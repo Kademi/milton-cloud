@@ -1,0 +1,104 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="theme.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="../../js/jquery-1.7.2.min.js">//</script>
+        <script type="text/javascript" src="../../js/tinybox-1.2.min.js">//</script>
+        <script type="text/javascript" src="../../js/common.js">//</script>        
+        <script type="text/javascript" src="theme.js">//</script>
+    </head>
+    <body class="theme">
+        <!-- page layout goes here -->
+        <div id="wrapper">
+            <header id="header">
+                <!-- Here is the header -->
+                <nav id="nav">
+                    <ul>
+                        <li id="logo"><a href="/" title="Fuse Admin">Home</a></li>
+                        <li><a href="#">My Dashboard</a></li>
+                        <li><a href="#" class="navActive">Learning Management</a></li>
+                        <li><a href="#">Talk &amp; Connect</a></li>
+                        <li><a href="#">Reporting</a></li>
+                    </ul>
+                </nav>
+                <aside>
+                    <h3><a href="#">Welcome Patrick</a></h3>
+                </aside>
+            </header>
+            <div id="Panel-section">
+                <!-- the left menu width:210px -->
+                <aside id="sidebar-nav">
+                    <div class="sidebar">
+                        <div class="menu">
+                            <ul>
+                                <li>
+                                    <h4><a href="#" class="Arrow">Your Programs</a></h4>
+                                    <ul>
+                                        <li><a href="#">Setup Wizard</a></li>
+                                        <li class="MnActive"><a href="#">Manage Program Structure</a></li>
+                                        <li><a href="#">Manage Module Content</a></li>
+                                    </ul>				
+                                </li>
+                                <li><hr/></li>
+                                <li>
+                                    <h4><a href="#" class="Arrow">Groups &amp; Users</a></h4>
+                                    <ul>
+                                        <li><a href="/manageUsers">Manage Groups &amp; Users</a></li>
+                                        <li><a href="#">Manage Business Units</a></li>
+                                    </ul>				
+                                </li>
+                                <li><hr/></li>
+                                <li>
+                                    <h4><a href="#" class="Arrow">Website Manager</a></h4>
+                                    <ul>
+                                        <li><a href="#">Setup your Websites</a></li>
+                                        <li><a href="#">Templates &amp; Themes</a></li>
+                                    </ul>				
+                                </li>
+                                <li><hr/></li>
+                                <li>
+                                    <h4><a href="#" class="Arrow">Miscellaneous</a></h4>
+                                    <ul>
+                                        <li><a href="#">Create &amp; Edit Certificates</a></li>
+                                        <li><a href="#">Manage Rewards</a></li>
+                                        <li><a href="#">File Manager</a></li>
+                                    </ul>				
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+                <!-- courses and modules width:flex -->
+                <section id="RHS-Panel">
+                    <img src="/templates/themes/fuse/images/shadow-left.png" alt="" id="shadow-left" />
+                    <header id="head-Panel">
+                        <img src="/templates/themes/fuse/images/icon-prgram.png" alt="" /><h1>Manage Program Stucture</h1>
+                        <a href="#" class="helpIcon">Help</a>
+                    </header>
+                    <div id="module-Course">
+                        <article>
+                            [@body/]
+                        </article>
+                    </div>
+                </section>
+            </div>
+			<div id="modalHelp" class="Modal">
+				<header>
+					<h3>Help dialog</h3>
+					<a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+				</header>
+				<div class="ModalContent">
+					<p>This is an animated dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+				</div>
+			</div>
+
+        </div><!-- END WRAPPER -->
+
+
+        <script type="text/javascript" >
+            jQuery(function() {
+                initFuseTheme();
+            });        
+        </script>
+    </body>
+</html>

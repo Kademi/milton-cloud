@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.milton</groupId>
+    <artifactId>milton-cloud</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <distributionManagement>
+        <repository>
+            <id>ettrema-repo</id>
+            <url>http://www.ettrema.com/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>ettrema-repo</id>
+            <url>http://www.ettrema.com/maven2</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <developers>
+        <developer>
+            <name>Brad McEvoy</name>
+            <timezone>GMT+12</timezone>
+            <organization>McEvoy Software</organization>
+            <organizationUrl>http://www.mcevoysoftware.co.nz/</organizationUrl>
+        </developer>
+    </developers>    
+    <properties>
+        <milton.version>2.0.0-SNAPSHOT</milton.version>
+        <endrick.version>1.7.8</endrick.version>
+        <hashsplit4j.version>1.0.1</hashsplit4j.version>
+        <hibernate.version>3.2.6.ga</hibernate.version>
+        <hibernate.annotations.version>3.3.0.ga</hibernate.annotations.version>
+        <jpa.version>1.0</jpa.version>
+        <jdbc.driverClassName>org.hsqldb.jdbcDriver</jdbc.driverClassName>
+        <jdbc.username>sa</jdbc.username>
+        <jdbc.password />
+        <jdbc.groupId>hsqldb</jdbc.groupId>
+        <jdbc.artifactId>hsqldb</jdbc.artifactId>
+        <jdbc.version>1.8.0.7</jdbc.version>   
+        <netbeans.hint.license>agpl30</netbeans.hint.license>
+    </properties>
+    <licenses>
+		<license>
+            <name>Affero GPL3</name>
+            <url>http://www.gnu.org/licenses/agpl.html</url>
+            <distribution>repo</distribution>
+            <comments>The GNU Affero General Public License is a free, copyleft license for software and other kinds of works, specifically designed to ensure cooperation with the community in the case of network server software.</comments>
+        </license>
+    </licenses>    
+    <organization>
+        <name>McEvoy Software Ltd</name>
+        <url>http://www.mcevoysoftware.co.nz/</url>
+    </organization>    
+    <modules>
+        <module>milton-cloud-lib</module>
+        <module>milton-cloud-server</module>
+        <module>milton-cloud-sync</module>
+    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <repository>
+            <id>ettrema-repo</id>
+            <url>http://www.ettrema.com/maven2</url>
+        </repository>
+    </repositories>    
+</project>
+

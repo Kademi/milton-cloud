@@ -1,0 +1,690 @@
+﻿/*
+Theme Name: Yellow
+Description: PSD by <a href="http://about.me/andreseptian">Andre Septian</a> PSD to WordPress by <a href="http://www.wpcharity.com">WPCharity</a>
+Theme URI: http://wpcharity.com
+Author: Moch. Zamroni
+Author URI: http://wpcharity.com
+Template: twentyeleven
+Version: 1.0.0
+
+Copyright: (c) 2010 WPCharity.
+License: GNU/GPL Version 2 or later. http://www.gnu.org/licenses/gpl.html
+*/
+
+@import url(wp-2011.css);
+@import url(http://fonts.googleapis.com/css?family=Amaranth:400,700);
+@import url(http://fonts.googleapis.com/css?family=Lobster);
+
+h1, h2, h3 {
+    font-family: 'Amaranth', arial, helvetica, sans-serif;
+}
+
+h1 {
+    font-size: 2em;
+    margin: 0.4em 0;
+}
+h2 {
+    font-size: 1.5em;
+}
+h3 {
+    font-size: 1em;
+}
+
+a{
+	color: #f07500;
+}
+a:hover,
+a:active,
+a:focus{
+	text-decoration: none;
+	color: #ff8c00;
+}
+#page{
+	margin: 0px auto;
+	padding: 0px;
+	background-color: transparent;
+    /**
+	text-shadow: 1px 1px 1px #fff;
+    */
+	width: 780px;
+	font: normal 16px/32px 'Amaranth', arial, helvetica, sans-serif;
+}
+body{
+	padding: 0px;
+	background: #dedede url(background.jpg) repeat 0 0;
+	font: normal 16px 'Amaranth', arial, helvetica, sans-serif;
+	color: #333;
+}
+.clear{
+	clear: both;
+}
+
+/* Main menu settings */
+#access {
+   clear:both;
+   float:left;
+   margin:0;
+   padding:0;
+   width:100%;
+   z-index:1000; /* This makes the dropdown menus appear above the page content below */
+   position:relative;
+	background: #f7b503;
+	height: 54px;
+	border-bottom: 7px solid #3d3d3d;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 6px;
+	-moz-box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 6px;
+	box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 6px;
+}
+
+/* Top menu items */
+#access ul {
+   margin:0;
+   padding:0;
+   list-style:none;
+   float:right;
+   position:relative;
+   right:50%;
+   font: normal 24px 'Amaranth', arial, helvetica, sans-serif;
+}
+#access ul li {
+   margin:0 0 0 20px;
+   padding:0;
+   float:left;
+   position:relative;
+   left:50%;
+   top:7px;
+}
+#access ul li a {
+   display:block;
+   margin:0;
+   padding: 0 20px;
+   text-decoration:none;
+   color:#3d3d3d;
+   line-height: 40px;
+}
+#access ul li.active a,
+#access ul li a:hover,
+#access ul li:hover a,
+#access ul li.hover a {
+   color:#e9e3ce;
+   background:#3d3d3d;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	font-weight: normal;
+}
+#access .current_page_item > a,
+#access .current_page_ancestor > a,
+#access li:hover > a,
+#access ul ul :hover > a,
+#access a:focus{
+	font-weight: normal;
+}
+/* Submenu items */
+#access ul ul {
+   display:none; /* Sub menus are hiden by default */
+   position:absolute;
+   top:47px;
+   left:0;
+   right:auto; /*resets the right:50% on the parent ul */
+	background:#3d3d3d;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+}
+#access ul ul li {
+   left:auto;  /*resets the left:50% on the parent li */
+   margin:0; /* Reset the 1px margin from the top menu */
+   clear:left;
+   width:100%;
+}
+#access ul ul li a,
+#access ul li.active li a,
+#access ul li:hover ul li a,
+#access ul li.hover ul li a { /* This line is required for IE 6 and below */
+   color:#fff;
+  	-moz-border-radius: 0;
+	border-radius: 0;
+	border: 0px;
+	font: normal 18px 'Amaranth', arial, helvetica, sans-serif;
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+#access ul ul li a:hover,
+#access ul li.active ul li a:hover,
+#access ul li:hover ul li a:hover,
+#access ul li.hover ul li a:hover { /* This line is required for IE 6 and below */
+   color:#f7b503;
+}
+
+/* Flip the last submenu so it stays within the page */
+#access ul ul.last {
+   left:auto; /* reset left:0; value */
+   right:0; /* Set right value instead */
+}
+
+/* Make the sub menus appear on hover */
+#access ul li:hover ul,
+#access ul li.hover ul { /* This line is required for IE 6 and below */
+   display:block; /* Show the sub menus */
+}
+
+#site-title{
+	text-align: center;
+	margin: 45px 0 15px 0;
+	padding: 0px;
+	background: url(bglogo.png) no-repeat center;
+}
+#site-title a{
+	font: normal 72px/126px lobster, arial, helvetica, sans-serif;
+	color: #38362e;
+	text-shadow: 1px 1px 1px #fff;
+}
+#site-title a:hover, #site-title a:focus, #site-title a:active{
+	color: #000;
+}
+#site-description{
+	margin: 0;
+	text-align: center;
+	font: normal 16px 'Amaranth', arial, helvetica, sans-serif;
+	color: #565656;
+}
+#primary{
+	margin: 0px;
+}
+#content{
+	width: 100%;
+	margin: 0px;
+    min-height: 350px;
+    position: relative;
+}
+
+body.home #content {
+    min-height: 150px;
+}
+
+#main{
+	padding: 0px;
+}
+.entry-header{
+	text-align: center;
+	background: url(separator.png) no-repeat bottom center;
+	padding-bottom: 20px;
+}
+.entry-title,
+.entry-header .entry-meta{
+	padding: 0px;
+}
+.entry-title{
+	font: bold 30px 'Amaranth', arial, helvetica, sans-serif;
+	padding-bottom: 5px;
+	letter-spacing: -1px;
+}
+.entry-title a{
+	color: #565656;
+}
+.entry-title a:hover, .entry-title a:focus, .entry-title a:active{
+	color: #333;
+}
+header .entry-meta{
+	font: normal 18px 'Amaranth', arial, helvetica, sans-serif;
+}
+header .entry-meta a{
+	font-weight: normal;
+}
+.singular .entry-header .entry-meta{
+	position: inherit;
+}
+.singular .entry-meta .edit-link{
+	position: absolute;
+}
+.singular .entry-meta .edit-link a{
+	top: 0px;
+	left: 20px;
+}
+.singular .entry-title{
+	color: #333;
+}
+img[class*="align"], img[class*="wp-image-"], #content .gallery .gallery-icon img, .featimg{
+	border: 10px solid #343434;
+	padding: 0px;
+	-webkit-box-shadow: #343434 2px 2px 5px;
+	-moz-box-shadow: #343434 2px 2px 5px;
+	box-shadow: #343434 2px 2px 5px;
+}
+.image-attachment div.attachment a:focus img,
+.image-attachment div.attachment a:hover img,
+.image-attachment div.attachment a:active img,
+.image-attachment div.attachment img,
+#content .indexed.format-image img{
+	border: 10px solid #343434 !important;
+	padding: 0px;
+	-webkit-box-shadow: #343434 2px 2px 5px;
+	-moz-box-shadow: #343434 2px 2px 5px;
+	box-shadow: #343434 2px 2px 5px;
+}
+.image-attachment div.attachment{
+	background-color: transparent;
+}
+a:focus img[class*="align"],
+a:hover img[class*="align"],
+a:active img[class*="align"],
+a:focus img[class*="wp-image-"],
+a:hover img[class*="wp-image-"],
+a:active img[class*="wp-image-"],
+#content .gallery .gallery-icon a:focus img,
+#content .gallery .gallery-icon a:hover img,
+#content .gallery .gallery-icon a:active img {/* Add some useful style to those fancy borders for linked images ... */
+	background: #eee;
+	border-color: #343434;
+}
+.featimg{
+	max-width: 760px;
+	min-width: 760px;
+	height: 100%;
+}
+.format-status p{
+	font: normal 28px/36px Georgia,Palatino,Helvetica Neue,Helvetica,Arial,sans-serif;
+}
+.tag-links span{
+	display: none;
+}
+.page-link a,
+.more-link,
+#content nav a{
+	font: normal 12px arial, helvetica, sans-serif;
+	background: #eee;
+	padding: 4px 10px;
+	box-shadow: 1px 1px 5px #999 inset;
+	color: #333;
+	margin: 0 4px 5px 4px;
+	-moz-border-radius: 50px;
+	border-radius: 50px;
+	text-transform: lowercase;
+	display: inline-block;
+}
+.page-link a:hover,
+.more-link:hover,
+#content nav a:hover{
+	background: #f7b503;
+	box-shadow: 1px 1px 5px #666 inset;
+	color: #333;
+}
+.tag-links a,
+.tagcloud a{
+	font-size: 11px !important;
+	background-color: #999;
+	margin: 0 0 5px 13px;
+	color: #fff;
+	display: inline-block;
+	-moz-border-radius-bottomright:4px;
+	-webkit-border-bottom-right-radius:4px;	
+	border-bottom-right-radius:4px;
+	-moz-border-radius-topright:4px;
+	-webkit-border-top-right-radius:4px;	
+	border-top-right-radius:4px;	
+	position:relative;
+	height: 24px;
+	line-height: 24px;
+	padding: 0 7px 0 5px;
+	text-shadow: none;
+}
+.tag-links a:before,
+.tagcloud a:before{
+	content:"";
+	float:left;
+	position:absolute;
+	top:0;
+	left:-12px;
+	width:0;
+	height:0;
+	border-color:transparent  #999 transparent transparent;
+	border-style:solid;
+	border-width:12px 12px 12px 0;		
+}
+.tag-links a:after,
+.tagcloud a:after{
+	content:"";
+	position:absolute;
+	top:10px;
+	left:-5px;
+	float:left;
+	width:4px;
+	height:4px;
+	-moz-border-radius:2px;
+	-webkit-border-radius:2px;
+	border-radius:2px;
+	background:#ddd;
+}
+.tag-links a:hover,
+.tagcloud a:hover{
+	background-color: #f7b503;
+	color: #666;
+}
+.tag-links a:hover:before,
+.tagcloud a:hover:before{
+	border-color:transparent #f7b503 transparent transparent;
+}
+.widget-area .tagcloud a{
+	background-color: #f7b503;
+	color: #333;
+}
+.tagcloud a:before{
+	border-color:transparent  #f7b503 transparent transparent;
+}
+.tagcloud a:after{
+	background-color: #373737;
+}
+.widget-area .tagcloud a:hover{
+	background-color: #999;
+	color: #fff;
+}
+.tagcloud a:hover:before{
+	border-color:transparent  #999 transparent transparent;
+}
+#content nav a{
+	font-weight: normal;
+	padding: 5px 10px;
+}
+.wp-caption{
+	background: transparent;
+}
+.singular #content, .left-sidebar.singular #content{
+	margin: 0px;
+}
+.singular .entry-header, .singular .entry-content, .singular footer.entry-meta, .singular #comments-title{
+	width: 100%;
+}
+.singular #author-info{
+	margin: 20px 0;
+	padding: 0px;
+	border: 0px;
+	background-color: transparent;
+	font: normal 14px/150% 'Amaranth', arial, helvetica, sans-serif;
+	color: #666;
+}
+.format-status img.avatar{
+	margin: 10px 20px 20px 0;
+}
+#author-avatar,
+.format-status #author-avatar img.avatar{
+	margin: 5px -78px 0 0;
+}
+#author-description h2{
+	margin: 0px;
+	font: normal 18px 'Amaranth', arial, helvetica, sans-serif;
+}
+#author-description a{
+	font-size: 14px;
+}
+#author-link a{
+	font: normal 12px 'Amaranth', arial, helvetica, sans-serif;
+}
+blockquote:before{
+	content: url(quote.png);
+	position: absolute;
+	margin:  0 0 0 -30px;
+}
+.wp-caption .wp-caption-text, .gallery-caption{
+	font: normal 14px/150% 'Amaranth',arial,helvetica,sans-serif;
+}
+.singular .entry-meta .edit-link{
+	margin: -20px 0 0 0;
+	right: 0px;
+}
+#nav-single .nav-previous,
+#nav-single .nav-next{
+	width: 40%;
+	float: left;
+	text-align: left;
+}
+#nav-single .nav-next{
+	float: right;
+	text-align: right;
+}
+#nav-single .assistive-text{
+	display: none;
+}
+.entry-content h1,
+.comment-content h1,
+.entry-content h2,
+.comment-content h2,
+.entry-content h3,
+.comment-content h3,
+.entry-content h4,
+.comment-content h4,
+.entry-content h5,
+.comment-content h5,
+.entry-content h6,
+.comment-content h6{
+	font: bold 27px 'Amaranth', arial, helvetica, sans-serif;
+	margin: 0 0 5px 0;
+	letter-spacing: normal;
+	text-transform: capitalize;
+	color: #666;
+}
+.entry-content h2,
+.comment-content h2{
+	font-size: 24px;
+}
+.entry-content h3,
+.comment-content h3{
+	font-size: 20px;
+}
+.entry-content h4,
+.comment-content h4{
+	font-size: 18px;
+}
+.entry-content h5,
+.comment-content h5{
+	font-size: 16px;
+}
+.entry-content h6,
+.comment-content h6{
+	font-size: 14px;
+}
+#searchform input{
+	background-color: #f9f9f9;
+	-moz-border-radius: 50px;
+	border-radius: 50px;
+}
+.indexed.format-image div.entry-meta{
+	display: block;
+	width: 100%;
+	float: none;
+}
+.indexed.format-image footer.entry-meta{
+	margin: 10px 0 0 0;
+	padding: 0px;
+}
+.indexed.format-image footer.entry-meta a{
+	color: #fff;
+}
+.indexed.format-image footer.entry-meta a:hover{
+	color: #666;
+}
+.format-link header .entry-meta,
+.format-status header .entry-meta,
+.format-aside header .entry-meta{
+	color: #666666;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    top: -5px;
+}
+.format-quote header .entry-meta,
+.format-gallery header .entry-meta,
+.format-image header .entry-meta{
+	font-size: 14px;
+	padding-top: 5px;	
+}
+.entry-meta .tag-links a{
+	font-weight: normal;
+}
+#respond{
+	background-color: #e8e8e5;
+	padding-bottom: 60px;
+}
+#respond .form-submit{
+	margin: 10px 0 0 0;
+}
+#respond input#submit:active,
+#respond input#submit{
+	background-color: #373737;
+	-moz-border-radius: 50px;
+	border-radius: 50px;
+	font: normal 18px 'Amaranth', arial, helvetica, sans-serif;
+	padding: 5px 20px;
+	color: #fff;
+	left: 0px;
+	margin: 0px;
+}
+#respond input#submit:hover{
+	background-color: #f7b503;
+	text-shadow: 1px 1px 1px #fff;
+	color: #333;	
+}
+#respond p{
+	margin: 0px;
+	padding: 0px;
+}
+footer#colophon{
+	background-color: #373737;
+	color: #fff;
+	border-top: 15px solid #f7b503;
+}
+#supplementary,
+#site-info{
+	padding: 20px 0;
+	margin: 0px auto;
+	width: 780px;
+	border: 0px;
+}
+.widget-title{
+	color: #f7b503;
+	text-transform: capitalize;
+	font: normal 28px 'Amaranth', arial, helvetica, sans-serif;
+	letter-spacing: normal;
+	padding: 0 0 10px 0;
+}
+.widget-area,
+.widget ul li  {
+	font: normal 14px/28px 'Amaranth', arial, helvetica, sans-serif;
+	list-style: none;
+}
+.widget-area a{
+	color: #fff;
+	font-weight: normal;
+}
+.widget-area a:hover{
+	text-decoration: none;
+	color: #999;
+}
+.paged #nav-above{
+	display: none;
+}
+.page-title,
+.entry-header .entry-format{
+	padding: 0px;
+	text-align: center;
+	margin: 0px;
+}
+.entry-header .entry-format{
+	position: relative;
+}
+.entry-header hgroup .entry-title{
+	padding: 0px;
+}
+#nav-single{
+	float: none;
+	text-align: center;
+	padding: 0px;
+}
+.singular .hentry,
+.singular.page .hentry{
+	padding: 0px;
+}
+#site-generator{
+	background-color: #222;
+	border: 0px;
+	padding: 0px;
+	text-align: right;
+}
+#site-info a{
+	color: #999;
+	font: normal 12px 'Amaranth', arial, helvetica, sans-serif;
+}
+#site-info a:hover{
+	color: #f7b503;
+}
+#site-info .name{
+	float: left;
+	font: normal 20px lobster, arial, helvetica, sans-serif;
+}
+#site-info .wordpress:hover,
+#site-info .wpcharity:hover{
+	color: #fff;
+}
+
+table.data {
+    border: none;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    font-family: Arial;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.data th {
+    text-align: left;
+}
+table.data thead th {
+    background-color: #4c4c4c;
+    color: white;
+}
+table.data tbody tr:nth-child(odd) td {
+    background-color: #f1f1f1;
+}
+table.data td, table.data th {
+    border-color: #D4D4D4;    
+    border-width: 1px;    
+    padding: 10px;
+    border-style: solid none none none;
+}
+
+table.data td:first-child {
+    border-left-style: solid;
+}
+table.data td:last-child {
+    border-right-style: solid;
+}
+
+table.data tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;    
+}
+table.data tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;    
+}
+table.data tr:last-child td {
+    border-bottom-style: solid;
+}
+table.data thead th:first-child {
+    border-radius: 8px 0 0 0;
+}
+table.data thead th:last-child {
+    border-radius: 0 8px 0 0;
+}
+.panel {
+    min-width: 200px;
+    width: 30%;
+    border: solid #999 1px;
+    border-radius: 8px;
+    float: left;
+    padding: 0.5em;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+
+.register #site-title {
+    margin: 0 0 15px;
+}

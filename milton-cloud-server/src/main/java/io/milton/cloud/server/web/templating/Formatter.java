@@ -1,0 +1,713 @@
+package io.milton.cloud.server.web.templating;
+
+import io.milton.resource.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+
+import org.joda.time.Interval;
+import org.joda.time.format.DateTimeFormat;
+import io.milton.cloud.server.manager.CurrentDateService;
+import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.calc.Calc;
+import io.milton.common.FileUtils;
+import io.milton.common.Utils;
+
+/**
+ * Handy functions exposes to rendering logic for formatting.
+ *
+ * @author brad
+ */
+public class Formatter {
+
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Formatter.class);
+    public static ThreadLocal<DateFormat> tlSdfUkShort = new ThreadLocal<DateFormat>() {
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy");
+        }
+    };
+    public static ThreadLocal<DateFormat> tlSdfUkLong = new ThreadLocal<DateFormat>() {
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("dd MMMM yyyy");
+        }
+    };
+    public static final ThreadLocal<DateFormat> sdfDateOnly = new ThreadLocal<DateFormat>() {
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy");
+        }
+    };
+    public static final ThreadLocal<DateFormat> sdfDateAndTime = new ThreadLocal<DateFormat>() {
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        }
+    };
+    
+
+    private final CurrentDateService currentDateService;
+
+    public Formatter(CurrentDateService currentDateService) {
+        this.currentDateService = currentDateService;
+    }
+
+    /**
+     * Null safe method, returns empty string if the value is null
+     *
+     * @param o
+     * @return
+     */
+    public String toString(Object o) {
+        if (o == null) {
+            return "";
+        } else {
+            return o.toString();
+        }
+    }
+
+    public Boolean toBool(Object o) {
+        if (o == null) {
+            return null;
+        } else if (o instanceof Boolean) {
+            return (Boolean) o;
+        } else if (o instanceof Integer) {
+            Integer i = (Integer) o;
+            return i.intValue() == 0;
+        } else if (o instanceof String) {
+            String s = (String) o;
+            s = s.toLowerCase();
+            s = s.trim();
+            if (s.length() > 0) {
+                return s.equals("true") || s.equals("yes");
+            } else {
+                return null;
+            }
+        } else {
+            throw new RuntimeException("Unsupported boolean type: " + o.getClass());
+        }
+
+    }
+
+    public BigDecimal toDecimal(Object o, int places) {
+        if (o == null) {
+            return BigDecimal.ZERO;
+        } else if (o instanceof BigDecimal) {
+            BigDecimal bd = (BigDecimal) o;
+            return bd.setScale(places, RoundingMode.HALF_UP);
+        } else if (o instanceof Double) {
+            Double d = (Double) o;
+            return BigDecimal.valueOf(d).setScale(places, RoundingMode.HALF_UP);
+        } else if (o instanceof Integer) {
+            Integer i = (Integer) o;
+            return BigDecimal.valueOf(i.longValue()).setScale(places, RoundingMode.HALF_UP);
+        } else if (o instanceof Float) {
+            Float f = (Float) o;
+            return BigDecimal.valueOf(f.doubleValue()).setScale(places, RoundingMode.HALF_UP);
+        } else if (o instanceof String) {
+            String s = (String) o;
+            s = s.trim();
+            if (s.length() == 0) {
+                return BigDecimal.ZERO;
+            } else {
+                try {
+                    return new BigDecimal(s).setScale(places, RoundingMode.HALF_UP);
+                } catch (NumberFormatException numberFormatException) {
+                    throw new RuntimeException("Non-numeric data: " + s);
+                }
+            }
+        } else {
+            throw new RuntimeException("Unsupported value type, should be numeric: " + o.getClass());
+        }
+    }
+
+    public Double toDouble(Object o) {
+        if (o == null) {
+            return 0d;
+        } else if (o instanceof String) {
+            String s = (String) o;
+            s = s.trim();
+            if (s.length() == 0) {
+                return 0d;
+            } else {
+                try {
+                    return Double.valueOf(s);
+                } catch (NumberFormatException numberFormatException) {
+                    throw new RuntimeException("Non-numeric data: " + s);
+                }
+            }
+        } else if (o instanceof Double) {
+            return (Double) o;
+        } else if (o instanceof Integer) {
+            Integer i = (Integer) o;
+            return (double) i;
+        } else if (o instanceof Float) {
+            Float f = (Float) o;
+            return f.doubleValue();
+        } else if (o instanceof BigDecimal) {
+            BigDecimal bd = (BigDecimal) o;
+            return bd.doubleValue();
+        } else {
+            throw new RuntimeException("Unsupported value type, should be numeric: " + o.getClass());
+        }
+    }
+
+    public Long toLong(Object oLimit) {
+        return toLong(oLimit, false);
+    }
+
+    public Long toLong(Object oVal, boolean withNulls) {
+        Long limit;
+        if (oVal == null) {
+            limit = withNulls ? null : 0l;
+        } else if (oVal instanceof Long) {
+            limit = (Long) oVal;
+        } else if (oVal instanceof Integer) {
+            int i = (Integer) oVal;
+            limit = (long) i;
+        } else if (oVal instanceof Double) {
+            Double d = (Double) oVal;
+            return d.longValue();
+        } else if (oVal instanceof Float) {
+            Float d = (Float) oVal;
+            return d.longValue();
+        } else if (oVal instanceof BigDecimal) {
+            BigDecimal bd = (BigDecimal) oVal;
+            return bd.longValue();
+        } else if (oVal instanceof Boolean) {
+            Boolean bb = (Boolean) oVal;
+            return bb ? 1l : 0l;
+        } else if (oVal instanceof String) {
+            String s = (String) oVal;
+            if (s.length() == 0) {
+                limit = withNulls ? null : 0l;
+            } else {
+                if (s.equals("true") || s.equals("false")) {
+                    Boolean b = Boolean.parseBoolean(s);
+                    return toLong(b);
+                } else {
+                    if (s.contains(".")) {
+                        Double d = toDouble(s);
+                        limit = d.longValue();
+                    } else {
+                        limit = Long.parseLong(s);
+                    }
+                }
+            }
+        } else {
+            throw new RuntimeException("unsupported class: " + oVal.getClass());
+        }
+        return limit;
+    }
+
+    public int getYear(Object o) {
+        if (o == null || !(o instanceof Date)) {
+            return 0;
+        }
+        Date dt = (Date) o;
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        return cal.get(Calendar.YEAR);
+    }
+
+    public int getMonth(Object o) {
+        if (o == null || !(o instanceof Date)) {
+            return 0;
+        }
+        Date dt = (Date) o;
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        return cal.get(Calendar.MONTH) + 1;
+    }
+
+    public int getDayOfMonth(Object o) {
+        if (o == null || !(o instanceof Date)) {
+            return 0;
+        }
+        Date dt = (Date) o;
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        return cal.get(Calendar.DAY_OF_MONTH) + 1;
+    }
+
+    public String formatDate(Object o) {
+        DateTime dt = getDateTime(o);
+        if (dt == null) {
+            return "";
+        }
+        return DateTimeFormat.shortDate().print(dt);
+    }
+
+    public String formatDateLong(Object o) {
+        DateTime dt = getDateTime(o);
+        if (dt == null) {
+            return "";
+        }
+        return DateTimeFormat.longDateTime().print(dt);
+    }
+
+    /**
+     * Returns a user friendly description of the age of the date. Eg "4 minutes
+     * ago"
+     *
+     * @param o
+     * @return
+     */
+    public String formatAge(Object o) {
+        org.joda.time.DateTime dt = getDateTime(o);
+        DateTime now = new DateTime();
+        Interval i = new Interval(dt, now);
+        Duration d = i.toDuration();
+        long secs = d.getStandardSeconds();
+        if (secs < 10) {
+            return "Just now";
+        } else if (secs < 60) {
+            return secs + " seconds ago";
+        } else if (secs < 60 * 60) {
+            return secs / 60 + " minutes ago";
+        } else if (secs < 24 * 60 * 60) {
+            return secs / (60 * 60) + " hours ago";
+        } else {
+            long days = secs / (60 * 60 * 24);
+            if (days < 2) {
+                return "a day ago";
+            } else if (days < 30) {
+                return days + " days ago";
+            } else if (days < 40) {
+                return "a month ago";
+            } else if (days < 7 * 8) {
+                return days / 7 + " weeks ago";
+            } else {
+                return days / 30 + " months ago";
+            }
+        }
+    }
+
+    public String formatMinsAsDuration(Object o) {
+        return formatMinsAsDuration(o, true);
+    }
+
+    public String formatMinsAsDuration(Object o, boolean numeric) {
+        Long l = toLong(o);
+        if (l == null) {
+            return "";
+        } else {
+            long hours = l / 60;
+            long mins = l % 60;
+            if (numeric) {
+                return hours + ":" + pad(mins, 2);
+            } else {
+                if (hours == 0) {
+                    return mins + "mins";
+                } else if (hours == 1) {
+                    return hours + "hr " + mins;
+                } else {
+                    return hours + "hrs " + mins;
+                }
+            }
+        }
+    }
+
+    public String pad2(long l) {
+        return pad(l, 2);
+    }
+
+    public String pad(long l, int length) {
+        return padWith("0", l, length);
+    }
+
+    public String padWith(String padChar, long l, int length) {
+        return _pad(padChar, l + "", length);
+    }
+
+    private String _pad(String padChar, String val, int length) {
+        if (val.length() >= length) {
+            return val;
+        }
+        return _pad(padChar, padChar + val, length);
+    }
+
+    public org.joda.time.DateTime getDateTime(Object o) {
+        if (o == null) {
+            return null;
+        } else if (o instanceof Resource) {
+            Resource res = (Resource) o;
+            return getDateTime(res.getModifiedDate());
+        } else if (o instanceof String) {
+            if (o.toString().length() == 0) {
+                return null;
+            } else {
+                try {
+                    Date dt = tlSdfUkShort.get().parse(o.toString());
+                    return new DateTime(dt.getTime());
+                } catch (ParseException ex) {
+                    throw new RuntimeException("Couldnt convert to date: " + o, ex);
+                }
+            }
+        }
+        return new DateTime(o);
+    }
+
+    /**
+     * Format as a percentage, including a percentage symbol and where
+     * blank/null values result in a blank output
+     *
+     * @param num - the numerator
+     * @param div - the divisor
+     * @return
+     */
+    public String toPercent(Object num, Object div) {
+        return toPercent(num, div, true, true);
+    }
+
+    /**
+     *
+     * @param num
+     * @param div
+     * @param appendSymbol - if true the percentage symbol is appended if a
+     * non-blank value
+     * @param withBlanks - if true, blank numerators or divisors result in a
+     * blank value. Otherwise return zero.
+     * @return
+     */
+    public String toPercent(Object num, Object div, boolean appendSymbol, boolean withBlanks) {
+        Long lNum = toLong(num, true);
+        Long lDiv = toLong(div, true);
+        if (lDiv == null || lDiv == 0 || lNum == null) {
+            if (withBlanks) {
+                return "";
+            } else {
+                return "0" + (appendSymbol ? "%" : "");
+            }
+        } else {
+            long perc = lNum * 100 / lDiv;
+            return perc + (appendSymbol ? "%" : "");
+        }
+    }
+
+    public String format(Object o) {
+        if (o == null) {
+            return "";
+        } else if (o instanceof Date) {
+            return formatDate(o);
+        } else {
+            return o.toString().trim();
+        }
+    }
+
+    /**
+     * Removes the file extension if present
+     *
+     * Eg file1.swf -> file1
+     *
+     * file1 -> file1
+     *
+     * @param s
+     * @return
+     */
+    public String stripExt(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        return FileUtils.stripExtension(s);
+    }
+
+    /**
+     * True if val1 is greater then val2
+     *
+     * will do string conversions
+     *
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public boolean gt(Object val1, Object val2) {
+        if (val1 == null) {
+            return false;
+        }
+        if (val2 == null) {
+            return true;
+        }
+        Double d1 = toDouble(val1);
+        Double d2 = toDouble(val2);
+        return d1.doubleValue() > d2.doubleValue();
+    }
+
+    public boolean lt(Object val1, Object val2) {
+        if (val1 == null) {
+            return false;
+        }
+        if (val2 == null) {
+            return true;
+        }
+        Double d1 = toDouble(val1);
+        Double d2 = toDouble(val2);
+        return d1.doubleValue() < d2.doubleValue();
+    }
+
+    public boolean eq(Object val1, Object val2) {
+        if (val1 == null) {
+            return (val2 == null);
+        }
+        if (val2 == null) {
+            return false;
+        }
+        Double d1 = toDouble(val1);
+        Double d2 = toDouble(val2);
+        return d1.doubleValue() == d2.doubleValue();
+    }
+
+    public String htmlEncode(String s) {
+        return EncodeUtils.encodeHTML(s);
+    }
+
+    /**
+     * Decode percentage encoded paths. Eg a%20b -> a b
+     *
+     * @param s
+     * @return
+     */
+    public String percentDecode(String s) {
+        if (s == null) {
+            return "";
+        } else if (s.length() == 0) {
+            return "";
+        }
+        return Utils.decodePath(s);
+    }
+
+    /**
+     * Returns true if the given value is between the start and finish dates, or
+     * the respective values are null. Ie if start date is null and finish date
+     * is given it will only check that the value is less then the finish date
+     *
+     * Values are converted using the joda time converters
+     *
+     * @param oVal
+     * @param oStart
+     * @param oFinish
+     * @return
+     */
+    public boolean between(Object oVal, Object oStart, Object oFinish) {
+        DateTime val = getDateTime(oVal);
+        if (val == null) {
+            log.warn("null date value");
+            return false;
+        }
+        DateTime start = getDateTime(oStart);
+        DateTime finish = getDateTime(oFinish);
+        if (start != null) {
+            if (val.isBefore(start)) {
+                return false;
+            }
+        }
+        if (finish != null) {
+            if (val.isAfter(finish)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public Date toDate(Object oVal) {
+        if (oVal == null) {
+            return null;
+        } else if (oVal instanceof Date) {
+            return (Date) oVal;
+        } else {
+            if (oVal instanceof String) {
+                String s = (String) oVal;
+                return parseDate(s);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public java.sql.Date toSqlDate(Object oVal) {
+        Date dt = toDate(oVal);
+        if (dt == null) {
+            return null;
+        } else {
+            return new java.sql.Date(dt.getTime());
+        }
+    }
+
+    public java.sql.Timestamp toSqlTimestamp(Object oVal) {
+        Date dt = toDate(oVal);
+        if (dt == null) {
+            return null;
+        } else {
+            return new java.sql.Timestamp(dt.getTime());
+        }
+    }
+
+    public org.joda.time.DateTime toJodaDate(Object oVal) {
+        Date dt = toDate(oVal);
+        if (dt != null) {
+            return new DateTime(dt.getTime());
+        } else {
+            return null;
+        }
+    }
+
+    public String toPlain(String html) {
+        if (html == null) {
+            return null;
+        }
+        html = replaceTag("br", html, "", "\n");
+        html = replaceTag("p", html, "", "\n");
+        html = replaceTag("b", html, "", "");
+        html = replaceTag("i", html, "", "");
+        html = replaceTag("h1", html, "", "");
+        html = replaceTag("h2", html, "", "");
+        html = replaceTag("h3", html, "", "");
+        return html;
+    }
+
+    private String replaceTag(String tag, String html, String replaceWithOpening, String replaceWithClosing) {
+        html = html.replace("<" + tag + "/>", replaceWithClosing); // self closing
+        html = html.replace("<" + tag + ">", replaceWithOpening);  // opening tag
+        html = html.replace("</" + tag + ">", replaceWithClosing); // closing tag
+        return html;
+    }
+
+    public Date getNow() {
+        return currentDateService.getNow();
+    }
+
+    /**
+     * Get the duration from the start to the finish date in seconds.
+     *
+     * @param start - any object which can be converted to a jodadate
+     * @param finish - any object which can be converted to a jodadate
+     * @return
+     */
+    public long durationSecs(Object start, Object finish) {
+        DateTime jodaSt = toJodaDate(start);
+        DateTime jodaFn = toJodaDate(finish);
+        Duration d = new Duration(jodaSt, jodaFn);
+        return d.getStandardSeconds();
+    }
+
+    public String getMonthName(int i) {
+        switch (i) {
+            case 0:
+                return "January";
+            case 1:
+                return "February";
+            case 2:
+                return "March";
+            case 3:
+                return "April";
+            case 4:
+                return "May";
+            case 5:
+                return "June";
+            case 6:
+                return "July";
+            case 7:
+                return "August";
+            case 8:
+                return "September";
+            case 9:
+                return "October";
+            case 10:
+                return "November";
+            case 11:
+                return "December";
+            default:
+                return "Unknown month " + i;
+        }
+    }
+
+    public CurrentDateService getCurrentDateService() {
+        return currentDateService;
+    }
+
+    public String ifEqual(String ifEqual, String ifNoteEqual, Object o1, Object o2) {
+        if (o1 == null) {
+            return o2 == null ? ifEqual : ifNoteEqual;
+        } else {
+            return o1.equals(o2) ? ifEqual : ifNoteEqual;
+        }
+    }
+
+    public ResourceList newList() {
+        return new ResourceList();
+    }
+
+    public ResourceList getList() {
+        return new ResourceList();
+    }
+
+    private Date parseDate(String s) {
+        if (s == null || s.trim().length() == 0) {
+            return null;
+        }
+        try {
+            Date dt;
+            if (s.contains(":")) {
+                dt = sdf(true).parse(s);
+            } else {
+                dt = sdf(false).parse(s);
+            }
+            return dt;
+        } catch (ParseException ex) {
+            log.warn("couldnt parse date", ex);
+            return null;
+//            throw new RuntimeException(ex);
+        }
+    }
+
+    public DateFormat sdf(boolean hasTime) {
+        if (hasTime) {
+            return sdfDateAndTime.get();
+        } else {
+            return sdfDateOnly.get();
+        }
+    }
+    
+    public BigDecimal toBigDecimal(Object o, int decimals) {
+        if (o instanceof Integer) {
+            Integer ii = (Integer) o;
+            return new BigDecimal(ii.intValue());
+        } else if (o instanceof Double) {
+            Double dd = (Double) o;
+            return new BigDecimal(dd.doubleValue()).setScale(decimals, RoundingMode.HALF_UP);
+        } else if (o instanceof Float) {
+            Float ff = (Float) o;
+            return new BigDecimal(ff);
+        } else if (o instanceof String) {
+            Double dd = toDouble(o);
+            return toBigDecimal(dd, decimals);
+        } else {
+            log.warn("unhandled type: " + o.getClass());
+            return null;
+        }
+    }    
+    
+    public Calc calc(ResourceList list) {
+        return new Calc(list, this);
+    }
+
+    public ResourceList where(String mvelExpr, ResourceList list) {
+        return calc(list).filter(mvelExpr);
+    }
+
+    
+}

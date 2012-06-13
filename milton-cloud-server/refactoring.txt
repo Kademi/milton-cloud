@@ -1,0 +1,77 @@
+The current schema for storing files is probably non-optimal.
+
+Currently it uses non-crypto relationships to establish file hierarchy. This means
+that we have item identity (which allows modified dates, permissions, etc), but 
+at the expense of efficiency. It also makes folder sharing hard.
+
+Suggestion here is to return to crypto relationships, btu augmented with a path
+based structure to contain modified dates, permissions, etc.
+
+When using cryptographic relationships, there is nothing which identifies a file
+or directory as belonging to a particular user, or even being in a particular location
+in a user's repository. In fact, the same item may manifest itself in many places. Eg
+an empty directory will only be stored to once, but will be linked to many times.
+
+So, to associated things which are peculiar to a resource's manifested location we
+need somethign which represents that location. This proposal is to create that 
+representation in the form of a conventional parent/child tree structure, although
+one which is aware of branching so does not duplicate parent/child data when a 
+branch is created
+
+Schema
+
+Cryptographic relationship tables:
+
+HashItem (unique key=Name,Hash,Type)
+    - ID
+    - Name
+    - Hash
+    - Type
+
+HashLink (unique key=HashItemID,ParentHash)
+    - HashItemID (fk -> HashItem.ID)
+    - ParentHash
+
+Commit
+    - RootParentHash
+    - ... other columns
+
+
+Augmented tree tables:
+
+TreeItem
+    - ID
+    - RelatedToTreeItemID
+    - RelationType (branch, link)
+    - ParentID (fk -> TreeItem.ID)
+    - Name
+    - CreatedDate
+    - ModDate
+
+TreeItemVersion
+    - ID
+    - TreeItem.ID
+    - ModDate
+    - Action (update, move, delete)
+
+When creating a branch, create a TreeItem related to the branched from resource. 
+When viewing the branch, locate TreeITems for resources initially within the branch
+TreeItem, if none found look under the source branch (ie trunk) to get view only. In
+this case the located TreeItem is a "shadow". IF the resource is changed, create a 
+new one, including parent links up to the branched TreeITem
+
+When sharing a folder,create a TreeItem relating to the source with a relation type
+of "linked". So when a resource is changed (or the parent of a changed resource is
+has its hash updated) and you find "linked" TreeItems, you know to set the related
+hash to be the same.
+
+MetaData
+TreeItem can be subclassed with additional meta. For example, a Module could be 
+represented as a ModuleTreeItem, with columns for the module. Same for contacts,
+calendar items, etc.
+
+Versioning
+When a resource is created, update the mod date on the TreeItem, and insert a new
+TreeItemVersion
+
+Perhaps TreeItemVersion can be subclassed, to provide versioned meta data??? Eg ModuleVersion??

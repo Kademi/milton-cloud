@@ -1,0 +1,86 @@
+body.home #content ul {
+    margin-left: auto;
+    margin-right: auto;
+}
+body.home #content ul li {
+    list-style-type: none;
+    display: block;
+    float: left;
+    width: 33%;
+    text-align: center;
+}
+
+#comments input, #comments textarea{
+    padding:7px 10px 6px;
+    width:75%;
+    margin-right:3px;
+    height:19px;
+}
+.fBox{
+    margin:0 auto;
+    padding:5px 0 18px;
+}
+#comments fieldset {
+    text-align: center;
+    position: relative;
+}
+#comments div.forumReply{
+    padding:10px 10px 9px;
+    background:#fff;
+    border-top:1px solid #d4d4d4;
+    margin-bottom:3px;
+    text-align: left;
+    position: relative;
+}
+#comments div.forumReply div{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+#comments button {
+    margin: 0;
+    position: absolute;
+    bottom: 5px;
+    right: 0;
+    display: block;
+}
+.error, .validationError, #validationMessage {
+    font-size: 0.8em;
+}
+
+a.share {
+    display: block;    
+    float: right;
+    border: solid gray 1px;
+    padding: 0.3em;
+    border-radius: 0.3em;    
+}
+
+#shareModal textarea {
+    width: 350px;
+}
+
+#signup label {
+    display: inline-block;
+    width: 150px;
+}
+#signup button {
+    margin-left: 155px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    width: 160px;
+}
+
+button.add {
+    background-image: url("images/add.png");
+    display: inline-block;
+    height: 48px;
+    width: 48px;
+    text-indent: -9999px;
+    float: right;
+}
+div.breadcrumbs {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
