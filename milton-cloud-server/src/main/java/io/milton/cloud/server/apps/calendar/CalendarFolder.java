@@ -1,11 +1,11 @@
 package io.milton.cloud.server.apps.calendar;
 
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.CalEvent;
-import io.milton.cloud.server.db.Calendar;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.CalEvent;
+import io.milton.vfs.db.Calendar;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,11 +17,11 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.Utils;
 import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -62,7 +62,7 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
     }    
     
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

@@ -27,34 +27,31 @@
         <property name="dataSource" ref="dataSource" />
         <property name="annotatedClasses">
             <list>
-                <value>org.spliffy.server.db.BaseEntity</value>
-                <value>org.spliffy.server.db.BlobHash</value>
-                <value>org.spliffy.server.db.DirectoryMember</value>
-                <value>org.spliffy.server.db.Branch</value>                
-                <value>org.spliffy.server.db.Commit</value>
-                <value>org.spliffy.server.db.Repository</value>
-                <value>org.spliffy.server.db.Item</value>
-                <value>org.spliffy.server.db.Profile</value>
-                <value>org.spliffy.server.db.Credential</value>
-                <value>org.spliffy.server.db.PasswordCredential</value>
-                <value>org.spliffy.server.db.FanoutHash</value>
-                <value>org.spliffy.server.db.FanoutEntry</value>
-                <value>org.spliffy.server.db.ItemVersion</value>
-                <value>org.spliffy.server.db.Permission</value>
-                <value>org.spliffy.server.db.Share</value>
-                <value>org.spliffy.server.db.DeletedItem</value>
-                <value>org.spliffy.server.db.Volume</value>
-                <value>org.spliffy.server.db.VolumeInstance</value>
-                <value>org.spliffy.server.db.Calendar</value>
-                <value>org.spliffy.server.db.CalEvent</value>
-                <value>org.spliffy.server.db.AddressBook</value>
-                <value>org.spliffy.server.db.Contact</value>
-                <value>org.spliffy.server.db.ContactExtendedProperty</value>
-                <value>org.spliffy.server.db.Organisation</value>
-                <value>org.spliffy.server.db.Website</value>
-                <value>org.spliffy.server.db.Group</value>
-                <value>org.spliffy.server.db.NvPair</value>
-                <value>org.spliffy.server.db.GroupMembership</value>                
+                <value>io.milton.vfs.db.Branch</value>                
+                <value>io.milton.vfs.db.Commit</value>
+                <value>io.milton.vfs.db.Repository</value>
+                <value>io.milton.vfs.db.DataItem</value>
+                <value>io.milton.vfs.db.ItemHistory</value>
+                <value>io.milton.vfs.db.MetaItem</value>
+                <value>io.milton.vfs.db.BlobHash</value>
+                <value>io.milton.vfs.db.FanoutEntry</value>
+                <value>io.milton.vfs.db.FanoutHash</value>
+                
+                <value>io.milton.vfs.db.BaseEntity</value>
+                <value>io.milton.vfs.db.Profile</value>
+                <value>io.milton.vfs.db.Credential</value>
+                <value>io.milton.vfs.db.PasswordCredential</value>
+                <value>io.milton.vfs.db.Permission</value>
+                <value>io.milton.vfs.db.Calendar</value>
+                <value>io.milton.vfs.db.CalEvent</value>
+                <value>io.milton.vfs.db.AddressBook</value>
+                <value>io.milton.vfs.db.Contact</value>
+                <value>io.milton.vfs.db.ContactExtendedProperty</value>
+                <value>io.milton.vfs.db.Organisation</value>
+                <value>io.milton.vfs.db.Website</value>
+                <value>io.milton.vfs.db.Group</value>
+                <value>io.milton.vfs.db.GroupMembership</value>    
+                <value>io.milton.vfs.db.NvPair</value>    
             </list>
         </property>
         <property name="hibernateProperties">

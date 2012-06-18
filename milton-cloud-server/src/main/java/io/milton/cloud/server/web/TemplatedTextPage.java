@@ -21,14 +21,14 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -41,11 +41,11 @@ import io.milton.resource.GetableResource;
 public class TemplatedTextPage extends AbstractResource implements GetableResource {
 
     protected final String name;
-    protected final SpliffyCollectionResource parent;
+    protected final CommonCollectionResource parent;
     protected final String contentType;
     protected final String template;
     
-    public TemplatedTextPage(String name, SpliffyCollectionResource parent, Services services, String contentType, String template) {
+    public TemplatedTextPage(String name, CommonCollectionResource parent, Services services, String contentType, String template) {
         super(services);
         this.name = name;
         this.parent = parent;
@@ -82,7 +82,7 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

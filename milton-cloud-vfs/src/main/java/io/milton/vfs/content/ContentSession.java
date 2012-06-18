@@ -16,18 +16,19 @@ package io.milton.vfs.content;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.common.Path;
-import io.milton.http.exceptions.BadRequestException;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.data.DataSession.DataNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.MetaItem;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.meta.MetaSession;
 import io.milton.vfs.meta.MetaSession.MetaNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.hashsplit4j.api.*;
 import org.hibernate.Session;
@@ -48,13 +49,11 @@ public class ContentSession {
     private MetaSession metaSession;
     private CurrentDateService currentDateService;
     private DirectoryNode rootContentNode;
-    private long currentUserId;
 
-    public ContentSession(Session session, Branch branch, CurrentDateService currentDateService, long currentUserId, HashStore hashStore, BlobStore blobStore) {
+    public ContentSession(Session session, Branch branch, CurrentDateService currentDateService, HashStore hashStore, BlobStore blobStore) {
         this.currentDateService = currentDateService;
         this.session = session;
         this.branch = branch;
-        this.currentUserId = currentUserId;
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         Commit c = branch.latestVersion(session);
@@ -92,11 +91,11 @@ public class ContentSession {
         }
     }
 
-    public void save() {
+    public void save(Profile currentUser) {
         long newHash = dataSession.save();
         Commit newCommit = new Commit();
         newCommit.setCreatedDate(currentDateService.getNow());
-        newCommit.setEditorId(currentUserId);
+        newCommit.setEditor(currentUser);
         newCommit.setItemHash(newHash);
         session.save(newCommit);
         branch.setHead(newCommit);
@@ -109,6 +108,8 @@ public class ContentSession {
         protected final DataSession.DataNode dataNode;
         protected MetaNode metaNode;
         protected List<ContentNode> children;
+        
+        public abstract void copy(DirectoryNode dest, String destName);
 
         private ContentNode(DirectoryNode parent, DataNode dataNode, MetaNode metaNode) {
             if (dataNode == null) {
@@ -123,7 +124,7 @@ public class ContentSession {
             return dataNode.getName();
         }
 
-        public void move(ContentNode newParent, String newName) {
+        public void move(DirectoryNode newParent, String newName) {
             dataNode.move(newParent.dataNode, newName);
             metaNode.move(newParent.metaNode, newName);
         }
@@ -134,6 +135,14 @@ public class ContentSession {
             if (parent.children != null) {
                 parent.children.remove(this);
             }
+        }
+        
+        public Date getCreatedDate() {
+            return metaNode.getCreatedDate();
+        }
+        
+        public Date getModifedDate() {
+            return metaNode.getModifiedDate();
         }
     }
 
@@ -186,6 +195,20 @@ public class ContentSession {
             children.add(newContentNode);
             return newContentNode;
         }
+        
+        /**
+         * Performs recursive copy to ensure metadata is created
+         * 
+         * @param dest
+         * @param destName 
+         */
+        @Override
+        public void copy(DirectoryNode dest, String destName) {
+            DirectoryNode copied = dest.addDirectory(destName);
+            for( ContentNode child : this.getChildren() ) {
+                child.copy(copied, child.getName());
+            }
+        }        
     }
 
     public class FileNode extends ContentNode {
@@ -196,6 +219,11 @@ public class ContentSession {
             super(parent, dataNode, metaNode);
         }
 
+        @Override
+        public void copy(DirectoryNode dest, String destName) {
+            dest.addFile(destName).setHash(getHash());
+        }
+        
         public void setHash(long hash) {
             dataNode.setHash(hash);
             metaNode.setModifiedDate(currentDateService.getNow());

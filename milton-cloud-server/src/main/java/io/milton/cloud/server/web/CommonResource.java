@@ -1,11 +1,11 @@
 package io.milton.cloud.server.web;
 
 import java.util.List;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.common.Path;
-import io.milton.http.AccessControlledResource;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.DigestResource;
 
 /**
@@ -13,7 +13,7 @@ import io.milton.resource.DigestResource;
  *
  * @author brad
  */
-public interface SpliffyResource extends DigestResource{
+public interface CommonResource extends DigestResource{
         
     
     /**
@@ -21,7 +21,7 @@ public interface SpliffyResource extends DigestResource{
      * 
      * @return 
      */
-    SpliffyCollectionResource getParent();
+    CommonCollectionResource getParent();
     
     /**
      * Convenient access to main service singletons

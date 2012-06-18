@@ -16,18 +16,20 @@
  */
 package io.milton.cloud.server.apps.signup;
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.AddressBook;
+import io.milton.vfs.db.Calendar;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.db.*;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -41,8 +43,8 @@ import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
@@ -163,7 +165,7 @@ public class SignupPage extends AbstractResource implements GetableResource, Pos
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

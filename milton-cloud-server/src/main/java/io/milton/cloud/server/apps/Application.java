@@ -19,7 +19,7 @@ package io.milton.cloud.server.apps;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import java.util.List;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;

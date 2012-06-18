@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.db;
+package io.milton.vfs.db;
 
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Repository;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
@@ -62,6 +63,18 @@ public class Website extends Repository {
 
     public void setCurrentBranch(String currentBranch) {
         this.currentBranch = currentBranch;
+    }
+
+    public Branch currentBranch() {
+        if( getBranches() == null ) {
+            return null;
+        }
+        for( Branch b : getBranches() ) {
+            if( b.getName().equals(getCurrentBranch())) {
+                return b;
+            }
+        }
+        return null;
     }
 
     

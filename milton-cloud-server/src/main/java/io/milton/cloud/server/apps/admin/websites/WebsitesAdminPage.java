@@ -17,18 +17,19 @@
 package io.milton.cloud.server.apps.admin.websites;
 
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
-import io.milton.cloud.server.db.*;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -55,10 +56,10 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     private static final Logger log = LoggerFactory.getLogger(WebsitesAdminPage.class);
     
     private final String name;
-    private final SpliffyCollectionResource parent;
+    private final CommonCollectionResource parent;
     private final Organisation organisation;
 
-    public WebsitesAdminPage(String name, Organisation organisation, SpliffyCollectionResource parent, Services services) {
+    public WebsitesAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
         super(services);
         this.organisation = organisation;
         this.parent = parent;
@@ -92,7 +93,7 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

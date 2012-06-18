@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.SpliffyResource;
+import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.templating.Formatter;
 
 /**
@@ -14,10 +14,10 @@ import io.milton.cloud.server.web.templating.Formatter;
 public class Calc {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Calc.class);
-    private final List<SpliffyResource> list;
+    private final List<CommonResource> list;
     private final Formatter formatter;
 
-    public Calc(List<SpliffyResource> list, Formatter formatter) {
+    public Calc(List<CommonResource> list, Formatter formatter) {
         this.list = list;
         this.formatter = formatter;
     }
@@ -47,7 +47,7 @@ public class Calc {
     }
 
     void accumulate(Accumulator a, String mvelExpr) {
-        for (SpliffyResource r : list) {
+        for (CommonResource r : list) {
             Object o = eval(mvelExpr, r);
             a.accumulate(r, o);
         }

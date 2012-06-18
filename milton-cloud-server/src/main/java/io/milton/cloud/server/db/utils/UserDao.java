@@ -7,10 +7,10 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import io.milton.cloud.server.db.Credential;
-import io.milton.cloud.server.db.PasswordCredential;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Credential;
+import io.milton.vfs.db.PasswordCredential;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 
 /**
  *

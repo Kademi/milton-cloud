@@ -1,7 +1,7 @@
 package io.milton.cloud.server.web.calc;
 
 import java.math.BigDecimal;
-import io.milton.cloud.server.web.SpliffyResource;
+import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.templating.Formatter;
 
 class Sumor implements Accumulator {
@@ -17,7 +17,7 @@ class Sumor implements Accumulator {
     BigDecimal value = new BigDecimal(0);
 
     @Override
-    public void accumulate(SpliffyResource r, Object o) {
+    public void accumulate(CommonResource r, Object o) {
         BigDecimal bd = formatter.toBigDecimal(o, decimals);
         if (bd != null) {
             value = value.add(bd);

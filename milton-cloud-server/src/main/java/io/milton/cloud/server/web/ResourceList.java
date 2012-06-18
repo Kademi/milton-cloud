@@ -25,16 +25,16 @@ import io.milton.resource.Resource;
  *
  * @author brad
  */
-public class ResourceList extends ArrayList<SpliffyResource> {
+public class ResourceList extends ArrayList<CommonResource> {
 
     private static final Logger log = Logger.getLogger(ResourceList.class);
     private static final long serialVersionUID = 1L;
-    private final Map<String, SpliffyResource> map = new HashMap<>();
+    private final Map<String, CommonResource> map = new HashMap<>();
 
     public ResourceList() {
     }
 
-    public ResourceList(SpliffyResource[] array) {
+    public ResourceList(CommonResource[] array) {
         addAll(Arrays.asList(array));
     }
 
@@ -43,7 +43,7 @@ public class ResourceList extends ArrayList<SpliffyResource> {
     }
 
     @Override
-    public boolean add(SpliffyResource e) {
+    public boolean add(CommonResource e) {
         if (e == null) {
             throw new NullPointerException("Attempt to add null node");
         }
@@ -86,14 +86,14 @@ public class ResourceList extends ArrayList<SpliffyResource> {
         return this;
     }
 
-    public SpliffyResource get(String name) {
+    public CommonResource get(String name) {
         return map.get(name);
     }
 
     @Override
     public boolean remove(Object o) {
-        if (o instanceof SpliffyResource) {
-            SpliffyResource e = (SpliffyResource) o;
+        if (o instanceof CommonResource) {
+            CommonResource e = (CommonResource) o;
             map.remove(e.getName());
         }
         int i = super.indexOf(o);
@@ -101,14 +101,14 @@ public class ResourceList extends ArrayList<SpliffyResource> {
         return (removed != null);
     }
 
-    public SpliffyResource getFirst() {
+    public CommonResource getFirst() {
         if (isEmpty()) {
             return null;
         }
         return this.get(0);
     }
 
-    public SpliffyResource getLast() {
+    public CommonResource getLast() {
         if (this.size() > 0) {
             return this.get(this.size() - 1);
         } else {
@@ -116,14 +116,14 @@ public class ResourceList extends ArrayList<SpliffyResource> {
         }
     }
 
-    public SpliffyResource getRandom() {
+    public CommonResource getRandom() {
         int l = this.size();
         if (l == 0) {
             return null;
         }
 
-        List<SpliffyResource> list = new ArrayList<>();
-        for (SpliffyResource res : this) {
+        List<CommonResource> list = new ArrayList<>();
+        for (CommonResource res : this) {
             list.add(res);
         }
         if (list.isEmpty()) {
@@ -159,7 +159,7 @@ public class ResourceList extends ArrayList<SpliffyResource> {
     }
 
     public ResourceList getRandomSort() {
-        SpliffyResource[] array = new SpliffyResource[this.size()];
+        CommonResource[] array = new CommonResource[this.size()];
         this.toArray(array);
 
         Random rng = new Random();   // i.e., java.util.Random.
@@ -167,7 +167,7 @@ public class ResourceList extends ArrayList<SpliffyResource> {
         while (n > 1) {
             int k = rng.nextInt(n);  // 0 <= k < n.
             n--;                     // n is now the last pertinent index;
-            SpliffyResource temp = array[n];     // swap array[n] with array[k] (does nothing if k == n).
+            CommonResource temp = array[n];     // swap array[n] with array[k] (does nothing if k == n).
             array[n] = array[k];
             array[k] = temp;
         }
@@ -193,7 +193,7 @@ public class ResourceList extends ArrayList<SpliffyResource> {
 
     public ResourceList _exclude(String... s) {
         ResourceList newList = new ResourceList(this);
-        Iterator<SpliffyResource> it = newList.iterator();
+        Iterator<CommonResource> it = newList.iterator();
         while (it.hasNext()) {
             Resource ct = it.next();
             if (contains(s, ct.getName())) {
@@ -220,9 +220,9 @@ public class ResourceList extends ArrayList<SpliffyResource> {
      */
     public ResourceList ofType(String s) {
         ResourceList newList = new ResourceList(this);
-        Iterator<SpliffyResource> it = newList.iterator();
+        Iterator<CommonResource> it = newList.iterator();
         while (it.hasNext()) {
-            SpliffyResource ct = it.next();
+            CommonResource ct = it.next();
             if (!ct.is(s)) {
                 it.remove();
             }

@@ -1,4 +1,4 @@
-package io.milton.cloud.server.db;
+package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
@@ -9,7 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 
 /**
- * A user is defined within an organisation. Might change this in the future so
+ * A user profile is defined within an organisation. Might change this in the future so
  * that the user profile is within an organsiation, but the credentials probably should exist
  * in a global space.
  *

@@ -22,9 +22,11 @@ public class HashCalc {
     
     public long calcHash(Iterable<? extends ITriplet> childDirEntries) {
         OutputStream nulOut = new NullOutputStream();
-        CheckedOutputStream cout = new CheckedOutputStream(nulOut, new Adler32());
+        return calcHash(childDirEntries, nulOut);
+    }
+    public long calcHash(Iterable<? extends ITriplet> childDirEntries, OutputStream out) {        
+        CheckedOutputStream cout = new CheckedOutputStream(out, new Adler32());
         for (ITriplet r : childDirEntries) {
-            String name = r.getName();
             String line = HashUtils.toHashableText(r.getName(), r.getHash(), r.getType());
             HashUtils.appendLine(line, cout);
         }

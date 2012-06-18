@@ -1,13 +1,13 @@
 package io.milton.cloud.server.web;
 
 
-import io.milton.cloud.server.db.BaseEntity;
+import io.milton.vfs.db.BaseEntity;
 import io.milton.cloud.server.db.Branch;
-import io.milton.cloud.server.db.Permission;
-import io.milton.cloud.server.db.Profile;
-import io.milton.http.AccessControlledResource;
-import io.milton.http.AccessControlledResource.Priviledge;
-import io.milton.http.acl.Principal;
+import io.milton.vfs.db.Permission;
+import io.milton.vfs.db.Profile;
+import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
+import io.milton.principal.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

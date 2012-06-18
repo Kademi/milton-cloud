@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import org.hashsplit4j.api.Fanout;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.GetableResource;
 

@@ -19,9 +19,7 @@ import io.milton.cloud.common.store.FileSystemBlobStore;
 import io.milton.common.Path;
 import io.milton.vfs.content.ContentSession.DirectoryNode;
 import io.milton.vfs.content.ContentSession.FileNode;
-import io.milton.vfs.db.Branch;
-import io.milton.vfs.db.MetaItem;
-import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
 import java.util.ArrayList;
@@ -52,6 +50,7 @@ public class ContentSessionTest {
     HashStore hashStore;
     BlobStore blobStore;
     SessionManager sessionManager;
+    Profile user;
     
     @Before
     public void setUp() throws Exception {
@@ -72,6 +71,12 @@ public class ContentSessionTest {
         
         sessionManager = new SessionManager(sessionFactory);
         session = sessionManager.open();
+        
+        user = new Profile();
+        user.setName("testUser");
+        user.setCreatedDate(currentDateService.getNow());
+        user.setModifiedDate(currentDateService.getNow());
+        session.save(user);
     }
 
     /**
@@ -82,41 +87,41 @@ public class ContentSessionTest {
         Branch b = initRepo();
         
         Transaction tx = session.beginTransaction();
-        ContentSession contentSession = new ContentSession(session, b, currentDateService, 123, hashStore, blobStore);
+        ContentSession contentSession = new ContentSession(session, b, currentDateService, hashStore, blobStore);
         DirectoryNode root = contentSession.getRootContentNode();
         DirectoryNode x1 = root.addDirectory("x1");
         DirectoryNode x2 = root.addDirectory("x2");
         FileNode y = x1.addFile("y");
         y.setHash(111);
-        contentSession.save();
+        contentSession.save(user);
         tx.commit();        
         session.close();
         
         session = sessionManager.open();
         tx = session.beginTransaction();
-        contentSession = new ContentSession(session, b, currentDateService, 123, hashStore, blobStore);
+        contentSession = new ContentSession(session, b, currentDateService, hashStore, blobStore);
         y = (FileNode) contentSession.find(Path.path("/x1/y"));
         assertNotNull(y);
         x2 = (DirectoryNode) contentSession.find(Path.path("/x2"));
         assertNotNull(x2);
         y.move(x2, "y");
-        contentSession.save();
+        contentSession.save(user);
         tx.commit();        
         session.close();        
 
         session = sessionManager.open();
         tx = session.beginTransaction();
-        contentSession = new ContentSession(session, b, currentDateService, 123, hashStore, blobStore);
+        contentSession = new ContentSession(session, b, currentDateService, hashStore, blobStore);
         y = (FileNode) contentSession.find(Path.path("/x2/y"));
         assertNotNull(y);
         y.delete();
-        contentSession.save();
+        contentSession.save(user);
         tx.commit();        
         session.close();        
 
         session = sessionManager.open();
         tx = session.beginTransaction();
-        contentSession = new ContentSession(session, b, currentDateService, 123, hashStore, blobStore);
+        contentSession = new ContentSession(session, b, currentDateService, hashStore, blobStore);
         y = (FileNode) contentSession.find(Path.path("/x2/y2"));
         assertNull(y);
         session.close();                
@@ -128,7 +133,7 @@ public class ContentSessionTest {
         Branch b = initRepo();
         
         Transaction tx = session.beginTransaction();
-        ContentSession contentSession = new ContentSession(session, b, currentDateService, 123, hashStore, blobStore);
+        ContentSession contentSession = new ContentSession(session, b, currentDateService, hashStore, blobStore);
         DirectoryNode root = contentSession.getRootContentNode();
         DirectoryNode x1 = root.addDirectory("x1");
         FileNode y = x1.addFile("y");
@@ -136,13 +141,13 @@ public class ContentSessionTest {
         Arrays.fill(buf, (byte)9);
         InputStream in = new ByteArrayInputStream(buf);
         y.setContent(in);
-        contentSession.save();
+        contentSession.save(user);
         tx.commit();        
         session.close();
         
         // read it back
         session = sessionManager.open();
-        contentSession = new ContentSession(session, b, currentDateService, 123, hashStore, blobStore);
+        contentSession = new ContentSession(session, b, currentDateService, hashStore, blobStore);
         y = (FileNode) contentSession.find(Path.path("/x1/y"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         y.writeContent(out);
@@ -151,20 +156,37 @@ public class ContentSessionTest {
     }
 
     private Branch initRepo() throws HibernateException {
+        
+        Organisation org = new Organisation();
+        org.setName("test org");
+        org.setCreatedDate(new Date());
+        org.setModifiedDate(new Date());
+        session.save(org);
+        
         Repository r = new Repository();
+        r.setBaseEntity(org);
         r.setCreatedDate(new Date());
         r.setName("test");
         r.setTitle("test repo");
         r.setBranches(new ArrayList<Branch>());
         session.save(r);
+        
         MetaItem rootMeta = new MetaItem();
         rootMeta.setCreatedDate(new Date());
         rootMeta.setModifiedDate(new Date());
         session.save(rootMeta);
+        
+        Commit c = new Commit();
+        c.setCreatedDate(new Date());
+        c.setEditor(user);
+        c.setItemHash(0);
+        session.save(c);
+        
         Branch b = new Branch();
         b.setRepository(r);
         b.setName("trunk");
         b.setCreatedDate(new Date());
+        b.setHead(c);
         r.getBranches().add(b);
         b.setRootMetaItem(rootMeta);
         session.save(b);

@@ -19,7 +19,7 @@ package io.milton.cloud.server.db.utils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 
 /**
  *

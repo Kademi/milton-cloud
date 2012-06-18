@@ -8,6 +8,6 @@ import io.milton.resource.CollectionResource;
  *
  * @author brad
  */
-public interface SpliffyCollectionResource extends SpliffyResource, CollectionResource{
+public interface CommonCollectionResource extends CommonResource, CollectionResource{
     
 }

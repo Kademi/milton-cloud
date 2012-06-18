@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.BlobStore;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.PutableResource;
 

@@ -10,7 +10,7 @@ import java.util.Date;
  *
  * @author brad
  */
-public abstract class AbstractCollectionResource extends AbstractResource implements SpliffyCollectionResource {
+public abstract class AbstractCollectionResource extends AbstractResource implements CommonCollectionResource {
 
     private Date modDate;
     private Date createdDate;

@@ -17,18 +17,20 @@
 package io.milton.cloud.server.apps.contacts;
 
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
-import io.milton.cloud.server.db.*;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Contact;
+import io.milton.vfs.db.AddressBook;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.Utils;
 import io.milton.common.InternationalizedString;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -80,7 +82,7 @@ public class ContactsFolder extends AbstractCollectionResource implements Addres
     }    
     
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

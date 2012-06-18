@@ -25,18 +25,18 @@ import java.io.OutputStream;
 import java.util.*;
 import org.hibernate.Session;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Permission;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Permission;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SecurityUtils;
 import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.UserResource;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
@@ -49,7 +49,7 @@ import io.milton.vfs.db.utils.SessionManager;
  *
  * @author brad
  */
-public class OrganisationFolder extends AbstractResource implements RootFolder, SpliffyCollectionResource, GetableResource, PropFindableResource {
+public class OrganisationFolder extends AbstractResource implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
 
     private Map<String, PrincipalResource> children = new HashMap<>();
     private final ApplicationManager applicationManager;
@@ -137,7 +137,7 @@ public class OrganisationFolder extends AbstractResource implements RootFolder, 
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return null;
     }
 

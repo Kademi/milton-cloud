@@ -16,40 +16,41 @@
  */
 package io.milton.cloud.server.apps.website;
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
-import io.milton.vfs.db.NvPair;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Permission;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.db.*;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RepositoryFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SecurityUtils;
 import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.Utils;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
  * @author brad
  */
-public class WebsiteRootFolder extends AbstractResource implements RootFolder, SpliffyCollectionResource, GetableResource, PropFindableResource {
+public class WebsiteRootFolder extends AbstractResource implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
 
     private Map<String, PrincipalResource> children = new HashMap<>();
     private final ApplicationManager applicationManager;
@@ -120,7 +121,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, S
             PrincipalResource r = findEntity(getCurrentUser().getName());
             list.add(r);
         }
-        Branch currentLive = website.
+        Branch currentLive = website.currentBranch();
         if (currentLive != null) {
             RepositoryFolder rf = new RepositoryFolder("content", this, website, currentLive, true);
             list.add(rf);
@@ -158,7 +159,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, S
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return null;
     }
 
@@ -172,7 +173,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, S
         // TODO: also include priviledges on the repo, eg:
         //List<Permission> perms = itemVersion.getItem().grantedPermissions(user);
         //SecurityUtils.addPermissions(perms, list);
-        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getBaseEntity(), SessionManager.session());
+        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getOrganisation(), SessionManager.session());
         SecurityUtils.addPermissions(perms, list);        
     }
 
@@ -193,7 +194,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, S
 
     @Override
     public Organisation getOrganisation() {
-        return (Organisation) website.getBaseEntity();
+        return (Organisation) website.getOrganisation();
     }
 
     public Website getWebsite() {

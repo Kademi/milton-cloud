@@ -1,7 +1,7 @@
 package io.milton.cloud.server.web.sync;
 
 import java.util.Date;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.Auth;
 import io.milton.http.Request;

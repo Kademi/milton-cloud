@@ -1,10 +1,14 @@
 package io.milton.cloud.server.db.utils;
 
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Contact;
+import io.milton.vfs.db.AddressBook;
+import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.utils.SessionManager;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
-import io.milton.vfs.db.SessionManager;
-import io.milton.cloud.server.db.*;
 import java.util.Date;
 import java.util.UUID;
 import org.hibernate.HibernateException;
@@ -12,7 +16,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.http.AccessControlledResource;
+import io.milton.resource.AccessControlledResource;
 
 /**
  *
@@ -52,7 +56,7 @@ public class InitialDataCreator {
             rootOrg.setCreatedDate(new Date());            
             session.save(rootOrg);
             Website spliffyWeb = new Website();            
-            spliffyWeb.setBaseEntity(rootOrg);
+            spliffyWeb.setOrganisation(rootOrg);
             spliffyWeb.setName(initialWebsite);
             spliffyWeb.setCreatedDate(new Date());
             spliffyWeb.setTheme("yellow");

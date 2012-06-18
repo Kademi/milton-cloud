@@ -77,6 +77,7 @@ public class Branch implements Serializable {
         this.id = id;
     }
 
+    @ManyToOne(optional=false)
     public Commit getHead() {
         return head;
     }

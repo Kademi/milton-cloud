@@ -21,11 +21,12 @@ public class Commit implements Serializable {
     private long id;
     private long itemHash; // this is the root directory for the repository (in this version)   
     private Date createdDate; 
-    private long editorId;
+    private Profile editor;
 
     public Commit() {
     }
 
+    @Column
     public long getItemHash() {
         return itemHash;
     }
@@ -34,15 +35,20 @@ public class Commit implements Serializable {
         this.itemHash = itemHash;
     }
 
-    public long getEditorId() {
-        return editorId;
+    /**
+     * The user who created this commit
+     * 
+     * @return 
+     */
+    @ManyToOne(optional=false)
+    public Profile getEditor() {
+        return editor;
     }
 
-    public void setEditorId(long editorId) {
-        this.editorId = editorId;
+    public void setEditor(Profile editor) {
+        this.editor = editor;
     }
-        
-
+    
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getCreatedDate() {
         return createdDate;

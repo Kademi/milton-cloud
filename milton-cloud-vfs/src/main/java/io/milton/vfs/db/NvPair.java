@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2012 McEvoy Software Ltd
+ * Copyright 2012 McEvoy Software Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.db;
+package io.milton.vfs.db;
 
 import java.io.Serializable;
 import javax.persistence.*;
@@ -30,9 +28,10 @@ import javax.persistence.*;
  * @author brad
  */
 @Entity
-public class ContactExtendedProperty implements Serializable{
+public class NvPair implements Serializable{
     private Long id;
-    private Contact contact;
+    private BaseEntity baseEntity;
+    private Repository repository;
     private String name;
     private String propValue;
     
@@ -46,17 +45,6 @@ public class ContactExtendedProperty implements Serializable{
         this.id = id;
     }
 
-    @ManyToOne(optional=false)
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
-    }
-    
-    
-    
     @Column(nullable=false)
     public String getName() {
         return name;
@@ -64,8 +52,8 @@ public class ContactExtendedProperty implements Serializable{
 
     public void setName(String name) {
         this.name = name;
-    }
-
+    }    
+    
     @Column(nullable=false)
     public String getPropValue() {
         return propValue;
@@ -75,8 +63,23 @@ public class ContactExtendedProperty implements Serializable{
         this.propValue = propValue;
     }
 
-    
+    @ManyToOne
+    public Repository getRepository() {
+        return repository;
+    }
 
+    public void setRepository(Repository repository) {
+        this.repository = repository;
+    }
+
+    @ManyToOne
+    public BaseEntity getBaseEntity() {
+        return baseEntity;
+    }
+
+    public void setBaseEntity(BaseEntity baseEntity) {
+        this.baseEntity = baseEntity;
+    }
     
     
 }

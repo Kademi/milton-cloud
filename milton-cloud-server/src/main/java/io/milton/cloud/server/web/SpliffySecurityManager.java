@@ -1,20 +1,20 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.manager.PasswordManager;
 import java.util.List;
 import org.hibernate.Session;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
-import io.milton.vfs.db.SessionManager;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
-import io.milton.http.AccessControlledResource;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.cloud.server.manager.PasswordManager;
+import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

@@ -45,6 +45,47 @@ public class DataSessionTest {
         sessionFactory = (SessionFactory) appContext.getBean("sessionFactory");
         session = sessionFactory.openSession();
     }
+
+    /**
+     * Create a tree of resources, then copy the hash and make sure we have a copy
+     * of the tree
+     */
+    @Test
+    public void testCopy() {
+        Transaction tx = session.beginTransaction();
+        DataSession dataSession = new DataSession(0, session);
+        DataNode root = dataSession.getRootDataNode();
+        DataNode x1 = root.add("x1", 1, "d");
+        x1.add("y1", 123, "f");
+        x1.add("y2", 123, "f");
+        x1.add("y3", 123, "f");
+        long newHash = dataSession.save();
+        System.out.println("creted new hash: " + newHash);
+        tx.commit();        
+        session.close();
+        
+        session = sessionFactory.openSession();
+        tx = session.beginTransaction();
+        dataSession = new DataSession(newHash, session);
+        root = dataSession.getRootDataNode();
+        x1 = dataSession.find(Path.path("/x1"));
+        assertEquals(3, x1.size());
+        root.add("x2", x1.getHash(), "d");
+        newHash = dataSession.save();
+        System.out.println("done copy, root hash is now: " + newHash);
+        tx.commit();
+        session.close();
+        
+        session = sessionFactory.openSession();
+        dataSession = new DataSession(newHash, session);
+        DataNode x2 = dataSession.find(Path.path("/x2"));
+        assertNotNull(x2);
+        assertEquals(3, x2.size());
+        session.close();        
+        
+        
+    }
+    
     
     @Test
     public void test() {

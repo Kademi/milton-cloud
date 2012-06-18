@@ -26,17 +26,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.apps.signup.SignupPage;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -55,12 +55,12 @@ public class UserAdminPage extends AbstractCollectionResource implements Getable
     private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
     
     private final String name;
-    private final SpliffyCollectionResource parent;
+    private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
     private List<Profile> searchResults;
 
-    public UserAdminPage(String name, Organisation organisation, SpliffyCollectionResource parent, Services services) {
+    public UserAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
         super(services);
         this.organisation = organisation;
         this.parent = parent;
@@ -113,7 +113,7 @@ public class UserAdminPage extends AbstractCollectionResource implements Getable
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

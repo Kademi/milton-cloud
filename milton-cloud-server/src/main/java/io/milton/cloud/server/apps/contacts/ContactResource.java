@@ -27,16 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.apps.calendar.CalEventResource;
 import io.milton.cloud.server.apps.calendar.CalendarFolder;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Contact;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Contact;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Response;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -124,7 +124,7 @@ public class ContactResource extends AbstractResource implements GetableResource
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

@@ -1,9 +1,9 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.common.ITriplet;
 import io.milton.vfs.data.HashCalc;
 import io.milton.vfs.db.ItemHistory;
 import io.milton.vfs.db.MetaItem;
-import io.milton.vfs.db.SessionManager;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -14,6 +14,9 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.content.ContentSession;
+import io.milton.vfs.content.ContentSession.DirectoryNode;
+import io.milton.vfs.db.utils.SessionManager;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -30,61 +33,17 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class DirectoryResource extends AbstractMutableResource implements PutableResource, GetableResource, MutableCollection {
+public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ITriplet {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
     private final boolean renderMode;
     private ResourceList children;    
-    private boolean dirty;
 
-    public DirectoryResource(String name, MetaItem meta, MutableCollection parent, Services services, boolean renderMode) {
-        super(name, meta, parent, services);
+    public DirectoryResource(ContentSession.DirectoryNode directoryNode, ContentDirectoryResource parent, Services services, boolean renderMode) {
+        super(directoryNode, parent, services);
         this.renderMode = renderMode;
     }
 
-    @Override
-    public void copyTo(CollectionResource toCollection, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
-        if (toCollection instanceof MutableCollection) {
-            Session session = SessionManager.session();
-            Transaction tx = session.beginTransaction();
-
-            MutableCollection newParent = (MutableCollection) toCollection;
-            MetaItem newMeta = Utils.newFileItemVersion();
-            DirectoryResource newDir = new DirectoryResource(newName, newMeta, newParent, services, renderMode);
-            newDir.setHash(hash);
-            newParent.addChild(newDir);
-            newParent.save(session);
-            tx.commit();
-        } else {
-            throw new ConflictException(this, "Can't copy to collection of type: " + toCollection.getClass());
-        }
-    }
-
-    @Override
-    public void removeChild(MutableResource r) throws NotAuthorizedException, BadRequestException {
-        setDirty(true);
-        getChildren().remove(r);
-        parent.onChildChanged(this);
-    }
-
-    @Override
-    public void addChild(MutableResource r) throws NotAuthorizedException, BadRequestException {
-        log.trace("addChild: " + getName());
-        Resource existing = child(r.getName());
-        if (existing != null) {
-            MutableResource mr = (MutableResource) existing;
-            removeChild(mr);
-        }
-        setDirty(true);
-        getChildren().add(r);
-        parent.onChildChanged(this);
-    }
-
-    @Override
-    public void onChildChanged(MutableResource r) {
-        setDirty(true);
-        parent.onChildChanged(this);
-    }
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
@@ -94,12 +53,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            if (getItemVersion() != null) {
-                List<ItemHistory> members = getItemVersion().getMembers();
-                children = Utils.toResources(this, members, renderMode);
-            } else {
-                children = new ResourceList();
-            }
+            children = Utils.toResources(this, members, renderMode);
         }
         return children;
     }
@@ -119,16 +73,9 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
         return rdr;
     }
 
-    /**
-     * Just call up to the RepoResource. It will call back to generate and save
-     * hashes for all directories, then it will save a new RepoVersion
-     *
-     * @param session
-     * @return
-     */
     @Override
-    public void save(Session session) {
-        parent.save(session);
+    public void save() {
+        parent.save();
     }
 
     @Override
@@ -170,7 +117,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
             getTemplater().writePage("directoryIndex", this, params, out);
         } else {
             if (type.equals("hashes")) {
-                HashCalc.calcResourceesHash(getChildren(), out);
+                HashCalc.calcResourceesHash(getChildren(), out); 
             }
         }
     }
@@ -195,28 +142,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
     }
 
     @Override
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    @Override
-    public void setDirty(boolean dirty) {
-        log.trace("setDirty: " + dirty + "  on : " + getName());
-        this.dirty = dirty;
-    }
-
-    @Override
     public boolean isDir() {
         return true;
-    }
-
-    @Override
-    public String getType() {
-        return "d";
-    }
-
-    @Override
-    public void setEntryHash(long hash) {
-        this.hash = hash;
     }
 }

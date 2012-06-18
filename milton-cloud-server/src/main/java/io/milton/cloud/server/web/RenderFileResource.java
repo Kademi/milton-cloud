@@ -16,11 +16,11 @@
  */
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.ItemHistory;
 import io.milton.vfs.db.MetaItem;
-import io.milton.cloud.server.db.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +31,7 @@ import io.milton.cloud.server.web.templating.WebResource;
 import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -42,7 +42,7 @@ import io.milton.resource.*;
  *
  * @author brad
  */
-public class RenderFileResource extends AbstractResource implements MutableResource, GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage {
+public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage {
 
     private final FileResource fileResource;
     
@@ -116,7 +116,7 @@ public class RenderFileResource extends AbstractResource implements MutableResou
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return fileResource.getParent();
     }
 
@@ -154,37 +154,6 @@ public class RenderFileResource extends AbstractResource implements MutableResou
     public Map<Principal, List<Priviledge>> getAccessControlList() {
         return fileResource.getAccessControlList();
     }
-
-    @Override
-    public boolean isDirty() {
-        return fileResource.isDirty();
-    }
-
-    @Override
-    public Long getEntryHash() {
-        return fileResource.getEntryHash();
-    }
-
-    @Override
-    public MetaItem getItemVersion() {
-        return fileResource.getItemVersion();
-    }
-
-    @Override
-    public void setItemVersion(MetaItem newVersion) {
-        fileResource.setItemVersion(newVersion);
-    }
-
-    @Override
-    public String getType() {
-        return fileResource.getType();
-    }
-
-    @Override
-    public ItemHistory getDirectoryMember() {
-        return fileResource.getDirectoryMember();
-    }
-
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {

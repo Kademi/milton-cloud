@@ -1,7 +1,7 @@
-package io.milton.cloud.server.db;
+package io.milton.vfs.db;
 
-import io.milton.http.AccessControlledResource;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;

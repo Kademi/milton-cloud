@@ -8,22 +8,22 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.CalEvent;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.CalEvent;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Transaction;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Response.Status;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -199,7 +199,7 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

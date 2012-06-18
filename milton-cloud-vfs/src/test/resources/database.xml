@@ -36,6 +36,22 @@
                 <value>io.milton.vfs.db.BlobHash</value>
                 <value>io.milton.vfs.db.FanoutEntry</value>
                 <value>io.milton.vfs.db.FanoutHash</value>
+                
+                <value>io.milton.vfs.db.BaseEntity</value>
+                <value>io.milton.vfs.db.Profile</value>
+                <value>io.milton.vfs.db.Credential</value>
+                <value>io.milton.vfs.db.PasswordCredential</value>
+                <value>io.milton.vfs.db.Permission</value>
+                <value>io.milton.vfs.db.Calendar</value>
+                <value>io.milton.vfs.db.CalEvent</value>
+                <value>io.milton.vfs.db.AddressBook</value>
+                <value>io.milton.vfs.db.Contact</value>
+                <value>io.milton.vfs.db.ContactExtendedProperty</value>
+                <value>io.milton.vfs.db.Organisation</value>
+                <value>io.milton.vfs.db.Website</value>
+                <value>io.milton.vfs.db.Group</value>
+                <value>io.milton.vfs.db.GroupMembership</value>    
+                <value>io.milton.vfs.db.NvPair</value>    
             </list>
         </property>
         <property name="hibernateProperties">

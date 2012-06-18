@@ -1,7 +1,8 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.SessionManager;
 
@@ -15,12 +16,11 @@ import io.milton.cloud.server.apps.calendar.CalendarFolder;
 import io.milton.cloud.server.apps.calendar.CalendarHomeFolder;
 import io.milton.cloud.server.apps.contacts.ContactsFolder;
 import io.milton.cloud.server.apps.contacts.ContactsHomeFolder;
-import io.milton.cloud.server.db.*;
-import io.milton.http.AccessControlledResource;
+import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.http.acl.HrefPrincipleId;
-import io.milton.http.acl.Principal;
+import io.milton.principal.HrefPrincipleId;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -37,11 +37,11 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserResource.class);
     private final Profile user;
-    private final SpliffyCollectionResource parent;
+    private final CommonCollectionResource parent;
     private final ApplicationManager applicationManager;
     private List<Resource> children;
 
-    public UserResource(SpliffyCollectionResource parent, Profile u, ApplicationManager applicationManager) {
+    public UserResource(CommonCollectionResource parent, Profile u, ApplicationManager applicationManager) {
         super(parent.getServices());
         this.parent = parent;
         this.user = u;
@@ -161,7 +161,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 

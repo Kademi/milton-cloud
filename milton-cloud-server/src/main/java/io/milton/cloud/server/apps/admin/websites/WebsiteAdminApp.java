@@ -22,10 +22,10 @@ import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.admin.users.UserAdminPage;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.RootFolder;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;
 
@@ -52,7 +52,7 @@ public class WebsiteAdminApp  implements Application {
         if (parent instanceof OrganisationFolder) {
             if (requestedName.equals("manageWebsites")) {
                 OrganisationFolder orgFolder = (OrganisationFolder) parent;
-                return new WebsitesAdminPage(requestedName,orgFolder.getOrganisation(), (SpliffyCollectionResource) parent, resourceFactory.getServices());
+                return new WebsitesAdminPage(requestedName,orgFolder.getOrganisation(), (CommonCollectionResource) parent, resourceFactory.getServices());
             }
         }
         return null;

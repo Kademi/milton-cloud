@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.db;
+package io.milton.vfs.db;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -22,104 +22,118 @@ import java.util.List;
 import javax.persistence.*;
 
 /**
- * Represents a user calendar, which can contain events
  *
  * @author brad
  */
 @Entity
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "owner"})}// item names must be unique within a directory
-)
-public class Calendar implements Serializable {
-    private List<CalEvent> events;
-
+public class AddressBook implements Serializable {
+    private List<Contact> contacts;
     private Long id;
     private BaseEntity owner;
     private String name;
-    private String color;
-    private Long ctag;
+    private String description;
     private Date createdDate;
     private Date modifiedDate;
 
+    /**
+     * @return the id
+     */
     @Id
     @GeneratedValue
     public Long getId() {
         return id;
     }
 
+    /**
+     * @param id the id to set
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * @return the baseEntity
+     */
+    @ManyToOne
+    public BaseEntity getOwner() {
+        return owner;
+    }
+
+    /**
+     * @param baseEntity the baseEntity to set
+     */
+    public void setOwner(BaseEntity baseEntity) {
+        this.owner = baseEntity;
+    }
+
+    /**
+     * @return the name
+     */
     @Column(nullable=false)
     public String getName() {
         return name;
     }
 
+    /**
+     * @param name the name to set
+     */
     public void setName(String name) {
         this.name = name;
     }
 
-    @ManyToOne(optional=false)
-    public BaseEntity getOwner() {
-        return owner;
-    }
-
-    public void setOwner(BaseEntity owner) {
-        this.owner = owner;
-    }
-       
+    /**
+     * @return the description
+     */
     @Column
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
+    public String getDescription() {
+        return description;
     }
 
     /**
-     * Identifies the state of this calendar and all of its child resources
-     * 
-     * @return 
+     * @param description the description to set
      */
-    @Column(nullable = false)
-    public Long getCtag() {
-        return ctag;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setCtag(Long ctag) {
-        this.ctag = ctag;
-    }
-
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    /**
+     * @return the createdDate
+     */
+    @Column(nullable=false)    
+    @Temporal(javax.persistence.TemporalType.DATE)
     public Date getCreatedDate() {
         return createdDate;
     }
 
+    /**
+     * @param createdDate the createdDate to set
+     */
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    /**
+     * @return the modifiedDate
+     */
+    @Column(nullable=false)    
+    @Temporal(javax.persistence.TemporalType.DATE)
     public Date getModifiedDate() {
         return modifiedDate;
     }
 
+    /**
+     * @param modifiedDate the modifiedDate to set
+     */
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 
-    @OneToMany(mappedBy = "calendar")
-    public List<CalEvent> getEvents() {
-        return events;
+    @OneToMany(mappedBy = "addressBook")
+    public List<Contact> getContacts() {
+        return contacts;
     }
 
-    public void setEvents(List<CalEvent> events) {
-        this.events = events;
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
     }
-    
-    
 }

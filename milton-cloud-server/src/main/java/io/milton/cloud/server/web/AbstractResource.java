@@ -7,16 +7,16 @@ import java.util.List;
 import java.util.Map;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.Templater;
 import io.milton.common.Path;
-import io.milton.http.AccessControlledResource;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.http.values.HrefList;
 import io.milton.resource.CollectionResource;
@@ -27,7 +27,7 @@ import io.milton.resource.ReportableResource;
  *
  * @author brad
  */
-public abstract class AbstractResource implements SpliffyResource, PropFindableResource, AccessControlledResource, ReportableResource {
+public abstract class AbstractResource implements CommonResource, PropFindableResource, AccessControlledResource, ReportableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractResource.class);
 
@@ -202,7 +202,7 @@ public abstract class AbstractResource implements SpliffyResource, PropFindableR
     
     @Override
     public Path getPath() {
-        SpliffyCollectionResource p = getParent();
+        CommonCollectionResource p = getParent();
         if( p != null ) {
             return p.getPath().child(this.getName());
         } else {

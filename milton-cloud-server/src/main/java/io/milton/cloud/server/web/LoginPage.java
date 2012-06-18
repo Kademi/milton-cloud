@@ -5,11 +5,11 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.common.Path;
-import io.milton.http.AccessControlledResource.Priviledge;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -24,11 +24,11 @@ import io.milton.resource.GetableResource;
  *
  * @author brad
  */
-public class LoginPage implements GetableResource, SpliffyResource {
+public class LoginPage implements GetableResource, CommonResource {
     private final SpliffySecurityManager securityManager;
-    private final SpliffyCollectionResource parent;
+    private final CommonCollectionResource parent;
 
-    public LoginPage(SpliffySecurityManager securityManager, SpliffyCollectionResource parent) {
+    public LoginPage(SpliffySecurityManager securityManager, CommonCollectionResource parent) {
         this.securityManager = securityManager;
         this.parent = parent;
     }
@@ -101,7 +101,7 @@ public class LoginPage implements GetableResource, SpliffyResource {
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 
@@ -143,7 +143,7 @@ public class LoginPage implements GetableResource, SpliffyResource {
     
     @Override
     public Path getPath() {
-        SpliffyCollectionResource p = getParent();
+        CommonCollectionResource p = getParent();
         if( p != null ) {
             return p.getPath().child(this.getName());
         } else {

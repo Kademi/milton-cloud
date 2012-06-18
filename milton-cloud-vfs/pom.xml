@@ -30,6 +30,11 @@
             <version>${milton.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.milton</groupId>
+            <artifactId>milton-api</artifactId>
+            <version>${milton.version}</version>
+        </dependency>          
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.9</version>

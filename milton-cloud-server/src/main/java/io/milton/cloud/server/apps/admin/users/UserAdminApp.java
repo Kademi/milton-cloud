@@ -20,10 +20,10 @@ import io.milton.cloud.server.web.templating.MenuItem;
 import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.RootFolder;
-import io.milton.cloud.server.web.SpliffyCollectionResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
@@ -51,7 +51,7 @@ public class UserAdminApp implements Application {
         if (parent instanceof OrganisationFolder) {
             if (requestedName.equals("manageUsers")) {
                 OrganisationFolder orgFolder = (OrganisationFolder) parent;
-                return new UserAdminPage(requestedName,orgFolder.getOrganisation(), (SpliffyCollectionResource) parent, resourceFactory.getServices());
+                return new UserAdminPage(requestedName,orgFolder.getOrganisation(), (CommonCollectionResource) parent, resourceFactory.getServices());
             }
         }
         return null;

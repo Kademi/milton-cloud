@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import org.hashsplit4j.api.FanoutImpl;
 import org.hashsplit4j.api.HashStore;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.PutableResource;
 

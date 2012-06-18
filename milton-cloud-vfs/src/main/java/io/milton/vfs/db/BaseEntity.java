@@ -1,5 +1,6 @@
-package io.milton.cloud.server.db;
+package io.milton.vfs.db;
 
+import io.milton.resource.AccessControlledResource;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -7,8 +8,6 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
-import io.milton.http.AccessControlledResource;
-import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 
 /**

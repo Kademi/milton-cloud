@@ -1,22 +1,26 @@
 package io.milton.cloud.server.web;
 
 
-import io.milton.cloud.server.db.BaseEntity;
-import io.milton.cloud.server.db.Profile;
+import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Permission;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.data.HashCalc;
 import io.milton.vfs.db.ItemHistory;
 import io.milton.vfs.db.MetaItem;
-import io.milton.cloud.server.db.*;
-import io.milton.vfs.db.SessionManager;
 import io.milton.http.*;
-import io.milton.http.acl.Principal;
+import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
+import io.milton.vfs.content.ContentSession;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
 import java.util.*;
 import org.hashsplit4j.api.Parser;
@@ -28,45 +32,42 @@ import org.hibernate.Transaction;
  *
  * This behaves much the same as a DirectoryResource but is defined differently
  *
- * TODO: must support PUT
  *
  * @author brad
  */
-public class RepositoryFolder extends AbstractCollectionResource implements MutableCollection, CollectionResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource {
+public class RepositoryFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(RepositoryFolder.class);
-    private final Repository repository;
     private final boolean renderMode;
-    private final SpliffyCollectionResource parent;
+    private final CommonCollectionResource parent;
     private final String name;
     private final Branch branch;
     private ResourceList children;
-    private long hash;
-    private boolean dirty;
-    private Commit repoVersion; // may be null
-    private MetaItem rootItemVersion;
+    private Commit commit; // may be null
+    private ContentSession contentSession;
+
     /**
      * if set html resources will be rendered with the templater
      */
     private String theme;
     private JsonResult jsonResult; // set after completing a POST
 
-    public RepositoryFolder(String name, SpliffyCollectionResource parent, Repository repository, Branch branch, boolean renderMode) {
+    public RepositoryFolder(String name, CommonCollectionResource parent, Branch branch, boolean renderMode) {
         super(parent.getServices());
         this.renderMode = renderMode;
         this.name = name;
         this.parent = parent;
-        this.repository = repository;
         this.branch = branch;
-        this.repoVersion = branch.getHead();        
-        if( this.repoVersion != null) {
-            rootItemVersion = repoVersion.getRootItemVersion();
-        }
-        if (rootItemVersion != null) {
-            hash = rootItemVersion.getItemHash();
-        }
-
+        this.commit = branch.getHead();
+        this.contentSession = new ContentSession(SessionManager.session(), branch, getServices().getCurrentDateService(), getServices().getHashStore(), getServices().getBlobStore());
     }
+
+    @Override
+    public void save() {
+        contentSession.save(this.getCurrentUser());
+    }
+    
+    
 
     @Override
     public Resource child(String childName) {
@@ -76,12 +77,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
     @Override
     public ResourceList getChildren() {
         if (children == null) {
-            if (repoVersion != null) {
-                List<ItemHistory> members = repoVersion.getRootItemVersion().getMembers();
-                children = Utils.toResources(this, members, renderMode);
-            } else {
-                children = new ResourceList();
-            }
+            children = Utils.toResources(this, contentSession.getRootContentNode(), renderMode);
         }
         return children;
     }
@@ -145,48 +141,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
 
     }
 
-    /**
-     * Save procedure is:
-     *
-     * 1. as resources are changed they set their dirty flag, which propogates
-     * up tp the parent. If in save the dirty flag on RepositoryFolder is false,
-     * then nothing has changed - exit<br/>
-     *
-     * 2.Recalculate hashes on all dirty directories<br/>
-     *
-     * 3. If dirty, insert a new root item version
-     *
-     * 4. for each member
-     *
-     * 4a. if dirty create a new item version,
-     *
-     * 4b. insert member record connecting it to this version
-     *
-     * 4c. go to step 3
-     *
-     * @param session
-     * @return
-     */
-    @Override
-    public void save(Session session) {
-        log.trace("save");
-        services.getResourceManager().save(session, this);
-    }
-
-    @Override
-    public Long getEntryHash() {
-        return hash;
-    }
-
-    @Override
-    public void setEntryHash(long newHash) {
-        this.hash = newHash;
-    }
-
-    @Override
-    public MetaItem getItemVersion() {
-        return rootItemVersion;
-    }
 
     @Override
     public void setItemVersion(MetaItem newVersion) {
@@ -297,11 +251,11 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
      * @return
      */
     public Commit getRepoVersion() {
-        return repoVersion;
+        return commit;
     }
 
     @Override
-    public SpliffyCollectionResource getParent() {
+    public CommonCollectionResource getParent() {
         return parent;
     }
 
@@ -342,8 +296,8 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
      * @return
      */
     public Branch getDirectRepository() {
-        if (this.repoVersion != null) {
-            return repoVersion.getRepository();
+        if (this.commit != null) {
+            return commit.getRepository();
         }
         return repository.trunk(SessionManager.session());
     }

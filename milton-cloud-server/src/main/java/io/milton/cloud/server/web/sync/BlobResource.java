@@ -8,7 +8,7 @@ import io.milton.http.exceptions.NotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
-import io.milton.cloud.server.db.Organisation;
+import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.GetableResource;
 

@@ -2,7 +2,6 @@ package io.milton.cloud.server.web;
 
 import com.ettrema.common.Service;
 import io.milton.cloud.server.db.utils.UserDao;
-import io.milton.vfs.db.SessionManager;
 
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.common.Path;
@@ -14,6 +13,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.webdav.PropertySourcesList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

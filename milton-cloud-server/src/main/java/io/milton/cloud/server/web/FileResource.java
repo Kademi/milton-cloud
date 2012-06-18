@@ -11,8 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.MetaItem;
-import io.milton.vfs.db.SessionManager;
+
 import io.milton.common.ContentTypeUtils;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -20,41 +19,27 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.resource.CollectionResource;
 import io.milton.resource.ReplaceableResource;
+import io.milton.vfs.content.ContentSession.FileNode;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.logging.Level;
 
 /**
  *
  *
  * @author brad
  */
-public class FileResource extends AbstractMutableResource implements ReplaceableResource {
+public class FileResource extends AbstractContentResource implements ReplaceableResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
+    private final FileNode fileNode;
     private Fanout fanout;
     private boolean dirty;
     private RenderFileResource htmlPage; // for parsing html pages
 
-    public FileResource(String name, MetaItem meta, MutableCollection parent, Services services) {
-        super(name, meta, parent, services);
-    }
-
-    @Override
-    public void copyTo(CollectionResource toCollection, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
-        if (toCollection instanceof MutableCollection) {
-            Session session = SessionManager.session();
-            Transaction tx = session.beginTransaction();
-
-            MutableCollection newParent = (MutableCollection) toCollection;
-            MetaItem newMeta = Utils.newFileItemVersion();
-            FileResource fileResource = new FileResource(newName, newMeta, newParent, services);
-            fileResource.setHash(hash);
-            newParent.addChild(fileResource);
-            newParent.save(session);
-            tx.commit();
-        } else {
-            throw new ConflictException(this, "Can't copy to collection of type: " + toCollection.getClass());
-        }
+    public FileResource(FileNode fileNode, ContentDirectoryResource parent, Services services) {
+        super(fileNode, parent, services);
+        this.fileNode = fileNode;
     }
 
     @Override
@@ -71,30 +56,23 @@ public class FileResource extends AbstractMutableResource implements Replaceable
             // read the new hash and set it on this            
             DataInputStream din = new DataInputStream(in);
             try {
-                hash = din.readLong();
+                long hash = din.readLong();
+                fileNode.setHash(hash);
+                parent.save();
             } catch (IOException ex) {
                 throw new BadRequestException("Couldnt read the new hash", ex);
             }
-            log.info("replaceContent: setting hash: " + hash);
 
         } else {
             log.info("replaceContent: set content");
-            // parse data and persist to stores
-            Parser parser = new Parser();
-            long fileHash;
             try {
-                fileHash = parser.parse(in, getHashStore(), getBlobStore());
+                // parse data and persist to stores
+                fileNode.setContent(in);
             } catch (IOException ex) {
-                throw new BadRequestException("Couldnt parse given data", ex);
+                throw new BadRequestException("exception", ex);
             }
-            setHash(fileHash);
-
-            // Create a new Version Meta record
-            itemVersion = Utils.newFileItemVersion(itemVersion.getItem());
         }
-        // update parent
-        parent.onChildChanged(this);
-        parent.save(session);
+        parent.save();
         tx.commit();
     }
 

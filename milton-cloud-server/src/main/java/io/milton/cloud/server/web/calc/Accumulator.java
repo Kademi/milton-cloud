@@ -1,8 +1,8 @@
 package io.milton.cloud.server.web.calc;
 
-import io.milton.cloud.server.web.SpliffyResource;
+import io.milton.cloud.server.web.CommonResource;
 
 interface Accumulator {
 
-    void accumulate(SpliffyResource r, Object o);
+    void accumulate(CommonResource r, Object o);
 }

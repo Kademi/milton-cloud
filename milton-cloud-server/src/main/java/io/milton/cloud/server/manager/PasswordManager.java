@@ -1,9 +1,9 @@
 package io.milton.cloud.server.manager;
 
 import java.util.Date;
-import io.milton.cloud.server.db.Credential;
-import io.milton.cloud.server.db.PasswordCredential;
-import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Credential;
+import io.milton.vfs.db.PasswordCredential;
+import io.milton.vfs.db.Profile;
 import io.milton.http.http11.auth.DigestGenerator;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.vfs.db.utils.SessionManager;
