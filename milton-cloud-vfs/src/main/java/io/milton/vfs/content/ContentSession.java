@@ -108,7 +108,7 @@ public class ContentSession {
         protected final DataSession.DataNode dataNode;
         protected MetaNode metaNode;
         protected List<ContentNode> children;
-        
+
         public abstract void copy(DirectoryNode dest, String destName);
 
         private ContentNode(DirectoryNode parent, DataNode dataNode, MetaNode metaNode) {
@@ -136,14 +136,22 @@ public class ContentSession {
                 parent.children.remove(this);
             }
         }
-        
+
         public Date getCreatedDate() {
             return metaNode.getCreatedDate();
         }
-        
+
         public Date getModifedDate() {
             return metaNode.getModifiedDate();
         }
+
+        public DataNode getDataNode() {
+            return dataNode;
+        }
+
+        public MetaNode getMetaNode() {
+            return metaNode;
+        }                
     }
 
     public class DirectoryNode extends ContentNode {
@@ -195,26 +203,26 @@ public class ContentSession {
             children.add(newContentNode);
             return newContentNode;
         }
-        
+
         /**
          * Performs recursive copy to ensure metadata is created
-         * 
+         *
          * @param dest
-         * @param destName 
+         * @param destName
          */
         @Override
         public void copy(DirectoryNode dest, String destName) {
             DirectoryNode copied = dest.addDirectory(destName);
-            for( ContentNode child : this.getChildren() ) {
+            for (ContentNode child : this.getChildren()) {
                 child.copy(copied, child.getName());
             }
-        }        
+        }
     }
 
     public class FileNode extends ContentNode {
 
         private Fanout fanout;
-        
+
         public FileNode(DirectoryNode parent, DataNode dataNode, MetaNode metaNode) {
             super(parent, dataNode, metaNode);
         }
@@ -223,12 +231,12 @@ public class ContentSession {
         public void copy(DirectoryNode dest, String destName) {
             dest.addFile(destName).setHash(getHash());
         }
-        
+
         public void setHash(long hash) {
             dataNode.setHash(hash);
             metaNode.setModifiedDate(currentDateService.getNow());
         }
-        
+
         public long getHash() {
             return dataNode.getHash();
         }
@@ -255,6 +263,10 @@ public class ContentSession {
             List<Long> fanoutCrcs = getFanout().getHashes();
             combiner.combine(fanoutCrcs, hashStore, blobStore, out);
             out.flush();
+        }
+
+        public long getContentLength() {
+            return getFanout().getActualContentLength();
         }
     }
 }

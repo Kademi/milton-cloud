@@ -123,12 +123,12 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         }
         Branch currentLive = website.currentBranch();
         if (currentLive != null) {
-            RepositoryFolder rf = new RepositoryFolder("content", this, website, currentLive, true);
+            RepositoryFolder rf = new RepositoryFolder("content", this, currentLive, true);
             list.add(rf);
         }
         if (website.getBranches() != null) {
             for (Branch b : website.getBranches()) {
-                RepositoryFolder rf = new RepositoryFolder(b.getName(), this, website, b, false);
+                RepositoryFolder rf = new RepositoryFolder(b.getName(), this, b, false);
                 list.add(rf);
             }
         }
@@ -173,7 +173,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         // TODO: also include priviledges on the repo, eg:
         //List<Permission> perms = itemVersion.getItem().grantedPermissions(user);
         //SecurityUtils.addPermissions(perms, list);
-        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getOrganisation(), SessionManager.session());
+        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getBaseEntity(), SessionManager.session());
         SecurityUtils.addPermissions(perms, list);        
     }
 
@@ -194,7 +194,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
     @Override
     public Organisation getOrganisation() {
-        return (Organisation) website.getOrganisation();
+        return (Organisation) website.getBaseEntity();
     }
 
     public Website getWebsite() {

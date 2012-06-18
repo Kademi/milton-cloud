@@ -4,7 +4,6 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
-import io.milton.vfs.db.SessionManager;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +27,8 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.HrefList;
 import io.milton.ldap.Condition;
 import io.milton.resource.*;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
@@ -95,8 +96,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
             if (user.getRepositories() != null) {
                 for (Repository r : user.getRepositories()) {
                     Branch b = r.trunk(SessionManager.session());
-                    // Note that r is not necessarily the direct repo for rv, might be linked
-                    RepositoryFolder rr = new RepositoryFolder(r.getName(), this, r, b, false);
+                    RepositoryFolder rr = new RepositoryFolder(r.getName(), this, b, false);
                     children.add(rr);
                 }
             }
@@ -126,7 +126,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
         SessionManager.session().save(r);
         tx.commit();
-        return new RepositoryFolder(r.getName(), this, r, b, false);
+        return new RepositoryFolder(r.getName(), this, b, false);
     }
 
     @Override

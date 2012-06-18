@@ -127,4 +127,22 @@ public class Repository implements Serializable {
         return null;
     }    
     
+    public Branch trunk(Session session) {
+        if (getBranches() != null) {
+            for (Branch b : getBranches()) {
+                if (Branch.TRUNK.equals(b.getName())) { 
+                    return b;
+                }
+            }
+        }
+        Branch b = new Branch();
+        b.setName(Branch.TRUNK);
+        b.setRepository(this);
+        session.save(b);
+        if (this.branches == null) {
+            setBranches(new ArrayList<Branch>());
+        }
+        getBranches().add(b);
+        return b;
+    }    
 }

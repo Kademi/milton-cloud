@@ -10,7 +10,6 @@ import io.milton.http.HttpManager;
 import io.milton.http.ResourceFactory;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.webdav.PropertySourcesList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.utils.SessionManager;
@@ -35,16 +34,14 @@ public class SpliffyResourceFactory implements ResourceFactory, Service {
     private final Services services;
     private final ApplicationManager applicationManager;
     private final EventManager eventManager;
-    private final PropertySourcesList propertySources;
     private final SessionManager sessionManager;
 
-    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, Services services, ApplicationManager applicationManager, EventManager eventManager, PropertySourcesList propertySources, SessionManager sessionManager) {
+    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, Services services, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager) {
         this.userDao = userDao;
         this.securityManager = securityManager;
         this.services = services;
         this.applicationManager = applicationManager;
         this.eventManager = eventManager;
-        this.propertySources = propertySources;
         this.sessionManager = sessionManager;
     }
 
@@ -98,10 +95,6 @@ public class SpliffyResourceFactory implements ResourceFactory, Service {
 
     public EventManager getEventManager() {
         return eventManager;
-    }
-
-    public PropertySourcesList getPropertySources() {
-        return propertySources;
     }
 
     public SpliffySecurityManager getSecurityManager() {

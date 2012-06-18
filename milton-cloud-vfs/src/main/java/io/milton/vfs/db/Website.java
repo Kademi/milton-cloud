@@ -35,19 +35,8 @@ public class Website extends Repository {
 
     private String theme;
     private String currentBranch;
-    private Organisation organisation;
-
-    @ManyToOne(optional=false)
-    public Organisation getOrganisation() {
-        return organisation;
-    }
-
-    public void setOrganisation(Organisation organisation) {
-        this.organisation = organisation;
-    }
     
     
-
     @Column
     public String getTheme() {
         return theme;

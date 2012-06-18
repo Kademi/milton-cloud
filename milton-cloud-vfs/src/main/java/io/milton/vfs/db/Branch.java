@@ -2,6 +2,7 @@ package io.milton.vfs.db;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
 
@@ -19,12 +20,19 @@ import org.hibernate.Session;
 @javax.persistence.Entity
 @Table(name="BRANCH")
 public class Branch implements Serializable {
+    
+    /**
+     * Special branch which always exists on a repository
+     */
+    public static String TRUNK = "trunk";    
+    
     private long id;
     private String name;
     private Commit head;
     private MetaItem rootMetaItem;
     private Repository repository;
     private Date createdDate; 
+    private List<Permission> permissions; // can be granted permissions
            
 
     public Branch() {
@@ -85,10 +93,22 @@ public class Branch implements Serializable {
     public void setHead(Commit head) {
         this.head = head;
     }
-
-    
-
+   
     public Commit latestVersion(Session session) {
         return head;
     }    
+    
+    /**
+     * Permissions which have been granted on this Branch
+     * 
+     * @return 
+     */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "grantedOnBranch")
+    public List<Permission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<Permission> grantedPermissions) {
+        this.permissions = grantedPermissions;
+    }        
 }

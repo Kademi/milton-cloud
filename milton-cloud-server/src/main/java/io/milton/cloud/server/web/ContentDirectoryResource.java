@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.resource.MakeCollectionableResource;
 import io.milton.vfs.content.ContentSession.DirectoryNode;
 
 /**
@@ -22,7 +23,7 @@ import io.milton.vfs.content.ContentSession.DirectoryNode;
  *
  * @author brad
  */
-public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource{
+public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource, MakeCollectionableResource{
     /**
      * Either save this content session, or delegate to a parent who can
      * 

@@ -33,8 +33,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     private final FileNode fileNode;
-    private Fanout fanout;
-    private boolean dirty;
     private RenderFileResource htmlPage; // for parsing html pages
 
     public FileResource(FileNode fileNode, ContentDirectoryResource parent, Services services) {
@@ -46,10 +44,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        // a note on file dirtiness: a file is only dirty if its content has changed. If it is moved
-        // or deleted then that is a change to the directories affected, not the file
-        dirty = true;
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {
@@ -78,10 +72,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        Combiner combiner = new Combiner();
-        List<Long> fanoutCrcs = getFanout().getHashes();
-        combiner.combine(fanoutCrcs, getHashStore(), getBlobStore(), out);
-        out.flush();
+        fileNode.writeContent(out);
     }
 
     /**
@@ -98,32 +89,13 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public Long getContentLength() {
-        return getFanout().getActualContentLength();
+        return fileNode.getContentLength();
     }
 
-    private Fanout getFanout() {
-        if (fanout == null) {
-            fanout = getHashStore().getFanout(hash);
-            if (fanout == null) {
-                throw new RuntimeException("Fanout not found: " + hash);
-            }
-        }
-        return fanout;
-    }
 
     @Override
     public boolean isDir() {
         return false;
-    }
-
-    @Override
-    public String getType() {
-        return "f";
-    }
-
-    @Override
-    public boolean isDirty() {
-        return dirty;
     }
     
     public RenderFileResource getHtml() {

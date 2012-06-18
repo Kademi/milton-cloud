@@ -6,8 +6,6 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.common.DefaultCurrentDateService;
-import io.milton.cloud.server.manager.ResourceManager;
-import io.milton.cloud.server.manager.ShareManager;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplateParser;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
@@ -24,18 +22,14 @@ public class Services {
     private final Templater htmlTemplater;
     private final Templater textTemplater;
     private final SpliffySecurityManager securityManager;
-    private final ResourceManager resourceManager;
-    private final ShareManager shareManager;
     private final ApplicationManager applicationManager;
     private HtmlTemplateParser templateParser;
     private final CurrentDateService currentDateService;
 
-    public Services(HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ResourceManager resourceManager, ShareManager shareManager, ApplicationManager applicationManager) {
+    public Services(HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;        
         this.securityManager = securityManager;
-        this.resourceManager = resourceManager;
-        this.shareManager = shareManager;
         this.applicationManager = applicationManager;
         templateParser = new HtmlTemplateParser();
         this.textTemplater = new TextTemplater(securityManager);
@@ -60,15 +54,6 @@ public class Services {
         return securityManager;
     }
 
-
-    public ResourceManager getResourceManager() {
-        return resourceManager;
-    }
-
-    public ShareManager getShareManager() {
-        return shareManager;
-    }
-
     public HtmlTemplateParser getTemplateParser() {
         return templateParser;
     }
@@ -83,6 +68,5 @@ public class Services {
 
     public CurrentDateService getCurrentDateService() {
         return currentDateService;
-    }
-    
+    }    
 }

@@ -1,9 +1,6 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.common.ITriplet;
 import io.milton.vfs.data.HashCalc;
-import io.milton.vfs.db.ItemHistory;
-import io.milton.vfs.db.MetaItem;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -14,8 +11,8 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.content.ContentSession;
 import io.milton.vfs.content.ContentSession.DirectoryNode;
+import io.milton.vfs.content.ContentSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 
 import java.io.DataInputStream;
@@ -23,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import org.hashsplit4j.api.Parser;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -33,14 +29,16 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ITriplet {
+public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
+    private final DirectoryNode directoryNode;
     private final boolean renderMode;
     private ResourceList children;    
 
-    public DirectoryResource(ContentSession.DirectoryNode directoryNode, ContentDirectoryResource parent, Services services, boolean renderMode) {
+    public DirectoryResource(DirectoryNode directoryNode, ContentDirectoryResource parent, Services services, boolean renderMode) {
         super(directoryNode, parent, services);
+        this.directoryNode = directoryNode;
         this.renderMode = renderMode;
     }
 
@@ -53,7 +51,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = Utils.toResources(this, members, renderMode);
+            children = Utils.toResources(this, directoryNode, renderMode);
         }
         return children;
     }
@@ -62,11 +60,10 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        MetaItem newMeta = Utils.newDirItemVersion();
-        DirectoryResource rdr = new DirectoryResource(newName, newMeta, this, services, renderMode);
-        addChild(rdr);
-        save(session);
+        DirectoryNode newNode = directoryNode.addDirectory(newName);
+        DirectoryResource rdr = new DirectoryResource(newNode, this, services, renderMode);
+        onAddedChild(this);
+        save();
 
         tx.commit();
 
@@ -82,28 +79,22 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        MetaItem newMeta = Utils.newFileItemVersion();
-        FileResource fileResource = new FileResource(newName, newMeta, this, services);
+        FileNode newFileNode = directoryNode.addFile(newName);
+        FileResource fileResource = new FileResource(newFileNode, this, services);
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {
             // read the new hash and set it on this
             DataInputStream din = new DataInputStream(inputStream);
-
             long newHash = din.readLong();
-            log.info("createNew: setting hash: " + hash);
-            fileResource.setHash(newHash);
+            newFileNode.setHash(newHash);
         } else {
             log.info("createNew: set content");
             // parse data and persist to stores
-            Parser parser = new Parser();
-            long fileHash = parser.parse(inputStream, getHashStore(), getBlobStore());
-
-            fileResource.setHash(fileHash);
+            newFileNode.setContent(inputStream);
         }
-        addChild(fileResource);
-        save(session);
+        onAddedChild(fileResource);
+        save();
         tx.commit();
 
         return fileResource;
@@ -117,7 +108,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             getTemplater().writePage("directoryIndex", this, params, out);
         } else {
             if (type.equals("hashes")) {
-                HashCalc.calcResourceesHash(getChildren(), out); 
+                HashCalc.getInstance().calcHash(directoryNode.getDataNode(), out); 
             }
         }
     }
@@ -144,5 +135,20 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     @Override
     public boolean isDir() {
         return true;
+    }
+
+    @Override
+    public DirectoryNode getDirectoryNode() {
+        return directoryNode;
+    }
+
+    @Override
+    public void onAddedChild(AbstractContentResource aThis) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void onRemovedChild(AbstractContentResource aThis) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

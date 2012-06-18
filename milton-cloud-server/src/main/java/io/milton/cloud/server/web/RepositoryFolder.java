@@ -1,16 +1,12 @@
 package io.milton.cloud.server.web;
 
-
 import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
-import io.milton.vfs.db.Repository;
 import io.milton.vfs.data.HashCalc;
-import io.milton.vfs.db.ItemHistory;
-import io.milton.vfs.db.MetaItem;
 import io.milton.http.*;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -19,11 +15,11 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
 import io.milton.vfs.content.ContentSession;
+import io.milton.vfs.content.ContentSession.DirectoryNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
 import java.util.*;
-import org.hashsplit4j.api.Parser;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -45,7 +41,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     private ResourceList children;
     private Commit commit; // may be null
     private ContentSession contentSession;
-
     /**
      * if set html resources will be rendered with the templater
      */
@@ -66,8 +61,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     public void save() {
         contentSession.save(this.getCurrentUser());
     }
-    
-    
 
     @Override
     public Resource child(String childName) {
@@ -98,10 +91,10 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     }
 
     public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException {
-        MetaItem newItemVersion = Utils.newDirItemVersion();
-        DirectoryResource rdr = new DirectoryResource(newName, newItemVersion, this, services, false);
-        addChild(rdr);
-        save(session);
+        ContentSession.DirectoryNode newNode = contentSession.getRootContentNode().addDirectory(newName);
+        DirectoryResource rdr = new DirectoryResource(newNode, this, services, false);
+        onAddedChild(rdr);
+        save();
         return rdr;
     }
 
@@ -109,57 +102,37 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        MetaItem newMeta = Utils.newFileItemVersion();
-        FileResource fileResource = new FileResource(newName, newMeta, this, services);
+        DirectoryNode thisNode = contentSession.getRootContentNode();
+        ContentSession.FileNode newFileNode = thisNode.addFile(newName);
+        FileResource fileResource = new FileResource(newFileNode, this, services);
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {
             // read the new hash and set it on this
             DataInputStream din = new DataInputStream(inputStream);
-
             long newHash = din.readLong();
-            fileResource.setHash(newHash);
-
+            newFileNode.setHash(newHash);
         } else {
+            log.info("createNew: set content");
             // parse data and persist to stores
-            Parser parser = new Parser();
-            long fileHash = parser.parse(inputStream, getHashStore(), getBlobStore());
-
-            // add a reference to the new child
-            getChildren();
-            fileResource.setHash(fileHash);
+            newFileNode.setContent(inputStream);
         }
-        addChild(fileResource);
-
-        save(session);
-        SessionManager.session().save(newMeta);
-
+        onAddedChild(fileResource);
+        save();
         tx.commit();
 
         return fileResource;
 
     }
 
-
-    @Override
-    public void setItemVersion(MetaItem newVersion) {
-        log.trace("setItemVersion");
-        //this.dirty = false;
-        this.rootItemVersion = newVersion;
-    }
-
     @Override
     public Date getCreateDate() {
-        return repository.getCreatedDate();
+        return contentSession.getRootContentNode().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        if (rootItemVersion != null) {
-            return rootItemVersion.getModifiedDate();
-        }
-        return null;
+        return contentSession.getRootContentNode().getModifedDate();
     }
 
     @Override
@@ -177,15 +150,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
             log.trace("sendContent: " + type);
             switch (type) {
                 case "hashes":
-                    HashCalc.calcResourceesHash(getChildren(), out);
-                    out.flush();
-                    break;
-                case "revision":
-                    // write the directory hash
-                    Commit rv = repository.latestVersion(SessionManager.session());
-                    try (DataOutputStream dout = new DataOutputStream(out)) {
-                        dout.writeLong(rv.getRootItemVersion().getItemHash());
-                    }
+                    HashCalc.getInstance().calcHash(contentSession.getRootContentNode().getDataNode(), out);
                     break;
             }
         }
@@ -218,33 +183,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
         return null;
     }
 
-    @Override
-    public void removeChild(MutableResource r) {
-        dirty = true;
-        getChildren().remove(r);
-    }
-
-    @Override
-    public void addChild(MutableResource r) throws NotAuthorizedException, BadRequestException {
-        dirty = true;
-        getChildren().add(r);
-    }
-
-    @Override
-    public void onChildChanged(MutableResource r) {
-        dirty = true;
-    }
-
-    @Override
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    @Override
-    public void setDirty(boolean dirty) {
-        this.dirty = dirty;
-    }
-
     /**
      * may be null
      *
@@ -260,19 +198,13 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     }
 
     @Override
-    public String getType() {
-        return "d";
-    }
-
-    @Override
     public BaseEntity getOwner() {
         return parent.getOwner();
     }
 
     @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {        
+    public void addPrivs(List<Priviledge> list, Profile user) {
         Set<Permission> perms = SecurityUtils.getPermissions(user, branch, SessionManager.session());
-        System.out.println("addPrivs: " + perms);
         SecurityUtils.addPermissions(perms, list);
         parent.addPrivs(list, user);
     }
@@ -289,38 +221,16 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
         return null;
     }
 
-    /**
-     * Return the direct (not linked) repository. That is, the direct parent of
-     * the RepositoryVersion object this resource is listing children for
-     *
-     * @return
-     */
-    public Branch getDirectRepository() {
-        if (this.commit != null) {
-            return commit.getRepository();
-        }
-        return repository.trunk(SessionManager.session());
-    }
-
-    public MetaItem getRootItemVersion() {
-        return rootItemVersion;
-    }
-
-    @Override
-    public ItemHistory getDirectoryMember() {
-        return null;
-    }
-
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        String shareWith = parameters.get("shareWith");
-        String priv = parameters.get("priviledge");
-        AccessControlledResource.Priviledge p = AccessControlledResource.Priviledge.valueOf(priv);
-        String message = parameters.get("message");
-        if (shareWith != null) {
-            getServices().getShareManager().sendShareInvites(getCurrentUser(), repository, shareWith, p, message);
-            this.jsonResult = new JsonResult(true);
-        }
+//        String shareWith = parameters.get("shareWith");
+//        String priv = parameters.get("priviledge");
+//        AccessControlledResource.Priviledge p = AccessControlledResource.Priviledge.valueOf(priv);
+//        String message = parameters.get("message");
+//        if (shareWith != null) {
+//            getServices().getShareManager().sendShareInvites(getCurrentUser(), repository, shareWith, p, message);
+//            this.jsonResult = new JsonResult(true);
+//        }
         return null;
 
     }
@@ -329,8 +239,23 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
-    
+
     public String getTitle() {
-        return repository.getTitle();
+        return this.branch.getRepository().getTitle();
+    }
+
+    @Override
+    public DirectoryNode getDirectoryNode() {
+        return contentSession.getRootContentNode();
+    }
+
+    @Override
+    public void onAddedChild(AbstractContentResource aThis) {
+        getChildren().add(aThis);
+    }
+
+    @Override
+    public void onRemovedChild(AbstractContentResource aThis) {
+        getChildren().remove(aThis);
     }
 }

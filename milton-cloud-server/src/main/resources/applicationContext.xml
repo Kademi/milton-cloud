@@ -25,15 +25,15 @@
     -->
     <import resource="classpath:env.xml"/>
 
-    <bean id="lock.manager" class="com.ettrema.http.fs.SimpleLockManager" />
+    <bean id="lock.manager" class="io.milton.http.fs.SimpleLockManager" />
             
-    <bean id="blob.store" class="org.spliffy.server.db.store.FileSystemBlobStore">
+    <bean id="blob.store" class="io.milton.cloud.common.store.FileSystemBlobStore">
         <constructor-arg value="${blob.storage.location}" />
     </bean>
     
     <!-- This is a much more robust blob store, but experimental -->
     <!--
-    <bean id="blob.store" class="org.spliffy.server.db.store.HAVolumeBlobStore">
+    <bean id="blob.store" class="io.milton.cloud.server.db.store.HAVolumeBlobStore">
         <constructor-arg ref="volume.allocator"/>
         <constructor-arg>
             <list>
@@ -44,7 +44,7 @@
     </bean>
     -->
 
-    <bean id="hash.store" class="org.spliffy.server.db.store.SpliffyHashStore"/>
+    <bean id="hash.store" class="io.milton.vfs.content.DbHashStore"/>
     
     <bean id="mail.sender" class="com.ettrema.mail.send.RemoteSmtpMailSender" init-method="start">
         <constructor-arg value="${mail.smtp.host}"/>
@@ -61,145 +61,45 @@
     -->
     
     
-    <bean id="password.manager" class="org.spliffy.server.manager.PasswordManager"/>
+    <bean id="password.manager" class="io.milton.cloud.server.manager.PasswordManager"/>
 
-    <bean id="dao.user" class="org.spliffy.server.db.utils.UserDao"  >
+    <bean id="dao.user" class="io.milton.cloud.server.db.utils.UserDao"  >
 
     </bean>
 
-    <bean id="security.manager" class="org.spliffy.server.web.SpliffySecurityManager">
+    <bean id="security.manager" class="io.milton.cloud.server.web.SpliffySecurityManager">
         <constructor-arg ref="dao.user" />
         <constructor-arg ref="password.manager" />
     </bean>
+            
+    <bean id="event.manager" class="io.milton.event.EventManagerImpl"/>
     
-    <bean id="resource.manager" class="org.spliffy.server.manager.ResourceManager"></bean>
-    
-    <bean id="share.manager" class="org.spliffy.server.manager.ShareManager">
-        <constructor-arg ref="resource.manager" />
-        <constructor-arg ref="mail.sender" />
-    </bean>    
-    
-    <bean id="event.manager" class="com.ettrema.event.EventManagerImpl"/>
-    
-    <bean id="application.manager" class="org.spliffy.server.apps.ApplicationManager">
+    <bean id="application.manager" class="io.milton.cloud.server.apps.ApplicationManager">
         <constructor-arg>
             <list>
-                <bean class="org.spliffy.server.apps.orgs.OrganisationsApp"/>
-                <bean class="org.spliffy.server.apps.website.WebsiteApp"/>
-                <bean class="org.spliffy.server.apps.admin.dashboard.DashboardAdminApp"/>
-                <bean class="org.spliffy.server.apps.admin.users.UserAdminApp"/>
-                <bean class="org.spliffy.server.apps.admin.websites.WebsiteAdminApp"/>
-                <bean class="org.spliffy.server.apps.login.LoginApp"/>
-                <bean class="org.spliffy.server.apps.calendar.CalendarApp"/>
-                <bean class="org.spliffy.server.apps.contacts.ContactsApp"/>
-                <bean class="org.spliffy.server.apps.sharing.ShareApp"/>
-                <bean class="org.spliffy.server.apps.signup.SignupApp"/>
+                <bean class="io.milton.cloud.server.apps.orgs.OrganisationsApp"/>
+                <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.dashboard.DashboardAdminApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.users.UserAdminApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.websites.WebsiteAdminApp"/>
+                <bean class="io.milton.cloud.server.apps.login.LoginApp"/>
+                <bean class="io.milton.cloud.server.apps.calendar.CalendarApp"/>
+                <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
+                <bean class="io.milton.cloud.server.apps.signup.SignupApp"/>
             </list>
         </constructor-arg>
         <property name="appsConfigDir" value="${apps.config.dir}" />
     </bean>
     
-    <bean id="resource.type.helper.default" class="com.bradmcevoy.http.webdav.WebDavResourceTypeHelper"/>
-
-    <bean id="resource.type.helper.acl" class="com.ettrema.http.acl.AccessControlledResourceTypeHelper">
-        <constructor-arg ref="resource.type.helper.default"/>
-    </bean>
-
-    <bean id="resource.type.helper.caldav" class="com.ettrema.http.caldav.CalendarResourceTypeHelper">
-        <constructor-arg ref="resource.type.helper.acl"/>
-    </bean>        
-
-    <bean id="resource.type.helper.carddav" class="com.ettrema.http.carddav.AddressBookResourceTypeHelper">
-        <constructor-arg ref="resource.type.helper.caldav"/>
-    </bean>    
-    
-    <bean id="auth.service" class="com.bradmcevoy.http.AuthenticationService">
-        <property name="disableDigest" value="false" />
-    </bean>
-
-    <bean id="milton.response.handler" class="com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler">
-        <constructor-arg ref="auth.service"/>
-        <constructor-arg ref="resource.type.helper.carddav"/>
-    </bean>    
-    
-    <!-- The compressing response handler wraps the default response handler and compresses
-    response content. This will only actually perform compression for specific mime types
-    (currently hard coded to text, css and js files) and if the client supports gzip -->
-    <bean id="milton.response.handler.compressing" class="com.bradmcevoy.http.CompressingResponseHandler">
-        <constructor-arg ref="milton.response.handler" />
-    </bean>
-
-    <bean id="milton.handler.helper" class="com.bradmcevoy.http.HandlerHelper">
-        <constructor-arg ref="auth.service"/>
-        <constructor-arg>
-            <list>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="protocol.http11" class="com.bradmcevoy.http.http11.Http11Protocol">
-        <constructor-arg ref="milton.response.handler"/>
-        <constructor-arg ref="milton.handler.helper"/>
-    </bean>
-
-    <bean id="protocol.webdav" class="com.bradmcevoy.http.webdav.WebDavProtocol">
-        <constructor-arg ref="milton.response.handler"/>
-        <constructor-arg ref="milton.handler.helper"/>
-        <constructor-arg ref="resource.type.helper.carddav"/>
-        <constructor-arg ref="milton.property.sources"/>
-    </bean>
-
-    <bean id="protocol.caldav" class="com.ettrema.http.caldav.CalDavProtocol">
-        <constructor-arg ref="main.spliffy.resource.factory" />
-        <constructor-arg ref="milton.response.handler"/>
-        <constructor-arg ref="milton.handler.helper"/>
-        <constructor-arg ref="protocol.webdav"/>
-    </bean>
-
-    <bean id="protocol.carddav" class="com.ettrema.http.carddav.CardDavProtocol">
-        <constructor-arg ref="main.spliffy.resource.factory" />
-        <constructor-arg ref="milton.response.handler"/>
-        <constructor-arg ref="milton.handler.helper"/>
-        <constructor-arg ref="protocol.webdav"/>
-    </bean>
-
-    <bean id="protocol.acl" class="com.ettrema.http.acl.ACLProtocol">
-        <constructor-arg ref="protocol.webdav"/>
-    </bean>
-
-    <bean id="protocol.handlers" class="com.bradmcevoy.http.ProtocolHandlers">
-        <constructor-arg>
-            <list>
-                <ref bean="protocol.http11"/>
-                <ref bean="protocol.webdav"/>
-                <ref bean="protocol.caldav"/>
-                <ref bean="protocol.acl"/>
-                <ref bean="protocol.carddav"/>				
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <!-- property sources defined explicitly so we can inject quota manager-->
-    <bean id="milton.property.sources" class="com.bradmcevoy.http.webdav.PropertySourcesList">
-        <constructor-arg ref="resource.type.helper.carddav"/>
-    </bean>
-
-    <bean id="milton.prop.patcher" class="com.bradmcevoy.http.webdav.PropertySourcePatchSetter">
-        <constructor-arg ref="milton.property.sources"/>
-    </bean>
-
-    <bean id="permissions.authoriser" class="com.bradmcevoy.property.DefaultPropertyAuthoriser"/>
-    
-    <bean id="services" class="org.spliffy.server.web.Services">
+        
+    <bean id="services" class="io.milton.cloud.server.web.Services">
         <constructor-arg ref="hash.store"/>
         <constructor-arg ref="blob.store"/>
         <constructor-arg ref="security.manager"/>
-        <constructor-arg ref="share.manager"/>
-        <constructor-arg ref="resource.manager"/>
         <constructor-arg ref="application.manager"/>
     </bean>       
 
-    <bean id="main.spliffy.resource.factory" class="org.spliffy.server.web.SpliffyResourceFactory" init-method="start" destroy-method="stop">
+    <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory" init-method="start" destroy-method="stop">
         <!--        
         <constructor-arg ref="lock.manager"/>
         -->
@@ -209,77 +109,51 @@
         <constructor-arg ref="services"/>
         <constructor-arg ref="application.manager"/>        
         <constructor-arg ref="event.manager"/> 
-        <constructor-arg ref="milton.property.sources" />
     </bean>
-    
-    <!-- This RF acts as a pass-through wrapper. If it doesnt handler the url it will use the wrapped RF -->
-    <bean id="wrapper.resource.factory" class="com.ettrema.json.JsonResourceFactory">
-        <constructor-arg ref="main.spliffy.resource.factory"/>
-        <constructor-arg ref="milton.property.sources"/>
-        <constructor-arg ref="milton.prop.patcher"/>
-        <constructor-arg ref="permissions.authoriser"/>
-        <constructor-arg ref="event.manager"/>
-    </bean>
-    
-    <bean id="sync.spliffy.resource.factory" class="org.spliffy.server.web.sync.SpliffySyncResourceFactory">
+       
+    <bean id="sync.spliffy.resource.factory" class="io.milton.cloud.server.web.sync.SpliffySyncResourceFactory">
         <constructor-arg ref="hash.store" />
         <constructor-arg ref="blob.store" />
         <constructor-arg ref="security.manager" />
     </bean>
-
-    <bean id="wellknown.resource.factory" class="com.bradmcevoy.http.WellKnownResourceFactory">
-        <constructor-arg ref="main.spliffy.resource.factory"/>
-        <constructor-arg>
-            <list>
-                <ref local="protocol.caldav"/>
-                <ref local="protocol.carddav"/>
-            </list>
-        </constructor-arg>
-    </bean>
-    
     
     <!-- This will expose resources on the classpath, required for apps which have css/js files in the jar -->
-    <bean id="classpath.resource.factory" class="com.ettrema.http.fs.ClassPathResourceFactory"></bean>
+    <bean id="classpath.resource.factory" class="io.milton.http.fs.ClassPathResourceFactory"></bean>
     
-    <bean id="apps.resource.factory" class="org.spliffy.server.web.resources.AppsResourceFactory">
+    <bean id="apps.resource.factory" class="io.milton.cloud.server.web.resources.AppsResourceFactory">
         <constructor-arg ref="application.manager" />
     </bean>        
     
-    <bean id="resource.factory" class="com.bradmcevoy.http.MultipleResourceFactory">
+    <bean id="resource.factory" class="io.milton.http.MultipleResourceFactory">
         <constructor-arg>
             <list>
                 <ref local="sync.spliffy.resource.factory" />
-                <ref local="wrapper.resource.factory" />  
+                <ref local="main.spliffy.resource.factory" />  
                 <ref local="apps.resource.factory"/>
                 <ref local="classpath.resource.factory" />
-                <ref local="wellknown.resource.factory" />
             </list>
         </constructor-arg>
     </bean>
 
     <!-- This is used for accessing web resources from a file path. Most useful for debugging -->
-    <bean class="org.spliffy.server.config.SysPropertyResourceFactoryLoader" init-method="init">
+    <bean class="io.milton.cloud.server.config.SysPropertyResourceFactoryLoader" init-method="init">
         <constructor-arg ref="resource.factory" />
     </bean>
 
-    <bean id="open.session.in.view.filter" class="org.spliffy.server.db.utils.MiltonOpenSessionInViewFilter">
+    <bean id="open.session.in.view.filter" class="io.milton.cloud.server.db.utils.MiltonOpenSessionInViewFilter">
         <constructor-arg ref="session.manager"/>
     </bean>
 
-    <bean id="milton.http.manager" class="com.bradmcevoy.http.HttpManager">        
-        <constructor-arg ref="resource.factory" />        
-        <constructor-arg ref="milton.response.handler.compressing" />
-        <constructor-arg ref="protocol.handlers"/>
-        <property name="propertyPermissionService" ref="permissions.authoriser"/>
-        <property name="eventManager" ref="event.manager"/>        
-        
+    <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
+        <property name="mainResourceFactory" ref="resource.factory" /> 
+        <property name="eventManager" ref="event.manager" />
         <property name="filters">
             <list>
                 <ref local="open.session.in.view.filter" />
             </list>
-        </property>
-        <property name="buffering" value="never" />
+        </property>        
     </bean>
+
 
     <!--
     <bean id="ftp.security.manager" class="com.ettrema.ftp.WrappingFtpSecurityManager">
