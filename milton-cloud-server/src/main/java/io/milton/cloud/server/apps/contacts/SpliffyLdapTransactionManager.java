@@ -17,8 +17,8 @@
 package io.milton.cloud.server.apps.contacts;
 
 import java.io.IOException;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.ldap.LdapTransactionManager;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

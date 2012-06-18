@@ -11,10 +11,10 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.cloud.server.db.Organisation;
 import io.milton.cloud.server.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.ResourceFactory;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * Implements a URL scheme for handling HTTP interactions with a file sync
@@ -66,7 +66,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
                 throw new RuntimeException("No root organisation");
             }            
         } else {
-            org = (Organisation) website.getBaseEntity(); // TODO: the website might not be associated with an org directly
+            org = website.getOrganisation();
         }
 
         if (path.startsWith(basePath)) {

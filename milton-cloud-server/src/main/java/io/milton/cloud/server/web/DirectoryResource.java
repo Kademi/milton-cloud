@@ -1,8 +1,9 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.db.DirectoryMember;
-import io.milton.cloud.server.db.ItemVersion;
-import io.milton.cloud.server.db.utils.SessionManager;
+import io.milton.vfs.data.HashCalc;
+import io.milton.vfs.db.ItemHistory;
+import io.milton.vfs.db.MetaItem;
+import io.milton.vfs.db.SessionManager;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -36,7 +37,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
     private ResourceList children;    
     private boolean dirty;
 
-    public DirectoryResource(String name, ItemVersion meta, MutableCollection parent, Services services, boolean renderMode) {
+    public DirectoryResource(String name, MetaItem meta, MutableCollection parent, Services services, boolean renderMode) {
         super(name, meta, parent, services);
         this.renderMode = renderMode;
     }
@@ -48,7 +49,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
             Transaction tx = session.beginTransaction();
 
             MutableCollection newParent = (MutableCollection) toCollection;
-            ItemVersion newMeta = Utils.newFileItemVersion();
+            MetaItem newMeta = Utils.newFileItemVersion();
             DirectoryResource newDir = new DirectoryResource(newName, newMeta, newParent, services, renderMode);
             newDir.setHash(hash);
             newParent.addChild(newDir);
@@ -94,7 +95,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             if (getItemVersion() != null) {
-                List<DirectoryMember> members = getItemVersion().getMembers();
+                List<ItemHistory> members = getItemVersion().getMembers();
                 children = Utils.toResources(this, members, renderMode);
             } else {
                 children = new ResourceList();
@@ -108,7 +109,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        ItemVersion newMeta = Utils.newDirItemVersion();
+        MetaItem newMeta = Utils.newDirItemVersion();
         DirectoryResource rdr = new DirectoryResource(newName, newMeta, this, services, renderMode);
         addChild(rdr);
         save(session);
@@ -135,7 +136,7 @@ public class DirectoryResource extends AbstractMutableResource implements Putabl
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        ItemVersion newMeta = Utils.newFileItemVersion();
+        MetaItem newMeta = Utils.newFileItemVersion();
         FileResource fileResource = new FileResource(newName, newMeta, this, services);
 
         String ct = HttpManager.request().getContentTypeHeader();

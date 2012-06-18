@@ -1,6 +1,9 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.db.utils.SessionManager;
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.SessionManager;
 
 import java.io.IOException;
 import java.io.OutputStream;

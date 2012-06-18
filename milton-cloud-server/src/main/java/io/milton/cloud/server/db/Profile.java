@@ -1,12 +1,12 @@
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
-import io.milton.cloud.server.db.utils.SessionManager;
 
 /**
  * A user is defined within an organisation. Might change this in the future so
@@ -24,7 +24,6 @@ public class Profile extends BaseEntity {
         crit.add(Expression.and(Expression.eq("organisation", org), Expression.eq("name", name)));        
         List list = crit.list();
         if( list == null || list.isEmpty() ) {
-            System.out.println("nothignn found");
             return null;
         } else {
             return (Profile) list.get(0);

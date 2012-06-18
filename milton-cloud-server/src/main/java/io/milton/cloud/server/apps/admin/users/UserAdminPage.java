@@ -30,7 +30,6 @@ import io.milton.cloud.server.db.BaseEntity;
 import io.milton.cloud.server.db.Organisation;
 import io.milton.cloud.server.db.Profile;
 import io.milton.cloud.server.db.utils.OrganisationDao;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
 import io.milton.http.AccessControlledResource.Priviledge;
@@ -45,6 +44,7 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

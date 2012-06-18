@@ -30,7 +30,6 @@ import io.milton.cloud.server.apps.calendar.CalendarFolder;
 import io.milton.cloud.server.db.BaseEntity;
 import io.milton.cloud.server.db.Contact;
 import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.db.Profile;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.SpliffyCollectionResource;
@@ -46,6 +45,7 @@ import io.milton.http.webdav.PropFindResponse;
 import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

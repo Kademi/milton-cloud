@@ -1,7 +1,7 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.db.DirectoryMember;
-import io.milton.cloud.server.db.ItemVersion;
+import io.milton.vfs.db.ItemHistory;
+import io.milton.vfs.db.MetaItem;
 
 /**
  * Represents a web resource which can be changed (ie is mutable)
@@ -21,14 +21,14 @@ public interface MutableResource extends SpliffyResource {
            
     Long getEntryHash();
     
-    ItemVersion getItemVersion();
+    MetaItem getItemVersion();
 
     /**
      * Called during the save process. Must reset dirty flag!!!
      * 
      * @param newVersion 
      */
-    void setItemVersion(ItemVersion newVersion);
+    void setItemVersion(MetaItem newVersion);
     
     
     /**
@@ -44,5 +44,5 @@ public interface MutableResource extends SpliffyResource {
      * 
      * @return 
      */
-    DirectoryMember getDirectoryMember();
+    ItemHistory getDirectoryMember();
 }

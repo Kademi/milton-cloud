@@ -20,7 +20,6 @@ import net.fortuna.ical4j.model.Calendar;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.db.Organisation;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Response.Status;
@@ -33,6 +32,7 @@ import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

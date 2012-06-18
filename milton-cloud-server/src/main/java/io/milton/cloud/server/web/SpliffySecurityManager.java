@@ -5,7 +5,7 @@ import java.util.List;
 import org.hibernate.Session;
 import io.milton.cloud.server.db.Organisation;
 import io.milton.cloud.server.db.Profile;
-import io.milton.cloud.server.db.utils.SessionManager;
+import io.milton.vfs.db.SessionManager;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.http.AccessControlledResource;
 import io.milton.http.AccessControlledResource.Priviledge;

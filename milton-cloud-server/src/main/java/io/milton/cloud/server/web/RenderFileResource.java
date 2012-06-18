@@ -16,6 +16,10 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.ItemHistory;
+import io.milton.vfs.db.MetaItem;
 import io.milton.cloud.server.db.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -162,12 +166,12 @@ public class RenderFileResource extends AbstractResource implements MutableResou
     }
 
     @Override
-    public ItemVersion getItemVersion() {
+    public MetaItem getItemVersion() {
         return fileResource.getItemVersion();
     }
 
     @Override
-    public void setItemVersion(ItemVersion newVersion) {
+    public void setItemVersion(MetaItem newVersion) {
         fileResource.setItemVersion(newVersion);
     }
 
@@ -177,7 +181,7 @@ public class RenderFileResource extends AbstractResource implements MutableResou
     }
 
     @Override
-    public DirectoryMember getDirectoryMember() {
+    public ItemHistory getDirectoryMember() {
         return fileResource.getDirectoryMember();
     }
 

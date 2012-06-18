@@ -19,7 +19,6 @@ package io.milton.cloud.server.apps.calendar;
 import io.milton.cloud.common.HashUtils;
 import io.milton.cloud.server.db.BaseEntity;
 import io.milton.cloud.server.db.CalEvent;
-import io.milton.cloud.server.db.utils.SessionManager;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +41,7 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.db.Calendar;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

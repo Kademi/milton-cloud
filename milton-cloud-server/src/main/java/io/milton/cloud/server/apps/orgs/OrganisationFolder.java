@@ -29,7 +29,6 @@ import io.milton.cloud.server.db.BaseEntity;
 import io.milton.cloud.server.db.Organisation;
 import io.milton.cloud.server.db.Permission;
 import io.milton.cloud.server.db.Profile;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RootFolder;
@@ -42,6 +41,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * This is the root folder for the admin site. The admin site is used to setup

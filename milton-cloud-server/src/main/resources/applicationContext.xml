@@ -26,22 +26,7 @@
     <import resource="classpath:env.xml"/>
 
     <bean id="lock.manager" class="com.ettrema.http.fs.SimpleLockManager" />
-    
-    <bean id="local.volume.type" class="org.spliffy.server.db.store.LocalVolumeInstanceType">
-        <constructor-arg value="local" />
-        <constructor-arg ref="sessionFactory"/>
-        <constructor-arg>
-            <!-- we have 2 stores for representing redundancy operation. These will be autoloaded into database (autoloading is not intended for production) -->
-            <list>
-                <value>target/blobs/store1</value>
-                <value>target/blobs/store2</value>
-            </list>
-        </constructor-arg>
-    </bean>
-    
-    
-    <bean id="volume.allocator" class="org.spliffy.server.db.store.SingleVolumeInstanceAllocator"/>
-        
+            
     <bean id="blob.store" class="org.spliffy.server.db.store.FileSystemBlobStore">
         <constructor-arg value="${blob.storage.location}" />
     </bean>

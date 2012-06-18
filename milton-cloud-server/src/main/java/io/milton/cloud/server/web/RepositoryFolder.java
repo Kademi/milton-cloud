@@ -1,8 +1,15 @@
 package io.milton.cloud.server.web;
 
 
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Commit;
+import io.milton.vfs.db.Repository;
+import io.milton.vfs.data.HashCalc;
+import io.milton.vfs.db.ItemHistory;
+import io.milton.vfs.db.MetaItem;
 import io.milton.cloud.server.db.*;
-import io.milton.cloud.server.db.utils.SessionManager;
+import io.milton.vfs.db.SessionManager;
 import io.milton.http.*;
 import io.milton.http.acl.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -37,7 +44,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
     private long hash;
     private boolean dirty;
     private Commit repoVersion; // may be null
-    private ItemVersion rootItemVersion;
+    private MetaItem rootItemVersion;
     /**
      * if set html resources will be rendered with the templater
      */
@@ -70,7 +77,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
     public ResourceList getChildren() {
         if (children == null) {
             if (repoVersion != null) {
-                List<DirectoryMember> members = repoVersion.getRootItemVersion().getMembers();
+                List<ItemHistory> members = repoVersion.getRootItemVersion().getMembers();
                 children = Utils.toResources(this, members, renderMode);
             } else {
                 children = new ResourceList();
@@ -95,7 +102,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
     }
 
     public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException {
-        ItemVersion newItemVersion = Utils.newDirItemVersion();
+        MetaItem newItemVersion = Utils.newDirItemVersion();
         DirectoryResource rdr = new DirectoryResource(newName, newItemVersion, this, services, false);
         addChild(rdr);
         save(session);
@@ -107,7 +114,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        ItemVersion newMeta = Utils.newFileItemVersion();
+        MetaItem newMeta = Utils.newFileItemVersion();
         FileResource fileResource = new FileResource(newName, newMeta, this, services);
 
         String ct = HttpManager.request().getContentTypeHeader();
@@ -177,12 +184,12 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
     }
 
     @Override
-    public ItemVersion getItemVersion() {
+    public MetaItem getItemVersion() {
         return rootItemVersion;
     }
 
     @Override
-    public void setItemVersion(ItemVersion newVersion) {
+    public void setItemVersion(MetaItem newVersion) {
         log.trace("setItemVersion");
         //this.dirty = false;
         this.rootItemVersion = newVersion;
@@ -336,17 +343,17 @@ public class RepositoryFolder extends AbstractCollectionResource implements Muta
      */
     public Branch getDirectRepository() {
         if (this.repoVersion != null) {
-            return repoVersion.getBranch();
+            return repoVersion.getRepository();
         }
         return repository.trunk(SessionManager.session());
     }
 
-    public ItemVersion getRootItemVersion() {
+    public MetaItem getRootItemVersion() {
         return rootItemVersion;
     }
 
     @Override
-    public DirectoryMember getDirectoryMember() {
+    public ItemHistory getDirectoryMember() {
         return null;
     }
 

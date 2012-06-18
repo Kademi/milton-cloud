@@ -2,7 +2,7 @@ package io.milton.cloud.server.web;
 
 import com.ettrema.common.Service;
 import io.milton.cloud.server.db.utils.UserDao;
-import io.milton.cloud.server.db.utils.SessionManager;
+import io.milton.vfs.db.SessionManager;
 
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.common.Path;

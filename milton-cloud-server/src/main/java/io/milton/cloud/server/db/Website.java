@@ -16,9 +16,11 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Repository;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 /**
  * A Website is a repository with a theme. The name of the repository is the DNS
@@ -32,6 +34,18 @@ public class Website extends Repository {
 
     private String theme;
     private String currentBranch;
+    private Organisation organisation;
+
+    @ManyToOne(optional=false)
+    public Organisation getOrganisation() {
+        return organisation;
+    }
+
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
+    }
+    
+    
 
     @Column
     public String getTheme() {
@@ -50,18 +64,5 @@ public class Website extends Repository {
         this.currentBranch = currentBranch;
     }
 
-    public Branch currentBranch() {
-        String branchName = getCurrentBranch();
-        if (branchName == null || branchName.isEmpty()) {
-            return null;
-        }
-        if (getBranches() != null) {
-            for (Branch b : getBranches()) {
-                if( b.getName().equals(branchName)) {
-                    return b;
-                }
-            }
-        }
-        return null;
-    }
+    
 }

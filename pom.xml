@@ -37,7 +37,7 @@
         <jdbc.groupId>hsqldb</jdbc.groupId>
         <jdbc.artifactId>hsqldb</jdbc.artifactId>
         <jdbc.version>1.8.0.7</jdbc.version>   
-        <netbeans.hint.license>agpl30</netbeans.hint.license>
+        <netbeans.hint.license>agpl3</netbeans.hint.license>
     </properties>
     <licenses>
 		<license>

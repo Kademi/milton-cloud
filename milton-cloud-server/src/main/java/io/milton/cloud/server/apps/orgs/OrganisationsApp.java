@@ -26,12 +26,12 @@ import io.milton.cloud.server.db.Organisation;
 import io.milton.cloud.server.db.Profile;
 import io.milton.cloud.server.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

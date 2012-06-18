@@ -16,6 +16,9 @@
  */
 package io.milton.cloud.server.apps.website;
 
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.NvPair;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
@@ -27,7 +30,6 @@ import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.db.*;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RepositoryFolder;
@@ -40,6 +42,8 @@ import io.milton.cloud.server.web.Utils;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
@@ -116,7 +120,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, S
             PrincipalResource r = findEntity(getCurrentUser().getName());
             list.add(r);
         }
-        Branch currentLive = website.currentBranch();
+        Branch currentLive = website.
         if (currentLive != null) {
             RepositoryFolder rf = new RepositoryFolder("content", this, website, currentLive, true);
             list.add(rf);

@@ -16,7 +16,6 @@
  */
 package io.milton.cloud.server.apps.contacts;
 
-import io.milton.cloud.server.db.utils.SessionManager;
 import info.ineighborhood.cardme.engine.VCardEngine;
 import info.ineighborhood.cardme.io.VCardWriter;
 import info.ineighborhood.cardme.vcard.VCard;
@@ -30,6 +29,7 @@ import io.milton.cloud.server.db.AddressBook;
 import io.milton.cloud.server.db.BaseEntity;
 import io.milton.cloud.server.db.Contact;
 import io.milton.cloud.server.db.ContactExtendedProperty;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

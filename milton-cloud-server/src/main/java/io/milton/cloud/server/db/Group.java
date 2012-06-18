@@ -16,12 +16,12 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Table;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
-import io.milton.cloud.server.db.utils.SessionManager;
 
 /**
  * A user group, is a list of users and other groups. Is typically used to convey priviledges

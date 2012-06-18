@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author brad
  */
-public class Triplet {
+public class Triplet implements ITriplet {
     private String name;
     private long hash;
     private String type;

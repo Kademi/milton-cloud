@@ -17,6 +17,8 @@
 package io.milton.cloud.server.apps.contacts;
 
 
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
 import io.milton.cloud.server.db.*;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.Services;

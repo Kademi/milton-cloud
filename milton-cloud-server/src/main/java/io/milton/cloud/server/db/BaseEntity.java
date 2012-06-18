@@ -1,15 +1,15 @@
 package io.milton.cloud.server.db;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.http.AccessControlledResource;
+import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * Represents a real world entity such as a user or an organisation
@@ -56,7 +56,6 @@ public class BaseEntity implements Serializable {
     private List<Permission> grantedPermissions; // permissions granted TO this entity
     private List<Repository> repositories;    // has repositories
     private List<GroupMembership> memberships; // can belong to groups
-    private List<NvPair> nvPairs; // holds data capture information
     private List<AddressBook> addressBooks; // has addressbooks
     private List<Calendar> calendars; // has calendars
 
@@ -165,15 +164,6 @@ public class BaseEntity implements Serializable {
         this.addressBooks = addressBooks;
     }
 
-    @OneToMany(mappedBy = "baseEntity")
-    public List<NvPair> getNvPairs() {
-        return nvPairs;
-    }
-
-    public void setNvPairs(List<NvPair> nvPairs) {
-        this.nvPairs = nvPairs;
-    }
-
     @Column
     public String getType() {
         return type;
@@ -217,58 +207,5 @@ public class BaseEntity implements Serializable {
                 Expression.and(Expression.eq("grantee", this), Expression.and(Expression.eq("grantedOnEntity", grantedOn), Expression.eq("priviledge", priviledge))));
         List list = crit.list();
         return list != null && !list.isEmpty();
-    }
-
-    public void grant(AccessControlledResource.Priviledge priviledge, Branch grantedOn) {
-        if (isGranted(priviledge, grantedOn)) {
-            return;
-        }
-        Permission p = new Permission();
-        p.setGrantedOnBranch(grantedOn);
-        p.setGrantee(this);
-        p.setPriviledge(priviledge);
-        SessionManager.session().save(p);
-    }
-
-    public boolean isGranted(AccessControlledResource.Priviledge priviledge, Branch grantedOn) {
-        Session session = SessionManager.session();
-        Criteria crit = session.createCriteria(Permission.class);
-        crit.add(
-                Expression.and(Expression.eq("grantee", this), Expression.and(Expression.eq("grantedOnBranch", grantedOn), Expression.eq("priviledge", priviledge))));
-        List list = crit.list();
-        return list != null && !list.isEmpty();
-    }
-
-    public void setAttribute(String name, String value, Session session) {
-        List<NvPair> list = getNvPairs();
-        if (list == null) {
-            list = new ArrayList<>();
-            setNvPairs(list);
-        }
-        for (NvPair nv : list) {
-            if (nv.getName().equals(name)) {
-                nv.setPropValue(value);
-                session.save(nv);
-            }
-        }
-        NvPair nv = new NvPair();
-        nv.setName(name);
-        nv.setPropValue(value);
-        nv.setBaseEntity(this);
-        list.add(nv);
-        session.save(nv);
-    }
-
-    public String getAttribute(String name) {
-        List<NvPair> list = getNvPairs();
-        if (list == null) {
-            return null;
-        }
-        for (NvPair nv : list) {
-            if (nv.getName().equals(name)) {
-                return nv.getPropValue();
-            }
-        }
-        return null;
     }
 }

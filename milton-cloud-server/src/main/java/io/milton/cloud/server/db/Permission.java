@@ -34,7 +34,6 @@ public class Permission implements Serializable {
     private long id;
     private AccessControlledResource.Priviledge priviledge;
     private BaseEntity grantedOnEntity;
-    private Branch grantedOnBranch;
     private BaseEntity grantee;
     private String granteePrincipal;
 
@@ -77,15 +76,6 @@ public class Permission implements Serializable {
 
     public void setGrantedOnEntity(BaseEntity grantedOnEntity) {
         this.grantedOnEntity = grantedOnEntity;
-    }
-
-    @ManyToOne
-    public Branch getGrantedOnBranch() {
-        return grantedOnBranch;
-    }
-
-    public void setGrantedOnBranch(Branch grantedOnBranch) {
-        this.grantedOnBranch = grantedOnBranch;
     }
 
     /**

@@ -11,8 +11,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.cloud.server.db.ItemVersion;
-import io.milton.cloud.server.db.utils.SessionManager;
+import io.milton.vfs.db.MetaItem;
+import io.milton.vfs.db.SessionManager;
 import io.milton.common.ContentTypeUtils;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -35,7 +35,7 @@ public class FileResource extends AbstractMutableResource implements Replaceable
     private boolean dirty;
     private RenderFileResource htmlPage; // for parsing html pages
 
-    public FileResource(String name, ItemVersion meta, MutableCollection parent, Services services) {
+    public FileResource(String name, MetaItem meta, MutableCollection parent, Services services) {
         super(name, meta, parent, services);
     }
 
@@ -46,7 +46,7 @@ public class FileResource extends AbstractMutableResource implements Replaceable
             Transaction tx = session.beginTransaction();
 
             MutableCollection newParent = (MutableCollection) toCollection;
-            ItemVersion newMeta = Utils.newFileItemVersion();
+            MetaItem newMeta = Utils.newFileItemVersion();
             FileResource fileResource = new FileResource(newName, newMeta, newParent, services);
             fileResource.setHash(hash);
             newParent.addChild(fileResource);

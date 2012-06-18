@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;

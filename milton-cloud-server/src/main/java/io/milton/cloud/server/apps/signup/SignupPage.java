@@ -16,6 +16,9 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Repository;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.*;
 import io.milton.http.*;
@@ -35,7 +38,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.Services;
@@ -43,6 +45,7 @@ import io.milton.cloud.server.web.SpliffyCollectionResource;
 import io.milton.http.AccessControlledResource.Priviledge;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *

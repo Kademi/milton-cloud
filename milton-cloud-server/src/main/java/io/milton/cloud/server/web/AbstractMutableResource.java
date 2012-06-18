@@ -1,8 +1,12 @@
 package io.milton.cloud.server.web;
 
 
+import io.milton.cloud.server.db.BaseEntity;
+import io.milton.cloud.server.db.Profile;
+import io.milton.vfs.db.Commit;
+import io.milton.vfs.db.ItemHistory;
+import io.milton.vfs.db.MetaItem;
 import io.milton.cloud.server.db.*;
-import io.milton.cloud.server.db.utils.SessionManager;
 import io.milton.http.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.acl.Principal;
@@ -10,6 +14,8 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.*;
+import io.milton.vfs.content.ContentSession.ContentNode;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -20,31 +26,23 @@ import org.hibernate.Transaction;
  */
 public abstract class AbstractMutableResource extends AbstractResource implements PropFindableResource, GetableResource, DeletableResource, MutableResource, CopyableResource, MoveableResource {
 
-    protected String name;
     protected final MutableCollection parent;
-    protected ItemVersion itemVersion;
-    protected long hash;    
-    protected DirectoryMember dm;
+    protected ContentNode contentNode;    
         
     /**
      * 
-     * @param name - the name of this resource within its parent
-     * @param itemVersion - the current item version for this resource
+     * @param contentNode - the current item version for this resource
      * @param parent - Primary parent, ie that which located the resource in this request. May be null when looking for linked resources
      * @param parents - All parents. May be null in cases where the resource is freshly created, in which case the given parent is the set
      * @param services 
      */
-    public AbstractMutableResource(String name, ItemVersion itemVersion, MutableCollection parent, Services services) {
+    public AbstractMutableResource( ContentNode contentNode, MutableCollection parent, Services services) {
         super(services);
-        this.itemVersion = itemVersion;
-        this.name = name;
+        this.contentNode = contentNode;
         this.parent = parent;
 
     }
 
-    public void setDirectoryMember(DirectoryMember dm) {
-        this.dm = dm;
-    }    
     
     @Override
     public void moveTo(CollectionResource rDest, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
@@ -123,12 +121,12 @@ public abstract class AbstractMutableResource extends AbstractResource implement
     }
 
     @Override
-    public ItemVersion getItemVersion() {
+    public MetaItem getItemVersion() {
         return itemVersion;
     }
 
     @Override
-    public void setItemVersion(ItemVersion itemVersion) {
+    public void setItemVersion(MetaItem itemVersion) {
         this.itemVersion = itemVersion;
     }
 
@@ -176,7 +174,7 @@ public abstract class AbstractMutableResource extends AbstractResource implement
     }
 
     @Override
-    public DirectoryMember getDirectoryMember() {
+    public ItemHistory getDirectoryMember() {
         return dm;
     }
     

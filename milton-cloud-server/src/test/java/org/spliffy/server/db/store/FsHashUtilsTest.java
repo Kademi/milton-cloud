@@ -1,6 +1,6 @@
 package org.spliffy.server.db.store;
 
-import io.milton.cloud.server.db.store.FsHashUtils;
+import io.milton.cloud.common.store.FsHashUtils;
 import java.io.File;
 import org.junit.*;
 import static org.junit.Assert.*;
