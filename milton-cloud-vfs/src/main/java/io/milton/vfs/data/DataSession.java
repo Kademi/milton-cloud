@@ -242,6 +242,7 @@ public class DataSession {
 
         public void setHash(long hash) {
             this.hash = hash;
+            setDirty();
         }
 
         public int size() {

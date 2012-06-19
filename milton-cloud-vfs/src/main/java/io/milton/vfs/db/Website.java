@@ -18,24 +18,43 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Repository;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.*;
 
 /**
- * A Website is a repository with a theme. The name of the repository is the DNS
- * name for it
+ * A Website is an alias for a repository. The name of the website is the DNS name
  *
  * @author brad
  */
 @Entity
-@DiscriminatorValue("U")
-public class Website extends Repository {
-
+public class Website implements Serializable {
+    private Organisation organisation;
+    private long id;
+    private String name; // identifies the resource to webdav
+    private Repository repository;
     private String theme;
     private String currentBranch;
+    private Date createdDate;
     
+    @Id
+    @GeneratedValue
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+    
+    @Column(length = 255, nullable=false)
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }    
     
     @Column
     public String getTheme() {
@@ -46,6 +65,16 @@ public class Website extends Repository {
         this.theme = theme;
     }
 
+    @Temporal(javax.persistence.TemporalType.DATE)
+    @Column(nullable = false)
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+    
     public String getCurrentBranch() {
         return currentBranch;
     }
@@ -55,15 +84,33 @@ public class Website extends Repository {
     }
 
     public Branch currentBranch() {
-        if( getBranches() == null ) {
+        if( repository.getBranches() == null ) {
             return null;
         }
-        for( Branch b : getBranches() ) {
+        for( Branch b : repository.getBranches() ) {
             if( b.getName().equals(getCurrentBranch())) {
                 return b;
             }
         }
         return null;
+    }
+
+    @ManyToOne(optional=false)
+    public Organisation getOrganisation() {
+        return organisation;
+    }
+
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
+    }
+
+    @ManyToOne(optional=false)
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(Repository repository) {
+        this.repository = repository;
     }
 
     

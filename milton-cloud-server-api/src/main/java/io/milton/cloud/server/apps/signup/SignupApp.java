@@ -27,6 +27,7 @@ import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.event.EventManager;
 
 /**
@@ -68,7 +69,7 @@ public class SignupApp implements Application {
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
     @Override

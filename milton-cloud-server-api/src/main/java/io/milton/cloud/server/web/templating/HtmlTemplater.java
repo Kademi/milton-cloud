@@ -16,7 +16,7 @@
  */
 package io.milton.cloud.server.web.templating;
 
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.common.Path;
 import io.milton.resource.Resource;
@@ -88,7 +88,7 @@ public class HtmlTemplater implements Templater {
         Profile user = securityManager.getCurrentUser();
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
         String theme;
-        if (rootFolder instanceof OrganisationFolder) {
+        if (rootFolder instanceof OrganisationRootFolder) {
             theme = defaultTheme;
         } else if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder websiteFolder = (WebsiteRootFolder) rootFolder;

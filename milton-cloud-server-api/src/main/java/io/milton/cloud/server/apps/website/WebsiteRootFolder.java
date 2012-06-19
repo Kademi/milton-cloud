@@ -31,15 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.PrincipalResource;
-import io.milton.cloud.server.web.RepositoryFolder;
-import io.milton.cloud.server.web.RootFolder;
-import io.milton.cloud.server.web.SecurityUtils;
-import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.UserResource;
-import io.milton.cloud.server.web.Utils;
+import io.milton.cloud.server.web.*;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
@@ -52,9 +44,10 @@ import io.milton.vfs.db.utils.SessionManager;
  */
 public class WebsiteRootFolder extends AbstractResource implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
 
-    private Map<String, PrincipalResource> children = new HashMap<>();
+    private Map<String, PrincipalResource> childEntities = new HashMap<>();
     private final ApplicationManager applicationManager;
     private final Website website;
+    private ResourceList children;
 
     public WebsiteRootFolder(Services services, ApplicationManager applicationManager, Website website) {
         super(services);
@@ -100,7 +93,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
     @Override
     public PrincipalResource findEntity(String name) {
-        PrincipalResource r = children.get(name);
+        PrincipalResource r = childEntities.get(name);
         if (r != null) {
             return r;
         }
@@ -109,44 +102,43 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
             return null;
         } else {
             UserResource ur = new UserResource(this, u, applicationManager);
-            children.put(name, ur);
+            childEntities.put(name, ur);
             return ur;
         }
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        List<Resource> list = new ArrayList<>();
-        if (getCurrentUser() != null) {
-            PrincipalResource r = findEntity(getCurrentUser().getName());
-            list.add(r);
-        }
-        Branch currentLive = website.currentBranch();
-        if (currentLive != null) {
-            RepositoryFolder rf = new RepositoryFolder("content", this, currentLive, true);
-            list.add(rf);
-        }
-        if (website.getBranches() != null) {
-            for (Branch b : website.getBranches()) {
-                RepositoryFolder rf = new RepositoryFolder(b.getName(), this, b, false);
-                list.add(rf);
+        if (children == null) {
+            children = new ResourceList();
+            if (getCurrentUser() != null) {
+                PrincipalResource r = findEntity(getCurrentUser().getName());
+                children.add(r);
             }
+            Branch currentLive = website.currentBranch();
+            if (currentLive != null) {
+                BranchFolder rf = new BranchFolder("content", this, currentLive, true);
+                children.add(rf);
+            }
+            if (website.getRepository().getBranches() != null) {
+                for (Branch b : website.getRepository().getBranches()) {
+                    BranchFolder rf = new BranchFolder(b.getName(), this, b, false);
+                    children.add(rf);
+                }
+            }
+
+            applicationManager.addBrowseablePages(this, children);
         }
-
-        applicationManager.addBrowseablePages(this, list);
-
-        return list;
+        return children;
     }
 
     @Override
     public String checkRedirect(Request request) {
-        if( request.getMethod().equals(Method.GET)) {
+        if (request.getMethod().equals(Method.GET)) {
             return "/content/index.html";
         }
         return null;
     }
-    
-    
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -182,8 +174,8 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         // TODO: also include priviledges on the repo, eg:
         //List<Permission> perms = itemVersion.getItem().grantedPermissions(user);
         //SecurityUtils.addPermissions(perms, list);
-        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getBaseEntity(), SessionManager.session());
-        SecurityUtils.addPermissions(perms, list);        
+        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getRepository().getBaseEntity(), SessionManager.session());
+        SecurityUtils.addPermissions(perms, list);
     }
 
     @Override
@@ -203,7 +195,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
     @Override
     public Organisation getOrganisation() {
-        return (Organisation) website.getBaseEntity();
+        return (Organisation) website.getOrganisation();
     }
 
     public Website getWebsite() {
@@ -213,18 +205,18 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     public SettingsMap getSettings() {
         return new SettingsMap();
     }
-    
+
     public class SettingsMap implements Map<String, String> {
 
         @Override
         public String get(Object key) {
-            return website.getAttribute(key.toString());
+            return website.getRepository().getAttribute(key.toString());
         }
 
         @Override
         public int size() {
-            if( website.getNvPairs() != null ) {
-                return website.getNvPairs().size();
+            if (website.getRepository().getNvPairs() != null) {
+                return website.getRepository().getNvPairs().size();
             } else {
                 return 0;
             }
@@ -279,12 +271,12 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         public Set<Entry<String, String>> entrySet() {
             System.out.println("get entryset");
             Set<Entry<String, String>> set = new HashSet<>();
-            if( website.getNvPairs() != null ) {
-                System.out.println("num items: " + website.getNvPairs().size());
-                for( NvPair nv : website.getNvPairs() ) {
-                    System.out.println("nvpair: " + nv.getName()  + " = " + nv.getPropValue());
+            if (website.getRepository().getNvPairs() != null) {
+                System.out.println("num items: " + website.getRepository().getNvPairs().size());
+                for (NvPair nv : website.getRepository().getNvPairs()) {
+                    System.out.println("nvpair: " + nv.getName() + " = " + nv.getPropValue());
                     final NvPair pair = nv;
-                    Entry<String,String> e = new Entry<String, String>() {
+                    Entry<String, String> e = new Entry<String, String>() {
 
                         @Override
                         public String getKey() {

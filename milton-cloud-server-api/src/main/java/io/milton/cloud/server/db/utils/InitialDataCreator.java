@@ -48,6 +48,7 @@ public class InitialDataCreator {
         
         GroupDao groupDao = new GroupDao();
         Organisation rootOrg = OrganisationDao.getRootOrg(session);
+        Profile admin = checkCreateUser(adminUserName, adminPassword,session, rootOrg);
         if( rootOrg == null ) {
             System.out.println("Create new organisation");
             rootOrg = new Organisation();
@@ -55,12 +56,7 @@ public class InitialDataCreator {
             rootOrg.setModifiedDate(new Date());
             rootOrg.setCreatedDate(new Date());            
             session.save(rootOrg);
-            Website spliffyWeb = new Website();            
-            spliffyWeb.setBaseEntity(rootOrg);
-            spliffyWeb.setName(initialWebsite);
-            spliffyWeb.setCreatedDate(new Date());
-            spliffyWeb.setTheme("yellow");
-            session.save(spliffyWeb);
+            Website spliffyWeb = rootOrg.createWebsite(rootOrgName, rootOrgName, admin, session);
             
             createChildOrg(rootOrg, "Branch1", session);
             createChildOrg(rootOrg, "Branch2", session);
@@ -74,7 +70,7 @@ public class InitialDataCreator {
         
         Group users = checkCreateGroup(rootOrg, Group.USERS,groupDao, session);
         
-        checkCreateUser(adminUserName, adminPassword,session, rootOrg).addToGroup(administrators).addToGroup(users);        
+        admin.addToGroup(administrators).addToGroup(users);        
         checkCreateUser("user1", "password1",session, rootOrg).addToGroup(users);
         checkCreateUser("user2", "password1",session, rootOrg).addToGroup(users);
         checkCreateUser("user3", "password1",session, rootOrg).addToGroup(users);

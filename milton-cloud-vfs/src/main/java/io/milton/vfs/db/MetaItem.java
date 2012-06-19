@@ -19,6 +19,10 @@ import org.hibernate.criterion.Expression;
  * @author brad
  */
 @javax.persistence.Entity
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "parent"})}// item names must be unique within a directory
+)
 public class MetaItem implements Serializable {
 
     public static MetaItem find(MetaItem parent, String name, Session session) {

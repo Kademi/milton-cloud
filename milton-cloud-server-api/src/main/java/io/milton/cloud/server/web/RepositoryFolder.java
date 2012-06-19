@@ -1,66 +1,59 @@
+/*
+ * Copyright 2012 McEvoy Software Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.milton.cloud.server.web;
 
-import io.milton.resource.AccessControlledResource;
-import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Permission;
-import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Commit;
-import io.milton.vfs.data.HashCalc;
-import io.milton.http.*;
-import io.milton.principal.Principal;
+import io.milton.http.Auth;
+import io.milton.http.HttpManager;
+import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.principal.Principal;
 import io.milton.resource.*;
 import io.milton.vfs.content.ContentSession;
-import io.milton.vfs.content.ContentSession.DirectoryNode;
-import io.milton.vfs.db.Branch;
+import io.milton.vfs.data.HashCalc;
+import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 /**
- * Represents the current version of the trunk of a repository
- *
- * This behaves much the same as a DirectoryResource but is defined differently
- *
+ * A RepositoryFolder just holds the branches of the folder
  *
  * @author brad
  */
-public class RepositoryFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource {
+public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(RepositoryFolder.class);
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
     private final boolean renderMode;
     private final CommonCollectionResource parent;
-    private final String name;
-    private final Branch branch;
+    private final Repository repo;
     private ResourceList children;
-    private Commit commit; // may be null
-    private ContentSession contentSession;
-    /**
-     * if set html resources will be rendered with the templater
-     */
-    private String theme;
-    private JsonResult jsonResult; // set after completing a POST
+    
 
-    public RepositoryFolder(String name, CommonCollectionResource parent, Branch branch, boolean renderMode) {
+    public RepositoryFolder(CommonCollectionResource parent, Repository r, boolean renderMode) {
         super(parent.getServices());
         this.renderMode = renderMode;
-        this.name = name;
+        this.repo = r;
         this.parent = parent;
-        this.branch = branch;
-        this.commit = branch.getHead();
-        this.contentSession = new ContentSession(SessionManager.session(), branch, getServices().getCurrentDateService(), getServices().getHashStore(), getServices().getBlobStore());
-    }
-
-    @Override
-    public void save() {
-        UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
-        contentSession.save(currentUser.getThisUser());
     }
 
     @Override
@@ -71,14 +64,18 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     @Override
     public ResourceList getChildren() {
         if (children == null) {
-            children = Utils.toResources(this, contentSession.getRootContentNode(), renderMode);
+            children = new ResourceList();
+            for( Branch b : repo.getBranches()) {
+                BranchFolder bf = new BranchFolder(b.getName(), this, b, renderMode);
+                children.add(bf);
+            }
         }
         return children;
     }
 
     @Override
     public String getName() {
-        return name;
+        return repo.getName();
     }
 
     @Override
@@ -86,75 +83,29 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
         log.trace("createCollection: " + newName);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        DirectoryResource rdr = createDirectoryResource(newName, session);
+        
+        Branch b = repo.createBranch(newName, getCurrentUser(), session);
+        BranchFolder bf = new BranchFolder(newName, this, b, false);
+        
         tx.commit();
-        return rdr;
+        return bf;
     }
 
-    public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException {
-        ContentSession.DirectoryNode newNode = contentSession.getRootContentNode().addDirectory(newName);
-        DirectoryResource rdr = new DirectoryResource(newNode, this, services, false);
-        onAddedChild(rdr);
-        save();
-        return rdr;
-    }
-
-    @Override
-    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        DirectoryNode thisNode = contentSession.getRootContentNode();
-        ContentSession.FileNode newFileNode = thisNode.addFile(newName);
-        FileResource fileResource = new FileResource(newFileNode, this, services);
-
-        String ct = HttpManager.request().getContentTypeHeader();
-        if (ct != null && ct.equals("spliffy/hash")) {
-            // read the new hash and set it on this
-            DataInputStream din = new DataInputStream(inputStream);
-            long newHash = din.readLong();
-            newFileNode.setHash(newHash);
-        } else {
-            log.info("createNew: set content");
-            // parse data and persist to stores
-            newFileNode.setContent(inputStream);
-        }
-        onAddedChild(fileResource);
-        save();
-        tx.commit();
-
-        return fileResource;
-
-    }
+    
 
     @Override
     public Date getCreateDate() {
-        return contentSession.getRootContentNode().getCreatedDate();
+        return repo.getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return contentSession.getRootContentNode().getModifedDate();
+        return null;
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if (jsonResult != null) {
-            jsonResult.write(out);
-            return;
-        }
-        String type = params.get("type");
-        if (type == null) {
-            // output directory listing
-            log.trace("sendContent: render template");
-            getTemplater().writePage("repoHome", this, params, out);
-        } else {
-            log.trace("sendContent: " + type);
-            switch (type) {
-                case "hashes":
-                    HashCalc.getInstance().calcHash(contentSession.getRootContentNode().getDataNode(), out);
-                    break;
-            }
-        }
+
     }
 
     @Override
@@ -164,9 +115,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
 
     @Override
     public String getContentType(String accepts) {
-        if (jsonResult != null) {
-            return "application/x-javascript; charset=utf-8";
-        }
+
         String type = HttpManager.request().getParams().get("type");
         if (type == null || type.length() == 0) {
             return "text/html";
@@ -184,15 +133,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
         return null;
     }
 
-    /**
-     * may be null
-     *
-     * @return
-     */
-    public Commit getRepoVersion() {
-        return commit;
-    }
-
     @Override
     public CommonCollectionResource getParent() {
         return parent;
@@ -204,9 +144,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
     }
 
     @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        Set<Permission> perms = SecurityUtils.getPermissions(user, branch, SessionManager.session());
-        SecurityUtils.addPermissions(perms, list);
+    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
         parent.addPrivs(list, user);
     }
 
@@ -222,41 +160,9 @@ public class RepositoryFolder extends AbstractCollectionResource implements Cont
         return null;
     }
 
-    @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-//        String shareWith = parameters.get("shareWith");
-//        String priv = parameters.get("priviledge");
-//        AccessControlledResource.Priviledge p = AccessControlledResource.Priviledge.valueOf(priv);
-//        String message = parameters.get("message");
-//        if (shareWith != null) {
-//            getServices().getShareManager().sendShareInvites(getCurrentUser(), repository, shareWith, p, message);
-//            this.jsonResult = new JsonResult(true);
-//        }
-        return null;
-
-    }
 
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
-    }
-
-    public String getTitle() {
-        return this.branch.getRepository().getTitle();
-    }
-
-    @Override
-    public DirectoryNode getDirectoryNode() {
-        return contentSession.getRootContentNode();
-    }
-
-    @Override
-    public void onAddedChild(AbstractContentResource aThis) {
-        getChildren().add(aThis);
-    }
-
-    @Override
-    public void onRemovedChild(AbstractContentResource aThis) {
-        getChildren().remove(aThis);
     }
 }

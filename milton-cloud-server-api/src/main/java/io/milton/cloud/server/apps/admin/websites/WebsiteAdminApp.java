@@ -23,9 +23,10 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.admin.users.UserAdminPage;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;
 
@@ -49,9 +50,9 @@ public class WebsiteAdminApp  implements Application {
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if (parent instanceof OrganisationFolder) {
+        if (parent instanceof OrganisationRootFolder) {
             if (requestedName.equals("manageWebsites")) {
-                OrganisationFolder orgFolder = (OrganisationFolder) parent;
+                OrganisationRootFolder orgFolder = (OrganisationRootFolder) parent;
                 return new WebsitesAdminPage(requestedName,orgFolder.getOrganisation(), (CommonCollectionResource) parent, resourceFactory.getServices());
             }
         }
@@ -59,7 +60,7 @@ public class WebsiteAdminApp  implements Application {
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
     @Override
@@ -72,7 +73,7 @@ public class WebsiteAdminApp  implements Application {
 
     @Override
     public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-        if (rootFolder instanceof OrganisationFolder) {
+        if (rootFolder instanceof OrganisationRootFolder) {
             MenuItem m = new MenuItem();
             m.setText("Websites");
             m.setHref("/manageSites/");

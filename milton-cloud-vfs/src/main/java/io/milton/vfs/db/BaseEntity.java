@@ -9,6 +9,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
 
 /**
  * Represents a real world entity such as a user or an organisation
@@ -206,5 +207,22 @@ public class BaseEntity implements Serializable {
                 Expression.and(Expression.eq("grantee", this), Expression.and(Expression.eq("grantedOnEntity", grantedOn), Expression.eq("priviledge", priviledge))));
         List list = crit.list();
         return list != null && !list.isEmpty();
+    }
+    
+    public Repository createRepository(String name, Profile user, Session session) {
+        if( getRepositories() == null ) {
+            setRepositories(new ArrayList<Repository>());
+        }
+        Repository r = new Repository();
+        r.setBaseEntity(this);
+        getRepositories().add(r);
+        r.setCreatedDate(new Date());
+        r.setName(name);
+        r.setTitle(name);
+        session.save(r);
+        
+        r.createBranch(Branch.TRUNK, user, session);
+        
+        return r;
     }
 }

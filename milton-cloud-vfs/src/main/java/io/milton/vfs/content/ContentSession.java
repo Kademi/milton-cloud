@@ -92,14 +92,17 @@ public class ContentSession {
     }
 
     public void save(Profile currentUser) {
+        long oldHash = dataSession.getRootDataNode().getHash();
         long newHash = dataSession.save();
         Commit newCommit = new Commit();
         newCommit.setCreatedDate(currentDateService.getNow());
         newCommit.setEditor(currentUser);
         newCommit.setItemHash(newHash);
         session.save(newCommit);
-        branch.setHead(newCommit);
+        branch.setHead(newCommit);        
         session.save(branch);
+        System.out.println("ContentSession: saved new root hash: " + newHash + " on branch: " + branch.getName());
+        System.out.println("ContentSession: old hash: " + oldHash);
     }
 
     public abstract class ContentNode {
@@ -196,6 +199,9 @@ public class ContentSession {
         }
 
         public FileNode addFile(String name) {
+            if( child(name) != null ) {
+                throw new RuntimeException("Child item already exists with that name: " + name);
+            }
             DataNode newDataNode = dataNode.add(name, 0, "f");
             MetaNode newMetaNode = metaNode.add(name, session);
             FileNode newContentNode = new FileNode(this, newDataNode, newMetaNode);

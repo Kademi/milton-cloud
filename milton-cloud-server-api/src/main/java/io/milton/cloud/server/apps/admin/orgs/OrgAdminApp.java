@@ -19,6 +19,7 @@ package io.milton.cloud.server.apps.admin.orgs;
 import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -48,7 +49,7 @@ public class OrgAdminApp implements Application{
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

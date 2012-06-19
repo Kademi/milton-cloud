@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps;
 
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.MenuItem;
 import java.io.*;
 import java.util.ArrayList;
@@ -121,9 +122,9 @@ public class ApplicationManager {
         return null;
     }
 
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         for (Application app : apps) {
-            app.addBrowseablePages(parent, children);
+            app.addBrowseablePages(parent, children); 
         }
     }
 

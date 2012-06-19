@@ -25,6 +25,7 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.WebsiteDao;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -74,7 +75,7 @@ public class WebsiteApp implements Application {
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
     @Override

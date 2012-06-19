@@ -73,6 +73,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void save() {
+        System.out.println("DirectoryResource: save...");
         parent.save();
     }
 
@@ -80,6 +81,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
+        System.out.println("Add file: " + newName + "  to " + getName());
         FileNode newFileNode = directoryNode.addFile(newName);
         FileResource fileResource = new FileResource(newFileNode, this, services);
 
@@ -110,6 +112,9 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         } else {
             if (type.equals("hashes")) {
                 HashCalc.getInstance().calcHash(directoryNode.getDataNode(), out);
+            } else if( type.equals("hash")) {
+                String s = directoryNode.getDataNode().getHash() + "";
+                out.write(s.getBytes());
             }
         }
     }

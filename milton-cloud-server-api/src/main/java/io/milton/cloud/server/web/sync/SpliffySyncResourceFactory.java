@@ -66,7 +66,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
                 throw new RuntimeException("No root organisation");
             }            
         } else {
-            org = (Organisation) website.getBaseEntity();
+            org = (Organisation) website.getOrganisation();
         }
 
         if (path.startsWith(basePath)) {

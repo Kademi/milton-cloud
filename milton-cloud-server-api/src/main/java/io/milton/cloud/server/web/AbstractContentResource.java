@@ -117,10 +117,10 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     public Commit currentRepoVersion() {
         CommonResource col = parent;
-        while (!(col instanceof RepositoryFolder)) {
+        while (!(col instanceof BranchFolder)) {
             col = col.getParent();
         }
-        RepositoryFolder rr = (RepositoryFolder) col;
+        BranchFolder rr = (BranchFolder) col;
         return rr.getRepoVersion();
     }
 

@@ -17,11 +17,14 @@
 package io.milton.cloud.server.apps.orgs;
 
 import io.milton.http.*;
+import io.milton.http.Request.Method;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import org.hibernate.Session;
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
@@ -41,42 +44,75 @@ import io.milton.vfs.db.utils.SessionManager;
  *
  * @author brad
  */
-public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource {
+public class OrganisationRootFolder extends OrganisationFolder implements RootFolder {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationFolder.class);
-    private final CommonCollectionResource parent;
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationRootFolder.class);
+    private Map<String, PrincipalResource> childEntities = new HashMap<>();
+    private final ApplicationManager applicationManager;
     private final Organisation organisation;
     private ResourceList children;
 
-    public OrganisationFolder(CommonCollectionResource parent, Organisation organisation, Services services) {
-        super(services);
-        this.parent = parent;
+    public OrganisationRootFolder(Services services, ApplicationManager applicationManager, Organisation organisation) {
+        super(null, organisation, services);
+        this.applicationManager = applicationManager;
         this.organisation = organisation;
     }
 
     @Override
     public String getName() {
-        return organisation.getName();
+        return "";
     }
 
     @Override
-    public Date getModifiedDate() {
-        return organisation.getModifiedDate();
+    public boolean authorise(Request request, Request.Method method, Auth auth) {
+        if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
+            return services.getSecurityManager().getCurrentUser() != null;
+        }
+        return true;
     }
+
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        Resource r = services.getApplicationManager().getPage(this, childName);
+        Resource r = applicationManager.getPage(this, childName);
         if (r != null) {
             return r;
         }
+        PrincipalResource p = findEntity(childName);
+        if (p != null) {
+            return p;
+        }
         return Utils.childOf(getChildren(), childName);
+    }
+
+    @Override
+    public PrincipalResource findEntity(String name) {
+        PrincipalResource r = childEntities.get(name);
+        if (r != null) {
+            return r;
+        }
+        Session session = SessionManager.session();
+        Profile u = services.getSecurityManager().getUserDao().getProfile(name, organisation, session);
+        if (u == null) {
+            return null;
+        } else {
+            UserResource ur = new UserResource(this, u, applicationManager);
+            childEntities.put(name, ur);
+            return ur;
+        }
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
+            Profile user = getCurrentUser();
+            if (user != null) {
+                PrincipalResource r = findEntity(getCurrentUser().getName());
+                if (r != null) {
+                    children.add(r);
+                }
+            }
             if (organisation.getRepositories() != null) {
                 for (Repository repo : organisation.getRepositories()) {
                     RepositoryFolder rf = new RepositoryFolder(this, repo, false);
@@ -90,62 +126,4 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         return children;
     }
 
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("home", this, params, out);
-    }
-
-    @Override
-    public Long getMaxAgeSeconds(Auth auth) {
-        return null;
-    }
-
-    @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
-    @Override
-    public Long getContentLength() {
-        return null;
-    }
-
-    @Override
-    public CommonCollectionResource getParent() {
-        return null;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        Set<Permission> perms = SecurityUtils.getPermissions(user, organisation, SessionManager.session());
-        SecurityUtils.addPermissions(perms, list);
-        if( parent != null ) {
-            parent.addPrivs(list, user);
-        }
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return organisation.getCreatedDate();
-    }
-
-    @Override
-    public boolean isDir() {
-        return true;
-    }
-
-    @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
-        return Collections.EMPTY_MAP;
-    }
-
-    @Override
-    public Organisation getOrganisation() {
-        return organisation;
-    }
 }

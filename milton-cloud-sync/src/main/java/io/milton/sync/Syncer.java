@@ -22,6 +22,7 @@ import io.milton.sync.event.DownloadSyncEvent;
 import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FinishedSyncEvent;
 import io.milton.sync.event.UploadSyncEvent;
+import org.apache.commons.io.FileUtils;
 
 /**
  * This class contains the code to actually perform file sync operations. This
@@ -31,9 +32,8 @@ import io.milton.sync.event.UploadSyncEvent;
  * @author brad
  */
 public class Syncer {
-    
+
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Syncer.class);
-    
     private final EventManager eventManager;
     private final HttpHashStore httpHashStore;
     private final HttpBlobStore httpBlobStore;
@@ -41,7 +41,6 @@ public class Syncer {
     private final Archiver archiver;
     private final File root;
     private final Path baseUrl;
-    
     private boolean paused;
     private boolean readonlyLocal;
 
@@ -92,9 +91,9 @@ public class Syncer {
     }
 
     public void downloadSync(long hash, Path path) throws IOException {
-        if( readonlyLocal ) {
+        if (readonlyLocal) {
             log.warn("Not downsyncing because local is readonly");
-            return ;
+            return;
         }
         try {
             EventUtils.fireQuietly(eventManager, new DownloadSyncEvent());
@@ -103,7 +102,7 @@ public class Syncer {
             EventUtils.fireQuietly(eventManager, new FinishedSyncEvent());
         }
     }
-    
+
     private void _downloadSync(long hash, Path path) throws IOException {
         System.out.println("downloadSync: " + path);
         File localFile = toFile(path);
@@ -117,13 +116,17 @@ public class Syncer {
         FileBlobStore oldFileBlobStore = null;
         try {
             if (fTemp.exists()) {
-                // found previous download file, so use it as a hashstore
-                MemoryHashStore partialDownloadHashStore = new MemoryHashStore();
-                partialDownloadBlobStore = new FileBlobStore(fTemp);
-                partialDownloadBlobStore.openForRead();
-                Parser.parse(fTemp, partialDownloadBlobStore, partialDownloadHashStore);
-                hashStores.add(partialDownloadHashStore);
-                blobStores.add(partialDownloadBlobStore);
+                if (fTemp.isFile()) {
+                    // found previous download file, so use it as a hashstore
+                    MemoryHashStore partialDownloadHashStore = new MemoryHashStore();
+                    partialDownloadBlobStore = new FileBlobStore(fTemp);
+                    partialDownloadBlobStore.openForRead();
+                    Parser.parse(fTemp, partialDownloadBlobStore, partialDownloadHashStore);
+                    hashStores.add(partialDownloadHashStore);
+                    blobStores.add(partialDownloadBlobStore);
+                } else {
+                    FileUtils.deleteDirectory(fTemp);
+                }
             }
 
             // Also use the current file (if it exists!) as a hash and blob store, since we're hoping
@@ -233,7 +236,7 @@ public class Syncer {
         byte[] data = bout.toByteArray();
 
         try {
-            Path p = baseUrl.add(path);            
+            Path p = baseUrl.add(path);
             host.doPut(p, data, "spliffy/hash");
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -264,6 +267,4 @@ public class Syncer {
     public void setReadonlyLocal(boolean readonlyLocal) {
         this.readonlyLocal = readonlyLocal;
     }
-    
-    
 }

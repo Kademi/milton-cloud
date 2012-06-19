@@ -56,12 +56,17 @@ public class SpliffySecurityManager {
         log.info("authenticate: " + digest.getUser());
         Session session = SessionManager.session();
         Profile user = userDao.getProfile(digest.getUser(), org, session);
+        while( user == null && org != null ) {
+            org = org.getOrganisation();
+            user = userDao.getProfile(digest.getUser(), org, session);
+        }
         if (user == null) {
             log.warn("user not found: " + digest.getUser());
             return null;
         }
         if (passwordManager.verifyDigest(digest, user)) {
             log.warn("digest auth ok: " + user.getName());
+            HttpManager.request().getAttributes().put("_current_user", user);
             return user;
         } else {
             log.warn("password verifuication failed");

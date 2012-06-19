@@ -20,7 +20,8 @@ import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -48,7 +49,7 @@ public class DashboardAdminApp implements Application {
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
     @Override
@@ -62,7 +63,7 @@ public class DashboardAdminApp implements Application {
     @Override
     public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
         if (user != null) {
-            if (rootFolder instanceof OrganisationFolder) {
+            if (rootFolder instanceof OrganisationRootFolder) {
                 MenuItem m = new MenuItem();
                 m.setHref("/" + user.getName() + "/");
                 m.setText("Dashboard");

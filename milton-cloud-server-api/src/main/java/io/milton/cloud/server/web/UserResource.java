@@ -40,7 +40,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     private final Profile user;
     private final CommonCollectionResource parent;
     private final ApplicationManager applicationManager;
-    private List<Resource> children;
+    private ResourceList children;
 
     public UserResource(CommonCollectionResource parent, Profile u, ApplicationManager applicationManager) {
         super(parent.getServices());
@@ -49,11 +49,11 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         this.applicationManager = applicationManager;
     }
 
-    public List<RepositoryFolder> getRepositories() throws NotAuthorizedException, BadRequestException {
-        List<RepositoryFolder> list = new ArrayList<>();
+    public List<BranchFolder> getRepositories() throws NotAuthorizedException, BadRequestException {
+        List<BranchFolder> list = new ArrayList<>();
         for (Resource r : getChildren()) {
-            if (r instanceof RepositoryFolder) {
-                list.add((RepositoryFolder) r);
+            if (r instanceof BranchFolder) {
+                list.add((BranchFolder) r);
             }
         }
         return list;
@@ -92,11 +92,11 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = new ArrayList();
+            children = new ResourceList();
             if (user.getRepositories() != null) {
                 for (Repository r : user.getRepositories()) {
                     Branch b = r.trunk(SessionManager.session());
-                    RepositoryFolder rr = new RepositoryFolder(r.getName(), this, b, false);
+                    BranchFolder rr = new BranchFolder(r.getName(), this, b, false);
                     children.add(rr);
                 }
             }
@@ -126,7 +126,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
         SessionManager.session().save(r);
         tx.commit();
-        return new RepositoryFolder(r.getName(), this, b, false);
+        return new BranchFolder(r.getName(), this, b, false);
     }
 
     @Override

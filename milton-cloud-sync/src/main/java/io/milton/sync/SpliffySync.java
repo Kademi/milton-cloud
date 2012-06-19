@@ -110,7 +110,7 @@ public class SpliffySync {
 
         @Override
         public void run() {
-            log.info("doing scan..");
+            log.info("ScanRunner: doing scan..");
             try {
                 if( !paused ) {
                     scan();

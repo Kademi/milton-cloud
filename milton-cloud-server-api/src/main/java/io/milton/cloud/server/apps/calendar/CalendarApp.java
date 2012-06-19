@@ -22,11 +22,8 @@ import io.milton.cloud.server.web.templating.MenuItem;
 import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.RootFolder;
-import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.UserResource;
 
 /**
  *
@@ -59,7 +56,7 @@ public class CalendarApp implements Application {
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, List<Resource> children) {
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof UserResource) {
             UserResource rf = (UserResource) parent;
             CalendarHomeFolder calHome = new CalendarHomeFolder(rf, services, CALENDAR_HOME_NAME, calendarManager);

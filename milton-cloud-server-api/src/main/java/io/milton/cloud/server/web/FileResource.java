@@ -4,9 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
-import org.hashsplit4j.api.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -22,7 +20,6 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.ReplaceableResource;
 import io.milton.vfs.content.ContentSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
-import java.util.logging.Level;
 
 /**
  *
@@ -38,6 +35,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
     public FileResource(FileNode fileNode, ContentDirectoryResource parent, Services services) {
         super(fileNode, parent, services);
         this.fileNode = fileNode;
+        System.out.println("loaed file: " + getName() + " with hash: " + fileNode.getHash());
     }
 
     @Override
@@ -52,7 +50,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             try {
                 long hash = din.readLong();
                 fileNode.setHash(hash);
-                parent.save();
+                System.out.println("setHash: " + hash + " - on " + getName());
             } catch (IOException ex) {
                 throw new BadRequestException("Couldnt read the new hash", ex);
             }
@@ -72,7 +70,13 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        fileNode.writeContent(out);
+        System.out.println("sendContent: fileresource: " + getName());
+        if( params != null && params.containsKey("type") && "hash".equals(params.get("type") )) {
+            String s = fileNode.getHash() + "";
+            out.write(s.getBytes());
+        } else {
+            fileNode.writeContent(out);
+        }
     }
 
     /**

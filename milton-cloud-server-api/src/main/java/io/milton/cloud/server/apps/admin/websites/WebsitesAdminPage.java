@@ -21,7 +21,6 @@ import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Repository;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -39,8 +38,6 @@ import io.milton.resource.PostableResource;
 import io.milton.resource.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -143,24 +140,13 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
         return null;
     }
 
+    @Override
     public Organisation getOrganisation() {
         return organisation;
     }
     
-    
-    
     public List<Website> getWebsites() {
-        List<Repository> list = organisation.getRepositories();
-        if( list == null || list.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-        List<Website> sites = new ArrayList<>();
-        for( Repository r : list ) {
-            if( r instanceof Website) {
-                sites.add((Website)r);
-            }
-        }
-        return sites;
+        return organisation.websites();
     }
     
     

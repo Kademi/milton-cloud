@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps;
 
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import java.util.List;
@@ -67,7 +68,7 @@ public interface Application {
      * @param parent
      * @param children 
      */
-    void addBrowseablePages(CollectionResource parent, List<Resource> children);
+    void addBrowseablePages(CollectionResource parent, ResourceList children);
     
     /**
      * Causes the application to release all resources. It should be restartable
@@ -84,6 +85,14 @@ public interface Application {
      */
     void initDefaultProperties(AppConfig config);
 
+    /**
+     * Add menu items if appropriate
+     * 
+     * @param list
+     * @param r
+     * @param user
+     * @param rootFolder 
+     */
     void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder);
 
 
