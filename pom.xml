@@ -54,6 +54,7 @@
     <modules>
         <module>milton-cloud-lib</module>
         <module>milton-cloud-server</module>
+        <module>milton-cloud-server-api</module>
         <module>milton-cloud-sync</module>
     </modules>
     <build>

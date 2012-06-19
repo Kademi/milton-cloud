@@ -135,14 +135,41 @@ public class Repository implements Serializable {
                 }
             }
         }
+        return null;
+    }  
+    
+    /**
+     * Creates and saves a new branch, including setting up initial commit etc
+     * 
+     * @param name
+     * @param user
+     * @param session
+     * @return 
+     */
+    public Branch createBranch(String name, Profile user, Session session) {
+        Commit head = new Commit();
+        head.setCreatedDate(new Date());
+        head.setEditor(user);
+        head.setItemHash(0);
+        session.save(head);
+        
+        MetaItem rootMetaItem = new MetaItem();
+        rootMetaItem.setCreatedDate(new Date());
+        rootMetaItem.setModifiedDate(new Date());
+        session.save(rootMetaItem);
+        
         Branch b = new Branch();
         b.setName(Branch.TRUNK);
         b.setRepository(this);
-        session.save(b);
-        if (this.branches == null) {
+        b.setHead(head);
+        b.setRootMetaItem(rootMetaItem);
+        session.save(b);    
+        
+        if( getBranches() == null ) {
             setBranches(new ArrayList<Branch>());
         }
         getBranches().add(b);
+        
         return b;
-    }    
+    }
 }

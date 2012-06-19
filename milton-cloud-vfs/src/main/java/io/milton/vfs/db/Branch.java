@@ -1,39 +1,42 @@
 package io.milton.vfs.db;
 
+import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.Permission.DynamicPrincipal;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
 
 /**
  * A Commit is a link between a Repository and an TreeItem
- * 
- * The TreeItem linked to is a directory, and its members are the 
- * members of the Repository for this version
- * 
- * The latest version for a Repository (ie with the highest versionNum)
- * is the current version of the repository (ie the Head)
+ *
+ * The TreeItem linked to is a directory, and its members are the members of the
+ * Repository for this version
+ *
+ * The latest version for a Repository (ie with the highest versionNum) is the
+ * current version of the repository (ie the Head)
  *
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name="BRANCH")
+@Table(name = "BRANCH")
 public class Branch implements Serializable {
-    
+
     /**
      * Special branch which always exists on a repository
      */
-    public static String TRUNK = "trunk";    
-    
+    public static String TRUNK = "trunk";
     private long id;
     private String name;
     private Commit head;
     private MetaItem rootMetaItem;
     private Repository repository;
-    private Date createdDate; 
+    private Date createdDate;
     private List<Permission> permissions; // can be granted permissions
-           
 
     public Branch() {
     }
@@ -46,7 +49,7 @@ public class Branch implements Serializable {
         this.name = name;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public MetaItem getRootMetaItem() {
         return rootMetaItem;
     }
@@ -54,10 +57,8 @@ public class Branch implements Serializable {
     public void setRootMetaItem(MetaItem rootMetaItem) {
         this.rootMetaItem = rootMetaItem;
     }
-    
-    
-      
-    @ManyToOne(optional=false)    
+
+    @ManyToOne(optional = false)
     public Repository getRepository() {
         return repository;
     }
@@ -85,7 +86,7 @@ public class Branch implements Serializable {
         this.id = id;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Commit getHead() {
         return head;
     }
@@ -93,15 +94,15 @@ public class Branch implements Serializable {
     public void setHead(Commit head) {
         this.head = head;
     }
-   
+
     public Commit latestVersion(Session session) {
         return head;
-    }    
-    
+    }
+
     /**
      * Permissions which have been granted on this Branch
-     * 
-     * @return 
+     *
+     * @return
      */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "grantedOnBranch")
     public List<Permission> getPermissions() {
@@ -110,5 +111,25 @@ public class Branch implements Serializable {
 
     public void setPermissions(List<Permission> grantedPermissions) {
         this.permissions = grantedPermissions;
-    }        
+    }
+
+    public void grant(AccessControlledResource.Priviledge priviledge, DynamicPrincipal grantee) {
+        if (isGranted(priviledge, grantee)) {
+            return;
+        }
+        Permission p = new Permission();
+        p.setGrantedOnBranch(this);
+        p.setGranteePrincipal(grantee.name());
+        p.setPriviledge(priviledge);
+        SessionManager.session().save(p);
+    }
+
+    public boolean isGranted(AccessControlledResource.Priviledge priviledge, DynamicPrincipal grantee) {
+        Session session = SessionManager.session();
+        Criteria crit = session.createCriteria(Permission.class);
+        crit.add(
+                Expression.and(Expression.eq("granteePrincipal", grantee.name()), Expression.and(Expression.eq("grantedOnBranch", this), Expression.eq("priviledge", priviledge))));
+        List list = crit.list();
+        return list != null && !list.isEmpty();
+    }
 }
