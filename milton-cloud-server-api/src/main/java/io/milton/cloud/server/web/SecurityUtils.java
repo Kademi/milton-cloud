@@ -1,6 +1,5 @@
 package io.milton.cloud.server.web;
 
-
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.Profile;
@@ -33,22 +32,22 @@ public class SecurityUtils {
         Set<Permission> perms = new HashSet<>();
         appendPermissions(grantee, grantedOn, session, perms);
         return perms;
-    }    
+    }
 
     private static void appendPermissions(BaseEntity grantee, Branch grantedOn, Session session, Set<Permission> perms) {
-        if( grantedOn.getPermissions() != null ) {
-            for( Permission p : grantedOn.getPermissions() ) {
-                if( p.isGrantedTo(grantee)) {
+        if (grantedOn.getPermissions() != null) {
+            for (Permission p : grantedOn.getPermissions()) {
+                if (p.isGrantedTo(grantee)) {
                     perms.add(p);
                 }
             }
         }
-    }    
-    
+    }
+
     private static void appendPermissions(BaseEntity grantee, BaseEntity grantedOn, Session session, Set<Permission> perms) {
-        if( grantedOn.getPermissions() != null ) {
-            for( Permission p : grantedOn.getPermissions() ) {
-                if( p.isGrantedTo(grantee)) {
+        if (grantedOn.getPermissions() != null) {
+            for (Permission p : grantedOn.getPermissions()) {
+                if (p.isGrantedTo(grantee)) {
                     perms.add(p);
                 }
             }
@@ -60,13 +59,16 @@ public class SecurityUtils {
         if (perms != null) {
             for (Permission p : perms) {
                 BaseEntity grantee = p.getGrantee();
-                Principal principal = SpliffyResourceFactory.getRootFolder().findEntity(grantee.getName());
-                List<AccessControlledResource.Priviledge> list = map.get(principal);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    map.put(principal, list);
+                if (grantee instanceof Profile) {
+                    // todo: handle groups
+                    Principal principal = SpliffyResourceFactory.getRootFolder().findEntity((Profile)grantee);
+                    List<AccessControlledResource.Priviledge> list = map.get(principal);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        map.put(principal, list);
+                    }
+                    list.add(p.getPriviledge());
                 }
-                list.add(p.getPriviledge());
             }
         }
         return map;
@@ -95,6 +97,4 @@ public class SecurityUtils {
         }
         return false;
     }
-
-
 }

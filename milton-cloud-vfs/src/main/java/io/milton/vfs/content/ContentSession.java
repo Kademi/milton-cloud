@@ -248,9 +248,10 @@ public class ContentSession {
         }
 
         public void setContent(InputStream in) throws IOException {
+            long oldhash = getHash();
             Parser parser = new Parser();
-            long fileHash;
-            fileHash = parser.parse(in, hashStore, blobStore);
+            long fileHash = parser.parse(in, hashStore, blobStore);
+            System.out.println("setContent: oldhash: " + oldhash + " - newhash: "+ fileHash );
             setHash(fileHash);
         }
 

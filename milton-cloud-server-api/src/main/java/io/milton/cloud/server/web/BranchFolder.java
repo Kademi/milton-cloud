@@ -38,9 +38,9 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     private final CommonCollectionResource parent;
     private final String name;
     private final Branch branch;
-    private ResourceList children;
+    protected ResourceList children;
     private Commit commit; // may be null
-    private ContentSession contentSession;
+    protected final ContentSession contentSession;
     /**
      * if set html resources will be rendered with the templater
      */

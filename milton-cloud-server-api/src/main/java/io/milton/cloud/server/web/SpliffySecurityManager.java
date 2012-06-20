@@ -38,8 +38,9 @@ public class SpliffySecurityManager {
 
     public Profile authenticate(Organisation org, String userName, String requestPassword) {
         Session session = SessionManager.session();
-        Profile user = userDao.getProfile(userName, org, session);
+        Profile user = userDao.findProfile(userName, org, session);
         if (user == null) {
+            log.warn("user not found: " + userName);
             return null;
         } else {
             // only the password hash is stored on the user, so need to generate an expected hash
@@ -55,7 +56,7 @@ public class SpliffySecurityManager {
     public Profile authenticate(Organisation org, DigestResponse digest) {
         log.info("authenticate: " + digest.getUser());
         Session session = SessionManager.session();
-        Profile user = userDao.getProfile(digest.getUser(), org, session);
+        Profile user = userDao.findProfile(digest.getUser(), org, session);
         while( user == null && org != null ) {
             org = org.getOrganisation();
             user = userDao.getProfile(digest.getUser(), org, session);

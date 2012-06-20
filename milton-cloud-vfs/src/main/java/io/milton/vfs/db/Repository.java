@@ -13,6 +13,11 @@ import org.hibernate.Session;
  * @author brad
  */
 @javax.persistence.Entity
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "base_entity"})}
+)
+
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
 @Inheritance(strategy = InheritanceType.JOINED)

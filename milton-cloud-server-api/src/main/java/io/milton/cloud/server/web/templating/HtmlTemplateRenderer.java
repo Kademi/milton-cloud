@@ -25,6 +25,8 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.CommonResource;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 
@@ -43,14 +45,20 @@ public class HtmlTemplateRenderer {
         this.formatter = formatter;
     }
 
-    public void renderHtml(RootFolder rootFolder, Resource aThis, Map<String, String> params, Profile user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, OutputStream out) throws IOException {
+    public void renderHtml(RootFolder rootFolder, Resource page, Map<String, String> params, Profile user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, OutputStream out) throws IOException {
         Context datamodel = new VelocityContext();
-        datamodel.put("page", aThis);
+        CommonCollectionResource folder = null;
+        if( page instanceof CommonResource) {
+            CommonResource cr = (CommonResource) page;
+            folder = cr.getParent();
+            datamodel.put("folder", folder);
+        }
+        datamodel.put("page", page);
         datamodel.put("params", params);
         if (user != null) {
             datamodel.put("user", user);
         }
-        List<MenuItem> menu = applicationManager.getMenu(aThis, user, rootFolder);
+        List<MenuItem> menu = applicationManager.getMenu(page, user, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
 
@@ -61,10 +69,12 @@ public class HtmlTemplateRenderer {
 
         List<WebResource> pageWebResources = null;
         List<String> pageBodyClasses = null;
-        if (aThis instanceof HtmlPage) {
-            HtmlPage page = (HtmlPage) aThis;
-            pageWebResources = page.getWebResources();
-            pageBodyClasses = page.getBodyClasses();
+        if (page instanceof HtmlPage) {
+            HtmlPage htmlPage = (HtmlPage) page;
+            pageWebResources = htmlPage.getWebResources();
+            pageBodyClasses = htmlPage.getBodyClasses();
+            BodyRenderer bodyRenderer = new BodyRenderer(htmlPage);
+            datamodel.put("body", bodyRenderer);
         }
 
         List<WebResource> webResources = deDupe(themeTemplateTemplateMeta.getWebResources(), bodyTemplateMeta.getWebResources(), pageWebResources);
@@ -125,5 +135,18 @@ public class HtmlTemplateRenderer {
         for (String s : bodyClasses) {
             pw.append(s).append(" ");
         }
+    }
+    
+    public class BodyRenderer {
+        private final HtmlPage htmlPage;
+
+        public BodyRenderer(HtmlPage htmlPage) {
+            this.htmlPage = htmlPage;
+        }
+
+        @Override
+        public String toString() {
+            return htmlPage.getBody();
+        }                
     }
 }

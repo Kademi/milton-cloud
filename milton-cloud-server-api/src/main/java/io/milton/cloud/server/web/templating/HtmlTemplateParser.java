@@ -17,7 +17,9 @@
 package io.milton.cloud.server.web.templating;
 
 import com.bradmcevoy.xml.XmlHelper;
+import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.common.Path;
+import io.milton.http.XmlWriter;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,8 @@ public class HtmlTemplateParser {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateParser.class);
 
+    private HtmlFormatter htmlFormatter = new HtmlFormatter();
+    
     /**
      * Parse the file associated with the meta, extracting webresources, body
      * class attributes and the template, and setting that information on the
@@ -70,9 +74,18 @@ public class HtmlTemplateParser {
 
         // TODO: move ftl directive into top level trmplate only
         String body = getValueOf(elRoot, "body");
-        meta.setBody(body); // add ftl square bracket directive, for XML friendly tags
-
+        meta.setBody(body); 
     }
+    
+    /**
+     * Does the opposite of parse, formats the structured fields into HTML
+     * 
+     * @param aThis
+     * @param bout 
+     */
+    public void update(RenderFileResource r, ByteArrayOutputStream bout) {
+        htmlFormatter.update(r, bout);
+    }    
 
     public org.jdom.Document getJDomDocument(InputStream fin) {
         try {
@@ -163,6 +176,7 @@ public class HtmlTemplateParser {
         }
         return els;
     }
+
 
 
 }

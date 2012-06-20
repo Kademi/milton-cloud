@@ -19,8 +19,6 @@ package io.milton.cloud.server.web;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.ItemHistory;
-import io.milton.vfs.db.MetaItem;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +28,7 @@ import io.milton.cloud.server.web.templating.HtmlPage;
 import io.milton.cloud.server.web.templating.WebResource;
 import io.milton.common.Path;
 import io.milton.http.Auth;
+import io.milton.http.FileItem;
 import io.milton.http.Range;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -37,21 +36,27 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
+import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
-public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage {
+public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource {
 
+    private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
     private final FileResource fileResource;
-    
     private final List<String> bodyClasses = new ArrayList<>();
     private final List<WebResource> webResources = new ArrayList<>();
-    
     private boolean parsed;
+    private String template;
     private String title;
     private String body;
+    private JsonResult jsonResult;
 
     public RenderFileResource(Services services, FileResource fileResource) {
         super(services);
@@ -59,19 +64,63 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        log.info("processform: " + getName());
+        Session session = SessionManager.session();
+
+        // First ensure existing content is parsed
         checkParse();
-        services.getHtmlTemplater().writePage("content/page", this, params, out);
+
+        // Now bind new data to the parsed fields
+        if (parameters.containsKey("template")) {
+            template = parameters.get("template");
+        }
+        if (parameters.containsKey("title")) {
+            title = parameters.get("title");
+        }
+        if (parameters.containsKey("body")) {
+            body = parameters.get("body");
+        }
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        services.getTemplateParser().update(this, bout);
+
+        System.out.println("new html:");
+        System.out.println(bout.toString());
+
+        byte[] arr = bout.toByteArray();
+        ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+        fileResource.replaceContent(bin, (long) arr.length);
+        jsonResult = new JsonResult(true);
+        return null;
     }
-    
+
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            checkParse();
+            services.getHtmlTemplater().writePage(template, this, params, out);
+        }
+    }
+
     private void checkParse() {
-        if( parsed ) {
-            return ;
+        if (parsed) {
+            return;
         }
         try {
             services.getTemplateParser().parse(this, Path.root);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+        template = "content/page";
+        for (WebResource wr : webResources) {
+            if (wr.getTag().equals("link")) {
+                String rel = wr.getAtts().get("rel");
+                if (rel != null && rel.equals("template")) {
+                    template = wr.getAtts().get("href");
+                }
+            }
         }
         parsed = true;
     }
@@ -85,8 +134,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             throw new RuntimeException(ex);
         }
         return new ByteArrayInputStream(bout.toByteArray());
-    }    
-    
+    }
+
     @Override
     public List<String> getBodyClasses() {
         return bodyClasses;
@@ -101,15 +150,13 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public String getBody() {
         checkParse();
         return body;
-    }    
-    
-    
+    }
+
     @Override
     public Long getContentLength() {
         return null;
     }
-    
-    
+
     @Override
     public boolean isDir() {
         return false;
@@ -194,5 +241,15 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     @Override
     public void setTitle(String t) {
         this.title = t;
+    }
+
+    @Override
+    public boolean is(String type) {
+        checkParse();
+        // eg, if template is learner/modulePage, then is("modulePage") returns true
+        if (this.template != null && template.endsWith(type)) {
+            return true;
+        }
+        return fileResource.is(type);
     }
 }

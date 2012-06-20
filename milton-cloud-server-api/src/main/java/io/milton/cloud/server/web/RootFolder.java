@@ -17,6 +17,7 @@
 package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 
 /**
  *
@@ -29,7 +30,8 @@ public interface RootFolder extends CommonCollectionResource {
      * @param name
      * @return 
      */
-    PrincipalResource findEntity(String name);
+    PrincipalResource findEntity(Profile user);
     
+    @Override
     Organisation getOrganisation();
 }

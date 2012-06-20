@@ -19,24 +19,14 @@ package io.milton.cloud.server.apps.orgs;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.exceptions.NotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
-import org.hibernate.Session;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.Profile;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
-import io.milton.resource.GetableResource;
-import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
-import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * This is the root folder for the admin site. The admin site is used to setup
@@ -78,26 +68,20 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
         if (r != null) {
             return r;
         }
-        PrincipalResource p = findEntity(childName);
-        if (p != null) {
-            return p;
-        }
         return Utils.childOf(getChildren(), childName);
     }
 
     @Override
-    public PrincipalResource findEntity(String name) {
-        PrincipalResource r = childEntities.get(name);
+    public PrincipalResource findEntity(Profile u) {
+        PrincipalResource r = childEntities.get(u.getName());
         if (r != null) {
             return r;
         }
-        Session session = SessionManager.session();
-        Profile u = services.getSecurityManager().getUserDao().getProfile(name, organisation, session);
         if (u == null) {
             return null;
         } else {
             UserResource ur = new UserResource(this, u, applicationManager);
-            childEntities.put(name, ur);
+            childEntities.put(u.getName(), ur);
             return ur;
         }
     }
@@ -108,7 +92,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
             children = new ResourceList();
             Profile user = getCurrentUser();
             if (user != null) {
-                PrincipalResource r = findEntity(getCurrentUser().getName());
+                PrincipalResource r = findEntity(getCurrentUser());
                 if (r != null) {
                     children.add(r);
                 }

@@ -99,12 +99,10 @@ public class HtmlTemplater implements Templater {
         } else {
             throw new RuntimeException("Unknown root folder type: " + rootFolder.getClass());
         }
-        System.out.println("templatePath1: " + templatePath);
         if( !templatePath.startsWith("/")) {
             templatePath = "/templates/apps/" + templatePath;
         }        
         templatePath = templatePath + ".html";
-        System.out.println("templatePath2: " + templatePath);
         
         Template bodyTemplate = getTemplate(templatePath);
         TemplateHtmlPage bodyTemplateMeta = cachedTemplateMetaData.get(templatePath);

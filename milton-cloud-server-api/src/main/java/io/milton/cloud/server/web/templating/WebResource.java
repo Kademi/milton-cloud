@@ -25,25 +25,23 @@ import java.util.Map;
  * @author brad
  */
 public class WebResource {
-    
-    private Map<String,String> atts = new HashMap<>();
-    
+
+    private Map<String, String> atts = new HashMap<>();
     private final Path webPath;
-    
     private String tag;
-    
     private String body;
 
     public WebResource(Path webPath) {
+        if (webPath == null) {
+            throw new NullPointerException("webPath is null");
+        }
         this.webPath = webPath;
     }
 
-    
-    
     /**
      * Eg <script>, <link>, <meta>
-     * 
-     * @return 
+     *
+     * @return
      */
     public String getTag() {
         return tag;
@@ -52,12 +50,11 @@ public class WebResource {
     public void setTag(String tag) {
         this.tag = tag;
     }
-    
-   
+
     /**
      * Eg src, property, content, type
-     * 
-     * @return 
+     *
+     * @return
      */
     public Map<String, String> getAtts() {
         return atts;
@@ -69,8 +66,8 @@ public class WebResource {
 
     /**
      * The body of the tag, such as an inline script
-     * 
-     * @return 
+     *
+     * @return
      */
     public String getBody() {
         return body;
@@ -78,16 +75,16 @@ public class WebResource {
 
     public void setBody(String body) {
         this.body = body;
-    }           
-    
+    }
+
     public String toHtml(String themeName) {
         StringBuilder sb = new StringBuilder();
         sb.append("<").append(tag).append(" ");
-        for( Map.Entry<String, String> entry : atts.entrySet()) {
+        for (Map.Entry<String, String> entry : atts.entrySet()) {
             String adjustedValue = adjustRelativePath(entry.getKey(), entry.getValue(), themeName);
             sb.append(entry.getKey()).append("=\"").append(adjustedValue).append("\" ");
         }
-        if( body != null && body.length()>0 ) {
+        if (body != null && body.length() > 0) {
             sb.append(">").append(body).append("</").append(tag).append(">");
         } else {
             sb.append("/>");
@@ -97,18 +94,18 @@ public class WebResource {
 
     /**
      * TODO: make use theme, or something...
-     * 
-     * If the attribute name is src or href, checks the value to see if
-     * its relative, and if so return an absolute path, assuming webresource
-     * root is /templates
-     * 
+     *
+     * If the attribute name is src or href, checks the value to see if its
+     * relative, and if so return an absolute path, assuming webresource root is
+     * /templates
+     *
      * @param value
-     * @return 
+     * @return
      */
     private String adjustRelativePath(String name, String value, String themeName) {
-        if( name.equals("href") || name.equals("src")) {
-            if( value != null && value.length() > 0 ) {
-                if( !value.startsWith("/") && !value.startsWith("http")) {
+        if (name.equals("href") || name.equals("src")) {
+            if (value != null && value.length() > 0) {
+                if (!value.startsWith("/") && !value.startsWith("http")) {
                     return evaluateRelativePath(value, themeName);
                 }
             }
@@ -119,7 +116,7 @@ public class WebResource {
     private String evaluateRelativePath(String value, String themeName) {
         Path relative = Path.path(value);
         Path p = webPath;
-        for( String relPart : relative.getParts()) {
+        for (String relPart : relative.getParts()) {
             switch (relPart) {
                 case "..":
                     p = p.getParent();
@@ -129,10 +126,15 @@ public class WebResource {
                 default:
                     // we want to transform hard coded theme references to the configured theme
                     // so if we have eg "../themes/yellow/style.css", but configured theme is "blue", then need to transform to -> "/templates/themes/blue/style.css"
-                    if( p.getName().equals("themes")) {
-                        p = p.child(themeName); 
+                    if (p == null || p.getName() == null) {
+                        // invalid path
+                        return "";
                     } else {
-                        p = p.child(relPart);
+                        if (p.getName().equals("themes")) {
+                            p = p.child(themeName);
+                        } else {
+                            p = p.child(relPart);
+                        }
                     }
                     break;
             }

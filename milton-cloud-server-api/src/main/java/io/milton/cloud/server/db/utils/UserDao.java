@@ -39,9 +39,38 @@ public class UserDao {
         }
     }
 
+    /**
+     * Look for the given user profile in the given organisation
+     * 
+     * @param name
+     * @param organisation
+     * @param session
+     * @return 
+     */
     public Profile getProfile(String name, Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.add(Expression.and(Expression.eq("organisation", organisation), Expression.eq("name", name)));
         return (Profile)crit.uniqueResult();        
     }
+    
+    /**
+     * Look for the given profile in the given organisation or any of its ancestors
+     * 
+     * @param name
+     * @param organisation
+     * @param session
+     * @return 
+     */
+    public Profile findProfile(String name, Organisation organisation, Session session) {
+        while( organisation != null ) {
+            Profile p = getProfile(name, organisation, session);
+            if( p != null ) {
+                return p;
+            }
+            organisation = organisation.getOrganisation();
+        }
+        return null;
+    }
+    
+    
 }
