@@ -16,14 +16,20 @@ package io.milton.cloud.server.web;
 
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.webdav.PropertySourcePatchSetter;
+import java.util.List;
 
 /**
  * Represents a resource which can have parameterised
+ * 
+ * Must implement CommitableResource so that changes are saved after proppatch
  *
  * @author brad
  */
-public interface ParameterisedResource extends CommonResource{
+public interface ParameterisedResource extends CommonResource, PropertySourcePatchSetter.CommitableResource{
     String getParam(String name) throws NotAuthorizedException, BadRequestException;
     
     void setParam(String name, String value) throws NotAuthorizedException, BadRequestException;
+    
+    List<String> getParamNames() throws NotAuthorizedException, BadRequestException;
 }

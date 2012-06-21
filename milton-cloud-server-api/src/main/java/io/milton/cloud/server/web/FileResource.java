@@ -14,13 +14,19 @@ import org.slf4j.LoggerFactory;
 import io.milton.common.ContentTypeUtils;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
+import io.milton.http.Response.Status;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.http.values.ValueAndType;
+import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.resource.ReplaceableResource;
 import io.milton.vfs.content.ContentSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.*;
+import java.util.List;
+import javax.xml.namespace.QName;
 
 /**
  *
@@ -110,11 +116,34 @@ public class FileResource extends AbstractContentResource implements Replaceable
         return htmlPage;                
     }
     
+    @Override
     public String getParam(String name) {
         return getHtml().getParam(name);
     }
     
+    @Override
     public void setParam(String name, String value) {    
         getHtml().setParam(name, value);
+    }
+
+    @Override
+    public List<String> getParamNames() {
+        return getHtml().getParamNames();
+    }
+
+    @Override
+    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        services.getTemplateParser().update(htmlPage, bout);
+        byte[] arr = bout.toByteArray();
+        ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+        
+        System.out.println("new content: " + bout.toString());
+        
+        try {
+            replaceContent(bin, (long) arr.length);
+        } catch (ConflictException ex) {
+            throw new BadRequestException(this, "Exception: " + ex);
+        }
     }
 }

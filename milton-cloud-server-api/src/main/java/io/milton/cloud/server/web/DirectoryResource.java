@@ -3,10 +3,14 @@ package io.milton.cloud.server.web;
 import io.milton.vfs.data.HashCalc;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
+import io.milton.http.Response.Status;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.http.values.ValueAndType;
+import io.milton.http.webdav.PropFindResponse.NameAndError;
+import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;
@@ -20,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -29,6 +34,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
+@BeanPropertyResource(value="milton")
 public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
@@ -185,6 +191,16 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         }
     }
     
+    public void setTitle(String s)  throws NotAuthorizedException, BadRequestException {
+        RenderFileResource r = getIndex();
+        if( r != null ) {
+            r.setTitle(s);
+        } else {
+            throw new RuntimeException("no index page");
+        }        
+    }
+    
+    
     @Override
     public String getParam(String name) throws NotAuthorizedException, BadRequestException {
         RenderFileResource html = getIndex();
@@ -203,5 +219,24 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             throw new RuntimeException("not done yet");
         }
         html.setParam(name, value);
-    }    
+    }
+
+    @Override
+    public List<String> getParamNames()  throws NotAuthorizedException, BadRequestException {
+        RenderFileResource html = getIndex();
+        if( html == null ) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return html.getParamNames();
+        }
+
+    }
+
+    @Override
+    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws NotAuthorizedException, BadRequestException {
+        RenderFileResource html = getIndex();
+        if( html != null ) {
+            html.doCommit(knownProps, errorProps);
+        }
+    }
 }

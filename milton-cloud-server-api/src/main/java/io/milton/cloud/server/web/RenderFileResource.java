@@ -30,15 +30,17 @@ import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
+import io.milton.http.Response.Status;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.http.values.ValueAndType;
+import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.resource.*;
-import io.milton.vfs.db.utils.SessionManager;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import java.util.logging.Level;
+import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +68,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processform: " + getName());
-        Session session = SessionManager.session();
 
         // First ensure existing content is parsed
         checkParse();
@@ -83,10 +84,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         services.getTemplateParser().update(this, bout);
-
-        System.out.println("new html:");
-        System.out.println(bout.toString());
-
         byte[] arr = bout.toByteArray();
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
         fileResource.replaceContent(bin, (long) arr.length);
@@ -266,6 +263,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     
     @Override
     public void setParam(String name, String value) {
+        System.out.println("setParam: " + getName() + " - " + name + " -> " + value);
         checkParse();
         WebResource wr = param(name);
         if(wr == null ) {
@@ -291,5 +289,26 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             }
         }
         return null;
+    }
+
+    @Override
+    public List<String> getParamNames() {
+        List<String> names = new ArrayList<>();
+        for( WebResource wr : this.webResources ) {
+            if( wr.getTag().equals("script")) {
+                String type = wr.getAtts().get("type");
+                if( "data/parameter".equals(type) ) {
+                    String paramTitle = wr.getAtts().get("title");
+                    names.add(paramTitle);
+                }
+            }
+        }
+        return names;
+    }
+
+    @Override
+    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
+        fileResource.doCommit(knownProps, errorProps);
+
     }
 }
