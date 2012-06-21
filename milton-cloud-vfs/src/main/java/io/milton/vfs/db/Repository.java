@@ -26,6 +26,7 @@ public class Repository implements Serializable {
     private long id;
     private String name; // identifies the resource to webdav
     private String title; // user friendly title
+    private String notes;
     private Date createdDate;
     private BaseEntity baseEntity; // the direct owner of this repository
     private List<Branch> branches;
@@ -69,6 +70,15 @@ public class Repository implements Serializable {
     public void setTitle(String title) {
         this.title = title;
     }
+    
+    @Column
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }    
     
     @Temporal(javax.persistence.TemporalType.DATE)
     @Column(nullable = false)

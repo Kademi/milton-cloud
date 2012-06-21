@@ -22,9 +22,8 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.principal.Principal;
+import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
-import io.milton.vfs.content.ContentSession;
-import io.milton.vfs.data.HashCalc;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
@@ -40,6 +39,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
+@BeanPropertyResource(value="milton")
 public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
@@ -73,6 +73,14 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return children;
     }
 
+    public String getTitle() {
+        return repo.getTitle();
+    }
+    
+    public String getNotes() {
+        return repo.getNotes();
+    }
+    
     @Override
     public String getName() {
         return repo.getName();

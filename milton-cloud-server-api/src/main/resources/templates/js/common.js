@@ -163,17 +163,11 @@ function isNumber(n) {
 
 function ajaxLoadingOn(sel) {
     log('ajax ON', sel);
-    $("#ajaxLoading").dialog({
-        modal: true,
-        width: "400px",
-        resizable: false,
-        dialogClass: "noTitle"
-    });
 }
 
 function ajaxLoadingOff(sel) {
     log('ajax OFF', sel);
-    $("#ajaxLoading").dialog('close');
+
 }
 
 /** Displays a modal with a title and message

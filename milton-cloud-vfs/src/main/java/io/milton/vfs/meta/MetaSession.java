@@ -18,6 +18,8 @@ import io.milton.common.Path;
 import io.milton.vfs.db.MetaItem;
 import java.util.Date;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,6 +27,8 @@ import org.hibernate.Session;
  */
 public class MetaSession {
 
+    private static final Logger log = LoggerFactory.getLogger(MetaSession.class);
+    
     private MetaNode rootNode;
     private Session session;
 
@@ -56,10 +60,13 @@ public class MetaSession {
         private MetaNode parent;
 
         public MetaNode(MetaNode parent, MetaItem treeItem) {
-            if(treeItem == null ) {
+            if (treeItem == null) {
                 throw new IllegalArgumentException("MetaItem cannot be null");
             }
             this.metaItem = treeItem;
+            if( metaItem.getName() == null ) {
+                log.warn("Found meta item with null name");
+            }
             this.parent = parent;
         }
 
@@ -103,7 +110,7 @@ public class MetaSession {
             }
             MetaItem child = childSource.getDirectChild(name, session);
             if (child != null) {
-                return new MetaNode(this, metaItem);
+                return new MetaNode(this, child);
             } else {
                 return null;
             }
@@ -125,7 +132,11 @@ public class MetaSession {
             newChild.setCreatedDate(new Date());
             newChild.setModifiedDate(new Date());
             newChild.setParent(metaItem);
-            session.save(newChild);
+            try {
+                session.save(newChild);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to insert meta item: " + name + "  in parent: " + metaItem.getName(), e);
+            }
             return new MetaNode(this, metaItem);
         }
 

@@ -56,7 +56,7 @@ public class HtmlTemplater implements Templater {
     private final HtmlTemplateParser templateParser;
     private final HtmlTemplateRenderer templateRenderer;
     private final Map<String, TemplateHtmlPage> cachedTemplateMetaData = new HashMap<>();
-    private String defaultTheme = "yellow";
+    private String defaultTheme = "fuse";
     private Path webRoot = Path.path("/"); 
 
     public HtmlTemplater(ApplicationManager applicationManager, Formatter formatter, SpliffySecurityManager securityManager) {
@@ -97,7 +97,11 @@ public class HtmlTemplater implements Templater {
                 theme = defaultTheme;
             }
         } else {
-            throw new RuntimeException("Unknown root folder type: " + rootFolder.getClass());
+            if( rootFolder == null) {
+                throw new RuntimeException("Couldnt find root folder for: "  + aThis.getClass());
+            } else {
+                throw new RuntimeException("Unknown root folder type: " + rootFolder.getClass());
+            }
         }
         if( !templatePath.startsWith("/")) {
             templatePath = "/templates/apps/" + templatePath;

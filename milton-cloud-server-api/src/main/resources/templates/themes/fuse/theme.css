@@ -200,18 +200,20 @@ nav#nav li a {
 .menu li li {
 	background:#FFF;
 	border:solid 1px #dedede;
-	height:12px;
 	border-radius:5px;
 	-webkit-border-radius:5px;
 	-moz-border-border-radius:5px;
 	margin:0 0 3px 0;
-	padding:9px 0 14px 10px;
+	padding: 0 0 0 10px;
 }
 .menu li li a {
 	background:url(images/circle.png) left center no-repeat !important;
 	padding:0 0 0 18px !important;
 	font-weight:bold;
-	color:#2e2e2e
+	color:#2e2e2e;
+    display: block;
+    height: 30px;
+    line-height: 30px;
 }
 .menu li li.MnActive a, .menu li li a:hover { background:url(images/circle-blue.png) left center no-repeat !important }
 .changebackg { background:url(images/arrow-open.png) 177px 15px no-repeat }
@@ -687,5 +689,23 @@ div.CheckBoxWrapper.Checked {
 }
 #manageUser div.Info table.Summary td div.Controller a.ShowDialog {
 	background: url(images/icon_dialogue.png) 50% 50% no-repeat;
+}
+#manageCourse div.Course > ul > li aside a.Move, #manageCourse div.Module > ul > li aside a.Move { 
+    background-image: url(images/icon_move_white.png); cursor: move; 
+}
+#manageCourse div.Course > ul > li aside a.Dialogue, #manageCourse div.Module > ul > li aside a.Dialogue {
+	background-image: url(images/icon_dialogue_white.png);
+	border-left: 1px solid #717171;
+}
+#manageCourse div.Module > ul > li.Splitter {
+	background: #FFF url(images/splitter.png) no-repeat 10px 50%;
+	padding-left: 37px;
+}
+#manageCourse div.Module > ul > li.Active a.Move, #manageCourse div.Module > ul > li.Splitter a.Move { background-image: url(images/icon_move.png); }
+#manageCourse div.Module > ul > li.Active a.Dialogue, #manageCourse div.Module > ul > li.Splitter a.Dialogue {
+	background-image: url(images/icon_dialogue.png);
+	border-color: #d1d1d1 !important;
+}
+
 
 

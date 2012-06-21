@@ -49,6 +49,7 @@ public class BaseEntity implements Serializable {
     private long id;
     private String name;
     private String type;
+    private String notes;
     private Organisation organisation;
     private Date createdDate;
     private Date modifiedDate;
@@ -181,6 +182,17 @@ public class BaseEntity implements Serializable {
     public void setMemberships(List<GroupMembership> memberships) {
         this.memberships = memberships;
     }
+
+    @Column
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+    
+    
 
     /**
      * Give this entity the given priviledge to access the grantedOn entity

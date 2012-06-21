@@ -112,7 +112,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public CommonCollectionResource getParent() {
-        return null;
+        return parent;
     }
 
     @Override

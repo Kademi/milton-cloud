@@ -19,6 +19,8 @@ package io.milton.cloud.server.web;
 import java.util.*;
 import org.apache.log4j.Logger;
 import io.milton.cloud.server.web.templating.ChildrenOfTypeMap;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.Resource;
 
 /**
@@ -270,5 +272,75 @@ public class ResourceList extends ArrayList<CommonResource> {
             }
             return null;
         }
+    }
+
+    public Map<Object, ResourceList> groupByField(final String fieldName) throws NotAuthorizedException, BadRequestException {
+        System.out.println("groupbyfield: " + fieldName);
+        Map<Object, ResourceList> groups = new LinkedHashMap<>();
+        for (CommonResource t : this) {
+            if (t instanceof ParameterisedResource) {
+                ParameterisedResource pr = (ParameterisedResource) t;
+                String key = pr.getParam(fieldName);
+                System.out.println("key: " + key);
+                ResourceList val = groups.get(key);
+                if (val == null) {
+                    val = new ResourceList();
+                    groups.put(key, val);
+                }
+                val.add(t);
+            }
+        }
+        return groups;
+    }
+
+    public ResourceList sortByField(final String fieldName) {
+        ResourceList list = new ResourceList(this);
+        Collections.sort(list, new Comparator<CommonResource>() {
+
+            @Override
+            public int compare(CommonResource o1, CommonResource o2) {
+                String val1 = null;
+                String val2 = null;
+                try {
+                    if (o1 instanceof ParameterisedResource) {
+                        ParameterisedResource p = (ParameterisedResource) o1;
+                        val1 = p.getParam(fieldName);
+                    }
+                    if (o2 instanceof ParameterisedResource) {
+                        ParameterisedResource p = (ParameterisedResource) o2;
+                        val2 = p.getParam(fieldName);
+                    }
+                } catch (NotAuthorizedException | BadRequestException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+                if (val1 == null) {
+                    if (val2 == null) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                } else {
+                    if (val1 instanceof Comparable) {
+                        try {
+                            Comparable c1 = (Comparable) val1;
+                            if (val2 != null) {
+                                return c1.compareTo(val2);
+                            } else {
+                                return 1;
+                            }
+                        } catch (Throwable e) {
+                            log.warn("failed to compare: " + val1 + " - " + val2);
+                            return -1;
+                        }
+                    } else {
+                        return -1;
+                    }
+                }
+
+            }
+        });
+        return list;
     }
 }

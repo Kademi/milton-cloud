@@ -11,6 +11,9 @@ import io.milton.vfs.db.Credential;
 import io.milton.vfs.db.PasswordCredential;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.utils.DbUtils;
+import org.hibernate.criterion.Conjunction;
+import org.hibernate.criterion.Disjunction;
 
 /**
  *
@@ -23,15 +26,30 @@ public class UserDao {
         crit.add(Expression.eq("email", email));
         return (PasswordCredential) crit.uniqueResult();
     }
-    
 
-    public List<Profile> listProfiles(Organisation org, Session sess) {        
+    public List<Profile> listProfilesByAdminOrg(Organisation org, Session sess) {
         Criteria crit = sess.createCriteria(Profile.class);
+        crit.add(Expression.eq("adminOrg", org));
         crit.addOrder(Order.asc("surName"));
         crit.addOrder(Order.asc("firstName"));
         crit.addOrder(Order.asc("email"));
         List list = crit.list();
-        if( list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        } else {
+            List<Profile> users = new ArrayList<>(list);
+            return users;
+        }
+    }
+
+    public List<Profile> listProfiles(Organisation org, Session sess) {
+        Criteria crit = sess.createCriteria(Profile.class);
+        crit.add(Expression.eq("organisation", org));
+        crit.addOrder(Order.asc("surName"));
+        crit.addOrder(Order.asc("firstName"));
+        crit.addOrder(Order.asc("email"));
+        List list = crit.list();
+        if (list == null || list.isEmpty()) {
             return Collections.EMPTY_LIST;
         } else {
             List<Profile> users = new ArrayList<>(list);
@@ -41,36 +59,62 @@ public class UserDao {
 
     /**
      * Look for the given user profile in the given organisation
-     * 
+     *
      * @param name
      * @param organisation
      * @param session
-     * @return 
+     * @return
      */
     public Profile getProfile(String name, Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.add(Expression.and(Expression.eq("organisation", organisation), Expression.eq("name", name)));
-        return (Profile)crit.uniqueResult();        
+        return (Profile) crit.uniqueResult();
     }
-    
+
     /**
-     * Look for the given profile in the given organisation or any of its ancestors
-     * 
+     * Look for the given profile in the given organisation or any of its
+     * ancestors
+     *
      * @param name
      * @param organisation
      * @param session
-     * @return 
+     * @return
      */
     public Profile findProfile(String name, Organisation organisation, Session session) {
-        while( organisation != null ) {
+        while (organisation != null) {
             Profile p = getProfile(name, organisation, session);
-            if( p != null ) {
+            if (p != null) {
                 return p;
             }
             organisation = organisation.getOrganisation();
         }
         return null;
     }
-    
-    
+
+    public List<Profile> search(String q, Organisation org, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        String[] arr = q.split(" ");
+        Conjunction con = Expression.conjunction();
+        con.add(Expression.eq("adminOrg", org));
+        for( String queryPart : arr ) {
+            Disjunction dis = Expression.disjunction();
+            String s = queryPart + "%";
+            dis.add(Expression.ilike("firstName", s));
+            dis.add(Expression.ilike("surName", s));
+            dis.add(Expression.ilike("name", s));
+            dis.add(Expression.ilike("email", s));
+            con.add(dis);
+        }
+        crit.add(con);        
+
+//        crit.add(Expression.ilike("name", q + "%"));
+
+        crit.addOrder(Order.asc("surName"));
+        crit.addOrder(Order.asc("firstName"));
+        crit.addOrder(Order.asc("email"));
+
+        List<Profile> list = DbUtils.toList(crit, Profile.class);
+        System.out.println("user search: " + q + " -> " + list.size());
+        return list;
+    }
 }

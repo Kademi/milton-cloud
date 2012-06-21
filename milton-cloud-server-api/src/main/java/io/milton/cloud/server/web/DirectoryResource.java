@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -31,7 +29,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource {
+public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
     private final DirectoryNode directoryNode;
@@ -73,7 +71,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void save() {
-        System.out.println("DirectoryResource: save...");
         parent.save();
     }
 
@@ -81,7 +78,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        System.out.println("Add file: " + newName + "  to " + getName());
         FileNode newFileNode = directoryNode.addFile(newName);
         FileResource fileResource = new FileResource(newFileNode, this, services);
 
@@ -165,4 +161,47 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             throw new RuntimeException(ex);
         }
     }
+    
+    public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
+        Resource r = child("index.html");
+        if( r == null ) {
+            return null;
+        } else if( r instanceof FileResource) {
+            FileResource fr = (FileResource) r;
+            return fr.getHtml();
+        } else if( r instanceof RenderFileResource ){
+            return (RenderFileResource) r;
+        } else {
+            return null;
+        }
+    }
+    
+    public String getTitle() throws NotAuthorizedException, BadRequestException {
+        RenderFileResource r = getIndex();
+        if( r != null ) {
+            return r.getTitle();
+        } else {
+            return getName();
+        }
+    }
+    
+    @Override
+    public String getParam(String name) throws NotAuthorizedException, BadRequestException {
+        RenderFileResource html = getIndex();
+        if( html == null ) {
+            return null;
+        } else {
+            return html.getParam(name);
+        }
+    }
+    
+    @Override
+    public void setParam(String name, String value) throws NotAuthorizedException, BadRequestException {    
+        RenderFileResource html = getIndex();
+        if( html == null ) {
+            // create a new one
+            throw new RuntimeException("not done yet");
+        }
+        html.setParam(name, value);
+    }    
 }

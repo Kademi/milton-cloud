@@ -4,7 +4,9 @@
         <link href="theme.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="../../js/jquery-1.7.2.min.js">//</script>
         <script type="text/javascript" src="../../js/tinybox-1.2.min.js">//</script>
+        <script type="text/javascript" src="../../js/jquery-ui-1.8.20.custom.min.js">//</script>
         <script type="text/javascript" src="../../js/common.js">//</script>        
+        <script type="text/javascript" src="../../js/file.js">//</script>        
         <script type="text/javascript" src="theme.js">//</script>
     </head>
     <body class="theme">
@@ -34,34 +36,34 @@
                                 <li>
                                     <h4><a href="#" class="Arrow">Your Programs</a></h4>
                                     <ul>
-                                        <li><a href="#">Setup Wizard</a></li>
-                                        <li class="MnActive"><a href="#">Manage Program Structure</a></li>
-                                        <li><a href="#">Manage Module Content</a></li>
+                                        <li><a href="${parentOrg.path}/wizard">Setup Wizard</a></li>
+                                        <li class="MnActive"><a href="${parentOrg.path}/programs/manageCourses">Manage Program Structure</a></li>
+                                        <li><a href="${parentOrg.path}/modules">Manage Module Content</a></li>
                                     </ul>				
                                 </li>
                                 <li><hr/></li>
                                 <li>
                                     <h4><a href="#" class="Arrow">Groups &amp; Users</a></h4>
                                     <ul>
-                                        <li><a href="/manageUsers">Manage Groups &amp; Users</a></li>
-                                        <li><a href="#">Manage Business Units</a></li>
+                                        <li><a href="${parentOrg.path}/users">Manage Groups &amp; Users</a></li>
+                                        <li><a href="${parentOrg.path}/orgs">Manage Business Units</a></li>
                                     </ul>				
                                 </li>
                                 <li><hr/></li>
                                 <li>
                                     <h4><a href="#" class="Arrow">Website Manager</a></h4>
                                     <ul>
-                                        <li><a href="#">Setup your Websites</a></li>
-                                        <li><a href="#">Templates &amp; Themes</a></li>
+                                        <li><a href="${parentOrg.path}/websites">Setup your Websites</a></li>
+                                        <li><a href="${parentOrg.path}/themes">Templates &amp; Themes</a></li>
                                     </ul>				
                                 </li>
                                 <li><hr/></li>
                                 <li>
                                     <h4><a href="#" class="Arrow">Miscellaneous</a></h4>
                                     <ul>
-                                        <li><a href="#">Create &amp; Edit Certificates</a></li>
-                                        <li><a href="#">Manage Rewards</a></li>
-                                        <li><a href="#">File Manager</a></li>
+                                        <li><a href="${parentOrg.path}/certificates">Create &amp; Edit Certificates</a></li>
+                                        <li><a href="${parentOrg.path}/rewards">Manage Rewards</a></li>
+                                        <li><a href="${parentOrg.path}/fileman">File Manager</a></li>
                                     </ul>				
                                 </li>
                             </ul>
@@ -77,7 +79,7 @@
                     </header>
                     <div id="module-Course">
                         <article>
-                            [@body/]
+                            #content
                         </article>
                     </div>
                 </section>

@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.templating.WebResource;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ import io.milton.vfs.db.utils.SessionManager;
  *
  * @author brad
  */
-public class FileResource extends AbstractContentResource implements ReplaceableResource {
+public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     private final FileNode fileNode;
@@ -107,5 +108,13 @@ public class FileResource extends AbstractContentResource implements Replaceable
             htmlPage = new RenderFileResource(services, this);
         }
         return htmlPage;                
+    }
+    
+    public String getParam(String name) {
+        return getHtml().getParam(name);
+    }
+    
+    public void setParam(String name, String value) {    
+        getHtml().setParam(name, value);
     }
 }

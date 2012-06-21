@@ -25,6 +25,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.vfs.db.Profile;
@@ -62,6 +63,11 @@ public class HtmlTemplateRenderer {
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
 
+        OrganisationFolder orgFolder = findParentOrg(page);
+        if( orgFolder != null ) {
+            datamodel.put("parentOrg", orgFolder);
+        }
+        
         PrintWriter pw = new PrintWriter(out);
         pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
         pw.write("<html>\n");
@@ -134,6 +140,17 @@ public class HtmlTemplateRenderer {
     private void writeBodyClasses(PrintWriter pw, List<String> bodyClasses) {
         for (String s : bodyClasses) {
             pw.append(s).append(" ");
+        }
+    }
+
+    private OrganisationFolder findParentOrg(Resource page) {
+        if( page instanceof OrganisationFolder ) {
+            return (OrganisationFolder) page;
+        } else if( page instanceof CommonResource ) {
+            CommonResource cr = (CommonResource) page;
+            return findParentOrg(cr.getParent());
+        } else {
+            return null;
         }
     }
     

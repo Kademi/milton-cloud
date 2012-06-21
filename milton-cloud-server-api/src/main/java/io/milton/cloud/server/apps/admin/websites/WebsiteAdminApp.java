@@ -16,12 +16,13 @@
  */
 package io.milton.cloud.server.apps.admin.websites;
 
+import io.milton.cloud.server.apps.admin.WebsitesAdminPage;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
-import io.milton.cloud.server.apps.admin.users.UserAdminPage;
+import io.milton.cloud.server.apps.admin.UserAdminPage;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.web.RootFolder;

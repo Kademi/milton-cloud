@@ -31,6 +31,7 @@ public class Profile extends BaseEntity {
         //return (Profile) crit.uniqueResult();
     }
             
+    private Organisation adminOrg;
     
     private List<Credential> credentials;
                 
@@ -84,6 +85,27 @@ public class Profile extends BaseEntity {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+    
+    /**
+     * This is a reference to the organisation which owns the profile in an
+     * administrative sense. This will generally be a parent of the direct organisation
+     * and will usually refer to the fuse customer account which owns the profile
+     * 
+     * This is used in filtering users when we don't care about the direct organisation
+     * 
+     * @return 
+     */
+    @ManyToOne(optional=false)
+    public Organisation getAdminOrg() {
+        return adminOrg;
+    }
+
+    public void setAdminOrg(Organisation adminOrg) {
+        this.adminOrg = adminOrg;
+    }
+    
+    
     
     /**
      * Create a GroupMembership linking this profile to the given group. Is immediately saved

@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import java.util.List;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
@@ -50,7 +51,7 @@ public interface CommonResource extends DigestResource{
      * @return 
      */
     Organisation getOrganisation();
-    
+        
     /**
      * Add whatever permissions are defined on this resource for the given user
      * 

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.admin.users;
 
+import io.milton.cloud.server.apps.admin.UserAdminPage;
 import io.milton.cloud.server.web.templating.MenuItem;
 import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;

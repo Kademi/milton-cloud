@@ -529,7 +529,7 @@ function showCreateFolder() {
 
 function createFolder(name) {
     var encodedName = name; //$.URLEncode(name);
-    ajaxLoadingOn();
+//    ajaxLoadingOn();
     $.ajax({
         type: 'POST',
         url: "_DAV/MKCOL",
@@ -538,11 +538,11 @@ function createFolder(name) {
         },
         dataType: "json",
         success: function() {
-            ajaxLoadingOff();
-            window.location = encodedName + "/index.html";
+//            ajaxLoadingOff();
+            //window.location = encodedName + "/index.html";
         },
         error: function() {
-            ajaxLoadingOff();
+//            ajaxLoadingOff();
             alert('There was a problem creating the folder');
         }
     });
@@ -551,17 +551,17 @@ function createFolder(name) {
 
 function ajaxLoadingOn(sel) {
     log('ajax ON', sel);
-    $("#ajaxLoading").dialog({
-        modal: true,
-        width: "400px",
-        resizable: false,
-        dialogClass: "noTitle"
-    });
+//    $("#ajaxLoading").dialog({
+//        modal: true,
+//        width: "400px",
+//        resizable: false,
+//        dialogClass: "noTitle"
+//    });
 }
 
 function ajaxLoadingOff(sel) {
     log('ajax OFF', sel);
-    $("#ajaxLoading").dialog('close');
+    //$("#ajaxLoading").dialog('close');
 }
 function initFolderUpload() {
     var button = $('#filemanUpload');

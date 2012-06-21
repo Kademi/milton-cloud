@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource {
+public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
     private final FileResource fileResource;
@@ -251,5 +251,45 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             return true;
         }
         return fileResource.is(type);
+    }
+    
+    @Override
+    public String getParam(String name) {
+        checkParse();
+        WebResource wr = param(name);
+        if( wr == null ) {
+            return null;
+        } else {
+            return wr.getBody();
+        }
+    }
+    
+    @Override
+    public void setParam(String name, String value) {
+        checkParse();
+        WebResource wr = param(name);
+        if(wr == null ) {
+            wr = new WebResource(Path.root);
+            wr.setTag("script");
+            wr.getAtts().put("type", "data/parameter");
+            wr.getAtts().put("title", name);
+            webResources.add(wr);
+        }
+        wr.setBody(value);
+    }
+    
+    private WebResource param(String name) {
+        for( WebResource wr : this.webResources ) {
+            if( wr.getTag().equals("script")) {
+                String type = wr.getAtts().get("type");
+                if( "data/parameter".equals(type) ) {
+                    String title = wr.getAtts().get("title");
+                    if( name.equals(title)) {
+                        return wr;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

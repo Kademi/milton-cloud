@@ -121,6 +121,9 @@ public class ContentSession {
             this.parent = parent;
             this.dataNode = dataNode;
             this.metaNode = metaNode;
+            if( metaNode == null ) {
+                System.out.println("------ Null metaNode for: " + dataNode.getName() + " --------- ");
+            }
         }
 
         public String getName() {
@@ -134,7 +137,9 @@ public class ContentSession {
 
         public void delete() {
             dataNode.delete();
-            metaNode.delete();
+            if( metaNode != null ) {
+                metaNode.delete();
+            }
             if (parent.children != null) {
                 parent.children.remove(this);
             }

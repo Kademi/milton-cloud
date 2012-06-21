@@ -14,16 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.admin.websites;
+package io.milton.cloud.server.apps.admin;
 
-
-import io.milton.vfs.db.Website;
-import io.milton.vfs.db.Organisation;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.milton.cloud.server.apps.signup.SignupPage;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.db.utils.UserDao;
+import io.milton.cloud.server.web.*;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -35,28 +42,23 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
-import io.milton.resource.Resource;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
  * @author brad
  */
-public class WebsitesAdminPage extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class UserAdminPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(WebsitesAdminPage.class);
+    private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
     
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
+    private JsonResult jsonResult;
+    private List<Profile> searchResults;
 
-    public WebsitesAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
+    public UserAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
         super(services);
         this.organisation = organisation;
         this.parent = parent;
@@ -70,23 +72,24 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     
     
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {                
-        services.getHtmlTemplater().writePage("manageWebsites/websites", this, params, out);
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
+        
+        UserDao userDao = services.getSecurityManager().getUserDao();        
+        RootFolder rootFolder = WebUtils.findRootFolder(this);
+        Organisation org = rootFolder.getOrganisation();
+        String q = params.get("q");
+        if( q != null && q.length() > 0 ) {            
+            searchResults = userDao.search(q, org, SessionManager.session()); // find the given user in this organisation
+        } else {
+            searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
+        }
+        services.getHtmlTemplater().writePage("manageUsers/userAdmin", this, params, out);
     }
 
-    @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return null;
-    }
-            
+    
     @Override
     public boolean isDir() {
-        return true;
+        return false;
     }
 
     @Override
@@ -140,13 +143,35 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
         return null;
     }
 
+    public List<Profile> getSearchResults() {
+        return searchResults;
+    }
+    
     @Override
     public Organisation getOrganisation() {
         return organisation;
     }
     
-    public List<Website> getWebsites() {
-        return organisation.websites();
+    public List<Organisation> getChildOrganisations() {
+        List<Organisation> list = new ArrayList<>();        
+        List<BaseEntity> members = getOrganisation().getMembers();
+        if( members == null || members.isEmpty() ) {
+            return Collections.EMPTY_LIST;
+        }
+        for( BaseEntity be : members ) {
+            if( be instanceof Organisation) {
+                list.add((Organisation)be);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("userAdmin")) {
+            return true;
+        }
+        return super.is(type);
     }
     
     
