@@ -50,6 +50,12 @@ h3 { font-size:15px; }
 h4 { font-size:13px; }
 /*-- END DEFAULT --*/
 ul, li, ol { list-style:none }
+hr {
+	height: 0;
+	border: 0;
+	border-top: solid 1px #dadada;
+	border-bottom: solid 1px #fcfcfc;
+}
 /* End Reset */
 body.theme { background:#efefef url(images/background.jpg) repeat-x; }
 body {
@@ -168,12 +174,7 @@ nav#nav li a {
 	margin:0px;
 	padding:0px
 }
-.menu hr {
-	margin:8px 2px;
-	border-top:solid 1px #dadada;
-	border-bottom:solid 1px #fcfcfc;
-	border-left:0px
-}
+.menu hr { margin:8px 2px; }
 .menu li { padding-bottom: 8px }
 .menu ul li h4 a {
 	display: block;
@@ -251,6 +252,17 @@ nav#nav li a {
 }
 /* ------ MainContent ------ */
 section.MainContent { padding: 20px; }
+section.MainContent > header > .Left { float: left; }
+section.MainContent > header > .Right { float: right; }
+section.MainContent > header:after {
+	clear: both;
+	content: ".";
+	display: block;
+	font-size: 0;
+	height: 0;
+	line-height: 0;
+	visibility: hidden;
+}
 /* ------  I Help-------*/
 #head-Panel .helpIcon {
 	float:right;
@@ -647,6 +659,88 @@ label.FuseChkLabel input[type="checkbox"] {
 label.FuseChkLabel.Disabled input[type="checkbox"] {
 	cursor: default;
 }
+/* Input & Textarea */
+input[type="text"], textarea {
+	border: 1px solid #d0d0d0;
+	padding: 0 10px;
+	height: 30px;
+	line-height: 30px;
+	font-size: 12px;
+	width: 290px;
+	background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+	background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+	background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+	background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+	background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+	background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
+}
+input[type="text"].Small { width: 60px; }
+input[type="text"].DateTime {
+	width: 70px;
+	text-align: center;
+}
+img.DateTimeIcon { margin: 4px 0 0 5px; }
+textarea {
+	width: 490px;
+	height: 170px;
+	overflow: auto;
+	resize: none;
+	line-height: 20px;
+	padding: 5px 10px;
+}
+/* Form details for editing purpose */
+form.Details {
+	padding: 20px;
+	background-color: #F0F0F0;
+	border: 1px solid #CECECE;
+	border-radius: 5px;
+}
+form.Details table { width: 100%; }
+form.Details table th {
+	width: 145px;
+	padding-right: 25px;
+	text-align: left;
+}
+form.Details table th small, form.Details table th a {
+	font-style: italic;
+	font-weight: normal;
+	font-size: 11px;
+	display: block;
+}
+form.Details table th small { margin-top: 5px; }
+form.Details table th a {
+	text-decoration: underline;
+	color: #77c4e8;
+	margin-top: -5px;
+}
+form.Details table td input[type="text"] { float: left; }
+form.Details table tbody td, form.Details table tbody th {
+	padding-top: 8px;
+	font-size: 12px;
+	vertical-align: top;
+}
+form.Details table tbody th { padding-right: 25px; }
+form.Details table tbody td #email {
+	float: left;
+	margin: 0 5px 0 0;
+}
+form.Details table tbody td > label { float: left; }
+form.Details table tbody td select { float: left; }
+form.Details table tfoot td {
+	text-align: right;
+	padding-top: 8px;
+}
+/* Select box */
+select {
+	border-radius: 3px;
+	width: 190px;
+	padding: 5px 3px 5px 6px;
+	border: 1px solid;
+	border-color: #b4b4b4 #e8e8e8 #e8e8e8 #b4b4b4;
+	height: 32px;
+	margin-right: 10px;
+}
+select.Small { width: 80px; }
 /* ClearFix */
 .ClearFix:after {
 	clear: both;
@@ -658,7 +752,7 @@ label.FuseChkLabel.Disabled input[type="checkbox"] {
 	visibility: hidden;
 }
 /* ----- */
-.Hidden { display: none !important; }
+.Hidden { display: none; }
 
 #manageUser > header .Right button.Download { background-image: url(images/icon_download.png); }
 #manageUser > header .Right button.Upload { background-image: url(images/icon_upload.png); }
@@ -706,6 +800,13 @@ div.CheckBoxWrapper.Checked {
 	background-image: url(images/icon_dialogue.png);
 	border-color: #d1d1d1 !important;
 }
-
+#manageModule div.Content div.MainContent article.Quiz { background-image: url(images/icon_quiz.png); }
+#manageModule div.Content div.MainContent article aside a.Edit { background-image: url(images/icon_edit.png); }
+#manageModule div.Content div.MainContent article aside a.Move { background-image: url(images/icon_move.png); }
+#manageModule div.Content div.MainContent article aside a.Dialogue { background-image: url(images/icon_dialogue.png); }
+#manageModule div.Content div.MainContent article aside a.Delete { background-image: url(images/icon_delete.png); }
+#manageModule div.Content div.MainContent article {
+	background: #FFF url(images/icon_document.png) no-repeat 7px 50%;
+}
 
 

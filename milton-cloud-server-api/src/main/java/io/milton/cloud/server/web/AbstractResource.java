@@ -16,6 +16,8 @@ import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.principal.Principal;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.http.values.HrefList;
@@ -104,7 +106,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
      * @return
      */
     @Override
-    public String checkRedirect(Request request) {
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException{
         if (request.getMethod().equals(Request.Method.GET)) {
             if (this instanceof CollectionResource) {
                 if (request.getParams().isEmpty()) { // only do redirect if no request params

@@ -36,12 +36,16 @@ public abstract class AbstractContentResource extends AbstractResource implement
      * freshly created, in which case the given parent is the set
      * @param services
      */
-    public AbstractContentResource(ContentNode contentNode, ContentDirectoryResource parent, Services services) {
-        super(services);
+    public AbstractContentResource(ContentNode contentNode, ContentDirectoryResource parent) {
+        super(parent.getServices());
         this.contentNode = contentNode;
         this.parent = parent;
-
     }
+    
+    public AbstractContentResource(ContentDirectoryResource parent) {
+        super(parent.getServices());
+        this.parent = parent;
+    }    
 
     @Override
     public void moveTo(CollectionResource rDest, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {

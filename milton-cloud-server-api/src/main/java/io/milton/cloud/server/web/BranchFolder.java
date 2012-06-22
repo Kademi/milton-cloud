@@ -31,15 +31,15 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource {
+public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource, NodeChildUtils.ResourceCreator {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-    private final boolean renderMode;
-    private final CommonCollectionResource parent;
-    private final String name;
-    private final Branch branch;
+    protected final boolean renderMode;
+    protected final CommonCollectionResource parent;
+    protected final String name;
+    protected final Branch branch;
     protected ResourceList children;
-    private Commit commit; // may be null
+    protected Commit commit; // may be null
     protected final ContentSession contentSession;
     /**
      * if set html resources will be rendered with the templater
@@ -72,7 +72,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public ResourceList getChildren() {
         if (children == null) {
-            children = Utils.toResources(this, contentSession.getRootContentNode(), renderMode);
+            children = NodeChildUtils.toResources(this, contentSession.getRootContentNode(), renderMode, this);
         }
         return children;
     }
@@ -94,7 +94,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException {
         ContentSession.DirectoryNode newNode = contentSession.getRootContentNode().addDirectory(newName);
-        DirectoryResource rdr = new DirectoryResource(newNode, this, services, false);
+        DirectoryResource rdr = newDirectoryResource(newNode, this, false);
         onAddedChild(rdr);
         save();
         return rdr;
@@ -106,7 +106,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         Transaction tx = session.beginTransaction();
         DirectoryNode thisNode = contentSession.getRootContentNode();
         ContentSession.FileNode newFileNode = thisNode.addFile(newName);
-        FileResource fileResource = new FileResource(newFileNode, this, services);
+        FileResource fileResource = newFileResource(newFileNode, this, false);
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {
@@ -264,4 +264,14 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public void onRemovedChild(AbstractContentResource aThis) {
         getChildren().remove(aThis);
     }
+    
+    @Override
+    public FileResource newFileResource(ContentSession.FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
+        return new FileResource(dm, parent);
+    }
+
+    @Override
+    public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
+        return new DirectoryResource(dm, parent, renderMode);
+    }    
 }

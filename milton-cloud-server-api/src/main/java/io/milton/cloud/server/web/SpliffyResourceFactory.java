@@ -59,6 +59,9 @@ public class SpliffyResourceFactory implements ResourceFactory, Service {
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
         Path path = Path.path(sPath);
         Resource r = find(host, path);
+        if( r != null ) {
+            System.out.println("Got resource: " + r.getClass());
+        }
         return r;
     }
 

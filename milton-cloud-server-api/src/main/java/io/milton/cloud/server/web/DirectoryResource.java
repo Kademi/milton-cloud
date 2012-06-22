@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.vfs.data.HashCalc;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -34,29 +35,34 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-@BeanPropertyResource(value="milton")
-public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource {
+@BeanPropertyResource(value = "milton")
+public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, ResourceCreator {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
     private final DirectoryNode directoryNode;
     private final boolean renderMode;
     private ResourceList children;
 
-    public DirectoryResource(DirectoryNode directoryNode, ContentDirectoryResource parent, Services services, boolean renderMode) {
-        super(directoryNode, parent, services);
+    public DirectoryResource(DirectoryNode directoryNode, ContentDirectoryResource parent, boolean renderMode) {
+        super(directoryNode, parent);
         this.directoryNode = directoryNode;
         this.renderMode = renderMode;
     }
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        Resource r = services.getApplicationManager().getPage(this, childName);
+        if (r != null) {
+            return r;
+        }        
         return Utils.childOf(getChildren(), childName);
     }
 
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = Utils.toResources(this, directoryNode, renderMode);
+            children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
+            services.getApplicationManager().addBrowseablePages(this, children);
         }
         return children;
     }
@@ -66,7 +72,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         DirectoryNode newNode = directoryNode.addDirectory(newName);
-        DirectoryResource rdr = new DirectoryResource(newNode, this, services, renderMode);
+        DirectoryResource rdr = new DirectoryResource(newNode, this, renderMode);
         onAddedChild(this);
         save();
 
@@ -85,7 +91,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         FileNode newFileNode = directoryNode.addFile(newName);
-        FileResource fileResource = new FileResource(newFileNode, this, services);
+        FileResource fileResource = newFileResource(newFileNode, this, false);
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {
@@ -114,7 +120,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         } else {
             if (type.equals("hashes")) {
                 HashCalc.getInstance().calcHash(directoryNode.getDataNode(), out);
-            } else if( type.equals("hash")) {
+            } else if (type.equals("hash")) {
                 String s = directoryNode.getDataNode().getHash() + "";
                 out.write(s.getBytes());
             }
@@ -167,54 +173,53 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             throw new RuntimeException(ex);
         }
     }
-    
+
     public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
         Resource r = child("index.html");
-        if( r == null ) {
+        if (r == null) {
             return null;
-        } else if( r instanceof FileResource) {
+        } else if (r instanceof FileResource) {
             FileResource fr = (FileResource) r;
             return fr.getHtml();
-        } else if( r instanceof RenderFileResource ){
+        } else if (r instanceof RenderFileResource) {
             return (RenderFileResource) r;
         } else {
             return null;
         }
     }
-    
+
     public String getTitle() throws NotAuthorizedException, BadRequestException {
         RenderFileResource r = getIndex();
-        if( r != null ) {
+        if (r != null) {
             return r.getTitle();
         } else {
             return getName();
         }
     }
-    
-    public void setTitle(String s)  throws NotAuthorizedException, BadRequestException {
+
+    public void setTitle(String s) throws NotAuthorizedException, BadRequestException {
         RenderFileResource r = getIndex();
-        if( r != null ) {
+        if (r != null) {
             r.setTitle(s);
         } else {
             throw new RuntimeException("no index page");
-        }        
+        }
     }
-    
-    
+
     @Override
     public String getParam(String name) throws NotAuthorizedException, BadRequestException {
         RenderFileResource html = getIndex();
-        if( html == null ) {
+        if (html == null) {
             return null;
         } else {
             return html.getParam(name);
         }
     }
-    
+
     @Override
-    public void setParam(String name, String value) throws NotAuthorizedException, BadRequestException {    
+    public void setParam(String name, String value) throws NotAuthorizedException, BadRequestException {
         RenderFileResource html = getIndex();
-        if( html == null ) {
+        if (html == null) {
             // create a new one
             throw new RuntimeException("not done yet");
         }
@@ -222,9 +227,9 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     @Override
-    public List<String> getParamNames()  throws NotAuthorizedException, BadRequestException {
+    public List<String> getParamNames() throws NotAuthorizedException, BadRequestException {
         RenderFileResource html = getIndex();
-        if( html == null ) {
+        if (html == null) {
             return Collections.EMPTY_LIST;
         } else {
             return html.getParamNames();
@@ -235,8 +240,18 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws NotAuthorizedException, BadRequestException {
         RenderFileResource html = getIndex();
-        if( html != null ) {
+        if (html != null) {
             html.doCommit(knownProps, errorProps);
         }
+    }
+
+    @Override
+    public FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
+        return new FileResource(dm, parent);
+    }
+
+    @Override
+    public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
+        return new DirectoryResource(directoryNode, parent, renderMode);
     }
 }

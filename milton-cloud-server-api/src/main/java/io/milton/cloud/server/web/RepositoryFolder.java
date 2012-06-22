@@ -43,10 +43,10 @@ import org.hibernate.Transaction;
 public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-    private final boolean renderMode;
-    private final CommonCollectionResource parent;
-    private final Repository repo;
-    private ResourceList children;
+    protected final boolean renderMode;
+    protected final CommonCollectionResource parent;
+    protected final Repository repo;
+    protected ResourceList children;
     
 
     public RepositoryFolder(CommonCollectionResource parent, Repository r, boolean renderMode) {

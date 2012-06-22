@@ -39,10 +39,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
     private final FileNode fileNode;
     private RenderFileResource htmlPage; // for parsing html pages
 
-    public FileResource(FileNode fileNode, ContentDirectoryResource parent, Services services) {
-        super(fileNode, parent, services);
+    public FileResource(FileNode fileNode, ContentDirectoryResource parent) {
+        super(fileNode, parent);
         this.fileNode = fileNode;
-        System.out.println("loaed file: " + getName() + " with hash: " + fileNode.getHash());
     }
 
     @Override
@@ -63,22 +62,32 @@ public class FileResource extends AbstractContentResource implements Replaceable
             }
 
         } else {
-            log.info("replaceContent: set content");
-            try {
-                // parse data and persist to stores
-                fileNode.setContent(in);
-            } catch (IOException ex) {
-                throw new BadRequestException("exception", ex);
-            }
+            setContent(in);
         }
         parent.save();
         tx.commit();
     }
 
+    /**
+     * Just updates content, does not save on parent or do any transaction handling
+     * @param in
+     * @throws BadRequestException 
+     */
+    public void setContent(InputStream in) throws BadRequestException {
+        log.info("replaceContent: set content");
+        try {
+            // parse data and persist to stores
+            fileNode.setContent(in);
+        } catch (IOException ex) {
+            throw new BadRequestException("exception", ex);
+        }
+
+    }
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         System.out.println("sendContent: fileresource: " + getName());
-        if( params != null && params.containsKey("type") && "hash".equals(params.get("type") )) {
+        if (params != null && params.containsKey("type") && "hash".equals(params.get("type"))) {
             String s = fileNode.getHash() + "";
             out.write(s.getBytes());
         } else {
@@ -103,26 +112,36 @@ public class FileResource extends AbstractContentResource implements Replaceable
         return fileNode.getContentLength();
     }
 
-
     @Override
     public boolean isDir() {
         return false;
     }
-    
+
     public RenderFileResource getHtml() {
-        if( htmlPage == null ) {
-            htmlPage = new RenderFileResource(services, this);
+        if (htmlPage == null) {
+            if (NodeChildUtils.isHtml(this)) {
+                htmlPage = new RenderFileResource(this);
+            }
         }
-        return htmlPage;                
+        return htmlPage;
     }
-    
+
+    public String getTitle() {
+        RenderFileResource r = getHtml();
+        if (r != null) {
+            return r.getTitle();
+        } else {
+            return getName();
+        }
+    }
+
     @Override
     public String getParam(String name) {
         return getHtml().getParam(name);
     }
-    
+
     @Override
-    public void setParam(String name, String value) {    
+    public void setParam(String name, String value) {
         getHtml().setParam(name, value);
     }
 
@@ -137,9 +156,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
         services.getTemplateParser().update(htmlPage, bout);
         byte[] arr = bout.toByteArray();
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-        
+
         System.out.println("new content: " + bout.toString());
-        
+
         try {
             replaceContent(bin, (long) arr.length);
         } catch (ConflictException ex) {

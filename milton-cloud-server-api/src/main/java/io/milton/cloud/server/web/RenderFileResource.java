@@ -39,7 +39,6 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.resource.*;
-import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +59,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     private String body;
     private JsonResult jsonResult;
 
-    public RenderFileResource(Services services, FileResource fileResource) {
-        super(services);
+    public RenderFileResource(FileResource fileResource) {
+        super(fileResource.getServices());
         this.fileResource = fileResource;
     }
 
