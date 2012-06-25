@@ -40,7 +40,7 @@ public class VelocityContentDirective extends Directive {
         context.put(NAME_CONTENT_TEMPLATE, t);
     }
     
-    public Template getContentTemplate(Context context) {
+    public static Template getContentTemplate(Context context) {
         return (Template) context.get(NAME_CONTENT_TEMPLATE);
     }
 

@@ -79,7 +79,6 @@
             <list>
                 <bean class="io.milton.cloud.server.apps.orgs.OrganisationsApp"/>
                 <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>
-                <bean class="io.milton.cloud.server.apps.admin.dashboard.DashboardAdminApp"/>
                 <bean class="io.milton.cloud.server.apps.admin.users.UserAdminApp"/>
                 <bean class="io.milton.cloud.server.apps.admin.websites.WebsiteAdminApp"/>
                 <bean class="io.milton.cloud.server.apps.login.LoginApp"/>

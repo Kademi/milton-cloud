@@ -32,7 +32,6 @@
                 <value>io.milton.vfs.db.Repository</value>
                 <value>io.milton.vfs.db.DataItem</value>
                 <value>io.milton.vfs.db.ItemHistory</value>
-                <value>io.milton.vfs.db.MetaItem</value>
                 <value>io.milton.vfs.db.BlobHash</value>
                 <value>io.milton.vfs.db.FanoutEntry</value>
                 <value>io.milton.vfs.db.FanoutHash</value>

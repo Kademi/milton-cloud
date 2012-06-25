@@ -6,13 +6,13 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import io.milton.cloud.common.Triplet;
-import io.milton.sync.triplets.JdbcLocalTripletStore;
 
 /**
  *
  * @author brad
  */
 class SyncingDeltaListener implements DeltaListener2 {
+
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SyncingDeltaListener.class);
     private final Syncer syncer;
     private final Archiver archiver;
@@ -26,14 +26,13 @@ class SyncingDeltaListener implements DeltaListener2 {
         this.syncStatusStore = syncStatusStore;
     }
 
-        
     @Override
-    public void onRemoteChange(Triplet remoteTriplet, Triplet localTriplet, Path path) throws IOException {        
-        if( remoteTriplet.isDirectory()) {
+    public void onRemoteChange(Triplet remoteTriplet, Triplet localTriplet, Path path) throws IOException {
+        if (remoteTriplet.isDirectory()) {
             final File localFile = toFile(path);
-            if( !localFile.exists() ) {
+            if (!localFile.exists()) {
                 log.info("new remote directory, create: " + localFile.getAbsolutePath());
-                if( !localFile.mkdirs() ) {
+                if (!localFile.mkdirs()) {
                     throw new IOException("Couldnt create local directory: " + localFile.getAbsolutePath());
                 }
             }
@@ -42,16 +41,16 @@ class SyncingDeltaListener implements DeltaListener2 {
             log.info("new or modified remote file: " + localChild.getAbsolutePath());
             syncer.downloadSync(remoteTriplet.getHash(), path);
             syncStatusStore.setBackedupHash(path, remoteTriplet.getHash());
-        }        
+        }
     }
-    
+
     @Override
     public void onRemoteDelete(Triplet localTriplet, Path path) {
         final File localChild = toFile(path);
-        log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());        
+        log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());
         archiver.archive(localChild);
         syncStatusStore.clearBackedupHash(path);
-    }    
+    }
 
     @Override
     public void onLocalChange(Triplet localTriplet, Path path) throws IOException {
@@ -69,14 +68,14 @@ class SyncingDeltaListener implements DeltaListener2 {
             }
         }
     }
-    
+
     @Override
     public void onLocalDeletion(Path path, Triplet remoteTriplet) {
         final File localChild = toFile(path);
         System.out.println("Delete file from server for locally deleted file: " + localChild.getAbsolutePath());
         syncer.deleteRemote(path);
         syncStatusStore.clearBackedupHash(path);
-    }    
+    }
 
     @Override
     public void onTreeConflict(Triplet remoteTriplet, Triplet localTriplet, Path path) {
@@ -86,13 +85,29 @@ class SyncingDeltaListener implements DeltaListener2 {
     }
 
     @Override
-    public void onFileConflict(Triplet remoteTriplet, Triplet localTriplet, Path path) {
+    public void onFileConflict(Triplet remoteTriplet, Triplet localTriplet, Path path) throws IOException {
         Thread.dumpStack();
         final File localChild = toFile(path);
-        JOptionPane.showMessageDialog(null, "Files are in conflict. There has been a change to a local file, but also a change to the corresponding remote file: " + localChild.getAbsolutePath());
+
+        Object[] options = {"Use my local file",
+            "Use the remote file",
+            "Do nothing"};
+        String message = "Files are in conflict. There has been a change to a local file, but also a change to the corresponding remote file: " + localChild.getAbsolutePath();
+        String title = "File conflict";
+        int n = JOptionPane.showOptionDialog(null,
+                message,
+                title,
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[2]);
+        if( n == JOptionPane.YES_OPTION) {
+            onLocalChange(localTriplet, path);
+        } else if( n == JOptionPane.NO_OPTION) {
+            onRemoteChange(remoteTriplet, localTriplet, path);
+        }
     }
-
-
 
     private File toFile(Path path) {
         File f = root;
@@ -100,5 +115,5 @@ class SyncingDeltaListener implements DeltaListener2 {
             f = new File(f, fname);
         }
         return f;
-    }    
+    }
 }

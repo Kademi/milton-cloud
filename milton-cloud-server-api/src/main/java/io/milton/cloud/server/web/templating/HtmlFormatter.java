@@ -32,10 +32,11 @@ public class HtmlFormatter {
         html.writeText("\n");
         XmlWriter.Element head = html.begin("head");
         head.writeText("\n");
-        head.begin("title").writeText(r.getTitle()).close(true);
+        head.begin(null, "title", false).writeText(r.getTitle()).close(true);
         for (WebResource wr : r.getWebResources()) {
             write(writer, wr);
         }
+        writer.newLine();
         head.close(true);
         XmlWriter.Element body = html.begin("body");        
         StringBuilder sb = null;
@@ -55,13 +56,6 @@ public class HtmlFormatter {
     }
 
     private void write(XmlWriter writer, WebResource wr) {
-        Element el = writer.begin(wr.getTag());
-        for (Entry<String, String> att : wr.getAtts().entrySet()) {
-            el.writeAtt(att.getKey(), att.getValue());
-        }
-        if (wr.getBody() != null) {
-            el.writeText(wr.getBody(), false);
-        }
-        el.close(true);
+        writer.writeText(wr.getRawHtml());
     }
 }

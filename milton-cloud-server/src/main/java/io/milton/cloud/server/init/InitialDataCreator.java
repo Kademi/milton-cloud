@@ -1,5 +1,7 @@
-package io.milton.cloud.server.db.utils;
+package io.milton.cloud.server.init;
 
+import io.milton.cloud.server.db.utils.GroupDao;
+import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
@@ -45,35 +47,43 @@ public class InitialDataCreator {
         SessionManager sessionManager = new SessionManager(sessionFactory);
         Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
-        
+
         GroupDao groupDao = new GroupDao();
         Organisation rootOrg = OrganisationDao.getRootOrg(session);
-        Profile admin = checkCreateUser(adminUserName, adminPassword,session, rootOrg);
-        if( rootOrg == null ) {
+        boolean newOrg = false;
+        if (rootOrg == null) {
             System.out.println("Create new organisation");
+            newOrg = true;
             rootOrg = new Organisation();
             rootOrg.setName(rootOrgName);
             rootOrg.setModifiedDate(new Date());
-            rootOrg.setCreatedDate(new Date());            
+            rootOrg.setCreatedDate(new Date());
             session.save(rootOrg);
-            Website spliffyWeb = rootOrg.createWebsite(rootOrgName, rootOrgName, admin, session);
-            
+
             createChildOrg(rootOrg, "Branch1", session);
             createChildOrg(rootOrg, "Branch2", session);
             createChildOrg(rootOrg, "Branch3", session);
+        } else {
+            System.out.println("Root org exists: " + rootOrg.getName());
         }
-        Group administrators = checkCreateGroup(rootOrg, Group.ADMINISTRATORS,groupDao, session);
+
+        Profile admin = checkCreateUser(adminUserName, adminPassword, session, rootOrg);
+        if (newOrg) {
+            Website spliffyWeb = rootOrg.createWebsite("localhost", "fuse", admin, session);
+        }
+
+        Group administrators = checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, session);
         administrators.grant(AccessControlledResource.Priviledge.READ, rootOrg);
         administrators.grant(AccessControlledResource.Priviledge.READ_ACL, rootOrg);
         administrators.grant(AccessControlledResource.Priviledge.WRITE, rootOrg);
         administrators.grant(AccessControlledResource.Priviledge.WRITE_ACL, rootOrg);
-        
-        Group users = checkCreateGroup(rootOrg, Group.USERS,groupDao, session);
-        
-        admin.addToGroup(administrators).addToGroup(users);        
-        checkCreateUser("user1", "password1",session, rootOrg).addToGroup(users);
-        checkCreateUser("user2", "password1",session, rootOrg).addToGroup(users);
-        checkCreateUser("user3", "password1",session, rootOrg).addToGroup(users);
+
+        Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);
+
+        admin.addToGroup(administrators).addToGroup(users);
+        checkCreateUser("user1", "password1", session, rootOrg).addToGroup(users);
+        checkCreateUser("user2", "password1", session, rootOrg).addToGroup(users);
+        checkCreateUser("user3", "password1", session, rootOrg).addToGroup(users);
         tx.commit();
         session.close();
         sessionManager.close();
@@ -81,7 +91,7 @@ public class InitialDataCreator {
 
     private Group checkCreateGroup(Organisation org, String name, GroupDao groupDao, Session session) throws HibernateException {
         Group g = groupDao.findGroup(org, name, session);
-        if( g == null ) {
+        if (g == null) {
             g = new Group();
             g.setName(name);
             g.setOrganisation(org);
@@ -92,26 +102,27 @@ public class InitialDataCreator {
         return g;
     }
 
-    private Profile checkCreateUser(String name,String password, Session session, Organisation org) throws HibernateException {
+    private Profile checkCreateUser(String name, String password, Session session, Organisation org) throws HibernateException {
         Profile t = Profile.find(org, name, session);
         if (t == null) {
             System.out.println("User not found: " + name + " in org: " + org.getId());
             t = new Profile();
             t.setOrganisation(org);
-            t.setName(name);            
+            t.setName(name);
             t.setCreatedDate(new Date());
             t.setModifiedDate(new Date());
             t.setEmail(name + "@spliffy.org");
+            t.setAdminOrg(org);
             session.save(t);
             passwordManager.setPassword(t, password);
             System.out.println("created test user");
-            
+
             Repository r1 = new Repository();
             r1.setBaseEntity(t);
             r1.setCreatedDate(new Date());
-            r1.setName("repo1");            
+            r1.setName("repo1");
             session.save(r1);
-                        
+
             Calendar cal = new Calendar();
             cal.setOwner(t);
             cal.setCreatedDate(new Date());
@@ -119,7 +130,7 @@ public class InitialDataCreator {
             cal.setModifiedDate(new Date());
             cal.setName("cal1");
             session.save(cal);
-            
+
 //            CalEvent e =new CalEvent();
 //            e.setCalendar(cal);
 //            e.setCreatedDate(new Date());
@@ -140,7 +151,7 @@ public class InitialDataCreator {
             addressBook.setModifiedDate(new Date());
             addressBook.setDescription("Auto generated");
             session.save(addressBook);
-            
+
             Contact c = new Contact();
             c.setName("contact1");
             c.setAddressBook(addressBook);

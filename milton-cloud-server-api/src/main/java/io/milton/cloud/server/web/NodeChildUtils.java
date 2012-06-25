@@ -67,7 +67,6 @@ public class NodeChildUtils {
         ResourceList list = new ResourceList();
         for (DataNode n : dir ) {
             String name = n.getName();
-            System.out.println("adding: " + name);
             CommonResource r = toResource(parent, n, renderMode, resourceCreator);
             list.add(r);
         }

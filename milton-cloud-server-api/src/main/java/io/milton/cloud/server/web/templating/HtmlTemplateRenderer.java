@@ -97,8 +97,15 @@ public class HtmlTemplateRenderer {
         pw.flush();
         // do theme body (then content body)
 
+        if( VelocityContentDirective.getContentTemplate(datamodel) != null  ) {
+            log.error("recurisve content invoication");
+            Thread.dumpStack();            
+            throw new RuntimeException("recursive contetn invocation");
+        }
+        
         VelocityContentDirective.setContentTemplate(contentTemplate, datamodel);
         themeTemplate.merge(datamodel, pw);
+        VelocityContentDirective.setContentTemplate(null, datamodel);
 
         pw.write("</body>\n");
         pw.write("</html>");

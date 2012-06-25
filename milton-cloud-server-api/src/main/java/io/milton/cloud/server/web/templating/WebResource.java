@@ -91,6 +91,21 @@ public class WebResource {
         }
         return sb.toString();
     }
+    
+    public String getRawHtml() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<").append(tag).append(" ");
+        for( Map.Entry<String, String> entry : atts.entrySet()) {
+            String v = entry.getValue();
+            sb.append(entry.getKey()).append("=\"").append(v).append("\" ");
+        }
+        if( body != null && body.length()>0 ) {
+            sb.append(">").append(body).append("</").append(tag).append(">");
+        } else {
+            sb.append("/>");
+        }
+        return sb.toString();
+    }      
 
     /**
      * TODO: make use theme, or something...
