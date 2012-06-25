@@ -14,12 +14,14 @@
  */
 package io.milton.cloud.server.web;
 
-import io.milton.vfs.content.ContentSession;
-import io.milton.vfs.content.ContentSession.ContentNode;
-import io.milton.vfs.content.ContentSession.DirectoryNode;
-import io.milton.vfs.content.ContentSession.FileNode;
+import io.milton.vfs.data.DataSession.DataNode;
+import io.milton.vfs.data.DataSession.DirectoryNode;
+import io.milton.vfs.data.DataSession.FileNode;
+
 
 /**
+ * Just shove stuff in here that doesnt fit anywhere else. Hopefuly mostly
+ * to do with nodes and children
  *
  * @author brad
  */
@@ -35,12 +37,12 @@ public class NodeChildUtils {
      * @param dm
      * @return
      */
-    public static CommonResource toResource(ContentDirectoryResource parent, ContentNode contentNode, boolean renderMode, ResourceCreator resourceCreator) {
-        if (contentNode instanceof ContentSession.DirectoryNode) {
+    public static CommonResource toResource(ContentDirectoryResource parent, DataNode contentNode, boolean renderMode, ResourceCreator resourceCreator) {
+        if (contentNode instanceof DirectoryNode) {
             DirectoryNode dm = (DirectoryNode) contentNode;
             DirectoryResource rdr = resourceCreator.newDirectoryResource(dm, parent, renderMode);
             return rdr;
-        } else if (contentNode instanceof ContentSession.FileNode) {
+        } else if (contentNode instanceof FileNode) {
             FileNode dm = (FileNode) contentNode;
             FileResource rfr = resourceCreator.newFileResource(dm, parent, renderMode);
             if (renderMode) {
@@ -61,9 +63,11 @@ public class NodeChildUtils {
         return "text/html".equals(ct);
     }
 
-    public static ResourceList toResources(ContentDirectoryResource parent, ContentSession.DirectoryNode dir, boolean renderMode, ResourceCreator resourceCreator) {
+    public static ResourceList toResources(ContentDirectoryResource parent, DirectoryNode dir, boolean renderMode, ResourceCreator resourceCreator) {
         ResourceList list = new ResourceList();
-        for (ContentSession.ContentNode n : dir.getChildren()) {
+        for (DataNode n : dir ) {
+            String name = n.getName();
+            System.out.println("adding: " + name);
             CommonResource r = toResource(parent, n, renderMode, resourceCreator);
             list.add(r);
         }
@@ -76,4 +80,6 @@ public class NodeChildUtils {
 
         DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode);
     }
+    
+    
 }

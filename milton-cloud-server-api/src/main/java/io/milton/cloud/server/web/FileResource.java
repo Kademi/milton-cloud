@@ -1,6 +1,5 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.web.templating.WebResource;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,9 +21,10 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.resource.ReplaceableResource;
-import io.milton.vfs.content.ContentSession.FileNode;
+import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
+import java.util.Date;
 import java.util.List;
 import javax.xml.namespace.QName;
 
@@ -56,7 +56,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             try {
                 long hash = din.readLong();
                 fileNode.setHash(hash);
-                System.out.println("setHash: " + hash + " - on " + getName());
+                updateModDate();
             } catch (IOException ex) {
                 throw new BadRequestException("Couldnt read the new hash", ex);
             }
@@ -78,6 +78,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         try {
             // parse data and persist to stores
             fileNode.setContent(in);
+            updateModDate();
         } catch (IOException ex) {
             throw new BadRequestException("exception", ex);
         }

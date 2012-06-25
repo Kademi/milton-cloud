@@ -1,6 +1,7 @@
 package io.milton.vfs.db;
 
 import java.io.Serializable;
+import java.util.UUID;
 import javax.persistence.*;
 
 /**
@@ -17,10 +18,10 @@ public class ItemHistory implements Serializable {
 
     private long id;
     
-    private MetaItem treeItem; // the treeitem this version relates to
+    private UUID treeItem; // the treeitem meta ID this version relates to
     
     private String name; // the name at the time of this version
-    private MetaItem parentTreeItem; // the parent at the time of the version
+    private UUID parentTreeItem; // the parent at the time of the version
     private String action; // what happened? u=update/create,d=delete,m=move
 
     /**
@@ -28,12 +29,12 @@ public class ItemHistory implements Serializable {
      * 
      * @return 
      */
-    @ManyToOne(optional=false)
-    public MetaItem getTreeItem() {
+    @Column(nullable=false)
+    public UUID getTreeItem() {
         return treeItem;
     }
 
-    public void setTreeItem(MetaItem treeItem) {
+    public void setTreeItem(UUID treeItem) {
         this.treeItem = treeItem;
     }
 
@@ -59,12 +60,12 @@ public class ItemHistory implements Serializable {
      * 
      * @return the hash
      */
-    @ManyToOne(optional = false)
-    public MetaItem getParentTreeItem() {
+    @Column(nullable=false)
+    public UUID getParentTreeItem() {
         return parentTreeItem;
     }
 
-    public void setParentTreeItem(MetaItem parentTreeItem) {
+    public void setParentTreeItem(UUID parentTreeItem) {
         this.parentTreeItem = parentTreeItem;
     }
 

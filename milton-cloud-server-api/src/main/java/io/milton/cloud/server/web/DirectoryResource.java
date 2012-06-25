@@ -16,8 +16,8 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.content.ContentSession.DirectoryNode;
-import io.milton.vfs.content.ContentSession.FileNode;
+import io.milton.vfs.data.DataSession.DirectoryNode;
+import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 
 import java.io.DataInputStream;
@@ -62,7 +62,9 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
+            System.out.println("DirectoryResource.getChildren: " + getName() + " - " + children.size());
             services.getApplicationManager().addBrowseablePages(this, children);
+            System.out.println("DirectoryResource.getChildren: " + getName() + " - " + children.size());
         }
         return children;
     }
@@ -73,6 +75,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Transaction tx = session.beginTransaction();
         DirectoryNode newNode = directoryNode.addDirectory(newName);
         DirectoryResource rdr = new DirectoryResource(newNode, this, renderMode);
+        rdr.updateModDate(); 
         onAddedChild(this);
         save();
 
@@ -99,6 +102,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             DataInputStream din = new DataInputStream(inputStream);
             long newHash = din.readLong();
             newFileNode.setHash(newHash);
+            fileResource.updateModDate();
         } else {
             log.info("createNew: set content");
             // parse data and persist to stores
@@ -119,9 +123,9 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             getTemplater().writePage("directoryIndex", this, params, out);
         } else {
             if (type.equals("hashes")) {
-                HashCalc.getInstance().calcHash(directoryNode.getDataNode(), out);
+                HashCalc.getInstance().calcHash(directoryNode, out);
             } else if (type.equals("hash")) {
-                String s = directoryNode.getDataNode().getHash() + "";
+                String s = directoryNode.getHash() + "";
                 out.write(s.getBytes());
             }
         }
@@ -252,6 +256,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
-        return new DirectoryResource(directoryNode, parent, renderMode);
+        return new DirectoryResource(dm, parent, renderMode);
     }
 }

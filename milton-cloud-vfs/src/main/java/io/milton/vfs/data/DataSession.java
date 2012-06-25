@@ -14,11 +14,19 @@
  */
 package io.milton.vfs.data;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.DataItem;
+import io.milton.vfs.db.Profile;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
+import org.hashsplit4j.api.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
@@ -35,19 +43,31 @@ import org.hibernate.criterion.Expression;
  */
 public class DataSession {
 
-    private DataNode rootDataNode;
+    private DirectoryNode rootDataNode;
     private final Session session;
-    private HashCalc hashCalc = HashCalc.getInstance();
+    private final HashStore hashStore;
+    private final BlobStore blobStore;
+    private final HashCalc hashCalc = HashCalc.getInstance();
+    private final CurrentDateService currentDateService;
+    private final Branch branch;
 
-    public DataSession(long hash, Session session) {
+    public DataSession(Branch branch, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService) {
+        this.blobStore = blobStore;
+        this.hashStore = hashStore;
         this.session = session;
-        rootDataNode = new DataNode(null, null, "d", hash);        
+        this.branch = branch;
+        this.currentDateService = currentDateService;
+        Commit c = branch.latestVersion(session);
+        long hash = 0;
+        if (c != null) {
+            hash = c.getItemHash();
+        }
+        rootDataNode = new DirectoryNode(null, null, hash);
     }
 
-    public DataNode getRootDataNode() {
+    public DirectoryNode getRootDataNode() {
         return rootDataNode;
     }
-    
 
     public DataNode find(Path path) {
         if (path.isRoot()) {
@@ -56,8 +76,11 @@ public class DataSession {
             DataNode parent = find(path.getParent());
             if (parent == null) {
                 return null;
+            } else if (parent instanceof DirectoryNode) {
+                DirectoryNode dirNode = (DirectoryNode) parent;
+                return dirNode.get(path.getName());
             } else {
-                return parent.get(path.getName());
+                return null;
             }
         }
     }
@@ -77,14 +100,21 @@ public class DataSession {
      *
      * @return
      */
-    public long save() {
+    public long save(Profile currentUser) {
         recalcHashes(rootDataNode);
 
         // persist stuff
         saveDir(rootDataNode);
+        long newHash = rootDataNode.hash;
 
-        //DirectMeta meta = (DirectMeta) rootVfsItem.getMeta();
-        //return Arrays.asList(meta.getTreeItem());
+        Commit newCommit = new Commit();
+        newCommit.setCreatedDate(currentDateService.getNow());
+        newCommit.setEditor(currentUser);
+        newCommit.setItemHash(newHash);
+        session.save(newCommit);
+        branch.setHead(newCommit);
+        session.save(branch);
+
         return rootDataNode.hash;
     }
 
@@ -93,25 +123,25 @@ public class DataSession {
             return; // not dirty, which means no children are dirty
         }
         // only directories have derived hashes
-        if (!item.getType().equals("d")) {
-            return;
+        if (item instanceof DirectoryNode) {
+            DirectoryNode dirNode = (DirectoryNode) item;
+            for (DataNode child : dirNode) {
+                recalcHashes(child);
+            }
+            long newHash = hashCalc.calcHash(dirNode);
+            item.setHash(newHash);
         }
-        for (DataNode child : item) {
-            recalcHashes(child);
-        }
-        long newHash = hashCalc.calcHash(item);
-        item.setHash(newHash);
     }
 
-    private void saveDir(DataNode item) {
+    private void saveDir(DirectoryNode item) {
         if (item.dirty == null) {
             return; // not dirty, which means no children are dirty
         }
         // the directory list to save might already be saved, in which case
         // unique constraints will prevent the insertion, so check first
         List<DataItem> existing = find(item.hash);
-        if( existing != null && !existing.isEmpty()) {
-            return ; // already in db
+        if (existing != null && !existing.isEmpty()) {
+            return; // already in db
         }
         for (DataNode child : item) {
             insertMember(item.hash, child);
@@ -125,8 +155,8 @@ public class DataSession {
         newItem.setType(item.getType());
         newItem.setParentHash(parentHash);
         session.save(newItem);
-        if (item.getType().equals("d")) {
-            saveDir(item);
+        if (item instanceof DirectoryNode) {
+            saveDir((DirectoryNode) item);
         }
     }
 
@@ -138,29 +168,27 @@ public class DataSession {
      * An item implements Iterable so its children can be iterated over, and
      * mutating operations must be performed through the DataNode methods.
      */
-    public class DataNode implements Iterable<DataNode>, ITriplet {
+    public abstract class DataNode implements ITriplet {
 
-        private DataNode parent;
-        private String name;
-        private String type;
-        private long hash;
-        private List<DataNode> members;
-        private Boolean dirty;
+        protected DirectoryNode parent;
+        protected String name;
+        protected String type;
+        protected long hash;
+        protected Boolean dirty;
 
-        private DataNode(DataNode parent, String name, String type, long hash) {
+        /**
+         * Copy just creates the same type of item with the same hash
+         * 
+         * @param newDir
+         * @param newName 
+         */
+        public abstract void copy(DirectoryNode newDir, String newName);
+                
+        private DataNode(DirectoryNode parent, String name, String type, long hash) {
             this.parent = parent;
             this.name = name;
             this.type = type;
             this.hash = hash;
-        }
-
-        public DataNode get(String name) {
-            for (DataNode i : getChildren()) {
-                if (i.getName().equals(name)) {
-                    return i;
-                }
-            }
-            return null;
         }
 
         /**
@@ -168,8 +196,8 @@ public class DataSession {
          *
          * @param newParent
          */
-        public void move(DataNode newParent, String name) {
-            DataNode oldParent = this.getParent();
+        public void move(DirectoryNode newParent, String name) {
+            DirectoryNode oldParent = this.getParent();
             if (oldParent != newParent) {
                 this.setParent(newParent);
                 if (oldParent.members != null) {
@@ -180,39 +208,20 @@ public class DataSession {
             if (name.equals(getName())) {
                 setName(name);
             }
-            checkConsistency(this);
-        }
-
-        private List<DataNode> getChildren() {
-            if (members == null) {
-                List<DataItem> list = find(hash);
-                members = new ArrayList<>();
-                for (DataItem i : list) {
-                    DataNode vfsItem = new DataNode(this, i.getName(), i.getType(), i.getItemHash());                    
-                    members.add(vfsItem);
-                }
-            }
-            return members;
-        }
-
-        public DataNode add(String name, long hash, String type) {
-            DataNode item = new DataNode(this, name, type, hash);
-            getChildren().add(item);
-            setDirty();
-            return item;
+            parent.checkConsistency(this);
         }
 
         public void delete() {
             parent.getChildren().remove(this);
-            checkConsistency(parent);
+            parent.checkConsistency(parent);
             setDirty();
         }
 
-        public DataNode getParent() {
+        public DirectoryNode getParent() {
             return parent;
         }
 
-        private void setParent(DataNode parent) {
+        private void setParent(DirectoryNode parent) {
             this.parent = parent;
         }
 
@@ -245,6 +254,73 @@ public class DataSession {
             setDirty();
         }
 
+        protected void setDirty() {
+            if (dirty != null) {
+                return; // already set
+            }
+            dirty = Boolean.TRUE;
+            if (parent != null) {
+                parent.setDirty();
+            }
+        }
+
+    }
+
+    public class DirectoryNode extends DataNode implements Iterable<DataNode> {
+
+        private List<DataNode> members;
+
+        public DirectoryNode(DirectoryNode parent, String name, long hash) {
+            super(parent, name, "d", hash);
+        }
+
+        @Override
+        public void copy(DirectoryNode newDir, String newName) {
+            newDir.addDirectory(newName, this.hash);
+        }
+                
+        private List<DataNode> getChildren() {
+            if (members == null) {
+                List<DataItem> list = find(hash);
+                members = new ArrayList<>();
+                for (DataItem i : list) {
+                    DataNode c;
+                    if (i.getType().equals("d")) {
+                        c = new DirectoryNode(this, i.getName(), i.getItemHash());
+                    } else {
+                        c = new FileNode(this, i.getName(), i.getItemHash());
+                    }
+                    members.add(c);
+                }
+            }
+            return members;
+        }
+
+        public FileNode addFile(String name) {
+            FileNode item = new FileNode(this, name, 0);
+            getChildren().add(item);
+            setDirty();
+            return item;
+        }
+
+        public FileNode addFile(String name, long hash) {
+            FileNode item = new FileNode(this, name, hash);
+            getChildren().add(item);
+            setDirty();
+            return item;
+        }
+
+        public DirectoryNode addDirectory(String name, long hash) {
+            DirectoryNode item = new DirectoryNode(this, name, hash);
+            getChildren().add(item);
+            setDirty();
+            return item;
+        }
+
+        public DirectoryNode addDirectory(String name) {
+            return addDirectory(name, 0);
+        }
+
         public int size() {
             return getChildren().size();
         }
@@ -260,6 +336,15 @@ public class DataSession {
         @Override
         public Iterator<DataNode> iterator() {
             return getChildren().iterator();
+        }
+
+        public DataNode get(String name) {
+            for (DataNode i : getChildren()) {
+                if (i.getName().equals(name)) {
+                    return i;
+                }
+            }
+            return null;
         }
 
         /**
@@ -282,15 +367,49 @@ public class DataSession {
                 }
             }
         }
+    }
 
-        private void setDirty() {
-            if (dirty != null) {
-                return; // already set
+    public class FileNode extends DataNode {
+
+        private Fanout fanout;
+
+        public FileNode(DirectoryNode parent, String name, long hash) {
+            super(parent, name, "f", hash);
+        }
+
+        @Override
+        public void copy(DirectoryNode newDir, String newName) {
+            newDir.addFile(newName, this.hash);
+        }
+        
+        
+
+        public void setContent(InputStream in) throws IOException {
+            long oldhash = getHash();
+            Parser parser = new Parser();
+            long fileHash = parser.parse(in, hashStore, blobStore);
+            setHash(fileHash);
+        }
+
+        private Fanout getFanout() {
+            if (fanout == null) {
+                fanout = hashStore.getFanout(getHash());
+                if (fanout == null) {
+                    throw new RuntimeException("Fanout not found: " + getHash());
+                }
             }
-            dirty = Boolean.TRUE;
-            if (parent != null) {
-                parent.setDirty();
-            }
+            return fanout;
+        }
+
+        public void writeContent(OutputStream out) throws IOException {
+            Combiner combiner = new Combiner();
+            List<Long> fanoutCrcs = getFanout().getHashes();
+            combiner.combine(fanoutCrcs, hashStore, blobStore, out);
+            out.flush();
+        }
+
+        public long getContentLength() {
+            return getFanout().getActualContentLength();
         }
     }
 }

@@ -14,8 +14,9 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
-import io.milton.vfs.content.ContentSession;
-import io.milton.vfs.content.ContentSession.DirectoryNode;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.data.DataSession.DirectoryNode;
+import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
@@ -40,12 +41,13 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     protected final Branch branch;
     protected ResourceList children;
     protected Commit commit; // may be null
-    protected final ContentSession contentSession;
+    protected final DataSession dataSession;
     /**
      * if set html resources will be rendered with the templater
      */
     private String theme;
     private JsonResult jsonResult; // set after completing a POST
+    protected NodeMeta nodeMeta;
 
     public BranchFolder(String name, CommonCollectionResource parent, Branch branch, boolean renderMode) {
         super(parent.getServices());
@@ -54,14 +56,14 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         this.parent = parent;
         this.branch = branch;
         this.commit = branch.getHead();
-        this.contentSession = new ContentSession(SessionManager.session(), branch, getServices().getCurrentDateService(), getServices().getHashStore(), getServices().getBlobStore());
+        this.dataSession = new DataSession(branch, SessionManager.session(), getServices().getHashStore(), getServices().getBlobStore(), getServices().getCurrentDateService());
     }
 
     @Override
     public void save() {
         System.out.println("BranchFolder: save session");
         UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
-        contentSession.save(currentUser.getThisUser());
+        dataSession.save(currentUser.getThisUser());
     }
 
     @Override
@@ -72,7 +74,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public ResourceList getChildren() {
         if (children == null) {
-            children = NodeChildUtils.toResources(this, contentSession.getRootContentNode(), renderMode, this);
+            children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
         }
         return children;
     }
@@ -93,7 +95,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException {
-        ContentSession.DirectoryNode newNode = contentSession.getRootContentNode().addDirectory(newName);
+        DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
         DirectoryResource rdr = newDirectoryResource(newNode, this, false);
         onAddedChild(rdr);
         save();
@@ -104,8 +106,8 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        DirectoryNode thisNode = contentSession.getRootContentNode();
-        ContentSession.FileNode newFileNode = thisNode.addFile(newName);
+        DirectoryNode thisNode = dataSession.getRootDataNode();
+        FileNode newFileNode = thisNode.addFile(newName);
         FileResource fileResource = newFileResource(newFileNode, this, false);
 
         String ct = HttpManager.request().getContentTypeHeader();
@@ -129,12 +131,24 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public Date getCreateDate() {
-        return contentSession.getRootContentNode().getCreatedDate();
+        return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return contentSession.getRootContentNode().getModifedDate();
+        return loadNodeMeta().getModDate();
+    }
+    
+    private NodeMeta loadNodeMeta() {
+        if( nodeMeta == null ) {
+            try {
+                nodeMeta = NodeMeta.loadForNode(getDirectoryNode());
+            } catch (IOException ex) {
+                log.error("Couldnt load meta", ex);
+                nodeMeta = new NodeMeta(null, null, null);
+            }
+        }
+        return nodeMeta;
     }
 
     @Override
@@ -152,10 +166,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             log.trace("sendContent: " + type);
             switch (type) {
                 case "hashes":
-                    HashCalc.getInstance().calcHash(contentSession.getRootContentNode().getDataNode(), out);
+                    HashCalc.getInstance().calcHash(dataSession.getRootDataNode(), out);
                     break;
                 case "hash":
-                    String s = contentSession.getRootContentNode().getDataNode().getHash() + "";
+                    String s = dataSession.getRootDataNode().getHash() + "";
                     out.write(s.getBytes());                    
                     break;
             }
@@ -252,7 +266,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public DirectoryNode getDirectoryNode() {
-        return contentSession.getRootContentNode();
+        return dataSession.getRootDataNode();
     }
 
     @Override
@@ -266,7 +280,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
     
     @Override
-    public FileResource newFileResource(ContentSession.FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
+    public FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
         return new FileResource(dm, parent);
     }
 

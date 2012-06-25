@@ -66,10 +66,8 @@ public class ParameterisedResourcePropertySource implements PropertySource {
 
     @Override
     public PropertyMetaData getPropertyMetaData(QName name, Resource r) {
-        System.out.println("getPropertyMetaData: " + name);
         if (nsUri.equals(name.getNamespaceURI())) {
             if (r instanceof ParameterisedResource) {
-                System.out.println(" --- yes");
                 return new PropertyMetaData(PropertyAccessibility.WRITABLE, String.class);
             }
         }

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web.templating;
 
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.resource.Resource;
 import java.io.*;
 import java.net.URL;
@@ -28,6 +29,7 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.cloud.server.web.WebUtils;
 
 /**
  * Templater for flat text files, such as css. Will locate templates in either
@@ -70,7 +72,9 @@ public class TextTemplater implements Templater {
             templatePath = "/templates/apps/" + templatePath;
         }        
         Template template = engine.getTemplate(templatePath);
+        RootFolder rootFolder = WebUtils.findRootFolder(aThis);
         Context datamodel = new VelocityContext();
+        datamodel.put("rootFolder", rootFolder);
         datamodel.put("page", aThis);
         datamodel.put("params", params);
         Profile user = securityManager.getCurrentUser();

@@ -11,9 +11,10 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.*;
-import io.milton.vfs.content.ContentSession;
-import io.milton.vfs.content.ContentSession.ContentNode;
+import io.milton.vfs.data.DataSession.DataNode;
+import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.IOException;
 import java.util.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -24,8 +25,10 @@ import org.hibernate.Transaction;
  */
 public abstract class AbstractContentResource extends AbstractResource implements CommonResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractContentResource.class);
     protected ContentDirectoryResource parent;
-    protected ContentNode contentNode;
+    protected DataNode contentNode;
+    protected NodeMeta nodeMeta;
 
     /**
      *
@@ -36,16 +39,16 @@ public abstract class AbstractContentResource extends AbstractResource implement
      * freshly created, in which case the given parent is the set
      * @param services
      */
-    public AbstractContentResource(ContentNode contentNode, ContentDirectoryResource parent) {
+    public AbstractContentResource(DataNode contentNode, ContentDirectoryResource parent) {
         super(parent.getServices());
         this.contentNode = contentNode;
         this.parent = parent;
     }
-    
+
     public AbstractContentResource(ContentDirectoryResource parent) {
         super(parent.getServices());
         this.parent = parent;
-    }    
+    }
 
     @Override
     public void moveTo(CollectionResource rDest, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
@@ -59,7 +62,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        ContentSession.DirectoryNode newParentNode = newParent.getDirectoryNode();
+        DirectoryNode newParentNode = newParent.getDirectoryNode();
         contentNode.move(newParentNode, newName);
         parent = newParent;
         newParent.onAddedChild(this);
@@ -75,7 +78,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
             Transaction tx = session.beginTransaction();
 
             ContentDirectoryResource newParent = (ContentDirectoryResource) toCollection;
-            ContentSession.DirectoryNode newDir = newParent.getDirectoryNode().addDirectory(newName);
+            DirectoryNode newDir = newParent.getDirectoryNode().addDirectory(newName);
             contentNode.copy(newDir, newName);
             parent.save();
             tx.commit();
@@ -96,12 +99,37 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public Date getCreateDate() {
-        return contentNode.getCreatedDate();
+        return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return contentNode.getModifedDate();
+        return loadNodeMeta().getModDate();
+    }
+
+    protected void updateModDate() {
+        Date newDate = getServices().getCurrentDateService().getNow();
+        loadNodeMeta().setModDate(newDate);
+        if( nodeMeta.getCreatedDate() == null ) {
+            nodeMeta.setCreatedDate(newDate);
+        }
+        try {
+            NodeMeta.saveMeta(contentNode, nodeMeta);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    protected NodeMeta loadNodeMeta() {
+        if (nodeMeta == null) {
+            try {
+                nodeMeta = NodeMeta.loadForNode(contentNode);
+            } catch (IOException ex) {
+                log.error("Couldnt load meta", ex);
+                nodeMeta = new NodeMeta(null, null, null);
+            }
+        }
+        return nodeMeta;
     }
 
     @Override

@@ -15,7 +15,7 @@
 package io.milton.cloud.server.web;
 
 import io.milton.resource.MakeCollectionableResource;
-import io.milton.vfs.content.ContentSession.DirectoryNode;
+import io.milton.vfs.data.DataSession.DirectoryNode;
 
 /**
  * Implemented by content resources, which dont save themselves, but delegate

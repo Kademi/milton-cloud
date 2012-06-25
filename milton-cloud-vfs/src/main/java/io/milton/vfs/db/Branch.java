@@ -33,7 +33,6 @@ public class Branch implements Serializable {
     private long id;
     private String name;
     private Commit head;
-    private MetaItem rootMetaItem;
     private Repository repository;
     private Date createdDate;
     private List<Permission> permissions; // can be granted permissions
@@ -47,15 +46,6 @@ public class Branch implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @ManyToOne(optional = false)
-    public MetaItem getRootMetaItem() {
-        return rootMetaItem;
-    }
-
-    public void setRootMetaItem(MetaItem rootMetaItem) {
-        this.rootMetaItem = rootMetaItem;
     }
 
     @ManyToOne(optional = false)

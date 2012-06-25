@@ -167,17 +167,11 @@ public class Repository implements Serializable {
         head.setEditor(user);
         head.setItemHash(0);
         session.save(head);
-        
-        MetaItem rootMetaItem = new MetaItem();
-        rootMetaItem.setCreatedDate(new Date());
-        rootMetaItem.setModifiedDate(new Date());
-        session.save(rootMetaItem);
-        
+                
         Branch b = new Branch();
         b.setName(Branch.TRUNK);
         b.setRepository(this);
         b.setHead(head);
-        b.setRootMetaItem(rootMetaItem);
         session.save(b);    
         
         if( getBranches() == null ) {

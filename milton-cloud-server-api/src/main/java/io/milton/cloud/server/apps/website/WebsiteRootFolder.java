@@ -62,7 +62,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
-        System.out.println("authorise");
         if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
             return getCurrentUser() != null;
         }
@@ -209,7 +208,9 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
         @Override
         public String get(Object key) {
-            return website.getRepository().getAttribute(key.toString());
+            String s = website.getRepository().getAttribute(key.toString());
+            System.out.println("get setting: " + key + " - " + s);
+            return s;
         }
 
         @Override

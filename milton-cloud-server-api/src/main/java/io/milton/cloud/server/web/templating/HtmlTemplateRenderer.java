@@ -48,7 +48,8 @@ public class HtmlTemplateRenderer {
 
     public void renderHtml(RootFolder rootFolder, Resource page, Map<String, String> params, Profile user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, OutputStream out) throws IOException {
         Context datamodel = new VelocityContext();
-        CommonCollectionResource folder = null;
+        datamodel.put("rootFolder", rootFolder);
+        CommonCollectionResource folder;
         if( page instanceof CommonResource) {
             CommonResource cr = (CommonResource) page;
             folder = cr.getParent();

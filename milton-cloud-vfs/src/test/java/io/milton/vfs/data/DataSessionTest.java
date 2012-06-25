@@ -14,9 +14,22 @@
  */
 package io.milton.vfs.data;
 
+import io.milton.cloud.common.MutableCurrentDateService;
+import io.milton.cloud.common.store.FileSystemBlobStore;
 import io.milton.common.Path;
-import io.milton.vfs.data.DataSession.DataNode;
-import java.io.File;
+import io.milton.vfs.content.DbHashStore;
+import io.milton.vfs.data.DataSession.DirectoryNode;
+import io.milton.vfs.data.DataSession.FileNode;
+import io.milton.vfs.db.*;
+import io.milton.vfs.db.utils.SessionManager;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import org.apache.commons.io.FileUtils;
+import org.hashsplit4j.api.BlobStore;
+import org.hashsplit4j.api.HashStore;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -34,6 +47,12 @@ public class DataSessionTest {
     
     SessionFactory sessionFactory;
     Session session;
+    HashStore hashStore;
+    BlobStore blobStore;
+    Organisation org;
+    Profile user;
+    MutableCurrentDateService currentDateService;
+    SessionManager sessionManager;    
     
     @Before
     public void setUp() throws Exception {
@@ -41,9 +60,36 @@ public class DataSessionTest {
         if(db.exists()) {
             db.delete();
         }
+        currentDateService = new MutableCurrentDateService();
         ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("database.xml");
         sessionFactory = (SessionFactory) appContext.getBean("sessionFactory");
         session = sessionFactory.openSession();
+        
+        File blobs = new File("target/blobs");
+        if( blobs.exists()) {
+            FileUtils.deleteDirectory(blobs);
+        }
+        
+        hashStore = new DbHashStore();
+        blobStore = new FileSystemBlobStore(blobs);
+        
+        org = new Organisation();
+        org.setCreatedDate(currentDateService.getNow());
+        org.setModifiedDate(currentDateService.getNow());
+        org.setName("root");
+        session.save(org);
+        
+        user = new Profile();
+        user.setName("testUser");
+        user.setAdminOrg(org);
+        user.setCreatedDate(currentDateService.getNow());
+        user.setModifiedDate(currentDateService.getNow());
+        session.save(user);
+        
+        
+        sessionManager = new SessionManager(sessionFactory);
+        session = sessionManager.open();
+                      
     }
 
     /**
@@ -52,33 +98,34 @@ public class DataSessionTest {
      */
     @Test
     public void testCopy() {
+        Branch b = initRepo();
         Transaction tx = session.beginTransaction();
-        DataSession dataSession = new DataSession(0, session);
-        DataNode root = dataSession.getRootDataNode();
-        DataNode x1 = root.add("x1", 1, "d");
-        x1.add("y1", 123, "f");
-        x1.add("y2", 123, "f");
-        x1.add("y3", 123, "f");
-        long newHash = dataSession.save();
+        DataSession dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        DirectoryNode root = dataSession.getRootDataNode();
+        DirectoryNode x1 = root.addDirectory("x1");
+        x1.addFile("y1", 123);
+        x1.addFile("y2", 123);
+        x1.addFile("y3", 123);
+        long newHash = dataSession.save(user);
         System.out.println("creted new hash: " + newHash);
         tx.commit();        
         session.close();
         
         session = sessionFactory.openSession();
         tx = session.beginTransaction();
-        dataSession = new DataSession(newHash, session);
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
         root = dataSession.getRootDataNode();
-        x1 = dataSession.find(Path.path("/x1"));
+        x1 = (DirectoryNode) dataSession.find(Path.path("/x1"));
         assertEquals(3, x1.size());
-        root.add("x2", x1.getHash(), "d");
-        newHash = dataSession.save();
+        root.addDirectory("x2", x1.getHash());
+        newHash = dataSession.save(user);
         System.out.println("done copy, root hash is now: " + newHash);
         tx.commit();
         session.close();
         
         session = sessionFactory.openSession();
-        dataSession = new DataSession(newHash, session);
-        DataNode x2 = dataSession.find(Path.path("/x2"));
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        DirectoryNode x2 = (DirectoryNode) dataSession.find(Path.path("/x2"));
         assertNotNull(x2);
         assertEquals(3, x2.size());
         session.close();        
@@ -89,44 +136,155 @@ public class DataSessionTest {
     
     @Test
     public void test() {
+        Branch b = initRepo();
+        
         Transaction tx = session.beginTransaction();
-        DataSession dataSession = new DataSession(0, session);
-        DataNode root = dataSession.getRootDataNode();
-        DataNode x1 = root.add("x1", 1, "d");
-        DataNode x2 = root.add("x2", 1, "d");
-        DataNode y = x1.add("y", 123, "f");
-        long newHash = dataSession.save();
+        DataSession dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        DirectoryNode root = dataSession.getRootDataNode();
+        DirectoryNode x1 = root.addDirectory("x1");
+        DirectoryNode x2 = root.addDirectory("x2");
+        FileNode y = x1.addFile("y", 123);
+        long newHash = dataSession.save(user);
         System.out.println("creted new hash: " + newHash);
         tx.commit();        
         session.close();
         
         session = sessionFactory.openSession();
         tx = session.beginTransaction();
-        dataSession = new DataSession(newHash, session);
-        y = dataSession.find(Path.path("/x1/y"));
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x1/y"));
         assertNotNull(y);
-        x2 = dataSession.find(Path.path("/x2"));
+        x2 = (DirectoryNode) dataSession.find(Path.path("/x2"));
         assertNotNull(x2);
         y.move(x2, "y");
-        newHash = dataSession.save();
+        newHash = dataSession.save(user);
         System.out.println("creted new hash: " + newHash);
         tx.commit();        
         session.close();
         
         session = sessionFactory.openSession();
         tx = session.beginTransaction();
-        dataSession = new DataSession(newHash, session);
-        y = dataSession.find(Path.path("/x2/y"));
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x2/y"));
         assertNotNull(y);
         y.delete();
-        newHash = dataSession.save();
+        newHash = dataSession.save(user);
         System.out.println("creted new hash: " + newHash);
         tx.commit();        
         session.close();
         
         session = sessionFactory.openSession();
-        dataSession = new DataSession(newHash, session);
-        y = dataSession.find(Path.path("/x2/y"));
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x2/y"));
         assertNull(y);
     }
+    
+
+    /**
+     * Test of save method, of class ContentSession.
+     */
+    @Test
+    public void test_BasicTransactionalManipulation() {
+        Branch b = initRepo();
+        
+        Transaction tx = session.beginTransaction();
+        DataSession dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        DirectoryNode root = dataSession.getRootDataNode();
+        DirectoryNode x1 = root.addDirectory("x1");
+        DirectoryNode x2 = root.addDirectory("x2");
+        FileNode y = x1.addFile("y");
+        y.setHash(111);
+        dataSession.save(user);
+        tx.commit();        
+        session.close();
+        
+        session = sessionManager.open();
+        tx = session.beginTransaction();
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x1/y"));
+        assertNotNull(y);
+        x2 = (DirectoryNode) dataSession.find(Path.path("/x2"));
+        assertNotNull(x2);
+        y.move(x2, "y");
+        dataSession.save(user);
+        tx.commit();        
+        session.close();        
+
+        session = sessionManager.open();
+        tx = session.beginTransaction();
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x2/y"));
+        assertNotNull(y);
+        y.delete();
+        dataSession.save(user);
+        tx.commit();        
+        session.close();        
+
+        session = sessionManager.open();
+        tx = session.beginTransaction();
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x2/y2"));
+        assertNull(y);
+        session.close();                
+    }
+
+    
+    @Test
+    public void test_SettingGettingContent() throws IOException {
+        Branch b = initRepo();
+        
+        Transaction tx = session.beginTransaction();
+        DataSession dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        DirectoryNode root = dataSession.getRootDataNode();
+        DirectoryNode x1 = root.addDirectory("x1");
+        FileNode y = x1.addFile("y");
+        byte[] buf = new byte[50000];
+        Arrays.fill(buf, (byte)9);
+        InputStream in = new ByteArrayInputStream(buf);
+        y.setContent(in);
+        dataSession.save(user);
+        tx.commit();        
+        session.close();
+        
+        // read it back
+        session = sessionManager.open();
+        dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);
+        y = (FileNode) dataSession.find(Path.path("/x1/y"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        y.writeContent(out);
+        assertEquals(50000, out.size());
+        session.close();           
+    }
+
+    private Branch initRepo() throws HibernateException {
+        
+        Organisation org = new Organisation();
+        org.setName("test org");
+        org.setCreatedDate(new Date());
+        org.setModifiedDate(new Date());
+        session.save(org);
+        
+        Repository r = new Repository();
+        r.setBaseEntity(org);
+        r.setCreatedDate(new Date());
+        r.setName("test");
+        r.setTitle("test repo");
+        r.setBranches(new ArrayList<Branch>());
+        session.save(r);
+                
+        Commit c = new Commit();
+        c.setCreatedDate(new Date());
+        c.setEditor(user);
+        c.setItemHash(0);
+        session.save(c);
+        
+        Branch b = new Branch();
+        b.setRepository(r);
+        b.setName("trunk");
+        b.setCreatedDate(new Date());
+        b.setHead(c);
+        r.getBranches().add(b);
+        session.save(b);
+        return b;
+    }      
 }
