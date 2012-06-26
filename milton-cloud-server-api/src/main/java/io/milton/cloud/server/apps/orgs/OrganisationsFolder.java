@@ -14,11 +14,11 @@
  */
 package io.milton.cloud.server.apps.orgs;
 
-import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -28,11 +28,9 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
-import org.hibernate.Session;
 
 /**
  *
@@ -73,6 +71,10 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        Resource r = services.getApplicationManager().getPage(this, childName);
+        if( r != null ) {
+            return r;
+        }
         return Utils.childOf(getChildren(), childName);
     }
 
@@ -92,8 +94,22 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("home", this, params, out);
+        
     }
+
+    @Override
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
+        String s = super.checkRedirect(request);
+        if( s != null ) {
+            return s;
+        }
+        if( request.getMethod().equals(Method.GET)) {
+            return "manage";
+        }        
+        return null;
+    }
+    
+    
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {

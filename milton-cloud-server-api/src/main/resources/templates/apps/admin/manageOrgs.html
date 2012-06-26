@@ -1,0 +1,14 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="manageGroup.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageGroup.js">//</script>
+    </head>
+    <body class="manageOrgs">
+        <ul>
+        #foreach($org in $folder.children)
+        <li><a href="$org.path">$org.name</a></li>
+        #end
+        </ul>
+    </body>
+</html>

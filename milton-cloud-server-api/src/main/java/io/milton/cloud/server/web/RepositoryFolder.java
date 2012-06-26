@@ -69,6 +69,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
                 BranchFolder bf = new BranchFolder(b.getName(), this, b, renderMode);
                 children.add(bf);
             }
+            services.getApplicationManager().addBrowseablePages(this, children);
         }
         return children;
     }
@@ -80,6 +81,12 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
     public String getNotes() {
         return repo.getNotes();
     }
+
+    public Repository getRepository() {
+        return repo;
+    }
+    
+    
     
     @Override
     public String getName() {

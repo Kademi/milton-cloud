@@ -1,54 +1,48 @@
 /*
- * Copyright (C) 2012 McEvoy Software Ltd
+ * Copyright 2012 McEvoy Software Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package io.milton.cloud.server.apps.admin;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.apps.signup.SignupPage;
-import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
-import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.principal.Principal;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
-public class UserAdminPage extends AbstractResource implements GetableResource, PostableResource {
+public class GroupsAdminPage  extends AbstractResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
     
@@ -56,9 +50,8 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
-    private List<Profile> searchResults;
 
-    public UserAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
+    public GroupsAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
         super(services);
         this.organisation = organisation;
         this.parent = parent;
@@ -73,17 +66,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        
-        UserDao userDao = services.getSecurityManager().getUserDao();        
-        RootFolder rootFolder = WebUtils.findRootFolder(this);
-        Organisation org = rootFolder.getOrganisation();
-        String q = params.get("q");
-        if( q != null && q.length() > 0 ) {            
-            searchResults = userDao.search(q, org, SessionManager.session()); // find the given user in this organisation
-        } else {
-            searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
-        }
-        services.getHtmlTemplater().writePage("admin/userAdmin", this, params, out);
+        services.getHtmlTemplater().writePage("admin/manageGroups", this, params, out);
     }
 
     
@@ -103,7 +86,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     }
 
     @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
+    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
         parent.addPrivs(list, user);
     }
 
@@ -123,7 +106,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     }
 
     @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
+    public Map<Principal, List<AccessControlledResource.Priviledge>> getAccessControlList() {
         return null;
     }
 
@@ -143,9 +126,6 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
         return null;
     }
 
-    public List<Profile> getSearchResults() {
-        return searchResults;
-    }
     
     @Override
     public Organisation getOrganisation() {
@@ -168,7 +148,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
 
     @Override
     public boolean is(String type) {
-        if( type.equals("userAdmin")) {
+        if( type.equals("groupsAdmin")) {
             return true;
         }
         return super.is(type);

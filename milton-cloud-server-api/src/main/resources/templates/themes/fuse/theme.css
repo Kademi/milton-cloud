@@ -216,7 +216,7 @@ nav#nav li a {
     height: 30px;
     line-height: 30px;
 }
-.menu li li.MnActive a, .menu li li a:hover { background:url(images/circle-blue.png) left center no-repeat !important }
+.menu li li a.active, .menu li li a:hover { background:url(images/circle-blue.png) left center no-repeat !important }
 .changebackg { background:url(images/arrow-open.png) 177px 15px no-repeat }
 /*     ---  RHS PANEL RIGHT ---    */
 
@@ -810,3 +810,40 @@ div.CheckBoxWrapper.Checked {
 }
 
 
+#manageGroup div.Group header {
+	padding: 14px 14px 14px 50px;
+	border-radius: 5px 5px 0 0;
+	background: #f0f0f0 url(images/icon_groups.png) no-repeat 14px 50%;
+	height: 20px;
+	font-weight: bold;
+	border-bottom: 1px solid #cecece;
+}
+#manageGroup div.Group header > div {
+	background: url(images/icon_dialogue_2.png) no-repeat 100% 0;
+	padding-right: 8px;
+	float: left;
+	line-height: 20px;
+	height: 20px;
+	position: relative;
+	font-size: 13px;
+	cursor: pointer;
+}
+
+#manageGroup div.Group div.ContentGroup ul li aside a.Edit { background-image: url(images/icon_edit.png); }
+#manageGroup div.Group div.ContentGroup ul li aside a.Delete { background-image: url(images/icon_delete.png); }
+
+#manageWebsite table.Summary td {
+	background: url(images/bg_websites_item.png) no-repeat 5px 50%;
+}
+
+#manageReward .Content header a {
+	background: url(images/icon_sortable.png) no-repeat 100% 50%;
+}
+#manageReward .Content ul li > div {
+	background: url(images/icon_reward_stt.png) no-repeat;
+}
+#manageReward .Content ul li > div > a {
+	background: url(images/icon_dialogue_2.png) 100% 0 no-repeat;
+}
+#manageReward .Content ul li aside a.Edit { background-image: url(images/icon_edit.png); }
+#manageReward .Content ul li aside a.Delete { background-image: url(images/icon_delete.png); }

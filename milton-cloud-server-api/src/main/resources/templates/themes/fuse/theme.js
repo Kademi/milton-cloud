@@ -35,8 +35,9 @@ function initHelp () {
 function initMenuEffects () {	
     //  JS FOR SIDEBAR MENU
     if($('.sidebar ')[0]) {
-        $('.sidebar .menu ul li h4 a').click(function () {
-            submenu = $(this).find('ul');
+        $('.sidebar .menu ul li h4 a').click(function () {            
+            var li = $(this).closest("li");
+            var submenu = $("ul", li);
             changebg = $(this).find('a.Arrow');
             if (submenu.is(':visible')){
                 submenu.slideUp(150);
@@ -52,10 +53,10 @@ function initMenuEffects () {
 
 function initActiveNav() {
     var url = window.location.pathname;
-    //log("initActiveNav",url);
+    log("initActiveNav", url);
     $("a").each(function(i, n) {
         var node = $(n);
-        if( node.attr("href") == url) {
+        if( node.attr("href").startsWith(url) ) {
             node.addClass("active");
         }
     });

@@ -17,6 +17,8 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.CollectionResource;
@@ -43,12 +45,20 @@ public class AdminApp implements Application {
     public Resource getPage(Resource parent, String requestedName) {
         if (parent instanceof OrganisationFolder) {
             CommonCollectionResource p = (CommonCollectionResource) parent;
-            if (requestedName.equals("dashboard")) {
-                return new TemplatedHtmlPage("dashboard", p, p.getServices(), "admin/dashboard");
-            } else if (requestedName.equals("users")) {
-                return new UserAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
-            } else if (requestedName.equals("websites")) {
-                return new WebsitesAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+            switch (requestedName) {
+                case "dashboard":
+                    return new TemplatedHtmlPage("dashboard", p, p.getServices(), "admin/dashboard");
+                case "users":
+                    return new UserAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+                case "groups":
+                    return new GroupsAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+                case "websites":
+                    return new WebsitesAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+            }
+        } else if( parent instanceof OrganisationsFolder) {
+            OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
+            if (requestedName.equals("manage")) {
+                return new OrgsAdminPage(requestedName, orgsFolder.getOrganisation(), orgsFolder, orgsFolder.getServices());
             }
         }
         return null;
@@ -68,5 +78,18 @@ public class AdminApp implements Application {
 
     @Override
     public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
+        if (rootFolder instanceof OrganisationRootFolder) {
+            MenuItem m = new MenuItem();
+            m.setText("Websites");
+            m.setHref("/manageSites/");
+            m.setId("websiteAdmin");
+            list.add(m);
+            
+            m = new MenuItem();
+            m.setText("Manage users");
+            m.setHref("/manageUsers/");
+            m.setId("userAdmin");
+            list.add(m);            
+        }
     }
 }
