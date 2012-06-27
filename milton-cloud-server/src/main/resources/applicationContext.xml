@@ -85,6 +85,8 @@
                 <bean class="io.milton.cloud.server.apps.calendar.CalendarApp"/>
                 <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
                 <bean class="io.milton.cloud.server.apps.signup.SignupApp"/>
+                <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
+                <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
             </list>
         </constructor-arg>
         <property name="appsConfigDir" value="${apps.config.dir}" />

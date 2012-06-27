@@ -73,10 +73,10 @@ public class InitialDataCreator {
         }
 
         Group administrators = checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, session);
-        administrators.grant(AccessControlledResource.Priviledge.READ, rootOrg);
-        administrators.grant(AccessControlledResource.Priviledge.READ_ACL, rootOrg);
-        administrators.grant(AccessControlledResource.Priviledge.WRITE, rootOrg);
-        administrators.grant(AccessControlledResource.Priviledge.WRITE_ACL, rootOrg);
+        administrators.grant(AccessControlledResource.Priviledge.READ, rootOrg, session);
+        administrators.grant(AccessControlledResource.Priviledge.READ_ACL, rootOrg, session);
+        administrators.grant(AccessControlledResource.Priviledge.WRITE, rootOrg, session);
+        administrators.grant(AccessControlledResource.Priviledge.WRITE_ACL, rootOrg, session);
 
         Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);
 
