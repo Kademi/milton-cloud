@@ -40,15 +40,15 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ForumAdminFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource {
+public class ForumTopicAdminFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource {
 
-    private final Forum forum;
+    private final ForumTopic forumTopic;
     private final CommonCollectionResource parent;
     private ResourceList children;
 
-    public ForumAdminFolder(Forum forum, CommonCollectionResource parent) {
+    public ForumTopicAdminFolder(ForumTopic forumTopic, CommonCollectionResource parent) {
         super(parent.getServices());
-        this.forum = forum;
+        this.forumTopic = forumTopic;
         this.parent = parent;
     }
 
@@ -62,37 +62,30 @@ public class ForumAdminFolder extends AbstractCollectionResource implements Prop
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Response.Status, List<PropFindResponse.NameAndError>> errorProps) {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        session.save(forum);
+        session.save(forumTopic);
         tx.commit();
     }
 
     public String getTitle() {
-        return forum.getTitle();
+        return forumTopic.getTitle();
     }
 
     public void setTitle(String t) {
-        forum.setTitle(t);
+        forumTopic.setTitle(t);
     }
 
     public String getNotes() {
-        return forum.getNotes();
+        return forumTopic.getNotes();
     }
 
     public void setNotes(String s) {
-        forum.setNotes(s);
+        forumTopic.setNotes(s);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = new ResourceList();
-            List<ForumTopic> topics = forum.getForumTopics();
-            if( topics != null ) {
-                for( ForumTopic t : topics ) {
-                    ForumTopicAdminFolder ftaf = new ForumTopicAdminFolder(t, this);
-                    children.add(ftaf);
-                }
-            }
+            children = new ResourceList();            
         }
         return children;
     }
@@ -119,7 +112,7 @@ public class ForumAdminFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public String getName() {
-        return forum.getName();
+        return forumTopic.getName();
     }
 
     @Override

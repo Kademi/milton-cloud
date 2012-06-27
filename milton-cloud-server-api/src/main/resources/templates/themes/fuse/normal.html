@@ -17,10 +17,9 @@
                 <nav id="nav">
                     <ul>
                         <li id="logo"><a href="/" title="Fuse Admin">Home</a></li>
-                        <li><a href="#">My Dashboard</a></li>
-                        <li><a href="#" class="navActive">Learning Management</a></li>
-                        <li><a href="#">Talk &amp; Connect</a></li>
-                        <li><a href="#">Reporting</a></li>
+                        #foreach($item in $menu.items)
+                        <li id="$item.id"><a class="$formatter.ifTrue($item.active, 'navActive', '')" href="$item.href">$item.text</a></li>
+                        #end
                     </ul>
                 </nav>
                 <aside>
@@ -33,40 +32,20 @@
                     <div class="sidebar">
                         <div class="menu">
                             <ul>
-                                <li>
-                                    <h4><a href="#" class="Arrow">Your Programs</a></h4>
+                                #foreach($parentItem in $menu.activeItems)
+                                    #foreach($item in $parentItem.items)
+                                <li id="$item.id">
+                                    <h4><a href="$item.href" class="Arrow">$item.text</a></h4>                                    
                                     <ul>
-                                        <li><a href="${parentOrg.path}/wizard">Setup Wizard</a></li>
-                                        <li class="MnActive"><a href="${parentOrg.path}/programs/manageCourses">Manage Program Structure</a></li>
-                                        <li><a href="${parentOrg.path}/programs/manageModules">Manage Module Content</a></li>
+                                        #foreach($subitem in $item.items)
+                                        <li id="$subitem.id"><a class="$formatter.ifTrue($subitem.active, 'active', '')" href="$subitem.href">$subitem.text</a></li>
+                                        #end
                                     </ul>				
                                 </li>
                                 <li><hr/></li>
-                                <li>
-                                    <h4><a href="#" class="Arrow">Groups &amp; Users</a></h4>
-                                    <ul>
-                                        <li><a href="${parentOrg.path}/users">Manage Users</a></li>
-                                        <li><a href="${parentOrg.path}/groups">Manage Groups</a></li>
-                                        <li><a href="${parentOrg.path}/organisations/manage">Manage Business Units</a></li>
-                                    </ul>				
-                                </li>
-                                <li><hr/></li>
-                                <li>
-                                    <h4><a href="#" class="Arrow">Website Manager</a></h4>
-                                    <ul>
-                                        <li><a href="${parentOrg.path}/websites">Setup your Websites</a></li>
-                                        <li><a href="${parentOrg.path}/themes">Templates &amp; Themes</a></li>
-                                    </ul>				
-                                </li>
-                                <li><hr/></li>
-                                <li>
-                                    <h4><a href="#" class="Arrow">Miscellaneous</a></h4>
-                                    <ul>
-                                        <li><a href="${parentOrg.path}/certificates">Create &amp; Edit Certificates</a></li>
-                                        <li><a href="${parentOrg.path}/rewards">Manage Rewards</a></li>
-                                        <li><a href="${parentOrg.path}/fileman">File Manager</a></li>
-                                    </ul>				
-                                </li>
+                                    
+                                    #end
+                                #end
                             </ul>
                         </div>
                     </div>

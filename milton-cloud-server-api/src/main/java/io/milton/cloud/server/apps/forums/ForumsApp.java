@@ -15,15 +15,16 @@
 package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.server.apps.AppConfig;
-import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.RepositoryFolder;
 import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -33,7 +34,7 @@ import java.util.List;
  *
  * @author brad
  */
-public class ForumsApp  implements Application {
+public class ForumsApp implements MenuApplication {
 
     @Override
     public String getInstanceId() {
@@ -46,9 +47,22 @@ public class ForumsApp  implements Application {
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if( parent instanceof ForumsAdminFolder) {
+        if (parent instanceof ForumsAdminFolder) {
             ForumsAdminFolder faf = (ForumsAdminFolder) parent;
-            
+            if (requestedName.equals("manage")) {
+                MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuEditForums");
+                return new ManageForumsPage(requestedName, faf.getOrganisation(), faf);
+            }
+        } else if (parent instanceof OrganisationFolder) {
+            OrganisationFolder orgFolder = (OrganisationFolder) parent;
+            if (requestedName.equals("manageForums")) {
+                MenuItem.setActiveIds("menuTalk", "menuPrograms", "menuEditForums");
+                return new ManageForumsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
+            } else if (requestedName.equals("managePosts")) {
+                MenuItem.setActiveIds("menuTalk", "menuPrograms", "menuManagePosts");
+                return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
+            }
+
         }
         return null;
     }
@@ -57,27 +71,34 @@ public class ForumsApp  implements Application {
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof RepositoryFolder) {
             RepositoryFolder repoFolder = (RepositoryFolder) parent;
-            System.out.println("found repo folder: " + repoFolder.getName());
             Repository r = repoFolder.getRepository();
             List<Website> list = Website.findByWebsite(r, SessionManager.session());
-            System.out.println("websites: " + list.size());
-            if( !list.isEmpty()) {
+            if (!list.isEmpty()) {
                 Website w = list.get(0); // should only ever be 1
                 ForumsAdminFolder forumsAdminFolder = new ForumsAdminFolder("forums", repoFolder, w);
                 children.add(forumsAdminFolder);
-            }            
+            }
         }
     }
 
     @Override
-    public void shutDown() {
-    }
-
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-    }
-
-    @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
+    public void appendMenu(MenuItem parent) {
+        OrganisationFolder parentOrg = HtmlTemplateRenderer.findParentOrg(parent.getResource());
+        switch (parent.getId()) {
+            case "menuRoot":
+                parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
+                break;
+            case "menuTalk":
+                parent.getOrCreate("menuManageForums", "Manage forums").setOrdering(10);
+                parent.getOrCreate("menuEmails", "Send emails").setOrdering(20);
+                break;
+            case "menuManageForums":
+                parent.getOrCreate("menuManagePosts", "Manage posts", parentOrg.getPath().child("managePosts")).setOrdering(10);
+                parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("manageForums")).setOrdering(20);
+                break;
+            case "menuEmails":
+                parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("emails")).setOrdering(10);
+                break;
+        }
     }
 }

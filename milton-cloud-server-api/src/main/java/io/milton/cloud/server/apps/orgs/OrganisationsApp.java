@@ -18,20 +18,16 @@ package io.milton.cloud.server.apps.orgs;
 
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.vfs.db.utils.SessionManager;
 
 /**
@@ -82,15 +78,4 @@ public class OrganisationsApp implements Application {
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
-    @Override
-    public void shutDown() {
-    }
-
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-    }
-
-    @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-    }
 }

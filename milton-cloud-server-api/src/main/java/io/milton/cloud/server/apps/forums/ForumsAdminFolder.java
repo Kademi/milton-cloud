@@ -12,6 +12,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,11 @@ public class ForumsAdminFolder extends AbstractCollectionResource {
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
+            List<Forum> forums = Forum.findByWebsite(website, SessionManager.session());
+            for( Forum f : forums ) {
+                ForumAdminFolder faf = new ForumAdminFolder(f, parent);
+                children.add(faf);
+            }
         }
         return children;
     }

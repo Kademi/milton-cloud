@@ -18,12 +18,9 @@ package io.milton.cloud.server.apps.contacts;
 
 
 import java.io.IOException;
-import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.web.*;
-import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 
@@ -55,11 +52,11 @@ public class ContactsApp implements Application {
 //        ldapServer.start();
     }
 
-    @Override
-    public void shutDown() {
+//    @Override
+//    public void shutDown() {
 //        ldapServer.interrupt();
 //        ldapServer.close();
-    }
+//    }
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
@@ -106,14 +103,13 @@ public class ContactsApp implements Application {
         return "contacts";
     }
 
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-        config.setInt("port", 8389); // default to non
-    }
-    @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-        
-    }
+//    @Override
+//    public void initDefaultProperties(AppConfig config) {
+//        config.setInt("port", 8389); // default to non
+//    }
+
+
+    
 
 
 }

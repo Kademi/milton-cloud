@@ -647,6 +647,21 @@ public class Formatter {
         }
     }
 
+    /**
+     * This just permits simple templating syntax for basic conditional values
+     * 
+     * Eg:
+     * <li><a class="$formatter.ifTrue($item.active, 'navActive', '')" href="$item.href">$item.text</a></li>
+     * 
+     * @param b
+     * @param o1
+     * @param o2
+     * @return 
+     */
+    public Object ifTrue(boolean b, Object o1, Object o2) {
+        return b ? o1 : o2;
+    }    
+
     public ResourceList newList() {
         return new ResourceList();
     }

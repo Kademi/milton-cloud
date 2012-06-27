@@ -15,22 +15,21 @@
 package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.server.apps.AppConfig;
-import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.Profile;
-import java.util.List;
 
 /**
  *
  * @author brad
  */
-public class AdminApp implements Application {
+public class AdminApp implements MenuApplication {
 
     @Override
     public String getInstanceId() {
@@ -47,17 +46,22 @@ public class AdminApp implements Application {
             CommonCollectionResource p = (CommonCollectionResource) parent;
             switch (requestedName) {
                 case "dashboard":
+                    MenuItem.setActiveId("menuDashboard");
                     return new TemplatedHtmlPage("dashboard", p, p.getServices(), "admin/dashboard");
                 case "users":
+                    MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuUsers");
                     return new UserAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
                 case "groups":
+                    MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuGroups");
                     return new GroupsAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
                 case "websites":
+                    MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "menuWebsites");
                     return new WebsitesAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
             }
-        } else if( parent instanceof OrganisationsFolder) {
+        } else if (parent instanceof OrganisationsFolder) {
             OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
             if (requestedName.equals("manage")) {
+                MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuOrgs");
                 return new OrgsAdminPage(requestedName, orgsFolder.getOrganisation(), orgsFolder, orgsFolder.getServices());
             }
         }
@@ -69,27 +73,29 @@ public class AdminApp implements Application {
     }
 
     @Override
-    public void shutDown() {
-    }
-
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-    }
-
-    @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-        if (rootFolder instanceof OrganisationRootFolder) {
-            MenuItem m = new MenuItem();
-            m.setText("Websites");
-            m.setHref("/manageSites/");
-            m.setId("websiteAdmin");
-            list.add(m);
-            
-            m = new MenuItem();
-            m.setText("Manage users");
-            m.setHref("/manageUsers/");
-            m.setId("userAdmin");
-            list.add(m);            
+    public void appendMenu(MenuItem parent) {
+        String parentId = parent.getId();
+        OrganisationFolder parentOrg = HtmlTemplateRenderer.findParentOrg(parent.getResource());
+        Path parentPath = parentOrg.getPath();
+        switch (parentId) {
+            case "menuRoot":
+                parent.getOrCreate("menuManagement", "Content management").setOrdering(20);
+                parent.getOrCreate("menuDashboard", "My Dashboard", parentPath.child("dashboard")).setOrdering(10);
+                break;
+            case "menuManagement":
+                parent.getOrCreate("menuGroupsUsers", "Groups &amp; users").setOrdering(20);
+                parent.getOrCreate("menuWebsiteManager", "Website manager").setOrdering(30);
+                break;
+            case "menuGroupsUsers":
+                parent.getOrCreate("menuUsers", "Manage users", parentPath.child("users")).setOrdering(10);
+                parent.getOrCreate("menuGroups", "Manage groups", parentPath.child("groups")).setOrdering(20);
+                Path p = parentOrg.getPath().child("organisations").child("manage");
+                parent.getOrCreate("menuOrgs", "Manage Business units", p).setOrdering(30);
+                break;
+            case "menuWebsiteManager":
+                parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("websites")).setOrdering(10);
+                parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
+                break;
         }
     }
 }

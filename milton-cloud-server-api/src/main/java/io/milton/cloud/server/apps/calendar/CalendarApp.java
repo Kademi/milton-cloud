@@ -52,10 +52,6 @@ public class CalendarApp implements Application {
     }
 
     @Override
-    public void shutDown() {
-    }
-
-    @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof UserResource) {
             UserResource rf = (UserResource) parent;
@@ -64,14 +60,4 @@ public class CalendarApp implements Application {
         }
 
     }
-
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-    }
-
-    @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-        
-    }
-
 }

@@ -60,7 +60,7 @@ public class HtmlTemplateRenderer {
         if (user != null) {
             datamodel.put("user", user);
         }
-        List<MenuItem> menu = applicationManager.getMenu(page, user, rootFolder);
+        MenuItem menu = applicationManager.getRootMenuItem(page, user, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
 
@@ -151,7 +151,7 @@ public class HtmlTemplateRenderer {
         }
     }
 
-    private OrganisationFolder findParentOrg(Resource page) {
+    public static OrganisationFolder findParentOrg(Resource page) {
         if( page instanceof OrganisationFolder ) {
             return (OrganisationFolder) page;
         } else if( page instanceof CommonResource ) {

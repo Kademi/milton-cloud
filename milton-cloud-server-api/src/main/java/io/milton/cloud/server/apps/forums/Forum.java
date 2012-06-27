@@ -31,7 +31,7 @@ import org.hibernate.criterion.Expression;
 @Entity
 public class Forum implements Serializable{
     
-    public static List<Forum>  findByOrg(Website website, Session session) {
+    public static List<Forum>  findByWebsite(Website website, Session session) {
         Criteria crit = session.createCriteria(Forum.class);
         crit.add(Expression.eq("website", website));
         return DbUtils.toList(crit, Forum.class);

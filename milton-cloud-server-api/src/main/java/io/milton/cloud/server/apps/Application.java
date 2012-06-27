@@ -19,11 +19,7 @@ package io.milton.cloud.server.apps;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import java.util.List;
-import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.templating.MenuItem;
 
 /**
  * Defines an extensibility mechanism for Spliffy.
@@ -70,30 +66,6 @@ public interface Application {
      */
     void addBrowseablePages(CollectionResource parent, ResourceList children);
     
-    /**
-     * Causes the application to release all resources. It should be restartable
-     */
-    void shutDown();
-
-   
-    /**
-     * Called when no configuration file exists. Populate the given object with
-     * default values, this will be stored to file so the administrator can
-     * review and edit as required
-     * 
-     * @param config 
-     */
-    void initDefaultProperties(AppConfig config);
-
-    /**
-     * Add menu items if appropriate
-     * 
-     * @param list
-     * @param r
-     * @param user
-     * @param rootFolder 
-     */
-    void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder);
 
 
     

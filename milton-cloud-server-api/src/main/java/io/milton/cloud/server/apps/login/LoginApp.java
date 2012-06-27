@@ -19,17 +19,15 @@ package io.milton.cloud.server.apps.login;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.cloud.server.web.templating.MenuItem;
-import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
-import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.web.*;
-import io.milton.vfs.db.Profile;
 
 /**
  *
  * @author brad
  */
-public class LoginApp implements Application{
+public class LoginApp implements MenuApplication{
 
     private Services services;
     
@@ -50,11 +48,6 @@ public class LoginApp implements Application{
     }
 
     @Override
-    public void shutDown() {
-        
-    }
-
-    @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         
     }
@@ -64,15 +57,13 @@ public class LoginApp implements Application{
         return "login"; // only single instance
     }
 
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-
-    }
 
     @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-        
+    public void appendMenu(MenuItem parent) {
+        // TODO: login and logout users menu
     }
+
+
 
     
 }

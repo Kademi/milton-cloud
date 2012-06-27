@@ -25,6 +25,7 @@ import java.util.Properties;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.templating.MenuItemList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 
@@ -65,8 +66,6 @@ public class ApplicationManager {
     public List<Application> getApps() {
         return apps;
     }
-    
-    
 
     public void init(SpliffyResourceFactory resourceFactory) {
         if (appsConfigDir == null) {
@@ -88,27 +87,33 @@ public class ApplicationManager {
             }
         }
     }
-    
+
     public Application get(String name) {
-        for( Application app : apps ) {
-            if( app.getInstanceId().equals(name)) {
+        for (Application app : apps) {
+            if (app.getInstanceId().equals(name)) {
                 return app;
             }
         }
         return null;
     }
 
-    public List<MenuItem> getMenu(Resource r, Profile user, RootFolder rootFolder) {
-        List<MenuItem> list = new ArrayList<>();
+    public void appendMenu(MenuItem parent) {
         for (Application app : apps) {
-            app.appendMenu(list, r, user, rootFolder);
+            if (app instanceof MenuApplication) {
+                ((MenuApplication) app).appendMenu(parent);
+            }
         }
-        return list;
+    }
+
+    public MenuItem getRootMenuItem(Resource r, Profile user, RootFolder rootFolder) {
+        return new MenuItem("menuRoot", this, r, user, rootFolder);
     }
 
     public void shutDown() {
         for (Application app : apps) {
-            app.shutDown();
+            if (app instanceof LifecycleApplication) {
+                ((LifecycleApplication) app).shutDown();
+            }
         }
     }
 
@@ -124,7 +129,7 @@ public class ApplicationManager {
 
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         for (Application app : apps) {
-            app.addBrowseablePages(parent, children); 
+            app.addBrowseablePages(parent, children);
         }
     }
 
@@ -152,9 +157,11 @@ public class ApplicationManager {
             return new AppConfig(props);
         } else {
             AppConfig config = new AppConfig(props);
-            app.initDefaultProperties(config);
-            try (FileOutputStream fout = new FileOutputStream(configFile)) {
-                props.store(fout, "auto-generated defaults");
+            if (app instanceof LifecycleApplication) {
+                ((LifecycleApplication) app).initDefaultProperties(config);
+                try (FileOutputStream fout = new FileOutputStream(configFile)) {
+                    props.store(fout, "auto-generated defaults");
+                }
             }
             return config;
         }

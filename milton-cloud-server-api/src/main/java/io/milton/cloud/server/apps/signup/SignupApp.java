@@ -18,12 +18,8 @@ package io.milton.cloud.server.apps.signup;
 
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import io.milton.cloud.server.web.templating.MenuItem;
-import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
-import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
@@ -71,19 +67,4 @@ public class SignupApp implements Application {
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
-
-    @Override
-    public void shutDown() {
-    }
-
-    @Override
-    public void initDefaultProperties(AppConfig config) {
-        
-    }
-    
-    @Override
-    public void appendMenu(List<MenuItem> list, Resource r, Profile user, RootFolder rootFolder) {
-        
-    }
-    
 }
