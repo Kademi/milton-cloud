@@ -19,6 +19,7 @@ import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.CollectionResource;
@@ -62,7 +63,7 @@ public class EmailApp implements MenuApplication{
 
     @Override
     public void appendMenu(MenuItem parent) {
-        OrganisationFolder parentOrg = HtmlTemplateRenderer.findParentOrg(parent.getResource());
+        OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
         switch (parent.getId()) {
             case "menuRoot":
                 parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
@@ -30,6 +31,18 @@ import java.util.Map;
  * @author brad
  */
 public class WebUtils {
+    
+    public static OrganisationFolder findParentOrg(Resource page) {
+        if( page instanceof OrganisationFolder ) {
+            return (OrganisationFolder) page;
+        } else if( page instanceof CommonResource ) {
+            CommonResource cr = (CommonResource) page;
+            return findParentOrg(cr.getParent());
+        } else {
+            return null;
+        }
+    }    
+    
     public static  RootFolder findRootFolder(Resource aThis) {
         if (aThis instanceof CommonResource) {
             CommonResource ar = (CommonResource) aThis;

@@ -16,6 +16,7 @@ package io.milton.cloud.server.manager;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.forums.Comment;
+import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommentBean;
 import io.milton.cloud.server.web.ProfileBean;
 import io.milton.vfs.db.Profile;
@@ -33,25 +34,32 @@ import org.hibernate.Session;
 public class CommentService {
 
     private final CurrentDateService currentDateService;
-    
+
     public CommentService(CurrentDateService currentDateService) {
         this.currentDateService = currentDateService;
     }
-        
-    
+
     public List<CommentBean> comments(UUID id) {
         List<Comment> comments = Comment.findByContentId(id, SessionManager.session());
         List<CommentBean> beans = new ArrayList<>();
-        for( Comment c : comments ) {
+        for (Comment c : comments) {
             CommentBean b = toBean(c);
             beans.add(b);
         }
         return beans;
     }
 
-    public Comment newComment(UUID id, String s, Website website, Profile poster, Session session) {
+    public Comment newComment(AbstractContentResource r, String s, Website website, Profile poster, Session session) {
+        UUID contentId = r.loadNodeMeta().getId(); 
+        if (contentId == null) {
+            throw new RuntimeException("No contentid for: " + r.getPath());
+        }
+        String title = r.getTitle();
+
         Comment c = new Comment();
-        c.setContentId(id);
+        c.setContentId(contentId);
+        c.setContentTitle(title);
+        c.setContentHref(r.getHref());
         c.setPostDate(currentDateService.getNow());
         c.setNotes(s);
         c.setPoster(poster);
@@ -68,5 +76,4 @@ public class CommentService {
         b.setUser(pb);
         return b;
     }
-    
 }

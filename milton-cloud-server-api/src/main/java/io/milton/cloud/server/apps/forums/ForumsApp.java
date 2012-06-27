@@ -17,9 +17,11 @@ package io.milton.cloud.server.apps.forums;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.RepositoryFolder;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.CollectionResource;
@@ -35,6 +37,11 @@ import java.util.List;
  */
 public class ForumsApp implements MenuApplication {
 
+    public static String toHref(ForumPost r) {
+        return "todo";
+    }
+    
+    
     @Override
     public String getInstanceId() {
         return "programsAdmin";
@@ -61,7 +68,11 @@ public class ForumsApp implements MenuApplication {
                 MenuItem.setActiveIds("menuTalk", "menuPrograms", "menuManagePosts");
                 return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
             }
-
+        } else if( parent instanceof WebsiteRootFolder) {
+            if( requestedName.equals("_postSearch")) {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+                return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
+            }
         }
         return null;
     }
@@ -82,7 +93,7 @@ public class ForumsApp implements MenuApplication {
 
     @Override
     public void appendMenu(MenuItem parent) {
-        OrganisationFolder parentOrg = HtmlTemplateRenderer.findParentOrg(parent.getResource());
+        OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
         switch (parent.getId()) {
             case "menuRoot":
                 parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);

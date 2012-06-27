@@ -30,6 +30,7 @@ import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.WebUtils;
 
 /**
  *
@@ -64,7 +65,7 @@ public class HtmlTemplateRenderer {
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
 
-        OrganisationFolder orgFolder = findParentOrg(page);
+        OrganisationFolder orgFolder = WebUtils.findParentOrg(page);
         if( orgFolder != null ) {
             datamodel.put("parentOrg", orgFolder);
         }
@@ -151,16 +152,6 @@ public class HtmlTemplateRenderer {
         }
     }
 
-    public static OrganisationFolder findParentOrg(Resource page) {
-        if( page instanceof OrganisationFolder ) {
-            return (OrganisationFolder) page;
-        } else if( page instanceof CommonResource ) {
-            CommonResource cr = (CommonResource) page;
-            return findParentOrg(cr.getParent());
-        } else {
-            return null;
-        }
-    }
     
     public class BodyRenderer {
         private final HtmlPage htmlPage;

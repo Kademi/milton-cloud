@@ -130,6 +130,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         return htmlPage;
     }
 
+    @Override
     public String getTitle() {
         RenderFileResource r = getHtml();
         if (r != null) {

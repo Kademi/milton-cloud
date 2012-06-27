@@ -192,12 +192,17 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         }
     }
 
-    public String getTitle() throws NotAuthorizedException, BadRequestException {
-        RenderFileResource r = getIndex();
-        if (r != null) {
-            return r.getTitle();
-        } else {
-            return getName();
+    @Override
+    public String getTitle()  {
+        try {
+            RenderFileResource r = getIndex();
+            if (r != null) {
+                return r.getTitle();
+            } else {
+                return getName();
+            }
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
         }
     }
 

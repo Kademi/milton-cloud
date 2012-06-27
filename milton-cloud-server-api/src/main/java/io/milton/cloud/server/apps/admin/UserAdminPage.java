@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ import io.milton.vfs.db.utils.SessionManager;
  */
 public class UserAdminPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
+    private static final Logger log = LoggerFactory.getLogger(UserAdminPage.class);
     
     private final String name;
     private final CommonCollectionResource parent;
@@ -75,8 +76,9 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
         
         UserDao userDao = services.getSecurityManager().getUserDao();        
-        RootFolder rootFolder = WebUtils.findRootFolder(this);
-        Organisation org = rootFolder.getOrganisation();
+        
+        OrganisationFolder orgFolder = WebUtils.findParentOrg(this);
+        Organisation org = orgFolder.getOrganisation();
         String q = params.get("q");
         if( q != null && q.length() > 0 ) {            
             searchResults = userDao.search(q, org, SessionManager.session()); // find the given user in this organisation

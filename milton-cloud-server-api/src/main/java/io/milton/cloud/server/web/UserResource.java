@@ -170,10 +170,6 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         return user;
     }
 
-    public String getHref() {
-        return "/" + getName() + "/";
-    }
-
     @Override
     public PrincipleId getIdenitifer() {
         return new HrefPrincipleId(getHref());

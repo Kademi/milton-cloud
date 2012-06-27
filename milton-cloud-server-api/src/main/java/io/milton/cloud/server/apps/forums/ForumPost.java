@@ -72,5 +72,8 @@ public class ForumPost extends Post implements Serializable{
         this.forumReplys = forumReplys;
     }
     
-    
+    @Override
+    public void accept(PostVisitor visitor) {
+        visitor.visit(this);
+    }       
 }

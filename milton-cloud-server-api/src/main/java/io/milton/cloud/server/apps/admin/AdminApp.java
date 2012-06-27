@@ -75,7 +75,7 @@ public class AdminApp implements MenuApplication {
     @Override
     public void appendMenu(MenuItem parent) {
         String parentId = parent.getId();
-        OrganisationFolder parentOrg = HtmlTemplateRenderer.findParentOrg(parent.getResource());
+        OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
         Path parentPath = parentOrg.getPath();
         switch (parentId) {
             case "menuRoot":

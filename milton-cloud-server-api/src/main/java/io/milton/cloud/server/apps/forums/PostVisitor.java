@@ -14,30 +14,12 @@
  */
 package io.milton.cloud.server.apps.forums;
 
-import java.io.Serializable;
-import javax.persistence.*;
-
 /**
- * A reply to a post in a forum
  *
  * @author brad
  */
-@Entity
-@DiscriminatorValue("FR")
-public class ForumReply extends Post implements Serializable{
-    private ForumPost post;
-
-    @ManyToOne(optional=false)
-    public ForumPost getPost() {
-        return post;
-    }
-
-    public void setPost(ForumPost post) {
-        this.post = post;
-    }
-
-    @Override
-    public void accept(PostVisitor visitor) {
-        visitor.visit(this);
-    }       
+public interface PostVisitor {
+    void visit(Comment c);
+    void visit(ForumPost p);
+    void visit(ForumReply r);
 }

@@ -112,9 +112,7 @@ public class HtmlTemplater implements Templater {
         TemplateHtmlPage bodyTemplateMeta = cachedTemplateMetaData.get(templatePath);
         
         String themeTemplateName = findThemeTemplateName(bodyTemplateMeta);
-        System.out.println("themeTemplateName: " + themeTemplateName);
         templatePath = "/templates/themes/" + theme + "/" + themeTemplateName + ".html";
-        System.out.println("templatePath: " + templatePath);
         Template themeTemplate = getTemplate(templatePath);
         TemplateHtmlPage themeTemplateTemplateMeta = cachedTemplateMetaData.get(templatePath);
         if (themeTemplateTemplateMeta == null) {
@@ -125,9 +123,7 @@ public class HtmlTemplater implements Templater {
     }
 
     private String findThemeTemplateName(TemplateHtmlPage bodyTemplateMeta) {
-        System.out.println("findThemeTemplateName: " + bodyTemplateMeta.getTitle());
         for (WebResource wr : bodyTemplateMeta.getWebResources()) {
-            System.out.println("check wr: " + wr.toHtml("xxx"));
             if (wr.getTag().equals("link")) {
                 String rel = wr.getAtts().get("rel");
                 if (rel != null && rel.equals("template")) {

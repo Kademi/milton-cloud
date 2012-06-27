@@ -65,10 +65,6 @@ public class ContactsFolder extends AbstractCollectionResource implements Addres
         this.addressBook = addressBook;
         this.contactManager = contactManager;
     }
-
-    public String getHref() {
-        return parent.getHref() + this.getName() + "/";
-    }
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {

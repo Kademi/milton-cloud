@@ -1,7 +1,6 @@
 package io.milton.cloud.server.web;
 
 
-import com.ettrema.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -214,5 +213,14 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         } else {
             return Path.root;
         }
+    }
+    
+    public String getHref() {
+        Path p = getPath();
+        String s = p.toString();
+        if( this instanceof CollectionResource) {
+            s += "/";
+        }
+        return s;
     }
 }

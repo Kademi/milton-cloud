@@ -30,6 +30,8 @@ public abstract class AbstractContentResource extends AbstractResource implement
     protected ContentDirectoryResource parent;
     protected DataNode contentNode;
     protected NodeMeta nodeMeta;
+    
+    public abstract String getTitle();
 
     /**
      *
@@ -121,7 +123,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
         }
     }
 
-    protected NodeMeta loadNodeMeta() {
+    public NodeMeta loadNodeMeta() {
         if (nodeMeta == null) {
             try {
                 nodeMeta = NodeMeta.loadForNode(contentNode);
@@ -210,11 +212,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
         if( rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             Profile currentUser = services.getSecurityManager().getCurrentUser();
-            UUID contentId = this.loadNodeMeta().getId();
-            if( contentId == null ) {
-                throw new RuntimeException("No contentid for: " + getPath());
-            }
-            services.getCommentService().newComment(contentId, s, wrf.getWebsite(), currentUser, SessionManager.session());
+            services.getCommentService().newComment(this, s, wrf.getWebsite(), currentUser, SessionManager.session());
         }
     }
 
@@ -226,4 +224,6 @@ public abstract class AbstractContentResource extends AbstractResource implement
     public String getNewComment() {
         return null;
     }    
+    
+
 }

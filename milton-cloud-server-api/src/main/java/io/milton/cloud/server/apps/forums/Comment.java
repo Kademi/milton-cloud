@@ -45,7 +45,8 @@ public class Comment extends Post {
     }
     
     private UUID contentId;
-    private Organisation adminOrg;
+    private String contentHref;
+    private String contentTitle;
 
     @Column(nullable=false)
     public UUID getContentId() {
@@ -54,5 +55,27 @@ public class Comment extends Post {
 
     public void setContentId(UUID contentId) {
         this.contentId = contentId;
-    }     
+    }
+    
+    @Column(nullable=false)
+    public String getContentHref() {
+        return contentHref;
+    }
+
+    public void setContentHref(String contentHref) {
+        this.contentHref = contentHref;
+    }
+
+    @Column(nullable=false)
+    public String getContentTitle() {
+        return contentTitle;
+    }
+
+    public void setContentTitle(String contentTitle) {
+        this.contentTitle = contentTitle;
+    }
+
+    public void accept(PostVisitor visitor) {
+        visitor.visit(this);
+    }    
 }

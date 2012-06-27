@@ -209,7 +209,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         @Override
         public String get(Object key) {
             String s = website.getRepository().getAttribute(key.toString());
-            System.out.println("get setting: " + key + " - " + s);
             return s;
         }
 
@@ -269,12 +268,9 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
         @Override
         public Set<Entry<String, String>> entrySet() {
-            System.out.println("get entryset");
             Set<Entry<String, String>> set = new HashSet<>();
             if (website.getRepository().getNvPairs() != null) {
-                System.out.println("num items: " + website.getRepository().getNvPairs().size());
                 for (NvPair nv : website.getRepository().getNvPairs()) {
-                    System.out.println("nvpair: " + nv.getName() + " = " + nv.getPropValue());
                     final NvPair pair = nv;
                     Entry<String, String> e = new Entry<String, String>() {
 
@@ -295,8 +291,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
                     };
                     set.add(e);
                 }
-            } else {
-                System.out.println("null set");
             }
             return set;
         }

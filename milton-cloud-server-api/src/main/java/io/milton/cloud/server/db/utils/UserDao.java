@@ -7,19 +7,22 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import io.milton.vfs.db.Credential;
 import io.milton.vfs.db.PasswordCredential;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
 public class UserDao {
+    
+    private static final Logger log = LoggerFactory.getLogger(UserDao.class);
 
     public PasswordCredential getEmailCredential(String email, Session sess) {
         Criteria crit = sess.createCriteria(PasswordCredential.class);
@@ -92,6 +95,7 @@ public class UserDao {
     }
 
     public List<Profile> search(String q, Organisation org, Session session) {
+        log.info("search: q=" + q + " org=" + org.getName() );
         Criteria crit = session.createCriteria(Profile.class);
         String[] arr = q.split(" ");
         Conjunction con = Expression.conjunction();
@@ -114,7 +118,7 @@ public class UserDao {
         crit.addOrder(Order.asc("email"));
 
         List<Profile> list = DbUtils.toList(crit, Profile.class);
-        System.out.println("user search: " + q + " -> " + list.size());
+        log.info("user search: " + q + " -> " + list.size());
         return list;
     }
 }

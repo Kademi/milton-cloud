@@ -143,10 +143,6 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
         return null;
     }
 
-    public String getHref() {
-        return parent.getHref() + name + "/";
-    }
-
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();

@@ -16,10 +16,15 @@ package io.milton.cloud.server.apps.forums;
 
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 
 /**
  *
@@ -30,6 +35,16 @@ import javax.persistence.*;
 @DiscriminatorValue("P")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Post implements Serializable{
+    
+    public static List<Post> findByWebsite(Website website, Session session) {
+        Criteria crit = session.createCriteria(Post.class);
+        crit.add(Expression.eq("website", website));
+        crit.addOrder(Order.desc("postDate"));
+        List<Post> list = DbUtils.toList(crit, Post.class);
+        System.out.println("findByWebsite=" + list.size());
+        return list;
+    }    
+    
     private long id;
     private Website website;
     private Profile poster;
@@ -91,6 +106,8 @@ public class Post implements Serializable{
         this.notes = notes;
     }
 
-
+    public void accept(PostVisitor visitor) {
+        // do nothing, will be overridden
+    }
     
 }
