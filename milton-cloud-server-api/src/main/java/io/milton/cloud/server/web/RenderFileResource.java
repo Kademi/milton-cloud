@@ -38,6 +38,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
+import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
 import javax.xml.namespace.QName;
 import org.slf4j.Logger;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
+@BeanPropertyResource(value="milton")
 public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
@@ -305,9 +307,29 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         return names;
     }
 
+    public List<CommentBean> getComments() {
+        return fileResource.getComments();
+    }
+
+    public int getNumComments() {
+        return fileResource.getNumComments();
+    }
+
+    public void setNewComment(String s) throws NotAuthorizedException {
+        fileResource.setNewComment(s);
+    }
+
+    /**
+     * This is just here to make newComment a bean property
+     *
+     * @return
+     */
+    public String getNewComment() {
+        return fileResource.getNewComment();
+    }    
+    
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
         fileResource.doCommit(knownProps, errorProps);
-
     }
 }

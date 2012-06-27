@@ -24,11 +24,6 @@
         </repository>
     </repositories>      
     <dependencies>
-       <dependency>
-            <groupId>io.milton</groupId>
-            <artifactId>milton-client</artifactId>
-            <version>${milton.version}</version>
-        </dependency>
         <dependency>
             <groupId>io.milton</groupId>
             <artifactId>milton-api</artifactId>
@@ -94,6 +89,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-cloud-lib</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring</artifactId>
+            <version>2.5.6</version>
         </dependency>
     </dependencies>    
 </project>

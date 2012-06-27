@@ -9,11 +9,6 @@
     <artifactId>milton-cloud-lib</artifactId>
     <packaging>jar</packaging>
     <dependencies>
-       <dependency>
-            <groupId>io.milton</groupId>
-            <artifactId>milton-client</artifactId>
-            <version>${milton.version}</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

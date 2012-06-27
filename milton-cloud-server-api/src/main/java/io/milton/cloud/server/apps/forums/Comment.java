@@ -15,11 +15,17 @@
 package io.milton.cloud.server.apps.forums;
 
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.utils.DbUtils;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 
 /**
  * This is a comment on a content item. It is keyed on the meta UUID of the content
@@ -30,6 +36,14 @@ import javax.persistence.ManyToOne;
 @Entity
 @DiscriminatorValue("C")
 public class Comment extends Post {
+    
+    public static List<Comment> findByContentId(UUID contentId, Session session) {
+        Criteria crit = session.createCriteria(Comment.class);
+        crit.add(Expression.eq("contentId", contentId));
+        crit.addOrder(Order.asc("postDate")); // hmm, might need a join or something
+        return DbUtils.toList(crit, Comment.class);        
+    }
+    
     private UUID contentId;
     private Organisation adminOrg;
 
@@ -40,17 +54,5 @@ public class Comment extends Post {
 
     public void setContentId(UUID contentId) {
         this.contentId = contentId;
-    }
-
-    @ManyToOne(optional=false)
-    public Organisation getAdminOrg() {
-        return adminOrg;
-    }
-
-    public void setAdminOrg(Organisation adminOrg) {
-        this.adminOrg = adminOrg;
-    }
-    
-    
-    
+    }     
 }

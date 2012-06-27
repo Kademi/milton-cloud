@@ -258,4 +258,14 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
         return new DirectoryResource(dm, parent, renderMode);
     }
+
+    @Override
+    public boolean is(String type) {
+        if(("folder".equals(type) || "directory".equals(type)) && !getName().startsWith(".") ) {
+            return true;
+        }
+        return super.is(type);
+    }
+    
+    
 }

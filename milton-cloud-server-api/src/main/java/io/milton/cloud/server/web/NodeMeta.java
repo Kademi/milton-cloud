@@ -28,12 +28,15 @@ import java.util.UUID;
 public class NodeMeta {
     
     public static NodeMeta loadForNode(DataNode node) throws IOException {
+        System.out.println("loadForNote: " + node.getName());
         DirectoryNode parent = node.getParent();
         if( parent == null ) {
+            System.out.println(" - loadForNode: parent is null");
             return new NodeMeta(null, null, null);
         }
         DataNode metaDir = parent.get(".mil");
         if( metaDir == null) {
+            System.out.println(" - loadForNote: metadir is null: " + parent.getName());
             return new NodeMeta(null, null, null);
         }
         String metaName = node.getName() + ".meta";
@@ -55,9 +58,11 @@ public class NodeMeta {
                 Date created = new Date(lCreated);
                 return new NodeMeta(mod, created, id);
             } else {
+                System.out.println(" - loadForNote: metaNode is not a file node");
                 return new NodeMeta(null, null, null);
             }
         } else {
+            System.out.println(" - loadForNote: metaDir is not a directory");
             return new NodeMeta(null, null, null);
         }
     }

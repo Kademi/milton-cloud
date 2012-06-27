@@ -19,6 +19,7 @@ import org.hibernate.criterion.Expression;
 @DiscriminatorValue("U")
 public class Profile extends BaseEntity {
     
+    
     public static Profile find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.add(Expression.and(Expression.eq("organisation", org), Expression.eq("name", name)));        
@@ -42,6 +43,10 @@ public class Profile extends BaseEntity {
     private String phone;
 
     private String email;
+    
+    private String photoHref;
+    
+    private String nickName;
 
     @OneToMany(mappedBy="profile")
     public List<Credential> getCredentials() {
@@ -73,10 +78,31 @@ public class Profile extends BaseEntity {
     public String getFirstName() {
         return firstName;
     }
-
+    
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+
+    @Column
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    @Column
+    public String getPhotoHref() {
+        return photoHref;
+    }
+
+    public void setPhotoHref(String photoHref) {
+        this.photoHref = photoHref;
+    }
+    
+    
+    
 
     public String getPhone() {
         return phone;

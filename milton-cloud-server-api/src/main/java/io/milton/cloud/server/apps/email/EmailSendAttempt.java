@@ -64,7 +64,7 @@ public class EmailSendAttempt implements Serializable{
     }
 
     @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.DATE)        
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)        
     public Date getStatusDate() {
         return statusDate;
     }

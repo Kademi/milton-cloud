@@ -226,6 +226,7 @@ public class ResourceList extends ArrayList<CommonResource> {
         while (it.hasNext()) {
             CommonResource ct = it.next();
             if (!ct.is(s)) {
+                System.out.println("ofType: not type: " + s + " - " + ct.getClass());
                 it.remove();
             }
         }

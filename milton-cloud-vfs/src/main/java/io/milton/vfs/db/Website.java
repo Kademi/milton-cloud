@@ -18,9 +18,14 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
 
 /**
  * A Website is an alias for a repository. The name of the website is the DNS name
@@ -29,6 +34,12 @@ import javax.persistence.*;
  */
 @Entity
 public class Website implements Serializable {
+    public static List<Website>  findByWebsite(Repository repository, Session session) {
+        Criteria crit = session.createCriteria(Website.class);
+        crit.add(Expression.eq("repository", repository));
+        return DbUtils.toList(crit, Website.class);
+    }    
+    
     private Organisation organisation;
     private long id;
     private String name; // identifies the resource to webdav
@@ -65,7 +76,7 @@ public class Website implements Serializable {
         this.theme = theme;
     }
 
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(nullable = false)
     public Date getCreatedDate() {
         return createdDate;

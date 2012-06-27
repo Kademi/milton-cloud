@@ -118,7 +118,7 @@ public class BaseEntity implements Serializable {
     }
 
     @Column(nullable = false)
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getCreatedDate() {
         return createdDate;
     }
@@ -128,7 +128,7 @@ public class BaseEntity implements Serializable {
     }
 
     @Column(nullable = false)
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getModifiedDate() {
         return modifiedDate;
     }
@@ -200,19 +200,18 @@ public class BaseEntity implements Serializable {
      * @param priviledge
      * @param grantedOn
      */
-    public void grant(AccessControlledResource.Priviledge priviledge, BaseEntity grantedOn) {
-        if (isGranted(priviledge, grantedOn)) {
+    public void grant(AccessControlledResource.Priviledge priviledge, BaseEntity grantedOn, Session session) {
+        if (isGranted(priviledge, grantedOn, session)) {
             return;
         }
         Permission p = new Permission();
         p.setGrantedOnEntity(grantedOn);
         p.setGrantee(this);
         p.setPriviledge(priviledge);
-        SessionManager.session().save(p);
+        session.save(p);
     }
 
-    public boolean isGranted(AccessControlledResource.Priviledge priviledge, BaseEntity grantedOn) {
-        Session session = SessionManager.session();
+    public boolean isGranted(AccessControlledResource.Priviledge priviledge, BaseEntity grantedOn, Session session) {
         Criteria crit = session.createCriteria(Permission.class);
         
         crit.add(

@@ -20,11 +20,11 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
+import io.milton.property.BeanPropertyResource;
 import io.milton.resource.ReplaceableResource;
 import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
-import java.util.Date;
 import java.util.List;
 import javax.xml.namespace.QName;
 
@@ -33,6 +33,7 @@ import javax.xml.namespace.QName;
  *
  * @author brad
  */
+@BeanPropertyResource(value = "milton")
 public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
@@ -69,9 +70,11 @@ public class FileResource extends AbstractContentResource implements Replaceable
     }
 
     /**
-     * Just updates content, does not save on parent or do any transaction handling
+     * Just updates content, does not save on parent or do any transaction
+     * handling
+     *
      * @param in
-     * @throws BadRequestException 
+     * @throws BadRequestException
      */
     public void setContent(InputStream in) throws BadRequestException {
         log.info("replaceContent: set content");
@@ -153,17 +156,19 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        services.getTemplateParser().update(htmlPage, bout);
-        byte[] arr = bout.toByteArray();
-        ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-
-        System.out.println("new content: " + bout.toString());
-
-        try {
-            replaceContent(bin, (long) arr.length);
-        } catch (ConflictException ex) {
-            throw new BadRequestException(this, "Exception: " + ex);
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        
+        // htmlPage will only have been set if html content fields have been set, in which
+        // case we need to generate and persist html content
+        if (htmlPage != null) {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            services.getTemplateParser().update(htmlPage, bout);
+            byte[] arr = bout.toByteArray();
+            ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+            setContent(bin);
+            parent.save();
         }
+        tx.commit();
     }
 }

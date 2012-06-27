@@ -98,6 +98,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
         DirectoryResource rdr = newDirectoryResource(newNode, this, false);
         onAddedChild(rdr);
+        rdr.updateModDate(); 
         save();
         return rdr;
     }
@@ -122,12 +123,27 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             newFileNode.setContent(inputStream);
         }
         onAddedChild(fileResource);
+        updateModDate(); 
         save();
         tx.commit();
 
         return fileResource;
-
     }
+    
+    protected void updateModDate() {
+        Date newDate = getServices().getCurrentDateService().getNow();
+        loadNodeMeta().setModDate(newDate);
+        if( nodeMeta.getCreatedDate() == null ) {
+            nodeMeta.setCreatedDate(newDate);
+        }
+        try {
+            NodeMeta.saveMeta(this.getDirectoryNode(), nodeMeta);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+  
 
     @Override
     public Date getCreateDate() {
@@ -161,7 +177,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         if (type == null) {
             // output directory listing
             log.trace("sendContent: render template");
-            getTemplater().writePage("repoHome", this, params, out);
+            renderPage(out, params);
         } else {
             log.trace("sendContent: " + type);
             switch (type) {
@@ -174,6 +190,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
                     break;
             }
         }
+    }
+    
+    protected void renderPage(OutputStream out, Map<String, String> params) throws IOException {
+        getTemplater().writePage("repoHome", this, params, out);
     }
 
     @Override
@@ -287,5 +307,13 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
         return new DirectoryResource(dm, parent, renderMode);
+    }    
+    
+    @Override
+    public boolean is(String type) {
+        if( "branch".equals(type) || "folder".equals(type) || "directory".equals(type)) {
+            return true;
+        }
+        return super.is(type);
     }    
 }

@@ -80,7 +80,7 @@ public class Repository implements Serializable {
         this.notes = notes;
     }    
     
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(nullable = false)
     public Date getCreatedDate() {
         return createdDate;

@@ -100,7 +100,7 @@ public class AddressBook implements Serializable {
      * @return the createdDate
      */
     @Column(nullable=false)    
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getCreatedDate() {
         return createdDate;
     }
@@ -116,7 +116,7 @@ public class AddressBook implements Serializable {
      * @return the modifiedDate
      */
     @Column(nullable=false)    
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getModifiedDate() {
         return modifiedDate;
     }

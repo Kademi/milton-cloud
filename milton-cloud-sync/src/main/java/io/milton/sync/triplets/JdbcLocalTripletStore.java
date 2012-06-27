@@ -113,10 +113,10 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     @Override
     public List<Triplet> getTriplets(Path path) {
         if (!initialScanDone) {
-            System.out.println("Initial scan not done, doing it now...");
+            log.info("getTriplets: Initial scan not done, doing it now...");
             scan();
             initialScanDone = true;
-            System.out.println("Initial scan finished. Now, where were we...");
+            log.info("getTriplets: Initial scan finished. Now, proceed with syncronisation...");
 
         }
 
@@ -127,7 +127,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             public List<CrcRecord> use(Connection con) throws Exception {
                 tlConnection.set(con);
                 List<CrcRecord> list = crcDao.listCrcRecords(con, f.getAbsolutePath());
-                log.trace("crc records: " + list.size() + " - " + f.getAbsolutePath());
+                long count = crcDao.getCrcRecordCount(con());
+                System.out.println("total count: " + count);
                 tlConnection.remove();
                 return list;
             }
@@ -191,7 +192,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 con().commit();
 
                 long count = crcDao.getCrcRecordCount(con());
-                System.out.println("Contains crc records: " + count);
+                log.info("scan: Contains crc records: " + count);
 
 
                 tlConnection.remove();
@@ -330,7 +331,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         this.currentOffset = 0;
         long crc = Parser.parse(f, this, new NullHashStore()); // will generate blobs into this blob store
         this.currentScanFile = null;
-        crcDao.insertCrc(c, f.getParent(), f.getName(), crc, f.lastModified());
+        crcDao.insertCrc(c, f.getParentFile().getAbsolutePath(), f.getName(), crc, f.lastModified());
     }
 
     /**
@@ -348,7 +349,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         List<Triplet> triplets = BlobUtils.toTriplets(dir, crcRecords);
         long newHash = HashUtils.calcTreeHash(triplets);
         log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
-        crcDao.insertCrc(c, dir.getParent(), dir.getName(), newHash, dir.lastModified());
+        crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
     }
 
     private void registerWatchDir(final File dir) throws IOException {

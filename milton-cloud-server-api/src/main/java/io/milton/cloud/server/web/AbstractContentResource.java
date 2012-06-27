@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
@@ -125,8 +126,9 @@ public abstract class AbstractContentResource extends AbstractResource implement
             try {
                 nodeMeta = NodeMeta.loadForNode(contentNode);
             } catch (IOException ex) {
-                log.error("Couldnt load meta", ex);
-                nodeMeta = new NodeMeta(null, null, null);
+                throw new RuntimeException("Couldnt load meta");
+                //log.error("Couldnt load meta", ex);
+                //nodeMeta = new NodeMeta(null, null, null);
             }
         }
         return nodeMeta;
@@ -188,4 +190,40 @@ public abstract class AbstractContentResource extends AbstractResource implement
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
+    
+
+    public List<CommentBean> getComments() {
+        return services.getCommentService().comments(this.loadNodeMeta().getId()); 
+    }
+
+    public int getNumComments() {
+        List<CommentBean> list = getComments();
+        if (list == null) {
+            return 0;
+        } else {
+            return list.size();
+        }
+    }
+
+    public void setNewComment(String s) throws NotAuthorizedException {
+        RootFolder rootFolder = WebUtils.findRootFolder(this);
+        if( rootFolder instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+            Profile currentUser = services.getSecurityManager().getCurrentUser();
+            UUID contentId = this.loadNodeMeta().getId();
+            if( contentId == null ) {
+                throw new RuntimeException("No contentid for: " + getPath());
+            }
+            services.getCommentService().newComment(contentId, s, wrf.getWebsite(), currentUser, SessionManager.session());
+        }
+    }
+
+    /**
+     * This is just here to make newComment a bean property
+     *
+     * @return
+     */
+    public String getNewComment() {
+        return null;
+    }    
 }

@@ -6,6 +6,7 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.common.DefaultCurrentDateService;
+import io.milton.cloud.server.manager.CommentService;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplateParser;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
@@ -25,6 +26,7 @@ public class Services {
     private final ApplicationManager applicationManager;
     private HtmlTemplateParser templateParser;
     private final CurrentDateService currentDateService;
+    private final CommentService commentService;
 
     public Services(HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager) {
         this.hashStore = hashStore;
@@ -35,6 +37,7 @@ public class Services {
         this.textTemplater = new TextTemplater(securityManager);
         currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
         this.htmlTemplater = new HtmlTemplater(applicationManager, new Formatter(currentDateService), securityManager);
+        commentService = new CommentService(currentDateService);
     }
 
     
@@ -68,5 +71,11 @@ public class Services {
 
     public CurrentDateService getCurrentDateService() {
         return currentDateService;
-    }    
+    }
+
+    public CommentService getCommentService() {
+        return commentService;
+    }
+    
+    
 }
