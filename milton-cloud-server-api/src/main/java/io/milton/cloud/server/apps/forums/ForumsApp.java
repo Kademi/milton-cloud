@@ -22,7 +22,6 @@ import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
-import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Repository;
@@ -90,14 +89,10 @@ public class ForumsApp implements MenuApplication {
                 break;
             case "menuTalk":
                 parent.getOrCreate("menuManageForums", "Manage forums").setOrdering(10);
-                parent.getOrCreate("menuEmails", "Send emails").setOrdering(20);
                 break;
             case "menuManageForums":
                 parent.getOrCreate("menuManagePosts", "Manage posts", parentOrg.getPath().child("managePosts")).setOrdering(10);
                 parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("manageForums")).setOrdering(20);
-                break;
-            case "menuEmails":
-                parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("emails")).setOrdering(10);
                 break;
         }
     }

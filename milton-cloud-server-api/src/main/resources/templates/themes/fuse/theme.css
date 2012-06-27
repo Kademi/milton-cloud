@@ -730,6 +730,9 @@ form.Details table tfoot td {
 	text-align: right;
 	padding-top: 8px;
 }
+.TabContainer .Content form.Details {
+	border: 0;
+}
 /* Select box */
 select {
 	border-radius: 3px;
@@ -741,6 +744,33 @@ select {
 	margin-right: 10px;
 }
 select.Small { width: 80px; }
+select.Medium { width: 100px; }
+/* Tab Panel */
+.TabContainer nav {
+	padding: 0 7px;
+}
+.TabContainer nav a {
+	float: left;
+	display: block;
+	font-weight: bold;
+	font-size: 12px;
+	padding: 0 15px;
+	line-height: 33px;
+	height: 33px;
+	border: solid #dedede;
+	border-width: 1px 1px 0;
+	border-radius: 2px 2px 0 0;
+	margin-right: 5px;
+}
+.TabContainer nav a.Active {
+	color: #FFF;
+	background: #44bbe0;
+}
+.TabContainer .TabContent .Content {	
+	border: 1px solid #dedede;
+	border-radius: 5px;
+	background: #f2f2f2;
+}
 /* ClearFix */
 .ClearFix:after {
 	clear: both;
@@ -863,4 +893,17 @@ div.CheckBoxWrapper.Checked {
 }
 #manageCourse button.AddProgram {
 	background: #525252 url(images/btn_add.png) no-repeat 9px 50%;
+}
+#manageEmail > .Content header a {
+	background: url(images/icon_sortable.png) no-repeat 100% 50%;
+}
+#manageEmail > .Content ul li div span.Status {
+	background: url(images/icon_email_status.png) no-repeat;
+}
+#manageEmail > .Content ul li aside a.Edit { background-image: url(images/icon_edit.png); }
+#manageEmail > .Content ul li aside a.Delete { background-image: url(images/icon_delete.png); }
+#manageEmail > .Content ul li aside a.View { background-image: url(images/icon_view.png); }
+#manageEmail .TabContent .Content ul.GroupList li aside a.Delete { background-image: url(images/icon_delete.png); }
+#manageEmail .TabContent .Content.Success table thead tr th div .Btn {
+	background-image: url(images/icon_download.png);
 }

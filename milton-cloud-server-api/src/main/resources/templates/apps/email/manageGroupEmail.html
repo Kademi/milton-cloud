@@ -1,0 +1,54 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="manageGroupEmail.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageGroupEmail.js">//</script>
+    </head>
+    <body>
+        <section id="manageEmail" class="MainContent">
+            <header class="ClearFix">
+                <a class="SmallBtn Add"><span>Send email</span></a>
+            </header>
+            <div class="Content">
+                <header>
+                    <div>
+                        <a href="" class="Date SortByDate" rel="asc">Date</a>
+                        <a href="" class="Name SortByName" rel="asc">Name</a>
+                        <a href="" class="Status SortByStatus" rel="asc">Status</a>
+                    </div>
+                </header>		
+                <ul>
+                    #foreach($email in $folder.children)
+                    <li>
+                        <div class="emailStatus${email.statusCode}">
+                            <span class="Date">$formatter.formatDate($email.statusDate)</span>
+                            <span class="Name">$email.title</span>
+                            <span class="Status">$email.status</span>
+                            <aside>
+                                #if($email.statusCode == "Draft" )
+                                <a class="Edit EditEmail" title="Edit" href="$email.name">
+                                    <span class="Hidden">Edit</span>
+                                </a>
+                                <a class="Delete DeleteEmail" title="Delete" href="">
+                                    <span class="Hidden">Delete</span>
+                                </a>                                
+                                #else
+                                <a class="View ViewEmail" title="View" href="$email.name">
+                                    <span class="Hidden">View</span>
+                                </a>
+                                #end
+                            </aside>
+                        </div>
+                    </li>                    
+                    #end              
+                </ul>
+            </div>
+        </section>
+
+        <script type="text/javascript">
+            jQuery(function() {
+                initManageEmail();
+            });
+        </script>
+    </body>
+</html>
