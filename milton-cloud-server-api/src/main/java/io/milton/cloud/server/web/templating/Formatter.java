@@ -259,6 +259,15 @@ public class Formatter {
         }
         return DateTimeFormat.longDateTime().print(dt);
     }
+    
+    public String formatDateISO8601(Object o) {
+        DateTime dt = getDateTime(o);
+        if( dt == null ) {
+            return "";
+        } else {
+            return dt.toString();
+        }
+    }
 
     /**
      * Returns a user friendly description of the age of the date. Eg "4 minutes
@@ -268,9 +277,14 @@ public class Formatter {
      * @return
      */
     public String formatAge(Object o) {
-        org.joda.time.DateTime dt = getDateTime(o);
+        DateTime dt = getDateTime(o);
         DateTime now = new DateTime();
-        Interval i = new Interval(dt, now);
+        Interval i;
+        if( dt.isBefore(now) ) {
+            i = new Interval(dt, now);
+        } else {
+            i = new Interval(now, dt);
+        }
         Duration d = i.toDuration();
         long secs = d.getStandardSeconds();
         if (secs < 10) {

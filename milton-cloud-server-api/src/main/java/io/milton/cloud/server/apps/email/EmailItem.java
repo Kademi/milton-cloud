@@ -14,11 +14,18 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.apps.forums.Forum;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 
 /**
  * Represents a task to send an email, which may have been sent or might
@@ -34,6 +41,14 @@ import javax.persistence.*;
  */
 @Entity
 public class EmailItem implements Serializable{
+    
+    public static List<EmailItem>  findByRecipient(Profile p, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        crit.add(Expression.eq("recipient", p));
+        crit.addOrder(Order.desc("sendStatusDate"));
+        return DbUtils.toList(crit, EmailItem.class);
+    }        
+    
     private List<EmailSendAttempt> emailSendAttempts;
 
     private long id;

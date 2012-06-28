@@ -42,6 +42,8 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     private final DirectoryNode directoryNode;
     private final boolean renderMode;
     private ResourceList children;
+    private RenderFileResource indexPage;
+    private boolean updatedIndex;
 
     public DirectoryResource(DirectoryNode directoryNode, ContentDirectoryResource parent, boolean renderMode) {
         super(directoryNode, parent);
@@ -54,7 +56,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Resource r = services.getApplicationManager().getPage(this, childName);
         if (r != null) {
             return r;
-        }        
+        }
         return Utils.childOf(getChildren(), childName);
     }
 
@@ -75,7 +77,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Transaction tx = session.beginTransaction();
         DirectoryNode newNode = directoryNode.addDirectory(newName);
         DirectoryResource rdr = new DirectoryResource(newNode, this, renderMode);
-        rdr.updateModDate(); 
+        rdr.updateModDate();
         onAddedChild(this);
         save();
 
@@ -179,21 +181,24 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
-        Resource r = child("index.html");
-        if (r == null) {
-            return null;
-        } else if (r instanceof FileResource) {
-            FileResource fr = (FileResource) r;
-            return fr.getHtml();
-        } else if (r instanceof RenderFileResource) {
-            return (RenderFileResource) r;
-        } else {
-            return null;
+        if (indexPage == null) {
+            Resource r = child("index.html");
+            if (r == null) {
+                return null;
+            } else if (r instanceof FileResource) {
+                FileResource fr = (FileResource) r;
+                indexPage = fr.getHtml();
+            } else if (r instanceof RenderFileResource) {
+                indexPage = (RenderFileResource) r;
+            } else {
+                return null;
+            }
         }
+        return indexPage;
     }
 
     @Override
-    public String getTitle()  {
+    public String getTitle() {
         try {
             RenderFileResource r = getIndex();
             if (r != null) {
@@ -209,6 +214,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public void setTitle(String s) throws NotAuthorizedException, BadRequestException {
         RenderFileResource r = getIndex();
         if (r != null) {
+            updatedIndex = true;
             r.setTitle(s);
         } else {
             throw new RuntimeException("no index page");
@@ -232,6 +238,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             // create a new one
             throw new RuntimeException("not done yet");
         }
+        updatedIndex = true;
         html.setParam(name, value);
     }
 
@@ -248,10 +255,21 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws NotAuthorizedException, BadRequestException {
-        RenderFileResource html = getIndex();
-        if (html != null) {
-            html.doCommit(knownProps, errorProps);
-        }
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        
+        doSave();
+        
+        tx.commit();
+    }
+    
+    public void doSave() throws NotAuthorizedException, BadRequestException {
+        if (updatedIndex = true) {
+            RenderFileResource html = getIndex();
+            if (html != null) {
+                html.doSave();
+            }
+        }        
     }
 
     @Override
@@ -266,11 +284,9 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public boolean is(String type) {
-        if(("folder".equals(type) || "directory".equals(type)) && !getName().startsWith(".") ) {
+        if (("folder".equals(type) || "directory".equals(type)) && !getName().startsWith(".")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
 }

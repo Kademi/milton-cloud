@@ -40,4 +40,6 @@ public class MyInboxPage extends TemplatedHtmlPage {
         return map;
     }
     
+
+    
 }

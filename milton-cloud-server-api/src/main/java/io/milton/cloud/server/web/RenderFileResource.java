@@ -40,7 +40,10 @@ import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
+import io.milton.vfs.db.utils.SessionManager;
 import javax.xml.namespace.QName;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -330,6 +333,15 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
-        fileResource.doCommit(knownProps, errorProps);
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        doSave();
+
+        tx.commit();
     }
+    
+    public void doSave() throws BadRequestException, NotAuthorizedException {
+        fileResource.doSave();
+    }    
 }

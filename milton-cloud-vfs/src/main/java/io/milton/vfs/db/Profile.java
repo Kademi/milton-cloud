@@ -1,5 +1,6 @@
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
@@ -22,14 +23,15 @@ public class Profile extends BaseEntity {
     
     public static Profile find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.and(Expression.eq("organisation", org), Expression.eq("name", name)));        
-        List list = crit.list();
-        if( list == null || list.isEmpty() ) {
-            return null;
-        } else {
-            return (Profile) list.get(0);
-        }
-        //return (Profile) crit.uniqueResult();
+        crit.add(Expression.and(Expression.eq("adminOrg", org), Expression.eq("name", name)));        
+        return DbUtils.unique(crit);
+    }
+
+    public static List<Profile> findByAdminOrg(Organisation organisation, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.add(Expression.eq("adminOrg", organisation));        
+        return DbUtils.toList(crit, Profile.class);
+        
     }
             
     private Organisation adminOrg;

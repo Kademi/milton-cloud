@@ -48,6 +48,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     private String theme;
     private JsonResult jsonResult; // set after completing a POST
     protected NodeMeta nodeMeta;
+    private RenderFileResource indexPage;
 
     public BranchFolder(String name, CommonCollectionResource parent, Branch branch, boolean renderMode) {
         super(parent.getServices());
@@ -315,5 +316,22 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             return true;
         }
         return super.is(type);
+    }    
+    
+    public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
+        if (indexPage == null) {
+            Resource r = child("index.html");
+            if (r == null) {
+                return null;
+            } else if (r instanceof FileResource) {
+                FileResource fr = (FileResource) r;
+                indexPage = fr.getHtml();
+            } else if (r instanceof RenderFileResource) {
+                indexPage = (RenderFileResource) r;
+            } else {
+                return null;
+            }
+        }
+        return indexPage;
     }    
 }

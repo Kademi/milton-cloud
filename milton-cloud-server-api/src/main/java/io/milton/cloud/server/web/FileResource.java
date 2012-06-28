@@ -159,7 +159,13 @@ public class FileResource extends AbstractContentResource implements Replaceable
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        
+
+        doSave();
+
+        tx.commit();
+    }
+
+    public void doSave() throws BadRequestException, NotAuthorizedException {
         // htmlPage will only have been set if html content fields have been set, in which
         // case we need to generate and persist html content
         if (htmlPage != null) {
@@ -170,6 +176,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
             setContent(bin);
             parent.save();
         }
-        tx.commit();
+
     }
 }

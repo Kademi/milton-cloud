@@ -55,7 +55,7 @@ public class EmailApp implements MenuApplication{
         if( parent instanceof UserResource) {
             UserResource wrf = (UserResource) parent;
             if( requestedName.equals("myInbox")) {
-                return new MyInboxPage(requestedName, wrf, wrf.getServices()); 
+                //return new MyInboxPage(requestedName, wrf, wrf.getServices()); 
             }
         }
         return null;
@@ -67,6 +67,11 @@ public class EmailApp implements MenuApplication{
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
             children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation()));
         }        
+        if( parent instanceof UserResource) {
+            UserResource ur = (UserResource) parent;
+            EmailFolder f = new EmailFolder(ur, "inbox");
+            children.add(f);
+        }
     }
 
     @Override
