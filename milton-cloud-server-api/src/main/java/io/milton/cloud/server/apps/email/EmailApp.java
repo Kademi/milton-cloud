@@ -17,8 +17,10 @@ package io.milton.cloud.server.apps.email;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -48,6 +50,12 @@ public class EmailApp implements MenuApplication{
             if (requestedName.equals("manage")) {
                 MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
                 return new ManageGroupEmailsPage(requestedName, faf.getOrganisation(), faf);
+            }
+        }
+        if( parent instanceof UserResource) {
+            UserResource wrf = (UserResource) parent;
+            if( requestedName.equals("myInbox")) {
+                return new MyInboxPage(requestedName, wrf, wrf.getServices()); 
             }
         }
         return null;

@@ -189,12 +189,6 @@ public class DataSession {
             this.name = name;
             this.type = type;
             this.hash = hash;
-            if( parent != null ) {
-                System.out.println("new node: " + name + "  parent: " + parent.getName());
-                if( parent.getName() == null ) {
-                    System.out.println("parentname is null");
-                }
-            }
         }
 
         /**

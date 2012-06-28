@@ -83,10 +83,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         if (r != null) {
             return r;
         }
-        // Note that the current user might go to their own home page before they've logged in.
-        // This would mean that they would not be present in the list of children, because
-        // only the logged in user is added. So must look for them explicitly
-        //r = findEntity(childName);
         return r;
     }
 
@@ -109,8 +105,11 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            if (getCurrentUser() != null) {
+            Profile c = services.getSecurityManager().getCurrentUser();
+            System.out.println("current user: " + c);
+            if (c != null) {                
                 PrincipalResource r = findEntity(getCurrentUser());
+                System.out.println("add principal: " + r);
                 children.add(r);
             }
             Branch currentLive = website.currentBranch();

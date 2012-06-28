@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <title>Notifications</title>
+        <link rel="template" href="internal"/>
+        <link rel="stylesheet" type="text/css" href="learning.css" media="screen" />
+        <script type="text/javascript" src="jquery.pjax.js" >//</script>        
+    </head>
+    <body>
+        <div class="bar">
+            <div class="col1 col11">
+                <strong class="strongText">Notifications</strong>
+            </div>
+            <div class="clr"></div>
+        </div>
+        <!--contentLeft-->
+        <div class="contentLeft">  
+            <div class="leftBar notificationBox">
+                #set($messages = $user.inbox.folder.children.ofType.message)
+                
+                #if($messages.isEmpty())
+                <div><h3>You have no notifications</h3></div>
+                #else
+                    #foreach($msg in $messages)
+                        #set($activeClass = $formatter.ifEqual("active","",$msg,$targetPage))
+                <div class="$activeClass">
+                    <a class="close" href="#">delete</a>                    
+                    <span class="info">$formatter.formatAge($msg)</span>                    
+                    <h3><a href="$msg.url">$msg.from</a></h3>
+                    <p>$msg.subject</p>
+                </div>         
+                    #end
+                #end
+            </div>            
+        </div>
+
+        <!--contentLeftEnd-->
+        <!--contentRight-->
+        <div class="contentRight">
+            <div class="emailArea">
+                #if($targetPage.is("message"))
+                <div class="titleBox">
+                    <h2>$targetPage.subject</h2>                    
+                    <h3>From:  $targetPage.from</h3>
+                    <span class="info">$formatter.formatDateLong($targetPage)</span>
+
+                </div>
+                <div>
+                    $targetPage.html
+                </div>
+                #end
+            </div>
+        </div>
+        <!--contentRightEnd-->  
+        <div class="clr"></div>
+        #set($markRead = $targetPage.is("message") and !$targetPage.read)
+        <script type="text/javascript">       
+            jQuery(document).ready(function(){
+                initMessage($markRead, "");
+            });
+            function initMessage(markRead, page) {
+                if(!markRead) {
+                    return;
+                }
+                var url = page + "_DAV/PROPPATCH";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: "clyde:read=true",
+                    success: function() {
+
+                    },
+                    error: function(resp) {
+                        log("Failed to set read flag", resp);
+
+                    }
+                });                
+            }
+        </script>          
+    </body>
+</html>
+
+
