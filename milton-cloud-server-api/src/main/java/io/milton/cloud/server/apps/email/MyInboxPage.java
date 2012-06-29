@@ -31,7 +31,7 @@ import java.util.Map;
 public class MyInboxPage extends TemplatedHtmlPage {
 
     public MyInboxPage(String name, CommonCollectionResource parent, Services services) {
-        super(name, parent, services, "email/myInbox");
+        super(name, parent, services, "email/myInbox", "My inbox");
     }
 
     @Override

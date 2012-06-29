@@ -16,6 +16,8 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 
@@ -30,7 +32,7 @@ public interface RootFolder extends CommonCollectionResource {
      * @param name
      * @return 
      */
-    PrincipalResource findEntity(Profile user);
+    PrincipalResource findEntity(Profile user) throws NotAuthorizedException, BadRequestException;
     
     @Override
     Organisation getOrganisation();

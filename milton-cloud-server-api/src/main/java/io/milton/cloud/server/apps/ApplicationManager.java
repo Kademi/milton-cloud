@@ -25,7 +25,7 @@ import java.util.Properties;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.templating.MenuItemList;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 
@@ -178,5 +178,20 @@ public class ApplicationManager {
         } catch (InstantiationException | IllegalAccessException ex) {
             throw new RuntimeException(s, ex);
         }
+    }
+
+    /**
+     * Allow applications to append priviledges to the ACL for a resource
+     * 
+     * @param perms
+     * @param user
+     * @param aThis 
+     */
+    public void appendPriviledges(List<AccessControlledResource.Priviledge> privs, Profile user, Resource r) {
+        for (Application app : apps) {
+            if (app instanceof PriviledgeApplication) {
+                ((PriviledgeApplication) app).appendPriviledges(privs, user, r);
+            }
+        }        
     }
 }

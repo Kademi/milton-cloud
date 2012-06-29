@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.templating.TitledPage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -39,20 +40,22 @@ import io.milton.resource.GetableResource;
  *
  * @author brad
  */
-public class TemplatedHtmlPage extends AbstractResource implements GetableResource {
+public class TemplatedHtmlPage extends AbstractResource implements GetableResource, TitledPage {
 
     protected final String name;
     protected final CommonCollectionResource parent;
     protected final String template;
     protected Map<String,Object> model;
+    protected String title;
     
     private boolean forceLogin;
     
-    public TemplatedHtmlPage(String name, CommonCollectionResource parent, Services services, String template) {
+    public TemplatedHtmlPage(String name, CommonCollectionResource parent, Services services, String template, String title) {
         super(services);
         this.name = name;
         this.parent = parent;       
         this.template = template;
+        this.title = title;
     }
 
     @Override
@@ -152,7 +155,11 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     protected Map<String, Object> buildModel(Map<String, String> params) {
         return new HashMap<>();
     }
-    
-    
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+        
     
 }

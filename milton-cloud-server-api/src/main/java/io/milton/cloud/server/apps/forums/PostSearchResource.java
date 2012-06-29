@@ -20,6 +20,8 @@ import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonWriter;
 import io.milton.http.Auth;
 import io.milton.http.Range;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -73,6 +75,13 @@ public class PostSearchResource extends AbstractResource implements GetableResou
         }
         jsonWriter.write(beans, out);
     }
+
+    @Override
+    public boolean authorise(Request request, Method method, Auth auth) {
+        return super.authorise(request, method, auth);
+    }
+    
+    
         
     @Override
     public boolean isDir() {

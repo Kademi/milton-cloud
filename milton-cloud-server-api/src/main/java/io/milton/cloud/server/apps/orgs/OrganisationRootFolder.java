@@ -21,6 +21,7 @@ import io.milton.http.Request.Method;
 import io.milton.http.exceptions.NotAuthorizedException;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
@@ -72,31 +73,14 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     }
 
     @Override
-    public PrincipalResource findEntity(Profile u) {
-        PrincipalResource r = childEntities.get(u.getName());
-        if (r != null) {
-            return r;
-        }
-        if (u == null) {
-            return null;
-        } else {
-            UserResource ur = new UserResource(this, u, applicationManager);
-            childEntities.put(u.getName(), ur);
-            return ur;
-        }
+    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
+        return UserApp.findEntity(u, this);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            Profile user = getCurrentUser();
-            if (user != null) {
-                PrincipalResource r = findEntity(getCurrentUser());
-                if (r != null) {
-                    children.add(r);
-                }
-            }
             if (organisation.getRepositories() != null) {
                 for (Repository repo : organisation.getRepositories()) {
                     RepositoryFolder rf = new RepositoryFolder(this, repo, false);

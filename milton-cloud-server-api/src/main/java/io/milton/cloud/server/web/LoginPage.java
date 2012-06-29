@@ -36,7 +36,7 @@ public class LoginPage implements GetableResource, CommonResource {
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        parent.getServices().getHtmlTemplater().writePage("login", this, params, out); 
+        parent.getServices().getHtmlTemplater().writePage("login/login", this, params, out); 
     }
 
     @Override

@@ -64,9 +64,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
-            System.out.println("DirectoryResource.getChildren: " + getName() + " - " + children.size());
             services.getApplicationManager().addBrowseablePages(this, children);
-            System.out.println("DirectoryResource.getChildren: " + getName() + " - " + children.size());
         }
         return children;
     }

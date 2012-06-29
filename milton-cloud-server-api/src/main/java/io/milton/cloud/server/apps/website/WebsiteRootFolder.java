@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.web.*;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
@@ -44,7 +45,6 @@ import io.milton.vfs.db.utils.SessionManager;
  */
 public class WebsiteRootFolder extends AbstractResource implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
 
-    private Map<String, PrincipalResource> childEntities = new HashMap<>();
     private final ApplicationManager applicationManager;
     private final Website website;
     private ResourceList children;
@@ -87,31 +87,14 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     }
 
     @Override
-    public PrincipalResource findEntity(Profile u) {
-        PrincipalResource r = childEntities.get(u.getName());
-        if (r != null) {
-            return r;
-        }
-        if (u == null) {
-            return null;
-        } else {
-            UserResource ur = new UserResource(this, u, applicationManager);
-            childEntities.put(u.getName(), ur);
-            return ur;
-        }
+    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
+        return UserApp.findEntity(u, this);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            Profile c = services.getSecurityManager().getCurrentUser();
-            System.out.println("current user: " + c);
-            if (c != null) {                
-                PrincipalResource r = findEntity(getCurrentUser());
-                System.out.println("add principal: " + r);
-                children.add(r);
-            }
             Branch currentLive = website.currentBranch();
             if (currentLive != null) {
                 BranchFolder rf = new BranchFolder("content", this, currentLive, true);
@@ -171,8 +154,11 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         // TODO: also include priviledges on the repo, eg:
         //List<Permission> perms = itemVersion.getItem().grantedPermissions(user);
         //SecurityUtils.addPermissions(perms, list);
-        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getRepository().getBaseEntity(), SessionManager.session());
+        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getRepository().getBaseEntity(), SessionManager.session());        
+        // TODO: need a pluggable mechanism to inject permissions based on enrolements
+        
         SecurityUtils.addPermissions(perms, list);
+        services.getApplicationManager().appendPriviledges(list, user, this); 
     }
 
     @Override

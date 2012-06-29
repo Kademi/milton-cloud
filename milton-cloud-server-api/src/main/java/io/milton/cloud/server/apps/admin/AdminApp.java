@@ -47,8 +47,8 @@ public class AdminApp implements MenuApplication {
             switch (requestedName) {
                 case "dashboard":
                     MenuItem.setActiveId("menuDashboard");
-                    return new TemplatedHtmlPage("dashboard", p, p.getServices(), "admin/dashboard");
-                case "users":
+                    return new TemplatedHtmlPage("dashboard", p, p.getServices(), "admin/dashboard", "Admin dashboard");
+                case "manageUsers":
                     MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuUsers");
                     return new UserAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
                 case "groups":
@@ -87,7 +87,7 @@ public class AdminApp implements MenuApplication {
                 parent.getOrCreate("menuWebsiteManager", "Website manager").setOrdering(30);
                 break;
             case "menuGroupsUsers":
-                parent.getOrCreate("menuUsers", "Manage users", parentPath.child("users")).setOrdering(10);
+                parent.getOrCreate("menuUsers", "Manage users", parentPath.child("manageUsers")).setOrdering(10);
                 parent.getOrCreate("menuGroups", "Manage groups", parentPath.child("groups")).setOrdering(20);
                 Path p = parentOrg.getPath().child("organisations").child("manage");
                 parent.getOrCreate("menuOrgs", "Manage Business units", p).setOrdering(30);

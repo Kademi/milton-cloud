@@ -90,7 +90,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        System.out.println("sendContent: fileresource: " + getName());
         if (params != null && params.containsKey("type") && "hash".equals(params.get("type"))) {
             String s = fileNode.getHash() + "";
             out.write(s.getBytes());

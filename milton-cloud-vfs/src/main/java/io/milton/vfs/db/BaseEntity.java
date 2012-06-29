@@ -195,7 +195,9 @@ public class BaseEntity implements Serializable {
     
 
     /**
-     * Give this entity the given priviledge to access the grantedOn entity
+     * Give this entity the given priviledge to access the grantedOn entity or resource
+     * 
+     * Usually "this" is a user or group, and grantedOn is a resource like an organisation
      *
      * @param priviledge
      * @param grantedOn

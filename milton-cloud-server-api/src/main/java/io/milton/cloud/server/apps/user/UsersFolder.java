@@ -60,6 +60,12 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         services.getHtmlTemplater().writePage("user/home", this, params, out);
     }
+
+    @Override
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        return super.child(childName);
+    }
+    
     
         
     @Override

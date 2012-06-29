@@ -57,7 +57,8 @@ public class Permission implements Serializable {
     }
 
     /**
-     * The physical, discrete, entity to convery the permission to.
+     * The physical, discrete, entity to convey the permission to. This will
+     * usually be a user or a group
      *
      * @return
      */
@@ -79,6 +80,13 @@ public class Permission implements Serializable {
         this.grantedOnBranch = grantedOnBranch;
     }    
     
+    /**
+     * This is the entity which permission is being given to access. This entity
+     * might be something like an organisation, which means that the grantee (or
+     * granteePrincipal) is given access to that organisation
+     * 
+     * @return 
+     */
     @ManyToOne
     public BaseEntity getGrantedOnEntity() {
         return grantedOnEntity;

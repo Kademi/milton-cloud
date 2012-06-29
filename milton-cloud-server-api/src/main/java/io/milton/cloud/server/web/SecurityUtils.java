@@ -1,5 +1,7 @@
 package io.milton.cloud.server.web;
 
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.Profile;
@@ -54,7 +56,7 @@ public class SecurityUtils {
         }
     }
 
-    public static Map<Principal, List<AccessControlledResource.Priviledge>> toMap(List<Permission> perms) {
+    public static Map<Principal, List<AccessControlledResource.Priviledge>> toMap(List<Permission> perms) throws NotAuthorizedException, BadRequestException {
         Map<Principal, List<AccessControlledResource.Priviledge>> map = new HashMap<>();
         if (perms != null) {
             for (Permission p : perms) {

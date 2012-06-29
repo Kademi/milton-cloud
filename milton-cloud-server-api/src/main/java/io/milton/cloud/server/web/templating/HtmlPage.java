@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author brad
  */
-public interface HtmlPage {
+public interface HtmlPage extends  TitledPage{
     
     /**
      * Css classes defined on the body element
@@ -53,13 +53,6 @@ public interface HtmlPage {
     String getBody();
 
     void setBody(String b);
-
-    /**
-     * Get the page title, as defined in the <head> section
-     * 
-     * @return 
-     */
-    String getTitle();
     
     void setTitle(String t);
 

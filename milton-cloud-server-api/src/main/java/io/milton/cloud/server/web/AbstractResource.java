@@ -1,6 +1,6 @@
 package io.milton.cloud.server.web;
 
-
+import com.ettrema.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +23,8 @@ import io.milton.http.values.HrefList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReportableResource;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,12 +38,11 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
      * For templating, return true if this is a directory, false for a file
      */
     public abstract boolean isDir();
-    
     protected final Services services;
 
     public AbstractResource(Services services) {
         this.services = services;
-        if( services == null ) {
+        if (services == null) {
             throw new NullPointerException("services");
         }
     }
@@ -55,7 +56,11 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public Object authenticate(String user, String password) {
         Profile u = (Profile) services.getSecurityManager().authenticate(getOrganisation(), user, password);
         if (u != null) {
-            return SpliffyResourceFactory.getRootFolder().findEntity(u);
+            try {
+                return SpliffyResourceFactory.getRootFolder().findEntity(u);
+            } catch (NotAuthorizedException | BadRequestException ex) {
+                throw new RuntimeException(ex);
+            }
         } else {
             return null;
         }
@@ -65,12 +70,16 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public Object authenticate(DigestResponse digestRequest) {
         Profile u = (Profile) services.getSecurityManager().authenticate(getOrganisation(), digestRequest);
         if (u != null) {
-            PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);
-            if (ur == null) {
-                throw new RuntimeException("Failed to find UserResource for: " + u.getName());
+            try {
+                PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);
+                if (ur == null) {
+                    throw new RuntimeException("Failed to find UserResource for: " + u.getName());
+                }
+                log.warn("sigest auth ok: " + ur);
+                return ur;
+            } catch (NotAuthorizedException | BadRequestException ex) {
+                throw new RuntimeException(ex);
             }
-            log.warn("sigest auth ok: " + ur);
-            return ur;
         } else {
             log.warn("digest auth failed, got null user");
             return null;
@@ -79,15 +88,11 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        
-        // TODO: HACK! use explicit authorisation once we figure out how
-        
-        return auth != null && auth.getTag() != null;
-//        boolean b = services.getSecurityManager().authorise(request, method, auth, this);
-//        if (!b) {
-//            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
-//        }
-//        return b;
+        boolean b = services.getSecurityManager().authorise(request, method, auth, this);
+        if (!b) {
+            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
+        }
+        return b;
     }
 
     @Override
@@ -105,7 +110,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
      * @return
      */
     @Override
-    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException{
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
         if (request.getMethod().equals(Request.Method.GET)) {
             if (this instanceof CollectionResource) {
                 if (request.getParams().isEmpty()) { // only do redirect if no request params
@@ -170,9 +175,9 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         if (auth != null && auth.getTag() != null) {
             UserResource userRes = (UserResource) auth.getTag();
             user = userRes.getThisUser();
-        }        
+        }
         addPrivs(list, user);
-        
+
         return list;
     }
 
@@ -204,21 +209,21 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public boolean is(String type) {
         return type.equals("resource");
     }
-    
+
     @Override
     public Path getPath() {
         CommonCollectionResource p = getParent();
-        if( p != null ) {
+        if (p != null) {
             return p.getPath().child(this.getName());
         } else {
             return Path.root;
         }
     }
-    
+
     public String getHref() {
         Path p = getPath();
         String s = p.toString();
-        if( this instanceof CollectionResource) {
+        if (this instanceof CollectionResource) {
             s += "/";
         }
         return s;

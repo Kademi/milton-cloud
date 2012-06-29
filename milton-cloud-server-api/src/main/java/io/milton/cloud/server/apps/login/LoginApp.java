@@ -35,7 +35,7 @@ public class LoginApp implements MenuApplication{
     public Resource getPage(Resource parent, String childName) {
         if( parent instanceof RootFolder) {            
             RootFolder rf = (RootFolder) parent;
-            if( childName.equals("login")) {
+            if( childName.equals("login.html")) {
                 return new LoginPage(services.getSecurityManager(), rf); 
             }            
         }

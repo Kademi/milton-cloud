@@ -71,18 +71,24 @@ public class HtmlTemplateRenderer {
         }
         
         PrintWriter pw = new PrintWriter(out);
-        pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+        pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
         pw.write("<html>\n");
         pw.write("<head>\n");
 
         List<WebResource> pageWebResources = null;
         List<String> pageBodyClasses = null;
+        System.out.println("renderHtml: " + page.getClass());
         if (page instanceof HtmlPage) {
             HtmlPage htmlPage = (HtmlPage) page;
             pageWebResources = htmlPage.getWebResources();
             pageBodyClasses = htmlPage.getBodyClasses();
             BodyRenderer bodyRenderer = new BodyRenderer(htmlPage);
-            datamodel.put("body", bodyRenderer);
+            datamodel.put("body", bodyRenderer);            
+        }
+        
+        if( page instanceof TitledPage) {
+            TitledPage titledPage = (TitledPage) page;
+            pw.write("<title>" + titledPage.getTitle() + "</title>");
         }
 
         List<WebResource> webResources = deDupe(themeTemplateTemplateMeta.getWebResources(), bodyTemplateMeta.getWebResources(), pageWebResources);
