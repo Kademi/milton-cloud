@@ -23,9 +23,9 @@ import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.Utils;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.common.InternationalizedString;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 
+import static io.milton.context.RequestContext._;
+
 /**
  * Represents an Address Book
  *
@@ -59,8 +61,8 @@ public class ContactsFolder extends AbstractCollectionResource implements Addres
     
     private List<ContactResource> children;
 
-    public ContactsFolder(ContactsHomeFolder parent, Services services, AddressBook addressBook, ContactManager contactManager) {
-        super(services);
+    public ContactsFolder(ContactsHomeFolder parent,  AddressBook addressBook, ContactManager contactManager) {
+        
         this.parent = parent;
         this.addressBook = addressBook;
         this.contactManager = contactManager;
@@ -68,7 +70,7 @@ public class ContactsFolder extends AbstractCollectionResource implements Addres
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("contacts", this, params, out);
+        _(HtmlTemplater.class).writePage("contacts", this, params, out);
     }
     
     

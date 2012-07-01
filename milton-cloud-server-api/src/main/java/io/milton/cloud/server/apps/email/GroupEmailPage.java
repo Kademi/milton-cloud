@@ -16,7 +16,6 @@
  */
 package io.milton.cloud.server.apps.email;
 
-import io.milton.cloud.server.apps.forums.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -29,6 +28,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -51,6 +51,8 @@ import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -64,7 +66,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     private final GroupEmailJob job;
 
     public GroupEmailPage(GroupEmailJob job, CommonCollectionResource parent) {
-        super(parent.getServices());
+        
         this.job = job;
         this.parent = parent;
     }
@@ -153,7 +155,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
         MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
-        services.getHtmlTemplater().writePage("email/groupEmailJob", this, params, out);
+        _(HtmlTemplater.class).writePage("email/groupEmailJob", this, params, out);
     }
         
     @Override

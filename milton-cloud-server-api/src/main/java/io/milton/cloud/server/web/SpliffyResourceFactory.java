@@ -4,6 +4,7 @@ import com.ettrema.common.Service;
 import io.milton.cloud.server.db.utils.UserDao;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.manager.MCRootContext;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
@@ -18,7 +19,7 @@ import io.milton.vfs.db.utils.SessionManager;
  *
  * @author brad
  */
-public class SpliffyResourceFactory implements ResourceFactory, Service {
+public class SpliffyResourceFactory implements ResourceFactory {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffyResourceFactory.class);
 
@@ -31,35 +32,23 @@ public class SpliffyResourceFactory implements ResourceFactory, Service {
     }
     private final UserDao userDao;
     private final SpliffySecurityManager securityManager;
-    private final Services services;
     private final ApplicationManager applicationManager;
     private final EventManager eventManager;
     private final SessionManager sessionManager;
 
-    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, Services services, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager) {
+    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager) {
         this.userDao = userDao;
         this.securityManager = securityManager;
-        this.services = services;
         this.applicationManager = applicationManager;
         this.eventManager = eventManager;
         this.sessionManager = sessionManager;
     }
 
     @Override
-    public void start() {
-        applicationManager.init(this);
-    }
-
-    @Override
-    public void stop() {
-        applicationManager.shutDown();
-    }
-
-    @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
         Path path = Path.path(sPath);
         Resource r = find(host, path);
-        if( r != null ) {
+        if (r != null) {
             System.out.println("Got resource: " + r.getClass());
         }
         return r;
@@ -102,10 +91,6 @@ public class SpliffyResourceFactory implements ResourceFactory, Service {
 
     public SpliffySecurityManager getSecurityManager() {
         return securityManager;
-    }
-
-    public Services getServices() {
-        return services;
     }
 
     public UserDao getUserDao() {

@@ -23,6 +23,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.*;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
@@ -40,14 +41,13 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.Services;
-import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -61,8 +61,7 @@ public class SignupPage extends AbstractResource implements GetableResource, Pos
     private final WebsiteRootFolder parent;
     private JsonResult jsonResult;
 
-    public SignupPage(String name, WebsiteRootFolder parent, Services services) {
-        super(services);
+    public SignupPage(String name, WebsiteRootFolder parent) {       
         this.parent = parent;
         this.name = name;
     }
@@ -72,7 +71,7 @@ public class SignupPage extends AbstractResource implements GetableResource, Pos
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
-            services.getHtmlTemplater().writePage("signup", this, params, out);
+            _(HtmlTemplater.class).writePage("signup", this, params, out);
         }
     }
 
@@ -98,7 +97,7 @@ public class SignupPage extends AbstractResource implements GetableResource, Pos
             if( password == null || password.trim().length() == 0 ) {
                 throw new Exception("No password given");
             }
-            services.getSecurityManager().getPasswordManager().setPassword(u, password);
+            _(SpliffySecurityManager.class).getPasswordManager().setPassword(u, password);
             
             addCalendar("cal", u, session);     
             addAddressBook("contact", u, session);         

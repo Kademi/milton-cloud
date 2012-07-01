@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -34,6 +35,8 @@ import java.util.Map;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import static io.milton.context.RequestContext._;
+
 /**
  * A RepositoryFolder just holds the branches of the folder
  *
@@ -50,7 +53,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
     
 
     public RepositoryFolder(CommonCollectionResource parent, Repository r, boolean renderMode) {
-        super(parent.getServices());
         this.renderMode = renderMode;
         this.repo = r;
         this.parent = parent;
@@ -69,7 +71,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
                 BranchFolder bf = new BranchFolder(b.getName(), this, b, renderMode);
                 children.add(bf);
             }
-            services.getApplicationManager().addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }
@@ -99,7 +101,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         
-        Branch b = repo.createBranch(newName, getCurrentUser(), session);
+        Branch b = repo.createBranch(newName, _(SpliffySecurityManager.class).getCurrentUser(), session);
         BranchFolder bf = new BranchFolder(newName, this, b, false);
         
         tx.commit();

@@ -14,9 +14,7 @@
  */
 package io.milton.cloud.server.apps.email;
 
-import io.milton.cloud.server.apps.forums.Forum;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
@@ -67,6 +65,13 @@ public class EmailItem implements Serializable{
     private Date sendStatusDate;
     
     private boolean readStatus; // status of reading the email, if delivered to an internal user.
+    private int messageSize;
+    private String disposition;
+    private String encoding;
+    private String contentLanguage;
+    private String toList;
+    private String ccList;
+    private String bccList;
     
     
 
@@ -210,5 +215,65 @@ public class EmailItem implements Serializable{
     public void setEmailSendAttempts(List<EmailSendAttempt> emailSendAttempts) {
         this.emailSendAttempts = emailSendAttempts;
     }
+
+    public void setMessageSize(int size) {
+        this.messageSize = size;
+    }
+
+    public int getMessageSize() {
+        return messageSize;
+    }
+        
+
+    public void setDisposition(String disposition) {
+        this.disposition = disposition;
+    }
+
+    public String getDisposition() {
+        return disposition;
+    }
+
+    public String getBccList() {
+        return bccList;
+    }
+
+    public void setBccList(String bccList) {
+        this.bccList = bccList;
+    }
+
+    public String getCcList() {
+        return ccList;
+    }
+
+    public void setCcList(String ccList) {
+        this.ccList = ccList;
+    }
+
+    public String getContentLanguage() {
+        return contentLanguage;
+    }
+
+    public void setContentLanguage(String contentLanguage) {
+        this.contentLanguage = contentLanguage;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public String getToList() {
+        return toList;
+    }
+
+    public void setToList(String toList) {
+        this.toList = toList;
+    }
+    
+     
+   
 
 }

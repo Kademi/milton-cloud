@@ -32,7 +32,7 @@ public class GroupEmailAdminFolder extends AbstractCollectionResource {
     
 
     public GroupEmailAdminFolder(String name, CommonCollectionResource parent, Organisation org) {
-        super(parent.getServices());
+        
         this.name = name;
         this.parent = parent;
         this.org = org;

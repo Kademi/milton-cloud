@@ -15,8 +15,8 @@
 package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.server.apps.signup.SignupPage;
-import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
@@ -31,12 +31,13 @@ import io.milton.resource.PostableResource;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -51,8 +52,7 @@ public class OrgsAdminPage  extends AbstractResource implements GetableResource,
     private final Organisation organisation;
     private JsonResult jsonResult;
 
-    public OrgsAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
-        super(services);
+    public OrgsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {       
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -66,7 +66,7 @@ public class OrgsAdminPage  extends AbstractResource implements GetableResource,
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        services.getHtmlTemplater().writePage("admin/manageOrgs", this, params, out);
+        _(HtmlTemplater.class).writePage("admin/manageOrgs", this, params, out);
     }
 
     

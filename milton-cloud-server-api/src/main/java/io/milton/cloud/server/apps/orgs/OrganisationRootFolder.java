@@ -29,6 +29,8 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 
+import static io.milton.context.RequestContext._;
+
 /**
  * This is the root folder for the admin site. The admin site is used to setup
  * users and websites accessing the server
@@ -43,8 +45,8 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     private final Organisation organisation;
     private ResourceList children;
 
-    public OrganisationRootFolder(Services services, ApplicationManager applicationManager, Organisation organisation) {
-        super(null, organisation, services);
+    public OrganisationRootFolder( ApplicationManager applicationManager, Organisation organisation) {
+        super(null, organisation);
         this.applicationManager = applicationManager;
         this.organisation = organisation;
     }
@@ -57,7 +59,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
         if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
-            return services.getSecurityManager().getCurrentUser() != null;
+            return _(SpliffySecurityManager.class).getCurrentUser() != null;
         }
         return true;
     }
@@ -87,9 +89,9 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
                     children.add(rf);
                 }
             }
-            children.add(new OrganisationsFolder("organisations", this, services, organisation));
+            children.add(new OrganisationsFolder("organisations", this, organisation));
             
-            services.getApplicationManager().addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }

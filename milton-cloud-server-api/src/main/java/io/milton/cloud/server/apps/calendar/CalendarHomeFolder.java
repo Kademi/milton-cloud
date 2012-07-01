@@ -12,10 +12,10 @@ import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.Utils;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.principal.Principal;
@@ -28,6 +28,8 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.resource.Resource;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -39,8 +41,8 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
     private final CalendarManager calendarManager;
     private List<CalendarFolder> children;
 
-    public CalendarHomeFolder(UserResource parent, Services services, String name, CalendarManager calendarManager) {
-        super(services);
+    public CalendarHomeFolder(UserResource parent,  String name, CalendarManager calendarManager) {
+        
         this.parent = parent;
         this.name = name;
         this.calendarManager = calendarManager;
@@ -49,7 +51,7 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         Calendar calendar = calendarManager.createCalendar(parent.getOwner(), newName);
-        return new CalendarFolder(this, services, calendar, calendarManager);
+        return new CalendarFolder(this, calendar, calendarManager);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
             children = new ArrayList<>();
             if (calendarList != null) {
                 for (Calendar cal : calendarList) {
-                    CalendarFolder f = new CalendarFolder(this, services, cal, calendarManager);
+                    CalendarFolder f = new CalendarFolder(this, cal, calendarManager);
                     children.add(f);
                 }
             }
@@ -109,7 +111,7 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        getServices().getHtmlTemplater().writePage("calendar/calendarsHome", this, params, out);
+        _(HtmlTemplater.class).writePage("calendar/calendarsHome", this, params, out);
     }
 
     @Override

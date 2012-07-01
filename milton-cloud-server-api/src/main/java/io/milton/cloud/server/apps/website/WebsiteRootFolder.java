@@ -39,6 +39,8 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -49,8 +51,8 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     private final Website website;
     private ResourceList children;
 
-    public WebsiteRootFolder(Services services, ApplicationManager applicationManager, Website website) {
-        super(services);
+    public WebsiteRootFolder( ApplicationManager applicationManager, Website website) {
+        
         this.website = website;
         this.applicationManager = applicationManager;
     }
@@ -63,7 +65,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
         if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
-            return getCurrentUser() != null;
+            return _(SpliffySecurityManager.class).getCurrentUser() != null;
         }
         return true;
     }
@@ -158,7 +160,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         // TODO: need a pluggable mechanism to inject permissions based on enrolements
         
         SecurityUtils.addPermissions(perms, list);
-        services.getApplicationManager().appendPriviledges(list, user, this); 
+        _(ApplicationManager.class).appendPriviledges(list, user, this); 
     }
 
     @Override

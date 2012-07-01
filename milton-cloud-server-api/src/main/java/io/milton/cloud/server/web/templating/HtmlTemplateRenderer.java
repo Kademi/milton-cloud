@@ -30,6 +30,7 @@ import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.WebUtils;
 
 /**
@@ -47,7 +48,7 @@ public class HtmlTemplateRenderer {
         this.formatter = formatter;
     }
 
-    public void renderHtml(RootFolder rootFolder, Resource page, Map<String, String> params, Profile user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, OutputStream out) throws IOException {
+    public void renderHtml(RootFolder rootFolder, Resource page, Map<String, String> params, UserResource user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, OutputStream out) throws IOException {
         Context datamodel = new VelocityContext();
         datamodel.put("rootFolder", rootFolder);
         CommonCollectionResource folder;
@@ -58,10 +59,12 @@ public class HtmlTemplateRenderer {
         }
         datamodel.put("page", page);
         datamodel.put("params", params);
+        Profile p = null;        
         if (user != null) {
             datamodel.put("user", user);
+            p = user.getThisUser();
         }
-        MenuItem menu = applicationManager.getRootMenuItem(page, user, rootFolder);
+        MenuItem menu = applicationManager.getRootMenuItem(page, p, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
 

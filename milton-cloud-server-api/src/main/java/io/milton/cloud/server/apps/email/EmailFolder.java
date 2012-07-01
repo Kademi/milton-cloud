@@ -14,15 +14,19 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.UserResource;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.mail.MessageFolder;
+import io.milton.mail.MessageResource;
 import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
@@ -33,29 +37,33 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * List emails for this user
  *
  * @author brad
  */
-public class EmailFolder extends AbstractCollectionResource implements GetableResource {
+public class EmailFolder extends AbstractCollectionResource implements GetableResource, MessageFolder {
     private final UserResource parent;
     private final String name;
     
     private ResourceList children;
 
     public EmailFolder(UserResource parent, String name) {
-        super(parent.getServices());
+        
         this.parent = parent;
         this.name = name;
     }
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("email/myInbox", this, params, out);
+        _(HtmlTemplater.class).writePage("email/myInbox", this, params, out);
     }
     
     public EmailFolder getInbox() {
@@ -86,7 +94,7 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if( children == null ) {
             children = new ResourceList();
-            services.getApplicationManager().addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
             List<EmailItem> items = EmailItem.findByRecipient(getUser(), SessionManager.session());
             for( EmailItem item : items ) {
                 EmailItemFolder f = new EmailItemFolder(this, item);
@@ -125,6 +133,31 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
+    }
+
+    @Override
+    public Collection<MessageResource> getMessages() {
+        try {
+            Collection<MessageResource> col = new ArrayList<>();
+            for( Resource r : getChildren()) {
+                if( r instanceof MessageResource) {
+                    col.add((MessageResource)r);
+                }
+            }
+            return col;
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public int numMessages() {
+        return getMessages().size();
+    }
+
+    @Override
+    public int totalSize() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
  
 }

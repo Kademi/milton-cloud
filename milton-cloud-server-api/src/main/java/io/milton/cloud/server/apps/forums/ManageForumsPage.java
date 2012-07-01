@@ -28,6 +28,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -39,6 +40,8 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -53,7 +56,7 @@ public class ManageForumsPage extends AbstractResource implements GetableResourc
     private final Organisation organisation;
 
     public ManageForumsPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        super(parent.getServices());
+        
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -67,7 +70,7 @@ public class ManageForumsPage extends AbstractResource implements GetableResourc
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        services.getHtmlTemplater().writePage("forums/manageForums", this, params, out);
+        _(HtmlTemplater.class).writePage("forums/manageForums", this, params, out);
     }
         
     @Override

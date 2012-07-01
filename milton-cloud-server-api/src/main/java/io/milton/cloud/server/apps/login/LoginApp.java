@@ -27,29 +27,26 @@ import io.milton.cloud.server.web.*;
  *
  * @author brad
  */
-public class LoginApp implements MenuApplication{
+public class LoginApp implements MenuApplication {
 
-    private Services services;
-    
     @Override
     public Resource getPage(Resource parent, String childName) {
-        if( parent instanceof RootFolder) {            
+        if (parent instanceof RootFolder) {
             RootFolder rf = (RootFolder) parent;
-            if( childName.equals("login.html")) {
-                return new LoginPage(services.getSecurityManager(), rf); 
-            }            
+            if (childName.equals("login.html")) {
+                return new LoginPage(rf);
+            }
         }
         return null;
     }
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        this.services = resourceFactory.getServices();
+        
     }
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        
     }
 
     @Override
@@ -57,13 +54,8 @@ public class LoginApp implements MenuApplication{
         return "login"; // only single instance
     }
 
-
     @Override
     public void appendMenu(MenuItem parent) {
         // TODO: login and logout users menu
     }
-
-
-
-    
 }

@@ -1,6 +1,7 @@
 package io.milton.cloud.server.web;
 
 import com.ettrema.logging.LogUtils;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.templating.Templater;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -23,8 +23,8 @@ import io.milton.http.values.HrefList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReportableResource;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -38,13 +38,8 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
      * For templating, return true if this is a directory, false for a file
      */
     public abstract boolean isDir();
-    protected final Services services;
 
-    public AbstractResource(Services services) {
-        this.services = services;
-        if (services == null) {
-            throw new NullPointerException("services");
-        }
+    public AbstractResource() {
     }
 
     @Override
@@ -54,7 +49,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public Object authenticate(String user, String password) {
-        Profile u = (Profile) services.getSecurityManager().authenticate(getOrganisation(), user, password);
+        Profile u = _(SpliffySecurityManager.class).authenticate(getOrganisation(), user, password);
         if (u != null) {
             try {
                 return SpliffyResourceFactory.getRootFolder().findEntity(u);
@@ -68,7 +63,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public Object authenticate(DigestResponse digestRequest) {
-        Profile u = (Profile) services.getSecurityManager().authenticate(getOrganisation(), digestRequest);
+        Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(getOrganisation(), digestRequest);
         if (u != null) {
             try {
                 PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);
@@ -88,7 +83,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        boolean b = services.getSecurityManager().authorise(request, method, auth, this);
+        boolean b = _(SpliffySecurityManager.class).authorise(request, method, auth, this);
         if (!b) {
             LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
         }
@@ -125,30 +120,21 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     }
 
     public BlobStore getBlobStore() {
-        return services.getBlobStore();
+        return _(BlobStore.class);
     }
 
     public HashStore getHashStore() {
-        return services.getHashStore();
+        return _(HashStore.class);
     }
 
-    public Templater getTemplater() {
-        return services.getHtmlTemplater();
+    public HtmlTemplater getTemplater() {
+        return _(HtmlTemplater.class);
     }
 
-    @Override
-    public Services getServices() {
-        return services;
-    }
 
     @Override
     public boolean isDigestAllowed() {
         return true;
-    }
-
-    @Override
-    public Profile getCurrentUser() {
-        return services.getSecurityManager().getCurrentUser();
     }
 
     @Override

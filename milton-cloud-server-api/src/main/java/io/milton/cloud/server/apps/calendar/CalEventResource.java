@@ -49,7 +49,7 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
     private Transaction tx; // for proppatch setting
     
     public CalEventResource(CalendarFolder parent, CalEvent event, CalendarManager calendarManager) {
-        super(parent.getServices());
+        
         this.event = event;
         this.parent = parent;
         this.calendarManager = calendarManager;

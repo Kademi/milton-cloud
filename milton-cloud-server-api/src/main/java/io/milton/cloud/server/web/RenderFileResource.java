@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import io.milton.cloud.server.web.templating.HtmlPage;
+import io.milton.cloud.server.web.templating.HtmlTemplateParser;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.WebResource;
 import io.milton.common.Path;
 import io.milton.http.Auth;
@@ -47,6 +49,8 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -65,7 +69,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     private JsonResult jsonResult;
 
     public RenderFileResource(FileResource fileResource) {
-        super(fileResource.getServices());
         this.fileResource = fileResource;
     }
 
@@ -87,7 +90,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             body = parameters.get("body");
         }
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        services.getTemplateParser().update(this, bout);
+        _(HtmlTemplateParser.class).update(this, bout);
         byte[] arr = bout.toByteArray();
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
         fileResource.replaceContent(bin, (long) arr.length);
@@ -101,7 +104,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             jsonResult.write(out);
         } else {
             checkParse();
-            services.getHtmlTemplater().writePage(template, this, params, out);
+            _(HtmlTemplater.class).writePage(template, this, params, out);
         }
     }
 
@@ -110,7 +113,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             return;
         }
         try {
-            services.getTemplateParser().parse(this, Path.root);
+            _(HtmlTemplateParser.class).parse(this, Path.root);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

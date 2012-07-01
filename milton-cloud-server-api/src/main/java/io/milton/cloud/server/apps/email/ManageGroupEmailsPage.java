@@ -16,7 +16,6 @@
  */
 package io.milton.cloud.server.apps.email;
 
-import io.milton.cloud.server.apps.forums.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -29,6 +28,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -40,6 +40,8 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -54,7 +56,7 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
     private final Organisation organisation;
 
     public ManageGroupEmailsPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        super(parent.getServices());
+        
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -68,7 +70,7 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        services.getHtmlTemplater().writePage("email/manageGroupEmail", this, params, out);
+        _(HtmlTemplater.class).writePage("email/manageGroupEmail", this, params, out);
     }
     
     public String getTitle() {

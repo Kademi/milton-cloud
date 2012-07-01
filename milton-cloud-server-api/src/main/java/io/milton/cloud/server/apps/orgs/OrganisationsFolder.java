@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.orgs;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -32,6 +33,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -44,8 +47,8 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     private final String name;
     private ResourceList children;
 
-    public OrganisationsFolder(String name, CommonCollectionResource parent, Services services, Organisation organisation) {
-        super(services);
+    public OrganisationsFolder(String name, CommonCollectionResource parent,  Organisation organisation) {
+        
         this.name = name;
         this.parent = parent;
         this.organisation = organisation;
@@ -59,7 +62,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
         if (method.equals(Request.Method.PROPFIND)) { // force login for webdav browsing
-            return services.getSecurityManager().getCurrentUser() != null;
+            return _(SpliffySecurityManager.class).getCurrentUser() != null;
         }
         return true;
     }
@@ -71,7 +74,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        Resource r = services.getApplicationManager().getPage(this, childName);
+        Resource r = _(ApplicationManager.class).getPage(this, childName);
         if( r != null ) {
             return r;
         }
@@ -83,11 +86,11 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         if (children == null) {
             children = new ResourceList();
             for( Organisation o : organisation.childOrgs()) {
-                OrganisationFolder of = new OrganisationFolder(this, o, services);
+                OrganisationFolder of = new OrganisationFolder(this, o);
                 children.add(of);
             }
             
-            services.getApplicationManager().addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }

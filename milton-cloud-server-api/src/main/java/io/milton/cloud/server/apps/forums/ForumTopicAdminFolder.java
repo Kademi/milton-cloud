@@ -47,7 +47,7 @@ public class ForumTopicAdminFolder extends AbstractCollectionResource implements
     private ResourceList children;
 
     public ForumTopicAdminFolder(ForumTopic forumTopic, CommonCollectionResource parent) {
-        super(parent.getServices());
+        
         this.forumTopic = forumTopic;
         this.parent = parent;
     }

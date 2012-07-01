@@ -18,12 +18,9 @@ package io.milton.cloud.server.apps.calendar;
 
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import io.milton.cloud.server.web.templating.MenuItem;
-import java.util.List;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.web.*;
-import io.milton.vfs.db.Profile;
 
 /**
  *
@@ -33,7 +30,6 @@ public class CalendarApp implements Application {
 
     public static final String CALENDAR_HOME_NAME = "cal";
     private CalendarManager calendarManager;
-    private Services services;
 
     @Override
     public String getInstanceId() {
@@ -47,7 +43,6 @@ public class CalendarApp implements Application {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        this.services = resourceFactory.getServices();
         calendarManager = new CalendarManager();
     }
 
@@ -55,7 +50,7 @@ public class CalendarApp implements Application {
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof UserResource) {
             UserResource rf = (UserResource) parent;
-            CalendarHomeFolder calHome = new CalendarHomeFolder(rf, services, CALENDAR_HOME_NAME, calendarManager);
+            CalendarHomeFolder calHome = new CalendarHomeFolder(rf, CALENDAR_HOME_NAME, calendarManager);
             children.add(calHome);
         }
 

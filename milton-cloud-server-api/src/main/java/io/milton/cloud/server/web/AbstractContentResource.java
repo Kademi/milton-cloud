@@ -1,6 +1,8 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.manager.CommentService;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.util.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -43,13 +47,11 @@ public abstract class AbstractContentResource extends AbstractResource implement
      * @param services
      */
     public AbstractContentResource(DataNode contentNode, ContentDirectoryResource parent) {
-        super(parent.getServices());
         this.contentNode = contentNode;
         this.parent = parent;
     }
 
     public AbstractContentResource(ContentDirectoryResource parent) {
-        super(parent.getServices());
         this.parent = parent;
     }
 
@@ -111,7 +113,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
     }
 
     protected void updateModDate() {
-        Date newDate = getServices().getCurrentDateService().getNow();
+        Date newDate = _(CurrentDateService.class).getNow();
         loadNodeMeta().setModDate(newDate);
         if( nodeMeta.getCreatedDate() == null ) {
             nodeMeta.setCreatedDate(newDate);
@@ -195,7 +197,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
     
 
     public List<CommentBean> getComments() {
-        return services.getCommentService().comments(this.loadNodeMeta().getId()); 
+        return _(CommentService.class).comments(this.loadNodeMeta().getId()); 
     }
 
     public int getNumComments() {
@@ -211,8 +213,8 @@ public abstract class AbstractContentResource extends AbstractResource implement
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         if( rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-            Profile currentUser = services.getSecurityManager().getCurrentUser();
-            services.getCommentService().newComment(this, s, wrf.getWebsite(), currentUser, SessionManager.session());
+            Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
+            _(CommentService.class).newComment(this, s, wrf.getWebsite(), currentUser, SessionManager.session());
         }
     }
 

@@ -20,7 +20,6 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.ResourceList;
@@ -31,8 +30,6 @@ import io.milton.event.EventManager;
  * @author brad
  */
 public class SignupApp implements Application {
-
-    private Services services;
     private EventManager eventManager;
     private String signupPageName = "signup";
 
@@ -49,7 +46,6 @@ public class SignupApp implements Application {
         
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        this.services = resourceFactory.getServices();
         this.eventManager = resourceFactory.getEventManager();
     }
 
@@ -58,7 +54,7 @@ public class SignupApp implements Application {
         if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder rf = (WebsiteRootFolder) parent;
             if (requestedName.equals(signupPageName)) {
-                return new SignupPage(requestedName, rf, services);
+                return new SignupPage(requestedName, rf);
             }
         }
         return null;

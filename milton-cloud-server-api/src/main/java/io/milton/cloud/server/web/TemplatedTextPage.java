@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.templating.TextTemplater;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -34,6 +35,8 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -45,8 +48,7 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
     protected final String contentType;
     protected final String template;
     
-    public TemplatedTextPage(String name, CommonCollectionResource parent, Services services, String contentType, String template) {
-        super(services);
+    public TemplatedTextPage(String name, CommonCollectionResource parent, String contentType, String template) {
         this.name = name;
         this.parent = parent;
         this.contentType = contentType;
@@ -63,7 +65,7 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         System.out.println("template: " + template);
-        services.getTextTemplater().writePage(template, this, params, out);
+        _(TextTemplater.class).writePage(template, this, params, out);
     }
        
     @Override

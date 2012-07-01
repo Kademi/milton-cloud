@@ -17,12 +17,9 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
-import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.utils.SessionManager;
-import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  *
@@ -30,8 +27,8 @@ import java.util.Map;
  */
 public class MyInboxPage extends TemplatedHtmlPage {
 
-    public MyInboxPage(String name, CommonCollectionResource parent, Services services) {
-        super(name, parent, services, "email/myInbox", "My inbox");
+    public MyInboxPage(String name, CommonCollectionResource parent) {
+        super(name, parent, "email/myInbox", "My inbox");
     }
 
     @Override

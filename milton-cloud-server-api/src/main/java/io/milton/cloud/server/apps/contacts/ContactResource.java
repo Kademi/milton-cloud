@@ -61,7 +61,7 @@ public class ContactResource extends AbstractResource implements GetableResource
     private Transaction tx; // for proppatch setting
 
     public ContactResource(ContactsFolder parent, Contact contact, ContactManager contactManager) {
-        super(parent.getServices());
+        
         this.contact = contact;
         this.parent = parent;
         this.contactManager = contactManager;

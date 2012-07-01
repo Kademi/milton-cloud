@@ -55,7 +55,7 @@ public class PostSearchResource extends AbstractResource implements GetableResou
     
 
     public PostSearchResource(String name, Website website, CommonCollectionResource parent) {
-        super(parent.getServices());
+        
         this.website = website;
         this.parent = parent;
         this.name = name;

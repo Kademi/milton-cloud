@@ -15,6 +15,8 @@ import io.milton.cloud.server.apps.calendar.CalendarFolder;
 import io.milton.cloud.server.apps.calendar.CalendarHomeFolder;
 import io.milton.cloud.server.apps.contacts.ContactsFolder;
 import io.milton.cloud.server.apps.contacts.ContactsHomeFolder;
+import io.milton.cloud.server.apps.email.EmailFolder;
+import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -26,27 +28,30 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.HrefList;
 import io.milton.ldap.Condition;
+import io.milton.mail.Mailbox;
+import io.milton.mail.MessageFolder;
+import io.milton.mail.StandardMessageFactoryImpl;
 import io.milton.resource.*;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.utils.SessionManager;
+import javax.mail.internet.MimeMessage;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
  * @author brad
  */
-public class UserResource extends AbstractCollectionResource implements CollectionResource, MakeCollectionableResource, PropFindableResource, GetableResource, PrincipalResource {
+public class UserResource extends AbstractCollectionResource implements CollectionResource, MakeCollectionableResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserResource.class);
     private final Profile user;
     private final CommonCollectionResource parent;
-    private final ApplicationManager applicationManager;
     private ResourceList children;
 
-    public UserResource(CommonCollectionResource parent, Profile u, ApplicationManager applicationManager) {
-        super(parent.getServices());
+    public UserResource(CommonCollectionResource parent, Profile u) {
         this.parent = parent;
         this.user = u;
-        this.applicationManager = applicationManager;
     }
 
     public List<BranchFolder> getRepositories() throws NotAuthorizedException, BadRequestException {
@@ -100,7 +105,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
                     children.add(rr);
                 }
             }
-            applicationManager.addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }
@@ -289,5 +294,47 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
+    }
+
+    @Override
+    public boolean authenticate(String password) {
+        return _(PasswordManager.class).verifyPassword(user, password);
+    }
+
+    @Override
+    public boolean authenticateMD5(byte[] passwordHash) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public MessageFolder getInbox() {
+        try {
+            Resource dir = child("inbox");            
+            if( dir instanceof EmailFolder) {
+                EmailFolder emailFolder = (EmailFolder) dir;
+                return emailFolder;
+            } else {
+                throw new RuntimeException("inbox folder is not a valid mesasge folder");
+            }
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
+        }
+        
+    }
+
+    @Override
+    public MessageFolder getMailFolder(String name) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isEmailDisabled() {
+        return false;
+    }
+
+    @Override
+    public void storeMail(MimeMessage mm) {
+        StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
+        
     }
 }

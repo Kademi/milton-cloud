@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.vfs.data.HashCalc;
 import io.milton.http.HttpManager;
@@ -29,6 +30,8 @@ import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import static io.milton.context.RequestContext._;
+
 /**
  * Represents a version of a directory, containing the members which are in that
  * directory in the repository snapshot
@@ -53,7 +56,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        Resource r = services.getApplicationManager().getPage(this, childName);
+        Resource r = _(ApplicationManager.class).getPage(this, childName);
         if (r != null) {
             return r;
         }
@@ -64,7 +67,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
-            services.getApplicationManager().addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }
@@ -255,19 +258,19 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        
+
         doSave();
-        
+
         tx.commit();
     }
-    
+
     public void doSave() throws NotAuthorizedException, BadRequestException {
         if (updatedIndex = true) {
             RenderFileResource html = getIndex();
             if (html != null) {
                 html.doSave();
             }
-        }        
+        }
     }
 
     @Override

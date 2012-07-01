@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.cloud.server.apps.signup.SignupPage;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -44,6 +44,8 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -59,8 +61,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     private JsonResult jsonResult;
     private List<Profile> searchResults;
 
-    public UserAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
-        super(services);
+    public UserAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -75,7 +76,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
         
-        UserDao userDao = services.getSecurityManager().getUserDao();        
+        UserDao userDao = _(UserDao.class);
         
         OrganisationFolder orgFolder = WebUtils.findParentOrg(this);
         Organisation org = orgFolder.getOrganisation();
@@ -85,7 +86,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
         } else {
             searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
         }
-        services.getHtmlTemplater().writePage("admin/userAdmin", this, params, out);
+        _(HtmlTemplater.class).writePage("admin/userAdmin", this, params, out);
     }
 
     

@@ -33,7 +33,6 @@ public class ContactsApp implements Application {
     public static final String ADDRESS_BOOK_HOME_NAME = "abs";
     
     private ContactManager contactManager;           
-    private Services services;    
     private SpliffyResourceFactory resourceFactory;    
     
     @Override
@@ -43,7 +42,6 @@ public class ContactsApp implements Application {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws IOException{
-        this.services = resourceFactory.getServices();
         contactManager = new ContactManager();
         this.resourceFactory = resourceFactory;
 //        SpliffyLdapTransactionManager txManager = new SpliffyLdapTransactionManager(resourceFactory.getSessionManager());                
@@ -62,7 +60,7 @@ public class ContactsApp implements Application {
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if( parent instanceof UserResource) {            
             UserResource rf = (UserResource) parent;
-            ContactsHomeFolder calHome = new ContactsHomeFolder(rf, services, ADDRESS_BOOK_HOME_NAME, contactManager);
+            ContactsHomeFolder calHome = new ContactsHomeFolder(rf, ADDRESS_BOOK_HOME_NAME, contactManager);
             children.add(calHome);
         }        
         
@@ -72,11 +70,11 @@ public class ContactsApp implements Application {
 //    public String getUserPassword(String userName) {
 //        Session session = SessionManager.session();
 //        Organisation rootOrg = OrganisationDao.getRootOrg(session);
-//        Profile user = services.getSecurityManager().getUserDao().getProfile(userName, rootOrg, session);
+//        Profile user = _(SpliffySecurityManager.class).getUserDao().getProfile(userName, rootOrg, session);
 //        if( user == null ) {
 //            return null;
 //        } else {
-//            return services.getSecurityManager().getPasswordManager().getPassword(user);
+//            return _(SpliffySecurityManager.class).getPasswordManager().getPassword(user);
 //        }
 //    }
 //
@@ -84,7 +82,7 @@ public class ContactsApp implements Application {
 //    public LdapPrincipal getUser(String userName, String password) {
 //        Session session = SessionManager.session();
 //        Organisation rootOrg = OrganisationDao.getRootOrg(session);
-//        Profile user = (Profile) services.getSecurityManager().authenticate(rootOrg, userName, password);
+//        Profile user = (Profile) _(SpliffySecurityManager.class).authenticate(rootOrg, userName, password);
 //        if( user == null) {
 //            return null;
 //        }

@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.user;
 
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
@@ -24,6 +25,7 @@ import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.UserResource;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -38,6 +40,8 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
+import static io.milton.context.RequestContext._;
+
 /**
  * Represents the collection of users defined on this organisation as their admin
  * org
@@ -51,14 +55,14 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     private ResourceList children;
 
     public UsersFolder(CommonCollectionResource parent, String name) {
-        super(parent.getServices());
+        
         this.parent = parent;
         this.name = name;
     }
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("user/home", this, params, out);
+        _(HtmlTemplater.class).writePage("user/home", this, params, out);
     }
 
     @Override
@@ -94,10 +98,10 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if( children == null ) {
             children = new ResourceList();
-            services.getApplicationManager().addBrowseablePages(this, children);
+            _(ApplicationManager.class).addBrowseablePages(this, children);
             List<Profile> users = Profile.findByAdminOrg(getOrganisation(), SessionManager.session());
             for( Profile p : users ) {
-                UserResource ur = new UserResource(this, p, services.getApplicationManager());
+                UserResource ur = new UserResource(this, p);
                 children.add(ur);
             }
         }

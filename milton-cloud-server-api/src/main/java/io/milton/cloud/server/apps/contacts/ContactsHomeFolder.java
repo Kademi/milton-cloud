@@ -27,10 +27,10 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.Utils;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -44,6 +44,8 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.resource.Resource;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -55,8 +57,8 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
     private final ContactManager contactManager;
     private List<ContactsFolder> children;
 
-    public ContactsHomeFolder(UserResource parent, Services services, String name, ContactManager contactManager) {
-        super(services);
+    public ContactsHomeFolder(UserResource parent,  String name, ContactManager contactManager) {
+        
         this.parent = parent;
         this.name = name;
         this.contactManager = contactManager;
@@ -65,7 +67,7 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         AddressBook addressBook = contactManager.createAddressBook(parent.getOwner(), newName);
-        return new ContactsFolder(this, services, addressBook, contactManager);
+        return new ContactsFolder(this, addressBook, contactManager);
     }
 
     @Override
@@ -110,7 +112,7 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
             children = new ArrayList<>();
             if (addressBooks != null) {
                 for (AddressBook cal : addressBooks) {
-                    ContactsFolder f = new ContactsFolder(this, services, cal, contactManager);
+                    ContactsFolder f = new ContactsFolder(this, cal, contactManager);
                     children.add(f);
                 }
             }
@@ -125,7 +127,7 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        getServices().getHtmlTemplater().writePage("contactsHome", this, params, out);
+        _(HtmlTemplater.class).writePage("contactsHome", this, params, out);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.templating.HtmlTemplateParser;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,8 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
 import java.util.List;
 import javax.xml.namespace.QName;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -169,7 +172,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         // case we need to generate and persist html content
         if (htmlPage != null) {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            services.getTemplateParser().update(htmlPage, bout);
+            _(HtmlTemplateParser.class).update(htmlPage, bout);
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);

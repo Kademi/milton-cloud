@@ -24,9 +24,10 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -35,9 +36,7 @@ import io.milton.vfs.db.utils.SessionManager;
 public class WebsiteApp implements Application {
 
     private final WebsiteDao websiteDao = new WebsiteDao();
-    
-    private Services services;
-    
+        
     private ApplicationManager applicationManager;
     
     @Override
@@ -47,8 +46,7 @@ public class WebsiteApp implements Application {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        services = resourceFactory.getServices();
-        applicationManager = services.getApplicationManager();
+        applicationManager = _(ApplicationManager.class);
     }
 
     /**
@@ -64,7 +62,7 @@ public class WebsiteApp implements Application {
         if (parent == null) {
             Website website = websiteDao.getWebsite(requestedName, SessionManager.session());
             if (website != null) {                
-                return new WebsiteRootFolder(services, applicationManager, website);
+                return new WebsiteRootFolder(applicationManager, website);
             }
         }
         return null;

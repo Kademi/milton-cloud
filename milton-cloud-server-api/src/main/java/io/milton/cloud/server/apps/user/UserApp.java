@@ -27,6 +27,8 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -62,10 +64,10 @@ public class UserApp implements Application{
     public Resource getPage(Resource parent, String requestedName) {
         if( parent instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) parent;
-            UserDao userDao = uf.getServices().getSecurityManager().getUserDao();
+            UserDao userDao = _(UserDao.class);
             Profile p = userDao.findProfile(requestedName, uf.getOrganisation(), SessionManager.session());
             if( p != null ) {
-                return new UserResource(uf, p, uf.getServices().getApplicationManager());
+                return new UserResource(uf, p);
             }
         }
         return null;

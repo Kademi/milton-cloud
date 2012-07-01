@@ -47,7 +47,7 @@ public class ForumAdminFolder extends AbstractCollectionResource implements Prop
     private ResourceList children;
 
     public ForumAdminFolder(Forum forum, CommonCollectionResource parent) {
-        super(parent.getServices());
+        
         this.forum = forum;
         this.parent = parent;
     }

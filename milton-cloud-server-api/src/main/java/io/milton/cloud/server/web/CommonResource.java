@@ -24,12 +24,6 @@ public interface CommonResource extends DigestResource{
      */
     CommonCollectionResource getParent();
     
-    /**
-     * Convenient access to main service singletons
-     * 
-     * @return 
-     */
-    Services getServices();
     
     /**
      * Find whatever entity (user or other) which owns the given resource
@@ -38,12 +32,6 @@ public interface CommonResource extends DigestResource{
      */
     BaseEntity getOwner();
     
-    /**
-     * Returns the current user on this request
-     * 
-     * @return 
-     */
-    Profile getCurrentUser();
 
     /**
      * Get the organisation which most directly contains this resource

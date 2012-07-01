@@ -33,8 +33,21 @@ public class SpliffySecurityManager {
     }
     
     public Profile getCurrentUser() {
-        return (Profile) HttpManager.request().getAttributes().get("_current_user");
+        UserResource p = getCurrentPrincipal();
+        if( p != null ) {
+            return p.getThisUser();
+        }
+        return null;
     }
+    
+    public UserResource getCurrentPrincipal() {
+        Auth auth = HttpManager.request().getAuthorization();
+        if( auth == null || auth.getTag() == null ) {
+            return null;
+        }
+        UserResource ur = (UserResource) auth.getTag();
+        return ur;
+    }    
 
     public Profile authenticate(Organisation org, String userName, String requestPassword) {
         Session session = SessionManager.session();

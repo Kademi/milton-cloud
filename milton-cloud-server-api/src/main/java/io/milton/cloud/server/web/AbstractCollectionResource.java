@@ -1,10 +1,13 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.Resource;
 
 import java.util.Date;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -15,12 +18,10 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     private Date modDate;
     private Date createdDate;
 
-    public AbstractCollectionResource(Services services) {
-        super(services);
+    public AbstractCollectionResource() {
     }
 
-    public AbstractCollectionResource(Services services, Date createDate, Date modDate) {
-        super(services);
+    public AbstractCollectionResource(Date createDate, Date modDate) {
         this.createdDate = createDate;
         this.modDate = modDate;
     }
@@ -52,7 +53,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
      */
     @Override 
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        Resource r = services.getApplicationManager().getPage(this, childName);
+        Resource r = _(ApplicationManager.class).getPage(this, childName);
         if (r != null) {
             return r;
         }

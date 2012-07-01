@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.orgs;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.http.*;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Permission;
@@ -34,6 +36,8 @@ import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * This is the root folder for the admin site. The admin site is used to setup
@@ -48,8 +52,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     private final Organisation organisation;
     private ResourceList children;
 
-    public OrganisationFolder(CommonCollectionResource parent, Organisation organisation, Services services) {
-        super(services);
+    public OrganisationFolder(CommonCollectionResource parent, Organisation organisation) {
         this.parent = parent;
         this.organisation = organisation;
     }
@@ -66,7 +69,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        Resource r = services.getApplicationManager().getPage(this, childName);
+        Resource r = _(ApplicationManager.class).getPage(this, childName);
         if (r != null) {
             return r;
         }
@@ -83,16 +86,16 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
                     children.add(rf);
                 }
             }
-            children.add(new OrganisationsFolder("organisations", this, services, organisation));
-            
-            services.getApplicationManager().addBrowseablePages(this, children);
+            children.add(new OrganisationsFolder("organisations", this, organisation));
+
+            _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("home", this, params, out);
+        _(HtmlTemplater.class).writePage("home", this, params, out);
     }
 
     @Override
@@ -124,7 +127,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public void addPrivs(List<Priviledge> list, Profile user) {
         Set<Permission> perms = SecurityUtils.getPermissions(user, organisation, SessionManager.session());
         SecurityUtils.addPermissions(perms, list);
-        if( parent != null ) {
+        if (parent != null) {
             parent.addPrivs(list, user);
         }
     }

@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Permission;
@@ -23,6 +24,10 @@ import java.io.*;
 import java.util.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
+import static io.milton.context.RequestContext._;
+import org.hashsplit4j.api.BlobStore;
+import org.hashsplit4j.api.HashStore;
 
 /**
  * Represents the current version of a branch in a repository
@@ -51,13 +56,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     private RenderFileResource indexPage;
 
     public BranchFolder(String name, CommonCollectionResource parent, Branch branch, boolean renderMode) {
-        super(parent.getServices());
         this.renderMode = renderMode;
         this.name = name;
         this.parent = parent;
         this.branch = branch;
         this.commit = branch.getHead();
-        this.dataSession = new DataSession(branch, SessionManager.session(), getServices().getHashStore(), getServices().getBlobStore(), getServices().getCurrentDateService());
+        this.dataSession = new DataSession(branch, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
     }
 
     @Override
@@ -132,7 +136,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
     
     protected void updateModDate() {
-        Date newDate = getServices().getCurrentDateService().getNow();
+        Date newDate = _(CurrentDateService.class).getNow();
         loadNodeMeta().setModDate(newDate);
         if( nodeMeta.getCreatedDate() == null ) {
             nodeMeta.setCreatedDate(newDate);

@@ -16,8 +16,6 @@
  */
 package io.milton.vfs.db;
 
-import io.milton.vfs.db.Branch;
-import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;

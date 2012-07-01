@@ -19,11 +19,11 @@ import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
 import io.milton.cloud.server.web.*;
-import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+
 
 /**
  *
@@ -47,22 +47,22 @@ public class AdminApp implements MenuApplication {
             switch (requestedName) {
                 case "dashboard":
                     MenuItem.setActiveId("menuDashboard");
-                    return new TemplatedHtmlPage("dashboard", p, p.getServices(), "admin/dashboard", "Admin dashboard");
+                    return new TemplatedHtmlPage("dashboard", p, "admin/dashboard", "Admin dashboard");
                 case "manageUsers":
                     MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuUsers");
-                    return new UserAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+                    return new UserAdminPage(requestedName, p.getOrganisation(), p);
                 case "groups":
                     MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuGroups");
-                    return new GroupsAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+                    return new GroupsAdminPage(requestedName, p.getOrganisation(), p);
                 case "websites":
                     MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "menuWebsites");
-                    return new WebsitesAdminPage(requestedName, p.getOrganisation(), p, p.getServices());
+                    return new WebsitesAdminPage(requestedName, p.getOrganisation(), p);
             }
         } else if (parent instanceof OrganisationsFolder) {
             OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
             if (requestedName.equals("manage")) {
                 MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuOrgs");
-                return new OrgsAdminPage(requestedName, orgsFolder.getOrganisation(), orgsFolder, orgsFolder.getServices());
+                return new OrgsAdminPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
             }
         }
         return null;

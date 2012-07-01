@@ -7,6 +7,8 @@ import io.milton.vfs.db.Profile;
 import io.milton.http.http11.auth.DigestGenerator;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.vfs.db.utils.SessionManager;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  *
@@ -95,7 +97,6 @@ public class PasswordManager {
             System.out.println(digest.getUser());
             return false;
         }
-
     }
 
     public boolean verifyPassword(Profile user, String requestPassword) {
@@ -119,6 +120,7 @@ public class PasswordManager {
         log.warn("Basic login failed for user: " + user.getEmail());
         return false;
     }
+    
 
     private boolean matches(String username, PasswordCredential pc, String requestPassword) {
         String a1Md5 = pc.getPassword();

@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.Utils;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.principal.Principal;
@@ -27,6 +27,8 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -39,8 +41,8 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
     
     private List<CalEventResource> children;
 
-    public CalendarFolder(CalendarHomeFolder parent, Services services, Calendar calendar, CalendarManager calendarManager) {
-        super(services);
+    public CalendarFolder(CalendarHomeFolder parent,  Calendar calendar, CalendarManager calendarManager) {
+        
         this.parent = parent;
         this.calendar = calendar;
         this.calendarManager = calendarManager;
@@ -48,7 +50,7 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        services.getHtmlTemplater().writePage("calendar/calendar", this, params, out);
+        _(HtmlTemplater.class).writePage("calendar/calendar", this, params, out);
     }
     
     

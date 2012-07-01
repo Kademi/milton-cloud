@@ -29,9 +29,9 @@ import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.WebUtils;
 
 /**
@@ -85,7 +85,7 @@ public class HtmlTemplater implements Templater {
 
     @Override
     public void writePage(String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        Profile user = securityManager.getCurrentUser();
+        UserResource user = securityManager.getCurrentPrincipal();
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
         String theme;
         if (rootFolder instanceof OrganisationRootFolder) {
@@ -216,6 +216,7 @@ public class HtmlTemplater implements Templater {
             Path p = Path.path(path);
             Path webPath = webRoot.add(p).getParent(); // go to parent, because the path is the directory which contains the template
 
+            // First look in the filesystem
             TemplateHtmlPage meta = null;
             if (roots != null) {
                 for (File root : roots) {
@@ -229,6 +230,7 @@ public class HtmlTemplater implements Templater {
                     }
                 }
             }
+            // if not in filesystem, try classpath
             if (meta == null) {
                 String cpPath = path;
                 URL resource = this.getClass().getResource(cpPath);

@@ -22,8 +22,8 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.Services;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -44,6 +44,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -56,8 +58,7 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     private final CommonCollectionResource parent;
     private final Organisation organisation;
 
-    public WebsitesAdminPage(String name, Organisation organisation, CommonCollectionResource parent, Services services) {
-        super(services);
+    public WebsitesAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {       
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -71,7 +72,7 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {                
-        services.getHtmlTemplater().writePage("admin/manageWebsites", this, params, out);
+        _(HtmlTemplater.class).writePage("admin/manageWebsites", this, params, out);
     }
 
     @Override

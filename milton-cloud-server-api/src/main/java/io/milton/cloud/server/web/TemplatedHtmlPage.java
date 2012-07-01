@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.TitledPage;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,6 +37,8 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -50,8 +53,7 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     
     private boolean forceLogin;
     
-    public TemplatedHtmlPage(String name, CommonCollectionResource parent, Services services, String template, String title) {
-        super(services);
+    public TemplatedHtmlPage(String name, CommonCollectionResource parent, String template, String title) {
         this.name = name;
         this.parent = parent;       
         this.template = template;
@@ -81,7 +83,7 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         model = buildModel(params);
-        services.getHtmlTemplater().writePage(template, this, params, out);
+        _(HtmlTemplater.class).writePage(template, this, params, out);
     }
        
     @Override
