@@ -1,0 +1,234 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="manageGroupEmail.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageGroupEmail.js">//</script>
+    </head>
+    <body>
+        <section id="manageEmail" class="MainContent">
+            <div class="TabContainer">
+                <nav class="ClearFix"><a href="">Send information</a><a href="">Message</a><a href="">Recipients</a><a href="">Send</a></nav>
+                <div class="TabContent">
+                    <div class="Content">
+                        <form name="frmDetails" action="" method="post" class="Details">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>Send name</th>
+                                        <td><input type="text" name="name" value="$page.title" placeholder="" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Notes <small>These notes are for internal purposes only.</small></th>
+                                        <td><textarea cols="100" name="note" rows="10" placeholder="">$page.notes</textarea></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email subject</th>
+                                        <td><input type="text" name="subject" value="$page.subject" placeholder="" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
+                                        <td><input type="text" name="address" value="$page.fromAddress" placeholder="" /></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button class="Btn">Save Changes</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>	
+                <div class="TabContent">
+                    <div class="Content">
+                        <form name="frmDetails" action="" method="post" class="Details">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th class="Short">Choose a template</th>
+                                        <td><select name="template" class="Medium">
+                                                <option value="1">PainPod</option>
+                                            </select></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"><textarea cols="100" name="note" rows="10" placeholder=""></textarea></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button class="Btn">Preview</button> <button class="Btn">Save Changes</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+                <div class="TabContent">
+                    <div class="Content Recipient">
+                        <header class="ClearFix">
+                            <button class="SmallBtn Add AddGroup"><span>Add a group</span></button>
+                        </header>
+                        <ul class="GroupList ClearFix">
+                            <li data-group="0"><span>Group 01</span></li>
+                            <li data-group="1"><span>Group 02</span></li>
+                            <li data-group="2"><span>Group 03</span></li>
+                        </ul>
+                        <div class="ClearFix">
+                            <button class="Btn">Save changes</button>
+                        </div>	
+                    </div>
+                </div>
+                <div class="TabContent">
+                    <div class="Content Send">
+                        <h4>Before you send be sure to check your email information, message content and recipients.</h4>
+                        <p><button class="Btn">PREVIEW YOUR EMAIL</button></p>
+                        <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
+                        <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
+                        <p><button class="Btn Big Cancel SendEmail">SEND NOW</button></p>
+                    </div>
+                    <div class="Content SendProgress Hidden">
+                        <p><strong>Send in progress</strong><small>You may navigate away from this page.</small></p>
+                        <div class="Progress">
+                            <div class="Percent"></div>
+                        </div>
+                    </div>
+                    <div class="Content Success Hidden">
+                        <h3>450/455 emails sucessfully sent</h3>
+                        <p>You can view the failed send list below.</p>
+                    </div>
+                    <div class="Content Success Hidden">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email Address</th>
+                                    <th>Contact</th>
+                                    <th><div>State<button class="Btn Setting"><span class="Hidden">Setting</span></button></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                                <tr>
+                                    <td>Patrick</td>
+                                    <td>Hone</td>
+                                    <td>patrick@fuselms.com</td>
+                                    <td>0412 345 321</td>
+                                    <td>NSW</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="Hidden">
+            <div id="groupController">
+                <aside><a href="" class="Delete DeleteGroup" title="Delete this group"><span class="Hidden">Delete this group</span></a></aside>
+            </div>
+            <div id="modalListController">
+                <aside>
+                    <label for="selected"><input type="checkbox" value="1" id="selected" name="selected" class="FuseChk" checked="checked" /></label>
+                </aside>
+            </div>
+        </div>
+        <div id="modalGroup" class="Modal">
+            <header>
+                <h3>Choose groups</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <ul class="ListItem">
+                                <li><span>Group 01</span></li>
+                                <li><span>Group 02</span></li>
+                                <li><span>Group 03</span></li>
+                                <li><span>Group 04</span></li>
+                                <li><span>Group 05</span></li>
+                                <li><span>Group 06</span></li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="Btn">
+                            <button>Save changes</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            jQuery(function() {
+                initEditEmailPage();
+            });
+        </script>
+    </body>
+</html>

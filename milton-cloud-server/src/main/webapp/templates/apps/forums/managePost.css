@@ -1,0 +1,48 @@
+#managePost .Post {
+	margin-bottom: 9px;
+	border: 1px solid #dedede;
+	border-radius: 3px;
+}
+#managePost .Post > header {
+	background: #f0f0f0 no-repeat 7px 7px;
+	padding: 13px 40px;
+	border-bottom: 1px solid #dedede;
+}
+#managePost .Post > header a {
+	font-size: 13px;
+}
+#managePost .Post > .Content {
+	padding: 15px;
+	margin-right: 100px;
+}
+#managePost .Post > aside {
+	float: right;
+	padding: 15px;
+	width: 100px;
+}
+#managePost .Post > footer {
+	border-top: 1px solid #dedede;
+	padding: 5px 0 5px 5px;
+	text-align: right;
+}
+#managePost .Post > footer div {
+	float: right;
+}
+#managePost .Post > footer select {
+	margin-right: 0;
+	height: 30px;
+	float: left;
+	margin-right: 5px;
+}
+#managePost .Post > footer a {
+	display: block;
+	float: left;
+	margin-right: 5px;
+	background: #FFF no-repeat 50% 50%;
+	border-radius: 3px;
+	width: 29px;
+	height: 29px;
+}
+#managePost .Post > footer a:hover {
+	background-color: #f0f0f0;
+}

@@ -1,0 +1,78 @@
+#manageReward > header {
+	border-bottom: 1px solid #dadada;
+	margin-bottom: 5px;
+}
+#manageReward > header .Left h3 {
+	font-size: 12px;
+	font-weight: bold;
+	line-height: 26px;
+}
+#manageReward > header .Right button { margin-left: 5px; }
+#manageReward form.Details table td small {
+	display: block;
+	font-size: 11px;
+	font-style: italic;
+	width: 350px;
+}
+#manageReward .Content {
+	border: 1px solid #dedede;
+	border-radius: 5px;
+}
+#manageReward .Content header {
+	border-bottom: 1px solid #dedede;
+	border-radius: 5px 5px 0 0;
+	background: #f0f0f0;
+	height: 30px;
+	line-height: 30px;
+	padding-left: 11px;
+}
+#manageReward .Content header a {
+	display: inline-block;
+	font-weight: bold;
+	padding-right: 13px;
+}
+#manageReward .Content header a.Status { margin-right: 44px; }
+#manageReward .Content ul { padding: 0 4px 4px; }
+#manageReward .Content ul li {
+	border-radius: 3px;
+	border: 1px solid #ededed;
+	margin-top: 4px;
+	padding: 4px 4px 4px 6px;
+	background: #ededed;
+}
+#manageReward .Content ul li.Odd { background-color: #FFF; }
+#manageReward .Content ul li > div {
+	display: inline-block;
+	position: relative;
+	width: 64px;
+	height: 25px;
+	line-height: 25px;
+	padding-left: 29px;
+}
+#manageReward .Content ul li > div > a {
+	padding-right: 10px;
+}
+#manageReward .Content ul li > div.Fullfilled { background-position: 0 -25px; }
+#manageReward .Content ul li > div.Expired { background-position: 0 -50px; }
+#manageReward .Content ul li aside { float: right; }
+#manageReward .Content ul li aside a {
+	float: left;
+	display: block;
+	height: 23px;
+	width: 23px;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	margin-right: 4px;
+	border-radius: 2px;
+	padding: 1px;
+}
+#manageReward .Content ul li aside a:hover { background-color: #FFF; }
+#manageReward .Content ul li.Odd aside a:hover {
+	padding: 0px;
+	border: 1px solid #dedede;
+}
+#manageReward .Dialog {
+	right: auto;
+	left: 70px;
+	top: 20px;
+}

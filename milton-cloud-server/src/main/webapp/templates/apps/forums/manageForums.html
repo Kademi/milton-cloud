@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="manageForum.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageForum.js">//</script>
+    </head>
+    <body>
+        <section id="manageForum" class="MainContent">
+            <header class="ClearFix">
+                <button class="SmallBtn Add AddForum"><span>Add New Forum</span></button>
+            </header>
+            
+            #foreach($forum in $folder.children)
+            <div class="Forum">
+                <header class="ClearFix">
+                    <div class="ShowDialog"><span>$forum.title</span></div>
+                </header>
+                <div class="ContentForum ClearFix">
+                    <h4>Available Topics</h4>
+                    <ul class="TopicList">
+                        #foreach($topic in $forum.children)
+                        <li><span>$topic.title</span></li>
+                        #end
+                    </ul>			
+                    <button class="SmallBtn Add AddTopic"><span>Add New Topic</span></button>
+                </div>
+            </div>
+            #end
+            
+            <div class="Hidden">
+                <div id="topicController">
+                    <aside><a href="" class="Edit RenameTopic" title="Rename this topic"><span class="Hidden">Rename this topic</span></a> <a href="" class="Delete DeleteTopic" title="Delete this topic"><span class="Hidden">Delete this topic</span></a></aside>
+                </div>
+                <div id="dialogForum">
+                    <div class="Dialog Hidden">
+                        <a href="" class="RenameForum">Rename this forum</a>
+                        <a href="" class="Delete DeleteForum">Delete this forum</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div id="modalForum" class="Modal">
+            <header>
+                <h3>Edit Forum</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <th><label for="name">Enter program name</label></th>
+                        <td><input type="text" name="name" id="name" value="" placeholder="Program name" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="Btn">
+                            <button>Save changes</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            jQuery(function() {
+                initManageForum();
+            });
+        </script>
+    </body>
+</html>

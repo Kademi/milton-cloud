@@ -1,0 +1,103 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$page.title</title>
+        <link href="manageCourses.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageCourses.js">//</script>
+    </head>
+    <body>
+        <section id="manageCourse" class="MainContent">
+            <article class="Note">This page will allow you to create and edit the flow of modules and control how your users progress through your learning content. Simply click the + button to add a new item, drag an item up or down to reposition it or click on the down arrow in an item for more options.</article>
+            <section class="Control ClearFix">
+                <div class="DropdownControl ClearFix NoLabel">
+                    <div class="DropdownWrapper"> <span>$page.title</span> <a href="#" class="Control"><span class="Hidden">Change module</span></a> </div>
+                    <div class="DropdownContent Program Hidden">
+                        <div class="Content ClearFix">
+                            <section>
+                                <ul class="Program">.</ul>
+                                <button class="Btn Add AddProgram">ADD PROGRAM</button>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                #if($page.program)
+                <button id="publish" class="Btn Cancel">Publish changes</button>
+                #end
+            </section>
+            #if($page.program)
+            <section class="Content">
+                <header>
+                    <h3>Courses</h3>
+                    <h3>Modules</h3>
+                </header>
+                <section>
+                    <table>
+                        <tr>
+                            <td>						
+                                <div class="Course ClearFix">
+                                    <ul>
+                                        #foreach($course in $page.parent.children)
+                                            #set( $modules = $course.child("trunk") )
+                                            #set($levels = $modules.children.sortByField("order").groupByField("level") )
+                                        <li data-author-notes="$course.notes" data-href="$course.path">
+                                            <div class="ClearFix"> <span>$course.title</span> </div>
+                                            <div class="Module ClearFix">
+                                                <ul>
+                                                    #foreach($level in $levels.values())
+                                                        #foreach($module in $level)
+                                                    <li data-author-notes="$module.notes" id="$module.name"> <span>$module.title</span> </li>
+                                                        #end
+                                                    <li class="Splitter"> <span>Level Splitter</span> </li>
+                                                    #end                                                    
+                                                </ul>
+                                                <button class="SmallBtn Add NoText AddModule" title="Add module"><span>Add</span></button>
+                                            </div>
+                                        </li>
+                                        #end
+                                    </ul>
+                                    <button class="SmallBtn Add NoText AddCourse" title="Add course"><span>Add</span></button>
+                                </div>
+                            </td>
+                            <td id="modulePanel"></td>
+                        </tr>
+                    </table>
+                </section>
+                <div class="Hidden">
+                    <aside id="moduleController"> <a href="" class="Move" title="Move up or down"><span class="Hidden">Move up or down</span></a> <a href="" class="Dialogue DialogueModule" title="Show dialogue menu"><span class="Hidden">Show dialogue menu</span></a> </aside>
+                    <div class="Dialog Hidden" id="moduleDialog"> <a href="" class="EditModule">Edit this module</a> <a href="" class="AddSplitter">Add splitter below</a> <a href="" class="Delete DeleteModule">Delete this module</a> </div>
+                    <aside id="courseController"> <a href="" class="Move" title="Move up or down"><span class="Hidden">Move up or down</span></a> <a href="" class="Dialogue DialogueCourse" title="Show dialogue menu"><span class="Hidden">Show dialogue menu</span></a> </aside>
+                    <div class="Dialog Hidden" id="courseDialog"> <a href="" class="EditCourse">Edit this course</a> <a href="" class="Delete DeleteCourse">Delete this course</a> </div>
+                    <aside id="programController"><a href="" title="Edit program" class="EditProgram"><span class="Hidden">Edit program</span></a> <a href="" title="Delete program" class="DeleteProgram"><span class="Hidden">Delete program</span></a></aside>
+                </div>
+            </section>
+            #end
+        </section>
+        <div id="modal" class="Modal">
+            <header>
+                <h3>Program Details</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <th><label for="name">Enter program name</label></th>
+                        <td><input type="text" name="name" id="name" value="" placeholder="Program name" /></td>
+                    </tr>
+                    <tr>
+                        <th><label for="note">Enter author notes</label></th>
+                        <td><textarea name="note" id="note" placeholder="Author notes" cols="2" rows="2"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="Btn">
+                            <button>Submit</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            jQuery(function() {
+                initManageCourse("${parentOrg.path}/programs/");
+            });
+        </script>
+    </body>
+</html>

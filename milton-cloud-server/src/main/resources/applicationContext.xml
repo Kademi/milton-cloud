@@ -46,20 +46,6 @@
 
     <bean id="hash.store" class="io.milton.vfs.content.DbHashStore"/>
     
-    <bean id="mail.sender" class="com.ettrema.mail.send.RemoteSmtpMailSender" init-method="start">
-        <constructor-arg value="${mail.smtp.host}"/>
-        <constructor-arg value="${mail.smtp.user}"/>
-        <constructor-arg value="${mail.smtp.password}"/>
-        <constructor-arg value="${mail.smtp.port}"/>
-    </bean>
-
-    <!--
-    <bean id="mail.sender.mock" class="com.ettrema.mail.send.MockMailSender"></bean>
-    -->
-    <!--
-    <bean id="mail.sender.aspirin" class="com.ettrema.mail.send.AspirinMailSender"></bean>
-    -->
-    
     
     <bean id="password.manager" class="io.milton.cloud.server.manager.PasswordManager"/>
 
@@ -79,35 +65,28 @@
             <list>
                 <bean class="io.milton.cloud.server.apps.orgs.OrganisationsApp"/>
                 <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>
-                <bean class="io.milton.cloud.server.apps.admin.users.UserAdminApp"/>
-                <bean class="io.milton.cloud.server.apps.admin.websites.WebsiteAdminApp"/>
                 <bean class="io.milton.cloud.server.apps.login.LoginApp"/>
                 <bean class="io.milton.cloud.server.apps.calendar.CalendarApp"/>
                 <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
                 <bean class="io.milton.cloud.server.apps.signup.SignupApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.AdminApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.reporting.ReportingApp"/>
                 <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
                 <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
+                <bean class="io.milton.cloud.server.apps.user.UserApp"/>
             </list>
         </constructor-arg>
         <property name="appsConfigDir" value="${apps.config.dir}" />
     </bean>
     
         
-    <bean id="services" class="io.milton.cloud.server.web.Services">
-        <constructor-arg ref="hash.store"/>
-        <constructor-arg ref="blob.store"/>
-        <constructor-arg ref="security.manager"/>
-        <constructor-arg ref="application.manager"/>
-    </bean>       
-
-    <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory" init-method="start" destroy-method="stop">
+    <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory">
         <!--        
         <constructor-arg ref="lock.manager"/>
         -->
         <constructor-arg ref="session.manager"/>
         <constructor-arg ref="dao.user"/>
         <constructor-arg ref="security.manager"/>
-        <constructor-arg ref="services"/>
         <constructor-arg ref="application.manager"/>        
         <constructor-arg ref="event.manager"/> 
     </bean>
@@ -118,8 +97,23 @@
         <constructor-arg ref="security.manager" />
     </bean>
     
+    <bean id="root.context" class="io.milton.cloud.server.manager.MCRootContext" init-method="start" destroy-method="stop">        
+        <constructor-arg ref="servletContext" />        
+        <constructor-arg ref="main.spliffy.resource.factory" />        
+        <constructor-arg ref="hash.store"/>
+        <constructor-arg ref="blob.store"/>
+        <constructor-arg ref="security.manager"/>
+        <constructor-arg ref="application.manager"/>
+    </bean>       
+        
     <!-- This will expose resources on the classpath, required for apps which have css/js files in the jar -->
     <bean id="classpath.resource.factory" class="io.milton.http.fs.ClassPathResourceFactory"></bean>
+    
+    <bean id="static.resource.factory" class="io.milton.servlet.StaticResourceFactory">
+        <constructor-arg ref="webRoot" /> <!-- injected by SpringMiltonFilter -->
+    </bean>
+    
+    
     
     <bean id="apps.resource.factory" class="io.milton.cloud.server.web.resources.AppsResourceFactory">
         <constructor-arg ref="application.manager" />
@@ -132,17 +126,14 @@
                 <ref local="main.spliffy.resource.factory" />  
                 <ref local="apps.resource.factory"/>
                 <ref local="classpath.resource.factory" />
+                <ref local="static.resource.factory" />
             </list>
         </constructor-arg>
     </bean>
 
-    <!-- This is used for accessing web resources from a file path. Most useful for debugging -->
-    <bean class="io.milton.cloud.server.config.SysPropertyResourceFactoryLoader" init-method="init">
-        <constructor-arg ref="resource.factory" />
-    </bean>
-
     <bean id="open.session.in.view.filter" class="io.milton.cloud.server.db.utils.MiltonOpenSessionInViewFilter">
         <constructor-arg ref="session.manager"/>
+        <constructor-arg ref="root.context" />
     </bean>
 
     <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
@@ -153,6 +144,11 @@
                 <ref local="open.session.in.view.filter" />
             </list>
         </property>        
+        <property name="extraPropertySources">
+            <list>
+                <bean class="io.milton.cloud.server.web.ParameterisedResourcePropertySource"/>
+            </list>
+        </property>      
     </bean>
 
 

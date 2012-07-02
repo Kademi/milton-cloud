@@ -1,0 +1,91 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="theme.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="/templates/js/jquery-1.7.2.min.js">//</script>
+        <script type="text/javascript" src="../../js/tinybox-1.2.min.js">//</script>
+        <script type="text/javascript" src="../../js/jquery-ui-1.8.20.custom.min.js">//</script>
+        <script type="text/javascript" src="../../js/jquery.cookie.js">//</script>        
+        <script type="text/javascript" src="../../js/common.js">//</script>        
+        <script type="text/javascript" src="../../js/file.js">//</script>        
+        <script type="text/javascript" src="theme.js">//</script>
+    </head>
+    <body class="theme">
+        <!-- page layout goes here -->
+        <div id="wrapper">
+            <header id="header">
+                <!-- Here is the header -->
+                <nav id="nav">
+                    <ul>
+                        <li id="logo"><a href="/" title="Fuse Admin">Home</a></li>
+                        #foreach($item in $menu.items)
+                        <li id="$item.id"><a class="$formatter.ifTrue($item.active, 'navActive', '')" href="$item.href">$item.text</a></li>
+                        #end
+                    </ul>
+                </nav>
+                <aside>
+                    #if( $user )
+                    $user.class
+                    <h3><a href="$user.path">Welcome $user.nickName</a></h3>
+                    #end
+                </aside>
+            </header>
+            <div id="Panel-section">
+                <!-- the left menu width:210px -->
+                <aside id="sidebar-nav">
+                    <div class="sidebar">
+                        <div class="menu">
+                            <ul>
+                                #foreach($parentItem in $menu.activeItems)
+                                    #foreach($item in $parentItem.items)
+                                <li id="$item.id">
+                                    <h4><a href="$item.href" class="Arrow">$item.text</a></h4>                                    
+                                    <ul>
+                                        #foreach($subitem in $item.items)
+                                        <li id="$subitem.id"><a class="$formatter.ifTrue($subitem.active, 'active', '')" href="$subitem.href">$subitem.text</a></li>
+                                        #end
+                                    </ul>				
+                                </li>
+                                <li><hr/></li>
+                                    
+                                    #end
+                                #end
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+                <!-- courses and modules width:flex -->
+                <section id="RHS-Panel">
+                    <img src="/templates/themes/fuse/images/shadow-left.png" alt="" id="shadow-left" />
+                    <header id="head-Panel">
+                        <img src="/templates/themes/fuse/images/icon-prgram.png" alt="" />
+                        <h1>$page.title</h1>
+                        <a href="#" class="helpIcon">Help</a>
+                    </header>
+                    <div id="module-Course">
+                        <article>
+                            #content
+                        </article>
+                    </div>
+                </section>
+            </div>
+			<div id="modalHelp" class="Modal">
+				<header>
+					<h3>Help dialog</h3>
+					<a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+				</header>
+				<div class="ModalContent">
+					<p>This is an animated dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+				</div>
+			</div>
+
+        </div><!-- END WRAPPER -->
+
+
+        <script type="text/javascript" >
+            jQuery(function() {
+                initFuseTheme();
+            });        
+        </script>
+    </body>
+</html>

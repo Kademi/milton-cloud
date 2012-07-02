@@ -1,0 +1,19 @@
+
+
+.error, .validationError, #validationMessage {
+    color: red;
+}
+
+.errorField {
+    border: solid red 1px !important;
+}
+
+.pageMessage {
+    padding: 10px;
+    border: dashed #cccccc 1px !important;
+    background: white;
+    display: none; /** initial state */
+}
+p.validationError {
+    margin: 0 0 0.1em 0;
+}

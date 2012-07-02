@@ -1,0 +1,121 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Manage modules</title>
+        <link href="manageModule.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageModule.js">//</script>
+    </head>
+    <body class="manageModulePages">
+        <!-- Content goes here - NO HEADER/BANNER/MENU! -->
+        <section id="manageModule" class="MainContent">
+            <header>
+                <div class="DropdownControl ClearFix">
+                    <span class="Label">Choose a module</span> 
+                    <div class="DropdownWrapper">
+                        <span> - Please choose a module - </span>
+                        <a href="#" class="Control"><span class="Hidden">Change module</span></a>
+                    </div>
+                    <div class="DropdownContent Rows3 Hidden">
+                        <header>
+                            <h3>Programs</h3>
+                            <h3>Courses</h3>
+                            <h3>Modules</h3>
+                        </header>
+                        <div class="Content ClearFix">
+                            <section rel="program">.</section>
+                            <section rel="course">.</section>
+                            <section rel="module">.</section>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            #if($page.module)
+            <nav class="TabNav ClearFix"><a href="#list" class="Item">Module pages</a><a href="#detail" class="Item">Module details</a></nav>
+            <div class="Content Hidden" rel="#list">
+                <h4>$page.title</h4>
+                <div class="MainContent">
+                    #foreach($modulePage in $page.parent.children.sortByField("order"))
+                    #if($modulePage.name.startsWith("p"))
+                    <article class="modulePage">
+                        <span>$modulePage.title $modulePage.class</span>
+                        <aside class="Hidden">
+                            <a href="${modulePage.path}" class="Edit" title="Edit page"><span class="Hidden">Edit page</span></a>
+                            <a href="" class="Move" title="Move up or down"><span class="Hidden">Move up or down</span></a>
+                            <a href="" class="Dialogue" title="Show dialogue menu"><span class="Hidden">Show dialogue menu</span></a>
+                            <a href="" class="Delete" title="Delete page"><span class="Hidden">Delete page</span></a>
+                        </aside>    
+                        <div class="Dialog Hidden">
+                            <a href="">Edit module details</a>
+                            <a href="">View module details</a>
+                        </div>
+
+                    </article>
+                    #end
+                    #end
+                    <!-- no quizes at the moment
+                    <article class="Quiz"><span>This is a quiz page title</span></article>
+                    -->
+                </div>
+            </div>
+            <div class="Content Hidden" rel="#detail">
+                <form name="frmDetails" action="" method="post" class="Details">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Module title</th>
+                                <td><input type="text" name="title" value="$page.title" placeholder="Here is a module page title" /></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Completion message <small>Enter a message that will appear at the end of this module once completed.</small></th>
+                                <td><textarea cols="100" id="message" name="message" rows="10" placeholder="Enter your completion message here">$page.completionContent</textarea></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><hr /></td>
+                            </tr>
+                            <tr rel="email">
+                                <th>Email confirmation <small class="Hidden">Enter a message that will appear in an email that get's sent to the user after this module is completed.</small></th>
+                                <td><input type="checkbox" name="email" id="email" value="" /><label for="email">Send an email confirmation upon module completion</label>
+                                    <div class="EmailMessage Hidden"><textarea cols="100" id="email_message" name="email_message" rows="10" placeholder="Enter your email message here"></textarea></div></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><hr /></td>
+                            </tr>
+                            <tr>
+                                <th>Choose a certificate <a href="">Edit certificates</a></th>
+                                <td rel="certificate"><button class="SmallBtn Add" title="Add certificate" id="addCert"><span>Add</span></button></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><hr /></td>
+                            </tr>
+                            <tr>
+                                <th>Choose a reward <a href="">Edit rewards</a></th>
+                                <td rel="reward"><button class="SmallBtn Add" title="Add reward" id="addRewards"><span>Add</span></button></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><hr /></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">
+                                    <button class="Btn">Save Changes</button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
+            </div>
+            #end
+        </section>
+        <div class="Hidden">
+            <div class="Certificate ClearFix" id="certTemp"><select name="certificate"><option>No certificate</option></select> <label for="points">CPD points</label> <input type="text" name="points" id="points" value="" class="Small" /> <button class="SmallBtn Delete NoText" title="Delete certificate"><span>Delete</span></button></div>
+            <div class="Reward ClearFix" id="rewardTemp"><select name="reward_package1"><option>Bonus bumper package</option></select> <select name="reward_number1"><option>Number of rewards</option></select> <button class="SmallBtn Delete NoText" title="Delete reward"><span>Delete</span></button></div>
+        </div>
+        <script type="text/javascript" >
+            jQuery(function() {
+                initManageModule("${parentOrg.path}/programs");
+            });            
+        </script>        
+    </body>
+</html>
