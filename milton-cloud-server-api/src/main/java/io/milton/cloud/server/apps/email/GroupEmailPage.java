@@ -155,7 +155,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
         MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
-        _(HtmlTemplater.class).writePage("email/groupEmailJob", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","email/groupEmailJob", this, params, out);
     }
         
     @Override

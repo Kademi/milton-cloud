@@ -72,7 +72,7 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {                
-        _(HtmlTemplater.class).writePage("admin/manageWebsites", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","admin/manageWebsites", this, params, out);
     }
 
     @Override
@@ -148,7 +148,5 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
     
     public List<Website> getWebsites() {
         return organisation.websites();
-    }
-    
-    
+    }        
 }

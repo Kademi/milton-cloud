@@ -138,7 +138,8 @@ public class Organisation extends BaseEntity {
         w.setOrganisation(this);
         w.setCreatedDate(new Date());
         w.setName(webName);
-        w.setTheme(theme);
+        w.setPublicTheme(theme);
+        w.setInternalTheme(null);
         w.setCurrentBranch(Branch.TRUNK);
         w.setRepository(r);
         session.save(w);

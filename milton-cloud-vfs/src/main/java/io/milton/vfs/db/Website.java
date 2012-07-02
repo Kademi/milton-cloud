@@ -42,7 +42,8 @@ public class Website implements Serializable {
     private long id;
     private String name; // identifies the resource to webdav
     private Repository repository;
-    private String theme;
+    private String internalTheme;
+    private String publicTheme;
     private String currentBranch;
     private Date createdDate;
     
@@ -63,16 +64,39 @@ public class Website implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }    
-    
-    @Column
-    public String getTheme() {
-        return theme;
     }
 
-    public void setTheme(String theme) {
-        this.theme = theme;
+    /**
+     * The internal theme is intended for logged in access
+     * 
+     * @return 
+     */
+    @Column
+    public String getInternalTheme() {
+        return internalTheme;
     }
+
+    public void setInternalTheme(String internalTheme) {
+        this.internalTheme = internalTheme;
+    }
+
+    /**
+     * The public theme is intended for non-logged in access. It will usually
+     * control the landing page and other content pages available to users prior
+     * to signing up or logging in
+     * 
+     * @return 
+     */
+    @Column
+    public String getPublicTheme() {
+        return publicTheme;
+    }
+
+    public void setPublicTheme(String publicTheme) {
+        this.publicTheme = publicTheme;
+    }
+    
+
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(nullable = false)

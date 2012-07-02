@@ -225,7 +225,12 @@ public abstract class AbstractContentResource extends AbstractResource implement
      */
     public String getNewComment() {
         return null;
-    }    
-    
+    }
 
+    @Override
+    public boolean isPublic() {
+        return parent.isPublic();
+    }
+
+    
 }

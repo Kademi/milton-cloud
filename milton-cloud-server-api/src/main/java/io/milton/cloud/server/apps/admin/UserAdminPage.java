@@ -86,7 +86,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
         } else {
             searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
         }
-        _(HtmlTemplater.class).writePage("admin/userAdmin", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","admin/userAdmin", this, params, out);
     }
 
     

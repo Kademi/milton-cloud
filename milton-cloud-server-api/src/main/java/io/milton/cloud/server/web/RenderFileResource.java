@@ -346,5 +346,16 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     
     public void doSave() throws BadRequestException, NotAuthorizedException {
         fileResource.doSave();
-    }    
+    }
+
+    @Override
+    public boolean isPublic() {
+        return fileResource.isPublic();
+    }
+
+    public io.milton.cloud.server.web.FileResource getFileResource() {
+        return fileResource;
+    }
+        
+    
 }

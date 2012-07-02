@@ -17,7 +17,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.Utils;
+import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -91,7 +91,7 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
@@ -167,4 +167,6 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }    
+    
+
 }

@@ -48,7 +48,7 @@ public class DataSessionTest {
     SessionFactory sessionFactory;
     Session session;
     HashStore hashStore;
-    BlobStore blobStore;
+    FileSystemBlobStore blobStore;
     Organisation org;
     Profile user;
     MutableCurrentDateService currentDateService;
@@ -71,7 +71,7 @@ public class DataSessionTest {
         }
         
         hashStore = new DbHashStore();
-        blobStore = new FileSystemBlobStore(blobs);
+        blobStore = new FileSystemBlobStore(blobs); 
         
         org = new Organisation();
         org.setCreatedDate(currentDateService.getNow());

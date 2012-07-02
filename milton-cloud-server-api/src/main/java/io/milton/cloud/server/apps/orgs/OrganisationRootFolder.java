@@ -71,7 +71,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
         if (r != null) {
             return r;
         }
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override

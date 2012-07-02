@@ -15,15 +15,17 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.WebUtils;
-import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.mail.MailServer;
+import io.milton.mail.MailServerBuilder;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 
@@ -31,7 +33,10 @@ import io.milton.resource.Resource;
  *
  * @author brad
  */
-public class EmailApp implements MenuApplication{
+public class EmailApp implements MenuApplication, LifecycleApplication {
+
+    private MiltonCloudMailResourceFactory mailResourceFactory;
+    private MailServer mailServer;
 
     @Override
     public String getInstanceId() {
@@ -40,7 +45,14 @@ public class EmailApp implements MenuApplication{
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        
+        mailResourceFactory = new MiltonCloudMailResourceFactory();
+        MailServerBuilder mailServerBuilder = new MailServerBuilder();
+        mailServerBuilder.setMailResourceFactory(mailResourceFactory);
+        mailServerBuilder.setEnablePop(false);
+        mailServerBuilder.setEnableMsa(false);
+        mailServerBuilder.setSmtpPort(2525); // high port for linux. TODO: make configurable
+        mailServer = mailServerBuilder.build();
+        mailServer.start();
     }
 
     @Override
@@ -52,9 +64,9 @@ public class EmailApp implements MenuApplication{
                 return new ManageGroupEmailsPage(requestedName, faf.getOrganisation(), faf);
             }
         }
-        if( parent instanceof UserResource) {
+        if (parent instanceof UserResource) {
             UserResource wrf = (UserResource) parent;
-            if( requestedName.equals("myInbox")) {
+            if (requestedName.equals("myInbox")) {
                 //return new MyInboxPage(requestedName, wrf, wrf.getServices()); 
             }
         }
@@ -66,8 +78,8 @@ public class EmailApp implements MenuApplication{
         if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
             children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation()));
-        }        
-        if( parent instanceof UserResource) {
+        }
+        if (parent instanceof UserResource) {
             UserResource ur = (UserResource) parent;
             EmailFolder f = new EmailFolder(ur, "inbox");
             children.add(f);
@@ -77,17 +89,29 @@ public class EmailApp implements MenuApplication{
     @Override
     public void appendMenu(MenuItem parent) {
         OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
-        switch (parent.getId()) {
-            case "menuRoot":
-                parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
-                break;
-            case "menuTalk":
-                parent.getOrCreate("menuEmails", "Send emails").setOrdering(20);
-                break;
-            case "menuEmails":
-                parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("groupEmails").child("manage")).setOrdering(10);
-                break;
+        if (parentOrg != null) {
+            switch (parent.getId()) {
+                case "menuRoot":
+                    parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
+                    break;
+                case "menuTalk":
+                    parent.getOrCreate("menuEmails", "Send emails").setOrdering(20);
+                    break;
+                case "menuEmails":
+                    parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("groupEmails").child("manage")).setOrdering(10);
+                    break;
+            }
         }
     }
-    
+
+    @Override
+    public void shutDown() {
+        if (mailServer != null) {
+            mailServer.stop();
+        }
+    }
+
+    @Override
+    public void initDefaultProperties(AppConfig config) {
+    }
 }

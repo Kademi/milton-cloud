@@ -28,8 +28,8 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.cloud.server.web.UserResource;
-import io.milton.cloud.server.web.Utils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
@@ -102,7 +102,7 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override

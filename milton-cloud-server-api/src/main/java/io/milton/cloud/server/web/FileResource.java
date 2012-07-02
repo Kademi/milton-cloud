@@ -30,6 +30,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Auth;
 
 /**
  *
@@ -178,6 +179,19 @@ public class FileResource extends AbstractContentResource implements Replaceable
             setContent(bin);
             parent.save();
         }
+    }
 
+    @Override
+    public Long getMaxAgeSeconds(Auth auth) {
+        if( this.is("html")) {
+            return null;
+        } else {
+            return 60*60*24*7*4l; // 1 month
+        }
+        
+    }
+    
+    public long getHash() {
+        return this.contentNode.getHash();
     }
 }

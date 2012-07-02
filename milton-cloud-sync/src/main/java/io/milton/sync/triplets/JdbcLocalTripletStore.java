@@ -60,9 +60,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private final CrcDao crcDao;
     private final BlobDao blobDao;
     private final File root;
-    private final WatchService watchService;        
+    private final WatchService watchService;
     private final EventManager eventManager;
-    
     private File currentScanFile;
     private long currentOffset;
     private long lastBlobHash;
@@ -187,21 +186,26 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             @Override
             public Object use(Connection t) throws Exception {
                 System.out.println("START SCAN");
-                tlConnection.set(t);
-                scanDirectory(root);
-                con().commit();
+                try {
+                    tlConnection.set(t);
+                    scanDirectory(root);
+                    con().commit();
 
-                long count = crcDao.getCrcRecordCount(con());
-                log.info("scan: Contains crc records: " + count);
+                    long count = crcDao.getCrcRecordCount(con());
+                    log.info("scan: Contains crc records: " + count);
 
+                } catch (Throwable e) {
+                    log.error("Exception in scan: " + root.getAbsolutePath(), e);
+                } finally {
+                    tlConnection.remove();
+                }
 
-                tlConnection.remove();
                 return null;
             }
         });
 
     }
-    
+
     /**
      * Start processing file system events
      */
@@ -220,14 +224,14 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             }
         };
         log.info("Begin file watch loop: " + root.getAbsolutePath());
-        futureScan = scheduledExecutorService.scheduleWithFixedDelay(rScan, 200, 200, TimeUnit.MILLISECONDS);        
+        futureScan = scheduledExecutorService.scheduleWithFixedDelay(rScan, 200, 200, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Stop processing file system events
      */
     public void stop() {
-        if( futureScan != null ) {
+        if (futureScan != null) {
             futureScan.cancel(true);
         }
     }
@@ -313,7 +317,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 }
             }
         }
-                
+
         return changed;
     }
 
@@ -356,8 +360,9 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
         // will only watch specified directory, not subdirectories
         path.register(watchService, events);
+        System.out.println("Now watching: " + dir.getAbsolutePath());
     }
-    
+
     private void scanFsEvents() throws IOException {
         WatchKey watchKey;
         watchKey = watchService.poll(); // this call is blocking until events are present
@@ -396,7 +401,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     }
 
     private void directoryCreated(final File f) throws IOException {
-        registerWatchDir( f);
+        registerWatchDir(f);
         scanDirTx(f);
     }
 
@@ -411,14 +416,15 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private void fileDeleted(File f) {
         scanDirTx(f.getParentFile());
     }
-    
+
     private void scanDirTx(final File dir) {
+        log.info("scanDirTx: " + dir.getAbsolutePath());
         useConnection.use(new With<Connection, Object>() {
 
             @Override
             public Object use(Connection t) throws Exception {
                 tlConnection.set(t);
-                if( scanDirectory(dir) ) {
+                if (scanDirectory(dir)) {
                     EventUtils.fireQuietly(eventManager, new FileChangedEvent());
                 }
                 con().commit();
@@ -426,6 +432,6 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 tlConnection.remove();
                 return null;
             }
-        });        
+        });
     }
 }

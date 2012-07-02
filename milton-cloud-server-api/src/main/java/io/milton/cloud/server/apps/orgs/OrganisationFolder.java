@@ -73,7 +73,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         if (r != null) {
             return r;
         }
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("home", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","home", this, params, out);
     }
 
     @Override
@@ -151,4 +151,11 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public Organisation getOrganisation() {
         return organisation;
     }
+
+    @Override
+    public boolean isPublic() {
+        return false;
+    }
+    
+    
 }

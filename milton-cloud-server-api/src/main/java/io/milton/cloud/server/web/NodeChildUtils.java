@@ -14,9 +14,16 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.common.Path;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.resource.CollectionResource;
+import io.milton.resource.Resource;
 import io.milton.vfs.data.DataSession.DataNode;
 import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.data.DataSession.FileNode;
+import java.util.List;
 
 
 /**
@@ -73,6 +80,30 @@ public class NodeChildUtils {
         return list;
     }
 
+    public static Resource childOf(List<? extends Resource> children, String name) {
+        if (children == null) {
+            return null;
+        }
+        for (Resource r : children) {
+            if (r.getName().equals(name)) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public static Resource find(Path p, CollectionResource col) throws NotAuthorizedException, BadRequestException {
+        Resource r = col;
+        for( String s : p.getParts()) {
+            if( r instanceof CollectionResource) {
+                r = ((CollectionResource)r).child(s);
+            } else {
+                return null;
+            }
+        }
+        return r;
+    }
+    
     public interface ResourceCreator {
 
         FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode);

@@ -78,7 +78,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         if( r != null ) {
             return r;
         }
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
@@ -163,5 +163,12 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     public Organisation getOrganisation() {
         return organisation;
     }
+
+    @Override
+    public boolean isPublic() {
+        return false;
+    }
+    
+    
 }
 

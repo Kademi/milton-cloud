@@ -60,7 +60,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public Resource child(String childName) {
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override

@@ -70,7 +70,7 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        _(HtmlTemplater.class).writePage("email/manageGroupEmail", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","email/manageGroupEmail", this, params, out);
     }
     
     public String getTitle() {

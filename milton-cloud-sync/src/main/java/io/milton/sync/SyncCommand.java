@@ -110,12 +110,17 @@ public class SyncCommand {
         private final String pwd;
         private final boolean monitor;
 
-        public SyncJob(File sLocalDir, String sRemoteAddress, String user, String pwd, boolean monitor) {
-            this.localDir = sLocalDir;
+        public SyncJob(File localDir, String sRemoteAddress, String user, String pwd, boolean monitor) {
+            this.localDir = localDir;
             this.remoteAddress = sRemoteAddress;
             this.user = user;
             this.pwd = pwd;
             this.monitor = monitor;
+            if( !localDir.exists()) {
+                throw new RuntimeException("Sync dir does not exist: " + localDir.getAbsolutePath());
+            } else if( !localDir.isDirectory()) {
+                throw new RuntimeException("Sync path is not a directory: " + localDir.getAbsolutePath());
+            }
         }
 
         public String getPwd() {

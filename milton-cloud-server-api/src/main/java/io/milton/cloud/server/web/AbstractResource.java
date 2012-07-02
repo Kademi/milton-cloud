@@ -214,4 +214,11 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         }
         return s;
     }
+
+    @Override
+    public boolean isPublic() {
+        return false;
+    }
+    
+    
 }

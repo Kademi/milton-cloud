@@ -70,7 +70,7 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        _(HtmlTemplater.class).writePage("forums/managePosts", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","forums/managePosts", this, params, out);
     }
         
     @Override

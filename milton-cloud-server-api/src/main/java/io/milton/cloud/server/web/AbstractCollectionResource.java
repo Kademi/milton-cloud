@@ -57,7 +57,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
         if (r != null) {
             return r;
         }
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
@@ -68,5 +68,9 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
         return super.is(type);
     }
     
-    
+    @Override
+    public boolean isPublic() {
+        return false;
+    }
+        
 }

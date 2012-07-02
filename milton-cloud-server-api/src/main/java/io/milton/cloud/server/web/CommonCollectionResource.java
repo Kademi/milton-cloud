@@ -9,5 +9,5 @@ import io.milton.resource.CollectionResource;
  * @author brad
  */
 public interface CommonCollectionResource extends CommonResource, CollectionResource{
-    
+
 }

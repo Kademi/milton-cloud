@@ -139,4 +139,11 @@ public class LoginPage implements GetableResource, CommonResource {
             return Path.root;
         }
     }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+    
+    
 }

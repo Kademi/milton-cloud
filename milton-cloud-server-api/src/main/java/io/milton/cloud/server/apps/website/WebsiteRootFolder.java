@@ -51,8 +51,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     private final Website website;
     private ResourceList children;
 
-    public WebsiteRootFolder( ApplicationManager applicationManager, Website website) {
-        
+    public WebsiteRootFolder( ApplicationManager applicationManager, Website website) {        
         this.website = website;
         this.applicationManager = applicationManager;
     }
@@ -81,7 +80,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         if (r != null) {
             return r;
         }
-        r = Utils.childOf(getChildren(), childName);
+        r = NodeChildUtils.childOf(getChildren(), childName);
         if (r != null) {
             return r;
         }
@@ -282,4 +281,11 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
             return set;
         }
     }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+    
+    
 }

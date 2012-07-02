@@ -52,7 +52,9 @@ public class ReportingApp implements MenuApplication {
         String parentId = parent.getId();
         if (parentId.equals("menuRoot")) {
             OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
-            parent.getOrCreate("menuReporting", "Reporting", parentOrg.getPath().child("reporting"));
-        }        
+            if (parentOrg != null) {
+                parent.getOrCreate("menuReporting", "Reporting", parentOrg.getPath().child("reporting"));
+            }
+        }
     }
 }

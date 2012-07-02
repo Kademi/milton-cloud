@@ -60,7 +60,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         if (r != null) {
             return r;
         }
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override

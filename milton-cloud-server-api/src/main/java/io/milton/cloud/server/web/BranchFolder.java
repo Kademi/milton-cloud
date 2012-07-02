@@ -73,7 +73,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public Resource child(String childName) {
-        return Utils.childOf(getChildren(), childName);
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
     
     protected void renderPage(OutputStream out, Map<String, String> params) throws IOException {
-        getTemplater().writePage("repoHome", this, params, out);
+        getTemplater().writePage(false, "repoHome", this, params, out);
     }
 
     @Override
@@ -337,5 +337,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             }
         }
         return indexPage;
-    }    
+    }
+
+    @Override
+    public boolean isPublic() {
+        return parent.isPublic();
+    }
+    
+    
 }

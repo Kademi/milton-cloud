@@ -66,7 +66,7 @@ public class GroupsAdminPage  extends AbstractResource implements GetableResourc
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        _(HtmlTemplater.class).writePage("admin/manageGroups", this, params, out);
+        _(HtmlTemplater.class).writePage("admin", "admin/manageGroups", this, params, out);
     }
 
     

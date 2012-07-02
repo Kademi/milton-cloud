@@ -63,4 +63,12 @@ public interface CommonResource extends DigestResource{
      * @return 
      */
     Path getPath();
+    
+    /**
+     * Used for theming, is a way for the resource to indicate if it is in a secure
+     * or public realm
+     * 
+     * @return 
+     */
+    boolean isPublic();    
 }

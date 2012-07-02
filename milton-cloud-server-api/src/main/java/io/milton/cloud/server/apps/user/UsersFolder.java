@@ -62,7 +62,7 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("user/home", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","user/home", this, params, out);
     }
 
     @Override

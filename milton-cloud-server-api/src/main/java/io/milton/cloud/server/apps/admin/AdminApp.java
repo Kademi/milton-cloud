@@ -76,6 +76,9 @@ public class AdminApp implements MenuApplication {
     public void appendMenu(MenuItem parent) {
         String parentId = parent.getId();
         OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
+        if(parentOrg == null ) {
+            return ;
+        }
         Path parentPath = parentOrg.getPath();
         switch (parentId) {
             case "menuRoot":

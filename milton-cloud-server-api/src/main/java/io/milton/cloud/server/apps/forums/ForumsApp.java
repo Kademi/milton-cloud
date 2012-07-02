@@ -16,14 +16,13 @@ package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.web.RepositoryFolder;
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Repository;
@@ -35,16 +34,15 @@ import java.util.List;
  *
  * @author brad
  */
-public class ForumsApp implements MenuApplication {
+public class ForumsApp implements MenuApplication, ResourceApplication {
 
     public static String toHref(ForumPost r) {
         return "todo";
     }
-    
-    
+
     @Override
     public String getInstanceId() {
-        return "programsAdmin";
+        return "forums";
     }
 
     @Override
@@ -68,8 +66,8 @@ public class ForumsApp implements MenuApplication {
                 MenuItem.setActiveIds("menuTalk", "menuPrograms", "menuManagePosts");
                 return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
             }
-        } else if( parent instanceof WebsiteRootFolder) {
-            if( requestedName.equals("_postSearch")) {
+        } else if (parent instanceof WebsiteRootFolder) {
+            if (requestedName.equals("_postSearch")) {
                 WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
                 return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
             }
@@ -88,23 +86,40 @@ public class ForumsApp implements MenuApplication {
                 ForumsAdminFolder forumsAdminFolder = new ForumsAdminFolder("forums", repoFolder, w);
                 children.add(forumsAdminFolder);
             }
+        } else if (parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            children.add(new MyForumsFolder("forums", wrf, wrf.getWebsite()));
         }
     }
 
     @Override
     public void appendMenu(MenuItem parent) {
         OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
-        switch (parent.getId()) {
-            case "menuRoot":
-                parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
-                break;
-            case "menuTalk":
-                parent.getOrCreate("menuManageForums", "Manage forums").setOrdering(10);
-                break;
-            case "menuManageForums":
-                parent.getOrCreate("menuManagePosts", "Manage posts", parentOrg.getPath().child("managePosts")).setOrdering(10);
-                parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("manageForums")).setOrdering(20);
-                break;
+        if (parentOrg != null) {
+            switch (parent.getId()) {
+                case "menuRoot":
+                    parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
+                    break;
+                case "menuTalk":
+                    parent.getOrCreate("menuManageForums", "Manage forums").setOrdering(10);
+                    break;
+                case "menuManageForums":
+                    parent.getOrCreate("menuManagePosts", "Manage posts", parentOrg.getPath().child("managePosts")).setOrdering(10);
+                    parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("manageForums")).setOrdering(20);
+                    break;
+            }
         }
+    }
+
+    @Override
+    public Resource getResource(WebsiteRootFolder webRoot, String path) {
+        if (!path.startsWith("/templates/apps/forum")) {
+            return null;
+        }
+        if (path.endsWith(".css")) {
+            Path p = Path.path(path);
+            return new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
+        }
+        return null;
     }
 }
