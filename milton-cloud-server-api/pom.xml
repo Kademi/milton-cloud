@@ -84,11 +84,6 @@
             <version>1.0.2</version>
         </dependency>
         <dependency>
-            <groupId>cardme</groupId>
-            <artifactId>cardme-vcard</artifactId>
-            <version>0.3.2.03</version>
-        </dependency>
-        <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel</artifactId>
             <version>1.3.16-java1.6</version>
@@ -120,9 +115,9 @@
             <classifier>jdk15</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>io.milton</groupId>
             <artifactId>cardme</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
