@@ -116,12 +116,12 @@ public class AltFormatGenerator implements EventListener {
 
     private boolean isVideo(FileResource fr) {
         List<String> list = contentTypeService.findContentTypes(fr.getName());
-        System.out.println("isvideo: " + fr.getName() + " - " + list.size());
-        if( list.size() > 0 ) {
-            System.out.println(" - " + list.get(0));
+        for( String s : list ) {
+            if( s.contains("video")) {
+                return true;
+            }
         }
-        String v = contentTypeService.getPreferedMimeType("video", list);
-        return v != null;
+        return false;
     }
 
     private void generate(FileResource fr) throws IOException {

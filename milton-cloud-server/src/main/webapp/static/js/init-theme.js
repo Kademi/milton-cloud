@@ -15,6 +15,8 @@ function initTheme() {
     
     jQuery('textarea.autoresize').autoResize();    
     
+    initEdify();
+    
     initNav();
            
     initExtraInfo();
@@ -162,12 +164,18 @@ function initHtmlEditors(mainCssFile) {
     });  
 }
 
-function edify() {
-    log("edify");
+function initEdify(container) {
+    if( !$("body").hasClass("edifyIsEditMode")) {
+        $("body").addClass("edifyIsViewMode");
+    }
+}
+
+function edify(container) {
+    log("edify", container);
+    $("body").removeClass("edifyIsViewMode");
+    $("body").addClass("edifyIsEditMode");
     initHtmlEditors(["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
-    $(".panelBox").wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
-    var btn = $("<button type='submit'>Save</button>");
-    $("#edifyForm").prepend(btn);
+    container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
     $("#edifyForm").append("<input type='hidden' name='body' value='' />");
     $("#edifyForm").submit(function() {
         log("submit form");

@@ -1,0 +1,7 @@
+body.edifyIsViewMode .edifyEditMode {
+    display: none;
+}
+
+body.edifyIsEditMode .edifyViewMode {
+    display: none;
+}

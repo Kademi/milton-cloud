@@ -672,7 +672,9 @@ public class Formatter {
      * @param o2
      * @return 
      */
-    public Object ifTrue(boolean b, Object o1, Object o2) {
+    public Object ifTrue(Object bb, Object o1, Object o2) {
+        Boolean b = toBool(bb);
+        if( b == null ) b = Boolean.FALSE;
         return b ? o1 : o2;
     }    
 
