@@ -163,6 +163,9 @@ public class HtmlTemplater {
             themeTemplatePath = "/templates/themes/" + theme + "/" + themeTemplateName + ".html";
         }
         Template themeTemplate = getTemplate(themeTemplatePath);
+        if( themeTemplate == null ) {
+            throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);
+        }
         TemplateHtmlPage themeTemplateTemplateMeta = cachedTemplateMetaData.get(themeTemplatePath);
         if (themeTemplateTemplateMeta == null) {
             throw new RuntimeException("Couldnt find meta for template: " + themeTemplatePath);
@@ -310,20 +313,11 @@ public class HtmlTemplater {
                 System.out.println("isCustom, load from: " + wrf.getWebsite().getName());
                 try {
                     Resource r = NodeChildUtils.find(p, wrf);
-                    if (r == null) {
-                        throw new RuntimeException("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getName());
-                    } else if (r instanceof FileResource) {
-                        meta = loadContentMeta((FileResource) r, webPath);
-                    } else if (r instanceof RenderFileResource) {
-                        meta = loadContentMeta(((RenderFileResource) r).getFileResource(), webPath);
-                    } else {
-                        throw new RuntimeException("Cant load template from resource: " + r.getClass() + " at " + path + " in website: " + wrf.getWebsite().getName());
+                    FileResource fr = NodeChildUtils.toFileResource(r);
+                    if (fr == null) {
+                        throw new RuntimeException("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getName());                        
                     }
-                    if (meta != null) {
-                        return meta;
-                    } else {
-                        throw new RuntimeException("Couldnt find custom theme template: " + path);
-                    }
+                    meta = loadContentMeta(fr, wrf.getWebsite().getName(), webPath);
                 } catch (NotAuthorizedException | BadRequestException | NotFoundException ex) {
                     throw new IOException(ex);
                 }
@@ -381,8 +375,8 @@ public class HtmlTemplater {
             return meta;
         }
 
-        private TemplateHtmlPage loadContentMeta( FileResource fr, Path webPath) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr);
+        private TemplateHtmlPage loadContentMeta( FileResource fr, String websiteName, Path webPath) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr, websiteName, webPath);
             templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
             return meta;
 

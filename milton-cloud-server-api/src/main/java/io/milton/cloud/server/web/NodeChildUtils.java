@@ -104,6 +104,30 @@ public class NodeChildUtils {
         return r;
     }
     
+    public static long getHash(Resource r) {
+        if( r instanceof FileResource) {
+            FileResource fr = (FileResource) r;
+            return fr.getHash();
+        } else if( r instanceof RenderFileResource) {
+            RenderFileResource rfr = (RenderFileResource) r;
+            return getHash(rfr.getFileResource());                    
+        } else {
+            return -1;
+        }
+    }
+    
+    public static FileResource toFileResource(Resource r) {
+        if( r instanceof FileResource) {
+            FileResource fr = (FileResource) r;
+            return fr;
+        } else if( r instanceof RenderFileResource) {
+            RenderFileResource rfr = (RenderFileResource) r;
+            return rfr.getFileResource();
+        } else {
+            return null;
+        }
+    }    
+    
     public interface ResourceCreator {
 
         FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode);

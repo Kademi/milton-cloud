@@ -13,6 +13,8 @@ import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.GetableResource;
 
 /**
+ * Note that this outputs the bytes for a single chunk. Many such chunks will
+ * usually make up a file
  *
  * @author brad
  */

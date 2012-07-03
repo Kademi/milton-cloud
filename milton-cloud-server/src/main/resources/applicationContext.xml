@@ -74,11 +74,20 @@
                 <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
                 <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
                 <bean class="io.milton.cloud.server.apps.user.UserApp"/>
+                <bean class="io.milton.cloud.server.apps.dynamiccss.DynamicCssApp"/>
             </list>
         </constructor-arg>
         <property name="appsConfigDir" value="${apps.config.dir}" />
     </bean>
     
+    <bean id="content.type.service" class="io.milton.common.DefaultContentTypeService"/>
+    
+    <bean id="alt.format.generator" class="io.milton.cloud.server.web.alt.AltFormatGenerator">
+        <constructor-arg ref="hash.store" index="0" />
+        <constructor-arg ref="blob.store" index="1" />        
+        <constructor-arg ref="event.manager" index="2" />        
+        <constructor-arg ref="content.type.service" index="3" />
+    </bean>
         
     <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory">
         <!--        
@@ -97,6 +106,13 @@
         <constructor-arg ref="security.manager" />
     </bean>
     
+    <bean id="altformat.resource.factory" class="io.milton.cloud.server.web.alt.AltFormatResourceFactory">
+        <constructor-arg ref="hash.store" />
+        <constructor-arg ref="blob.store" />
+        <constructor-arg ref="main.spliffy.resource.factory" />
+        <constructor-arg ref="alt.format.generator" />
+    </bean>    
+    
     <bean id="root.context" class="io.milton.cloud.server.manager.MCRootContext" init-method="start" destroy-method="stop">        
         <constructor-arg ref="servletContext" />        
         <constructor-arg ref="main.spliffy.resource.factory" />        
@@ -104,6 +120,7 @@
         <constructor-arg ref="blob.store"/>
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>
+        <constructor-arg ref="event.manager"/>
     </bean>       
         
     <!-- This will expose resources on the classpath, required for apps which have css/js files in the jar -->
@@ -127,6 +144,7 @@
                 <ref local="apps.resource.factory"/>
                 <ref local="classpath.resource.factory" />
                 <ref local="static.resource.factory" />
+                <ref local="altformat.resource.factory" />                
             </list>
         </constructor-arg>
     </bean>

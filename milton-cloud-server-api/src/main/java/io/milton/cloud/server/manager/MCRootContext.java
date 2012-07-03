@@ -16,6 +16,7 @@ package io.milton.cloud.server.manager;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.common.DefaultCurrentDateService;
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
@@ -24,6 +25,7 @@ import io.milton.common.Service;
 import io.milton.context.Context;
 import io.milton.context.Executable2;
 import io.milton.context.RootContext;
+import io.milton.event.EventManager;
 import javax.servlet.ServletContext;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
@@ -45,7 +47,7 @@ public class MCRootContext extends RootContext implements Service{
     private final CurrentDateService currentDateService;
     private final CommentService commentService;
     
-    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager) {
+    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager) {
         super();
         this.resourceFactory = resourceFactory;                
         this.hashStore = hashStore;
@@ -53,7 +55,7 @@ public class MCRootContext extends RootContext implements Service{
         this.securityManager = securityManager;
         this.applicationManager = applicationManager;
         templateParser = new HtmlTemplateParser();
-        this.textTemplater = new TextTemplater(securityManager);
+        this.textTemplater = new TextTemplater(securityManager, servletContext);
         currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
         this.htmlTemplater = new HtmlTemplater(applicationManager, new Formatter(currentDateService), securityManager, servletContext);
         commentService = new CommentService(currentDateService);
@@ -61,6 +63,11 @@ public class MCRootContext extends RootContext implements Service{
         put(hashStore, blobStore, securityManager, securityManager.getUserDao(), applicationManager, templateParser, textTemplater, currentDateService, htmlTemplater, commentService);
         put(securityManager.getPasswordManager());
         put(resourceFactory);
+        
+        for( Application a : applicationManager.getApps()) {
+            put(a);
+        }
+        
     }
     
     @Override

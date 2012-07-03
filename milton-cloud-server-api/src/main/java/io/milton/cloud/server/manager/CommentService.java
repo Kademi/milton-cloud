@@ -15,7 +15,7 @@
 package io.milton.cloud.server.manager;
 
 import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.server.apps.forums.Comment;
+import io.milton.cloud.server.db.Comment;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommentBean;
 import io.milton.cloud.server.web.ProfileBean;

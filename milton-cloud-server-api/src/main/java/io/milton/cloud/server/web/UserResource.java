@@ -8,14 +8,8 @@ import io.milton.vfs.db.Repository;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
-import org.hibernate.LockMode;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.apps.calendar.CalendarFolder;
-import io.milton.cloud.server.apps.calendar.CalendarHomeFolder;
-import io.milton.cloud.server.apps.contacts.ContactsFolder;
-import io.milton.cloud.server.apps.contacts.ContactsHomeFolder;
-import io.milton.cloud.server.apps.email.EmailFolder;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
@@ -27,7 +21,6 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.HrefList;
-import io.milton.ldap.Condition;
 import io.milton.mail.Mailbox;
 import io.milton.mail.MessageFolder;
 import io.milton.mail.StandardMessageFactoryImpl;
@@ -64,35 +57,6 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         return list;
     }
 
-    public List<CalendarFolder> getCalendars() throws NotAuthorizedException, BadRequestException {
-        List<CalendarFolder> list = new ArrayList<>();
-        for (Resource r : getChildren()) {
-            if (r instanceof CalendarHomeFolder) {
-                CalendarHomeFolder calHome = (CalendarHomeFolder) r;
-                for (Resource r2 : calHome.getChildren()) { 
-                    if (r2 instanceof CalendarFolder) {
-                        list.add((CalendarFolder) r2);
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
-    public List<ContactsFolder> getAddressBooks() throws NotAuthorizedException, BadRequestException {
-        List<ContactsFolder> list = new ArrayList<>();
-        for (Resource r : getChildren()) {
-            if (r instanceof ContactsHomeFolder) {
-                ContactsHomeFolder home = (ContactsHomeFolder) r;
-                for (Resource r2 : home.getChildren()) {
-                    if (r2 instanceof ContactsFolder) {
-                        list.add((ContactsFolder) r2);
-                    }
-                }
-            }
-        }
-        return list;
-    }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
@@ -247,40 +211,40 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         return map;
     }
 
-    @Override
-    public List<LdapContact> searchContacts(Condition condition, int maxCount) {
-        log.info("searchContacts: " + condition);
-        SessionManager.session().lock(user, LockMode.NONE);
-        try {
-            List<LdapContact> results = new ArrayList<>();
-
-            for (Resource r : getChildren()) {
-                if (r instanceof ContactsHomeFolder) {
-                    ContactsHomeFolder contactsHomeFolder = (ContactsHomeFolder) r;
-                    for (Resource r2 : contactsHomeFolder.getChildren()) {
-                        if (r2 instanceof ContactsFolder) {
-                            ContactsFolder cf = (ContactsFolder) r2;
-                            for (Resource r3 : cf.getChildren()) {
-                                if (r3 instanceof LdapContact) {
-                                    LdapContact ldapContact = (LdapContact) r3;
-                                    if (condition == null || condition.isMatch(ldapContact)) {
-                                        log.trace("searchContacts: contact matches search criteria: " + ldapContact.getName());
-                                        results.add(ldapContact);
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
-
-            log.trace("searchContacts: " + getName() + ", results ->" + results.size());
-            return results;
-        } catch (NotAuthorizedException | BadRequestException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
+//    @Override
+//    public List<LdapContact> searchContacts(Condition condition, int maxCount) {
+//        log.info("searchContacts: " + condition);
+//        SessionManager.session().lock(user, LockMode.NONE);
+//        try {
+//            List<LdapContact> results = new ArrayList<>();
+//
+//            for (Resource r : getChildren()) {
+//                if (r instanceof ContactsHomeFolder) {
+//                    ContactsHomeFolder contactsHomeFolder = (ContactsHomeFolder) r;
+//                    for (Resource r2 : contactsHomeFolder.getChildren()) {
+//                        if (r2 instanceof ContactsFolder) {
+//                            ContactsFolder cf = (ContactsFolder) r2;
+//                            for (Resource r3 : cf.getChildren()) {
+//                                if (r3 instanceof LdapContact) {
+//                                    LdapContact ldapContact = (LdapContact) r3;
+//                                    if (condition == null || condition.isMatch(ldapContact)) {
+//                                        log.trace("searchContacts: contact matches search criteria: " + ldapContact.getName());
+//                                        results.add(ldapContact);
+//                                    }
+//                                }
+//
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            log.trace("searchContacts: " + getName() + ", results ->" + results.size());
+//            return results;
+//        } catch (NotAuthorizedException | BadRequestException ex) {
+//            throw new RuntimeException(ex);
+//        }
+//    }
 
     /**
      * Get the user this resource represents
@@ -310,8 +274,8 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     public MessageFolder getInbox() {
         try {
             Resource dir = child("inbox");            
-            if( dir instanceof EmailFolder) {
-                EmailFolder emailFolder = (EmailFolder) dir;
+            if( dir instanceof MessageFolder) {
+                MessageFolder emailFolder = (MessageFolder) dir;
                 return emailFolder;
             } else {
                 throw new RuntimeException("inbox folder is not a valid mesasge folder");

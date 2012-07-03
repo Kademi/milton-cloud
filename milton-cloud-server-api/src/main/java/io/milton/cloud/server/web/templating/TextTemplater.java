@@ -30,6 +30,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.WebUtils;
+import javax.servlet.ServletContext;
 
 /**
  * Templater for flat text files, such as css. Will locate templates in either
@@ -40,22 +41,27 @@ import io.milton.cloud.server.web.WebUtils;
 public class TextTemplater implements Templater {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TextTemplater.class);
-    public static final String ROOTS_SYS_PROP_NAME = "template.file.roots";
     private List<File> roots;
     private final SimpleTemplateLoader templateLoader;
     private final VelocityEngine engine;
     private final SpliffySecurityManager securityManager;
 
-    public TextTemplater(SpliffySecurityManager securityManager) {
+    public TextTemplater(SpliffySecurityManager securityManager, ServletContext servletContext) {
         this.securityManager = securityManager;
         templateLoader = new SimpleTemplateLoader();
         engine = new VelocityEngine();
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", templateLoader);
-        String extraRoots = System.getProperty(ROOTS_SYS_PROP_NAME);
+        
+        roots = new ArrayList<>();
+        File fWebappRoot = new File(servletContext.getRealPath("/"));
+        roots.add(fWebappRoot);
+        log.info("Using webapp root dir: " + fWebappRoot.getAbsolutePath());
+        
+        
+        String extraRoots = System.getProperty(HtmlTemplater.ROOTS_SYS_PROP_NAME);
         if (extraRoots != null && !extraRoots.isEmpty()) {
-            String[] arr = extraRoots.split(",");
-            roots = new ArrayList<>();
+            String[] arr = extraRoots.split(",");            
             for (String s : arr) {
                 File root = new File(s);
                 if (!root.exists()) {
@@ -137,14 +143,12 @@ public class TextTemplater implements Templater {
                 for (File root : roots) {
                     File templateFile = new File(root, path);
                     if (templateFile.exists()) {
-                        System.out.println("file: " + templateFile.getAbsolutePath());
                         return new FileTemplateSource(templateFile);
                     }
                 }
             }
             URL resource = this.getClass().getResource(path);
             if (resource != null) {
-                System.out.println("cp res");
                 return new ClassPathTemplateSource(resource);
             }
             return null;

@@ -159,6 +159,20 @@ public class ResourceList extends ArrayList<CommonResource> {
         });
         return list;
     }
+    
+    public ResourceList getSortByName() {
+        ResourceList list = new ResourceList(this);
+        Collections.sort(list, new Comparator<Resource>() {
+
+            @Override
+            public int compare(Resource o1, Resource o2) {
+                String n1 = o1.getName();
+                String n2 = o2.getName();
+                return n1.compareTo(n2);
+            }
+        });
+        return list;
+    }    
 
     public ResourceList getRandomSort() {
         CommonResource[] array = new CommonResource[this.size()];

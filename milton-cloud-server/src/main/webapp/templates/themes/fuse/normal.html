@@ -1,28 +1,33 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>        
         <link rel="stylesheet" type="text/css" href="base.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="theme.dyn.css" media="screen" />
         <link rel="stylesheet" type="text/css" href="validation.css" media="screen" />
         <link rel="stylesheet" type="text/css" href="/static/common/jquery-ui-1.8.11.custom.css" media="screen" />        
 
-        <script type="text/javascript" src="js/jquery-1.7.2.min.js" >//</script>
-        <script type="text/javascript" src="js/jquery.cookie.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js" >//</script>
+        <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js">//</script>        
-        <script type="text/javascript" src="js/jquery.autoresize.js">//</script>                
-        <script type="text/javascript" src="js/common.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.autoresize.js">//</script>                
+        <script type="text/javascript" src="/static/js/common.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
         <script type="text/javascript" src="/static/js/init-theme.js" >//</script>
-        <script type="text/javascript" src="js/register.js" >//</script>
-        <script type="text/javascript" src="js/validation.js" >//</script>      
-        <script type="text/javascript" src="js/jquery.comments.js" >//</script>      
-        <script type="text/javascript" src="js/toolbars.js" >//</script>
+        <script type="text/javascript" src="/static/js/register.js" >//</script>
+        <script type="text/javascript" src="/static/js/validation.js" >//</script>      
+        <script type="text/javascript" src="/static/js/jquery.comments.js" >//</script>      
+        <script type="text/javascript" src="/static/js/toolbars.js" >//</script>
+        <script type="text/javascript" src="/static/ckeditor36/ckeditor.js" >//</script>
+        <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" >//</script>
+        <script type="text/javascript" src="/static/js/toolbars.js" >//</script> 
+        
     </head>
-    <body class="$rc.targetPage.templateName $targetPage.parents.first.name $targetPage.params.extraCss $!targetPage.template.template.name">
+    <body class="normal">
         <!--wrapper-->
         <div class="wrapper">
             <!--header-->
             <div class="header">
                 <!--logo-->
-                <h1 class="logo"><a href="/index.html">$page.parent.settings.logo</a></h1>
+                <h1 class="logo"><a href="/index.html">$rootFolder.settings.logo</a></h1>
                 <!--headRight-->
                 <div class="headRight">
                     <div class="formBox">

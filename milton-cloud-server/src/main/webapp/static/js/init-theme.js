@@ -154,7 +154,6 @@ function initHtmlEditors(mainCssFile) {
             filebrowserUploadUrl : '/uploader/upload',
             format_tags : 'p;h2;h3;h4;h5'
         };    
-        //http://ark.ettrema.com/static/editor/filemanager/browser/default/browser.html?Type=Image&Connector=/fck_connector.html
     
         log("ckeditor config", config);
 
@@ -165,7 +164,7 @@ function initHtmlEditors(mainCssFile) {
 
 function edify() {
     log("edify");
-    initHtmlEditors("/templates/apps/learner/learning.css");
+    initHtmlEditors(["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
     $(".panelBox").wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
     var btn = $("<button type='submit'>Save</button>");
     $("#edifyForm").prepend(btn);

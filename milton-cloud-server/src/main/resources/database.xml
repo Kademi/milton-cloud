@@ -52,17 +52,18 @@
                 <value>io.milton.vfs.db.GroupMembership</value>    
                 <value>io.milton.vfs.db.NvPair</value>    
                 
-                <value>io.milton.cloud.server.apps.forums.Forum</value>
-                <value>io.milton.cloud.server.apps.forums.ForumPost</value>
-                <value>io.milton.cloud.server.apps.forums.ForumReply</value>
-                <value>io.milton.cloud.server.apps.forums.ForumTopic</value>
-                <value>io.milton.cloud.server.apps.forums.Comment</value>
-                <value>io.milton.cloud.server.apps.forums.Post</value>
+                <value>io.milton.cloud.server.db.Forum</value>
+                <value>io.milton.cloud.server.db.ForumPost</value>
+                <value>io.milton.cloud.server.db.ForumReply</value>
+                <value>io.milton.cloud.server.db.ForumTopic</value>
+                <value>io.milton.cloud.server.db.Comment</value>
+                <value>io.milton.cloud.server.db.Post</value>
                 
-                <value>io.milton.cloud.server.apps.email.EmailItem</value>
-                <value>io.milton.cloud.server.apps.email.EmailSendAttempt</value>
-                <value>io.milton.cloud.server.apps.email.GroupEmailJob</value>
-                <value>io.milton.cloud.server.apps.email.GroupRecipient</value>
+                <value>io.milton.cloud.server.db.EmailItem</value>
+                <value>io.milton.cloud.server.db.EmailSendAttempt</value>
+                <value>io.milton.cloud.server.db.GroupEmailJob</value>
+                <value>io.milton.cloud.server.db.GroupRecipient</value>
+                <value>io.milton.cloud.server.db.AltFormat</value>
                 
             </list>
         </property>

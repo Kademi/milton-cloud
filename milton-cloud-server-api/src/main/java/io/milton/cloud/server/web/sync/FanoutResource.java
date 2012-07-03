@@ -15,6 +15,8 @@ import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.GetableResource;
 
 /**
+ * Note that this will write the hash values which make up the fanout hash
+ * - it will NOT write the actual file content!
  *
  * @author brad
  */

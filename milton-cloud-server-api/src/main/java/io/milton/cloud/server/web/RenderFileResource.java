@@ -134,7 +134,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try {
             fileResource.sendContent(bout, null, null, title);
-        } catch (IOException | NotAuthorizedException | BadRequestException | NotFoundException ex) {
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
         return new ByteArrayInputStream(bout.toByteArray());

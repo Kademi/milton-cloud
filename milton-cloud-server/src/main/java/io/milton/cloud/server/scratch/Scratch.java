@@ -64,18 +64,18 @@ public class Scratch {
 
         server.start();
 
-        File contentDir = new File("src/main/3dn-content");
-        File coursesDir = new File("src/main/courses");
+        File contentDir = new File("/home/brad/proj/fuse-admin/fuse-admin-web2/src/main/3dn-content");
+        File coursesDir = new File("/home/brad/proj/fuse-admin/fuse-admin-web2/src/main/courses");
         System.out.println("Beginning monitor of: " + contentDir.getAbsolutePath());
         File dbFile = new File("target/sync-db");
         List<SyncCommand.SyncJob> jobs = Arrays.asList(
                 // content for 3dn 
-//                new SyncCommand.SyncJob(contentDir, "http://127.0.0.1:8080/organisations/3dn/idhealth.localhost/" + Branch.TRUNK + "/", "admin", "password8", true)
-//                ,                
-//                new SyncCommand.SyncJob(new File(coursesDir, "pmh1"), "http://127.0.0.1:8080/organisations/3dn/programs/prof/pmh1/" + Branch.TRUNK + "/", "admin", "password8", true),
-//                new SyncCommand.SyncJob(new File(coursesDir, "pmh2"), "http://127.0.0.1:8080/organisations/3dn/programs/prof/pmh2/" + Branch.TRUNK + "/", "admin", "password8", true),
-//                new SyncCommand.SyncJob(new File(coursesDir, "cmh1"), "http://127.0.0.1:8080/organisations/3dn/programs/carer/cmh1/" + Branch.TRUNK + "/", "admin", "password8", true),
-//                new SyncCommand.SyncJob(new File(coursesDir, "cmh2"), "http://127.0.0.1:8080/organisations/3dn/programs/carer/pmh2/" + Branch.TRUNK + "/", "admin", "password8", true)
+                new SyncCommand.SyncJob(contentDir, "http://127.0.0.1:8080/organisations/3dn/idhealth.localhost/" + Branch.TRUNK + "/", "admin", "password8", true)
+                ,                
+                new SyncCommand.SyncJob(new File(coursesDir, "pmh1"), "http://127.0.0.1:8080/organisations/3dn/programs/prof/pmh1/" + Branch.TRUNK + "/", "admin", "password8", true),
+                new SyncCommand.SyncJob(new File(coursesDir, "pmh2"), "http://127.0.0.1:8080/organisations/3dn/programs/prof/pmh2/" + Branch.TRUNK + "/", "admin", "password8", true),
+                new SyncCommand.SyncJob(new File(coursesDir, "cmh1"), "http://127.0.0.1:8080/organisations/3dn/programs/carer/cmh1/" + Branch.TRUNK + "/", "admin", "password8", true),
+                new SyncCommand.SyncJob(new File(coursesDir, "cmh2"), "http://127.0.0.1:8080/organisations/3dn/programs/carer/pmh2/" + Branch.TRUNK + "/", "admin", "password8", true)
         );
         SyncCommand.start(dbFile, jobs);
         

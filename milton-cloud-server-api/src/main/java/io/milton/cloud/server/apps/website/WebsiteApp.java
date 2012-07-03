@@ -58,7 +58,7 @@ public class WebsiteApp implements Application {
      * @return
      */
     @Override
-    public Resource getPage(Resource parent, String requestedName) {
+    public WebsiteRootFolder getPage(Resource parent, String requestedName) {
         if (parent == null) {
             Website website = websiteDao.getWebsite(requestedName, SessionManager.session());
             if (website != null) {                
