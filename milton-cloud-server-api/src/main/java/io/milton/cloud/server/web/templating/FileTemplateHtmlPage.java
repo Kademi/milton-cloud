@@ -75,7 +75,13 @@ public class FileTemplateHtmlPage extends TemplateHtmlPage{
         return templateFile;
     }
 
+    @Override
     public long getTimestamp() {
         return timestamp;
-    }    
+    }
+
+    @Override
+    boolean isValid() {
+        return timestamp == templateFile.lastModified();
+    }
 }

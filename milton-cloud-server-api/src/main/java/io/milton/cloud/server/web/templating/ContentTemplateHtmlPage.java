@@ -79,5 +79,10 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage{
         int hash = 3;
         hash = 67 * hash + Objects.hashCode(hash);
         return hash;
-    } 
+    }
+
+    @Override
+    boolean isValid() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

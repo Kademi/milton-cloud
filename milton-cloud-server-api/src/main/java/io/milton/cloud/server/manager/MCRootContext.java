@@ -24,6 +24,7 @@ import io.milton.common.Service;
 import io.milton.context.Context;
 import io.milton.context.Executable2;
 import io.milton.context.RootContext;
+import javax.servlet.ServletContext;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
@@ -44,7 +45,7 @@ public class MCRootContext extends RootContext implements Service{
     private final CurrentDateService currentDateService;
     private final CommentService commentService;
     
-    public MCRootContext(SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager) {
+    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager) {
         super();
         this.resourceFactory = resourceFactory;                
         this.hashStore = hashStore;
@@ -54,7 +55,7 @@ public class MCRootContext extends RootContext implements Service{
         templateParser = new HtmlTemplateParser();
         this.textTemplater = new TextTemplater(securityManager);
         currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
-        this.htmlTemplater = new HtmlTemplater(applicationManager, new Formatter(currentDateService), securityManager);
+        this.htmlTemplater = new HtmlTemplater(applicationManager, new Formatter(currentDateService), securityManager, servletContext);
         commentService = new CommentService(currentDateService);
         
         put(hashStore, blobStore, securityManager, securityManager.getUserDao(), applicationManager, templateParser, textTemplater, currentDateService, htmlTemplater, commentService);

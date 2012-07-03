@@ -69,5 +69,10 @@ public class ClassPathTemplateHtmlPage extends TemplateHtmlPage{
         int hash = 3;
         hash = 67 * hash + Objects.hashCode(this.resource);
         return hash;
-    } 
+    }
+
+    @Override
+    boolean isValid() {
+        return true;
+    }
 }

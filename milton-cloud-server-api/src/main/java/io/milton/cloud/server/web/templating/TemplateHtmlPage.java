@@ -33,11 +33,18 @@ public abstract class TemplateHtmlPage implements HtmlPage{
     
     abstract long getTimestamp();
     
+    /**
+     * Check if the resource has changed
+     * 
+     * @return 
+     */
+    abstract boolean isValid();
+    
     public TemplateHtmlPage(String id) {
         this.id = id;
         this.webResources = new ArrayList<>();
         this.bodyClasses = new ArrayList<>();
-    }
+    }    
 
     @Override
     public List<String> getBodyClasses() {

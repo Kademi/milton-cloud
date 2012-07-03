@@ -29,27 +29,37 @@ public class Scratch {
 
     public static void main(String[] args) throws Exception {
         sendStop();
-        
-        String extraApps = ""; //toCsv(FuseDataCreatorApp.class, LearningRegistrationApp.class, LearningContentApp.class, LearningAdminApp.class);
+
+//        File extraCp = new File("/home/brad/proj/fuse-admin/fuse-admin-web2/target/classes");
+//        if( !extraCp.exists() ) {
+//            throw new RuntimeException("Not found: " + extraCp.getAbsolutePath());                    
+//        }
+//        String sExtraCp = extraCp.getAbsolutePath();
+//        if( !sExtraCp.endsWith("/")) {
+//            sExtraCp += "/";
+//        }
+//        System.out.println("extra cp: " + sExtraCp);
+                
+        String extraApps = ""; //com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learner.registration.LearningRegistrationApp,com.fuselms.apps.learner.content.LearningContentApp,com.fuselms.apps.admin.programs.LearningAdminApp";
         System.out.println("extra apps: " + extraApps);
         System.setProperty(ApplicationManager.EXTRA_APPS_SYS_PROP_NAME, extraApps);
-        File root = new File("src/main/resources");
-        System.setProperty(HtmlTemplater.ROOTS_SYS_PROP_NAME, root.getAbsolutePath() );
-        System.out.println("set template roots: " + root.getAbsolutePath() );
+//        File root = new File("src/main/resources");
+//        System.setProperty(HtmlTemplater.ROOTS_SYS_PROP_NAME, root.getAbsolutePath() );
+//        System.out.println("set template roots: " + root.getAbsolutePath() );
 
-        System.setProperty("extra.web.resources.location", root.getParentFile().getAbsolutePath());
+//        System.setProperty("extra.web.resources.location", root.getParentFile().getAbsolutePath());
 
         server = new Server(8080);
         server.setStopAtShutdown(true);
         WebAppContext context = new WebAppContext();
-        //File f = new File();
+//        context.setExtraClasspath(sExtraCp);        
+        
         context.setDescriptor("src/test/resources/web.xml");
         context.setResourceBase("src/main/webapp");
         context.setContextPath("/");
 
-        context.setParentLoaderPriority(true);
-//        context.setExtraClasspath("E:/proj/spliffy/spliffy-server/src/main/resources/,E:/proj/spliffy/spliffy-server/src/test/resources/, src/test/resources/");
-
+        context.setParentLoaderPriority(false);
+        
         server.setHandler(context);
 
         server.start();

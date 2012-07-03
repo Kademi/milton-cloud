@@ -120,9 +120,24 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>extra.apps</name>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.Autoloader</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>template.file.roots</name>
+                                    <value>/home/brad/proj/fuse-admin/fuse-admin-web2/src/main/resources</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>fuse.autoloader.dir</name>
+                                    <value>/home/brad/proj/fuse-admin/fuse-admin-web2</value>
+                                </systemProperty>
+                                
+                            </systemProperties>                            
                             <overrideWebXml>src/test/resources/web.xml</overrideWebXml>
                             <webAppConfig>
-                                <extraClasspath>/home/brad/proj/fuse-admin/fuse-admin-web2/target</extraClasspath>
+                                <extraClasspath>/home/brad/proj/fuse-admin/fuse-admin-web2/target/classes/</extraClasspath>
                             </webAppConfig>
                             <contextPath>/</contextPath>
                             <connectors>
