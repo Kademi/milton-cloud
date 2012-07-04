@@ -24,6 +24,7 @@ public class HashCalc {
         OutputStream nulOut = new NullOutputStream();
         return calcHash(childDirEntries, nulOut);
     }
+    
     public long calcHash(Iterable<? extends ITriplet> childDirEntries, OutputStream out) {        
         CheckedOutputStream cout = new CheckedOutputStream(out, new Adler32());
         for (ITriplet r : childDirEntries) {

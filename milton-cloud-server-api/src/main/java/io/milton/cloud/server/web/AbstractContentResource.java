@@ -2,6 +2,7 @@ package io.milton.cloud.server.web;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.Version;
 import io.milton.cloud.server.manager.CommentService;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
@@ -34,7 +35,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
     protected ContentDirectoryResource parent;
     protected DataNode contentNode;
     protected NodeMeta nodeMeta;
-    
+
     public abstract String getTitle();
 
     /**
@@ -113,9 +114,23 @@ public abstract class AbstractContentResource extends AbstractResource implement
     }
 
     protected void updateModDate() {
+        long previousProfileId = loadNodeMeta().getProfileId();
+        Date previousModDate = loadNodeMeta().getModDate();
+        long previousResourceHash = contentNode.getLoadedHash();
+        
+        long newResourceHash = contentNode.getHash();
         Date newDate = _(CurrentDateService.class).getNow();
-        loadNodeMeta().setModDate(newDate);
-        if( nodeMeta.getCreatedDate() == null ) {
+        long newProfileId = 0;
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+        if (p != null) {
+            newProfileId = p.getId();
+        }
+        
+        Version.insert(previousResourceHash, previousModDate, previousProfileId, newResourceHash, newDate, newProfileId, SessionManager.session());
+        
+        nodeMeta.setModDate(newDate);
+        nodeMeta.setProfileId(newProfileId);
+        if (nodeMeta.getCreatedDate() == null) {
             nodeMeta.setCreatedDate(newDate);
         }
         try {
@@ -194,10 +209,9 @@ public abstract class AbstractContentResource extends AbstractResource implement
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
-    
 
     public List<CommentBean> getComments() {
-        return _(CommentService.class).comments(this.loadNodeMeta().getId()); 
+        return _(CommentService.class).comments(this.loadNodeMeta().getId());
     }
 
     public int getNumComments() {
@@ -211,7 +225,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     public void setNewComment(String s) throws NotAuthorizedException {
         RootFolder rootFolder = WebUtils.findRootFolder(this);
-        if( rootFolder instanceof WebsiteRootFolder) {
+        if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
             _(CommentService.class).newComment(this, s, wrf.getWebsite(), currentUser, SessionManager.session());
@@ -231,6 +245,4 @@ public abstract class AbstractContentResource extends AbstractResource implement
     public boolean isPublic() {
         return parent.isPublic();
     }
-
-    
 }

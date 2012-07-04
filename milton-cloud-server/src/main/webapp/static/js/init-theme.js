@@ -148,7 +148,7 @@ function initHtmlEditors(mainCssFile) {
             templates_files : [ '/templates/editor/ck-templates/templates.js' ],
             templates_replaceContent: false,
             toolbar: toolbarSets[toolbar],
-            extraPlugins : 'autogrow',
+            extraPlugins : 'autogrow,embed_video',
             removePlugins : 'resize',
             enterMode: "P",
             forceEnterMode:true,
@@ -159,7 +159,7 @@ function initHtmlEditors(mainCssFile) {
     
         log("ckeditor config", config);
 
-        config.stylesSet = 'myStyles:/templates/themes/3dn/js/styles.js';
+        //config.stylesSet = 'myStyles:/templates/themes/3dn/js/styles.js';
         $('.htmleditor').ckeditor(config);
     });  
 }

@@ -174,6 +174,7 @@ public class DataSession {
         protected String name;
         protected String type;
         protected long hash;
+        protected long loadedHash; // holds the hash value from when the node was loaded
         protected Boolean dirty;
 
         /**
@@ -189,6 +190,7 @@ public class DataSession {
             this.name = name;
             this.type = type;
             this.hash = hash;
+            this.loadedHash = hash; 
         }
 
         /**
@@ -254,6 +256,11 @@ public class DataSession {
             setDirty();
         }
 
+        public long getLoadedHash() {
+            return loadedHash;
+        }
+        
+        
         protected void setDirty() {
             if (dirty != null) {
                 return; // already set

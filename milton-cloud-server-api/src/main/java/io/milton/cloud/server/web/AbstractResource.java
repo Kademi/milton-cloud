@@ -193,7 +193,10 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public boolean is(String type) {
-        return type.equals("resource");
+        if( type.equals("resource") ) {
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -53,17 +53,19 @@ public class AltFormatGenerator implements EventListener {
         this.blobStore = blobStore;
         this.contentTypeService = contentTypeService;
         this.formats = new ArrayList<>();
-        formats.add(new FormatSpec("png", 150, 150));
-        formats.add(new FormatSpec("flv", 800, 600));
-        formats.add(new FormatSpec("png", 800, 600));
+        formats.add(new FormatSpec("image", "png", 150, 150));
+        formats.add(new FormatSpec("video", "flv", 800, 600));
+        formats.add(new FormatSpec("video", "m4v", 800, 600));
+        formats.add(new FormatSpec("video", "ogv", 800, 600));
+        formats.add(new FormatSpec("video", "png", 800, 600));
         eventManager.registerEventListener(this, PutEvent.class);
     }
-    
+
     public FormatSpec findFormat(String name) {
         System.out.println("findFormat: " + name);
-        for( FormatSpec f : formats) {
+        for (FormatSpec f : formats) {
             System.out.println("? " + name + " = " + f.getName());
-            if( f.getName().equals(name)) {
+            if (f.getName().equals(name)) {
                 return f;
             }
         }
@@ -81,70 +83,44 @@ public class AltFormatGenerator implements EventListener {
         }
     }
 
-    public AltFormat generate(FormatSpec f, FileResource fr) throws IOException {
-        String ext = FileUtils.getExtension(fr.getName());
-        FFMPEGConverter converter = new FFMPEGConverter(ffmpeg, fr, ext);        
-        return generate(f, fr, converter);
+    private void onPut(FileResource fr) {
+        log.info("onPut: " + fr.getName());
+        try {
+            generate(fr);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private void generate(FileResource file) throws IOException {
+        String ext = FileUtils.getExtension(file.getName());
+        AvconvConverter converter = new AvconvConverter(ffmpeg, file, ext);
+        if (formats != null) {
+            for (FormatSpec f : formats) {
+                if (file.is(f.inputType)) {
+                    generate(f, file, converter);
+                }
+            }
+        }
     }
     
-    public AltFormat generate(FormatSpec f, FileResource fr, FFMPEGConverter converter) throws IOException {
+    public AltFormat generate(FormatSpec f, FileResource fr) throws IOException {
+        String ext = FileUtils.getExtension(fr.getName());
+        AvconvConverter converter = new AvconvConverter(ffmpeg, fr, ext);
+        return generate(f, fr, converter);
+    }
+
+    public AltFormat generate(FormatSpec f, FileResource fr, AvconvConverter converter) throws IOException {
         final Parser parser = new Parser();
         long altHash = converter.generate(f, new With<InputStream, Long>() {
 
             @Override
             public Long use(InputStream t) throws Exception {
-                return parser.parse(t, hashStore, blobStore);                
+                return parser.parse(t, hashStore, blobStore);
             }
-        });        
+        });
         String name = f.getName();
         return AltFormat.insertIfOrUpdate(name, fr.getHash(), altHash, SessionManager.session());
     }
     
-
-    private void onPut(FileResource fr) {
-        log.info("onPut: " + fr.getName());
-        if (isVideo(fr)) {
-            try {
-                generate(fr);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        } else {
-            log.info("Not supported type");
-        }
-    }
-
-    private boolean isVideo(FileResource fr) {
-        List<String> list = contentTypeService.findContentTypes(fr.getName());
-        for( String s : list ) {
-            if( s.contains("video")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void generate(FileResource fr) throws IOException {
-        String ext = FileUtils.getExtension(fr.getName());
-        FFMPEGConverter converter = new FFMPEGConverter(ffmpeg, fr, ext);
-        if (formats != null) {
-            for (FormatSpec f : formats) {
-                generate(f, fr, converter);
-            }
-        }
-//        if (videoFormats != null) {
-//            for (Format f : videoFormats) {
-//                bout.reset();
-//                log.info("generate thumb: " + f.getName());
-//                converter.convert(bout, f.type, f.height, f.width);
-//                Parser parser = new Parser();
-//                ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-//                long altHash = parser.parse(bin, hashStore, blobStore);
-//                String name = f.getName();
-//                AltFormat.insertIfOrUpdate(name, fr.getHash(), altHash, SessionManager.session());
-//            }
-//        }
-
-
-    }
 }

@@ -145,7 +145,11 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public String getParam(String name) {
-        return getHtml().getParam(name);
+        if (getHtml() != null) {
+            return getHtml().getParam(name);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -155,7 +159,11 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public List<String> getParamNames() {
-        return getHtml().getParamNames();
+        if (getHtml() != null) {
+            return getHtml().getParamNames();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -183,15 +191,30 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
-        if( this.is("html")) {
+        if (this.is("html")) {
             return null;
         } else {
-            return 60*60*24*7*4l; // 1 month
+            return 60 * 60 * 24 * 7 * 4l; // 1 month
         }
-        
+
     }
-    
+
     public long getHash() {
         return this.contentNode.getHash();
+    }
+
+    @Override
+    public boolean is(String type) {
+        if (type.equals("file")) {
+            return true;
+        }
+        boolean b = super.is(type);
+        if (b) {
+            return true;
+        }
+
+        // will return a non-null value if type is contained in any content type
+        String s = ContentTypeUtils.findAcceptableContentTypeForName(getName(), type);
+        return s != null;
     }
 }

@@ -166,7 +166,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
                 nodeMeta = NodeMeta.loadForNode(getDirectoryNode());
             } catch (IOException ex) {
                 log.error("Couldnt load meta", ex);
-                nodeMeta = new NodeMeta(null, null, null);
+                nodeMeta = new NodeMeta(null, null, null, 0);
             }
         }
         return nodeMeta;

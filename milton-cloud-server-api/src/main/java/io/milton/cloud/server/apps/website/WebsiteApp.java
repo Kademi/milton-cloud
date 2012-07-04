@@ -62,14 +62,10 @@ public class WebsiteApp implements Application {
      */
     @Override
     public WebsiteRootFolder getPage(Resource parent, String requestedName) {
-        log.info("getPage");
         if (parent == null) {
             Website website = websiteDao.getWebsite(requestedName, SessionManager.session());
             if (website != null) {    
-                log.info("found website: " + website.getName());
                 return new WebsiteRootFolder(applicationManager, website);
-            } else {
-                log.info("No website: " + requestedName);
             }
         }
         return null;

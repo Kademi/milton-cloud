@@ -21,11 +21,13 @@ package io.milton.cloud.server.web.alt;
  * @author brad
  */
 public class FormatSpec {
+    final String inputType; // general type, eg "video" or "image"
     final String type; // eg flv, png
     final int height;
     final int width;
 
-    public FormatSpec(String type, int width, int height) {
+    public FormatSpec(String inputType, String type, int width, int height) {
+        this.inputType = inputType;
         this.type = type;
         this.height = height;
         this.width = width;
@@ -42,9 +44,11 @@ public class FormatSpec {
     public int getWidth() {
         return width;
     }
-    
-    
 
+    public String getInputType() {
+        return inputType;
+    }
+        
     /**
      * Combines type, width and height, eg
      *
