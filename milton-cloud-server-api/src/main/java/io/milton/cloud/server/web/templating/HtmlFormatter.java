@@ -32,20 +32,25 @@ public class HtmlFormatter {
         html.writeText("\n");
         XmlWriter.Element head = html.begin("head");
         head.writeText("\n");
-        head.begin(null, "title", false).writeText(r.getTitle()).close(true);
+        if (r.getTitle() != null) {
+            head.begin(null, "title", false).writeText(r.getTitle()).close(true);
+        }
         for (WebResource wr : r.getWebResources()) {
             write(writer, wr);
         }
         writer.newLine();
         head.close(true);
-        XmlWriter.Element body = html.begin("body");        
+        XmlWriter.Element body = html.begin("body");
         StringBuilder sb = null;
-        for( String c : r.getBodyClasses()) {
-            if( sb == null ) sb = new StringBuilder();
-            else sb.append(" ");
+        for (String c : r.getBodyClasses()) {
+            if (sb == null) {
+                sb = new StringBuilder();
+            } else {
+                sb.append(" ");
+            }
             sb.append(c);
         }
-        if( sb != null ) {
+        if (sb != null) {
             body.writeAtt("class", sb.toString());
         }
         body.writeText("\n");

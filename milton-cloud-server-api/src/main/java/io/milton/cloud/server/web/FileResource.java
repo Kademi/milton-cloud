@@ -18,7 +18,6 @@ import io.milton.http.Response.Status;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.property.BeanPropertyResource;
@@ -116,6 +115,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public Long getContentLength() {
+        if( fileNode == null || fileNode.getHash() == 0 ) {
+            return null;
+        }        
         return fileNode.getContentLength();
     }
 

@@ -80,18 +80,26 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         checkParse();
 
         // Now bind new data to the parsed fields
+        System.out.println("parameters: " + parameters.size());
         if (parameters.containsKey("template")) {
             template = parameters.get("template");
+            System.out.println("template: " + template);
         }
         if (parameters.containsKey("title")) {
-            title = parameters.get("title");
+            title = parameters.get("title");            
         }
         if (parameters.containsKey("body")) {
             body = parameters.get("body");
+        } else {
+            System.out.println("body: " + body);
         }
+        System.out.println("About to convert to html: " + template + ", " + title + ", " + body);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         _(HtmlTemplateParser.class).update(this, bout);
         byte[] arr = bout.toByteArray();
+        System.out.println("html: ");
+        System.out.println(bout.toString());
+        System.out.println("----------------------");
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
         fileResource.replaceContent(bin, (long) arr.length);
         jsonResult = new JsonResult(true);
@@ -117,7 +125,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        template = "content/page";
+        
         for (WebResource wr : webResources) {
             if (wr.getTag().equals("link")) {
                 String rel = wr.getAtts().get("rel");
@@ -126,11 +134,17 @@ public class RenderFileResource extends AbstractResource implements GetableResou
                 }
             }
         }
+        if( template == null ) {
+            template = "content/page";            
+        }
         parsed = true;
     }
 
     @Override
     public InputStream getInputStream() {
+        if( fileResource.getContentLength() == null ) {
+            return null;
+        }
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try {
             fileResource.sendContent(bout, null, null, title);
@@ -356,6 +370,40 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public io.milton.cloud.server.web.FileResource getFileResource() {
         return fileResource;
     }
-        
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
+        for (WebResource wr : webResources) {
+            if (wr.getTag().equals("link")) {
+                String rel = wr.getAtts().get("rel");
+                if (rel != null && rel.equals("template")) {
+                    wr.getAtts().put("href", template);
+                    return ;
+                }
+            }
+        }
+        WebResource wrTemplate = new WebResource(Path.root);
+        wrTemplate.setTag("link");
+        wrTemplate.getAtts().put("rel", "template");
+        wrTemplate.getAtts().put("href", template);
+        webResources.add(wrTemplate);
+    }                
+    
+    public boolean isNewPage() {
+        return fileResource.getContentLength() == null; // will be null if its content node is null
+    }
+
+    public boolean isParsed() {
+        return parsed;
+    }
+
+    public void setParsed(boolean parsed) {
+        this.parsed = parsed;
+    }
+    
     
 }

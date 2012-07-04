@@ -65,6 +65,13 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
+    public String getUniqueId() {
+        return "br" + branch.getId();
+    }
+
+    
+    
+    @Override
     public void save() {
         System.out.println("BranchFolder: save session");
         UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();

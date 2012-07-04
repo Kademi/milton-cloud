@@ -19,7 +19,6 @@ package io.milton.cloud.server.web.templating;
 import com.bradmcevoy.xml.XmlHelper;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.common.Path;
-import io.milton.http.XmlWriter;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,9 +38,8 @@ import org.jdom.Element;
 public class HtmlTemplateParser {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateParser.class);
-
     private HtmlFormatter htmlFormatter = new HtmlFormatter();
-    
+
     /**
      * Parse the file associated with the meta, extracting webresources, body
      * class attributes and the template, and setting that information on the
@@ -53,39 +51,44 @@ public class HtmlTemplateParser {
         log.info("parse");
         Document doc;
         try (InputStream fin = meta.getInputStream()) {
-            BufferedInputStream bufIn = new BufferedInputStream(fin);
-            doc = getJDomDocument(bufIn);
-
-        }
-        Element elRoot = doc.getRootElement();
-        if (!elRoot.getName().equals("html")) {
-            throw new RuntimeException("Document is not an html doc");
-        }
-        Element elHead = getChild(elRoot, "head");
-        parseWebResourcesFromHtml(elHead, meta, webPath);
-
-        Element elBody = getChild(elRoot, "body");
-        if (elBody != null) {
-            String sBodyClasses = elBody.getAttributeValue("class");
-            if (sBodyClasses != null) {
-                meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
+            if (fin != null) {
+                BufferedInputStream bufIn = new BufferedInputStream(fin);
+                doc = getJDomDocument(bufIn);
+            } else {
+                doc = null;
             }
         }
+        if (doc != null) {
+            Element elRoot = doc.getRootElement();
+            if (!elRoot.getName().equals("html")) {
+                throw new RuntimeException("Document is not an html doc");
+            }
+            Element elHead = getChild(elRoot, "head");
+            parseWebResourcesFromHtml(elHead, meta, webPath);
 
-        // TODO: move ftl directive into top level trmplate only
-        String body = getValueOf(elRoot, "body");
-        meta.setBody(body); 
+            Element elBody = getChild(elRoot, "body");
+            if (elBody != null) {
+                String sBodyClasses = elBody.getAttributeValue("class");
+                if (sBodyClasses != null) {
+                    meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
+                }
+            }
+
+            // TODO: move ftl directive into top level trmplate only
+            String body = getValueOf(elRoot, "body");
+            meta.setBody(body);
+        }
     }
-    
+
     /**
      * Does the opposite of parse, formats the structured fields into HTML
-     * 
+     *
      * @param aThis
-     * @param bout 
+     * @param bout
      */
     public void update(RenderFileResource r, ByteArrayOutputStream bout) {
         htmlFormatter.update(r, bout);
-    }    
+    }
 
     public org.jdom.Document getJDomDocument(InputStream fin) {
         try {
@@ -176,7 +179,4 @@ public class HtmlTemplateParser {
         }
         return els;
     }
-
-
-
 }

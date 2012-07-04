@@ -1,10 +1,24 @@
+/*
+ * Copyright (C) 2012 McEvoy Software Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.milton.cloud.server.web;
 
-import com.ettrema.common.Service;
 import io.milton.cloud.server.db.utils.UserDao;
 
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.manager.MCRootContext;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
@@ -48,6 +62,17 @@ public class SpliffyResourceFactory implements ResourceFactory {
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
         Path path = Path.path(sPath);
         Resource r = find(host, path);
+        if( r == null && sPath.endsWith(".html") ) {
+            System.out.println("not found, but html page requested, check for parent");
+            // Not found, but a html page is requested. If the parent exists and is a collection
+            // then we'll instantiate a placeholder page which will allow new pages to be created
+            Resource rParent = find(host, path.getParent());
+            if( rParent instanceof ContentDirectoryResource) {
+                System.out.println("found content parent, so create new page");
+                ContentDirectoryResource parentContentDir = (ContentDirectoryResource) rParent;
+                return new NewPageResource(parentContentDir, path.getName());
+            }
+        }
         return r;
     }
 

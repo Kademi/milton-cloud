@@ -55,19 +55,22 @@ public class AvconvConverter implements Closeable {
     public Long generate(FormatSpec format, With<InputStream,Long> with) {
         log.info("generateThumb: " + format);
         File dest = getDestFile(format.getOutputType());
-        try {
-            String dimensions = format.getWidth() + "x" + format.getHeight();
+        try {            
             String[] args;
+            // TODO: determine original dimensions, then choose x or y axis to scale on so that 
+            // the resulting image or video is bound by the format dimensions
+            
             if( isVideoOutput(format.getOutputType())) {
-                System.out.println("input ext: " + inputExt);
-                System.out.println("output ext: " + format.getOutputType());
+                // avconv -i MOV008.MOD -b 1024k -vf "scale=800:-1" /tmp/move008.ogv
+                String scale = "scale=" + format.getWidth() + ":-1"; // only scale on width
                 boolean isCopy = inputExt.equals(format.getOutputType());
                 if( isCopy) {
-                    args = new String[]{"-i", source.getAbsolutePath(), "-strict", "experimental", "-vcodec", "copy","-s", dimensions, "-ar", "22050", dest.getAbsolutePath()};                
+                    args = new String[]{"-i", source.getAbsolutePath(), "-strict", "experimental", "-vcodec", "copy","-vf", scale, "-b", "1024k", dest.getAbsolutePath()};
                 } else {
-                    args = new String[]{"-i", source.getAbsolutePath(), "-strict", "experimental", "-s", dimensions, "-ar", "22050", dest.getAbsolutePath()};                                    
+                    args = new String[]{"-i", source.getAbsolutePath(), "-strict", "experimental", "-vf", scale, "-b", "1024k", dest.getAbsolutePath()};                                    
                 }
             } else {
+                String dimensions = format.getWidth() + "x" + format.getHeight();
                 args = new String[] {"-i", source.getAbsolutePath(), "-s", dimensions, "-ss", "1", "-vframes", "1", "-f", "mjpeg", dest.getAbsolutePath()};            
             }
             int successCode = 0;

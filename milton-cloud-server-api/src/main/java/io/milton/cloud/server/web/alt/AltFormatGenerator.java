@@ -54,10 +54,10 @@ public class AltFormatGenerator implements EventListener {
         this.contentTypeService = contentTypeService;
         this.formats = new ArrayList<>();
         formats.add(new FormatSpec("image", "png", 150, 150));
-        formats.add(new FormatSpec("video", "flv", 800, 600));
-        formats.add(new FormatSpec("video", "m4v", 800, 600));
-        formats.add(new FormatSpec("video", "ogv", 800, 600));
-        formats.add(new FormatSpec("video", "png", 800, 600));
+        formats.add(new FormatSpec("video", "flv", 640, 480));
+        formats.add(new FormatSpec("video", "m4v", 640, 480));
+        formats.add(new FormatSpec("video", "ogv", 640, 480));
+        formats.add(new FormatSpec("video", "png", 640, 480));
         eventManager.registerEventListener(this, PutEvent.class);
     }
 

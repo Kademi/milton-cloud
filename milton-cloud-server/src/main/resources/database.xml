@@ -64,6 +64,7 @@
                 <value>io.milton.cloud.server.db.GroupEmailJob</value>
                 <value>io.milton.cloud.server.db.GroupRecipient</value>
                 <value>io.milton.cloud.server.db.AltFormat</value>
+                <value>io.milton.cloud.server.db.NamedCounter</value>
                 
             </list>
         </property>

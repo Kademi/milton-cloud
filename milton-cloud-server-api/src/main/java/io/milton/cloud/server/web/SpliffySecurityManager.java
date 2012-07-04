@@ -31,23 +31,23 @@ public class SpliffySecurityManager {
         this.userDao = userDao;
         this.passwordManager = passwordManager;
     }
-    
+
     public Profile getCurrentUser() {
         UserResource p = getCurrentPrincipal();
-        if( p != null ) {
+        if (p != null) {
             return p.getThisUser();
         }
         return null;
     }
-    
+
     public UserResource getCurrentPrincipal() {
         Auth auth = HttpManager.request().getAuthorization();
-        if( auth == null || auth.getTag() == null ) {
+        if (auth == null || auth.getTag() == null) {
             return null;
         }
         UserResource ur = (UserResource) auth.getTag();
         return ur;
-    }    
+    }
 
     public Profile authenticate(Organisation org, String userName, String requestPassword) {
         Session session = SessionManager.session();
@@ -70,7 +70,7 @@ public class SpliffySecurityManager {
         log.trace("authenticate: " + digest.getUser());
         Session session = SessionManager.session();
         Profile user = userDao.findProfile(digest.getUser(), org, session);
-        while( user == null && org != null ) {
+        while (user == null && org != null) {
             org = org.getOrganisation();
             user = userDao.getProfile(digest.getUser(), org, session);
         }
@@ -98,9 +98,17 @@ public class SpliffySecurityManager {
             List<Priviledge> privs = acr.getPriviledges(auth);
             boolean result;
             if (method.isWrite) {
-                result = SecurityUtils.hasWrite(privs);
+                //result = SecurityUtils.hasWrite(privs);
+
+                // Currently doesnt give administrators (ie users defined on parent orgs) access
+                result = ( auth != null && auth.getTag() != null);
             } else {
                 result = SecurityUtils.hasRead(privs);
+                if (!result) {
+                    if (auth != null) {
+                        result = auth.getTag() != null;
+                    }
+                }
             }
             if (!result) {
                 log.info("Denied access of: " + auth + " to resource: " + aThis.getName() + " (" + aThis.getClass() + ") because of authorisation failure");
@@ -109,7 +117,7 @@ public class SpliffySecurityManager {
                 for (Priviledge p : privs) {
                     log.info("   - " + p);
                 }
-                if( log.isTraceEnabled() ) {
+                if (log.isTraceEnabled()) {
                     log.trace("stack trace so you know whats going on", new Exception("not a real exception"));
                 }
             }

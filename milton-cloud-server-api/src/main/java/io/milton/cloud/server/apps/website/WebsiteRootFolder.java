@@ -155,9 +155,9 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         // TODO: also include priviledges on the repo, eg:
         //List<Permission> perms = itemVersion.getItem().grantedPermissions(user);
         //SecurityUtils.addPermissions(perms, list);
-        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getRepository().getBaseEntity(), SessionManager.session());        
+        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getRepository().getBaseEntity(), SessionManager.session());
         // TODO: need a pluggable mechanism to inject permissions based on enrolements
-        
+                
         SecurityUtils.addPermissions(perms, list);
         _(ApplicationManager.class).appendPriviledges(list, user, this); 
     }

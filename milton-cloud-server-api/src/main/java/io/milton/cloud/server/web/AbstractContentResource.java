@@ -117,7 +117,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
         long previousProfileId = loadNodeMeta().getProfileId();
         Date previousModDate = loadNodeMeta().getModDate();
         long previousResourceHash = contentNode.getLoadedHash();
-        
+
         long newResourceHash = contentNode.getHash();
         Date newDate = _(CurrentDateService.class).getNow();
         long newProfileId = 0;
@@ -125,9 +125,9 @@ public abstract class AbstractContentResource extends AbstractResource implement
         if (p != null) {
             newProfileId = p.getId();
         }
-        
+
         Version.insert(previousResourceHash, previousModDate, previousProfileId, newResourceHash, newDate, newProfileId, SessionManager.session());
-        
+
         nodeMeta.setModDate(newDate);
         nodeMeta.setProfileId(newProfileId);
         if (nodeMeta.getCreatedDate() == null) {
@@ -155,12 +155,20 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public String getUniqueId() {
-        return null;
+        if( contentNode != null ) {
+            return "r" + contentNode.getHash();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String getName() {
-        return contentNode.getName();
+        if (contentNode != null) {
+            return contentNode.getName();
+        } else {
+            return null;
+        }
     }
 
     @Override
