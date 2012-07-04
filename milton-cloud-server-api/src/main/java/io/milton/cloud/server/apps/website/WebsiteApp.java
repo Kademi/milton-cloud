@@ -21,6 +21,7 @@ import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.ResourceList;
@@ -34,6 +35,8 @@ import static io.milton.context.RequestContext._;
  * @author brad
  */
 public class WebsiteApp implements Application {
+    
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebsiteApp.class);
 
     private final WebsiteDao websiteDao = new WebsiteDao();
         
@@ -59,10 +62,14 @@ public class WebsiteApp implements Application {
      */
     @Override
     public WebsiteRootFolder getPage(Resource parent, String requestedName) {
+        log.info("getPage");
         if (parent == null) {
             Website website = websiteDao.getWebsite(requestedName, SessionManager.session());
-            if (website != null) {                
+            if (website != null) {    
+                log.info("found website: " + website.getName());
                 return new WebsiteRootFolder(applicationManager, website);
+            } else {
+                log.info("No website: " + requestedName);
             }
         }
         return null;

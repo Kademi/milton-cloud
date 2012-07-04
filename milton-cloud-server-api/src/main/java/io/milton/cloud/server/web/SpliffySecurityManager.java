@@ -67,7 +67,7 @@ public class SpliffySecurityManager {
     }
 
     public Profile authenticate(Organisation org, DigestResponse digest) {
-        log.info("authenticate: " + digest.getUser());
+        log.trace("authenticate: " + digest.getUser());
         Session session = SessionManager.session();
         Profile user = userDao.findProfile(digest.getUser(), org, session);
         while( user == null && org != null ) {
@@ -79,7 +79,7 @@ public class SpliffySecurityManager {
             return null;
         }
         if (passwordManager.verifyDigest(digest, user)) {
-            log.warn("digest auth ok: " + user.getName());
+            log.info("digest auth ok: " + user.getName());
             HttpManager.request().getAttributes().put("_current_user", user);
             return user;
         } else {

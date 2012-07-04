@@ -8,41 +8,16 @@
         <section id="manageWebsite" class="MainContent">
             <h3>Available websites</h3>
             <table class="Summary">
-                <tr rel="http://google.com">
+                #foreach($w in $page.websites)
+                <tr rel="http://$w.name">
                     <td>
-                        <h5>Website title</h5>
-                        <p>This is the website description that outlines what the site is about.</p>
+                        <h5>$w.name</h5>
+                        <p>Public theme: $!w.publicTheme; Internal theme: $!w.internalTheme; Current branch: $!w.currentBranch</p>
                     </td>
                     <th>.</th>
                 </tr>
-                <tr rel="http://gmail.com">
-                    <td>
-                        <h5>Website title</h5>
-                        <p>This is the website description that outlines what the site is about.</p>
-                    </td>
-                    <th>.</th>
-                </tr>
-                <tr rel="http://google.com">
-                    <td>
-                        <h5>Website title</h5>
-                        <p>This is the website description that outlines what the site is about.</p>
-                    </td>
-                    <th>.</th>
-                </tr>
-                <tr rel="http://google.com">
-                    <td>
-                        <h5>Website title</h5>
-                        <p>This is the website description that outlines what the site is about. This is the website description that outlines what the site is about.This is the website description that outlines what the site is about.</p>
-                    </td>
-                    <th>.</th>
-                </tr>
-                <tr rel="http://gmail.com">
-                    <td>
-                        <h5>Website title</h5>
-                        <p>This is the website description that outlines what the site is about.</p>
-                    </td>
-                    <th>.</th>
-                </tr>
+                #end
+                
             </table>
             <div class="Hidden">
                 <div id="websiteController"><button class="Btn ViewWebsite">View</button> <button class="Btn Cancel EditWebsite">Edit</button></div>

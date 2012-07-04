@@ -54,7 +54,7 @@ public class AdminApp implements MenuApplication {
                 case "groups":
                     MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuGroups");
                     return new GroupsAdminPage(requestedName, p.getOrganisation(), p);
-                case "websites":
+                case "manageWebsites":
                     MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "menuWebsites");
                     return new WebsitesAdminPage(requestedName, p.getOrganisation(), p);
             }
@@ -96,7 +96,7 @@ public class AdminApp implements MenuApplication {
                 parent.getOrCreate("menuOrgs", "Manage Business units", p).setOrdering(30);
                 break;
             case "menuWebsiteManager":
-                parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("websites")).setOrdering(10);
+                parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("manageWebsites")).setOrdering(10);
                 parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
                 break;
         }

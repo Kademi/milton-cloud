@@ -69,7 +69,6 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
         throw new UnsupportedOperationException("Not supported yet.");
     }    
     
-    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {                
         _(HtmlTemplater.class).writePage("admin","admin/manageWebsites", this, params, out);

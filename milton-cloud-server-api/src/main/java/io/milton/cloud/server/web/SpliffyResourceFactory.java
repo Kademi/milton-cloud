@@ -60,6 +60,9 @@ public class SpliffyResourceFactory implements ResourceFactory {
             Resource rootFolder = (Resource) HttpManager.request().getAttributes().get("_spliffy_root_folder");
             if (rootFolder == null) {
                 rootFolder = applicationManager.getPage(null, host);
+                if( rootFolder != null ) {
+                    log.info("Using rootFolder: " + rootFolder.getClass());
+                }
                 HttpManager.request().getAttributes().put("_spliffy_root_folder", rootFolder);
             }
             return rootFolder;

@@ -52,7 +52,6 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
-        log.info("getResource: " + sPath + " ----------------------------");
         Path p = Path.path(sPath);
         if (p.getName().startsWith("alt-")) {
             Resource r = wrapped.getResource(host, p.getParent().toString());
@@ -69,7 +68,6 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     if (format != null) {
                         return new AltFormatResource((FileResource) r, p.getName(), format);
                     }
-                    System.out.println("format not found: " + formatName);
                     return null;
                 }
             } else {

@@ -18,7 +18,6 @@ import java.util.List;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext; 
 
-
 /**
  *
  * @author brad

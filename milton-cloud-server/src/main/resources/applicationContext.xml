@@ -63,8 +63,8 @@
     <bean id="application.manager" class="io.milton.cloud.server.apps.ApplicationManager">
         <constructor-arg>
             <list>
+                <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>                
                 <bean class="io.milton.cloud.server.apps.orgs.OrganisationsApp"/>
-                <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>
                 <bean class="io.milton.cloud.server.apps.login.LoginApp"/>
                 <bean class="io.milton.cloud.server.apps.calendar.CalendarApp"/>
                 <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
