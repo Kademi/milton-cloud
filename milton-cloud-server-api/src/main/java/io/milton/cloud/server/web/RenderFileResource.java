@@ -55,7 +55,7 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-@BeanPropertyResource(value="milton")
+@BeanPropertyResource(value = "milton")
 public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
@@ -80,29 +80,26 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         checkParse();
 
         // Now bind new data to the parsed fields
-        System.out.println("parameters: " + parameters.size());
         if (parameters.containsKey("template")) {
             template = parameters.get("template");
-            System.out.println("template: " + template);
         }
         if (parameters.containsKey("title")) {
-            title = parameters.get("title");            
+            title = parameters.get("title");
         }
         if (parameters.containsKey("body")) {
             body = parameters.get("body");
-        } else {
-            System.out.println("body: " + body);
         }
-        System.out.println("About to convert to html: " + template + ", " + title + ", " + body);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         _(HtmlTemplateParser.class).update(this, bout);
         byte[] arr = bout.toByteArray();
-        System.out.println("html: ");
-        System.out.println(bout.toString());
-        System.out.println("----------------------");
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+        boolean didNew = isNewPage();
         fileResource.replaceContent(bin, (long) arr.length);
-        jsonResult = new JsonResult(true);
+        if (didNew) {
+            jsonResult = new JsonResult(true, "Created page", fileResource.getHref());
+        } else {
+            jsonResult = new JsonResult(true);
+        }
         return null;
     }
 
@@ -125,7 +122,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        
+
         for (WebResource wr : webResources) {
             if (wr.getTag().equals("link")) {
                 String rel = wr.getAtts().get("rel");
@@ -134,15 +131,15 @@ public class RenderFileResource extends AbstractResource implements GetableResou
                 }
             }
         }
-        if( template == null ) {
-            template = "content/page";            
+        if (template == null) {
+            template = "content/page";
         }
         parsed = true;
     }
 
     @Override
     public InputStream getInputStream() {
-        if( fileResource.getContentLength() == null ) {
+        if (fileResource.getContentLength() == null) {
             return null;
         }
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -268,26 +265,26 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         if (this.template != null && template.endsWith(type)) {
             return true;
         }
-        return fileResource.is(type);
+        boolean b = fileResource.is(type);
+        return b;
     }
-    
+
     @Override
     public String getParam(String name) {
         checkParse();
         WebResource wr = param(name);
-        if( wr == null ) {
+        if (wr == null) {
             return null;
         } else {
             return wr.getBody();
         }
     }
-    
+
     @Override
     public void setParam(String name, String value) {
-        System.out.println("setParam: " + getName() + " - " + name + " -> " + value);
         checkParse();
         WebResource wr = param(name);
-        if(wr == null ) {
+        if (wr == null) {
             wr = new WebResource(Path.root);
             wr.setTag("script");
             wr.getAtts().put("type", "data/parameter");
@@ -296,14 +293,14 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         wr.setBody(value);
     }
-    
+
     private WebResource param(String name) {
-        for( WebResource wr : this.webResources ) {
-            if( wr.getTag().equals("script")) {
+        for (WebResource wr : this.webResources) {
+            if (wr.getTag().equals("script")) {
                 String type = wr.getAtts().get("type");
-                if( "data/parameter".equals(type) ) {
+                if ("data/parameter".equals(type)) {
                     String title = wr.getAtts().get("title");
-                    if( name.equals(title)) {
+                    if (name.equals(title)) {
                         return wr;
                     }
                 }
@@ -315,10 +312,10 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     @Override
     public List<String> getParamNames() {
         List<String> names = new ArrayList<>();
-        for( WebResource wr : this.webResources ) {
-            if( wr.getTag().equals("script")) {
+        for (WebResource wr : this.webResources) {
+            if (wr.getTag().equals("script")) {
                 String type = wr.getAtts().get("type");
-                if( "data/parameter".equals(type) ) {
+                if ("data/parameter".equals(type)) {
                     String paramTitle = wr.getAtts().get("title");
                     names.add(paramTitle);
                 }
@@ -346,20 +343,20 @@ public class RenderFileResource extends AbstractResource implements GetableResou
      */
     public String getNewComment() {
         return fileResource.getNewComment();
-    }    
-    
+    }
+
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        doSave();
+        doSaveHtml();
 
         tx.commit();
     }
-    
-    public void doSave() throws BadRequestException, NotAuthorizedException {
-        fileResource.doSave();
+
+    public void doSaveHtml() throws BadRequestException, NotAuthorizedException {
+        fileResource.doSaveHtml();
     }
 
     @Override
@@ -382,7 +379,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
                 String rel = wr.getAtts().get("rel");
                 if (rel != null && rel.equals("template")) {
                     wr.getAtts().put("href", template);
-                    return ;
+                    return;
                 }
             }
         }
@@ -391,8 +388,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         wrTemplate.getAtts().put("rel", "template");
         wrTemplate.getAtts().put("href", template);
         webResources.add(wrTemplate);
-    }                
-    
+    }
+
     public boolean isNewPage() {
         return fileResource.getContentLength() == null; // will be null if its content node is null
     }
@@ -404,6 +401,4 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public void setParsed(boolean parsed) {
         this.parsed = parsed;
     }
-    
-    
 }

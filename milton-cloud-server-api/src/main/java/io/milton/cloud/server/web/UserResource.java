@@ -298,7 +298,17 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
     @Override
     public void storeMail(MimeMessage mm) {
-        StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
-        
+        StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();        
+    }
+    
+    public String getNickName() {
+        String s = user.getNickName();
+        if( s == null || s.length() == 0 ) {
+            s = user.getFirstName();
+        }
+        if( s == null ) {
+            s = user.getName();
+        }
+        return s;
     }
 }

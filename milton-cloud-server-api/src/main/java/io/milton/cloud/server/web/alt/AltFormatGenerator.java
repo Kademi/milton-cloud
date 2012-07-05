@@ -54,10 +54,13 @@ public class AltFormatGenerator implements EventListener {
         this.contentTypeService = contentTypeService;
         this.formats = new ArrayList<>();
         formats.add(new FormatSpec("image", "png", 150, 150));
-        formats.add(new FormatSpec("video", "flv", 640, 480));
-        formats.add(new FormatSpec("video", "m4v", 640, 480));
-        formats.add(new FormatSpec("video", "ogv", 640, 480));
-        formats.add(new FormatSpec("video", "png", 640, 480));
+        
+        formats.add(new FormatSpec("video", "flv", 800, 455));
+        formats.add(new FormatSpec("video", "mp4", 800, 455));
+        formats.add(new FormatSpec("video", "ogv", 800, 455));
+        formats.add(new FormatSpec("video", "webm", 800, 455));
+        
+        formats.add(new FormatSpec("video", "png", 800, 455));
         eventManager.registerEventListener(this, PutEvent.class);
     }
 
@@ -94,7 +97,7 @@ public class AltFormatGenerator implements EventListener {
 
     private void generate(FileResource file) throws IOException {
         String ext = FileUtils.getExtension(file.getName());
-        AvconvConverter converter = new AvconvConverter(ffmpeg, file, ext);
+        AvconvConverter converter = new AvconvConverter(ffmpeg, file, ext, contentTypeService);
         if (formats != null) {
             for (FormatSpec f : formats) {
                 if (file.is(f.inputType)) {
@@ -106,7 +109,7 @@ public class AltFormatGenerator implements EventListener {
     
     public AltFormat generate(FormatSpec f, FileResource fr) throws IOException {
         String ext = FileUtils.getExtension(fr.getName());
-        AvconvConverter converter = new AvconvConverter(ffmpeg, fr, ext);
+        AvconvConverter converter = new AvconvConverter(ffmpeg, fr, ext, contentTypeService);
         return generate(f, fr, converter);
     }
 

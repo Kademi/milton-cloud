@@ -46,8 +46,9 @@ public class AltFormat implements Serializable {
             if( f.getAltHash() == altHash) {
                 return f;
             }
-        }
-        f = new AltFormat();
+        } else {
+            f = new AltFormat();
+        }        
         f.setAltHash(altHash);
         f.setName(name);
         f.setSourceHash(sourceHash);

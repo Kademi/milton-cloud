@@ -13,6 +13,9 @@ import io.milton.cloud.common.Triplet;
  */
 public class Utils {
     public static boolean ignored(File childFile) {
+        if( childFile.getName().equals(".mil")) { // usually ignore resources starting with a dot, but special case for .mil directory
+            return false;
+        }
         return childFile.isHidden() || childFile.getName().startsWith(".");
     }
     

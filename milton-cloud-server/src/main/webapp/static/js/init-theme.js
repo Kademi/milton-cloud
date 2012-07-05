@@ -7,9 +7,13 @@
  *  application to get the toolbars you want
  */
 
+// Templates should push a page init function into this array. It will then be run after outer template init functions
+var pageInitFunctions = new Array();
+// Templates should push theme css files into this array, so they will be included in the editor
+var themeCssFiles = new Array();
 
 function initTheme() {
-    log("init ettrema-theme");
+    log("initTheme: init-theme.js");
     
     $(".Login").user(); // setup login and logout
     
@@ -23,7 +27,12 @@ function initTheme() {
                
     initFontSwitching();
          
-    log("finished init ettrema-theme");
+    log("initTheme: run page init functions");
+    for( i=0; i<pageInitFunctions.length; i++) {
+        pageInitFunctions[i]();
+    }
+         
+    log("finished init-theme");
 } 
 
 function initNav() {    
@@ -113,11 +122,11 @@ function getSavedFontSize() {
     return $.cookie("font-size");
 }
 
-function initHtmlEditors(mainCssFile) {    
+/**
+ * Make sure you push any required css files into "themeCssFiles" before calling
+ */
+function initHtmlEditors() {    
     log("initHtmlEditors");
-    if( !mainCssFile ) {
-        mainCssFile = "/templates/style.css";
-    }
     if( !$('.htmleditor').ckeditor ) {
         log("ckeditor jquery adapter is not loaded");
         return;
@@ -143,9 +152,9 @@ function initHtmlEditors(mainCssFile) {
         log("using toolbar",toolbar,"=>", toolbarSets[toolbar]);
         var config = {
             skin: editorSkin,
-            contentsCss: mainCssFile,
+            contentsCss: themeCssFiles, // mainCssFile,
             bodyId: "editor",
-            templates_files : [ '/templates/editor/ck-templates/templates.js' ],
+            templates_files : [ '/static/editor/templates.js' ],
             templates_replaceContent: false,
             toolbar: toolbarSets[toolbar],
             extraPlugins : 'autogrow,embed_video',
@@ -164,45 +173,5 @@ function initHtmlEditors(mainCssFile) {
     });  
 }
 
-function initEdify(container) {
-    if( !$("body").hasClass("edifyIsEditMode")) {
-        $("body").addClass("edifyIsViewMode");
-    }
-}
 
-function edify(container) {
-    log("edify", container);
-    $("body").removeClass("edifyIsViewMode");
-    $("body").addClass("edifyIsEditMode");
-    initHtmlEditors(["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
-    container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
-    $("#edifyForm").append("<input type='hidden' name='body' value='' />");
-    $("#edifyForm").submit(function() {
-        log("submit form");
-        try {
-            log("ckeditors", CKEDITOR.instances);
-            $("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
-            $.ajax({
-                type: 'POST',
-                url: $("#edifyForm").attr("action"),
-                data: $("#edifyForm").serialize(),
-                dataType: "json",
-                success: function(resp) {
-                    ajaxLoadingOff();
-                    log("save success", resp)
-                    alert("done");
-                },
-                error: function(resp) {
-                    ajaxLoadingOff();
-                    alert("err");
-                }
-            });     
-        } catch(e) {
-            log("exception", e);
-        }
-        return false;
-    });
-//$("#edifyBody").wrap("<textarea></textarea>");
-}
-
-/** End theme.js */
+/** End init-theme.js */

@@ -9,8 +9,8 @@ function initJPlayer() {
         var src = img.attr("src");
         var title = img.attr("alt");
         log("create jplayer for:", src);
-//        var width = img.attr("width");
-//        var height = img.attr("height");
+        //        var width = img.attr("width");
+        //        var height = img.attr("height");
         var vidDiv = $("<div class='video'></div>");
         img.replaceWith(vidDiv);
         vidDiv.load("/static/jplayer/player-fragment.html", function(i, n) {
@@ -43,14 +43,22 @@ function makeJPlayer(playerSel, contSel, posterUrl, title) {
     $(playerSel).jPlayer({
         ready: function () {
             $(this).jPlayer("setMedia", {
-                flv: primaryUrl + "/alt-800-600.flv", //"/programs/carers/course1/mod1/_sys_flashs/28032010.mp4.flv",
-//                m4v: "http://www.jplayer.org/video/m4v/Big_Buck_Bunny_Trailer_480x270_h264aac.m4v",
-//                ogv: "http://www.jplayer.org/video/ogv/Big_Buck_Bunny_Trailer_480x270.ogv",
+                webmv: primaryUrl + "/alt-800-455.webm",  
+                ogv: primaryUrl + "/alt-800-455.ogv",        
+                flv: primaryUrl + "/alt-800-455.flv",
+                m4v: primaryUrl + "/alt-800-455.mp4",   
+                //                m4v: "http://www.jplayer.org/video/m4v/Big_Buck_Bunny_Trailer_480x270_h264aac.m4v",
+                //                ogv: "http://www.jplayer.org/video/ogv/Big_Buck_Bunny_Trailer_480x270.ogv",
                 poster: posterUrl //"http://www.jplayer.org/video/poster/Big_Buck_Bunny_Trailer_480x270.png"
             });
         },
         swfPath: "/static/jplayer",
-        supplied: "flv",
+        supplied: "webmv, mp4, ogv, flv",
+        size: {
+            width: "800px",
+            height: "455px",
+            cssClass: "jp-video-fuse"
+        },        
         cssSelectorAncestor: contSel
     });
 }

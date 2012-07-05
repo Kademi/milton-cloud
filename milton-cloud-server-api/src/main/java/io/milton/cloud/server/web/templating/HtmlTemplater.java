@@ -61,7 +61,8 @@ public class HtmlTemplater {
     private final HtmlTemplateParser templateParser;
     private final HtmlTemplateRenderer templateRenderer;
     private final Map<String, TemplateHtmlPage> cachedTemplateMetaData = new HashMap<>();
-    private String defaultTheme = "fuse";
+    private String defaultPublicTheme = "fuse";
+    private String defaultAdminTheme = "admin";
     private Path webRoot = Path.path("/");
 
     public HtmlTemplater(ApplicationManager applicationManager, Formatter formatter, SpliffySecurityManager securityManager, ServletContext servletContext) {
@@ -111,8 +112,10 @@ public class HtmlTemplater {
         if (aThis instanceof CommonResource) {
             CommonResource cr = (CommonResource) aThis;
             isPublic = cr.isPublic();
+            System.out.println("isPublic: " + isPublic + " - from res with parent " + cr.getParent().getClass());
         }
         String theme = findTheme(aThis, isPublic);
+        System.out.println("theme: " + theme);
         writePage(theme, templatePath, aThis, params, out);
     }
 
@@ -178,7 +181,7 @@ public class HtmlTemplater {
         RootFolder rootFolder = WebUtils.findRootFolder(r);
         String theme;
         if (rootFolder instanceof OrganisationRootFolder) {
-            theme = defaultTheme;
+            theme = defaultAdminTheme;
         } else if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder websiteFolder = (WebsiteRootFolder) rootFolder;
             if (isPublic) {
@@ -187,10 +190,10 @@ public class HtmlTemplater {
                 theme = websiteFolder.getWebsite().getInternalTheme();
             }
             if (theme == null) {
-                theme = defaultTheme;
+                theme = defaultPublicTheme;
             }
         } else {
-            theme = defaultTheme;
+            theme = defaultPublicTheme;
         }
         return theme;
     }
@@ -209,11 +212,11 @@ public class HtmlTemplater {
     }
 
     public String getDefaultTheme() {
-        return defaultTheme;
+        return defaultPublicTheme;
     }
 
     public void setDefaultTheme(String defaultTheme) {
-        this.defaultTheme = defaultTheme;
+        this.defaultPublicTheme = defaultTheme;
     }
 
     public String getWebRoot() {
@@ -279,6 +282,24 @@ public class HtmlTemplater {
         }
     }
 
+    public String getDefaultAdminTheme() {
+        return defaultAdminTheme;
+    }
+
+    public void setDefaultAdminTheme(String defaultAdminTheme) {
+        this.defaultAdminTheme = defaultAdminTheme;
+    }
+
+    public String getDefaultPublicTheme() {
+        return defaultPublicTheme;
+    }
+
+    public void setDefaultPublicTheme(String defaultPublicTheme) {
+        this.defaultPublicTheme = defaultPublicTheme;
+    }
+
+    
+    
     public class HtmlTemplateLoader {
 
         /**

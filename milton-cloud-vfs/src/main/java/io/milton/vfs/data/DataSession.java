@@ -30,6 +30,8 @@ import org.hashsplit4j.api.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A DataSession provides a simple way to read and write the versioned content
@@ -43,6 +45,8 @@ import org.hibernate.criterion.Expression;
  */
 public class DataSession {
 
+    private static final Logger log = LoggerFactory.getLogger(DataSession.class);
+    
     private DirectoryNode rootDataNode;
     private final Session session;
     private final HashStore hashStore;
@@ -137,14 +141,23 @@ public class DataSession {
         if (item.dirty == null) {
             return; // not dirty, which means no children are dirty
         }
+        item.checkConsistency(null);
         // the directory list to save might already be saved, in which case
         // unique constraints will prevent the insertion, so check first
         List<DataItem> existing = find(item.hash);
         if (existing != null && !existing.isEmpty()) {
             return; // already in db
         }
-        for (DataNode child : item) {
-            insertMember(item.hash, child);
+        try {
+            for (DataNode child : item) {
+                insertMember(item.hash, child);
+            }
+        } catch (RuntimeException e) {
+            log.error("Listing items in parent: " + item.getName());
+            for (DataNode child : item) {
+                log.error("  - " + child.getName() + ":" + child.getType());
+            }            
+            throw new RuntimeException("Failed to insert members into directory item: " + item.getName(), e);
         }
     }
 
@@ -154,7 +167,11 @@ public class DataSession {
         newItem.setName(item.getName());
         newItem.setType(item.getType());
         newItem.setParentHash(parentHash);
-        session.save(newItem);
+        try {
+            session.save(newItem);
+        } catch( org.hibernate.exception.ConstraintViolationException e) {
+            throw new RuntimeException("Failed to insert name: " + item.getName() + " hash: " + item.getHash() + " type: " + item.getType() + " into parent of hash: " + parentHash, e);
+        }
         if (item instanceof DirectoryNode) {
             saveDir((DirectoryNode) item);
         }
@@ -198,7 +215,7 @@ public class DataSession {
          *
          * @param newParent
          */
-        public void move(DirectoryNode newParent, String name) {
+        public void move(DirectoryNode newParent, String newName) {
             DirectoryNode oldParent = this.getParent();
             if (oldParent != newParent) {
                 this.setParent(newParent);
@@ -206,9 +223,12 @@ public class DataSession {
                     oldParent.members.remove(this);
                 }
                 newParent.getChildren().add(this);
+                setDirty();
+                newParent.setDirty();
+                oldParent.setDirty();
             }
-            if (name.equals(getName())) {
-                setName(name);
+            if (!newName.equals(name)) {
+                setName(newName);
             }
             parent.checkConsistency(this);
         }
@@ -304,15 +324,17 @@ public class DataSession {
         }
 
         public FileNode addFile(String name) {
-            FileNode item = new FileNode(this, name, 0);
-            getChildren().add(item);
+            FileNode newItem = new FileNode(this, name, 0);
+            getChildren().add(newItem);
+            checkConsistency(newItem);
             setDirty();
-            return item;
+            return newItem;
         }
 
         public FileNode addFile(String name, long hash) {
             FileNode item = new FileNode(this, name, hash);
             getChildren().add(item);
+            checkConsistency(item);
             setDirty();
             return item;
         }
@@ -367,11 +389,16 @@ public class DataSession {
             Set<String> names = new HashSet<>();
             for (DataNode item : members) {
                 if (names.contains(item.getName())) {
-                    throw new RuntimeException("Found duplicate name in set: " + item.getName() + " when adding item: " + newItem.getName());
+                    if( newItem != null ) {
+                        throw new RuntimeException("Found duplicate name: " + item.getName() + " when adding item: " + newItem.getName() + " to directory: " + getName() );
+                    } else {
+                        throw new RuntimeException("Found duplicate name: " + item.getName() + " in parent: " + getName() );
+                    }
                 }
                 if (item.getParent() != this) {
                     throw new RuntimeException("Found item in this set which does not have this item as its parent: " + item.getName() + ". Its parent is: " + item.getParent().getName() + " and my name is : " + this.getName());
                 }
+                names.add(item.getName());
             }
         }
     }

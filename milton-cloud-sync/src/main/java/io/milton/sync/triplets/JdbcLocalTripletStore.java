@@ -127,12 +127,11 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 tlConnection.set(con);
                 List<CrcRecord> list = crcDao.listCrcRecords(con, f.getAbsolutePath());
                 long count = crcDao.getCrcRecordCount(con());
-                System.out.println("total count: " + count);
                 tlConnection.remove();
                 return list;
             }
         });
-        log.trace("JdbcLocalTripletStore: getTriplets: " + f.getAbsolutePath() + " - " + records.size());
+        // log.trace("JdbcLocalTripletStore: getTriplets: " + f.getAbsolutePath() + " - " + records.size());
         return BlobUtils.toTriplets(f, records);
     }
 
@@ -192,7 +191,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                     con().commit();
 
                     long count = crcDao.getCrcRecordCount(con());
-                    log.info("scan: Contains crc records: " + count);
+                    //log.info("scan: Contains crc records: " + count);
 
                 } catch (Throwable e) {
                     log.error("Exception in scan: " + root.getAbsolutePath(), e);
@@ -312,7 +311,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                         crcDao.deleteCrc(con(), parent.getAbsolutePath(), f.getName());
                         scanFile(con(), f);
                     } else {
-                        log.trace("scanChildren: file is up to date: " + f.getAbsolutePath());
+                        //log.trace("scanChildren: file is up to date: " + f.getAbsolutePath());
                     }
                 }
             }
@@ -360,7 +359,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
         // will only watch specified directory, not subdirectories
         path.register(watchService, events);
-        System.out.println("Now watching: " + dir.getAbsolutePath());
+        log.info("Now watching: " + dir.getAbsolutePath());
     }
 
     private void scanFsEvents() throws IOException {

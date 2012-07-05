@@ -34,10 +34,10 @@ public class DirWalker {
 
 
     public void walk() throws IOException {
-        log.info("DirWalker::walk ----------------------------");
+//        log.info("DirWalker::walk ----------------------------");
         walk(Path.root());
         processLocalDeletes(); // we want to leave deletes until last in case there's some bytes we can use
-        log.info("DirWalker::End walk ----------------------------");
+//        log.info("DirWalker::End walk ----------------------------");
     }
 
     private void walk(Path path) throws IOException {
@@ -48,7 +48,7 @@ public class DirWalker {
 
         int numLocal = localTriplets == null ? 0 : localTriplets.size();
         int numRemote = remoteTriplets == null ? 0 : remoteTriplets.size();
-        log.info("walk: " + path + " local items: " + numLocal + " - remote items: " + numRemote);        
+        //log.info("walk: " + path + " local items: " + numLocal + " - remote items: " + numRemote);        
         
         if (remoteTriplets != null) {            
             for (Triplet remoteTriplet : remoteTriplets) {
@@ -59,10 +59,10 @@ public class DirWalker {
                 } else {
                     if (localTriplet.getHash() == remoteTriplet.getHash()) {
                         // clean, nothing to do
-                        log.info("in sync: " + childPath);
+                        //log.info("in sync: " + childPath);
                         syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
                     } else {
-                        log.info("different hashes: " + childPath);
+                        // log.info("different hashes: " + childPath);
                         doDifferentHashes(remoteTriplet, localTriplet, childPath);
                     }
                 }

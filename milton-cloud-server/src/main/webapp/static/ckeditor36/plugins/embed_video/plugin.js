@@ -284,7 +284,7 @@ CKEDITOR.plugins.add( 'embed_video',
                             });
                         },
                         swfPath: jsPath,
-                        supplied: "webmv, m4v, ogv, ogg, mp3, mp4, flv",
+                        supplied: "webmv, mp4, ogv, flv",
                         solution:"flash, html",
                         size: {
                             width: "500px",
@@ -305,7 +305,8 @@ CKEDITOR.plugins.add( 'embed_video',
                     img = this.element;
  
                     img.setAttribute( "url", url );
-                    img.setAttribute( "src", url + "/alt-800-600.png" );
+                    img.setAttribute( "src", url + "/alt-720-576.png" );
+                    img.setAttribute("class", "video");
                     if ( this.insertMode ) {
                         editor.insertElement( img );
                     }
@@ -469,13 +470,15 @@ function attachNode(e, data){
 function methodInvoke(url) {
     log("methodInvoke", url);
     $("#jquery_jplayer_1").jPlayer("setMedia", {
-        m4v: url + "/alt-800-600.m4v",
-        ogv: url + "/alt-800-600.ogv",
-        flv: url + "/alt-800-600.flv",
+        webmv: url + "/alt-720-576.webm",  
+        ogv: url + "/alt-720-576.ogv",        
+        flv: url + "/alt-720-576.flv",
+        m4v: url + "/alt-720-576.mp4",        
         poster: src
     });
     $("#jquery_jplayer_1").jPlayer({
-        solution:"flash, html"
+        solution:"flash, html",
+        supplied: "webmv, mp4, ogv, flv"
     });
     $("#jquery_jplayer_1").jPlayer("play", 0);
 }

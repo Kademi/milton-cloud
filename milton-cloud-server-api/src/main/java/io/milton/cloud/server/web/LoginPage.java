@@ -142,7 +142,7 @@ public class LoginPage implements GetableResource, CommonResource {
 
     @Override
     public boolean isPublic() {
-        return true;
+        return parent.isPublic();
     }
     
     

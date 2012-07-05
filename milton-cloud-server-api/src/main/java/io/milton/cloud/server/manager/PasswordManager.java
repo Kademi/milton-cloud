@@ -7,8 +7,6 @@ import io.milton.vfs.db.Profile;
 import io.milton.http.http11.auth.DigestGenerator;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.vfs.db.utils.SessionManager;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
  *
@@ -83,7 +81,7 @@ public class PasswordManager {
         String expectedResp = digestGenerator.generateDigestWithEncryptedPassword(digest, a1Md5);
         String actualResp = digest.getResponseDigest();
         if (expectedResp.equals(actualResp)) {
-            log.info("verifyDigest: ok");
+//            log.info("verifyDigest: ok");
             return true;
         } else {
             System.out.println("digests don't match!!!!");

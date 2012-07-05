@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.data.DataSession;
 
 /**
  * Represents a version of a directory, containing the members which are in that
@@ -185,7 +186,15 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         if (indexPage == null) {
             Resource r = child("index.html");
             if (r == null) {
-                return null;
+                DataSession.FileNode newNode = getDirectoryNode().addFile("index.html");
+                FileResource fr = new FileResource(newNode, this);
+                indexPage = fr.getHtml();
+                indexPage.setParsed(true);
+                if(renderMode) {
+                    children.add(indexPage);
+                } else {
+                    children.add(fr);
+                }
             } else if (r instanceof FileResource) {
                 FileResource fr = (FileResource) r;
                 indexPage = fr.getHtml();
@@ -202,11 +211,14 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public String getTitle() {
         try {
             RenderFileResource r = getIndex();
+            String t = null;
             if (r != null) {
-                return r.getTitle();
-            } else {
-                return getName();
+                t = r.getTitle();
             }
+            if( t == null) {
+                t = getName();
+            }
+            return t;
         } catch (NotAuthorizedException | BadRequestException ex) {
             throw new RuntimeException(ex);
         }
@@ -235,10 +247,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     @Override
     public void setParam(String name, String value) throws NotAuthorizedException, BadRequestException {
         RenderFileResource html = getIndex();
-        if (html == null) {
-            // create a new one
-            throw new RuntimeException("not done yet");
-        }
         updatedIndex = true;
         html.setParam(name, value);
     }
@@ -259,16 +267,19 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        doSave();
+        doSaveHtml();
 
         tx.commit();
     }
 
-    public void doSave() throws NotAuthorizedException, BadRequestException {
+    /**
+     * Save any parameters which have been set to HTML content
+     */
+    public void doSaveHtml() throws NotAuthorizedException, BadRequestException {
         if (updatedIndex = true) {
             RenderFileResource html = getIndex();
             if (html != null) {
-                html.doSave();
+                html.doSaveHtml();
             }
         }
     }

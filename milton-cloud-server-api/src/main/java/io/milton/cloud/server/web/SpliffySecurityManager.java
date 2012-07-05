@@ -79,7 +79,7 @@ public class SpliffySecurityManager {
             return null;
         }
         if (passwordManager.verifyDigest(digest, user)) {
-            log.info("digest auth ok: " + user.getName());
+//            log.info("digest auth ok: " + user.getName());
             HttpManager.request().getAttributes().put("_current_user", user);
             return user;
         } else {
@@ -101,7 +101,7 @@ public class SpliffySecurityManager {
                 //result = SecurityUtils.hasWrite(privs);
 
                 // Currently doesnt give administrators (ie users defined on parent orgs) access
-                result = ( auth != null && auth.getTag() != null);
+                result = (auth != null && auth.getTag() != null);
             } else {
                 result = SecurityUtils.hasRead(privs);
                 if (!result) {
@@ -111,14 +111,18 @@ public class SpliffySecurityManager {
                 }
             }
             if (!result) {
-                log.info("Denied access of: " + auth + " to resource: " + aThis.getName() + " (" + aThis.getClass() + ") because of authorisation failure");
-                log.info("Requires " + (method.isWrite ? "writable" : "read") + "access");
-                log.info("Allowed privs of current user are:");
-                for (Priviledge p : privs) {
-                    log.info("   - " + p);
-                }
-                if (log.isTraceEnabled()) {
-                    log.trace("stack trace so you know whats going on", new Exception("not a real exception"));
+                if (auth != null && auth.getTag() != null) {
+                    log.info("Denied access of: " + auth + " to resource: " + aThis.getName() + " (" + aThis.getClass() + ") because of authorisation failure");
+                    log.info("Requires " + (method.isWrite ? "writable" : "read") + "access");
+                    log.info("Allowed privs of current user are:");
+                    for (Priviledge p : privs) {
+                        log.info("   - " + p);
+                    }
+                    if (log.isTraceEnabled()) {
+                        log.trace("stack trace so you know whats going on", new Exception("not a real exception"));
+                    }
+                } else {
+                    log.info("Authorisation declined, not logged in");
                 }
             }
             return result;

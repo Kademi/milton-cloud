@@ -17,6 +17,7 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.db.NamedCounter;
+import io.milton.common.FileUtils;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
@@ -70,9 +71,11 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             String name = baseName;
             Resource r = col.child(name);
             int cnt = 0;
+            boolean isFirst = true;
             while (r != null) {
                 cnt++;
-                name = baseName + cnt;
+                name = FileUtils.incrementFileName(name, isFirst);
+                isFirst = false;
                 r = col.child(name);
             }
             return name;
@@ -115,10 +118,8 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             created.setParsed(true);
             String t = params.get("template");
             if (t != null) {
-                System.out.println("set template: " + t);
                 created.setTemplate(t);
             } else {
-                System.out.println("no template, use default");
                 created.setTemplate("content/page");
             }
         }

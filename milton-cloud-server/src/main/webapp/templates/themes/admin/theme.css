@@ -423,7 +423,7 @@ article.Note {
 }
 .DropdownControl .DropdownContent.Rows3 header h3:last-child, .DropdownControl .DropdownContent.Rows3 div.Content section:last-child { margin-right: 0; }
 /* Small Button */
-button.SmallBtn {
+.SmallBtn {
 	float: left;
 	height: 32px;
 	padding-left: 20px;
@@ -433,16 +433,16 @@ button.SmallBtn {
 	cursor: pointer;
 	border: 0 none;
 }
-button.SmallBtn.Add { background-image: url(images/btn_add_small.png); }
-button.SmallBtn.Delete { background-image: url(images/btn_delete_small.png); }
-button.SmallBtn.NoText {
+.SmallBtn.Add { background-image: url(images/btn_add_small.png); }
+.SmallBtn.Delete { background-image: url(images/btn_delete_small.png); }
+.SmallBtn.NoText {
 	padding-left: 0;
 	width: 20px;
 	background-position: 50% 50%;
 }
-button.SmallBtn.NoText span { display: none; }
+.SmallBtn.NoText span { display: none; }
 /* Button */
-button.Btn {
+.Btn {
 	line-height: 26px;
 	height: 26px;
 	color: #FFF;

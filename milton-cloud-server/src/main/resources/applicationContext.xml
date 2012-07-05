@@ -121,6 +121,7 @@
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>
         <constructor-arg ref="event.manager"/>
+        <constructor-arg ref="content.type.service"/>        
     </bean>       
         
     <!-- This will expose resources on the classpath, required for apps which have css/js files in the jar -->

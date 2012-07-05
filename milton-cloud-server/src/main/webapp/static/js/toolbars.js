@@ -1,4 +1,4 @@
-var editorSkin = "kama";
+var editorSkin = "office2003";
 
 var toolbarSets = {};
 

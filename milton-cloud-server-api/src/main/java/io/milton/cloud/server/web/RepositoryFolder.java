@@ -97,7 +97,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
-        log.trace("createCollection: " + newName);
+        log.info("createCollection: " + newName);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         

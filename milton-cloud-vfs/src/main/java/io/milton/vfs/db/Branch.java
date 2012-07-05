@@ -32,6 +32,7 @@ public class Branch implements Serializable {
     public static String TRUNK = "trunk";
     private long id;
     private String name;
+    private Long version;
     private Commit head;
     private Repository repository;
     private Date createdDate;
@@ -47,6 +48,18 @@ public class Branch implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Version
+    @Column(name="LOCKVERSION")
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+    
+    
 
     @ManyToOne(optional = false)
     public Repository getRepository() {

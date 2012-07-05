@@ -1,6 +1,7 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.web.templating.HtmlTemplateParser;
+import io.milton.common.ContentTypeService;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -173,12 +174,18 @@ public class FileResource extends AbstractContentResource implements Replaceable
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        doSave();
+        doSaveHtml();
 
         tx.commit();
     }
 
-    public void doSave() throws BadRequestException, NotAuthorizedException {
+    /**
+     * Writes any parsed data in the htmlPage to this file's content
+     * 
+     * @throws BadRequestException
+     * @throws NotAuthorizedException 
+     */
+    public void doSaveHtml() throws BadRequestException, NotAuthorizedException {
         // htmlPage will only have been set if html content fields have been set, in which
         // case we need to generate and persist html content
         if (htmlPage != null) {
@@ -188,6 +195,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);
             parent.save();
+        } else {
+            System.out.println("no htmlPage, so no property changes");
         }
     }
 
@@ -216,7 +225,15 @@ public class FileResource extends AbstractContentResource implements Replaceable
         }
 
         // will return a non-null value if type is contained in any content type
-        String s = ContentTypeUtils.findAcceptableContentTypeForName(getName(), type);
-        return s != null;
+        List<String> list = _(ContentTypeService.class).findContentTypes(getName());
+        if( list != null ) {
+            for(String ct : list ) {
+                if( ct.contains(type)) {
+                    System.out.println("is: found matching content type: " + ct );
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

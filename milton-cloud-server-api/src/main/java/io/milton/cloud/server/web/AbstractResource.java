@@ -70,7 +70,6 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
                 if (ur == null) {
                     throw new RuntimeException("Failed to find UserResource for: " + u.getName());
                 }
-                log.warn("sigest auth ok: " + ur);
                 return ur;
             } catch (NotAuthorizedException | BadRequestException ex) {
                 throw new RuntimeException(ex);
@@ -85,7 +84,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public boolean authorise(Request request, Method method, Auth auth) {
         boolean b = _(SpliffySecurityManager.class).authorise(request, method, auth, this);
         if (!b) {
-            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
+//            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
         }
         return b;
     }

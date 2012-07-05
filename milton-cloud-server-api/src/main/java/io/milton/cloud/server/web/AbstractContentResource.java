@@ -58,10 +58,11 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public void moveTo(CollectionResource rDest, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
-
         if (!(rDest instanceof ContentDirectoryResource)) {
             throw new ConflictException(this, "Can't move to: " + rDest.getClass());
         }
+        log.info("moveTo: " + rDest.getName() + " " + newName);
+        log.info("old location: " + parent.getName() + "/" + getName());
         ContentDirectoryResource newParent = (ContentDirectoryResource) rDest;
         ContentDirectoryResource oldParent = parent;
 
@@ -97,10 +98,19 @@ public abstract class AbstractContentResource extends AbstractResource implement
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        contentNode.delete();
-        parent.onRemovedChild(this);
+        doDelete();
         parent.save();
         tx.commit();
+    }
+    
+    /**
+     * Deletes the content node and removes from parent, but does not do a save
+     * or commit
+     */
+    public void doDelete() {
+        contentNode.delete();
+        parent.onRemovedChild(this);
+        
     }
 
     @Override
@@ -156,10 +166,15 @@ public abstract class AbstractContentResource extends AbstractResource implement
     @Override
     public String getUniqueId() {
         if( contentNode != null ) {
-            return "r" + contentNode.getHash();
-        } else {
-            return null;
+            NodeMeta meta = loadNodeMeta();
+            if( meta != null ) {
+                UUID id = meta.getId();
+                if( id != null ) {
+                    return id.toString();
+                }
+            }             
         }
+        return null;
     }
 
     @Override

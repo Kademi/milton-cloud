@@ -54,7 +54,9 @@ public class HtmlFormatter {
             body.writeAtt("class", sb.toString());
         }
         body.writeText("\n");
-        body.writeText(r.getBody());
+        if (r.getBody() != null) {
+            body.writeText(r.getBody());
+        }
         body.close(true);
         html.close(true);
         writer.flush();

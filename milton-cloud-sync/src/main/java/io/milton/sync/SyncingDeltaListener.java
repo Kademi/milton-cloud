@@ -31,10 +31,11 @@ class SyncingDeltaListener implements DeltaListener2 {
         if (remoteTriplet.isDirectory()) {
             final File localFile = toFile(path);
             if (!localFile.exists()) {
-                log.info("new remote directory, create: " + localFile.getAbsolutePath());
                 if (!localFile.mkdirs()) {
                     throw new IOException("Couldnt create local directory: " + localFile.getAbsolutePath());
                 }
+            } else {
+                System.out.println("Local already exists: " + localFile.getAbsolutePath());
             }
         } else {
             final File localChild = toFile(path);

@@ -347,3 +347,144 @@ function validateAndSaveAjax(container, redirectToRelativeUrl) {
     return false;
 }
 
+
+function initEdify(container) {
+    if( !$("body").hasClass("edifyIsEditMode")) {
+        $("body").addClass("edifyIsViewMode");
+    }
+    $(".edifyDelete").click(function() {
+        var href = window.location.href;
+        var name = getFileName(href);
+        confirmDelete(href, name, function() {
+            alert("Page deleted");
+            var folderHref = getFolderPath(href);
+            window.location = folderHref;
+        });
+    });
+}
+
+function edify(container) {
+    log("edify", container);
+    $("body").removeClass("edifyIsViewMode");
+    $("body").addClass("edifyIsEditMode");
+    
+    initHtmlEditors(["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
+    
+    $(".inputTextEditor").each(function(i, n) {
+        var $n = $(n);
+        var s = $n.text();
+        $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
+    });
+    
+    container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
+    $("#edifyForm").append("<input type='hidden' name='body' value='' />");
+    
+    $("#edifyForm").submit(function() {
+        log("submit form");
+        try {
+            log("ckeditors", CKEDITOR.instances);
+            $("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
+            $.ajax({
+                type: 'POST',
+                url: $("#edifyForm").attr("action"),
+                data: $("#edifyForm").serialize(),
+                dataType: "json",
+                success: function(resp) {
+                    ajaxLoadingOff();
+                    log("save success", resp, window.location.path);
+                    if( resp.nextHref) {
+                        window.location = resp.nextHref;
+                    } else {
+                        window.location = window.location.pathname;
+                    }
+                },
+                error: function(resp) {
+                    ajaxLoadingOff();
+                    alert("err");
+                }
+            });     
+        } catch(e) {
+            log("exception", e);
+        }
+        return false;
+    });
+//$("#edifyBody").wrap("<textarea></textarea>");
+}
+
+function confirmDelete(href, name, callback) {
+    if( confirm("Are you sure you want to delete " + name + "?")) {
+        deleteFile(href, callback);
+    }
+}
+function deleteFile(href, callback) {
+    ajaxLoadingOn();
+    $.ajax({
+        type: 'DELETE',
+        url: href,
+        dataType: "json",
+        success: function(resp) {
+            log('deleted', href);
+            ajaxLoadingOff();
+            if( callback ) {
+                callback();
+            }
+        },
+        error: function(resp) {
+            log("failed", resp);
+            ajaxLoadingOff();
+            alert("Sorry, an error occured deleting " + href + ". Please check your internet connection");
+        }
+    });
+}
+
+function showCreateFolder() {
+    log("showCreateFolder");
+    $("#createFolderModal").dialog({
+        modal: true,
+        width: 500,
+        title: "Create folder",
+        buttons: { 
+            "Ok": function() { 
+                var name = $("#createFolderModal input[type=text]").val();
+                if( name && name.length > 0 ) {
+                    createFolder(name);
+                    $(this).dialog("close");                     
+                } else {
+                    alert("Please enter a name to create");
+                }
+            } ,
+            "Cancel": function() {
+                $(this).dialog("close"); 
+            }
+        }
+    });
+}
+
+function createFolder(name, parentHref, callback) {
+    var encodedName = name; //$.URLEncode(name);
+//    ajaxLoadingOn();
+    var url = "_DAV/MKCOL";
+    if( parentHref ) {
+        url = parentHref + "/" + url;
+    }
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: {
+            name: encodedName
+        },
+        dataType: "json",
+        success: function(resp) {
+//            ajaxLoadingOff();
+            //window.location = encodedName + "/index.html";
+            if( callback ) {
+                callback(name, resp);
+            }
+        },
+        error: function() {
+//            ajaxLoadingOff();
+            alert('There was a problem creating the folder');
+        }
+    });
+}
+

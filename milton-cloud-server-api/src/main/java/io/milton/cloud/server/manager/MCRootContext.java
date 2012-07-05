@@ -21,6 +21,7 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.*;
+import io.milton.common.ContentTypeService;
 import io.milton.common.Service;
 import io.milton.context.Context;
 import io.milton.context.Executable2;
@@ -47,7 +48,7 @@ public class MCRootContext extends RootContext implements Service{
     private final CurrentDateService currentDateService;
     private final CommentService commentService;
     
-    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager) {
+    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, ContentTypeService contentTypeService) {
         super();
         this.resourceFactory = resourceFactory;                
         this.hashStore = hashStore;
@@ -63,6 +64,7 @@ public class MCRootContext extends RootContext implements Service{
         put(hashStore, blobStore, securityManager, securityManager.getUserDao(), applicationManager, templateParser, textTemplater, currentDateService, htmlTemplater, commentService);
         put(securityManager.getPasswordManager());
         put(resourceFactory);
+        put(contentTypeService);
         
         for( Application a : applicationManager.getApps()) {
             put(a);

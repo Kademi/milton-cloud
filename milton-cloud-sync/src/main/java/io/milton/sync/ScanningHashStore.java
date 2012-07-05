@@ -144,6 +144,6 @@ public class ScanningHashStore implements HashStore {
     }
 
     public boolean ignored(File childFile) {
-        return childFile.isHidden() || childFile.getName().startsWith(".");
+        return Utils.ignored(childFile);
     }
 }

@@ -28,6 +28,7 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
+import org.hibernate.LockMode;
 
 /**
  * Represents the current version of a branch in a repository
@@ -73,7 +74,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     
     @Override
     public void save() {
-        System.out.println("BranchFolder: save session");
+        System.out.println("BranchFolder: save session: " + getName());
         UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
         dataSession.save(currentUser.getThisUser());
     }
@@ -98,10 +99,11 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
-        log.trace("createCollection: " + newName);
+        log.info("createCollection: " + newName);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         DirectoryResource rdr = createDirectoryResource(newName, session);
+        System.out.println("created: " + rdr.getHref() + " - " + getDirectoryNode().getHash());
         tx.commit();
         return rdr;
     }

@@ -16,6 +16,9 @@ div.video {
 .jp-video-360p, .jp-video-270p {
     /** width: 640px; */
 }
+.jp-video-fuse {
+    width: 800px;
+}
 body .jp-jplayer {
     margin: 0 auto; 
 }

@@ -98,9 +98,7 @@ public class ResourceList extends ArrayList<CommonResource> {
             CommonResource e = (CommonResource) o;
             map.remove(e.getName());
         }
-        int i = super.indexOf(o);
-        Object removed = super.remove(i);
-        return (removed != null);
+        return super.remove(o);
     }
 
     public CommonResource getFirst() {
