@@ -16,6 +16,8 @@ Any value defined here will override the pom.xml file value but is only applicab
         <netbeans.compile.on.save>all</netbeans.compile.on.save>
     </properties>
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
-        <configurations/>
+        <configurations>
+            <configuration id="run-fuse-linux-no-autoloader" profiles="run-fuse-linux-no-autoloader"/>
+        </configurations>
     </config-data>
 </project-shared-configuration>

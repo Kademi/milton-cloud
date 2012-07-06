@@ -352,6 +352,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public boolean isPublic() {
         return parent.isPublic();
     }
+
+    public Branch getBranch() {
+        return branch;
+    }
     
     
 }
