@@ -78,9 +78,9 @@ public class ApplicationManager {
         RootFolder rootFolder = currentRootFolderService.getRootFolder();
         if (rootFolder == null) {
             return apps;
-        } else {            
+        } else {
             List<Application> active = (List<Application>) rootFolder.getAttributes().get("activeApps");
-            if (active == null) {                
+            if (active == null) {
                 active = findActiveApps(rootFolder);
                 log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
                 rootFolder.getAttributes().put("activeApps", active);
@@ -235,7 +235,9 @@ public class ApplicationManager {
         for (AppControl appC : list) {
             if (appC.isEnabled()) {
                 Application app = get(appC.getName());
-                activApps.add(app);
+                if (app != null) {
+                    activApps.add(app);
+                }
             }
         }
         return activApps;
@@ -251,7 +253,9 @@ public class ApplicationManager {
         for (AppControl appC : list) {
             if (appC.isEnabled()) {
                 Application app = get(appC.getName());
-                activApps.add(app);
+                if (app != null) {
+                    activApps.add(app);
+                }
             }
         }
         return activApps;

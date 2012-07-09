@@ -90,7 +90,7 @@ public class ScriptExecutor {
      *
      * @throws ScriptException -
      */
-    public void exec() throws RuntimeException {
+    public void exec() throws Exception {
         log.info("exec: " + process);
         int cmdSize = args.length + 1;
         if (isWin32Batch()) {
@@ -126,7 +126,7 @@ public class ScriptExecutor {
             debug("...got exit val: " + exitVal);
             if (exitVal != successCode) {
                 log.error("error output: "  + errorDiscarder.toString());
-                throw new RuntimeException(exitVal + " - " + output.toString());
+                throw new Exception(exitVal + " - " + output.toString());
             }
             debug("...waiting for threads to join...");
             output.join(10000); // 10 sec at most!
@@ -140,9 +140,9 @@ public class ScriptExecutor {
             }
             debug("...done ok");
         } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
+            throw new Exception(ioe);
         } catch (InterruptedException ie) {
-            throw new RuntimeException(ie);
+            throw new Exception(ie);
         } finally {
             log.debug("finished exec");
         }

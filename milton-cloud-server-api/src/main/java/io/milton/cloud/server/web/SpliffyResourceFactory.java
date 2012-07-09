@@ -66,13 +66,11 @@ public class SpliffyResourceFactory implements ResourceFactory {
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
         Path path = Path.path(sPath);
         Resource r = find(host, path);
-        if( r == null && sPath.endsWith(".html") ) {
-            System.out.println("not found, but html page requested, check for parent");
+        if( r == null && sPath.endsWith(".new") ) {
             // Not found, but a html page is requested. If the parent exists and is a collection
             // then we'll instantiate a placeholder page which will allow new pages to be created
             Resource rParent = find(host, path.getParent());
             if( rParent instanceof ContentDirectoryResource) {
-                System.out.println("found content parent, so create new page");
                 ContentDirectoryResource parentContentDir = (ContentDirectoryResource) rParent;
                 return new NewPageResource(parentContentDir, path.getName());
             }

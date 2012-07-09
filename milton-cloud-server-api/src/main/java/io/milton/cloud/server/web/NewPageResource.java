@@ -150,7 +150,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
     }
 
     private String getImpliedName(Map<String, String> parameters, CollectionResource folder) {
-        String nameToCreate = getName();
+        String nameToCreate = getName().replace(".new", "");
         if (nameToCreate.equals("_autoname.html")) {
             if (parameters.containsKey("name")) {
                 nameToCreate = parameters.get("name");

@@ -51,7 +51,8 @@ public class AvconvConverter implements Closeable {
      *
      * @param format
      * @param with
-     * @return
+     * @return - null indicates no file was generated. Oterhwise returns whatever
+     * the callback returned
      */
     public Long generate(FormatSpec format, With<InputStream, Long> with) {
         log.info("generateThumb: " + format);
@@ -109,7 +110,12 @@ public class AvconvConverter implements Closeable {
 
             int successCode = 0;
             ScriptExecutor exec = new ScriptExecutor(process, args, successCode);
-            exec.exec();
+            try {
+                exec.exec();
+            } catch (Exception ex) {
+                log.error("Failed to generate alternate format", ex);
+                return null;
+            }
 
             if (!dest.exists()) {
                 log.error("Conversion failed. Dest temp file was not created");

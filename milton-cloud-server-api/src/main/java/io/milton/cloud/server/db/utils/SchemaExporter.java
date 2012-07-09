@@ -29,6 +29,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
  */
 public class SchemaExporter {
 
+
     private static enum Dialect {
 
         ORACLE("org.hibernate.dialect.Oracle10gDialect"),
@@ -45,13 +46,12 @@ public class SchemaExporter {
             return dialectClass;
         }
     }
+    private final List<String> packageNames;
+    private final File outputDir;
 
-    private String packageName;
-    
-    private File outputDir;
-    
-    public SchemaExporter(String packageName)  {
-        this.packageName = packageName;
+    public SchemaExporter(List<String> packageNames, File outputDir) {
+        this.outputDir = outputDir;
+        this.packageNames = packageNames;
     }
 
     /**
@@ -60,7 +60,7 @@ public class SchemaExporter {
      * @param dbDialect to use
      */
     public void generate() throws Exception {
-        if( !outputDir.exists()) {
+        if (!outputDir.exists()) {
             outputDir.mkdirs();
         }
         AnnotationConfiguration cfg;
@@ -68,9 +68,12 @@ public class SchemaExporter {
         cfg.setProperty("hibernate.hbm2ddl.auto", "create");
         cfg.setNamingStrategy(new org.hibernate.cfg.ImprovedNamingStrategy());
 
-        for (Class<Object> clazz : getClasses(packageName)) {
-            cfg.addAnnotatedClass(clazz);
+        for (String packageName : packageNames) {
+            for (Class<Object> clazz : getClasses(packageName)) {
+                cfg.addAnnotatedClass(clazz);
+            }
         }
+        List<File> outFiles = new ArrayList<>();
         for (Dialect d : Dialect.values()) {
             cfg.setProperty("hibernate.dialect", d.getDialectClass());
             SchemaExport export = new SchemaExport(cfg);
@@ -78,7 +81,13 @@ public class SchemaExporter {
             File fOut = new File(outputDir, d.name().toLowerCase() + ".sql");
             export.setOutputFile(fOut.getAbsolutePath());
             export.execute(true, false, false, false);
+            outFiles.add(fOut);                                                
         }
+        System.out.println("**********************************");
+        for( File f : outFiles) {
+            System.out.println("   exported: " + f.getAbsolutePath());
+        }
+        System.out.println("**********************************");
     }
 
     /**
@@ -103,7 +112,7 @@ public class SchemaExporter {
             String sFile = resource.getFile();
             sFile = sFile.replace("test-classes", "classes");
             directory = new File(sFile);
-            
+
         } catch (NullPointerException x) {
             throw new ClassNotFoundException(packageName + " (" + directory
                     + ") does not appear to be a valid package");
@@ -127,9 +136,5 @@ public class SchemaExporter {
         return outputDir;
     }
 
-    public void setOutputDir(File outputDir) {
-        this.outputDir = outputDir;
-    }
-    
-    
+
 }

@@ -265,6 +265,59 @@
         </profile>   
         
         <profile>
+            <id>run-fuse-linux-datacreator-but-no-content-load</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>maven-jetty-plugin</artifactId>
+                        <version>6.1.26</version>
+                        <executions>
+                            <execution>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>extra.apps</name>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>template.file.roots</name>
+                                    <value>${fuse.home}/fuse-admin-web2/src/main/resources</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>fuse.autoloader.dir</name>
+                                    <value>${fuse.home}/fuse-admin-web2</value>
+                                </systemProperty>
+                                
+                            </systemProperties>                            
+                            <overrideWebXml>src/test/resources/web.xml</overrideWebXml>
+                            <webAppConfig>
+                                <extraClasspath>${fuse.home}/fuse-admin-web2/target/classes/</extraClasspath>
+                            </webAppConfig>
+                            <contextPath>/</contextPath>
+                            <connectors>
+                                <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                                    <port>8080</port>  <!-- Run on non-priviledged port 8080 for linux -->
+                                    <maxIdleTime>60000</maxIdleTime>
+                                </connector>
+                            </connectors>
+                            <stopKey>stop</stopKey>
+                            <stopPort>8091</stopPort>
+                            <useTestClasspath>true</useTestClasspath>
+                            <scanIntervalSeconds>0</scanIntervalSeconds>
+                        </configuration>
+                    </plugin>   					
+                </plugins>
+            </build>         
+        </profile>           
+        
+        <profile>
             <id>run-fuse-linux-no-autoloader</id>
             <build>
                 <plugins>
