@@ -1,39 +1,36 @@
 <html>
     <head>
         <title>Administration</title>
-        <link rel="stylesheet" type="text/css" href="../themes/yellow/theme.css" media="screen" />
         <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
+        <link href="admin-home.css" rel="stylesheet" type="text/css" />
+        <link rel="template" href="plain" />
     </head>
-    <body class="home">
+    <body class="Login">
         <script type="text/javascript">
             jQuery(function($) {
                 $(".Login").user({
-                    afterLoginUrl: "/dashboard";
+                    afterLoginUrl: "/dashboard"
                 }); // setup login and logout
             });
         </script>
-        <div id="content">
-            <div class="Login"> 
-                <div class="LoginPanel">
-                    <div class="LoginContent">
-                        <p id="validationMessage" style="display: none"></p>
-                        <form method="post" action="" name="frmLogin">
-                            <table>
-                                <tr>
-                                    <td colspan="2"><input type="text" name="email" value="" class="Textbox" title="Email address" placeholder="Email address" /></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2"><input type="password" name="password" value="" class="Textbox" title="Password" placeholder="Password" /></td>
-                                </tr>
-                                <tr valign="top">
-                                    <td><a href="" title="Forgotten password" class="Forgot">Forgotten password</a></td>
-                                    <td align="right" width="90"><button class="Login Button" ><span>Login</span></button></td>
-                                </tr>
-                            </table>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
+        <section class="LoginPanel">
+            <h1 class="Logo"><img src="/templates/themes/admin/images/logo_login.png" width="177" height="65" alt="fuseLMS" /></h1>
+            <form action="" name="frmLogin" method="post">
+                <p id="validationMessage" style="display: none"></p>
+                <table>
+                    <tr>
+                        <td colspan="2"><input type="text" name="email" value="" placeholder="Enter your email address here" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="password" name="password" value="" placeholder="Enter your password here" /></td>
+                    </tr>
+                    <tr>
+                        <td><a href="/forgotten-password">Forgotten your password?</a></td>
+                        <td><button><span>Login</span></button></td>
+                    </tr>
+                </table>
+            </form>
+        </section>
     </body>
 </html>

@@ -1,0 +1,59 @@
+html {
+    height: 100%;
+}
+
+body.Login {
+	background: #000 url(/templates/themes/admin/images/bg_login.png) no-repeat 50% 50%;
+	height: 100%;
+}
+.LoginPanel {
+	position: relative;
+	left: 50%;
+	top: 50%;
+	width: 500px;
+	margin: -95px 0 0 -280px;
+	background-image: linear-gradient(bottom, rgb(1,1,3) 0%, rgb(12,23,33) 87%);
+	background-image: -o-linear-gradient(bottom, rgb(1,1,3) 0%, rgb(12,23,33) 87%);
+	background-image: -moz-linear-gradient(bottom, rgb(1,1,3) 0%, rgb(12,23,33) 87%);
+	background-image: -webkit-linear-gradient(bottom, rgb(1,1,3) 0%, rgb(12,23,33) 87%);
+	background-image: -ms-linear-gradient(bottom, rgb(1,1,3) 0%, rgb(12,23,33) 87%);
+	background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(1,1,3)),  color-stop(0.87, rgb(12,23,33))  );
+	border-radius: 5px;
+	padding: 35px 50px 25px 10px;
+}
+.LoginPanel .Logo { float: left; }
+.LoginPanel > form { margin-left: 200px; }
+.LoginPanel > form table td { padding-bottom: 10px; }
+.LoginPanel > form table td a {
+	font-style: italic;
+	color: #45afdf;
+	font-size: 11px;
+	text-decoration: underline;
+}
+.LoginPanel > form table td button {
+	background-image: linear-gradient(bottom, rgb(27,114,180) 0%, rgb(87,182,223) 87%);
+	background-image: -o-linear-gradient(bottom, rgb(27,114,180) 0%, rgb(87,182,223) 87%);
+	background-image: -moz-linear-gradient(bottom, rgb(27,114,180) 0%, rgb(87,182,223) 87%);
+	background-image: -webkit-linear-gradient(bottom, rgb(27,114,180) 0%, rgb(87,182,223) 87%);
+	background-image: -ms-linear-gradient(bottom, rgb(27,114,180) 0%, rgb(87,182,223) 87%);
+	background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(27,114,180)),  color-stop(0.87, rgb(87,182,223))  );
+	height: 26px;
+	line-height: 26px;
+	border: 0 none;
+	font-size: 11px;
+	font-weight: bold;
+	padding: 0 10px;
+	color: #FFF;
+	text-transform: uppercase;
+	border-radius: 3px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+	-moz-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+	-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+	-o-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+	cursor: pointer;
+	float: right;
+}
+.LoginPanel > form table td button span {
+	background: url(/templates/themes/admin/images/icon_right2.png) no-repeat 100% 50%;
+	padding-right: 15px;
+}
