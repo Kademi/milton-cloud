@@ -235,17 +235,17 @@
                                 </systemProperty>
                                 <systemProperty>
                                     <name>template.file.roots</name>
-                                    <value>/home/brad/proj/fuse-admin/fuse-admin-web2/src/main/resources</value>
+                                    <value>/proj/fuse-admin/fuse-admin-web2/src/main/resources</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>fuse.autoloader.dir</name>
-                                    <value>/home/brad/proj/fuse-admin/fuse-admin-web2</value>
+                                    <value>/proj/fuse-admin/fuse-admin-web2</value>
                                 </systemProperty>
                                 
                             </systemProperties>                            
                             <overrideWebXml>src/test/resources/web.xml</overrideWebXml>
                             <webAppConfig>
-                                <extraClasspath>/home/brad/proj/fuse-admin/fuse-admin-web2/target/classes/</extraClasspath>
+                                <extraClasspath>/proj/fuse-admin/fuse-admin-web2/target/classes/</extraClasspath>
                             </webAppConfig>
                             <contextPath>/</contextPath>
                             <connectors>
@@ -288,17 +288,17 @@
                                 </systemProperty>
                                 <systemProperty>
                                     <name>template.file.roots</name>
-                                    <value>/home/brad/proj/fuse-admin/fuse-admin-web2/src/main/resources</value>
+                                    <value>/proj/fuse-admin/fuse-admin-web2/src/main/resources</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>fuse.autoloader.dir</name>
-                                    <value>/home/brad/proj/fuse-admin/fuse-admin-web2</value>
+                                    <value>/proj/fuse-admin/fuse-admin-web2</value>
                                 </systemProperty>
                                 
                             </systemProperties>                            
                             <overrideWebXml>src/test/resources/web.xml</overrideWebXml>
                             <webAppConfig>
-                                <extraClasspath>/home/brad/proj/fuse-admin/fuse-admin-web2/target/classes/</extraClasspath>
+                                <extraClasspath>/proj/fuse-admin/fuse-admin-web2/target/classes/</extraClasspath>
                             </webAppConfig>
                             <contextPath>/</contextPath>
                             <connectors>
