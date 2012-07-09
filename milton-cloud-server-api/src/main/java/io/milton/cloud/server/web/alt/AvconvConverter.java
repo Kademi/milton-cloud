@@ -112,10 +112,12 @@ public class AvconvConverter implements Closeable {
             exec.exec();
 
             if (!dest.exists()) {
-                throw new RuntimeException("Conversion failed. Dest temp file was not created");
+                log.error("Conversion failed. Dest temp file was not created");
+                return null;
             }
             if (dest.length() == 0) {
-                throw new RuntimeException("Conversion failed. Dest temp file has size zero.");
+                log.error("Conversion failed. Dest temp file has size zero.");
+                return null;
             }
 
             log.debug(" ffmpeg ran ok. reading temp file back to out stream");

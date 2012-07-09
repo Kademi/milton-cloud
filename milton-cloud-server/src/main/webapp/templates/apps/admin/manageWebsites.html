@@ -9,19 +9,19 @@
             <h3>Available websites</h3>
             <table class="Summary">
                 #foreach($w in $page.websites)
-                <tr rel="http://$w.name">
+                <tr>
                     <td>
                         <h5>$w.name</h5>
                         <p>Public theme: $!w.publicTheme; Internal theme: $!w.internalTheme; Current branch: $!w.currentBranch</p>
                     </td>
-                    <th>.</th>
+                    <th>
+                        <a target="_blank" href="http://${w.name}${formatter.portString}/" class="Btn ViewWebsite">View</a> 
+                        <a href="$w.name" class="Btn Cancel EditWebsite">Edit</a>
+                    </th>
                 </tr>
                 #end
                 
             </table>
-            <div class="Hidden">
-                <div id="websiteController"><button class="Btn ViewWebsite">View</button> <button class="Btn Cancel EditWebsite">Edit</button></div>
-            </div>
         </section>
         <script type="text/javascript">
             jQuery(function() {

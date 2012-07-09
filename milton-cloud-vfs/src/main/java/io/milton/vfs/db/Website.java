@@ -31,7 +31,7 @@ import org.hibernate.criterion.Expression;
  * @author brad
  */
 @Entity
-public class Website implements Serializable {
+public class Website implements Serializable, VfsAcceptor {
     public static List<Website>  findByWebsite(Repository repository, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.add(Expression.eq("repository", repository));
@@ -146,5 +146,8 @@ public class Website implements Serializable {
         this.repository = repository;
     }
 
-    
+    @Override
+    public void accept(VfsVisitor visitor) {
+        visitor.visit(this);
+    }      
 }

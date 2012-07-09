@@ -60,6 +60,8 @@
             
     <bean id="event.manager" class="io.milton.event.EventManagerImpl"/>
     
+    <bean id="current.root.folder.service" class="io.milton.cloud.server.manager.DefaultCurrentRootFolderService"></bean>
+    
     <bean id="application.manager" class="io.milton.cloud.server.apps.ApplicationManager">
         <constructor-arg>
             <list>
@@ -77,6 +79,7 @@
                 <bean class="io.milton.cloud.server.apps.dynamiccss.DynamicCssApp"/>
             </list>
         </constructor-arg>
+        <constructor-arg ref="current.root.folder.service"/>
         <property name="appsConfigDir" value="${apps.config.dir}" />
     </bean>
     
@@ -92,12 +95,13 @@
     <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory">
         <!--        
         <constructor-arg ref="lock.manager"/>
-        -->
-        <constructor-arg ref="session.manager"/>
+        -->        
         <constructor-arg ref="dao.user"/>
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>        
         <constructor-arg ref="event.manager"/> 
+        <constructor-arg ref="session.manager"/>
+        <constructor-arg ref="current.root.folder.service"/>
     </bean>
        
     <bean id="sync.spliffy.resource.factory" class="io.milton.cloud.server.web.sync.SpliffySyncResourceFactory">
@@ -168,6 +172,7 @@
                 <bean class="io.milton.cloud.server.web.ParameterisedResourcePropertySource"/>
             </list>
         </property>      
+        <property name="enabledCkBrowser" value="true"/>
     </bean>
 
 

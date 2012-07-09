@@ -47,7 +47,7 @@ import org.hibernate.criterion.Expression;
 @javax.persistence.Entity
 @Table(name = "ORG_ENTITY")
 @DiscriminatorValue("O")
-public class Organisation extends BaseEntity {
+public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
@@ -146,4 +146,9 @@ public class Organisation extends BaseEntity {
         
         return w;
     }
+    
+    @Override
+    public void accept(VfsVisitor visitor) {
+        visitor.visit(this);
+    }       
 }

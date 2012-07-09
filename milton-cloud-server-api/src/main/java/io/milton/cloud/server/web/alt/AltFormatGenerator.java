@@ -54,12 +54,12 @@ public class AltFormatGenerator implements EventListener {
         this.contentTypeService = contentTypeService;
         this.formats = new ArrayList<>();
         formats.add(new FormatSpec("image", "png", 150, 150));
-        
+
         formats.add(new FormatSpec("video", "flv", 800, 455));
         formats.add(new FormatSpec("video", "mp4", 800, 455));
         formats.add(new FormatSpec("video", "ogv", 800, 455));
         formats.add(new FormatSpec("video", "webm", 800, 455));
-        
+
         formats.add(new FormatSpec("video", "png", 800, 455));
         eventManager.registerEventListener(this, PutEvent.class);
     }
@@ -106,7 +106,7 @@ public class AltFormatGenerator implements EventListener {
             }
         }
     }
-    
+
     public AltFormat generate(FormatSpec f, FileResource fr) throws IOException {
         String ext = FileUtils.getExtension(fr.getName());
         AvconvConverter converter = new AvconvConverter(ffmpeg, fr, ext, contentTypeService);
@@ -115,15 +115,18 @@ public class AltFormatGenerator implements EventListener {
 
     public AltFormat generate(FormatSpec f, FileResource fr, AvconvConverter converter) throws IOException {
         final Parser parser = new Parser();
-        long altHash = converter.generate(f, new With<InputStream, Long>() {
+        Long altHash = converter.generate(f, new With<InputStream, Long>() {
 
             @Override
             public Long use(InputStream t) throws Exception {
                 return parser.parse(t, hashStore, blobStore);
             }
         });
-        String name = f.getName();
-        return AltFormat.insertIfOrUpdate(name, fr.getHash(), altHash, SessionManager.session());
+        if (altHash != null) {
+            String name = f.getName();
+            return AltFormat.insertIfOrUpdate(name, fr.getHash(), altHash, SessionManager.session());
+        } else {
+            return null;
+        }
     }
-    
 }

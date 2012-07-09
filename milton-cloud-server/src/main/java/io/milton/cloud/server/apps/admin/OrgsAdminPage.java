@@ -43,16 +43,15 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class OrgsAdminPage  extends AbstractResource implements GetableResource, PostableResource {
+public class OrgsAdminPage extends AbstractResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
-    
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
 
-    public OrgsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {       
+    public OrgsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -61,15 +60,13 @@ public class OrgsAdminPage  extends AbstractResource implements GetableResource,
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         throw new UnsupportedOperationException("Not supported yet.");
-    }    
-    
-    
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        _(HtmlTemplater.class).writePage("admin","admin/manageOrgs", this, params, out);
     }
 
-    
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
+    }
+
     @Override
     public boolean isDir() {
         return false;
@@ -110,7 +107,6 @@ public class OrgsAdminPage  extends AbstractResource implements GetableResource,
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -126,21 +122,20 @@ public class OrgsAdminPage  extends AbstractResource implements GetableResource,
         return null;
     }
 
-    
     @Override
     public Organisation getOrganisation() {
         return organisation;
     }
-    
+
     public List<Organisation> getChildOrganisations() {
-        List<Organisation> list = new ArrayList<>();        
+        List<Organisation> list = new ArrayList<>();
         List<BaseEntity> members = getOrganisation().getMembers();
-        if( members == null || members.isEmpty() ) {
+        if (members == null || members.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-        for( BaseEntity be : members ) {
-            if( be instanceof Organisation) {
-                list.add((Organisation)be);
+        for (BaseEntity be : members) {
+            if (be instanceof Organisation) {
+                list.add((Organisation) be);
             }
         }
         return list;
@@ -148,11 +143,9 @@ public class OrgsAdminPage  extends AbstractResource implements GetableResource,
 
     @Override
     public boolean is(String type) {
-        if( type.equals("groupsAdmin")) {
+        if (type.equals("orgAdmin")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
 }

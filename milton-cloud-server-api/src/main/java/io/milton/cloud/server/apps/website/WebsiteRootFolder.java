@@ -50,6 +50,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     private final ApplicationManager applicationManager;
     private final Website website;
     private ResourceList children;
+    private Map<String,Object> attributes;
 
     public WebsiteRootFolder( ApplicationManager applicationManager, Website website) {        
         this.website = website;
@@ -95,6 +96,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
+            System.out.println("init children");
             children = new ResourceList();
             Branch currentLive = website.currentBranch();
             if (currentLive != null) {
@@ -107,7 +109,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
                     children.add(rf);
                 }
             }
-
+            System.out.println("add browseable pages");
             applicationManager.addBrowseablePages(this, children);
         }
         return children;
@@ -285,6 +287,14 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     @Override
     public boolean isPublic() {
         return true;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        if( attributes == null ) {
+            attributes = new HashMap<>();
+        }
+        return attributes;
     }
     
     

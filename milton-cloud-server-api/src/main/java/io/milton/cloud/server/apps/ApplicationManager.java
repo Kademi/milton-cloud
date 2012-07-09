@@ -16,6 +16,9 @@
  */
 package io.milton.cloud.server.apps;
 
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.MenuItem;
 import java.io.*;
@@ -28,6 +31,8 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
@@ -42,9 +47,11 @@ public class ApplicationManager {
      */
     public static final String EXTRA_APPS_SYS_PROP_NAME = "extra.apps";
     private final List<Application> apps;
+    private final CurrentRootFolderService currentRootFolderService;
     private File appsConfigDir;
 
-    public ApplicationManager(List<Application> initialApps) {
+    public ApplicationManager(List<Application> initialApps, CurrentRootFolderService currentRootFolderService) {
+        this.currentRootFolderService = currentRootFolderService;
         List<Application> list = new ArrayList<>(initialApps);
         this.apps = list;
         String extraApps = System.getProperty(EXTRA_APPS_SYS_PROP_NAME);
@@ -65,6 +72,22 @@ public class ApplicationManager {
 
     public List<Application> getApps() {
         return apps;
+    }
+
+    public List<Application> getActiveApps() {
+        RootFolder rootFolder = currentRootFolderService.getRootFolder();
+        if (rootFolder == null) {
+            return apps;
+        } else {            
+            List<Application> active = (List<Application>) rootFolder.getAttributes().get("activeApps");
+            if (active == null) {                
+                active = findActiveApps(rootFolder);
+                log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
+                rootFolder.getAttributes().put("activeApps", active);
+            }
+            return active;
+        }
+
     }
 
     public void init(SpliffyResourceFactory resourceFactory) {
@@ -98,7 +121,7 @@ public class ApplicationManager {
     }
 
     public void appendMenu(MenuItem parent) {
-        for (Application app : apps) {
+        for (Application app : getActiveApps()) {
             if (app instanceof MenuApplication) {
                 ((MenuApplication) app).appendMenu(parent);
             }
@@ -118,7 +141,7 @@ public class ApplicationManager {
     }
 
     public Resource getPage(Resource parent, String name) {
-        for (Application app : apps) {
+        for (Application app : getActiveApps()) {
             Resource child = app.getPage(parent, name);
             if (child != null) {
                 return child;
@@ -128,7 +151,7 @@ public class ApplicationManager {
     }
 
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        for (Application app : apps) {
+        for (Application app : getActiveApps()) {
             app.addBrowseablePages(parent, children);
         }
     }
@@ -182,16 +205,55 @@ public class ApplicationManager {
 
     /**
      * Allow applications to append priviledges to the ACL for a resource
-     * 
+     *
      * @param perms
      * @param user
-     * @param aThis 
+     * @param aThis
      */
     public void appendPriviledges(List<AccessControlledResource.Priviledge> privs, Profile user, Resource r) {
-        for (Application app : apps) {
+        for (Application app : getActiveApps()) {
             if (app instanceof PriviledgeApplication) {
                 ((PriviledgeApplication) app).appendPriviledges(privs, user, r);
             }
-        }        
+        }
+    }
+
+    private List<Application> findActiveApps(RootFolder rootFolder) {
+        List<AppControl> list;
+        if (rootFolder instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+            return findActiveApps(wrf.getWebsite());
+        } else {
+            Organisation org = rootFolder.getOrganisation();
+            return findActiveApps(org);
+        }
+    }
+
+    public List<Application> findActiveApps(io.milton.vfs.db.Website website) {
+        List<AppControl> list = AppControl.find(website, SessionManager.session());
+        List<Application> activApps = new ArrayList<>();
+        for (AppControl appC : list) {
+            if (appC.isEnabled()) {
+                Application app = get(appC.getName());
+                activApps.add(app);
+            }
+        }
+        return activApps;
+    }
+
+    public List<Application> findActiveApps(Organisation org) {
+        if (org.getOrganisation() == null) {
+            return apps;
+        }
+
+        List<AppControl> list = AppControl.find(org, SessionManager.session());
+        List<Application> activApps = new ArrayList<>();
+        for (AppControl appC : list) {
+            if (appC.isEnabled()) {
+                Application app = get(appC.getName());
+                activApps.add(app);
+            }
+        }
+        return activApps;
     }
 }

@@ -357,6 +357,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     public void doSaveHtml() throws BadRequestException, NotAuthorizedException {
         fileResource.doSaveHtml();
+        fileResource.getParent().save();
     }
 
     @Override

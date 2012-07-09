@@ -63,7 +63,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         if (website == null) {
             org = OrganisationDao.getRootOrg(SessionManager.session());
             if (org == null) {
-                throw new RuntimeException("No root organisation");
+                throw new RuntimeException("Not in a website and no root organisation. Host=" + host);
             }            
         } else {
             org = (Organisation) website.getOrganisation();

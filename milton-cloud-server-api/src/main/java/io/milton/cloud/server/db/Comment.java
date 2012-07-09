@@ -73,6 +73,7 @@ public class Comment extends Post {
         this.contentTitle = contentTitle;
     }
 
+    @Override
     public void accept(PostVisitor visitor) {
         visitor.visit(this);
     }    

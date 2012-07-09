@@ -54,8 +54,7 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     
     private ResourceList children;
 
-    public UsersFolder(CommonCollectionResource parent, String name) {
-        
+    public UsersFolder(CommonCollectionResource parent, String name) {        
         this.parent = parent;
         this.name = name;
     }
@@ -69,9 +68,7 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         return super.child(childName);
     }
-    
-    
-        
+                
     @Override
     public CommonCollectionResource getParent() {
         return parent;

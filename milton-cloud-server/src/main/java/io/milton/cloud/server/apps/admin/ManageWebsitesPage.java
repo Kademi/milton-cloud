@@ -23,6 +23,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -50,15 +51,17 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class WebsitesAdminPage extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class ManageWebsitesPage extends AbstractCollectionResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(WebsitesAdminPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageWebsitesPage.class);
     
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
+    
+    private ResourceList children;
 
-    public WebsitesAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {       
+    public ManageWebsitesPage(String name, Organisation organisation, CommonCollectionResource parent) {       
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -76,14 +79,16 @@ public class WebsitesAdminPage extends AbstractCollectionResource implements Get
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if( children == null ) {
+            children = new ResourceList();
+            for( Website w : getWebsites()) {
+                ManageWebsitePage p = new ManageWebsitePage(w, this); 
+                children.add(p);
+            }
+        }
+        return children;
     }
-
-    @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return null;
-    }
-            
+   
     @Override
     public boolean isDir() {
         return true;

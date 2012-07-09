@@ -19,6 +19,8 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.server.db.utils.UserDao;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
@@ -39,7 +41,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
     public static RootFolder getRootFolder() {
         if (HttpManager.request() != null) {
-            return (RootFolder) HttpManager.request().getAttributes().get("_spliffy_root_folder");
+            return (RootFolder) HttpManager.request().getAttributes().get(DefaultCurrentRootFolderService.ROOT_FOLDER_NAME);
         } else {
             return null;
         }
@@ -49,13 +51,15 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private final ApplicationManager applicationManager;
     private final EventManager eventManager;
     private final SessionManager sessionManager;
+    private final CurrentRootFolderService currentRootFolderService;
 
-    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager) {
+    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.userDao = userDao;
         this.securityManager = securityManager;
         this.applicationManager = applicationManager;
         this.eventManager = eventManager;
         this.sessionManager = sessionManager;
+        this.currentRootFolderService = currentRootFolderService;
     }
 
     @Override
@@ -82,11 +86,11 @@ public class SpliffyResourceFactory implements ResourceFactory {
         }
 
         if (p.isRoot()) {
-            Resource rootFolder = (Resource) HttpManager.request().getAttributes().get("_spliffy_root_folder");
+            Resource rootFolder = currentRootFolderService.getRootFolder();
             if (rootFolder == null) {
                 rootFolder = applicationManager.getPage(null, host);
-                if( rootFolder != null ) {
-                    //log.info("Using rootFolder: " + rootFolder.getClass());
+                if( rootFolder instanceof RootFolder ) {
+                    currentRootFolderService.setRootFolder((RootFolder)rootFolder);
                 }
                 HttpManager.request().getAttributes().put("_spliffy_root_folder", rootFolder);
             }

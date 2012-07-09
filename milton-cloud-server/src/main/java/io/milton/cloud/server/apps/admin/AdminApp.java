@@ -56,7 +56,11 @@ public class AdminApp implements MenuApplication {
                     return new GroupsAdminPage(requestedName, p.getOrganisation(), p);
                 case "manageWebsites":
                     MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "menuWebsites");
-                    return new WebsitesAdminPage(requestedName, p.getOrganisation(), p);
+                    return new ManageWebsitesPage(requestedName, p.getOrganisation(), p);
+                case "manageApps":
+                    MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "manageApps");
+                    return new ManageAppsPage(requestedName, p.getOrganisation(), p);
+                    
             }
         } else if (parent instanceof OrganisationsFolder) {
             OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
@@ -98,6 +102,7 @@ public class AdminApp implements MenuApplication {
             case "menuWebsiteManager":
                 parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("manageWebsites")).setOrdering(10);
                 parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
+                parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;
         }
     }

@@ -68,7 +68,8 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
             try {
                 PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);
                 if (ur == null) {
-                    throw new RuntimeException("Failed to find UserResource for: " + u.getName());
+                    log.error("Failed to find UserResource for: " + u.getName() + " in root folder: " + SpliffyResourceFactory.getRootFolder().getName() + ", " + SpliffyResourceFactory.getRootFolder().getClass());
+                    return null;
                 }
                 return ur;
             } catch (NotAuthorizedException | BadRequestException ex) {

@@ -442,6 +442,9 @@ article.Note {
 }
 .SmallBtn.NoText span { display: none; }
 /* Button */
+a.Btn {
+    display: inline-block;
+}
 .Btn {
 	line-height: 26px;
 	height: 26px;
@@ -455,7 +458,9 @@ article.Note {
 	font-weight: bold;
 	font-size: 11px;
 }
-button.Btn.Cancel { background: #e78b00; }
+button.Btn.Cancel, a.Btn.Cancel { 
+    background: #e78b00; 
+}
 /* Dialog Popup */
 div.Dialog {
 	position: absolute;

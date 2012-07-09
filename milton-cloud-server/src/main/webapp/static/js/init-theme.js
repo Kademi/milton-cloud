@@ -161,7 +161,7 @@ function initHtmlEditors() {
             removePlugins : 'resize',
             enterMode: "P",
             forceEnterMode:true,
-            filebrowserBrowseUrl : '/templates/filemanager/browser/default/browser.html?Type=Image&Connector=/fck_connector.html',
+            filebrowserBrowseUrl : '/static/fckfilemanager/browser/default/browser.html?Type=Image&Connector=/fck_connector.html',
             filebrowserUploadUrl : '/uploader/upload',
             format_tags : 'p;h2;h3;h4;h5'
         };    

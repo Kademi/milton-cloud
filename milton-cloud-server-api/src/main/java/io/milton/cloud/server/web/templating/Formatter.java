@@ -18,6 +18,8 @@ import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.calc.Calc;
 import io.milton.common.FileUtils;
 import io.milton.common.Utils;
+import io.milton.http.HttpManager;
+import io.milton.http.Request;
 
 /**
  * Handy functions exposes to rendering logic for formatting.
@@ -55,8 +57,6 @@ public class Formatter {
             return new SimpleDateFormat("dd/MM/yyyy HH:mm");
         }
     };
-    
-
     private final CurrentDateService currentDateService;
 
     public Formatter(CurrentDateService currentDateService) {
@@ -259,10 +259,10 @@ public class Formatter {
         }
         return DateTimeFormat.longDateTime().print(dt);
     }
-    
+
     public String formatDateISO8601(Object o) {
         DateTime dt = getDateTime(o);
-        if( dt == null ) {
+        if (dt == null) {
             return "";
         } else {
             return dt.toString();
@@ -280,7 +280,7 @@ public class Formatter {
         DateTime dt = getDateTime(o);
         DateTime now = new DateTime();
         Interval i;
-        if( dt.isBefore(now) ) {
+        if (dt.isBefore(now)) {
             i = new Interval(dt, now);
         } else {
             i = new Interval(now, dt);
@@ -663,20 +663,22 @@ public class Formatter {
 
     /**
      * This just permits simple templating syntax for basic conditional values
-     * 
-     * Eg:
-     * <li><a class="$formatter.ifTrue($item.active, 'navActive', '')" href="$item.href">$item.text</a></li>
-     * 
+     *
+     * Eg: <li><a class="$formatter.ifTrue($item.active, 'navActive', '')"
+     * href="$item.href">$item.text</a></li>
+     *
      * @param b
      * @param o1
      * @param o2
-     * @return 
+     * @return
      */
     public Object ifTrue(Object bb, Object o1, Object o2) {
         Boolean b = toBool(bb);
-        if( b == null ) b = Boolean.FALSE;
+        if (b == null) {
+            b = Boolean.FALSE;
+        }
         return b ? o1 : o2;
-    }    
+    }
 
     public ResourceList newList() {
         return new ResourceList();
@@ -712,7 +714,7 @@ public class Formatter {
             return sdfDateOnly.get();
         }
     }
-    
+
     public BigDecimal toBigDecimal(Object o, int decimals) {
         if (o instanceof Integer) {
             Integer ii = (Integer) o;
@@ -730,8 +732,8 @@ public class Formatter {
             log.warn("unhandled type: " + o.getClass());
             return null;
         }
-    }    
-    
+    }
+
     public Calc calc(ResourceList list) {
         return new Calc(list, this);
     }
@@ -740,5 +742,63 @@ public class Formatter {
         return calc(list).filter(mvelExpr);
     }
 
+    public String checkbox(String name, Object oChecked) {
+        return checkbox(null, name, oChecked, "true");
+    }
     
+    public String checkbox(String id, String name, Object oChecked, String value) {
+        Boolean checked = toBool(oChecked);
+        if (checked == null) {
+            checked = Boolean.FALSE;
+        }
+        StringBuilder sb = new StringBuilder("<input type='checkbox' ");
+        sb.append("name='").append(name).append("' ");
+        if (checked) {
+            sb.append("checked='true'");
+        }
+        sb.append("value='").append(value).append("'");
+        if( id != null ) {
+            sb.append("id='").append(id).append("'");
+        }
+        sb.append(" />");
+        return sb.toString();
+    }
+    
+    /**
+     * Attempts to find the port of the current request, defaults to 80
+     * 
+     * @return 
+     */
+    public int getPort() {
+        int port = 80;
+        Request req = HttpManager.request();
+        if( req != null ) {
+            String sHost = req.getHostHeader();
+            if( sHost != null ) {
+                String[] arr = sHost.split(":");
+                if( arr.length > 1) {
+                    String sPort = arr[1].trim();
+                    if( sPort.length() > 0 ) {
+                        port = Integer.parseInt(sPort);
+                    }
+                }
+            }
+        }
+        return port;
+    }
+    
+    /**
+     * Returns empty string if the current request is on port 80, otherwise returns
+     * the port number prefixed with a colon, eg :8080
+     * 
+     * @return 
+     */
+    public String getPortString() {
+        int p = getPort();
+        if( p == 80) {
+            return "";
+        } else {
+            return ":" + p;
+        }
+    }
 }

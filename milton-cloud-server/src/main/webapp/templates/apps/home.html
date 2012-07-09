@@ -1,27 +1,37 @@
 <html>
     <head>
+        <title>Administration</title>
         <link rel="stylesheet" type="text/css" href="../themes/yellow/theme.css" media="screen" />
+        <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
     </head>
     <body class="home">
-        <header id="branding" role="banner">
-            <hgroup>
-                <h1 id="site-title"><span><a href="http://spliffy.org" title="Yellow!" rel="home">Spliffy!</a></span></h1>
-                <h2 id="site-description">My personal cloud server.</h2>
-                <h2 id="site-description">Your files, contacts and calendars, everywhere you are.</h2>
-            </hgroup>
-        </header>
-
-        <div id="main">
-            <div id="primary">
-                <div id="content" role="main">
-                    <ul>
-                        <li><img src="/templates/apps/home/folder.png"/></li>
-
-                        <li><img src="/templates/apps/home/contact.png"/></li>
-
-                        <li><img src="/templates/apps/home/calendar.png"/></li>
-                    </ul>
-
+        <script type="text/javascript">
+            jQuery(function($) {
+                $(".Login").user({
+                    afterLoginUrl: "/dashboard";
+                }); // setup login and logout
+            });
+        </script>
+        <div id="content">
+            <div class="Login"> 
+                <div class="LoginPanel">
+                    <div class="LoginContent">
+                        <p id="validationMessage" style="display: none"></p>
+                        <form method="post" action="" name="frmLogin">
+                            <table>
+                                <tr>
+                                    <td colspan="2"><input type="text" name="email" value="" class="Textbox" title="Email address" placeholder="Email address" /></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><input type="password" name="password" value="" class="Textbox" title="Password" placeholder="Password" /></td>
+                                </tr>
+                                <tr valign="top">
+                                    <td><a href="" title="Forgotten password" class="Forgot">Forgotten password</a></td>
+                                    <td align="right" width="90"><button class="Login Button" ><span>Login</span></button></td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

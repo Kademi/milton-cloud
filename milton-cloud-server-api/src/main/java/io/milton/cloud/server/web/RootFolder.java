@@ -20,6 +20,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import java.util.Map;
 
 /**
  *
@@ -36,4 +37,13 @@ public interface RootFolder extends CommonCollectionResource {
     
     @Override
     Organisation getOrganisation();
+    
+    /**
+     * Just another map of objects for the request
+     * 
+     * @return 
+     */
+    Map<String,Object> getAttributes();
+    
+
 }

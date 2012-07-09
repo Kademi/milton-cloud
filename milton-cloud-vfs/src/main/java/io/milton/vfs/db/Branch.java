@@ -24,7 +24,7 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 @Table(name = "BRANCH")
-public class Branch implements Serializable {
+public class Branch implements Serializable, VfsAcceptor {
 
     /**
      * Special branch which always exists on a repository
@@ -135,4 +135,9 @@ public class Branch implements Serializable {
         List list = crit.list();
         return list != null && !list.isEmpty();
     }
+    
+    @Override
+    public void accept(VfsVisitor visitor) {
+        visitor.visit(this);
+    }       
 }

@@ -1,0 +1,19 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <script type="text/javascript" src="manageApps.js">//</script>
+    </head>
+    <body class="manageApplications">
+        <form method="POST" action="$page.name" onsubmit="return saveApps($(this))">
+            <ul>
+                #foreach($app in $page.apps )
+                <li>
+                    $formatter.checkbox($app.appId, $app.enabled)
+                    <label>$app.appId</label>
+                </li>
+                #end
+            </ul>
+            <button type="submit">Save</button>
+        </form>
+    </body>
+</html>

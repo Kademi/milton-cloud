@@ -175,6 +175,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         Transaction tx = session.beginTransaction();
 
         doSaveHtml();
+        parent.save();
 
         tx.commit();
     }
@@ -193,8 +194,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             _(HtmlTemplateParser.class).update(htmlPage, bout);
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-            setContent(bin);
-            parent.save();
+            setContent(bin);            
         } else {
             System.out.println("no htmlPage, so no property changes");
         }

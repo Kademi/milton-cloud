@@ -40,10 +40,10 @@ import static io.milton.context.RequestContext._;
 public class OrganisationRootFolder extends OrganisationFolder implements RootFolder {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationRootFolder.class);
-    private Map<String, PrincipalResource> childEntities = new HashMap<>();
     private final ApplicationManager applicationManager;
     private final Organisation organisation;
     private ResourceList children;
+    private Map<String,Object> attributes;
 
     public OrganisationRootFolder( ApplicationManager applicationManager, Organisation organisation) {
         super(null, organisation);
@@ -96,4 +96,11 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
         return children;
     }
 
+    @Override
+    public Map<String, Object> getAttributes() {
+        if( attributes == null ) {
+            attributes = new HashMap<>();
+        }
+        return attributes;
+    }    
 }

@@ -18,7 +18,7 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 @DiscriminatorValue("U")
-public class Profile extends BaseEntity {
+public class Profile extends BaseEntity implements VfsAcceptor {
     
     
     public static Profile find(Organisation org, String name, Session session) {
@@ -154,5 +154,8 @@ public class Profile extends BaseEntity {
         return this;
     }
 
-
+    @Override
+    public void accept(VfsVisitor visitor) {
+        visitor.visit(this);
+    }   
 }
