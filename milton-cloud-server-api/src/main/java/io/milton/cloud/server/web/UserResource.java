@@ -65,8 +65,10 @@ public class UserResource extends AbstractCollectionResource implements Collecti
             if (user.getRepositories() != null) {
                 for (Repository r : user.getRepositories()) {
                     Branch b = r.trunk(SessionManager.session());
-                    BranchFolder rr = new BranchFolder(r.getName(), this, b, false);
-                    children.add(rr);
+                    if( b != null ) {
+                        BranchFolder rr = new BranchFolder(r.getName(), this, b, false);
+                        children.add(rr);
+                    }
                 }
             }
             _(ApplicationManager.class).addBrowseablePages(this, children);

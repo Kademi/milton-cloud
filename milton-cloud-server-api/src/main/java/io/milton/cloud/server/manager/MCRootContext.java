@@ -27,6 +27,7 @@ import io.milton.context.Context;
 import io.milton.context.Executable2;
 import io.milton.context.RootContext;
 import io.milton.event.EventManager;
+import java.util.List;
 import javax.servlet.ServletContext;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
@@ -48,7 +49,7 @@ public class MCRootContext extends RootContext implements Service{
     private final CurrentDateService currentDateService;
     private final CommentService commentService;
     
-    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, ContentTypeService contentTypeService) {
+    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, ContentTypeService contentTypeService, List beans) {
         super();
         this.resourceFactory = resourceFactory;                
         this.hashStore = hashStore;
@@ -68,6 +69,9 @@ public class MCRootContext extends RootContext implements Service{
         
         for( Application a : applicationManager.getApps()) {
             put(a);
+        }
+        for( Object bean : beans ) {
+            put(bean);
         }
         
     }

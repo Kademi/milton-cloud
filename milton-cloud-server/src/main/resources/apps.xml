@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+    <bean id="application.manager" class="io.milton.cloud.server.apps.ApplicationManager">
+        <constructor-arg>
+            <list>
+                <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>                
+                <bean class="io.milton.cloud.server.apps.orgs.OrganisationsApp"/>
+                <bean class="io.milton.cloud.server.apps.login.LoginApp"/>
+                <bean class="io.milton.cloud.server.apps.calendar.CalendarApp"/>
+                <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
+                <bean class="io.milton.cloud.server.apps.signup.SignupApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.AdminApp"/>
+                <bean class="io.milton.cloud.server.apps.admin.reporting.ReportingApp"/>
+                <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
+                <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
+                <bean class="io.milton.cloud.server.apps.user.UserApp"/>
+                <bean class="io.milton.cloud.server.apps.dynamiccss.DynamicCssApp"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg ref="current.root.folder.service"/>
+        <property name="appsConfigDir" value="${apps.config.dir}" />
+    </bean>
+
+
+</beans>

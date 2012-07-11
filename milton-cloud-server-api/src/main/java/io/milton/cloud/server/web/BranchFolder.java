@@ -74,7 +74,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     
     @Override
     public void save() {
-        System.out.println("BranchFolder: save session: " + getName());
         UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
         dataSession.save(currentUser.getThisUser());
     }
@@ -103,7 +102,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         DirectoryResource rdr = createDirectoryResource(newName, session);
-        System.out.println("created: " + rdr.getHref() + " - " + getDirectoryNode().getHash());
         tx.commit();
         return rdr;
     }

@@ -16,8 +16,6 @@
  */
 package io.milton.cloud.server.apps.orgs;
 
-import io.milton.http.*;
-import io.milton.http.Request.Method;
 import io.milton.http.exceptions.NotAuthorizedException;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
@@ -55,15 +53,6 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     public String getName() {
         return "";
     }
-
-    @Override
-    public boolean authorise(Request request, Request.Method method, Auth auth) {
-        if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
-            return _(SpliffySecurityManager.class).getCurrentUser() != null;
-        }
-        return true;
-    }
-
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {

@@ -43,7 +43,7 @@ function makeJPlayer(playerSel, contSel, posterUrl, title) {
     $(playerSel).jPlayer({
         ready: function () {
             $(this).jPlayer("setMedia", {
-                webmv: primaryUrl + "/alt-800-455.webm",  
+                //webmv: primaryUrl + "/alt-800-455.webm",  
                 ogv: primaryUrl + "/alt-800-455.ogv",        
                 flv: primaryUrl + "/alt-800-455.flv",
                 m4v: primaryUrl + "/alt-800-455.mp4",   
@@ -53,7 +53,7 @@ function makeJPlayer(playerSel, contSel, posterUrl, title) {
             });
         },
         swfPath: "/static/jplayer",
-        supplied: "webmv, mp4, ogv, flv",
+        supplied: "mp4, ogv, flv",
         size: {
             width: "800px",
             height: "455px",

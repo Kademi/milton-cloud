@@ -135,7 +135,6 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
 
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        System.out.println("createNew: " + newName);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         IOUtils.copy(inputStream, bout);
         String data = bout.toString();

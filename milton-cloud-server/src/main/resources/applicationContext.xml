@@ -20,6 +20,8 @@
 
     <import resource="classpath:database.xml"/>
     
+    <import resource="classpath:apps.xml"/>
+    
     <!-- Another environment specific file. Default empty file is included, but create your own outside the WAR to 
     environment specific bean declarations
     -->
@@ -61,35 +63,20 @@
     <bean id="event.manager" class="io.milton.event.EventManagerImpl"/>
     
     <bean id="current.root.folder.service" class="io.milton.cloud.server.manager.DefaultCurrentRootFolderService"></bean>
-    
-    <bean id="application.manager" class="io.milton.cloud.server.apps.ApplicationManager">
-        <constructor-arg>
-            <list>
-                <bean class="io.milton.cloud.server.apps.website.WebsiteApp"/>                
-                <bean class="io.milton.cloud.server.apps.orgs.OrganisationsApp"/>
-                <bean class="io.milton.cloud.server.apps.login.LoginApp"/>
-                <bean class="io.milton.cloud.server.apps.calendar.CalendarApp"/>
-                <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
-                <bean class="io.milton.cloud.server.apps.signup.SignupApp"/>
-                <bean class="io.milton.cloud.server.apps.admin.AdminApp"/>
-                <bean class="io.milton.cloud.server.apps.admin.reporting.ReportingApp"/>
-                <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
-                <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
-                <bean class="io.milton.cloud.server.apps.user.UserApp"/>
-                <bean class="io.milton.cloud.server.apps.dynamiccss.DynamicCssApp"/>
-            </list>
-        </constructor-arg>
-        <constructor-arg ref="current.root.folder.service"/>
-        <property name="appsConfigDir" value="${apps.config.dir}" />
-    </bean>
-    
+        
     <bean id="content.type.service" class="io.milton.common.DefaultContentTypeService"/>
     
+    <bean id="async.processor" class="io.milton.cloud.server.queue.impl.LocalAsynchProcessor" init-method="start">
+        <constructor-arg ref="root.context" />
+        <constructor-arg ref="session.manager" />
+    </bean>
+    
     <bean id="alt.format.generator" class="io.milton.cloud.server.web.alt.AltFormatGenerator">
-        <constructor-arg ref="hash.store" index="0" />
-        <constructor-arg ref="blob.store" index="1" />        
-        <constructor-arg ref="event.manager" index="2" />        
-        <constructor-arg ref="content.type.service" index="3" />
+        <constructor-arg ref="hash.store" />
+        <constructor-arg ref="blob.store"  />        
+        <constructor-arg ref="event.manager" /> 
+        <constructor-arg ref="content.type.service" />
+        <constructor-arg ref="async.processor"/>
     </bean>
         
     <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory">
@@ -125,7 +112,12 @@
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>
         <constructor-arg ref="event.manager"/>
-        <constructor-arg ref="content.type.service"/>        
+        <constructor-arg ref="content.type.service"/> 
+        <constructor-arg>
+            <list>
+
+            </list>
+        </constructor-arg>
     </bean>       
         
     <!-- This will expose resources on the classpath, required for apps which have css/js files in the jar -->

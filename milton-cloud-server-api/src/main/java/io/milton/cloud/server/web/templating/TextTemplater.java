@@ -49,7 +49,9 @@ public class TextTemplater implements Templater {
     public TextTemplater(SpliffySecurityManager securityManager, ServletContext servletContext) {
         this.securityManager = securityManager;
         templateLoader = new SimpleTemplateLoader();
-        engine = new VelocityEngine();
+        java.util.Properties p = new java.util.Properties();
+        p.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
+        engine = new VelocityEngine(p);
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", templateLoader);
         

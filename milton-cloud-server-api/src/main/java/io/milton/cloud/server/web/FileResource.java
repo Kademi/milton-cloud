@@ -229,7 +229,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
         if( list != null ) {
             for(String ct : list ) {
                 if( ct.contains(type)) {
-                    System.out.println("is: found matching content type: " + ct );
                     return true;
                 }
             }

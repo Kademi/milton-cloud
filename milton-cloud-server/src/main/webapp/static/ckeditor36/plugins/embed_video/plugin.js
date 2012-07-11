@@ -279,12 +279,12 @@ CKEDITOR.plugins.add( 'embed_video',
                         ready: function () {
                             $(this).jPlayer("setMedia", {
                                 m4v: "",
-                                webmv: "",
+//                                webmv: "",
                                 poster: ""
                             });
                         },
                         swfPath: jsPath,
-                        supplied: "webmv, mp4, ogv, flv",
+                        supplied: "mp4, ogv, flv",
                         solution:"flash, html",
                         size: {
                             width: "500px",
@@ -470,15 +470,15 @@ function attachNode(e, data){
 function methodInvoke(url) {
     log("methodInvoke", url);
     $("#jquery_jplayer_1").jPlayer("setMedia", {
-        webmv: url + "/alt-720-576.webm",  
-        ogv: url + "/alt-720-576.ogv",        
-        flv: url + "/alt-720-576.flv",
-        m4v: url + "/alt-720-576.mp4",        
+//        webmv: url + "/alt-720-576.webm",  
+        ogv: url + "/alt-800-455.ogv",        
+        flv: url + "/alt-800-455.flv",
+        m4v: url + "/alt-800-455.mp4",        
         poster: src
     });
     $("#jquery_jplayer_1").jPlayer({
         solution:"flash, html",
-        supplied: "webmv, mp4, ogv, flv"
+        supplied: "mp4, ogv, flv"
     });
     $("#jquery_jplayer_1").jPlayer("play", 0);
 }

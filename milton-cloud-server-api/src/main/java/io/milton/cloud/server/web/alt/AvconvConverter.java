@@ -2,7 +2,6 @@ package io.milton.cloud.server.web.alt;
 
 import com.bradmcevoy.utils.FileUtils;
 import io.milton.cloud.common.With;
-import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.util.ScriptExecutor;
 import io.milton.common.ContentTypeService;
 import java.io.BufferedOutputStream;
@@ -14,6 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.hashsplit4j.api.BlobStore;
+import org.hashsplit4j.api.Combiner;
+import org.hashsplit4j.api.Fanout;
+import org.hashsplit4j.api.HashStore;
 
 public class AvconvConverter implements Closeable {
 
@@ -21,14 +24,24 @@ public class AvconvConverter implements Closeable {
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
     private final ContentTypeService contentTypeService;
     private final String process;
-    private final File source;
+    private final long primaryMediaHash;
+    private final String inputName;
     private final String inputExt;
+    private final HashStore hashStore;
+    private final BlobStore blobStore;
+    private File source;    
+    private long sourceLength;
 
-    public AvconvConverter(String process, FileResource fr, String inputFormat, ContentTypeService contentTypeService) {
+
+    public AvconvConverter(String process, long primaryMediaHash, String inputName, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore) {
+        this.hashStore = hashStore;
+        this.blobStore = blobStore;
         this.process = process;
         this.contentTypeService = contentTypeService;
-        source = createSourceFile(fr, inputFormat);
-        inputExt = FileUtils.getExtension(fr.getName());
+        this.primaryMediaHash = primaryMediaHash;
+        this.inputName = inputFormat;
+        this.inputExt = FileUtils.getExtension(inputName);
+        source = createSourceFile();        
     }
 
     @Override
@@ -126,6 +139,11 @@ public class AvconvConverter implements Closeable {
                 return null;
             }
 
+            if( sourceLength > 0 ) {
+                long percent = dest.length() * 100 / sourceLength;
+                log.info("Compression: " + percent + "% of source file: " + sourceLength/1000000 + "Mb");
+            }
+            
             log.debug(" ffmpeg ran ok. reading temp file back to out stream");
             FileInputStream tempIn = null;
             try {
@@ -143,20 +161,23 @@ public class AvconvConverter implements Closeable {
         }
     }
 
-    private File createSourceFile(FileResource fr, String suffix) {
+    private File createSourceFile() {
         File temp = null;
         FileOutputStream out = null;
         BufferedOutputStream out2 = null;
         try {
-            temp = File.createTempFile("convert_vid_in_" + System.currentTimeMillis(), "." + suffix);
+            temp = File.createTempFile("convert_vid_in_" + System.currentTimeMillis(), "." + inputExt);
             if (temp.exists()) {
-                temp = File.createTempFile("convert_vid_in_" + fr.getName(), "." + suffix);
+                temp = File.createTempFile("convert_vid_in_" + inputName, "." + inputExt);
             }
+            Fanout fanout = hashStore.getFanout(primaryMediaHash);
             out = new FileOutputStream(temp);
             out2 = new BufferedOutputStream(out);
-            fr.sendContent(out2, null, null, null);
+            Combiner combiner = new Combiner();
+            combiner.combine(fanout.getHashes(), hashStore, blobStore, out);
             out2.flush();
             out.flush();
+            sourceLength = temp.length();
         } catch (IOException ex) {
             throw new RuntimeException("Writing to: " + temp.getAbsolutePath(), ex);
         } finally {

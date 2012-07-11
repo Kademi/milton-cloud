@@ -2,14 +2,14 @@
     <head>
         <title>Administration</title>
         <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
-        <link href="admin-home.css" rel="stylesheet" type="text/css" />
+        <link href="admin-login.css" rel="stylesheet" type="text/css" />
         <link rel="template" href="plain" />
     </head>
     <body class="Login">
         <script type="text/javascript">
             jQuery(function($) {
                 $(".Login").user({
-                    afterLoginUrl: "/dashboard"
+                    afterLoginUrl: null
                 }); // setup login and logout
             });
         </script>

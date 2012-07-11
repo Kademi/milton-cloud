@@ -25,50 +25,7 @@
 
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="annotatedClasses">
-            <list>
-                <value>io.milton.vfs.db.Branch</value>                
-                <value>io.milton.vfs.db.Commit</value>
-                <value>io.milton.vfs.db.Repository</value>
-                <value>io.milton.vfs.db.DataItem</value>
-                <value>io.milton.vfs.db.ItemHistory</value>
-                <value>io.milton.vfs.db.BlobHash</value>
-                <value>io.milton.vfs.db.FanoutEntry</value>
-                <value>io.milton.vfs.db.FanoutHash</value>
-                
-                <value>io.milton.vfs.db.BaseEntity</value>
-                <value>io.milton.vfs.db.Profile</value>
-                <value>io.milton.vfs.db.Credential</value>
-                <value>io.milton.vfs.db.PasswordCredential</value>
-                <value>io.milton.vfs.db.Permission</value>
-                <value>io.milton.vfs.db.Calendar</value>
-                <value>io.milton.vfs.db.CalEvent</value>
-                <value>io.milton.vfs.db.AddressBook</value>
-                <value>io.milton.vfs.db.Contact</value>
-                <value>io.milton.vfs.db.ContactExtendedProperty</value>
-                <value>io.milton.vfs.db.Organisation</value>
-                <value>io.milton.vfs.db.Website</value>
-                <value>io.milton.vfs.db.Group</value>
-                <value>io.milton.vfs.db.GroupMembership</value>    
-                <value>io.milton.vfs.db.NvPair</value>    
-                
-                <value>io.milton.cloud.server.db.Forum</value>
-                <value>io.milton.cloud.server.db.ForumPost</value>
-                <value>io.milton.cloud.server.db.ForumReply</value>
-                <value>io.milton.cloud.server.db.ForumTopic</value>
-                <value>io.milton.cloud.server.db.Comment</value>
-                <value>io.milton.cloud.server.db.Post</value>
-                
-                <value>io.milton.cloud.server.db.EmailItem</value>
-                <value>io.milton.cloud.server.db.EmailSendAttempt</value>
-                <value>io.milton.cloud.server.db.GroupEmailJob</value>
-                <value>io.milton.cloud.server.db.GroupRecipient</value>
-                <value>io.milton.cloud.server.db.AltFormat</value>
-                <value>io.milton.cloud.server.db.NamedCounter</value>
-                <value>io.milton.cloud.server.db.AppControl</value>
-                
-            </list>
-        </property>
+        <property name="packagesToScan" value="io.milton.vfs.db,io.milton.cloud.server.db,com.fuselms.db" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${hibernate.dialect}</prop>

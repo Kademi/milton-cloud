@@ -40,7 +40,6 @@ public class BaseEntity implements Serializable {
         crit.add(Expression.and(Expression.eq("organisation", org), Expression.eq("name", name)));
         List list = crit.list();
         if (list == null || list.isEmpty()) {
-            System.out.println("nothignn found");
             return null;
         } else {
             return (BaseEntity) list.get(0);
