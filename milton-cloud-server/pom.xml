@@ -194,6 +194,12 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>extra.apps</name>
+                                    <value>io.milton.cloud.server.init.InitialDataCreator</value>
+                                </systemProperty>                                
+                            </systemProperties> 
                             <overrideWebXml>src/test/resources/web.xml</overrideWebXml>
                             <contextPath>/</contextPath>
                             <connectors>

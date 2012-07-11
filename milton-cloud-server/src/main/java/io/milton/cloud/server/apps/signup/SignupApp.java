@@ -24,26 +24,30 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.event.EventManager;
+import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupInWebsite;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.List;
 
 /**
  *
  * @author brad
  */
 public class SignupApp implements Application {
+
     private EventManager eventManager;
     private String signupPageName = "signup";
 
     public SignupApp() {
     }
 
-    
-    
     @Override
     public String getInstanceId() {
         return "signup";
     }
 
-        
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.eventManager = resourceFactory.getEventManager();
@@ -56,11 +60,25 @@ public class SignupApp implements Application {
             if (requestedName.equals(signupPageName)) {
                 return new SignupPage(requestedName, rf);
             }
+        } else if (parent instanceof GroupInWebsiteFolder) {
+            GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
+            if (requestedName.equals("register.html")) {
+                return new GroupRegistrationPage(requestedName, wrf);
+            }
         }
         return null;
     }
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
+        if (parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            Website website = wrf.getWebsite();
+            List<GroupInWebsite> groupsInWebsite = website.groups(SessionManager.session());
+            for (GroupInWebsite giw : groupsInWebsite) {
+                GroupInWebsiteFolder f = new GroupInWebsiteFolder(giw, wrf);
+                children.add(f);
+            }
+        }
     }
 }
