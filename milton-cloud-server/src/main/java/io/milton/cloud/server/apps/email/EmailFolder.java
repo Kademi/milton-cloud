@@ -56,8 +56,7 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     
     private ResourceList children;
 
-    public EmailFolder(UserResource parent, String name) {
-        
+    public EmailFolder(UserResource parent, String name) {       
         this.parent = parent;
         this.name = name;
     }

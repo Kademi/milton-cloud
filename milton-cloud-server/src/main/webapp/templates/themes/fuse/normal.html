@@ -9,7 +9,8 @@
         <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js" >//</script>
         <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js">//</script>        
-        <script type="text/javascript" src="/static/js/jquery.autoresize.js">//</script>                
+        <script type="text/javascript" src="/static/js/jquery.autoresize.js">//</script> 
+        <script type="text/javascript" src="/static/js/jquery.timeago.js" >//</script>
         <script type="text/javascript" src="/static/js/common.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
         <script type="text/javascript" src="/static/js/init-theme.js" >//</script>
@@ -19,8 +20,7 @@
         <script type="text/javascript" src="/static/js/toolbars.js" >//</script>
         <script type="text/javascript" src="/static/ckeditor36/ckeditor.js" >//</script>
         <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" >//</script>
-        <script type="text/javascript" src="/static/js/toolbars.js" >//</script> 
-        
+        <script type="text/javascript" src="/static/js/toolbars.js" >//</script>         
     </head>
     <body class="normal">
         <!--wrapper-->
@@ -89,32 +89,9 @@
                 <!--nav-->
                 <div class="nav">
                     <ul>
-                        <li class="nav-myDashboard">
-                            <a href="/dashboard" shape="rect">My Dashboard</a>
-                        </li>                    
-                        <li class="nav-myLearning">
-                            <a href="/myLearning" shape="rect">My Learning</a>
-                        </li>                    
-                        <!--
-                        <li class="nav-myRewards">
-                            <a href="${user.url}rewards" shape="rect">My Rewards</a>
-                        </li>                    
-                        -->
-                        <li class="nav-myResources">
-                            <a href="/resources" shape="rect">Resources</a>
-                        </li>                    
-                        <li class="nav-myCommunity">
-                            <a href="/community" shape="rect">Community</a>
-                        </li>                    
-                        <li class="nav-myInbox">
-                            #set($unread = $user.inbox.numUnread)
-                            <a href="inbox" shape="rect">
-                                #if($unread gt 0)
-                                <span>$unread</span>
-                                #end
-                                Notifications
-                            </a>
-                        </li>                    
+                        #foreach($item in $menu.items)
+                        <li><a class="$formatter.ifTrue($item.active, 'navActive', '') nav-${item.id}" href="$item.href" shape="rect">$item.text</a></li>
+                        #end                                         
                     </ul>  
 
                     <div class="clr"></div>

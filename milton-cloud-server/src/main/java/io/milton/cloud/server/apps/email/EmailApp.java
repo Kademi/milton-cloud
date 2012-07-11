@@ -19,6 +19,8 @@ import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -33,6 +35,7 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
@@ -42,6 +45,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     private MiltonCloudMailResourceFactory mailResourceFactory;
     private MailServer mailServer;
+    private SpliffySecurityManager securityManager;
 
     @Override
     public String getInstanceId() {
@@ -50,6 +54,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        securityManager = resourceFactory.getSecurityManager();
         mailResourceFactory = new MiltonCloudMailResourceFactory();
         MailServerBuilder mailServerBuilder = new MailServerBuilder();
         mailServerBuilder.setMailResourceFactory(mailResourceFactory);
@@ -69,10 +74,10 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
                 return new ManageGroupEmailsPage(requestedName, faf.getOrganisation(), faf);
             }
         }
-        if (parent instanceof UserResource) {
-            UserResource wrf = (UserResource) parent;
-            if (requestedName.equals("myInbox")) {
-                //return new MyInboxPage(requestedName, wrf, wrf.getServices()); 
+        if (parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            if (requestedName.equals("inbox")) {
+                return new MyInboxPage(requestedName, wrf); 
             }
         }
         return null;
@@ -92,21 +97,36 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     }
 
     @Override
-    public void appendMenu(MenuItem parent) {
-        OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
-        if (parentOrg != null) {
-            switch (parent.getId()) {
-                case "menuRoot":
+    public void appendMenu(MenuItem parent) {        
+        switch (parent.getId()) {
+            case "menuRoot":
+                if (parent.getRootFolder() instanceof WebsiteRootFolder) {
+                    parent.getOrCreate("menuNotifications", getEmailMenuItemText(), "/inbox").setOrdering(50);
+                } else {
                     parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
-                    break;
-                case "menuTalk":
-                    parent.getOrCreate("menuEmails", "Send emails").setOrdering(20);
-                    break;
-                case "menuEmails":
+                }
+                break;
+            case "menuTalk":
+                parent.getOrCreate("menuEmails", "Send emails").setOrdering(20);
+                break;
+            case "menuEmails":
+                OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
+                if (parentOrg != null) {
                     parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("groupEmails").child("manage")).setOrdering(10);
-                    break;
-            }
+                }
+                break;
         }
+    }
+    
+    private String getEmailMenuItemText() {
+        Profile currentUser = securityManager.getCurrentUser();
+        int numUnread = EmailItem.findByNumUnreadByRecipient(currentUser, SessionManager.session());
+        StringBuilder sb = new StringBuilder();
+        if( numUnread > 0 ) {
+            sb.append("<span>").append(numUnread).append("</span>");
+        }
+        sb.append("Notifications");
+        return sb.toString();
     }
 
     @Override
@@ -122,7 +142,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if( portletSection.equals("messages")) {
+        if (portletSection.equals("messages")) {
             _(TextTemplater.class).writePage("email/emailMessagesPortlet.html", currentUser, rootFolder, context, writer);
         }
 //            <div>                

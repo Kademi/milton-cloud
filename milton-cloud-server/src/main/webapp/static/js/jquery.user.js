@@ -142,16 +142,18 @@ function isEmpty(s) {
 }
 
 function doLogout() {
+    log("doLogout");
     $.ajax({
         type: 'POST',
         url: "/.login",
         data: "miltonLogout=true",
         dataType: "text",
         success: function() {
+            log("logged out ok, going to root...");
             window.location = "/";
         },
-        error: function() {
-            alert('There was a problem logging you out');
+        error: function(resp) {
+            log('There was a problem logging you out', resp);
         }
     });    
 }

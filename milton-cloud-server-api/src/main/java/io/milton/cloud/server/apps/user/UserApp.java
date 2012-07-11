@@ -16,10 +16,12 @@ package io.milton.cloud.server.apps.user;
 
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
@@ -33,7 +35,7 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class UserApp implements Application {
+public class UserApp implements Application, MenuApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
@@ -82,6 +84,7 @@ public class UserApp implements Application {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             switch (requestedName) {
                 case "dashboard":
+                    MenuItem.setActiveIds("menuDashboard");
                     DashboardPage page = new DashboardPage(requestedName, wrf);
                     page.setForceLogin(true);
                     return page;
@@ -101,6 +104,19 @@ public class UserApp implements Application {
         } else if (parent instanceof OrganisationFolder) {
             OrganisationFolder organisationFolder = (OrganisationFolder) parent;
             children.add(new UsersFolder(organisationFolder, USERS_FOLDER_NAME));
+        }
+    }
+
+    @Override
+    public void appendMenu(MenuItem parent) {
+        String parentId = parent.getId();
+        switch (parentId) {
+            case "menuRoot":
+                if (parent.getRootFolder() instanceof WebsiteRootFolder) {
+                    if (parent.getUser() != null) {
+                        parent.getOrCreate("menuDashboard", "Dashboard", "/dashboard").setOrdering(10);
+                    }
+                }
         }
     }
 }

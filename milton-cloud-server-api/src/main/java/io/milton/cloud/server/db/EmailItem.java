@@ -24,6 +24,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 
 /**
  * Represents a task to send an email, which may have been sent or might
@@ -47,6 +48,19 @@ public class EmailItem implements Serializable{
         return DbUtils.toList(crit, EmailItem.class);
     }        
     
+    public static int findByNumUnreadByRecipient(Profile p, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        crit.add(Expression.eq("recipient", p));
+        crit.add(Expression.eq("readStatus", false));
+        crit.setProjection( Projections.rowCount() );
+        List results = crit.list();
+        if( results == null ) {
+            return 0;
+        }
+        Integer num = (Integer) results.get(0);
+        return num;
+    }       
+    
     private List<EmailSendAttempt> emailSendAttempts;
 
     private long id;
@@ -64,7 +78,7 @@ public class EmailItem implements Serializable{
     private String sendStatus; // status of the send job. c=completed, p=pending, r=retrying
     private Date sendStatusDate;
     
-    private boolean readStatus; // status of reading the email, if delivered to an internal user.
+    private boolean readStatus; // status of reading the email, if delivered to an internal user. false=not yet read
     private int messageSize;
     private String disposition;
     private String encoding;

@@ -75,7 +75,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
                 return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
             }
         } else if (parent instanceof WebsiteRootFolder) {
-            if (requestedName.equals("_postSearch")) {
+            if (requestedName.equals("_postSearch")) {                
                 WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
                 return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
             }
@@ -96,27 +96,32 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
             }
         } else if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
-            children.add(new MyForumsFolder("forums", wrf, wrf.getWebsite()));
+            children.add(new MyForumsFolder("community", wrf, wrf.getWebsite()));
         }
     }
 
     @Override
     public void appendMenu(MenuItem parent) {
-        OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
-        if (parentOrg != null) {
-            switch (parent.getId()) {
-                case "menuRoot":
+        switch (parent.getId()) {
+            case "menuRoot":
+                if (parent.getRootFolder() instanceof WebsiteRootFolder) {
+                    parent.getOrCreate("menuCommunity", "Community", "/community").setOrdering(40);
+                } else {
                     parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
-                    break;
-                case "menuTalk":
-                    parent.getOrCreate("menuManageForums", "Manage forums").setOrdering(10);
-                    break;
-                case "menuManageForums":
+                }
+                break;
+            case "menuTalk":
+                parent.getOrCreate("menuManageForums", "Manage forums").setOrdering(10);
+                break;
+            case "menuManageForums":
+                OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
+                if (parentOrg != null) {
                     parent.getOrCreate("menuManagePosts", "Manage posts", parentOrg.getPath().child("managePosts")).setOrdering(10);
                     parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("manageForums")).setOrdering(20);
-                    break;
-            }
+                }
+                break;
         }
+
     }
 
     @Override
@@ -133,7 +138,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if( portletSection.equals("secondary")) {
+        if (portletSection.equals("secondary")) {
             _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
         }
     }

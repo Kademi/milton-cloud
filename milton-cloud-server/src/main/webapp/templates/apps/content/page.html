@@ -4,6 +4,7 @@
     </head>
     <body>
         <div class="editableContent">
+            #if( $user )
             <div class="adminToolbar">
                 <a href="p$[counter].html?template=learner/modulePage" class="edifyViewMode button">New page</a>
                 <button type='submit' class="edifyEditMode">$formatter.ifTrue($page.newPage, "Create new page", "Save page")</button>
@@ -11,6 +12,7 @@
                 <a href="$page.name?editMode=true" class="edifyViewMode button">Edit this page</a>
                 <a href="$page.name" class="edifyEditMode button">Return without saving</a>
             </div>
+            #end
             <div class="edifyEditMode inputTextEditor" id="title">$!page.title</div>
             <div class="htmleditor">
                 $!{page.body}

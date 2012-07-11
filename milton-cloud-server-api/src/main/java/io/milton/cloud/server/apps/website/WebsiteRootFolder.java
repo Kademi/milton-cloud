@@ -42,6 +42,13 @@ import io.milton.vfs.db.utils.SessionManager;
 import static io.milton.context.RequestContext._;
 
 /**
+ * Represents the root of a website. A "website" in this context is a product, its
+ * a customer facing side of some activity, such as Learning Management System
+ * or business website.
+ * 
+ * Resources within a WebsiteRootFolder will often behave differently then if
+ * they were located under a OrganisationRootFolder, because the assumption is that
+ * websites are for customers, while aadministrators will accessing the organisation directly
  *
  * @author brad
  */

@@ -25,6 +25,11 @@ public interface MenuApplication extends Application {
      * Add menu items if appropriate to the parent menu item. This method will
      * be called repeatedly as required by the template to expand active menus
      * 
+     * The root item has the special id menuRoot
+     * 
+     * Typically this method will check the id of the parent, and add menu items
+     * if the parent id is one this app knows about
+     * 
      * @param parent
      * @param list
      */

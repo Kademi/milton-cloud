@@ -1,5 +1,6 @@
 package io.milton.cloud.server.apps.forums;
 
+import io.milton.cloud.server.apps.signup.GroupRegistrationPage;
 import io.milton.cloud.server.db.Forum;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -23,6 +24,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,6 +33,8 @@ import java.util.Map;
  */
 public class MyForumsFolder extends AbstractCollectionResource implements GetableResource {
 
+    private static final Logger log = LoggerFactory.getLogger(MyForumsFolder.class);
+    
     private final String name;
     private final CommonCollectionResource parent;
     private final Website website;
@@ -56,6 +61,7 @@ public class MyForumsFolder extends AbstractCollectionResource implements Getabl
                 }
             }
         }
+        log.error("There are no forums, so can't show page");
         return null;
     }
 

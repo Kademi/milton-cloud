@@ -31,8 +31,7 @@ public class ForumsAdminFolder extends AbstractCollectionResource {
     private ResourceList children;
     
 
-    public ForumsAdminFolder(String name, CommonCollectionResource parent, Website website) {
-        
+    public ForumsAdminFolder(String name, CommonCollectionResource parent, Website website) {        
         this.name = name;
         this.parent = parent;
         this.website = website;

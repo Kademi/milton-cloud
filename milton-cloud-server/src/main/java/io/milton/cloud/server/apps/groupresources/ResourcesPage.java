@@ -26,7 +26,7 @@ import static io.milton.context.RequestContext._;
 public class ResourcesPage extends TemplatedHtmlPage {
 
     public ResourcesPage(String name, CommonCollectionResource parent) {
-        super(name, parent, "learner/myResources", "My resources");
+        super(name, parent, "groupresources/myResources", "My resources");
     }
 
     @Override

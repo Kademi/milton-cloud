@@ -6,6 +6,7 @@ import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -115,6 +116,7 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        MenuItem.setActiveIds("menuCommunity");
         _(HtmlTemplater.class).writePage("forums/myForum", this, params, out);
     }
 
