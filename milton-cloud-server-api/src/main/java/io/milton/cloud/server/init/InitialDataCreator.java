@@ -1,5 +1,8 @@
 package io.milton.cloud.server.init;
 
+import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.db.utils.GroupDao;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.vfs.db.Website;
@@ -18,33 +21,52 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.manager.PasswordManager;
+import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.AccessControlledResource;
+import io.milton.resource.CollectionResource;
+import io.milton.resource.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author brad
  */
-public class InitialDataCreator {
+public class InitialDataCreator implements LifecycleApplication {
 
-    private final SessionFactory sessionFactory;
-    private final PasswordManager passwordManager;
+    private SessionManager sessionManager;
+    private PasswordManager passwordManager;
     private boolean enabled = false;
-    private String rootOrgName = "rootOrg";
-    private String initialWebsite = "localhost";
-    private String adminUserName = "admin";
-    private String adminPassword = "password8";
+    private String initialRootOrgName;
+    private String initialWebsite;
+    private String adminUserName;
+    private String adminPassword;
+    private List<String> names = new ArrayList<>();
+    private ApplicationManager applicationManager;
 
-    public InitialDataCreator(SessionFactory sessionFactory, PasswordManager passwordManager) {
-        this.sessionFactory = sessionFactory;
-        this.passwordManager = passwordManager;
+
+
+    @Override
+    public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        initialRootOrgName = config.get("initialRootOrgName");
+        initialWebsite = config.get("initialWebsite");
+        adminUserName = config.get("adminUserName");
+        adminPassword = config.get("adminPassword");
+        this.sessionManager = resourceFactory.getSessionManager();
+        this.passwordManager = resourceFactory.getSecurityManager().getPasswordManager();
+        this.applicationManager = resourceFactory.getApplicationManager();
+
+        initTestData();
     }
+    
+    
 
     /**
      * Can be called from spring init-method
      *
      */
     public void initTestData() {
-        SessionManager sessionManager = new SessionManager(sessionFactory);
         Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
 
@@ -55,7 +77,7 @@ public class InitialDataCreator {
             System.out.println("Create new organisation");
             newOrg = true;
             rootOrg = new Organisation();
-            rootOrg.setName(rootOrgName);
+            rootOrg.setName(initialRootOrgName);
             rootOrg.setModifiedDate(new Date());
             rootOrg.setCreatedDate(new Date());
             session.save(rootOrg);
@@ -68,9 +90,7 @@ public class InitialDataCreator {
         }
 
         Profile admin = checkCreateUser(adminUserName, adminPassword, session, rootOrg);
-        if (newOrg) {
-            Website spliffyWeb = rootOrg.createWebsite("localhost", "fuse", admin, session);
-        }
+
 
         Group administrators = checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, session);
         administrators.grant(AccessControlledResource.Priviledge.READ, rootOrg, session);
@@ -78,7 +98,11 @@ public class InitialDataCreator {
         administrators.grant(AccessControlledResource.Priviledge.WRITE, rootOrg, session);
         administrators.grant(AccessControlledResource.Priviledge.WRITE_ACL, rootOrg, session);
 
-        Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);
+        Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);        
+        if (newOrg) {
+            Website spliffyWeb = rootOrg.createWebsite("localhost", "fuse", admin, session);
+            spliffyWeb.addGroup(users, "o", session);
+        }        
 
         admin.addToGroup(administrators).addToGroup(users);
         checkCreateUser("user1", "password1", session, rootOrg).addToGroup(users);
@@ -183,5 +207,33 @@ public class InitialDataCreator {
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
         session.save(o);
+    }
+
+    @Override
+    public void shutDown() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void initDefaultProperties(AppConfig config) {
+        config.add("initialRootOrgName", "rootOrg");
+        config.add("initialWebsite", "localhost");
+        config.add("adminUserName", "admin");
+        config.add("adminPassword", "password8");
+    }
+
+    @Override
+    public String getInstanceId() {
+        return "initialDataCreator";
+    }
+
+    @Override
+    public Resource getPage(Resource parent, String requestedName) {
+        return null;
+    }
+
+    @Override
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
+        
     }
 }

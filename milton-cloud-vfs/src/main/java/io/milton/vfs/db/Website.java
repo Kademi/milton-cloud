@@ -18,6 +18,7 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -26,18 +27,19 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 
 /**
- * A Website is an alias for a repository. The name of the website is the DNS name
+ * A Website is an alias for a repository. The name of the website is the DNS
+ * name
  *
  * @author brad
  */
 @Entity
 public class Website implements Serializable, VfsAcceptor {
-    public static List<Website>  findByWebsite(Repository repository, Session session) {
+
+    public static List<Website> findByWebsite(Repository repository, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.add(Expression.eq("repository", repository));
         return DbUtils.toList(crit, Website.class);
-    }    
-    
+    }
     private Organisation organisation;
     private long id;
     private String name; // identifies the resource to webdav
@@ -46,7 +48,7 @@ public class Website implements Serializable, VfsAcceptor {
     private String publicTheme;
     private String currentBranch;
     private Date createdDate;
-    
+
     @Id
     @GeneratedValue
     public long getId() {
@@ -56,8 +58,8 @@ public class Website implements Serializable, VfsAcceptor {
     public void setId(long id) {
         this.id = id;
     }
-    
-    @Column(length = 255, nullable=false)
+
+    @Column(length = 255, nullable = false)
     public String getName() {
         return name;
     }
@@ -68,8 +70,8 @@ public class Website implements Serializable, VfsAcceptor {
 
     /**
      * The internal theme is intended for logged in access
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public String getInternalTheme() {
@@ -84,8 +86,8 @@ public class Website implements Serializable, VfsAcceptor {
      * The public theme is intended for non-logged in access. It will usually
      * control the landing page and other content pages available to users prior
      * to signing up or logging in
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public String getPublicTheme() {
@@ -95,8 +97,6 @@ public class Website implements Serializable, VfsAcceptor {
     public void setPublicTheme(String publicTheme) {
         this.publicTheme = publicTheme;
     }
-    
-
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(nullable = false)
@@ -107,7 +107,7 @@ public class Website implements Serializable, VfsAcceptor {
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
-    
+
     public String getCurrentBranch() {
         return currentBranch;
     }
@@ -117,18 +117,18 @@ public class Website implements Serializable, VfsAcceptor {
     }
 
     public Branch currentBranch() {
-        if( repository.getBranches() == null ) {
+        if (repository.getBranches() == null) {
             return null;
         }
-        for( Branch b : repository.getBranches() ) {
-            if( b.getName().equals(getCurrentBranch())) {
+        for (Branch b : repository.getBranches()) {
+            if (b.getName().equals(getCurrentBranch())) {
                 return b;
             }
         }
         return null;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Organisation getOrganisation() {
         return organisation;
     }
@@ -137,7 +137,7 @@ public class Website implements Serializable, VfsAcceptor {
         this.organisation = organisation;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Repository getRepository() {
         return repository;
     }
@@ -149,5 +149,35 @@ public class Website implements Serializable, VfsAcceptor {
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
-    }      
+    }
+
+    public void addGroup(Group group, String o, Session session) {
+        GroupInWebsite cur = null;
+        for (GroupInWebsite giw : GroupInWebsite.findByWebsite(this, session)) {
+            if (giw.getWebsite() == this && giw.getGroup() == group) {
+                cur = giw;
+                break;
+            }
+        }
+        if (cur == null) {
+            cur = new GroupInWebsite();
+            cur.setWebsite(this);
+            cur.setGroup(group);
+        }
+        cur.setRegistrationMode(o);
+        session.save(cur);
+    }
+
+    public void removeGroup(Group group, Session session) {
+        GroupInWebsite cur = null;
+        for (GroupInWebsite giw : GroupInWebsite.findByWebsite(this, session)) {
+            if (giw.getWebsite() == this && giw.getGroup() == group) {
+                session.delete(giw);
+            }
+        }
+    }
+
+    public List<GroupInWebsite> groups(Session session) {
+        return GroupInWebsite.findByWebsite(this, session);
+    }
 }
