@@ -33,30 +33,33 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class UserApp implements Application{
+public class UserApp implements Application {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
-    
     public static String USERS_FOLDER_NAME = "users";
-    
+
     public static PrincipalResource findEntity(Profile u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
         System.out.println("findEntity");
         Resource r = rootFolder.child(USERS_FOLDER_NAME);
-        if( r instanceof UsersFolder) {
+        if (r instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) r;
             Resource p = uf.child(u.getName());
-            if( p instanceof PrincipalResource) {
+            if (p instanceof PrincipalResource) {
                 PrincipalResource pr = (PrincipalResource) p;
                 return pr;
-            } else if( p != null ) {
+            } else if (p != null) {
                 log.warn("Found a resource which is not a principalResource: " + p.getClass());
             }
         } else {
-            log.warn("users folder not found: " + USERS_FOLDER_NAME + " in " + rootFolder.getClass());
+            if (r == null) {
+                log.warn("users folder not found: " + USERS_FOLDER_NAME + " in " + rootFolder.getClass() + " - " + rootFolder.getName() + "  hash: " + rootFolder.hashCode());
+            } else {
+                log.warn("users folder not found correct type: " + r.getClass());
+            }
         }
         return null;
     }
-    
+
     @Override
     public String getInstanceId() {
         return "userApp";
@@ -64,17 +67,25 @@ public class UserApp implements Application{
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        
     }
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if( parent instanceof UsersFolder) {
+        if (parent instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) parent;
             UserDao userDao = _(UserDao.class);
             Profile p = userDao.findProfile(requestedName, uf.getOrganisation(), SessionManager.session());
-            if( p != null ) {
+            if (p != null) {
                 return new UserResource(uf, p);
+            }
+        } else if (parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            switch (requestedName) {
+                case "dashboard":
+                    DashboardPage page = new DashboardPage(requestedName, wrf);
+                    page.setForceLogin(true);
+                    return page;
+
             }
         }
         return null;
@@ -83,14 +94,13 @@ public class UserApp implements Application{
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         log.info("addBrowseablePages: " + parent.getClass());
-        if( parent instanceof RootFolder) {
+        if (parent instanceof RootFolder) {
             RootFolder wrf = (RootFolder) parent;
-            log.info("adding users folder");
+            log.info("adding users folder to: " + children.hashCode() + " for parent: " + parent.getName() + " - " + parent.getClass() + " - " + parent.hashCode());
             children.add(new UsersFolder(wrf, USERS_FOLDER_NAME));
-        } else if( parent instanceof OrganisationFolder) {
+        } else if (parent instanceof OrganisationFolder) {
             OrganisationFolder organisationFolder = (OrganisationFolder) parent;
             children.add(new UsersFolder(organisationFolder, USERS_FOLDER_NAME));
         }
     }
-    
 }

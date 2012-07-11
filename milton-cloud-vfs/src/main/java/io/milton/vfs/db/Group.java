@@ -18,7 +18,9 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
@@ -39,7 +41,7 @@ public class Group extends BaseEntity {
     
     
     public static String ADMINISTRATORS = "administrators";
-    public static String USERS = "users";
+    public static String USERS = "everyone";
     
     public boolean isMember(BaseEntity u) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
@@ -52,7 +54,4 @@ public class Group extends BaseEntity {
     public boolean containsUser(BaseEntity entity) {
         return isMember(entity);
     }
-    
-    
-    
 }

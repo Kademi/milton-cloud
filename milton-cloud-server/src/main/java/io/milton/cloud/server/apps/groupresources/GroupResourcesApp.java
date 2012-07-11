@@ -1,4 +1,4 @@
-package io.milton.cloud.server.apps.admin.groupresources;
+package io.milton.cloud.server.apps.groupresources;
 
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
@@ -21,6 +21,7 @@ public class GroupResourcesApp implements Application {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+
     }
 
     @Override

@@ -3,7 +3,30 @@
         <title>title</title>
     </head>
     <body>
-        ${page.body}
+        <div class="editableContent">
+            <div class="adminToolbar">
+                <a href="p$[counter].html?template=learner/modulePage" class="edifyViewMode button">New page</a>
+                <button type='submit' class="edifyEditMode">$formatter.ifTrue($page.newPage, "Create new page", "Save page")</button>
+                <button type='button' class="edifyViewMode edifyDelete">Delete page</button>
+                <a href="$page.name?editMode=true" class="edifyViewMode button">Edit this page</a>
+                <a href="$page.name" class="edifyEditMode button">Return without saving</a>
+            </div>
+            <div class="edifyEditMode inputTextEditor" id="title">$!page.title</div>
+            <div class="htmleditor">
+                $!{page.body}
+            </div>
+        </div>
+
+        #set($editMode = $formatter.ifTrue($params.editMode,true, $page.newPage))
+        <script type="text/javascript">                   
+            $(document).ready(function(){
+                pageInitFunctions.push(function(){
+                    if( $editMode ) {
+                        edify($(".editableContent"));
+                    }
+                });                    
+            });
+        </script>        
     </body>
 </html>
 

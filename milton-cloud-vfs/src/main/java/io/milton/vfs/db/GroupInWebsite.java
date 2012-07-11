@@ -19,7 +19,7 @@ import org.hibernate.criterion.Expression;
  */
 @Entity
 @Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"group", "website"})}// item names must be unique within a directory
+    @UniqueConstraint(columnNames = {"user_group", "website"})}// item names must be unique within a directory
 )
 public class GroupInWebsite implements Serializable {
 
@@ -28,8 +28,16 @@ public class GroupInWebsite implements Serializable {
         crit.add(Expression.eq("website", w));
         return DbUtils.toList(crit, GroupInWebsite.class);
     }
+
+    public static List<GroupInWebsite> findByGroup(Group g, Session session) {
+        Criteria crit = session.createCriteria(GroupInWebsite.class);
+        crit.add(Expression.eq("userGroup", g));
+        return DbUtils.toList(crit, GroupInWebsite.class);
+    }
+    
+    
     private long id;
-    private Group group;
+    private Group userGroup;
     private Website website;
     private String registrationMode;
 
@@ -43,13 +51,13 @@ public class GroupInWebsite implements Serializable {
         this.id = id;
     }
 
-    @ManyToOne(optional = false)
-    public Group getGroup() {
-        return group;
+    @ManyToOne(optional=false)
+    public Group getUserGroup() {
+        return userGroup;
     }
 
-    public void setGroup(Group g) {
-        this.group = g;
+    public void setUserGroup(Group g) {
+        this.userGroup = g;
     }
 
     @ManyToOne(optional = false)

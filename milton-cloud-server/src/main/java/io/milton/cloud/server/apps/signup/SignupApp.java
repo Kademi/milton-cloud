@@ -24,8 +24,6 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.event.EventManager;
-import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -37,7 +35,6 @@ import java.util.List;
  */
 public class SignupApp implements Application {
 
-    private EventManager eventManager;
     private String signupPageName = "signup";
 
     public SignupApp() {
@@ -50,19 +47,14 @@ public class SignupApp implements Application {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        this.eventManager = resourceFactory.getEventManager();
+
     }
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if (parent instanceof WebsiteRootFolder) {
-            WebsiteRootFolder rf = (WebsiteRootFolder) parent;
-            if (requestedName.equals(signupPageName)) {
-                return new SignupPage(requestedName, rf);
-            }
-        } else if (parent instanceof GroupInWebsiteFolder) {
+        if (parent instanceof GroupInWebsiteFolder) {
             GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
-            if (requestedName.equals("register.html")) {
+            if (requestedName.equals(signupPageName)) {
                 return new GroupRegistrationPage(requestedName, wrf);
             }
         }

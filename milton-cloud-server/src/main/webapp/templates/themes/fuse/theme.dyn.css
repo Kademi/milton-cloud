@@ -1971,4 +1971,1131 @@ body .tabularBox div.wBox:hover {
 
 
 }
-/**    End theme.css    */
+
+/** Start learning.css **/
+/** A dynamic css file, this is templated with TemplatedTextPage, which gets config parameters from the website **/
+
+.myResources .col11{
+    width:80%;
+    float:left;
+}
+.myResources .col12{
+    width:10%;
+    min-width:65px;
+    float:left;
+}
+.myResources .col12 small{
+    color:#fff;
+    font-size:11px;
+    font-style:italic;
+    display:block;
+}
+.imageL{
+    float:left;
+    display:block;
+    margin:12px 15px 0 18px;
+}
+.p_Text{
+    float:left;
+    width:80%;
+    font-size:11px;
+    color:$page.parent.settings.textColour2;
+    display:block;
+}
+.hTxt{
+    margin:10px 0 3px;
+    padding:0;
+}
+.date{
+    color:$page.parent.settings.textColour2;
+    font-size:12px !important;
+    display:block;
+    margin-top:28px !important;
+    font-weight:normal !important;
+}
+.conArea{
+    position:relative;
+    background:#f0f0f0;
+    overflow:hidden;
+}
+
+a.gBox {
+    display:block;
+    background:none;
+    border-top:1px solid #dbdada;
+    border-bottom:1px solid #dbdada;
+    min-height:52px;
+}
+a.gBox1{
+    display:block;
+    background:none;
+    border-top:1px solid #dbdada;
+    border-bottom:1px solid #dbdada;
+    min-height:39px;
+    padding-bottom:13px;
+}
+.col1 img {
+    float:left;
+    margin-right:12px;
+    display:block;
+}
+.pText1 {
+    margin-top:12px;
+    line-height:1em;
+}
+.tick {
+    background-image: url(images/tick1.gif);
+    background-position: center center;
+    background-repeat: no-repeat;    
+    text-indent: -10000px;
+}
+
+.pTxt {
+    color:$page.parent.settings.textColour2;
+    font-size:0.7em;
+    margin:2px 0 8px 65px;
+    display:block;
+}
+.time {
+    float:left;
+    color:$page.parent.settings.textColour2;
+    font-size:10px;
+    background:url(images/img6.gif) top left no-repeat;
+    padding-left:15px;
+    margin-left:65px;
+    margin-right:20px;
+    display:block;
+    height:13px;
+    line-height: 13px;
+}
+.highlights {
+    font-size:10px;
+    color:$page.parent.settings.textColour2;
+    float:left;
+    line-height: 13px;
+}
+.highlights a {
+    color:$page.parent.settings.heroColour1;
+}
+.txtP {
+    display:block;
+    color:#cacaca;
+    font-size:10px;
+    font-weight:bold;
+    margin-top:10px;
+}
+.pagiBox {
+    width:160px;
+    position:absolute;
+    bottom:10px;
+    left:38%;
+}
+.pagiBox1{
+    left:42%;
+}
+a.arrowL {
+    background:$page.parent.settings.heroColour1;
+    width:18px;
+    height:19px;
+    border-bottom-left-radius: 15px 15px;
+    border-bottom-right-radius: 15px 15px;
+    border-top-left-radius: 15px 15px;
+    border-top-right-radius: 15px 15px;
+    float:left;
+    display:block;
+    padding-top:6px;
+    padding-left:7px;
+}
+ul.pagi {
+    float:left;
+}
+ul.pagi li {
+    list-style:none;
+    float:left;
+    font-size:13px;
+    font-weight:bold;
+    margin-left:16px;
+    margin-top:5px;
+}
+ul.pagi li a {
+    text-decoration:none;
+    color:$page.parent.settings.heroColour1;
+}
+ul.pagi li:hover a {
+    text-decoration:underline;
+}
+a.arrowR {
+    float:right;
+    padding-left:10px;
+}
+
+
+/*sideBar*/
+.sideBar{
+    width:29%;
+    float:right;
+}
+body ul.barList {
+    margin: 0;
+}
+ul.barList li{
+    list-style:none;
+    border-top:1px solid #dbdada;
+    padding:7px 0 7px 10px;
+    margin: 0;
+    font-size: 0.75em;    
+}
+ul.barList li:last-child {
+    border-bottom: 1px solid #dbdada;
+}
+.profilePic{
+    float:left;
+    margin-right:8px;
+}
+ul.barList li .textBox{
+    float:left;
+    width:70%;
+}
+ul.barList p {    
+    line-height: 12px;
+    margin: 0;
+}
+.textBox h3{
+    color:#262626;
+    font-size:12px;
+    font-weight:bold;
+    margin: 0 0 4px 0;
+}
+.textBox h3 a{
+    text-decoration:none;
+    color:#262626;
+}
+.textBox h3 a:hover{
+    text-decoration:underline;
+}
+.textBox h3 span{
+    color:$page.parent.settings.heroColour1;
+}
+.textBox p{
+    color:#262626;
+    font-size:10px;
+    margin-bottom:4px;
+}
+ul.barList em, ul.barList small, ul.barList p {
+    font-size: 0.8333em;
+}
+ul.barList em{
+    color:#262626;    
+    margin-right:7px;
+}
+ul.barList small{
+    color:$page.parent.settings.heroColour1;    
+    font-style:italic;
+    background:url(images/plus.gif) top left no-repeat;
+    padding-left:10px;
+    background-position:0 4px;
+}
+
+a.module {
+    color: $page.parent.settings.heroColour1;
+    font-weight: bold;
+}
+a.user {
+    color: #262626;    
+    font-weight: bold;
+}
+
+
+a.questSign{
+    line-height:30px;
+    float:right;
+}
+a.questSign span{
+    border-radius: 15px;
+    background:#fff;
+    font-weight: 800;
+    padding: 4px 7px;    
+    font-size: 13px;
+}
+.listing{
+    border-top:1px solid #dbdada;
+    border-bottom:1px solid #dbdada;
+    padding-bottom:10px;
+}
+.listing ul{
+    padding:10px 0 0 12px;
+}
+.listing ul li{
+    width:25%;
+    float:left;
+    list-style:none;
+    margin: 0;
+}
+.listing ul li.second{
+    width:29%;
+}
+.listing ul li.last{
+    width:20%;
+}
+.listing ul li h3{
+    color:#262626;
+    font-size:12px;
+    font-weight:normal;
+}
+.listing ul li span{
+    font-size:30px;
+    font-weight:bold;
+    color:$page.parent.settings.heroColour1;
+    display:block;
+    line-height:1em;
+}
+.listing ul li small{
+    color:#8f8f8f;
+    font-size:11px;
+    display:block;
+    font-style:italic;
+}
+
+a.link_Txt{
+    float:right;
+    text-decoration:none;
+    color:$page.parent.settings.textColour2;
+    font-size:13px;
+    display:block;
+    background:url(images/arrow1.gif) top left no-repeat;
+    padding-left:16px;
+    background-position:0 1px;
+    margin:72px 10px 0 0;
+}
+a:hover.link_Txt{
+    text-decoration:underline;
+}
+
+.txtRBox{
+    float:left;
+    width:90%;
+}
+.txtRBox h3{
+    font-size:12px;
+    color:#262626;
+    font-weight:bold;
+}
+.txtRBox h3 a{
+    text-decoration:none;
+    color:#262626;
+}
+.txtRBox h3 a:hover{
+    text-decoration:underline;
+}
+.txtRBox p{
+    color:#262626;
+    font-size:11px;
+    margin:5px 0 3px;
+}
+.txtRBox small{
+    color:#262626;
+    font-size:10px;
+    font-style:italic;
+}
+.auxText a, a.auxText{
+    margin-left:12px;
+}
+a.lnkText{
+    float:right;
+    text-decoration:none;
+    font-size:10px;
+    color:$page.parent.settings.heroColour1;
+    font-style:italic;
+    margin-right:10px;
+}
+a.lnkText1{
+    margin-right:0;
+}
+a:hover.lnkText{
+    text-decoration:underline;
+}
+/*notification*/
+.nav .nav-myInbox span {
+    background: none repeat scroll 0 0 $page.parent.settings.heroColour1;
+    border-radius: 15px 15px 15px 15px;
+    color: #FFFFFF;
+    display: block;
+    float: left;
+    font-size: 9px;
+    margin: 0 4px 0 0;
+    padding: 0 4px;
+    text-align: center;
+}
+
+.notificationBox{
+    border-top:1px solid #d2d2d2;
+    position:relative;
+}
+.notificationBox > div{
+    border-bottom:1px solid #d2d2d2;
+    min-height:41px;
+    padding: 10px;
+    position: relative;    
+}
+.content .notificationBox > div.active{
+    background-color: $page.parent.settings.heroColour1;
+}
+.notificationBox > div.active * {
+    color: white;
+}
+.notificationBox > div:nth-child(even) {
+    background-color: white;
+}
+.notificationBox h3, .notificationBox h3 a{
+    font-size:13px;
+    color:$page.parent.settings.textColour2;
+    font-weight:bold;
+    margin: 0;
+    text-decoration:none;
+    color:$page.parent.settings.textColour2;
+}
+.notificationBox > div div.left h3 a:hover{
+    text-decoration:underline;
+}
+.notificationBox p{
+    color:#686868;
+    font-size:11px;
+}
+.notificationBox .info {
+    float: right;
+    margin-right: 10px;
+    font-size: 11px;
+    font-style: italic; 
+    color: $page.parent.settings.heroColour1;
+}
+.notificationBox .close {
+    float: right;
+}
+
+.close {
+    background-image: url(images/crosssign.png);
+    height: 12px;
+    width: 12px;
+    display: inline-block;
+    text-indent: -10000px;
+}
+
+.active .close {
+    background-image: url(images/cross.png);
+}
+
+.info {
+    font-size: 11px;
+    font-style: italic; 
+    color: $page.parent.settings.heroColour1;
+}
+.selectBox{
+    background:$page.parent.settings.heroColour1;
+}
+.emailArea{
+    margin-left: 15px;
+}
+.emailArea h2 {
+    margin: 15px 0;
+    font-size: 28px;
+}
+.titleBox .info {
+    position: absolute;
+    right: 5px;
+    bottom: 10px;
+}
+.titleBox{
+    border-bottom:1px solid #d2d2d2;
+    padding:0 0 10px 0;
+    margin-bottom:10px;
+    position: relative;
+}
+.titleBox h3{
+    font-size:13px;
+    color:$page.parent.settings.textColour2;
+    font-weight:normal;
+    margin: 0;
+}
+.titleBox small{
+    color:#686868;
+    font-size:10px;
+    font-style:italic;
+}
+.emailCon{
+}
+.emailCon h3{
+    font-size:28px;
+    color:$page.parent.settings.textColour2;
+    text-transform:capitalize;
+    font-weight:normal;
+    margin-bottom:8px;
+}
+.emailCon p{
+    color:$page.parent.settings.textColour2;
+    font-size:12px;
+    line-height:1.5em;
+    margin-bottom:10px;
+}
+
+.moduleBox {
+    position:relative;
+    background:#f0f0f0;
+}
+.content .moduleBox .wBox a:hover {
+    text-decoration: none;
+}
+
+
+.moduleBox1 {
+    float:right;
+}
+
+/*contentLeft*/
+.myLearning .contentLeft, .myInbox .contentLeft {
+    width:29%;
+    float:left;
+}
+.courcesBox {
+    height:2em;
+    line-height: 2em;
+    margin-bottom:2px;
+    border-radius: 5px;
+    padding: 0 8px;            
+    background:#3a3c3f;
+    border-top-left-radius: 5px 5px;
+    border-top-right-radius: 5px 5px;
+    border-bottom-left-radius: 5px 5px;
+    border-bottom-right-radius: 5px 5px;                                 
+}
+.content a.cources {
+    font-size:0.9em;
+    color:#fff;
+    text-decoration:none;
+    float:left;
+    display:block;
+
+}
+.content .courcesBox .role {
+    position:relative;
+    z-index:999;
+    height:2em;
+    line-height: 1.4em;
+    float:right;
+    border-left:1px solid #707070;
+    font-size:0.7em;
+    background:url(images/wArrrow.gif) top right no-repeat;
+    display:block;
+    background-position:100% 13px;
+    padding:8px 16px 0 12px;
+}
+.content .role span{
+    height:30px;
+    text-decoration:none;
+    color:#fff;
+    display:block;
+}
+
+.role:hover>.dropBox1 {
+    display:block;
+}
+
+a.programBox {
+    border-top:8px solid #dbdada;
+    padding:20px 20px 20px 20px;
+    display:block;
+    background-color: white;
+    border-bottom:1px solid #dbdada;
+}
+
+a.programBox:nth-child(odd) {
+    background-color: #F0F0F0;
+}
+
+a.programBox.active, a.programBox:hover {
+    /* For WebKit (Safari, Google Chrome etc) 
+    background: -webkit-gradient(linear, left top, left bottom, from(#dfdfdf), to(#fff));*/
+    /* For Mozilla/Gecko (Firefox etc) 
+    background: -moz-linear-gradient(top, #dfdfdf, #fff);*/
+    /* For Internet Explorer 5.5 - 7 
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#dfdfdf, endColorstr=#FFFFFFFF);*/
+    /* For Internet Explorer 8 
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#dfdfdf, endColorstr=#FFFFFFFF)";   */
+
+    border-top:8px solid $page.parent.settings.heroColour1;
+
+}
+.content a.programBox:hover {
+    text-decoration: none;
+}
+a.programBox1 {
+    background:none;
+    border:none;
+    border-top:1px solid #dbdada;
+    border-bottom:1px solid #dbdada;
+}
+a.programBox2 {
+    background:#fff;
+    border:none;
+}
+
+.modulePage .content {
+    padding: 0;
+}
+
+
+/** ADMIN screens **/
+div.treeView {
+    border: solid 1px lightgray;
+    width: 200px;
+    padding: 20px;
+}
+ul.treeView ul  {
+    padding-left: 55px;
+}
+.treeView li {
+    background-image: url(images/icons/folder.png);
+    background-repeat: no-repeat;
+    text-indent: 55px;
+    line-height: 45px;
+    list-style: none;
+}
+
+.treeView li.program {
+   background-image: url(images/icons/program.png);    
+}
+.treeView li.course {
+   background-image: url(images/icons/course.png);    
+}
+.treeView li.module {
+    display: none;
+}
+
+
+
+/*nav*/
+body.myDashboard li.nav-myDashboard, body.myLearning li.nav-myLearning, body.community li.nav-community, .nav li.active{
+    border-top:1px solid #cbcbcb;
+    border-left:1px solid #cbcbcb;
+    border-right:1px solid #cbcbcb;
+    background:#fff;
+    border-top-left-radius: 5px 5px;
+    border-top-right-radius: 5px 5px;
+}
+
+
+
+
+body li {
+    margin-left: 40px;
+}
+body textarea {
+    width: 98%;
+    background-color: #f4f4f4;
+}
+body h1, body h1 a,body h2, body h2 a,body h3, body h3 a,body h4, body h4 a {
+    margin-top: 5px;
+}
+body h1, body h1 a {
+    position:relative;
+    background-color: $rootFolder.settings.heroColour1;
+    display: inline-block;
+    color: white;
+    padding: 10px 15px;
+    margin: 0px 0px 15px 0px;
+    border-radius: 6px;
+    width: 920px;
+    font-size: 1.6em;
+    font-weight: 500;
+    left:-15px;
+}
+
+/** cke_panel_listItem is part of the CKEditor toolbar, which shows the h1 style. Must not be display:block for toolbar */
+body .cke_panel_listItem h1 {
+    display: inline;
+    padding-left: 0;
+}
+
+body h2, body h2 a {
+    color: $rootFolder.settings.heroColour1;
+    font-weight: 500;
+    font-size: 1.6em;    
+    padding: 0px 0px 15px 0px;
+    margin:0px;
+}
+
+body h3, body h3 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.4em;
+    font-weight: 500;
+
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+body h4, body h4 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.1em;
+    font-weight: 400;    
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+body h5, body h5 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.1em;
+    font-weight: 400;
+    font-style: italic;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+
+body h6, body h6 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 0.9em;
+    font-weight: 400;
+    line-height:18px;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+
+
+
+/** This is the new Dropdown header style 
+div.dropdown .dropDownStyle {
+  color: $rootFolder.settings.texColour1;
+    font-size: 1.0em;
+    font-weight: 400;
+    
+    padding: 10px 38px 10px 15px;
+    
+     display: inline-block;
+   
+    } */
+
+
+
+body p, body p a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 0.8em;
+    font-weight: 400;
+    line-height:20px;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+body p a {   
+    font-size: 1em !important;
+   
+}
+
+body .citation {
+    font-size: 0.6em !important;
+    font-weight: 400;
+    font-style:italic;
+  
+    padding: 0px 0px 0px 0px;
+    margin:0px;
+}
+
+
+body .panelBox  ul {
+    margin: 0px 0px 0px 40px;
+    padding:0px;
+    font-size: 0.9em;
+    color: $rootFolder.settings.textColour1;
+    font-weight: 400;
+    list-style:outside;
+}
+
+body .panelBox  ul li {
+    margin: 0px;
+    padding:0px;
+    line-height:22px; 
+}
+
+body .panelBox  ul li ul li {
+    
+}
+
+
+
+body .panelBox li a {
+    color: #88c03f;
+    font-weight: 600;
+    text-decoration:underline;
+}
+
+.activity, .keyPoint {
+    position: relative;    
+    border-radius: 6px;
+    font-weight: 700;
+    padding: 20px 15px 15px 60px;
+}
+
+
+.activity {
+    background-color: #ECF1F7;
+     border: 1px solid #d3dbe1;
+}
+.keyPoint {
+    background-color: #f8ecee;
+    border: 1px solid #d6c2c7;
+}
+
+/** this span is inserted by jquery so we can use a sprite as background image for the icon. Will not be present in the editor */
+.activity > span.sprite, .keyPoint > span.sprite {
+    background-image: url("images/icons.png");
+    background-repeat: no-repeat;
+    height: 34px;
+    left: 12px;
+    position: absolute;
+    top: 12px;
+    width: 35px;
+}
+
+/** paddy added this so he can position just the lighbulb icon */
+.lightbulb h6 span.sprite {
+    background-image: url("images/icons.png");
+    background-repeat: no-repeat;
+    height: 34px;
+    left: 5px;
+    position: absolute;
+    top: 5px !important;
+    width: 35px;
+    
+     
+}
+
+.activity > span.sprite {
+    background-position: -1px -48px;    
+}
+body .lightbulb div h6 {
+    /*padding: 10px 20px 8px 50px;*/
+    line-height: 36px;    
+    margin: 0;
+    padding: 0px 40px 0px 40px;
+    
+    
+    
+    
+    
+
+}
+.keyPoint > span.sprite {
+    background-position: -46px -48px;    
+}
+body .lightbulb div > span.sprite {
+    top: 8px;
+}
+body .lightbulb div h6 span.sprite {
+    background-position: -93px -47px;
+    height: 34px;
+    width: 35px;
+   
+
+}
+
+
+
+/** Display as inline in the editor style dropdown combo box */
+body .cke_panel_listItem .activity {
+    display: inline;
+    padding: 5px 5px 5px 50px;
+}
+
+div.dropdown {
+    border: 1px solid #D3D3D3;
+    border-radius: 6px;
+    padding: 0;
+    position: relative;
+    text-align: left;
+}
+
+
+
+.btnHideFollowing {
+    background-color: #88c140;
+    border-radius: 4px;
+   /* border: 1px solid #98a686;*/
+    color: white;
+    padding: 8px 38px 8px 12px;
+    margin: 0px 0px 0px 0px;
+    display: inline-block;
+    position: relative;
+   font-weight: 500;    
+}
+
+
+.lightbulb div.dropdown{
+    background-color: #fbf5e9;
+}
+
+.lightbulb {
+    text-align: right;
+  
+}
+
+div.dropdown > div {
+    
+   border-top: 1px solid #d3d3d3;
+    
+}
+
+
+/** This refers to the content div within the dropdown section */
+div.dropdown > div {
+    padding: 10px 15px;
+}
+
+/** The open class is added to the dropdown div when its open */
+.modulePage div.dropdown.open {
+    display: block;    
+}
+
+/** make the dropdown div inline so its width is sized to the heading, instead of full width */
+.modulePage div.dropdown {
+    display: inline-block; 
+
+}
+
+.modulePage .dropdown h6 {
+   /* background-color: #e9e9e9;*/
+
+}
+
+div.dropdown h6 {
+   line-height: 36px;    
+    margin: 0;
+    padding: 00px 40px 0px 13px;
+
+
+}
+
+/*
+div.dropdown h3, div.dropdown h4, div.dropdown h5 {
+    margin: 0;
+    padding: 10px 40px 10px 10px;
+}
+*/
+
+/** this span is inserted by jquery so we can use a sprite as background image for the icon. Will not be present in the editor */
+div.dropdown span.sprite, .btnHideFollowing > span.sprite {
+    background-color: transparent;
+    background-image: url("images/icons.png");
+    background-repeat: no-repeat;
+    background-position: -2px -94px;
+    display: inline-block;
+    height: 21px;
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    width: 21px; 
+}
+
+/** Note that we trigger on the  */
+
+.btnHideFollowing:hover, .modulePage div.dropdown h6:hover {
+    cursor: pointer;
+    /*background-color: #e9e9e9;*/
+    border-color:#d7d7d7;
+    color:$rootFolder.settings.textColour1;
+}
+
+
+
+/*
+.modulePage div.dropdown h3:hover, .modulePage div.dropdown h4:hover, .btnHideFollowing:hover, .modulePage div.dropdown .test:hover {
+    cursor: pointer;
+    background-color: #e9e9e9;
+    border-color:#d7d7d7;
+    color:$rootFolder.settings.texColour1;
+}
+*/
+
+#editor div.dropdown > span, div.dropdown.open > span {
+    background-position: -28px -94px;
+}
+.modulePage div.dropdown > div {
+    display: none;
+}
+
+.accentuated {
+    background-color: #eaf0e2;
+    border: 1px solid #c5cfb8;
+    border-radius: 6px;
+    padding: 15px 20px 15px 20px;           
+}
+
+.accentuated p {
+    margin:0px !important;
+    padding:0px !important;
+
+}
+
+.modulePage .panelBox ol ol {
+    list-style-type: none;
+    margin-left: -6px;    
+}
+
+
+/** Start moduleLayout.css **/
+div.adminToolbar {
+    border: 1px dashed gray;
+    position: absolute;
+    right: 10px;
+    top: -55px;
+    padding: 10px;
+    z-index: 100;
+}
+.modulePage .content {
+    min-height: 350px;
+    background-color:#eeeeee;
+}
+.modulePage .nav, .modulePage .formBox {
+    display: none;
+}   
+.modulePage div.header {
+    min-height: 80px;
+    border-bottom: solid #F4F4F4 1px;
+}
+.modulePage div.header h1 {
+    padding-top: 0;
+}
+.modulePage div.header h1 a {
+    margin-top: 0;
+}
+.modulePage .header > a {
+    position: absolute;
+    right: 20px;
+    bottom: 10px;
+    background: url("images/arrow1.gif") no-repeat scroll 0 1px transparent;
+    color: $rootFolder.settings.textColour2;
+    font-size: 13px;
+    padding-left: 20px;
+}
+.content ul.pages {
+    display: inline-block;
+}
+.pages li {
+    display: block;
+    float: left;
+    list-style-type: none;
+    margin: 8px;
+}
+.pages li a{
+    display: inline-block;
+    background-color: $rootFolder.settings.heroColour1;
+    border-radius: 18px;
+    border: solid 2px $rootFolder.settings.heroColour1;
+    padding: 6px 6px;
+    margin: 0;    
+    font-size: 14px;
+    width: 18px;
+    height: 18px;
+}
+.content .pages li a:hover, .content .pages li a.active {   
+    background-color: white;
+    border: solid 2px $rootFolder.settings.heroColour1;
+    padding: 6px 6px;
+    margin: 0;     
+    font-size: 14px;   
+}
+
+
+.handsImg{
+    position:absolute;
+    bottom:-3px;
+    right:0;
+}
+.commetnArea{
+    text-align: center;
+    margin:16px 15px 0;
+    position:relative;
+    overflow:hidden;
+}
+
+.modulePage a.nextBtn, .modulePage a.prevBtn{
+    position:absolute;
+    width:84px;
+    height:21px;    
+    color:#fff;
+    font-size:13px;    
+    top:0;    
+    text-decoration:none;
+    cursor:pointer;
+    text-align:center;
+    display:block;
+    background:$rootFolder.settings.heroColour1;
+    border-radius: 5px 5px;
+    padding-top:5px;    
+}
+
+.modulePage a.prevBtn{    
+    left:0;
+}
+.modulePage a.nextBtn{
+    right:0;
+}
+ul.btnList{
+    width:225px;
+    margin:0 auto;
+}
+ul.btnList li{
+    list-style:none;
+    float:left;
+    width:26px;
+    height:26px;
+    margin-right:10px;
+}
+ul.btnList li a{
+    background:url(images/hoverBtn.gif) no-repeat;
+    text-decoration:none;
+    display:block;
+    width:26px;
+    height:26px;
+}
+ul.btnList li:hover a, ul.btnList li.active a{
+    background-position:0 -26px;
+}
+.content .hideBtn{
+    margin:0 auto;
+    width:10em;
+    height:1.5em;
+    line-height: 1.3em;
+    background:$rootFolder.settings.heroColour1;
+    border-radius: 5px;
+    text-align:center;
+    margin-top:30px;
+}
+.content .hideBtn a{
+    text-decoration:none;
+    color:#fff;
+    background:url(images/wArrow.gif) top right no-repeat;
+    background-position:100% 5px;
+    padding-right:18px;
+    font-size:0.6875em;
+}
+.panelBox{
+    background:#fff;
+    position:relative;
+    min-height: 300px;
+    /*padding: 30px;*/
+    margin: 0 auto;
+    padding: 15px 30px 30px;
+    max-width: 920px;
+}
+.panelBox iframe {
+    width: 100% !important;
+}
+.pBox{
+    width:60%;
+    padding:30px 0 80px 35px;
+}
+.pBox p{
+    color:$rootFolder.settings.textColour2;
+    font-size:12px;
+    line-height:1.5em;
+    margin-bottom:15px;
+}
+

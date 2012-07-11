@@ -115,7 +115,7 @@
         <constructor-arg ref="content.type.service"/> 
         <constructor-arg>
             <list>
-
+                <ref local="event.manager" />
             </list>
         </constructor-arg>
     </bean>       

@@ -17,23 +17,28 @@ package io.milton.cloud.server.apps.email;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.UserResource;
-import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.mail.MailServer;
 import io.milton.mail.MailServerBuilder;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Profile;
+import java.io.IOException;
+import java.io.Writer;
+import org.apache.velocity.context.Context;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
  * @author brad
  */
-public class EmailApp implements MenuApplication, LifecycleApplication {
+public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication {
 
     private MiltonCloudMailResourceFactory mailResourceFactory;
     private MailServer mailServer;
@@ -113,5 +118,21 @@ public class EmailApp implements MenuApplication, LifecycleApplication {
 
     @Override
     public void initDefaultProperties(AppConfig config) {
+    }
+
+    @Override
+    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        if( portletSection.equals("messages")) {
+            _(TextTemplater.class).writePage("email/emailMessagesPortlet.html", currentUser, rootFolder, context, writer);
+        }
+//            <div>                
+//                <div class="txtR">
+//                    <h3>Hi Patrick, Welcome to your dashboard!</h3>
+//                    <p>Below you will find a list of your most recent and active modules.  A panel which gives you an overview of your eLearning progress and a snapshot of what people are talking about in the community.  Happy learning.</p>
+//                </div>
+//                <div class="clr"></div>
+//                <a class="close" href="#">close</a>
+//            </div>
+
     }
 }

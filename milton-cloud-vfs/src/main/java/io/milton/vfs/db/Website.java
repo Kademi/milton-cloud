@@ -154,7 +154,7 @@ public class Website implements Serializable, VfsAcceptor {
     public void addGroup(Group group, String o, Session session) {
         GroupInWebsite cur = null;
         for (GroupInWebsite giw : GroupInWebsite.findByWebsite(this, session)) {
-            if (giw.getWebsite() == this && giw.getGroup() == group) {
+            if (giw.getWebsite() == this && giw.getUserGroup() == group) {
                 cur = giw;
                 break;
             }
@@ -162,7 +162,7 @@ public class Website implements Serializable, VfsAcceptor {
         if (cur == null) {
             cur = new GroupInWebsite();
             cur.setWebsite(this);
-            cur.setGroup(group);
+            cur.setUserGroup(group);
         }
         cur.setRegistrationMode(o);
         session.save(cur);
@@ -171,7 +171,7 @@ public class Website implements Serializable, VfsAcceptor {
     public void removeGroup(Group group, Session session) {
         GroupInWebsite cur = null;
         for (GroupInWebsite giw : GroupInWebsite.findByWebsite(this, session)) {
-            if (giw.getWebsite() == this && giw.getGroup() == group) {
+            if (giw.getWebsite() == this && giw.getUserGroup() == group) {
                 session.delete(giw);
             }
         }

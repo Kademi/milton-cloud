@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>$view.title</title>        
+    </head>
+    <body class="regoPage">        
+        <div id="content">
+            <div class="SubContent">
+                <h1>Registration</h1>
+                <div class="MainContent">
+                    <form method="post" id="registerForm" action="$page.name" onsubmit="return createAccount()">                                                
+                        <fieldset>
+                            <legend>Your login details</legend>
+                            <div class="Box02">
+                                <div class="Box02Bottom">
+                                    <div class="Box02Middle">
+                                        <div class="pageMessage"></div>
+                                        <label class="first" for="email">Email</label>
+                                        <input class="required" type="text" name="email" id="email" placeholder="Enter your email address" />
+                                        <label class="last" for="password">Password</label>
+                                        <input class="required" type="password" name="password" id="password" placeholder="Enter your preferred password" />
+                                        <br/>
+                                        <label class="first" for="nickName">Nickname</label>
+                                        <input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" />
+                                        
+                                        <label class="last" for="confirmPassword">Confirm</label>
+                                        <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Please confirm your password" />
+
+                                        <button class="Register" ><span>Register</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>		
+                <br class="Clear" />
+            </div>
+        </div> 
+    </body>    
+</html> 
+

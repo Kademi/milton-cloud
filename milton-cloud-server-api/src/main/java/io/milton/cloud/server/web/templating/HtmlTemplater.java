@@ -74,7 +74,7 @@ public class HtmlTemplater {
         engine = new VelocityEngine(p);       
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", new HtmlTemplateLoaderResourceLoader());
-        engine.setProperty("userdirective", VelocityContentDirective.class.getName());
+        engine.setProperty("userdirective", VelocityContentDirective.class.getName() + "," + PortletsDirective.class.getName());
 
         templateParser = new HtmlTemplateParser();
         templateRenderer = new HtmlTemplateRenderer(applicationManager, formatter);

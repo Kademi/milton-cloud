@@ -16,10 +16,12 @@
  */
 package io.milton.cloud.server.web.templating;
 
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.SpliffySecurityManager;
 import java.io.IOException;
 import java.io.Writer;
-import org.apache.velocity.Template;
-import org.apache.velocity.context.Context;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -27,31 +29,19 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.parser.node.Node;
 
+import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Profile;
+
 /**
  * Called from theme templates to delegate to content rendering template
  *
  * @author brad
  */
-public class VelocityContentDirective extends Directive {
-
-    private static final String NAME_CONTENT_TEMPLATE = "contentTemplate";
-    
-    public static void setContentTemplate(Template t, Context context) {
-        context.put(NAME_CONTENT_TEMPLATE, t);
-    }
-    
-    public static Template getContentTemplate(Context context) {
-        return (Template) context.get(NAME_CONTENT_TEMPLATE);
-    }
-
-    public VelocityContentDirective() {
-    }
-    
-    
+public class PortletsDirective extends Directive {
 
     @Override
     public String getName() {
-        return "content";
+        return "portlets";
     }
 
     @Override
@@ -61,9 +51,16 @@ public class VelocityContentDirective extends Directive {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        Template t = getContentTemplate(context);
-        t.merge(context, writer);
+        String portletSection = null;
+        if (node.jjtGetChild(0) != null) {
+            portletSection = String.valueOf(node.jjtGetChild(0).value(context));
+        }
+        if( portletSection == null ) {
+            return true;
+        }
+        Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
+        RootFolder rootFolder = SpliffyResourceFactory.getRootFolder();
+        _(ApplicationManager.class).renderPortlets(portletSection, currentUser, rootFolder, context , writer); 
         return true;
     }
-    
 }

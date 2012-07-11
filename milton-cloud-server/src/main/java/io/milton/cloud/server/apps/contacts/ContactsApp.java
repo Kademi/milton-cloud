@@ -16,34 +16,48 @@
  */
 package io.milton.cloud.server.apps.contacts;
 
-
 import java.io.IOException;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.event.JoinGroupEvent;
+import io.milton.cloud.server.event.SignupEvent;
 import io.milton.cloud.server.web.*;
+import io.milton.event.Event;
+import io.milton.event.EventListener;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.AddressBook;
+import io.milton.vfs.db.GroupInWebsite;
+import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.Date;
+import java.util.List;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 
 /**
  *
  * @author brad
  */
-public class ContactsApp implements Application {
+public class ContactsApp implements Application, EventListener {
 
     public static final String ADDRESS_BOOK_HOME_NAME = "abs";
-    
-    private ContactManager contactManager;           
-    private SpliffyResourceFactory resourceFactory;    
-    
+    private ContactManager contactManager;
+    private ApplicationManager applicationManager;
+    private SpliffyResourceFactory resourceFactory;
+
     @Override
     public Resource getPage(Resource parent, String childName) {
         return null;
     }
 
     @Override
-    public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws IOException{
+    public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws IOException {
         contactManager = new ContactManager();
         this.resourceFactory = resourceFactory;
+        this.applicationManager = resourceFactory.getApplicationManager();
+        resourceFactory.getEventManager().registerEventListener(this, SignupEvent.class);
 //        SpliffyLdapTransactionManager txManager = new SpliffyLdapTransactionManager(resourceFactory.getSessionManager());                
 //        Integer port = config.getInt("port");        
 //        ldapServer = new LdapServer(txManager, this, resourceFactory.getPropertySources(), port, false, null);
@@ -55,15 +69,14 @@ public class ContactsApp implements Application {
 //        ldapServer.interrupt();
 //        ldapServer.close();
 //    }
-
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        if( parent instanceof UserResource) {            
+        if (parent instanceof UserResource) {
             UserResource rf = (UserResource) parent;
             ContactsHomeFolder calHome = new ContactsHomeFolder(rf, ADDRESS_BOOK_HOME_NAME, contactManager);
             children.add(calHome);
-        }        
-        
+        }
+
     }
 
 //    @Override
@@ -95,7 +108,6 @@ public class ContactsApp implements Application {
 //    public List<LdapContact> galFind(Condition equalTo, int sizeLimit) {
 //        return Collections.EMPTY_LIST;
 //    }
-
     @Override
     public String getInstanceId() {
         return "contacts";
@@ -105,11 +117,26 @@ public class ContactsApp implements Application {
 //    public void initDefaultProperties(AppConfig config) {
 //        config.setInt("port", 8389); // default to non
 //    }
+    @Override
+    public void onEvent(Event e) {
+        if (e instanceof JoinGroupEvent) {
+            JoinGroupEvent joinEvent = (JoinGroupEvent) e;
+            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(joinEvent.getGroup(), SessionManager.session());
+            for (GroupInWebsite giw : giws) {
+                if (applicationManager.isActive(this, giw.getWebsite())) {
+                    addAddressBook("contact", joinEvent.getProfile(), SessionManager.session());
+                }
+            }
+        }
+    }
 
-
-    
-
-
+    private void addAddressBook(String name, Profile u, Session session) throws HibernateException {
+        AddressBook addressBook = new AddressBook();
+        addressBook.setName(name);
+        addressBook.setOwner(u);
+        addressBook.setCreatedDate(new Date());
+        addressBook.setModifiedDate(new Date());
+        addressBook.setDescription("My contacts");
+        session.save(addressBook);
+    }
 }
-
-    

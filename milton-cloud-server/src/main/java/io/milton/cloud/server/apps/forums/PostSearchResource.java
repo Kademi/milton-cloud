@@ -15,7 +15,6 @@
 package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.server.db.Post;
-import io.milton.cloud.server.apps.signup.SignupPage;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonWriter;
@@ -43,12 +42,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Search for forum posts, comments, etc
  *
  * @author brad
  */
 public class PostSearchResource extends AbstractResource implements GetableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
+    private static final Logger log = LoggerFactory.getLogger(PostSearchResource.class);
     
     private final String name;
     private final CommonCollectionResource parent;

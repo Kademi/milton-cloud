@@ -17,25 +17,32 @@ package io.milton.cloud.server.apps.forums;
 import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.*;
-import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
+import org.apache.velocity.context.Context;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
  * @author brad
  */
-public class ForumsApp implements MenuApplication, ResourceApplication {
+public class ForumsApp implements MenuApplication, ResourceApplication, PortletApplication {
 
     public static String toHref(ForumPost r) {
         return "todo";
@@ -122,5 +129,12 @@ public class ForumsApp implements MenuApplication, ResourceApplication {
             return new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
         }
         return null;
+    }
+
+    @Override
+    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        if( portletSection.equals("secondary")) {
+            _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
+        }
     }
 }

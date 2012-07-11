@@ -1,8 +1,10 @@
 package io.milton.cloud.server.init;
 
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.LifecycleApplication;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.db.utils.GroupDao;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.vfs.db.Website;
@@ -26,6 +28,7 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,8 +48,6 @@ public class InitialDataCreator implements LifecycleApplication {
     private List<String> names = new ArrayList<>();
     private ApplicationManager applicationManager;
 
-
-
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         initialRootOrgName = config.get("initialRootOrgName");
@@ -59,8 +60,6 @@ public class InitialDataCreator implements LifecycleApplication {
 
         initTestData();
     }
-    
-    
 
     /**
      * Can be called from spring init-method
@@ -98,11 +97,9 @@ public class InitialDataCreator implements LifecycleApplication {
         administrators.grant(AccessControlledResource.Priviledge.WRITE, rootOrg, session);
         administrators.grant(AccessControlledResource.Priviledge.WRITE_ACL, rootOrg, session);
 
-        Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);        
-        if (newOrg) {
-            Website spliffyWeb = rootOrg.createWebsite("localhost", "fuse", admin, session);
-            spliffyWeb.addGroup(users, "o", session);
-        }        
+        Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);
+        Website miltonSite = checkCreateWebsite(session, rootOrg, "localhost", "fuse", admin);
+        miltonSite.addGroup(users, "o", session);
 
         admin.addToGroup(administrators).addToGroup(users);
         checkCreateUser("user1", "password1", session, rootOrg).addToGroup(users);
@@ -111,6 +108,31 @@ public class InitialDataCreator implements LifecycleApplication {
         tx.commit();
         session.close();
         sessionManager.close();
+    }
+
+    private Website checkCreateWebsite(Session session, Organisation org, String webName, String theme, Profile user) {
+        for (Website w : org.websites()) {
+            if (w.getName().equals(webName)) {
+                return w;
+            }
+        }
+        Website w = org.createWebsite(webName, theme, user, session);
+
+        Branch trunk = w.currentBranch();
+        trunk.grant(AccessControlledResource.Priviledge.READ, Permission.DynamicPrincipal.All);
+
+        Repository r = w.getRepository();
+        r.setAttribute("heroColour1", "#88c03f", session);
+        r.setAttribute("heroColour2", "#88c03f", session);
+        r.setAttribute("textColour1", "#1C1D1F", session);
+        r.setAttribute("textColour2", "#2F2F2F", session);
+        r.setAttribute("logo", webName, session);
+
+        for (Application app : applicationManager.getApps()) {
+            AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
+        }
+
+        return w;
     }
 
     private Group checkCreateGroup(Organisation org, String name, GroupDao groupDao, Session session) throws HibernateException {
@@ -234,6 +256,5 @@ public class InitialDataCreator implements LifecycleApplication {
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        
     }
 }

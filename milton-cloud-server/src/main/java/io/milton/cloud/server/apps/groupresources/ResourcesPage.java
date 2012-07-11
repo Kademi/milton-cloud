@@ -1,4 +1,4 @@
-package io.milton.cloud.server.apps.admin.groupresources;
+package io.milton.cloud.server.apps.groupresources;
 
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.*;

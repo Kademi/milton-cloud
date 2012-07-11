@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.cloud.server.apps.signup.SignupPage;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
@@ -49,7 +48,7 @@ import static io.milton.context.RequestContext._;
  */
 public class ManageForumsPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageForumsPage.class);
     
     private final String name;
     private final CommonCollectionResource parent;

@@ -17,8 +17,6 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.signup.SignupPage;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -57,7 +55,7 @@ import org.hibernate.Transaction;
  */
 public class ManageAppsPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageAppsPage.class);
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;

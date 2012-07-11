@@ -14,7 +14,6 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import io.milton.cloud.server.apps.signup.SignupPage;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
@@ -45,7 +44,7 @@ import static io.milton.context.RequestContext._;
  */
 public class OrgsAdminPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SignupPage.class);
+    private static final Logger log = LoggerFactory.getLogger(OrgsAdminPage.class);
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;

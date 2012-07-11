@@ -32,7 +32,9 @@ import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
+import org.apache.velocity.context.InternalContextAdapter;
 
 /**
  *
@@ -219,7 +221,6 @@ public class ApplicationManager {
     }
 
     private List<Application> findActiveApps(RootFolder rootFolder) {
-        List<AppControl> list;
         if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             return findActiveApps(wrf.getWebsite());
@@ -259,5 +260,23 @@ public class ApplicationManager {
             }
         }
         return activApps;
+    }
+
+    public boolean isActive(Application aThis, Website website) {
+        List<Application> activeApps = findActiveApps(website);
+        for( Application a : activeApps ) {
+            if( a.getInstanceId().equals(aThis.getInstanceId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, org.apache.velocity.context.Context context, Writer writer) throws IOException {
+        for (Application app : getActiveApps()) {
+            if (app instanceof PortletApplication) {
+                ((PortletApplication) app).renderPortlets(portletSection, currentUser, rootFolder, context, writer);
+            }
+        }        
     }
 }

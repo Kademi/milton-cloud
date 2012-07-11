@@ -1,5 +1,23 @@
+/*
+ * Copyright (C) 2012 McEvoy Software Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.server.event.JoinGroupEvent;
+import io.milton.cloud.server.event.SignupEvent;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
@@ -35,8 +53,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.event.EventManager;
 
 /**
+ * Manages registration of a user when signing up to a group
  *
  * @author brad
  */
@@ -60,7 +80,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             jsonResult.write(out);
         } else {
             log.info("sendContent: render page");
-            _(HtmlTemplater.class).writePage("learner/register", this, params, out);
+            _(HtmlTemplater.class).writePage("signup/register", this, params, out);
         }
     }
 
@@ -101,8 +121,12 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             _(SpliffySecurityManager.class).getPasswordManager().setPassword(u, password);
 
             u.addToGroup(parent.getGroup());
-            
-            addRepo("files", u, session);
+                            
+            //addRepo("files", u, session);
+            // Fire an event so other apps can choose to other apps can setup the user
+            // if they need to
+            _(EventManager.class).fireEvent(new SignupEvent(u, parent.getGroup(), parent.getWebsite()));
+            _(EventManager.class).fireEvent(new JoinGroupEvent(u, parent.getGroup()));
                        
             tx.commit();
 

@@ -70,7 +70,7 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
             Resource rResources = websiteRootFolder.child("resources");
             if( rResources instanceof DirectoryResource) {
                 DirectoryResource dr = (DirectoryResource) rResources;
-                Resource rGroup = dr.child(giw.getGroup().getName());
+                Resource rGroup = dr.child(giw.getUserGroup().getName());
                 if( rGroup instanceof DirectoryResource) {
                     DirectoryResource dGroup = (DirectoryResource) rGroup;
                     children.addAll(dGroup.getChildren());
@@ -97,7 +97,7 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
 
     @Override
     public String getName() {
-        return giw.getGroup().getName();
+        return giw.getUserGroup().getName();
     }
 
     @Override
@@ -106,6 +106,10 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
     }
 
     public Group getGroup() {
-        return giw.getGroup();
-    }        
+        return giw.getUserGroup();
+    }
+    
+    public Website getWebsite() {
+        return giw.getWebsite();
+    }
 }

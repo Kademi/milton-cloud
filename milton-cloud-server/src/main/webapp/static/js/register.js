@@ -29,7 +29,7 @@ function doCreateAccount() {
     ajaxLoadingOn();
     $.ajax({
         type: 'POST',
-        url: 'register.html',
+        url: container.attr("action"),
         data: container.serialize(),
         dataType: "json",
         success: function(resp) {

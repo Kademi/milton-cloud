@@ -221,6 +221,9 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
+        if( auth == null || auth.getTag() == null ) {
+            return false;
+        }
         return parent.authorise(request, method, auth);
     }
 

@@ -94,6 +94,21 @@ public class TextTemplater implements Templater {
         pw.flush();
     }
 
+    public void writePage(String templatePath, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        if( !templatePath.startsWith("/")) {
+            templatePath = "/templates/apps/" + templatePath;
+        }        
+        Template template = engine.getTemplate(templatePath);
+        Context datamodel = new VelocityContext(context);
+        datamodel.put("rootFolder", rootFolder);
+        Profile user = securityManager.getCurrentUser();
+        if (user != null) {
+            datamodel.put("user", user);
+        }
+        template.merge(datamodel, writer);
+        writer.flush();
+    }    
+    
     public List<File> getTemplateFileRoots() {
         return roots;
     }
