@@ -46,10 +46,12 @@ CKEDITOR.plugins.add( 'embed_video',
             });
         }
 
-        editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
-        editor.element.getDocument().appendStyleSheet("http://blueimp.github.com/cdn/css/bootstrap.min.css");
-        editor.element.getDocument().appendStyleSheet("http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css");
-        editor.element.getDocument().appendStyleSheet("http://blueimp.github.com/Bootstrap-Image-Gallery/css/bootstrap-image-gallery.min.css");
+// These interfere with page themes, but might need to be put back somehow for editor layout
+// 
+//        editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
+//        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap.min.css");
+//        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-responsive.min.css");
+//        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-image-gallery.min.css");
 
         /*CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/vendor/jquery.ui.widget.js'));
 		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/tmpl.min.js'));

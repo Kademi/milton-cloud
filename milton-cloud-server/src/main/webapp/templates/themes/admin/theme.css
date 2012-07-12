@@ -775,6 +775,7 @@ select.Medium { width: 100px; }
 	border: 1px solid #dedede;
 	border-radius: 5px;
 	background: #f2f2f2;
+        min-height: 300px;
 }
 /* ClearFix */
 .ClearFix:after {
@@ -924,4 +925,7 @@ div.CheckBoxWrapper.Checked {
 }
 #managePost .Post > footer a.Delete {
 	background-image: url(images/icon_delete.png);
+}
+.BtnBar button {
+    float: right;
 }

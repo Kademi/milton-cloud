@@ -25,4 +25,6 @@ public interface VfsVisitor {
     void visit(Organisation p);
     void visit(Profile r);    
     void visit(Branch r);    
+    void visit(BaseEntity r);    
+    void visit(Group r);    
 }

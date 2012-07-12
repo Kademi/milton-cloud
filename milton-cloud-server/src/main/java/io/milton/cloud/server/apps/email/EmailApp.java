@@ -46,6 +46,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private MiltonCloudMailResourceFactory mailResourceFactory;
     private MailServer mailServer;
     private SpliffySecurityManager securityManager;
+    private GroupEmailService groupEmailService;
 
     @Override
     public String getInstanceId() {
@@ -54,6 +55,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        groupEmailService = new GroupEmailService();
         securityManager = resourceFactory.getSecurityManager();
         mailResourceFactory = new MiltonCloudMailResourceFactory();
         MailServerBuilder mailServerBuilder = new MailServerBuilder();
@@ -61,6 +63,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         mailServerBuilder.setEnablePop(false);
         mailServerBuilder.setEnableMsa(false);
         mailServerBuilder.setSmtpPort(2525); // high port for linux. TODO: make configurable
+        mailServerBuilder.setMailStore(new EmailItemMailStore());
+        mailServerBuilder.setQueueStore(new EmailItemQueueStore());
         mailServer = mailServerBuilder.build();
         mailServer.start();
     }
@@ -87,7 +91,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
-            children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation()));
+            children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation(), groupEmailService));
         }
         if (parent instanceof UserResource) {
             UserResource ur = (UserResource) parent;

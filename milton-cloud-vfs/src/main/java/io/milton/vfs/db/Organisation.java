@@ -17,6 +17,7 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -150,5 +151,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
-    }       
+    }
+
+    public Group group(String groupName, Session session) {
+        Group g = Group.findByOrgAndName(this, groupName, session); 
+        return g;
+    }
+
+    public List<Group> groups(Session session) {
+        return Group.findByOrg(this, session);  
+    }
 }

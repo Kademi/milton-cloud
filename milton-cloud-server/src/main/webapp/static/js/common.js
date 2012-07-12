@@ -309,44 +309,6 @@ function getPathFromHref(href) {
     return path;
 }
 
-function validateAndSaveAjax(container, redirectToRelativeUrl) {        
-    var form = $("form", container);
-    var formAction = form.attr("action");
-    log("validateAndSaveAjax", container, formAction);
-        
-    resetValidation();
-    if( checkRequiredFields(container) ) {
-        try {
-            ajaxLoadingOn();            
-            $.ajax({
-                type: 'POST',
-                url: formAction + "/.ajax",
-                data: $("form", container).serialize(),
-                dataType: "json",
-                success: function(resp) {
-                    ajaxLoadingOff();
-                    log("save success", resp)
-                     window.location.href = resp.data.url;
-                },
-                error: function(resp) {
-                    ajaxLoadingOff();
-                    alert("err");
-                    $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
-                    log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
-                    $(config.valiationMessageSelector, container).show(100);
-                }
-            });                
-        } catch(e) {
-            ajaxLoadingOff();
-            log("exception sending forum comment", e);
-        }             
-        log("is valid");
-    } else {
-        log("not valid");
-    }
-    return false;
-}
-
 
 function initEdify(container) {
     if( !$("body").hasClass("edifyIsEditMode")) {
@@ -487,4 +449,5 @@ function createFolder(name, parentHref, callback) {
         }
     });
 }
+
 

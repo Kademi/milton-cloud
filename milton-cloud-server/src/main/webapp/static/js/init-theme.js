@@ -26,13 +26,14 @@ function initTheme() {
     
     jQuery('textarea.autoresize').autoResize();    
     
-    initEdify();
-    
-    initNav();
-           
-    initExtraInfo();
-               
+    initActiveNav();    
+    initEdify();    
+    initNav();           
+    initExtraInfo();               
     initFontSwitching();
+    initHelp();
+    initModal();
+    
          
     log("initTheme: run page init functions");
     for( i=0; i<pageInitFunctions.length; i++) {
@@ -41,6 +42,37 @@ function initTheme() {
          
     log("finished init-theme");
 } 
+
+function initActiveNav() {
+    var url = window.location.pathname;
+    log("initActiveNav", url);
+    $("a").each(function(i, n) {
+        var node = $(n);
+        var href = node.attr("href");
+        if( href ) {
+            if( href.startsWith(url) ) {
+                node.addClass("active");
+            }
+        }
+    });
+}
+
+function initModal() {
+    $("body").on("click", ".Modal a.Close", function(e) {
+        $.tinybox.close();
+        e.preventDefault();
+    });
+}
+
+function initHelp () {
+    $(".helpIcon").click(function(e) {
+        $.tinybox.show("#modalHelp", {
+            overlayClose: false,
+            opacity: 0
+        });
+        e.preventDefault();
+    });	
+}
 
 function initNav() {    
     var bodyClasses = jQuery("body").attr("class");
@@ -173,10 +205,9 @@ function initHtmlEditors() {
             format_tags : 'p;h2;h3;h4;h5'
         };    
     
-        log("ckeditor config", config);
-
         //config.stylesSet = 'myStyles:/templates/themes/3dn/js/styles.js';
-        $('.htmleditor').ckeditor(config);
+        log("create editor", inp, config)
+        inp.ckeditor(config);
     });  
 }
 

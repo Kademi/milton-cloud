@@ -33,7 +33,7 @@ uniqueConstraints = {
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
-public class BaseEntity implements Serializable {
+public class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
@@ -237,4 +237,9 @@ public class BaseEntity implements Serializable {
         
         return r;
     }
+    
+    @Override
+    public void accept(VfsVisitor visitor) {
+        visitor.visit(this);
+    }      
 }

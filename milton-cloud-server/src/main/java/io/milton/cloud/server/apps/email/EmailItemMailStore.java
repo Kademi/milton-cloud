@@ -12,37 +12,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.vfs.db;
+package io.milton.cloud.server.apps.email;
+
+import java.util.List;
+import javax.mail.internet.MimeMessage;
+import org.masukomi.aspirin.core.store.mail.MailStore;
 
 /**
  *
  * @author brad
  */
-public abstract class AbstractVfsVisitor implements VfsVisitor {
+public class EmailItemMailStore implements MailStore{
 
     @Override
-    public void visit(Website c) {
+    public MimeMessage get(String mailid) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void visit(Organisation p) {
+    public List<String> getMailIds() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void visit(Profile r) {
+    public void init() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void visit(Branch r) {
+    public void remove(String mailid) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void visit(BaseEntity r) {
-
+    public void set(String mailid, MimeMessage msg) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    @Override
-    public void visit(Group r) {
-     
-    }
+    
 }

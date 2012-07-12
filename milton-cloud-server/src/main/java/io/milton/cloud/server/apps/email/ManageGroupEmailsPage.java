@@ -16,6 +16,8 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.db.GroupEmailJob;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -41,6 +43,9 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -54,8 +59,9 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
     private final CommonCollectionResource parent;
     private final Organisation organisation;
 
-    public ManageGroupEmailsPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        
+    private JsonResult jsonResult;
+    
+    public ManageGroupEmailsPage(String name, Organisation organisation, CommonCollectionResource parent) {        
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -63,13 +69,31 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // this form post is to create a shell group email job
+        String nameToCreate = parameters.get("name");
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        GroupEmailJob job = new GroupEmailJob();
+        job.setName(nameToCreate);
+        job.setOrganisation(organisation);
+        Date now = _(CurrentDateService.class).getNow();
+        job.setStatusDate(now);
+        session.save(job);
+        tx.commit();
+        
+        jsonResult = new JsonResult(true);
+        
+        return null;
     }    
         
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        _(HtmlTemplater.class).writePage("admin","email/manageGroupEmail", this, params, out);
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        } else {
+            _(HtmlTemplater.class).writePage("admin","email/manageGroupEmail", this, params, out);
+        }
     }
     
     public String getTitle() {

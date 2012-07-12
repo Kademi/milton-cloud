@@ -7,7 +7,7 @@
     <body>
         <section id="manageEmail" class="MainContent">
             <header class="ClearFix">
-                <a class="SmallBtn Add"><span>Send email</span></a>
+                <a class="SmallBtn Add" href="javascript:showAddJob()"><span>Send email</span></a>
             </header>
             <div class="Content">
                 <header>
@@ -22,8 +22,8 @@
                     <li>
                         <div class="emailStatus${email.statusCode}">
                             <span class="Date">$formatter.formatDate($email.statusDate)</span>
-                            <span class="Name">$email.title</span>
-                            <span class="Status">$email.status</span>
+                            <span class="Name">$!email.title</span>
+                            <span class="Status">$!email.status</span>
                             <aside>
                                 #if($email.statusCode == "Draft" )
                                 <a class="Edit EditEmail" title="Edit" href="$email.name">
@@ -44,7 +44,27 @@
                 </ul>
             </div>
         </section>
-
+        <div id="modalCreateJob" class="Modal">
+            <header>
+                <h3>Create email</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <form method="POST" action="${page.name}" onsubmit="return createJob(this)">
+                    <table>
+                        <tr>
+                            <th><label for="name">Enter email name</label></th>
+                            <td><input type="text" name="name" id="name" value="" placeholder="A name for the email job" /></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="BtnBar">
+                                <button class="Btn" type="submit">Save changes</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
         <script type="text/javascript">
             jQuery(function() {
                 initManageEmail();

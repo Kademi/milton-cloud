@@ -41,6 +41,9 @@ public class SpliffySecurityManager {
     }
 
     public UserResource getCurrentPrincipal() {
+        if( HttpManager.request() == null ) {
+            return null;
+        }
         Auth auth = HttpManager.request().getAuthorization();
         if (auth == null || auth.getTag() == null) {
             return null;

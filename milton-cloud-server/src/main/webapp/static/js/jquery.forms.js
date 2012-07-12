@@ -1,10 +1,65 @@
-/** Validation.js **/
+/**
+ *
+ *  jquery.forms.js
+ *  
+ *  Depends on common.js
+ *  
+ *  The target should be a 
+ * 
+ */
 
-function resetValidation() {
-    $(".validationError").remove();
-    $(".pageMessage").hide(300);
-    $(".error > *").unwrap();
-    $(".errorField").removeClass("errorField");
+(function( $ ) {
+    $.fn.forms = function(options) {
+        log("init forms plugin", this);
+        
+        var config = $.extend( {
+            callback: function() {
+                
+            }
+        }, options);  
+  
+        var container = this;
+        $(this).submit(function() {
+            var form = $(this);
+            log("save", form);
+            resetValidation(container);
+            if( checkRequiredFields(container) ) {
+                try {                    
+                    $.ajax({
+                        type: 'POST',
+                        url: form.attr("id"),
+                        data: form.serialize(),
+                        dataType: "json",
+                        success: function(resp) {
+                            ajaxLoadingOff();
+                            log("save success", resp)
+                            config.callback(resp)
+                        },
+                        error: function(resp) {
+                            ajaxLoadingOff();
+                            alert("err");
+                            $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
+                            log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
+                            $(config.valiationMessageSelector, container).show(100);
+                        }
+                    });                
+                } catch(e) {
+                    log("exception sending forum comment", e);
+                }            
+            } else {
+                log("form is not valid");
+            }
+            return false;
+        });    
+    };
+})( jQuery );
+
+
+function resetValidation(container) {
+    $(".validationError", container).remove();
+    $(".pageMessage", container).hide(300);
+    $(".error > *", container).unwrap();
+    $(".errorField", container).removeClass("errorField");
 }
 
 function checkRequiredFields(container) {
@@ -339,4 +394,3 @@ function validatePassword (pw, options) {
     return true;
 }
 
-/** End Validation.js **/

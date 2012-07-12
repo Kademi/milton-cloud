@@ -4,33 +4,15 @@
 function initFuseTheme() {
     log("initFuseTheme");
     
-    initActiveNav();
-	initTabPanel();
+    initTabPanel();
     initMenuEffects ();
     initDropDownControl();
-    initHelp();
-    initModal();
     initCheckbox();
             
     log("finished initFuseTheme");
 }
 
-function initModal() {
-    $("body").on("click", ".Modal a.Close", function(e) {
-        $.tinybox.close();
-        e.preventDefault();
-    });
-}
 
-function initHelp () {
-    $(".helpIcon").click(function(e) {
-        $.tinybox.show("#modalHelp", {
-            overlayClose: false,
-            opacity: 0
-        });
-        e.preventDefault();
-    });	
-}
 
 function initMenuEffects () {	
     //  JS FOR SIDEBAR MENU
@@ -51,19 +33,6 @@ function initMenuEffects () {
     }	
 }
 
-function initActiveNav() {
-    var url = window.location.pathname;
-    log("initActiveNav", url);
-    $("a").each(function(i, n) {
-        var node = $(n);
-        var href = node.attr("href");
-        if( href ) {
-            if( href.startsWith(url) ) {
-                node.addClass("active");
-            }
-        }
-    });
-}
 
 function initDropDownControl() {
     // Functionality for DropDown Control
@@ -105,42 +74,42 @@ function initCheckbox() {
 
 // Function check or uncheck for FuseChk checkbox
 $.fn.check = function(yes_or_no) {
-	var _this = $(this);
-	if(_this.is(".FuseChk")) {
-		_this
-			.attr("checked", yes_or_no)
-		if(yes_or_no) {
-			_this.parent().addClass("Checked");
-		} else {
-			_this.parent().removeClass("Checked");
-		}
+    var _this = $(this);
+    if(_this.is(".FuseChk")) {
+        _this
+        .attr("checked", yes_or_no)
+        if(yes_or_no) {
+            _this.parent().addClass("Checked");
+        } else {
+            _this.parent().removeClass("Checked");
+        }
 			
-	}
+    }
 }
 
 function initTabPanel() {
-	var tab_container = $('.TabContainer');
-	if(tab_container[0]) {
-		var tab_content = tab_container.find('.TabContent');
-		var tab_nav = tab_container.find('nav a');
-		tab_content.addClass('Hidden');
+    var tab_container = $('.TabContainer');
+    log("initTabPanel", tab_container);
+    if(tab_container[0]) {
+        var tab_content = tab_container.find('.TabContent');
+        var tab_nav = tab_container.find('nav a');
 		
-		tab_nav.on('click', function(e) {
-			e.preventDefault();
+        tab_nav.on('click', function(e) {
+            e.preventDefault();
 			
-			var _this = $(this);
-			var _this_content = tab_content.eq(_this.index());
+            var _this = $(this);
+            var _this_content = tab_content.eq(_this.index());
 			
-			if(!_this.hasClass('Active')) {
-				tab_nav.filter('.Active').removeClass('Active');
-				_this.addClass('Active');
-				tab_content.not(_this_content).addClass('Hidden');
-				_this_content.removeClass('Hidden');
-			}
-		});
+            if(!_this.hasClass('Active')) {
+                tab_nav.filter('.Active').removeClass('Active');
+                _this.addClass('Active');
+                tab_content.not(_this_content).addClass('Hidden');
+                _this_content.removeClass('Hidden');
+            }
+        });
 		
-		tab_nav.eq(0).trigger('click');
-	}
+        tab_nav.eq(0).trigger('click');
+    }
 }
 
 if(!String.prototype.trim) {

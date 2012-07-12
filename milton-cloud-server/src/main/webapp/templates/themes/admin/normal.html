@@ -2,13 +2,23 @@
     <head>
         <title>$view.title</title>
         <link href="theme.css" rel="stylesheet" type="text/css" />
+        <link href="/static/common/validation.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js">//</script>
         <script type="text/javascript" src="/static/js/tinybox-1.2.min.js">//</script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.autoresize.js">//</script> 
         <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>        
+        <script type="text/javascript" src="/static/js/jquery.forms.js">//</script>        
+        <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
         <script type="text/javascript" src="/static/js/common.js">//</script>        
         <script type="text/javascript" src="/static/js/file.js">//</script>        
+        <script type="text/javascript" src="/static/js/init-theme.js">//</script>
         <script type="text/javascript" src="theme.js">//</script>
+        <script type="text/javascript" src="/static/js/toolbars.js" >//</script>
+        <script type="text/javascript" src="/static/ckeditor36/ckeditor.js" >//</script>
+        <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" >//</script>
+        <script type="text/javascript" src="/static/js/toolbars.js" >//</script>         
+        
     </head>
     <body class="theme">
         <!-- page layout goes here -->
@@ -36,7 +46,7 @@
                         <div class="menu">
                             <ul>
                                 #foreach($parentItem in $menu.activeItems)
-                                    #foreach($item in $parentItem.items)
+                                #foreach($item in $parentItem.items)
                                 <li id="$item.id">
                                     <h4><a href="$item.href" class="Arrow">$item.text</a></h4>                                    
                                     <ul>
@@ -46,8 +56,8 @@
                                     </ul>				
                                 </li>
                                 <li><hr/></li>
-                                    
-                                    #end
+
+                                #end
                                 #end
                             </ul>
                         </div>
@@ -68,23 +78,24 @@
                     </div>
                 </section>
             </div>
-			<div id="modalHelp" class="Modal">
-				<header>
-					<h3>Help dialog</h3>
-					<a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
-				</header>
-				<div class="ModalContent">
-					<p>This is an animated dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
-				</div>
-			</div>
+            <div id="modalHelp" class="Modal">
+                <header>
+                    <h3>Help dialog</h3>
+                    <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+                </header>
+                <div class="ModalContent">
+                    <p>This is an animated dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+                </div>
+            </div>
 
         </div><!-- END WRAPPER -->
 
 
         <script type="text/javascript" >
-            jQuery(function() {
+            $(document).ready(function(){
+                initTheme();
                 initFuseTheme();
-            });        
+            });            
         </script>
     </body>
 </html>

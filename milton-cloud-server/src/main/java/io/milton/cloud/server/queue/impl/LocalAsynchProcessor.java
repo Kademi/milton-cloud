@@ -53,6 +53,7 @@ public class LocalAsynchProcessor implements AsynchProcessor {
     public void start() {
         log.debug("AysnchProcessor starting...");
         log.debug("..starting queue processor");
+        rootContext.put(this);
         threadProcessor = new Thread(new QueueProcessor());
         threadProcessor.setDaemon(true);
         this.running = true;
@@ -102,7 +103,7 @@ public class LocalAsynchProcessor implements AsynchProcessor {
 
             @Override
             public void execute(Context context) {
-                System.out.println("context: " + context);
+                log.info("execite: " + p.getClass());
                 Session session = sessionManager.open();
                 context.put(session);
                 p.doProcess(context);

@@ -16,14 +16,15 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 
 /**
  * A user group, is a list of users and other groups. Is typically used to convey priviledges
@@ -38,10 +39,24 @@ import org.hibernate.criterion.Expression;
 @Table(name="GROUP_ENTITY")
 @DiscriminatorValue("G")
 public class Group extends BaseEntity {
-    
-    
+        
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
+
+    static List<Group> findByOrg(Organisation org, Session session) {
+        Criteria crit = session.createCriteria(Group.class);
+        crit.add(Expression.eq("organisation", org));
+        crit.addOrder(Order.asc("name"));
+        return DbUtils.toList(crit, Group.class);
+    }
+    
+    public static Group findByOrgAndName(Organisation org, String name, Session session) {
+        Criteria crit = session.createCriteria(Group.class);
+        crit.add(Expression.eq("organisation", org));
+        crit.add(Expression.eq("name", name));
+        return (Group) crit.uniqueResult();
+    }    
+    
     
     public boolean isMember(BaseEntity u) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
@@ -54,4 +69,11 @@ public class Group extends BaseEntity {
     public boolean containsUser(BaseEntity entity) {
         return isMember(entity);
     }
+
+    @Override
+    public void accept(VfsVisitor visitor) {
+        visitor.visit(this);
+    }
+    
+    
 }

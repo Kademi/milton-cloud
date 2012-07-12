@@ -15,6 +15,7 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
@@ -47,6 +48,7 @@ public class GroupEmailJob implements Serializable{
     private String subject;
     private String fromAddress;
     private String status;
+    private String html;
     private Date statusDate;
 
     @Id
@@ -77,7 +79,7 @@ public class GroupEmailJob implements Serializable{
         this.name = name;
     }
 
-    @Column(nullable=false)
+    @Column
     public String getTitle() {
         return title;
     }
@@ -86,7 +88,7 @@ public class GroupEmailJob implements Serializable{
         this.title = title;
     }
 
-    @Column(nullable=true)
+    @Column
     public String getNotes() {
         return notes;
     }
@@ -95,7 +97,7 @@ public class GroupEmailJob implements Serializable{
         this.notes = notes;
     }
 
-    @Column(nullable=false)
+    @Column
     public String getSubject() {
         return subject;
     }
@@ -104,7 +106,7 @@ public class GroupEmailJob implements Serializable{
         this.subject = subject;
     }
 
-    @Column(nullable=false)
+    @Column
     public String getFromAddress() {
         return fromAddress;
     }
@@ -124,7 +126,8 @@ public class GroupEmailJob implements Serializable{
 
     /**
      * c=completed
-     * p=in progress
+     * r=ready to send (ie as commanded by UI)
+     * p=in progress (set by background process)
      * otherwise not started
      * 
      * @return 
@@ -156,6 +159,19 @@ public class GroupEmailJob implements Serializable{
     public void setEmailItems(List<EmailItem> emailItems) {
         this.emailItems = emailItems;
     }
+
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
+
+    public boolean readyToSend() {
+        return "r".equals(getStatus());
+    }
+    
     
     
     
