@@ -18,13 +18,11 @@ package io.milton.cloud.server.apps.user;
 
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -41,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.*;
 
 /**
  * Represents the collection of users defined on this organisation as their admin
@@ -53,6 +52,7 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     private final String name;
     
     private ResourceList children;
+    private InstantiationVisitor instantiationVisitor;
 
     public UsersFolder(CommonCollectionResource parent, String name) {        
         this.parent = parent;
@@ -66,9 +66,26 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return super.child(childName);
+        return super.child(childName); // TODO: need to pick out resources without loading whole collection
     }
-                
+    
+    @Override
+    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+        if( children == null ) {
+            children = new ResourceList();
+            _(ApplicationManager.class).addBrowseablePages(this, children);
+            List<BaseEntity> entities = BaseEntity.find(getOrganisation(), SessionManager.session());
+            for( BaseEntity e : entities ) {
+                CommonResource r = instantiateEntity(e);
+                children.add(r);
+            }
+        }
+        return children;
+    }    
+
+    
+    
+    
     @Override
     public CommonCollectionResource getParent() {
         return parent;
@@ -88,23 +105,6 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     public String getName() {
         return name;
     }
-
-
-
-    @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if( children == null ) {
-            children = new ResourceList();
-            _(ApplicationManager.class).addBrowseablePages(this, children);
-            List<Profile> users = Profile.findByAdminOrg(getOrganisation(), SessionManager.session());
-            for( Profile p : users ) {
-                UserResource ur = new UserResource(this, p);
-                children.add(ur);
-            }
-        }
-        return children;
-    }
-
     
     @Override
     public Map<Principal, List<Priviledge>> getAccessControlList() {
@@ -131,5 +131,39 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
- 
+
+    /**
+     * Uses the visitor pattern to create an instance of an appropriate resource
+     * 
+     * @param e
+     * @return 
+     */
+    private CommonResource instantiateEntity(BaseEntity e) {
+        if( instantiationVisitor == null ) {
+            instantiationVisitor = new InstantiationVisitor();
+        }
+        instantiationVisitor.visit(e);
+        return instantiated;
+    }
+    
+    private CommonResource instantiated;
+    
+    private class InstantiationVisitor extends AbstractVfsVisitor {
+
+        @Override
+        public void visit(Group r) {
+            instantiated = new GroupResource(UsersFolder.this, r);
+        }
+
+        @Override
+        public void visit(Organisation p) {
+            instantiated = new OrganisationFolder(UsersFolder.this, p);
+        }
+
+        @Override
+        public void visit(Profile r) {
+            instantiated = new UserResource(UsersFolder.this, r);
+        }
+        
+    }
 }

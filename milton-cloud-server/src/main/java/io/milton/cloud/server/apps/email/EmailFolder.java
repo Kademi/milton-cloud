@@ -16,10 +16,7 @@ package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.UserResource;
+import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -51,12 +48,12 @@ import static io.milton.context.RequestContext._;
  * @author brad
  */
 public class EmailFolder extends AbstractCollectionResource implements GetableResource, MessageFolder {
-    private final UserResource parent;
+    private final BaseEntityResource parent;
     private final String name;
     
     private ResourceList children;
 
-    public EmailFolder(UserResource parent, String name) {       
+    public EmailFolder(BaseEntityResource parent, String name) {       
         this.parent = parent;
         this.name = name;
     }
@@ -95,7 +92,7 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         if( children == null ) {
             children = new ResourceList();
             _(ApplicationManager.class).addBrowseablePages(this, children);
-            List<EmailItem> items = EmailItem.findByRecipient(getUser(), SessionManager.session());
+            List<EmailItem> items = EmailItem.findByRecipient(getEntity(), SessionManager.session());
             for( EmailItem item : items ) {
                 EmailItemFolder f = new EmailItemFolder(this, item);
                 children.add(f);
@@ -104,8 +101,8 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         return children;
     }
     
-    public Profile getUser() {
-        return parent.getThisUser();
+    public BaseEntity getEntity() {
+        return parent.getBaseEntity();
     }
 
     

@@ -18,7 +18,6 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -35,11 +34,18 @@ import org.hibernate.criterion.Expression;
 @Entity
 public class Website implements Serializable, VfsAcceptor {
 
-    public static List<Website> findByWebsite(Repository repository, Session session) {
+    public static List<Website> findByRepository(Repository repository, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.add(Expression.eq("repository", repository));
         return DbUtils.toList(crit, Website.class);
     }
+    
+    public static Website findByDomainName(String name, Session session) {
+        Criteria crit = session.createCriteria(Website.class);
+        crit.add(Expression.eq("name", name));
+        return (Website) crit.uniqueResult();
+    }          
+    
     private Organisation organisation;
     private long id;
     private String name; // identifies the resource to webdav

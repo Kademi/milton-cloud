@@ -22,7 +22,6 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
@@ -64,7 +63,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     }
 
     @Override
-    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
+    public PrincipalResource findEntity(BaseEntity u) throws NotAuthorizedException, BadRequestException{
         return UserApp.findEntity(u, this);
     }
 

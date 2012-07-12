@@ -1,6 +1,7 @@
 package io.milton.vfs.db;
 
 import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +9,6 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
-import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 
 /**
@@ -33,7 +33,7 @@ uniqueConstraints = {
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
-public class BaseEntity implements Serializable, VfsAcceptor {
+public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
@@ -45,6 +45,14 @@ public class BaseEntity implements Serializable, VfsAcceptor {
             return (BaseEntity) list.get(0);
         }
     }
+
+    public static List<BaseEntity> find(Organisation organisation, Session session) {
+        Criteria crit = session.createCriteria(BaseEntity.class);
+        crit.add(Expression.eq("organisation", organisation));
+        return DbUtils.toList(crit, BaseEntity.class);
+    }
+    
+    
     private long id;
     private String name;
     private String type;
@@ -243,9 +251,5 @@ public class BaseEntity implements Serializable, VfsAcceptor {
         
         return r;
     }
-    
-    @Override
-    public void accept(VfsVisitor visitor) {
-        visitor.visit(this);
-    }      
+      
 }

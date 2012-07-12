@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import org.apache.commons.io.FileUtils;
-import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -81,7 +80,7 @@ public class DataSessionTest {
         
         user = new Profile();
         user.setName("testUser");
-        user.setAdminOrg(org);
+        user.setBusinessUnit(org);
         user.setCreatedDate(currentDateService.getNow());
         user.setModifiedDate(currentDateService.getNow());
         session.save(user);

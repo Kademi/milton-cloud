@@ -24,7 +24,6 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
-import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
@@ -37,7 +36,6 @@ import static io.milton.context.RequestContext._;
  */
 public class OrganisationsApp implements Application {
 
-    private final WebsiteDao websiteDao = new WebsiteDao();
     private ApplicationManager applicationManager;
 
     @Override
@@ -61,7 +59,7 @@ public class OrganisationsApp implements Application {
     @Override
     public Resource getPage(Resource parent, String requestedName) {
         if (parent == null) {
-            Website website = websiteDao.getWebsite(requestedName, SessionManager.session());
+            Website website = Website.findByDomainName(requestedName, SessionManager.session());
             if (website == null) {
                 Organisation org = OrganisationDao.getRootOrg(SessionManager.session());
                 if (org == null) {

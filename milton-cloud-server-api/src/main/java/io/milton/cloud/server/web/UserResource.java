@@ -30,12 +30,14 @@ import io.milton.vfs.db.utils.SessionManager;
 import javax.mail.internet.MimeMessage;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.caldav.CalDavPrincipal;
+import io.milton.http.carddav.CardDavPrincipal;
 
 /**
  *
  * @author brad
  */
-public class UserResource extends AbstractCollectionResource implements CollectionResource, MakeCollectionableResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox {
+public class UserResource extends AbstractCollectionResource implements CollectionResource, MakeCollectionableResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox, CalDavPrincipal, CardDavPrincipal {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserResource.class);
     private final Profile user;

@@ -106,7 +106,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
             Profile u = new Profile();
             u.setOrganisation(parent.getOrganisation());
-            u.setAdminOrg(parent.getOrganisation()); // TODO: need to allow registration within a child business unit
+            u.setBusinessUnit(parent.getOrganisation()); // TODO: need to allow registration within a child business unit
             u.setName(newName);
             u.setNickName(nickName);
             u.setEmail(parameters.get("email"));

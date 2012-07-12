@@ -30,6 +30,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.BaseEntity;
 
 /**
  *
@@ -40,8 +41,7 @@ public class UserApp implements Application, MenuApplication {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
 
-    public static PrincipalResource findEntity(Profile u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
-        System.out.println("findEntity");
+    public static PrincipalResource findEntity(BaseEntity u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
         Resource r = rootFolder.child(USERS_FOLDER_NAME);
         if (r instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) r;
@@ -61,6 +61,7 @@ public class UserApp implements Application, MenuApplication {
         }
         return null;
     }
+    
 
     @Override
     public String getInstanceId() {

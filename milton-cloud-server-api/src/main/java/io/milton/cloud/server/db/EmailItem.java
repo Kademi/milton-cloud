@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
@@ -64,7 +65,7 @@ public class EmailItem implements Serializable {
         return DbUtils.toList(crit, EmailItem.class);
     }
 
-    public static List<EmailItem> findByRecipient(Profile p, Session session) {
+    public static List<EmailItem> findByRecipient(BaseEntity p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         crit.add(Expression.eq("recipient", p));
         crit.addOrder(Order.desc("sendStatusDate"));
@@ -87,7 +88,7 @@ public class EmailItem implements Serializable {
     private long id;
     private GroupEmailJob job; // optional, might be linked to a job
     private Profile sender; // optional, the user account which sent the email if originated internally
-    private Profile recipient; // reference to user, possibly null
+    private BaseEntity recipient; // reference to user, possibly null
     private String recipientAddress; // actual email address being sent to
     private String fromAddress; // the stated from address
     private String replyToAddress; // reply-to field    
@@ -137,11 +138,11 @@ public class EmailItem implements Serializable {
     }
 
     @ManyToOne
-    public Profile getRecipient() {
+    public BaseEntity getRecipient() {
         return recipient;
     }
 
-    public void setRecipient(Profile recipient) {
+    public void setRecipient(BaseEntity recipient) {
         this.recipient = recipient;
     }
 

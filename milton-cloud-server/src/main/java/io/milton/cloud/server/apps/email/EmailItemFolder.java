@@ -124,15 +124,15 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
         if (children == null) {
             children = new ResourceList();
             _(ApplicationManager.class).addBrowseablePages(this, children);
-            List<EmailItem> items = EmailItem.findByRecipient(getUser(), SessionManager.session());
+            List<EmailItem> items = EmailItem.findByRecipient(getEntity(), SessionManager.session());
             for (EmailItem item : items) {
             }
         }
         return children;
     }
 
-    public Profile getUser() {
-        return parent.getUser();
+    public BaseEntity getEntity() {
+        return parent.getEntity();
     }
 
     @Override

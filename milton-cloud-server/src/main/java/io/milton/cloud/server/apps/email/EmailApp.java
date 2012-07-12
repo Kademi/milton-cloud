@@ -16,12 +16,14 @@ package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.event.SignupEvent;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -36,9 +38,15 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.event.Event;
+import io.milton.event.EventListener;
+import io.milton.mail.Filter;
 import io.milton.mail.StandardMessageFactory;
 import io.milton.mail.StandardMessageFactoryImpl;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.masukomi.aspirin.core.config.Configuration;
 import org.masukomi.aspirin.core.listener.ListenerManager;
 
@@ -46,7 +54,7 @@ import org.masukomi.aspirin.core.listener.ListenerManager;
  *
  * @author brad
  */
-public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication {
+public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication, EventListener {
 
     private MiltonCloudMailResourceFactory mailResourceFactory;
     private MailServer mailServer;
@@ -57,6 +65,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private EmailItemQueueStore queueStore;
     private EmailItemMailStore mailStore;
     private CurrentDateService currentDateService;
+    private MCMailFilter mailFilter;
 
     @Override
     public String getInstanceId() {
@@ -67,11 +76,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         groupEmailService = new GroupEmailService();
         securityManager = resourceFactory.getSecurityManager();
-        mailResourceFactory = new MiltonCloudMailResourceFactory();
+        mailResourceFactory = new MiltonCloudMailResourceFactory(resourceFactory);
         this.currentDateService = config.getContext().get(CurrentDateService.class);
         queueStore = new EmailItemQueueStore(resourceFactory.getSessionManager(), aspirinConfiguration, listenerManager, currentDateService);
         StandardMessageFactory smf = new StandardMessageFactoryImpl();
         mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf);
+        mailFilter = new MCMailFilter(resourceFactory.getSessionManager(), config.getContext()); 
 
         MailServerBuilder mailServerBuilder = new MailServerBuilder();
         mailServerBuilder.setListenerManager(listenerManager);
@@ -82,6 +92,9 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         mailServerBuilder.setSmtpPort(2525); // high port for linux. TODO: make configurable        
         mailServerBuilder.setMailStore(mailStore);
         mailServerBuilder.setQueueStore(queueStore);
+        List<Filter> filters = new ArrayList<>();
+        filters.add(mailFilter);
+        mailServerBuilder.setFilters(Collections.unmodifiableList(filters));
         mailServer = mailServerBuilder.build();
         mailStore.setAspirinInternal(mailServerBuilder.getAspirinInternal());
         mailServer.start();
@@ -111,8 +124,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
             children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation(), groupEmailService));
         }
-        if (parent instanceof UserResource) {
-            UserResource ur = (UserResource) parent;
+        if (parent instanceof BaseEntityResource) {
+            BaseEntityResource ur = (BaseEntityResource) parent;
             EmailFolder f = new EmailFolder(ur, "inbox");
             children.add(f);
         }
@@ -175,6 +188,11 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 //                <div class="clr"></div>
 //                <a class="close" href="#">close</a>
 //            </div>
+
+    }
+
+    @Override
+    public void onEvent(Event e) {
 
     }
 }

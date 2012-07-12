@@ -11,7 +11,6 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
-import io.milton.cloud.server.db.utils.WebsiteDao;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.ResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
@@ -42,7 +41,6 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
     public static final Date LONG_LONG_AGO = new Date(0);
     private String basePath = "/_hashes";
     private final SpliffySecurityManager securityManager;
-    private final WebsiteDao websiteDao;
     private final HashStore hashStore;
     private final BlobStore blobStore;
 
@@ -50,7 +48,6 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.securityManager = securityManager;
-        this.websiteDao = new WebsiteDao();
     }
 
     @Override
@@ -59,7 +56,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
             host = host.substring(0, host.indexOf(":"));
         }
         Organisation org;
-        Website website = websiteDao.getWebsite(host, SessionManager.session());
+        Website website = Website.findByDomainName(host, SessionManager.session());
         if (website == null) {
             org = OrganisationDao.getRootOrg(SessionManager.session());
             if (org == null) {

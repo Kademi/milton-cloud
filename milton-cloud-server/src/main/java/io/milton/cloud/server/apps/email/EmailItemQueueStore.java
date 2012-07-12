@@ -18,10 +18,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailSendAttempt;
 import io.milton.vfs.db.utils.SessionManager;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import org.hibernate.Session;
@@ -63,7 +60,7 @@ public class EmailItemQueueStore implements QueueStore {
 
     @Override
     public List<String> clean() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return Collections.EMPTY_LIST;
     }
 
     @Override

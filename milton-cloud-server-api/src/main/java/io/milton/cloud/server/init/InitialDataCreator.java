@@ -149,16 +149,16 @@ public class InitialDataCreator implements LifecycleApplication {
     }
 
     private Profile checkCreateUser(String name, String password, Session session, Organisation org) throws HibernateException {
-        Profile t = Profile.find(org, name, session);
-        if (t == null) {
+        BaseEntity e = BaseEntity.find(org, name, session);
+        if (e == null) {
             System.out.println("User not found: " + name + " in org: " + org.getId());
-            t = new Profile();
+            Profile t = new Profile();
             t.setOrganisation(org);
             t.setName(name);
             t.setCreatedDate(new Date());
             t.setModifiedDate(new Date());
             t.setEmail(name + "@bradmcevoy.com");
-            t.setAdminOrg(org);
+            t.setBusinessUnit(org);
             session.save(t);
             passwordManager.setPassword(t, password);
             System.out.println("created test user");
@@ -210,8 +210,9 @@ public class InitialDataCreator implements LifecycleApplication {
             c.setOrganizationName("Bloggs.com");
             c.setUid(UUID.randomUUID().toString());
             session.save(c);
+            return t;
         }
-        return t;
+        return (Profile) e;
     }
 
     public boolean isEnabled() {

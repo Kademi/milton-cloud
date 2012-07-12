@@ -1,6 +1,6 @@
 package io.milton.cloud.server.apps;
 
-import io.milton.context.Context;
+import io.milton.context.RootContext;
 import java.util.Properties;
 
 /**
@@ -10,14 +10,14 @@ import java.util.Properties;
 public class AppConfig {
 
     private Properties properties;
-    private Context context;
+    private RootContext context;
 
-    public AppConfig(Properties properties, Context context) {
+    public AppConfig(Properties properties, RootContext context) {
         this.properties = properties;
         this.context = context;
     }
 
-    public Context getContext() {
+    public RootContext getContext() {
         return context;
     }
             

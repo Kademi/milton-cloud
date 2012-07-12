@@ -88,7 +88,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         if (parent instanceof RepositoryFolder) {
             RepositoryFolder repoFolder = (RepositoryFolder) parent;
             Repository r = repoFolder.getRepository();
-            List<Website> list = Website.findByWebsite(r, SessionManager.session());
+            List<Website> list = Website.findByRepository(r, SessionManager.session());
             if (!list.isEmpty()) {
                 Website w = list.get(0); // should only ever be 1
                 ForumsAdminFolder forumsAdminFolder = new ForumsAdminFolder("forums", repoFolder, w);

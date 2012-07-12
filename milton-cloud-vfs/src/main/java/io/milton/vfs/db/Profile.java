@@ -21,20 +21,14 @@ import org.hibernate.criterion.Expression;
 public class Profile extends BaseEntity implements VfsAcceptor {
     
     
-    public static Profile find(Organisation org, String name, Session session) {
-        Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.and(Expression.eq("adminOrg", org), Expression.eq("name", name)));        
-        return DbUtils.unique(crit);
-    }
-
-    public static List<Profile> findByAdminOrg(Organisation organisation, Session session) {
+    public static List<Profile> findByBusinessUnit(Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.add(Expression.eq("adminOrg", organisation));        
-        return DbUtils.toList(crit, Profile.class);
-        
+        return DbUtils.toList(crit, Profile.class);        
     }
-            
-    private Organisation adminOrg;
+    
+     
+    private Organisation businessUnit; // users may be assigned to a business unit within their administrative organisation
     
     private List<Credential> credentials;
                 
@@ -114,25 +108,19 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.phone = phone;
     }
 
-    
     /**
-     * This is a reference to the organisation which owns the profile in an
-     * administrative sense. This will generally be a parent of the direct organisation
-     * and will usually refer to the fuse customer account which owns the profile
+     * Users may be assigned to a business unit within their administative organisation
      * 
-     * This is used in filtering users when we don't care about the direct organisation
-     * 
-     * @return 
      */
-    @ManyToOne(optional=false)
-    public Organisation getAdminOrg() {
-        return adminOrg;
+    @ManyToOne(optional=true)
+    public Organisation getBusinessUnit() {
+        return businessUnit;
     }
 
-    public void setAdminOrg(Organisation adminOrg) {
-        this.adminOrg = adminOrg;
+    public void setBusinessUnit(Organisation businessUnit) {
+        this.businessUnit = businessUnit;
     }
-    
+      
     
     
     /**
