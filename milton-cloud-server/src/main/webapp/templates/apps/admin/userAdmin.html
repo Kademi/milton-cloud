@@ -75,30 +75,30 @@
                     <tr>
                         <td>
                             #if($p.firstName)
-                                $p.firstName
+                            $p.firstName
                             #else
-                                $p.name
+                            $p.name
                             #end
                         </td>
                         <td>$!p.surName</td>
                         <td>$p.email</td>
                         <td>$!p.phone</td>
                         <td>NSW</td>
-                        <td></td>
+                        <td>
+                            <div class="Controller">
+                                <a title="Show Dialogue" class="ShowDialog" href="#"><span class="Hidden">Show Dialogue</span></a>
+                                <div class="Dialog Hidden">
+                                    <a href="$p.id">Edit user details</a>
+                                    <a href="$p.id">View user details</a>
+                                </div>
+                            </div>
+                        </td>                    
                     </tr>
                     #end
                 </table>
             </div>
         </section>
-        <div class="Hidden">			
-            <div class="Controller" id="tempController">
-                <a href="#" class="ShowDialog" title="Show Dialogue"><span class="Hidden">Show Dialogue</span></a>
-                <div class="Dialog Hidden">
-                    <a href="">Edit module details</a>
-                    <a href="">View module details</a>
-                </div>
-            </div>
-        </div>
+        
         <script type="text/javascript" >
             jQuery(function() {
                 initManageUser();                

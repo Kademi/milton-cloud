@@ -14,8 +14,13 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.db.EmailItem;
+import io.milton.mail.StandardMessageFactory;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 import javax.mail.internet.MimeMessage;
+import org.hibernate.Session;
+import org.masukomi.aspirin.core.AspirinInternal;
 import org.masukomi.aspirin.core.store.mail.MailStore;
 
 /**
@@ -24,9 +29,30 @@ import org.masukomi.aspirin.core.store.mail.MailStore;
  */
 public class EmailItemMailStore implements MailStore{
 
+    private final SessionManager sessionManager;
+    private final StandardMessageFactory standardMessageFactory;
+    private AspirinInternal aspirinInternal;
+
+    public EmailItemMailStore(SessionManager sessionManager, StandardMessageFactory standardMessageFactory) {
+        this.sessionManager = sessionManager;
+        this.standardMessageFactory = standardMessageFactory;
+    }
+        
+    
     @Override
     public MimeMessage get(String mailid) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Session session = sessionManager.open();
+        try {
+            Long id = Long.parseLong(mailid);
+            EmailItem i = (EmailItem) session.get(EmailItem.class, id);
+            if( i == null ) {
+                return null;
+            }
+            MimeMessage msg = toMimeMessage(i);
+            return msg;
+        } finally {
+            sessionManager.close();
+        }
     }
 
     @Override
@@ -36,7 +62,7 @@ public class EmailItemMailStore implements MailStore{
 
     @Override
     public void init() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     @Override
@@ -48,5 +74,22 @@ public class EmailItemMailStore implements MailStore{
     public void set(String mailid, MimeMessage msg) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    private MimeMessage toMimeMessage(EmailItem i) {
+        EmailItemStandardMessage sm = new EmailItemStandardMessage(i);
+        MimeMessage mm = aspirinInternal.createNewMimeMessage();
+        standardMessageFactory.toMimeMessage(sm, mm);
+        return mm;
+    }
+
+    public AspirinInternal getAspirinInternal() {
+        return aspirinInternal;
+    }
+
+    public void setAspirinInternal(AspirinInternal aspirinInternal) {
+        this.aspirinInternal = aspirinInternal;
+    }
+    
+    
     
 }

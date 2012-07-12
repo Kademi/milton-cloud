@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
@@ -35,7 +36,11 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.mail.StandardMessageFactory;
+import io.milton.mail.StandardMessageFactoryImpl;
 import io.milton.vfs.db.utils.SessionManager;
+import org.masukomi.aspirin.core.config.Configuration;
+import org.masukomi.aspirin.core.listener.ListenerManager;
 
 /**
  *
@@ -47,6 +52,11 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private MailServer mailServer;
     private SpliffySecurityManager securityManager;
     private GroupEmailService groupEmailService;
+    private Configuration aspirinConfiguration = new Configuration();
+    private ListenerManager listenerManager = new ListenerManager();
+    private EmailItemQueueStore queueStore;
+    private EmailItemMailStore mailStore;
+    private CurrentDateService currentDateService;
 
     @Override
     public String getInstanceId() {
@@ -58,14 +68,22 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         groupEmailService = new GroupEmailService();
         securityManager = resourceFactory.getSecurityManager();
         mailResourceFactory = new MiltonCloudMailResourceFactory();
+        this.currentDateService = config.getContext().get(CurrentDateService.class);
+        queueStore = new EmailItemQueueStore(resourceFactory.getSessionManager(), aspirinConfiguration, listenerManager, currentDateService);
+        StandardMessageFactory smf = new StandardMessageFactoryImpl();
+        mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf);
+
         MailServerBuilder mailServerBuilder = new MailServerBuilder();
+        mailServerBuilder.setListenerManager(listenerManager);
+        mailServerBuilder.setAspirinConfiguration(aspirinConfiguration);
         mailServerBuilder.setMailResourceFactory(mailResourceFactory);
         mailServerBuilder.setEnablePop(false);
         mailServerBuilder.setEnableMsa(false);
-        mailServerBuilder.setSmtpPort(2525); // high port for linux. TODO: make configurable
-        mailServerBuilder.setMailStore(new EmailItemMailStore());
-        mailServerBuilder.setQueueStore(new EmailItemQueueStore());
+        mailServerBuilder.setSmtpPort(2525); // high port for linux. TODO: make configurable        
+        mailServerBuilder.setMailStore(mailStore);
+        mailServerBuilder.setQueueStore(queueStore);
         mailServer = mailServerBuilder.build();
+        mailStore.setAspirinInternal(mailServerBuilder.getAspirinInternal());
         mailServer.start();
     }
 
@@ -81,7 +99,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             if (requestedName.equals("inbox")) {
-                return new MyInboxPage(requestedName, wrf); 
+                return new MyInboxPage(requestedName, wrf);
             }
         }
         return null;
@@ -101,7 +119,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     }
 
     @Override
-    public void appendMenu(MenuItem parent) {        
+    public void appendMenu(MenuItem parent) {
         switch (parent.getId()) {
             case "menuRoot":
                 if (parent.getRootFolder() instanceof WebsiteRootFolder) {
@@ -121,12 +139,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
                 break;
         }
     }
-    
+
     private String getEmailMenuItemText() {
         Profile currentUser = securityManager.getCurrentUser();
         int numUnread = EmailItem.findByNumUnreadByRecipient(currentUser, SessionManager.session());
         StringBuilder sb = new StringBuilder();
-        if( numUnread > 0 ) {
+        if (numUnread > 0) {
             sb.append("<span>").append(numUnread).append("</span>");
         }
         sb.append("Notifications");

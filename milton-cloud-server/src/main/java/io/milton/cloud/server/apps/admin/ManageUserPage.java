@@ -16,11 +16,8 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -43,7 +39,6 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
 
@@ -51,22 +46,23 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class UserAdminPage extends AbstractResource implements GetableResource, PostableResource {
+public class ManageUserPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(UserAdminPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageUserPage.class);
     
-    private final String name;
     private final CommonCollectionResource parent;
-    private final Organisation organisation;
-    private JsonResult jsonResult;
-    private List<Profile> searchResults;
+    private final Profile profile;
 
-    public UserAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        this.organisation = organisation;
+    private JsonResult jsonResult;
+
+
+    public ManageUserPage(Profile profile, CommonCollectionResource parent) {
+        this.profile = profile;
         this.parent = parent;
-        this.name = name;
     }
 
+    
+    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -74,19 +70,8 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
     
     
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        
-        UserDao userDao = _(UserDao.class);
-        
-        OrganisationFolder orgFolder = WebUtils.findParentOrg(this);
-        Organisation org = orgFolder.getOrganisation();
-        String q = params.get("q");
-        if( q != null && q.length() > 0 ) {            
-            searchResults = userDao.search(q, org, SessionManager.session()); // find the given user in this organisation
-        } else {
-            searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
-        }
-        _(HtmlTemplater.class).writePage("admin","admin/userAdmin", this, params, out);
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {                
+        _(HtmlTemplater.class).writePage("admin","admin/manageUser", this, params, out);
     }
 
     
@@ -112,7 +97,7 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
 
     @Override
     public String getName() {
-        return name;
+        return profile.getName();
     }
 
     @Override
@@ -146,36 +131,23 @@ public class UserAdminPage extends AbstractResource implements GetableResource, 
         return null;
     }
 
-    public List<Profile> getSearchResults() {
-        return searchResults;
-    }
     
     @Override
     public Organisation getOrganisation() {
-        return organisation;
+        return profile.getOrganisation();
     }
     
-    public List<Organisation> getChildOrganisations() {
-        List<Organisation> list = new ArrayList<>();        
-        List<BaseEntity> members = getOrganisation().getMembers();
-        if( members == null || members.isEmpty() ) {
-            return Collections.EMPTY_LIST;
-        }
-        for( BaseEntity be : members ) {
-            if( be instanceof Organisation) {
-                list.add((Organisation)be);
-            }
-        }
-        return list;
-    }
 
     @Override
     public boolean is(String type) {
-        if( type.equals("userAdmin")) {
+        if( type.equals("user")) {
             return true;
         }
         return super.is(type);
     }
-    
+
+    public Profile getProfile() {
+        return profile;
+    }
     
 }

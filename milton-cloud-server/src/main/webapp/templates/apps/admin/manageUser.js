@@ -141,14 +141,7 @@ function initSettingPanel() {
 
 // Add controller for business list panel
 function initControl() {
-    var _tempControl = $("#tempController").clone().removeAttr("id");
-	
-    $("div.Info")
-    .not("[rel]")
-    .find("table.Summary tr").each(function() {
-        $(this).find("td:last").html(_tempControl.clone());
-    })
-    .on("click", "a.ShowDialog", function(e) {
+    $("div.Info a.ShowDialog").click(function(e) {
         var _this = $(this);
         var _dialog = _this.parent().find("div.Dialog");
         $("div.Dialog").not(_dialog).addClass("Hidden");

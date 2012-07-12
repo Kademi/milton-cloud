@@ -87,8 +87,9 @@ public class GroupEmailService {
     }
 
     private void append(Group g, final Set<Profile> profiles) {
-        log.info("append: group: " + g.getName());
+        log.info("append: group: " + g.getName() + " - " + g.getId());
         if (g.getMemberships() == null) {
+            System.out.println("no memberships");
             return;
         }
         
@@ -104,7 +105,8 @@ public class GroupEmailService {
             }            
         };
         
-        for (GroupMembership m : g.getMemberships()) {
+        System.out.println("memberships: " + g.getMembers().size());
+        for (GroupMembership m : g.getMembers()) {
             System.out.println("membership: " + m.getMember().getName());
             m.getMember().accept(visitor); 
         }

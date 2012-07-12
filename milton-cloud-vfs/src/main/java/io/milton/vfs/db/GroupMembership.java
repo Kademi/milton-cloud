@@ -27,7 +27,7 @@ import javax.persistence.*;
 public class GroupMembership {
     private Long id;
     private BaseEntity member;
-    private Group group;
+    private Group groupEntity;
     private Date createdDate;
     private Date modifiedDate;
     
@@ -52,11 +52,11 @@ public class GroupMembership {
 
     @ManyToOne(optional=false)
     public Group getGroupEntity() {
-        return group;
+        return groupEntity;
     }
 
     public void setGroupEntity(Group group) {
-        this.group = group;
+        this.groupEntity = group;
     }
     
     

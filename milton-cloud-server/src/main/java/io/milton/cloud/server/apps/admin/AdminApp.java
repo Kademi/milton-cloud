@@ -50,7 +50,7 @@ public class AdminApp implements MenuApplication {
                     return new TemplatedHtmlPage("dashboard", p, "admin/dashboard", "Admin dashboard");
                 case "manageUsers":
                     MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuUsers");
-                    return new UserAdminPage(requestedName, p.getOrganisation(), p);
+                    return new ManageUsersFolder(requestedName, p.getOrganisation(), p);
                 case "groups":
                     MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuGroups");
                     return new GroupsAdminPage(requestedName, p.getOrganisation(), p);

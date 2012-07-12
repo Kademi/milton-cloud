@@ -19,6 +19,7 @@ package io.milton.cloud.server.apps;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.manager.MCRootContext;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.MenuItem;
 import java.io.*;
@@ -51,6 +52,7 @@ public class ApplicationManager {
     private final List<Application> apps;
     private final CurrentRootFolderService currentRootFolderService;
     private File appsConfigDir;
+    private MCRootContext rootContext;
 
     public ApplicationManager(List<Application> initialApps, CurrentRootFolderService currentRootFolderService) {
         this.currentRootFolderService = currentRootFolderService;
@@ -179,9 +181,9 @@ public class ApplicationManager {
             try (InputStream fin = new FileInputStream(configFile)) {
                 props.load(fin);
             }
-            return new AppConfig(props);
+            return new AppConfig(props, rootContext);
         } else {
-            AppConfig config = new AppConfig(props);
+            AppConfig config = new AppConfig(props, rootContext);
             if (app instanceof LifecycleApplication) {
                 ((LifecycleApplication) app).initDefaultProperties(config);
                 try (FileOutputStream fout = new FileOutputStream(configFile)) {
@@ -279,4 +281,14 @@ public class ApplicationManager {
             }
         }        
     }
+
+    public MCRootContext getRootContext() {
+        return rootContext;
+    }
+
+    public void setRootContext(MCRootContext rootContext) {
+        this.rootContext = rootContext;
+    }
+    
+    
 }

@@ -1,5 +1,6 @@
 package io.milton.cloud.server.apps;
 
+import io.milton.context.Context;
 import java.util.Properties;
 
 /**
@@ -9,11 +10,18 @@ import java.util.Properties;
 public class AppConfig {
 
     private Properties properties;
+    private Context context;
 
-    public AppConfig(Properties properties) {
+    public AppConfig(Properties properties, Context context) {
         this.properties = properties;
+        this.context = context;
     }
-        
+
+    public Context getContext() {
+        return context;
+    }
+            
+    
     public Integer getInt(String name) {
         String s = properties.getProperty(name);
         if (s == null) {

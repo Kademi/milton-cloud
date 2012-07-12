@@ -20,6 +20,7 @@ import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -57,6 +58,7 @@ public class Group extends BaseEntity {
         return (Group) crit.uniqueResult();
     }    
     
+    private List<GroupMembership> members; // those entities in this group
     
     public boolean isMember(BaseEntity u) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
@@ -74,6 +76,16 @@ public class Group extends BaseEntity {
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
     }
+
+    @OneToMany(mappedBy="groupEntity")
+    public List<GroupMembership> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<GroupMembership> members) {
+        this.members = members;
+    }
+    
     
     
 }

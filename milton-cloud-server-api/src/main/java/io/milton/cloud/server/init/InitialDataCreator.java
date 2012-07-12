@@ -157,7 +157,7 @@ public class InitialDataCreator implements LifecycleApplication {
             t.setName(name);
             t.setCreatedDate(new Date());
             t.setModifiedDate(new Date());
-            t.setEmail(name + "@spliffy.org");
+            t.setEmail(name + "@bradmcevoy.com");
             t.setAdminOrg(org);
             session.save(t);
             passwordManager.setPassword(t, password);

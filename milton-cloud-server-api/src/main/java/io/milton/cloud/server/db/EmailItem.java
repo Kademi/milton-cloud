@@ -27,42 +27,63 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 
 /**
- * Represents a task to send an email, which may have been sent or might
- * be queued to be sent.
- * 
+ * Represents a task to send an email, which may have been sent or might be
+ * queued to be sent.
+ *
  * Also represents an email received, if the recipient profile is set it will
  * show in their internal inbox.
- * 
- * Email attachments: TODO - probably just have a list of name and crc, then
- * the attachment can be put in any repository
+ *
+ * Email attachments: TODO - probably just have a list of name and crc, then the
+ * attachment can be put in any repository
  *
  * @author brad
  */
 @Entity
-public class EmailItem implements Serializable{
-    
-    public static List<EmailItem>  findByRecipient(Profile p, Session session) {
+public class EmailItem implements Serializable {
+
+    /**
+     * Get emauils to send. TODO: currently only gets those never tried, should
+     * also get those queued for retry
+     *
+     * @param session
+     * @return
+     */
+    public static List<EmailItem> findToSend(Date now, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be null or "r" = try
+        crit.add(Expression.or(
+                Expression.isNull("sendStatus"),
+                Expression.eq("sendStatus", "r")
+        ));
+        // and nextAttempt date must be null or past
+//        crit.add(Expression.or(
+//                Expression.isNull("nextAttempt"),
+//                Expression.gt("nextAttempt", now)
+//        ));
+        crit.addOrder(Order.asc("createdDate"));
+        return DbUtils.toList(crit, EmailItem.class);
+    }
+
+    public static List<EmailItem> findByRecipient(Profile p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         crit.add(Expression.eq("recipient", p));
         crit.addOrder(Order.desc("sendStatusDate"));
         return DbUtils.toList(crit, EmailItem.class);
-    }        
-    
+    }
+
     public static int findByNumUnreadByRecipient(Profile p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         crit.add(Expression.eq("recipient", p));
         crit.add(Expression.eq("readStatus", false));
-        crit.setProjection( Projections.rowCount() );
+        crit.setProjection(Projections.rowCount());
         List results = crit.list();
-        if( results == null ) {
+        if (results == null) {
             return 0;
         }
         Integer num = (Integer) results.get(0);
         return num;
-    }       
-    
+    }
     private List<EmailSendAttempt> emailSendAttempts;
-
     private long id;
     private GroupEmailJob job; // optional, might be linked to a job
     private Profile sender; // optional, the user account which sent the email if originated internally
@@ -70,14 +91,14 @@ public class EmailItem implements Serializable{
     private String recipientAddress; // actual email address being sent to
     private String fromAddress; // the stated from address
     private String replyToAddress; // reply-to field    
-    
     private String subject; // subject line
     private String html; // body html, fully rendered. ie after applying template
     private String text; // body as plain text
     private Date createdDate;
-    private String sendStatus; // status of the send job. c=completed, p=pending, r=retrying
+    private String sendStatus; // status of the send job. c=completed, p=pending, r=retrying, f=failed
     private Date sendStatusDate;
-    
+    private Integer numAttempts;
+    private Date nextAttempt;
     private boolean readStatus; // status of reading the email, if delivered to an internal user. false=not yet read
     private int messageSize;
     private String disposition;
@@ -86,11 +107,9 @@ public class EmailItem implements Serializable{
     private String toList;
     private String ccList;
     private String bccList;
-    
-    
 
     @Id
-    @GeneratedValue    
+    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -126,7 +145,7 @@ public class EmailItem implements Serializable{
         this.recipient = recipient;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getRecipientAddress() {
         return recipientAddress;
     }
@@ -135,7 +154,7 @@ public class EmailItem implements Serializable{
         this.recipientAddress = recipientAddress;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getFromAddress() {
         return fromAddress;
     }
@@ -144,7 +163,7 @@ public class EmailItem implements Serializable{
         this.fromAddress = fromAddress;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getReplyToAddress() {
         return replyToAddress;
     }
@@ -153,7 +172,7 @@ public class EmailItem implements Serializable{
         this.replyToAddress = replyToAddress;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getSubject() {
         return subject;
     }
@@ -162,7 +181,7 @@ public class EmailItem implements Serializable{
         this.subject = subject;
     }
 
-    @Column(nullable=true)
+    @Column(nullable = true)
     public String getHtml() {
         return html;
     }
@@ -171,7 +190,7 @@ public class EmailItem implements Serializable{
         this.html = html;
     }
 
-    @Column(nullable=true)
+    @Column(nullable = true)
     public String getText() {
         return text;
     }
@@ -180,8 +199,8 @@ public class EmailItem implements Serializable{
         this.text = text;
     }
 
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)           
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getCreatedDate() {
         return createdDate;
     }
@@ -198,8 +217,8 @@ public class EmailItem implements Serializable{
         this.sendStatus = sendStatus;
     }
 
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)           
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getSendStatusDate() {
         return sendStatusDate;
     }
@@ -210,8 +229,8 @@ public class EmailItem implements Serializable{
 
     /**
      * Set to true once the item has been read
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean isReadStatus() {
         return readStatus;
@@ -237,7 +256,6 @@ public class EmailItem implements Serializable{
     public int getMessageSize() {
         return messageSize;
     }
-        
 
     public void setDisposition(String disposition) {
         this.disposition = disposition;
@@ -286,8 +304,34 @@ public class EmailItem implements Serializable{
     public void setToList(String toList) {
         this.toList = toList;
     }
-    
-     
-   
 
+    public boolean complete() {
+        return "c".equals(sendStatus);
+    }
+
+    @Column(nullable = true)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)    
+    public Date getNextAttempt() {
+        return nextAttempt;
+    }
+
+    public void setNextAttempt(Date nextAttempt) {
+        this.nextAttempt = nextAttempt;
+    }
+
+    /**
+     * Number of attempts at SMTP delivery
+     * 
+     * @return 
+     */
+    @Column
+    public Integer getNumAttempts() {
+        return numAttempts;
+    }
+
+    public void setNumAttempts(Integer numRetries) {
+        this.numAttempts = numRetries;
+    }
+    
+    
 }

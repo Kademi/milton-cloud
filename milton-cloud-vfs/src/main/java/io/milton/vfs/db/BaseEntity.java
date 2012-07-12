@@ -173,6 +173,12 @@ public class BaseEntity implements Serializable, VfsAcceptor {
         this.type = type;
     }
 
+    /**
+     * Returns the groups that this entity is a member of. Not to be confused with
+     * members on a group, which lists the entities which are in the group
+     * 
+     * @return 
+     */
     @OneToMany(mappedBy = "member")
     public List<GroupMembership> getMemberships() {
         return memberships;

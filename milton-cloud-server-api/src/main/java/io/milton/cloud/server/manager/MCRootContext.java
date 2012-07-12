@@ -60,7 +60,7 @@ public class MCRootContext extends RootContext implements Service{
         this.textTemplater = new TextTemplater(securityManager, servletContext);
         currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
         this.htmlTemplater = new HtmlTemplater(applicationManager, new Formatter(currentDateService), securityManager, servletContext);
-        commentService = new CommentService(currentDateService);
+        commentService = new CommentService(currentDateService);        
         
         put(hashStore, blobStore, securityManager, securityManager.getUserDao(), applicationManager, templateParser, textTemplater, currentDateService, htmlTemplater, commentService);
         put(securityManager.getPasswordManager());
@@ -78,6 +78,7 @@ public class MCRootContext extends RootContext implements Service{
     
     @Override
     public void start() {
+        applicationManager.setRootContext(this);
         this.execute(new Executable2() {
 
             @Override
