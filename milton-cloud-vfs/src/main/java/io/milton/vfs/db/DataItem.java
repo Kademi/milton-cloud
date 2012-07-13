@@ -4,11 +4,10 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
- * For holding permissions, etc
- *
- * Note included in hash of directory entries
  *
  *
  *
@@ -18,6 +17,7 @@ import javax.persistence.*;
 @Table(uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name", "parentHash"})// item names must be unique within a directory
 })
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class DataItem implements Serializable {
 
     private long id;

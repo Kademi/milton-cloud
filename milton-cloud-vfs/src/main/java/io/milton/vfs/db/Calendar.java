@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Represents a user calendar, which can contain events
@@ -30,6 +32,7 @@ import javax.persistence.*;
 @Table(uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name", "owner"})}// item names must be unique within a directory
 )
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Calendar implements Serializable {
     private List<CalEvent> events;
 

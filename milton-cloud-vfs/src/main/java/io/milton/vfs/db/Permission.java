@@ -5,6 +5,8 @@ import io.milton.resource.AccessControlledResource.Priviledge;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Note that in this permission scheme priviledges can only be granted, not
@@ -23,6 +25,7 @@ import javax.persistence.*;
  * @author brad
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Permission implements Serializable {
 
     public enum DynamicPrincipal {

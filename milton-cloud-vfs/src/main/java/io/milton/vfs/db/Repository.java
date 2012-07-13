@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A repository
@@ -21,6 +23,7 @@ uniqueConstraints = {
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
 @Inheritance(strategy = InheritanceType.JOINED)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Repository implements Serializable {
 
     private long id;

@@ -18,6 +18,8 @@ package io.milton.vfs.db;
 
 import java.io.Serializable;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A NvPair is to allow data capture for entities such as users, groups and organisations
@@ -30,6 +32,7 @@ import javax.persistence.*;
  * @author brad
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ContactExtendedProperty implements Serializable{
     private Long id;
     private Contact contact;

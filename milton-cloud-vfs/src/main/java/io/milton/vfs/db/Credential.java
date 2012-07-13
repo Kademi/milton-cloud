@@ -19,6 +19,8 @@ package io.milton.vfs.db;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A credential is a means of authenticating a user, such as a usename and password,
@@ -37,6 +39,7 @@ import javax.persistence.*;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Credential implements Serializable{
     private Profile profile;
     private long id;

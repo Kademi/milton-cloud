@@ -10,6 +10,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import java.util.ArrayList;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Represents a real world entity such as a user or an organisation
@@ -33,6 +35,7 @@ uniqueConstraints = {
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {

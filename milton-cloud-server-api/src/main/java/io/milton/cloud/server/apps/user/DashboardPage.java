@@ -18,6 +18,9 @@ package io.milton.cloud.server.apps.user;
 
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
+import io.milton.http.Auth;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 
 /**
  * Dashboard for the user. Most functions will be provided by PortletApplications
@@ -40,6 +43,6 @@ public class DashboardPage extends TemplatedHtmlPage {
     public DashboardPage(String name, CommonCollectionResource parent) {
         super(name, parent, "user/dashboard", "Dashboard");
     }
-
+    
 
 }

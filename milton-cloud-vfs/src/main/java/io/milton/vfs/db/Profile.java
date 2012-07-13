@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -18,6 +20,7 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 @DiscriminatorValue("U")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Profile extends BaseEntity implements VfsAcceptor {
     
     

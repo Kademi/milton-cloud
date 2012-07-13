@@ -62,6 +62,7 @@ public class UserApp implements Application, MenuApplication {
         return null;
     }
     
+    private SpliffySecurityManager securityManager;
 
     @Override
     public String getInstanceId() {
@@ -70,6 +71,7 @@ public class UserApp implements Application, MenuApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        securityManager = resourceFactory.getSecurityManager();
     }
 
     @Override

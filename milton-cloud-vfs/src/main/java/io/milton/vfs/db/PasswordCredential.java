@@ -19,6 +19,8 @@ package io.milton.vfs.db;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Represents a password authentication factor, to be combined with the
@@ -28,6 +30,7 @@ import javax.persistence.Entity;
  */
 @Entity
 @DiscriminatorValue(value="P")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PasswordCredential extends Credential{
     private String password;
     

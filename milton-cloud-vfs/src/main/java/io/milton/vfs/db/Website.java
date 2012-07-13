@@ -23,6 +23,8 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -32,6 +34,7 @@ import org.hibernate.criterion.Expression;
  * @author brad
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Website implements Serializable, VfsAcceptor {
 
     public static List<Website> findByRepository(Repository repository, Session session) {

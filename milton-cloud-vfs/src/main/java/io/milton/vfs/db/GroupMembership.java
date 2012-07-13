@@ -18,6 +18,8 @@ package io.milton.vfs.db;
 
 import java.util.Date;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  *
@@ -28,6 +30,7 @@ import javax.persistence.*;
 uniqueConstraints = {
     @UniqueConstraint(columnNames = {"member", "group_entity"})}
 )
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupMembership {
     private Long id;
     private BaseEntity member;

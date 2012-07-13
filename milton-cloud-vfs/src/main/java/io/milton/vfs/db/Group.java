@@ -25,6 +25,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 
@@ -40,6 +42,7 @@ import org.hibernate.criterion.Order;
 @javax.persistence.Entity
 @Table(name="GROUP_ENTITY")
 @DiscriminatorValue("G")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Group extends BaseEntity {
         
     public static String ADMINISTRATORS = "administrators";

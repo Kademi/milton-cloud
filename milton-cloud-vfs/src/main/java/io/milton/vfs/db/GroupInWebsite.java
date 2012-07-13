@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -21,6 +23,7 @@ import org.hibernate.criterion.Expression;
 @Table(uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_group", "website"})}// item names must be unique within a directory
 )
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupInWebsite implements Serializable {
 
     public static List<GroupInWebsite> findByWebsite(Website w, Session session) {

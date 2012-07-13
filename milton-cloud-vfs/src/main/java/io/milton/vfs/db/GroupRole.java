@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A GroupRole is a well known idenfifier for a set of permissions. It is assigned
@@ -40,6 +42,7 @@ import javax.persistence.*;
 uniqueConstraints = {
     @UniqueConstraint(columnNames = {"roleName", "grantee"})}
 )
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupRole implements Serializable{
     /**
      * Gives permission for all activities within the administrative organisation

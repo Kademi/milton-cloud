@@ -3,6 +3,8 @@ package io.milton.vfs.db;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A Commit is a link between a Repository and an TreeItem
@@ -17,6 +19,7 @@ import javax.persistence.*;
  */
 @javax.persistence.Entity
 @Table(name="COMMIT_ITEM")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Commit implements Serializable {
     private long id;
     private long itemHash; // this is the root directory for the repository (in this version)   

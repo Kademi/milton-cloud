@@ -3,6 +3,8 @@ package io.milton.vfs.db;
 import java.io.Serializable;
 import java.util.UUID;
 import javax.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * This class captures the state of a resource and its location within a hierarchy
@@ -14,6 +16,7 @@ import javax.persistence.*;
  * @author brad
  */
 @javax.persistence.Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ItemHistory implements Serializable {
 
     private long id;
