@@ -33,6 +33,7 @@ function initTheme() {
     initFontSwitching();
     initHelp();
     initModal();
+    initShowModalButton();
     
          
     log("initTheme: run page init functions");
@@ -211,5 +212,18 @@ function initHtmlEditors() {
     });  
 }
 
+
+function initShowModalButton() {
+    $('a.ShowModal').tinybox({
+        overlayClose: false,
+        opacity: 0
+    });
+
+    $('body').on('click', '.Modal > a.Close', function(e) {
+        e.preventDefault();
+
+        $.tinybox.close();
+    });
+}
 
 /** End init-theme.js */

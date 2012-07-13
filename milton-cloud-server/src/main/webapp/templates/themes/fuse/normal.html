@@ -11,11 +11,12 @@
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js">//</script>        
         <script type="text/javascript" src="/static/js/jquery.autoresize.js">//</script> 
         <script type="text/javascript" src="/static/js/jquery.timeago.js" >//</script>
+        <script type="text/javascript" src="/static/js/jquery.forms.js">//</script>        
+        <script type="text/javascript" src="/static/js/tinybox-1.2.min.js">//</script>
         <script type="text/javascript" src="/static/js/common.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
         <script type="text/javascript" src="/static/js/init-theme.js" >//</script>
         <script type="text/javascript" src="/static/js/register.js" >//</script>
-        <script type="text/javascript" src="/static/js/validation.js" >//</script>      
         <script type="text/javascript" src="/static/js/jquery.comments.js" >//</script>      
         <script type="text/javascript" src="/static/js/toolbars.js" >//</script>
         <script type="text/javascript" src="/static/ckeditor36/ckeditor.js" >//</script>
@@ -90,7 +91,7 @@
                 <div class="nav">
                     <ul>
                         #foreach($item in $menu.items)
-                        <li><a class="$formatter.ifTrue($item.active, 'navActive', '') nav-${item.id}" href="$item.href" shape="rect">$item.text</a></li>
+                        <li class="$formatter.ifTrue($item.active, 'active', '')"><a class="nav-${item.id}" href="$item.href" shape="rect">$item.text</a></li>
                         #end                                         
                     </ul>  
 

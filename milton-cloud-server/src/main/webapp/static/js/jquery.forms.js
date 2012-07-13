@@ -19,9 +19,10 @@
         }, options);  
   
         var container = this;
-        $(this).submit(function() {
-            var form = $(this);
-            log("save", form);
+        $(this).submit(function(e) {
+            log("form submit", form);
+            e.preventDefault();
+            var form = $(this);            
             resetValidation(container);
             if( checkRequiredFields(container) ) {
                 try {                    

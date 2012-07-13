@@ -1,19 +1,32 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>$view.title</title>
-        <link rel="template" href="internal"/>
         <link href="myForums.css" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" type="text/css" href="/templates/apps/learner/learning.css" media="screen" />
+        <script type="text/javascript" src="myTopic.js" >//</script>
     </head>
     <body class="forums">
         <!-- Content goes here - NO HEADER/BANNER/MENU! -->
         <div id="content">
-            <div class="Control ClearFix">
-                <h3>Recent community questions</h3>
-                <a href="#postQuestion" class="Button ShowModal"><i class="Icon-add"><!----></i> Post a question</a> </div>
+            <div class="bar">
+                <div class="col1">
+                    <h3>Recent community questions</h3>
+                </div>
+                <a href="#postQuestion" class="Button ShowModal"><i class="Icon-add"><!----></i> Post a question</a> 
+                <div class="clr"></div>
+            </div>            
             <ul class="PostList ClearFix">
+                #foreach($post in $page.questions)
                 <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
+                    <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
+                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
+                    <div class="Details">
+                        <h4>$post.title</h4>
+                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
+                    </div>
+                </li>
+                #end
+                <li class="Post">
+                    <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
                     <div class="ReplyNumber"> <strong>15</strong> replies </div>
                     <div class="Details">
                         <h4>How do I get off the drugs I am taking!!! </h4>
@@ -137,18 +150,26 @@
                 <div class="ControllerContainer"> <a href="#postComment" class="Button ShowModal">Post a comment</a> </div>
             </div>
         </div>
-        <div id="postQuestion" class="Modal"> <a href="" class="Close" title="Close"></a>
+
+        <div id="postQuestion" class="Modal"> 
+            <a href="" class="Close" title="Close">Close</a>
             <h3 class="Title">Post a question</h3>
-            <table class="Form">
-                <tr>
-                    <td><input type="text" placeholder="Enter your question here" value="" name="question" class="HasClearButton" /></td>
-                </tr>
-                <tr>
-                    <td><textarea name="comment" placeholder="Leave a comment here" cols="50" rows="10"></textarea></td>
-                </tr>
-            </table>
-            <div class="ControllerContainer"> <a href="" class="Button">Cancel</a> <a href="" class="Button">Post</a> </div>
+            <form method="POST" action="$page.href">
+                <table class="Form">
+                    <tr>
+                        <td><input type="text" placeholder="Enter your question here" value="" name="newQuestion" class="required HasClearButton" /></td>
+                    </tr>
+                    <tr>
+                        <td><textarea name="comment" placeholder="Leave a comment here" cols="50" rows="10" class="required"></textarea></td>
+                    </tr>
+                </table>
+                <div class="ControllerContainer"> 
+                    <a href="" class="Button">Cancel</a> 
+                    <button type="submit" class="Button">Post</button> 
+                </div>
+            </form>
         </div>
+
         <div id="postComment" class="Modal"> <a href="" class="Close" title="Close"></a>
             <h3 class="Title">Post a comment</h3>
             <table class="Form">
@@ -158,5 +179,10 @@
             </table>
             <div class="ControllerContainer"> <a href="" class="Button">Cancel</a> <a href="" class="Button">Post</a> </div>
         </div>
+        <script type="text/javascript">
+            jQuery(function($) {
+                initMyTopic();
+            });            
+        </script>        
     </body>
 </html>
