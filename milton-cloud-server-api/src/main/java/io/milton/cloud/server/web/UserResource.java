@@ -302,7 +302,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
     @Override
     public void storeMail(MimeMessage mm) {
-        StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();        
+        _(ApplicationManager.class).storeMail(this, mm);
     }
     
     public String getNickName() {

@@ -16,14 +16,15 @@ package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
-import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.EmailApplication;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.EmailItem;
-import io.milton.cloud.server.event.SignupEvent;
+import io.milton.cloud.server.db.GroupEmailJob;
+import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -40,13 +41,17 @@ import org.apache.velocity.context.Context;
 import static io.milton.context.RequestContext._;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
-import io.milton.mail.Filter;
-import io.milton.mail.StandardMessageFactory;
-import io.milton.mail.StandardMessageFactoryImpl;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.mail.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.config.Configuration;
 import org.masukomi.aspirin.core.listener.ListenerManager;
 
@@ -54,8 +59,10 @@ import org.masukomi.aspirin.core.listener.ListenerManager;
  *
  * @author brad
  */
-public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication, EventListener {
+public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication, EventListener, EmailApplication {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailApp.class);
+    
     private MiltonCloudMailResourceFactory mailResourceFactory;
     private MailServer mailServer;
     private SpliffySecurityManager securityManager;
@@ -81,7 +88,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         queueStore = new EmailItemQueueStore(resourceFactory.getSessionManager(), aspirinConfiguration, listenerManager, currentDateService);
         StandardMessageFactory smf = new StandardMessageFactoryImpl();
         mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf);
-        mailFilter = new MCMailFilter(resourceFactory.getSessionManager(), config.getContext()); 
+        mailFilter = new MCMailFilter(resourceFactory.getSessionManager(), config.getContext());
 
         MailServerBuilder mailServerBuilder = new MailServerBuilder();
         mailServerBuilder.setListenerManager(listenerManager);
@@ -177,7 +184,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if (portletSection.equals("messages")) {
+        if (portletSection.equals("dashboardMessages")) {
             _(TextTemplater.class).writePage("email/emailMessagesPortlet.html", currentUser, rootFolder, context, writer);
         }
 //            <div>                
@@ -193,6 +200,83 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void onEvent(Event e) {
-
     }
+
+    @Override
+    public void storeMail(PrincipalResource principal, MimeMessage mm) {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        if (principal instanceof UserResource) {
+            // TODO: user should have option to not receive these emails
+            UserResource ur = (UserResource) principal;
+            Profile p = ur.getThisUser();
+            EmailItem i = new EmailItem();
+            i.setRecipient(p);
+            i.setRecipientAddress(p.getEmail());
+            EmailItemStandardMessage sm = new EmailItemStandardMessage(i);
+            StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
+            parser.toStandardMessage(mm, sm);
+            session.save(i);
+            tx.commit();
+        } else if (principal instanceof GroupResource) {
+            if (isAutoReply(mm)) {
+                log.warn("DISCARDING autoreply");
+                return;
+            }
+            // TODO: Should never accept a group email frmo outside of the group
+            // Also, should have config option for groups to only accept emails from admins, or not at all
+            GroupResource gr = (GroupResource) principal;
+            GroupEmailJob job = new GroupEmailJob();
+            job.addGroupRecipient(gr.getGroup());
+            job.setGroupRecipients(new ArrayList<GroupRecipient>());            
+            job.setName("received-" + System.currentTimeMillis()); // HACK HACK - make a nice name from subject and ensure uniqueness
+            GroupEmailStandardMessage sm = new GroupEmailStandardMessage(job);
+            job.setTitle(job.getSubject());
+            job.setStatusDate(currentDateService.getNow());
+            session.save(job);
+            tx.commit();            
+        } else {
+            throw new RuntimeException("Unsupported recipient type: " + principal.getClass());
+        }
+    }
+
+    @Override
+    public MessageFolder getInbox(PrincipalResource p) {
+        try {
+            Resource dir = p.child("inbox");
+            if (dir instanceof MessageFolder) {
+                MessageFolder emailFolder = (MessageFolder) dir;
+                return emailFolder;
+            } else {
+                throw new RuntimeException("inbox folder is not a valid mesasge folder");
+            }
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
+
+    boolean isAutoReply(MimeMessage mm) {
+        String sub = getSubject(mm);
+        return isAutoReply(sub);
+    }
+
+    boolean isAutoReply(String sub) {
+        sub = sub.toLowerCase();
+        if (sub.contains("autoreply")) {
+            return true;
+        }
+        if (sub.contains("out of") && sub.contains("office")) {
+            return true;
+        }
+        return false;
+    }
+    
+    String getSubject(MimeMessage mm) {
+        try {
+            return mm.getSubject();
+        } catch (MessagingException ex) {
+            throw new RuntimeException(ex);
+        }
+    }    
 }

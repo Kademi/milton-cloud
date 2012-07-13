@@ -18,6 +18,7 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.OneToMany;
@@ -44,7 +45,7 @@ public class Group extends BaseEntity {
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
 
-    static List<Group> findByOrg(Organisation org, Session session) {
+    public static List<Group> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(Group.class);
         crit.add(Expression.eq("organisation", org));
         crit.addOrder(Order.asc("name"));
@@ -59,6 +60,7 @@ public class Group extends BaseEntity {
     }    
     
     private List<GroupMembership> members; // those entities in this group
+    private List<GroupRole> groupRoles;
     
     public boolean isMember(BaseEntity u) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
@@ -85,7 +87,45 @@ public class Group extends BaseEntity {
     public void setMembers(List<GroupMembership> members) {
         this.members = members;
     }
+
+    @OneToMany(mappedBy="grantee")
+    public List<GroupRole> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<GroupRole> groupRoles) {
+        this.groupRoles = groupRoles;
+    }
     
     
-    
+    /**
+     * Add or remove the role to this group. Updates the groupRoles list and
+     * also saves the change in the session
+     * 
+     * @param roleName
+     * @param isGrant
+     * @param session 
+     */
+    public void grantRole(String roleName, boolean isGrant, Session session) {
+        if( getGroupRoles() == null ) {
+            setGroupRoles(new ArrayList<GroupRole>());
+        }
+        
+        for (GroupRole gr : getGroupRoles()) {
+            if (gr.getRoleName().equals(roleName)) {
+                if( isGrant ) {
+                    // nothing to do
+                } else {
+                    session.delete(gr);
+                    getGroupRoles().remove(gr);
+                }
+                return;
+            }
+        }
+        GroupRole gr = new GroupRole();
+        gr.setGrantee(this);
+        gr.setRoleName(roleName);
+        session.save(gr);
+        getGroupRoles().add(gr);
+    }    
 }

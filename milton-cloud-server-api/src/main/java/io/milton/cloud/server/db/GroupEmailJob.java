@@ -14,10 +14,11 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -172,9 +173,16 @@ public class GroupEmailJob implements Serializable{
         return "r".equals(getStatus());
     }
     
-    
-    
-    
-    
-    
+    /**
+     * Adds, but does not save, the group recipient
+     */
+    public void addGroupRecipient(Group g) {
+        if( this.getGroupRecipients() == null ) {
+            setGroupRecipients(new ArrayList<GroupRecipient>());
+        }
+        GroupRecipient gr = new GroupRecipient();
+        gr.setJob(this);
+        gr.setRecipient(g);
+        getGroupRecipients().add(gr);
+    }
 }

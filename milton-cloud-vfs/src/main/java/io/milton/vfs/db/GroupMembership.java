@@ -24,6 +24,10 @@ import javax.persistence.*;
  * @author brad
  */
 @Entity
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"member", "group_entity"})}
+)
 public class GroupMembership {
     private Long id;
     private BaseEntity member;

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
         <action>
-            <actionName>build</actionName>
+            <actionName>CUSTOM-install skip tests</actionName>
+            <displayName>install skip tests</displayName>
             <goals>
                 <goal>install</goal>
             </goals>
             <properties>
-                <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+                <skipTests>true</skipTests>
             </properties>
         </action>
     </actions>

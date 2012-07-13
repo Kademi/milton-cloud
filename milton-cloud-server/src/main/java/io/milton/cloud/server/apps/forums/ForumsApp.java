@@ -138,7 +138,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if (portletSection.equals("secondary")) {
+        if (portletSection.equals("dashboardSecondary")) {
             _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
         }
     }

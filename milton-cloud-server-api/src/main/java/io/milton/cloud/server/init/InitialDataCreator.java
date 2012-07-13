@@ -92,12 +92,11 @@ public class InitialDataCreator implements LifecycleApplication {
 
 
         Group administrators = checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, session);
-        administrators.grant(AccessControlledResource.Priviledge.READ, rootOrg, session);
-        administrators.grant(AccessControlledResource.Priviledge.READ_ACL, rootOrg, session);
-        administrators.grant(AccessControlledResource.Priviledge.WRITE, rootOrg, session);
-        administrators.grant(AccessControlledResource.Priviledge.WRITE_ACL, rootOrg, session);
+        administrators.grantRole(GroupRole.ROLE_ADMIN, true, session);
+        administrators.grantRole(GroupRole.ROLE_AUTHOR, true, session);
 
         Group users = checkCreateGroup(rootOrg, Group.USERS, groupDao, session);
+        users.grantRole(GroupRole.ROLE_AUTHOR, true, session);
         Website miltonSite = checkCreateWebsite(session, rootOrg, "localhost", "fuse", admin);
         miltonSite.addGroup(users, "o", session);
 

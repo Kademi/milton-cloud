@@ -100,7 +100,7 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if (portletSection.equals("primary")) {
+        if (portletSection.equals("dashboardPrimary")) {
             _(TextTemplater.class).writePage("myfiles/filesPortlet.html", currentUser, rootFolder, context, writer);
         }
     }

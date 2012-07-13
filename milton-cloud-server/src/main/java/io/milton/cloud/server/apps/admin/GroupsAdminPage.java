@@ -37,21 +37,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.*;
+import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
  * @author brad
  */
-public class GroupsAdminPage  extends AbstractResource implements GetableResource, PostableResource {
+public class GroupsAdminPage extends AbstractResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(GroupsAdminPage.class);
-    
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
 
-    public GroupsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {       
+    public GroupsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -59,15 +62,59 @@ public class GroupsAdminPage  extends AbstractResource implements GetableResourc
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }    
-    
-    
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        _(HtmlTemplater.class).writePage("admin", "admin/manageGroups", this, params, out);
+        log.info("processForm");
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        if (parameters.containsKey("role")) {
+            String groupName = parameters.get("group");
+            Group g = findGroup(groupName);
+            if (g != null) {
+                String role = parameters.get("role");
+                String sIsRecip = parameters.get("isRecip");
+                boolean isRecip = "true".equals(sIsRecip);
+                log.info("grant or revoke role: " + role + " - " + isRecip);
+                g.grantRole(role, isRecip, session);
+                tx.commit();
+            }
+        }        
+
+        jsonResult = new JsonResult(true);
+        return null;
     }
 
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        } else {
+            _(HtmlTemplater.class).writePage("admin", "admin/manageGroups", this, params, out);
+        }
+    }
+
+    public List<Group> getGroups() {
+        return Group.findByOrg(getOrganisation(), SessionManager.session());
+    }
+
+    public boolean isSelected(Group g, String role) {
+        if( g.getGroupRoles() == null ) {
+            return false;
+        }
+        for( GroupRole gr : g.getGroupRoles()) {
+            if( gr.getRoleName().contains(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public List<String> getAllRoles() {
+        return GroupRole.ROLES;
+    }
+
+    public String getTitle() {
+        return "Manage groups";
+    }
     
     @Override
     public boolean isDir() {
@@ -109,7 +156,6 @@ public class GroupsAdminPage  extends AbstractResource implements GetableResourc
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -125,33 +171,21 @@ public class GroupsAdminPage  extends AbstractResource implements GetableResourc
         return null;
     }
 
-    
     @Override
     public Organisation getOrganisation() {
         return organisation;
     }
-    
-    public List<Organisation> getChildOrganisations() {
-        List<Organisation> list = new ArrayList<>();        
-        List<BaseEntity> members = getOrganisation().getMembers();
-        if( members == null || members.isEmpty() ) {
-            return Collections.EMPTY_LIST;
-        }
-        for( BaseEntity be : members ) {
-            if( be instanceof Organisation) {
-                list.add((Organisation)be);
-            }
-        }
-        return list;
-    }
 
     @Override
     public boolean is(String type) {
-        if( type.equals("groupsAdmin")) {
+        if (type.equals("groupsAdmin")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
+
+    private Group findGroup(String groupName) {
+        Group g = Group.findByOrgAndName(organisation, groupName, SessionManager.session());
+        return g;
+    }
 }

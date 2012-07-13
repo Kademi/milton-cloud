@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>$view.title</title>
+        <title>Manage Groups</title>
         <link href="manageGroup.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageGroup.js">//</script>
     </head>
@@ -8,96 +8,86 @@
         <!-- Content goes here - NO HEADER/BANNER/MENU! -->
         <section id="manageGroup" class="MainContent">
             <header class="ClearFix">
-				<button class="SmallBtn Add AddGroup"><span>Add New Group</span></button>
-			</header>
-			<div class="Group">
-				<header class="ClearFix">
-					<div class="ShowDialog"><span>Pharmacists</span></div>
-				</header>
-				<div class="ContentGroup ClearFix">
-					<h4>Available Programs</h4>
-					<ul class="ProgramList">
-						<li data-program="0"><span>How to bake cakes 01</span></li>
-						<li data-program="1"><span>How to bake cakes 02</span></li>
-					</ul>
-					<div class="ClearFix"><button class="SmallBtn Add AddProgram"><span>Add New Program</span></button></div>
-					<h4>Permissions</h4>
-					<ul class="PermissionList ClearFix">
-						<li data-permission="0"><span>Administrator</span></li>
-						<li data-permission="1"><span>Content Author</span></li>
-					</ul>	
-					<div class="ClearFix"><button class="SmallBtn Add AddPermission"><span>Add New Permission</span></button></div>			
-				</div>
-			</div>
+                <button class="SmallBtn Add AddGroup"><span>Add New Group</span></button>
+            </header>
+            #foreach($group in $page.groups)
+            <div class="Group">
+                <header class="ClearFix">
+                    <div class="ShowDialog"><span>$group.name</span></div>
+                </header>
+                <div class="ContentGroup ClearFix">
+                    #portlets("groupDetails")
+                    <h4>Roles</h4>
+                    <ul class="PermissionList ClearFix">
+                        #foreach($role in $group.groupRoles)
+                        <li><span>$role.roleName</span></li>
+                        #end
+                    </ul>	
+                    <div class="ClearFix"><button onclick="showPermissionModal(this)" class="SmallBtn Add AddPermission"><span>Add/remove roles</span></button></div>
+                    <div class="Modal">
+                        <header>
+                            <h3>Edit roles</h3>
+                            <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+                        </header>
+
+                        <div class="ModalContent">
+                            <table>
+                                <tr>
+                                    <td colspan="2">
+                                        <ul class="ListItem roles">
+                                            #foreach($role in $page.allRoles)
+                                            <li>
+                                                $role
+                                                <aside rel="$group.name">
+                                                    $formatter.checkbox($role, $page.isSelected($group, $role) )
+                                                </aside>
+                                            </li>
+                                            #end
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>                    
+                    </div>
+                </div>
+            </div>
+            #end
         </section>
-		<div class="Hidden">
-			<div id="dialogGroup">
-				<div class="Dialog Hidden">
-					<a href="" class="RenameGroup">Rename this group</a>
-					<a href="" class="Delete DeleteGroup">Delete this group</a>
-				</div>
-			</div>
-			<div id="programController">
-				<aside>
-					<label for="view_only"><input type="checkbox" value="1" id="view_only" name="view_only" class="FuseChk" checked="checked" /> View only</label>
-					<a href="" title="Delete this program" class="Delete DeleteProgram"><span class="Hidden">Delete this program</span></a>
-				</aside>
-			</div>
-			<div id="permissionController">
-				<aside>
-					<a href="" class="Delete DeletePermission" title="Delete this permission"><span class="Hidden">Delete this permission</span></a>
-				</aside>
-			</div>
-			<div id="modalListController">
-				<aside>
-					<label for="selected"><input type="checkbox" value="1" id="selected" name="selected" class="FuseChk" checked="checked" /></label>
-				</aside>
-			</div>
-		</div>
-		<div id="modalGroup" class="Modal">
-			<header>
-				<h3>Edit Group</h3>
-				<a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
-			</header>
-			<div class="ModalContent">
-				<table>
-					<tr rel="Group" class="Hidden">
-						<th><label for="name">Group name</label></th>
-						<td><input type="text" name="name" id="name" value="" placeholder="Group name" /></td>
-					</tr>
-					<tr rel="Program" class="Hidden">
-						<td colspan="2">
-							<ul class="ListItem">
-								<li><span>How to bake cakes 01</span></li>
-								<li><span>How to bake cakes 02</span></li>
-								<li><span>How to bake cakes 03</span></li>
-								<li><span>How to bake cakes 04</span></li>
-								<li><span>How to bake cakes 05</span></li>
-								<li><span>How to bake cakes 06</span></li>
-							</ul>
-						</td>
-					</tr>
-					<tr rel="Permission" class="Hidden">
-						<td colspan="2">
-							<ul class="ListItem">
-								<li><span>Administrator</span></li>
-								<li><span>Content author</span></li>
-								<li><span>Manage users</span></li>
-								<li><span>View reports</span></li>
-							</ul>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2" class="Btn">
-							<button>Save changes</button>
-						</td>
-					</tr>
-				</table>
-			</div>
-		</div>
+        <div class="Hidden">
+            <div id="dialogGroup">
+                <div class="Dialog Hidden">
+                    <a href="" class="RenameGroup">Rename this group</a>
+                    <a href="" class="Delete DeleteGroup">Delete this group</a>
+                </div>
+            </div>
+            <div id="modalListController">
+                <aside>
+                    <label for="selected"><input type="checkbox" value="1" id="selected" name="selected" class="FuseChk" checked="checked" /></label>
+                </aside>
+            </div>
+        </div>
+        <div id="modalGroup" class="Modal">
+            <header>
+                <h3>Edit Group</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr rel="Group" class="Hidden">
+                        <th><label for="name">Group name</label></th>
+                        <td><input type="text" name="name" id="name" value="" placeholder="Group name" /></td>
+                    </tr>                    
+                    <tr>
+                        <td colspan="2" class="Btn">
+                            <button>Save changes</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
         <script type="text/javascript" >
             jQuery(function() {
-				initManageGroup();
+                initManageGroup();
             });
         </script>        
     </body>

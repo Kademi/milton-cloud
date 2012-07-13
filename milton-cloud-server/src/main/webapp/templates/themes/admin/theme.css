@@ -846,7 +846,7 @@ div.CheckBoxWrapper.Checked {
 }
 
 
-#manageGroup div.Group header {
+#manageGroup > div.Group > header {
 	padding: 14px 14px 14px 50px;
 	border-radius: 5px 5px 0 0;
 	background: #f0f0f0 url(images/icon_groups.png) no-repeat 14px 50%;

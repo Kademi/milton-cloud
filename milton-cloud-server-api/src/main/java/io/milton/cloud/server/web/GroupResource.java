@@ -18,7 +18,6 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.mail.Mailbox;
 import io.milton.mail.MessageFolder;
-import io.milton.mail.StandardMessageFactoryImpl;
 import io.milton.resource.*;
 import javax.mail.internet.MimeMessage;
 
@@ -145,18 +144,7 @@ public class GroupResource extends AbstractCollectionResource implements Collect
 
     @Override
     public MessageFolder getInbox() {
-        try {
-            Resource dir = child("inbox");
-            if (dir instanceof MessageFolder) {
-                MessageFolder emailFolder = (MessageFolder) dir;
-                return emailFolder;
-            } else {
-                throw new RuntimeException("inbox folder is not a valid mesasge folder");
-            }
-        } catch (NotAuthorizedException | BadRequestException ex) {
-            throw new RuntimeException(ex);
-        }
-
+        return _(ApplicationManager.class).getInbox(this);
     }
 
     @Override
@@ -171,6 +159,12 @@ public class GroupResource extends AbstractCollectionResource implements Collect
 
     @Override
     public void storeMail(MimeMessage mm) {
-        StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
+        _(ApplicationManager.class).storeMail(this, mm);
     }
+
+    public Group getGroup() {
+        return group;
+    }
+    
+    
 }

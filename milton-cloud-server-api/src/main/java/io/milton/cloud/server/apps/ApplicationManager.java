@@ -20,6 +20,8 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
+import io.milton.cloud.server.web.GroupResource;
+import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.MenuItem;
 import java.io.*;
@@ -29,13 +31,16 @@ import java.util.Properties;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.mail.MessageFolder;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
-import org.apache.velocity.context.InternalContextAdapter;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.internet.MimeMessage;
 
 /**
  *
@@ -235,11 +240,13 @@ public class ApplicationManager {
     public List<Application> findActiveApps(io.milton.vfs.db.Website website) {
         List<AppControl> list = AppControl.find(website, SessionManager.session());
         List<Application> activApps = new ArrayList<>();
+        Set<Application> set = new HashSet<>();
         for (AppControl appC : list) {
             if (appC.isEnabled()) {
                 Application app = get(appC.getName());
-                if (app != null) {
+                if (app != null && !set.contains(app)) {
                     activApps.add(app);
+                    set.add(app);
                 }
             }
         }
@@ -266,8 +273,8 @@ public class ApplicationManager {
 
     public boolean isActive(Application aThis, Website website) {
         List<Application> activeApps = findActiveApps(website);
-        for( Application a : activeApps ) {
-            if( a.getInstanceId().equals(aThis.getInstanceId())) {
+        for (Application a : activeApps) {
+            if (a.getInstanceId().equals(aThis.getInstanceId())) {
                 return true;
             }
         }
@@ -279,7 +286,7 @@ public class ApplicationManager {
             if (app instanceof PortletApplication) {
                 ((PortletApplication) app).renderPortlets(portletSection, currentUser, rootFolder, context, writer);
             }
-        }        
+        }
     }
 
     public MCRootContext getRootContext() {
@@ -289,6 +296,25 @@ public class ApplicationManager {
     public void setRootContext(MCRootContext rootContext) {
         this.rootContext = rootContext;
     }
-    
-    
+
+    public void storeMail(PrincipalResource principal, MimeMessage mm) {
+        for (Application app : getActiveApps()) {
+            if (app instanceof EmailApplication) {
+                ((EmailApplication) app).storeMail(principal, mm);
+            }
+        }
+
+    }
+
+    public MessageFolder getInbox(GroupResource principal) {
+        for (Application app : getActiveApps()) {
+            if (app instanceof EmailApplication) {
+                MessageFolder f = ((EmailApplication) app).getInbox(principal);
+                if (f != null) {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
 }
