@@ -6,7 +6,7 @@
                 <goal>install</goal>
             </goals>
             <properties>
-                <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+                <fuse.home>/proj/fuse-admin</fuse.home>
             </properties>
         </action>
     </actions>

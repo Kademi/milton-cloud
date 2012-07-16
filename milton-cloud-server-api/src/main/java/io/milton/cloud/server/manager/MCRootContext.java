@@ -59,7 +59,9 @@ public class MCRootContext extends RootContext implements Service{
         templateParser = new HtmlTemplateParser();
         this.textTemplater = new TextTemplater(securityManager, servletContext);
         currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
-        this.htmlTemplater = new HtmlTemplater(applicationManager, new Formatter(currentDateService), securityManager, servletContext);
+        Formatter formatter = new Formatter(currentDateService);
+        put(formatter);
+        this.htmlTemplater = new HtmlTemplater(applicationManager, formatter, securityManager, servletContext);
         commentService = new CommentService(currentDateService);        
         
         put(hashStore, blobStore, securityManager, securityManager.getUserDao(), applicationManager, templateParser, textTemplater, currentDateService, htmlTemplater, commentService);

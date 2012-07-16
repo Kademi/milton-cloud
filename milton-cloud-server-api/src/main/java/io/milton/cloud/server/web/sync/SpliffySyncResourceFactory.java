@@ -93,7 +93,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
                         long hash = Long.parseLong(sHash);
                         return findBlob(hash, org);
                     }
-                case "get":
+                case "files":
                     if (numPathParts == 1) {
                         return null;
                     } else {

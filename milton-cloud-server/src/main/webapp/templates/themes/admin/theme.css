@@ -694,48 +694,47 @@ textarea {
 	padding: 5px 10px;
 }
 /* Form details for editing purpose */
-form.Details {
+.Details {
 	padding: 20px;
 	background-color: #F0F0F0;
-	border: 1px solid #CECECE;
 	border-radius: 5px;
 }
-form.Details table { width: 100%; }
-form.Details table th {
+.Details table { width: 100%; }
+.Details table th {
 	width: 145px;
 	padding-right: 25px;
 	text-align: left;
 }
-form.Details table th small, form.Details table th a {
+.Details table th small, .Details table th a {
 	font-style: italic;
 	font-weight: normal;
 	font-size: 11px;
 	display: block;
 }
-form.Details table th small { margin-top: 5px; }
-form.Details table th a {
+.Details table th small { margin-top: 5px; }
+.Details table th a {
 	text-decoration: underline;
 	color: #77c4e8;
 	margin-top: -5px;
 }
-form.Details table td input[type="text"] { float: left; }
-form.Details table tbody td, form.Details table tbody th {
+.Details table td input[type="text"] { float: left; }
+.Details table tbody td, .Details table tbody th {
 	padding-top: 8px;
 	font-size: 12px;
 	vertical-align: top;
 }
-form.Details table tbody th { padding-right: 25px; }
-form.Details table tbody td #email {
+.Details table tbody th { padding-right: 25px; }
+.Details table tbody td #email {
 	float: left;
 	margin: 0 5px 0 0;
 }
-form.Details table tbody td > label { float: left; }
-form.Details table tbody td select { float: left; }
-form.Details table tfoot td {
+.Details table tbody td > label { float: left; }
+.Details table tbody td select { float: left; }
+.Details table tfoot td {
 	text-align: right;
 	padding-top: 8px;
 }
-.TabContainer .Content form.Details {
+.TabContainer .Content .Details {
 	border: 0;
 }
 /* Select box */
