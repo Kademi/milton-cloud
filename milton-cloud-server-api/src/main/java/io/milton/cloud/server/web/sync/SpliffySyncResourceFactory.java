@@ -43,7 +43,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
     private final SpliffySecurityManager securityManager;
     private final HashStore hashStore;
     private final BlobStore blobStore;
-
+    
     public SpliffySyncResourceFactory(HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
@@ -93,6 +93,14 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
                         long hash = Long.parseLong(sHash);
                         return findBlob(hash, org);
                     }
+                case "get":
+                    if (numPathParts == 1) {
+                        return null;
+                    } else {
+                        String sHash = p.getName();
+                        long hash = Long.parseLong(sHash);
+                        return findGetResource(hash, org);
+                    }
                 default:
                     return null;
             }
@@ -119,4 +127,16 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
             return new FanoutResource(fanout, hash, securityManager, org);
         }
     }
+    
+    private Resource findGetResource(long hash, Organisation org) {
+        Fanout fanout = hashStore.getFanout(hash);
+        if (fanout == null) {
+            System.out.println("fanout not found");
+            return null;
+        } else {
+            return new GetResource(fanout, hash, securityManager, org, blobStore, hashStore);
+        }
+        
+    }
+            
 }

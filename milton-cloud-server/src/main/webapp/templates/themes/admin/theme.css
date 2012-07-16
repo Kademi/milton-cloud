@@ -837,10 +837,6 @@ div.CheckBoxWrapper.Checked {
 	border-color: #d1d1d1 !important;
 }
 #manageModule div.Content div.MainContent article.Quiz { background-image: url(images/icon_quiz.png); }
-#manageModule div.Content div.MainContent article aside a.Edit { background-image: url(images/icon_edit.png); }
-#manageModule div.Content div.MainContent article aside a.Move { background-image: url(images/icon_move.png); }
-#manageModule div.Content div.MainContent article aside a.Dialogue { background-image: url(images/icon_dialogue.png); }
-#manageModule div.Content div.MainContent article aside a.Delete { background-image: url(images/icon_delete.png); }
 #manageModule div.Content div.MainContent article {
 	background: #FFF url(images/icon_document.png) no-repeat 7px 50%;
 }
@@ -929,3 +925,7 @@ div.CheckBoxWrapper.Checked {
 .BtnBar button {
     float: right;
 }
+a.Edit { background-image: url(images/icon_edit.png); }
+a.Move { background-image: url(images/icon_move.png); }
+a.Dialogue { background-image: url(images/icon_dialogue.png); }
+a.Delete { background-image: url(images/icon_delete.png); }

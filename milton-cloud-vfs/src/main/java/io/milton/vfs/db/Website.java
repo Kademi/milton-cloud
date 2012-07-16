@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -35,6 +36,12 @@ import org.hibernate.criterion.Expression;
  */
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = {"name"})
+        }// website DNS names must be unique across whole system
+        
+)
 public class Website implements Serializable, VfsAcceptor {
 
     public static List<Website> findByRepository(Repository repository, Session session) {
@@ -43,15 +50,40 @@ public class Website implements Serializable, VfsAcceptor {
         return DbUtils.toList(crit, Website.class);
     }
     
+    /**
+     * Attempts to locate a website with the exact name give. Will follow alias
+     * links
+     * 
+     * @param name
+     * @param session
+     * @return 
+     */
     public static Website findByDomainName(String name, Session session) {
+        Website w = findByName(name, session);
+        while( w != null && w.getAliasTo() != null ) {
+            w = w.getAliasTo();
+        }
+        return w;
+    }         
+    
+    public static Website findByName(String name, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.add(Expression.eq("name", name));
-        return (Website) crit.uniqueResult();
-    }          
+        return  DbUtils.unique(crit);
+    }     
+
+    public static Website findByAlias(String alias, Session session) {
+        Criteria crit = session.createCriteria(Website.class);
+        crit.add(Expression.eq("aliasSubdomain", alias));
+        return  DbUtils.unique(crit);
+    }     
+    
     
     private Organisation organisation;
     private long id;
     private String name; // identifies the resource to webdav
+    private Website aliasTo; // if not null, this website is really just an alias for that one
+    private String redirectTo; // if not null, this website will redirect to that one
     private Repository repository;
     private String internalTheme;
     private String publicTheme;
@@ -69,6 +101,7 @@ public class Website implements Serializable, VfsAcceptor {
     }
 
     @Column(length = 255, nullable = false)
+    @Index(name = "idx_name")
     public String getName() {
         return name;
     }
@@ -76,6 +109,41 @@ public class Website implements Serializable, VfsAcceptor {
     public void setName(String name) {
         this.name = name;
     }
+
+    
+    /**
+     * If set, this website is really just an alias for that one. This means
+     * that users will see exactly the same thing on both. Useful for having
+     * a "local" domain name as well as an externally delegated one.
+     * 
+     * @return 
+     */
+    @ManyToOne
+    public Website getAliasTo() {
+        return aliasTo;
+    }
+
+    public void setAliasTo(Website aliasTo) {
+        this.aliasTo = aliasTo;
+    }
+
+    /**
+     * If set any requests to this website will redirect to the one specified here
+     * 
+     * @return 
+     */
+    public String getRedirectTo() {
+        return redirectTo;
+    }
+
+    public void setRedirectTo(String redirectTo) {
+        this.redirectTo = redirectTo;
+    }
+
+    
+
+    
+    
 
     /**
      * The internal theme is intended for logged in access

@@ -29,13 +29,13 @@ public class ProfileBean {
         if( b.getName() == null ) {
             b.setName(p.getName());
         }
-        b.setPhotoHref(p.getPhotoHref());
+        b.setPhotoHash(p.getPhotoHash());
         return b;
     }
     
     private String href;
     private String name;
-    private String photoHref;
+    private long photoHash;
 
     public String getHref() {
         return href;
@@ -53,13 +53,15 @@ public class ProfileBean {
         this.name = name;
     }
 
-    public String getPhotoHref() {
-        return photoHref;
+    public long getPhotoHash() {
+        return photoHash;
     }
 
-    public void setPhotoHref(String thumb) {
-        this.photoHref = thumb;
+    public void setPhotoHash(long photoHash) {
+        this.photoHash = photoHash;
     }
+
+    
     
     
 }

@@ -37,6 +37,7 @@ import static io.milton.context.RequestContext._;
 public class OrganisationsApp implements Application {
 
     private ApplicationManager applicationManager;
+    private SpliffyResourceFactory resourceFactory;
 
     @Override
     public String getInstanceId() {
@@ -46,6 +47,7 @@ public class OrganisationsApp implements Application {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         applicationManager = _(ApplicationManager.class);
+        this.resourceFactory = resourceFactory;
     }
 
     /**

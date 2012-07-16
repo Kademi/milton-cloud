@@ -38,6 +38,8 @@ public class WebsiteApp implements Application {
         
     private ApplicationManager applicationManager;
     
+    private SpliffyResourceFactory resourceFactory;
+    
     @Override
     public String getInstanceId() {
         return "website";
@@ -46,6 +48,7 @@ public class WebsiteApp implements Application {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         applicationManager = _(ApplicationManager.class);
+        this.resourceFactory = resourceFactory;
     }
 
     /**

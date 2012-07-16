@@ -58,9 +58,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.add(Expression.isNull("organisation"));
         return (Organisation) crit.uniqueResult();
     }
-    
     private List<BaseEntity> members;
-    
     private List<Website> websites;
 
     @OneToMany(mappedBy = "organisation")
@@ -80,11 +78,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public void setWebsites(List<Website> websites) {
         this.websites = websites;
     }
-    
-    
 
     public List<Website> websites() {
-        if( getWebsites() == null ) {
+        if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
         } else {
             return getWebsites();
@@ -114,16 +110,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public List<Organisation> childOrgs() {
         List<Organisation> list = new ArrayList<>();
-        if( this.getMembers() != null ) {
-            for( BaseEntity be : getMembers() ) {
-                if( be instanceof Organisation) {
-                    list.add((Organisation)be);
+        if (this.getMembers() != null) {
+            for (BaseEntity be : getMembers()) {
+                if (be instanceof Organisation) {
+                    list.add((Organisation) be);
                 }
             }
         }
         return list;
     }
-    
+
     public BaseEntity childOrg(String dn) {
         if (this.getMembers() != null) {
             for (BaseEntity be : this.getMembers()) {
@@ -135,9 +131,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return null;
     }
 
-    public Website createWebsite(String webName, String theme, Profile user, Session session) {
+    /**
+     * Create a website for this organisation with the domain name given. Also
+     * creates an alias subdomain if the alias argument is not null
+     *
+     */
+    public Website createWebsite(String webName, String theme, Profile user, String alias, Session session) {
         Repository r = createRepository(webName, user, session);
-        
+
         Website w = new Website();
         w.setOrganisation(this);
         w.setCreatedDate(new Date());
@@ -147,21 +148,34 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         w.setCurrentBranch(Branch.TRUNK);
         w.setRepository(r);
         session.save(w);
-        
+
+        if (alias != null) {
+            Website aliasWebsite = new Website();
+            aliasWebsite.setOrganisation(this);
+            aliasWebsite.setCreatedDate(new Date());
+            aliasWebsite.setName(alias);
+            aliasWebsite.setPublicTheme(null);
+            aliasWebsite.setInternalTheme(null);
+            aliasWebsite.setCurrentBranch(Branch.TRUNK);
+            aliasWebsite.setRepository(r);
+            aliasWebsite.setAliasTo(w);
+            session.save(w);
+        }
+
         return w;
     }
-    
+
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
     }
 
     public Group group(String groupName, Session session) {
-        Group g = Group.findByOrgAndName(this, groupName, session); 
+        Group g = Group.findByOrgAndName(this, groupName, session);
         return g;
     }
 
     public List<Group> groups(Session session) {
-        return Group.findByOrg(this, session);  
+        return Group.findByOrg(this, session);
     }
 }

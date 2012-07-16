@@ -52,7 +52,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private final EventManager eventManager;
     private final SessionManager sessionManager;
     private final CurrentRootFolderService currentRootFolderService;
-
+    
     public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.userDao = userDao;
         this.securityManager = securityManager;
@@ -127,4 +127,5 @@ public class SpliffyResourceFactory implements ResourceFactory {
     public SessionManager getSessionManager() {
         return sessionManager;
     }
+       
 }

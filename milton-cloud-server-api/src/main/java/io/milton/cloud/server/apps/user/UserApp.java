@@ -61,7 +61,6 @@ public class UserApp implements Application, MenuApplication {
         }
         return null;
     }
-    
     private SpliffySecurityManager securityManager;
 
     @Override
@@ -92,6 +91,12 @@ public class UserApp implements Application, MenuApplication {
                     page.setForceLogin(true);
                     return page;
 
+            }
+        }
+        if (parent instanceof RootFolder) {
+            RootFolder rf = (RootFolder) parent;
+            if (requestedName.equals("login.html")) {
+                return new LoginPage(rf);
             }
         }
         return null;

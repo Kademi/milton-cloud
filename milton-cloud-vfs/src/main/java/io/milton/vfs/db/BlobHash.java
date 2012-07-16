@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 
 /**
  *
@@ -24,6 +25,7 @@ public class BlobHash implements Serializable {
     
 
     @Id    
+    @Index(name="ids_blobhash")
     public long getBlobHash() {
         return blobHash;
     }

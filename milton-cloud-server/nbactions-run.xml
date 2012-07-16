@@ -5,5 +5,8 @@
             <goals>
                 <goal>compile</goal>
             </goals>
+            <activatedProfiles>
+                <activatedProfile>run</activatedProfile>
+            </activatedProfiles>
         </action>
     </actions>

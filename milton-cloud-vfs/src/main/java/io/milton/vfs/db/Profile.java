@@ -9,6 +9,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -43,7 +44,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     private String email;
     
-    private String photoHref;
+    private long photoHash;
     
     private String nickName;
 
@@ -61,6 +62,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     @Column
+    @Index(name="ids_profile_email")
     public String getEmail() {
         return email;
     }
@@ -91,14 +93,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.nickName = nickName;
     }
 
-    @Column
-    public String getPhotoHref() {
-        return photoHref;
+    public long getPhotoHash() {
+        return photoHash;
     }
 
-    public void setPhotoHref(String photoHref) {
-        this.photoHref = photoHref;
+    public void setPhotoHash(long photoHash) {
+        this.photoHash = photoHash;
     }
+
     
     
     

@@ -12,6 +12,7 @@ import org.hibernate.criterion.Expression;
 import java.util.ArrayList;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 
 /**
  * Represents a real world entity such as a user or an organisation
@@ -90,6 +91,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
 
     @Column(nullable = false)
+    @Index(name="ids_entity_name")
     public String getName() {
         return name;
     }

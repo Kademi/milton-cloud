@@ -83,6 +83,68 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             throw new RuntimeException(ex);
         }
     }
+    
+    public static String findAutoName(String baseName, CollectionResource folder, Map<String, String> parameters) {        
+        String nameToUse = getImpliedName(baseName, parameters, folder);
+        if (nameToUse != null) {
+            nameToUse = nameToUse.toLowerCase().replace("/", "");
+            nameToUse = nameToUse.replace("'", "");
+            nameToUse = nameToUse.replace("\"", "");
+            nameToUse = nameToUse.replace("@", "-");
+            nameToUse = nameToUse.replace(" ", "-");
+            nameToUse = nameToUse.replace("?", "-");
+            nameToUse = nameToUse.replace(":", "-");
+            nameToUse = nameToUse.replace("--", "-");
+            nameToUse = nameToUse.replace("--", "-");
+            nameToUse = NewPageResource.getUniqueName(folder, nameToUse);
+        } else {
+            nameToUse = NewPageResource.getDateAsNameUnique(folder);
+        }
+        return nameToUse;
+    }
+    
+    
+    /**
+     * 
+     * @param baseName
+     * @param parameters
+     * @param folder
+     * @return 
+     */
+    public static String getImpliedName(String baseName, Map<String, String> parameters, CollectionResource folder) {        
+        String nameToCreate = baseName;
+        if (nameToCreate.equals("_autoname.html")) {
+            if (parameters.containsKey("name")) {
+                nameToCreate = parameters.get("name");
+            } else if (parameters.containsKey("nickName")) {
+                nameToCreate = parameters.get("nickName");
+            } else if (parameters.containsKey("fullName")) {
+                nameToCreate = parameters.get("fullName");
+            } else if (parameters.containsKey("firstName")) {
+                String fullName = parameters.get("firstName");
+                if (parameters.containsKey("surName")) {
+                    fullName = fullName + "." + parameters.get("surName");
+                }
+                nameToCreate = fullName;
+            } else if (parameters.containsKey("title")) {
+                nameToCreate = parameters.get("title");
+            } else {
+                nameToCreate = "$[counter]";
+            }
+        }
+
+        if (nameToCreate.contains("$[counter]")) {
+            String folderId = folder.getUniqueId();
+            if (folderId == null) {
+                throw new RuntimeException("Cant calc counter for folder which has null uniqueId: " + folder.getClass());
+            }
+            Long l = NamedCounter.increment(folderId, SessionManager.session());
+            nameToCreate = nameToCreate.replace("$[counter]", l.toString());
+        }
+        return nameToCreate;
+    }
+    
+    
     private final ContentDirectoryResource parent;
     private final String name;
     private RenderFileResource created;
@@ -127,62 +189,10 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
     }
 
     public String findAutoName(Map<String, String> parameters) {
-        return findAutoName(parent, parameters);
+        String baseName = getName().replace(".new", "");
+        return findAutoName(baseName, parent, parameters);
     }
 
-    public String findAutoName(CollectionResource folder, Map<String, String> parameters) {
-        String nameToUse = getImpliedName(parameters, folder);
-        if (nameToUse != null) {
-            nameToUse = nameToUse.toLowerCase().replace("/", "");
-            nameToUse = nameToUse.replace("'", "");
-            nameToUse = nameToUse.replace("\"", "");
-            nameToUse = nameToUse.replace("@", "-");
-            nameToUse = nameToUse.replace(" ", "-");
-            nameToUse = nameToUse.replace("?", "-");
-            nameToUse = nameToUse.replace(":", "-");
-            nameToUse = nameToUse.replace("--", "-");
-            nameToUse = nameToUse.replace("--", "-");
-            nameToUse = NewPageResource.getUniqueName(folder, nameToUse);
-        } else {
-            nameToUse = NewPageResource.getDateAsNameUnique(folder);
-        }
-        return nameToUse;
-    }
-
-    private String getImpliedName(Map<String, String> parameters, CollectionResource folder) {
-        String nameToCreate = getName().replace(".new", "");
-        if (nameToCreate.equals("_autoname.html")) {
-            if (parameters.containsKey("name")) {
-                nameToCreate = parameters.get("name");
-            } else if (parameters.containsKey("nickName")) {
-                nameToCreate = parameters.get("nickName");
-            } else if (parameters.containsKey("fullName")) {
-                nameToCreate = parameters.get("fullName");
-            } else if (parameters.containsKey("firstName")) {
-                String fullName = parameters.get("firstName");
-                if (parameters.containsKey("surName")) {
-                    fullName = fullName + "." + parameters.get("surName");
-                }
-                nameToCreate = fullName;
-            } else if (parameters.containsKey("title")) {
-                nameToCreate = parameters.get("title");
-            } else {
-                nameToCreate = "$[counter]";
-            }
-        }
-
-        if (nameToCreate.contains("$[counter]")) {
-            String folderId = folder.getUniqueId();
-            if (folderId == null) {
-                throw new RuntimeException("Cant calc counter for folder which has null uniqueId: " + folder.getClass());
-            }
-            Long l = NamedCounter.increment(folderId, SessionManager.session());
-            nameToCreate = nameToCreate.replace("$[counter]", l.toString());
-        }
-        System.out.println("nameToCreate: " + nameToCreate);
-        return nameToCreate;
-
-    }
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {

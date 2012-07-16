@@ -17,6 +17,7 @@
                 
             }
         }, options);  
+        
   
         var container = this;
         $(this).submit(function(e) {
@@ -34,7 +35,7 @@
                         success: function(resp) {
                             ajaxLoadingOff();
                             log("save success", resp)
-                            config.callback(resp)
+                            //config.callback(resp)
                         },
                         error: function(resp) {
                             ajaxLoadingOff();

@@ -136,7 +136,8 @@ function dateOrd(post1,post2){
     }
     if( n.day < m.day ) {
         return -1;
-    } else if( n.day > m.day ) {
+    }
+    else if( n.day > m.day ) {
         return 1;
     }
     if( n.hours < m.hours ) {
@@ -310,7 +311,7 @@ function getPathFromHref(href) {
 }
 
 
-function initEdify(container) {
+function initEdify() {
     if( !$("body").hasClass("edifyIsEditMode")) {
         $("body").addClass("edifyIsViewMode");
     }
@@ -325,7 +326,7 @@ function initEdify(container) {
     });
 }
 
-function edify(container) {
+function edify(container, callback) {
     log("edify", container);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
@@ -338,6 +339,16 @@ function edify(container) {
         $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
     });
     
+    if( !callback ) {
+        callback = function(resp) {
+            if( resp.nextHref) {
+                window.location = resp.nextHref;
+            } else {
+                window.location = window.location.pathname;
+            }            
+        };
+    }
+    
     container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
     $("#edifyForm").append("<input type='hidden' name='body' value='' />");
     
@@ -345,7 +356,7 @@ function edify(container) {
         log("submit form");
         try {
             log("ckeditors", CKEDITOR.instances);
-            $("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
+            //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
             $.ajax({
                 type: 'POST',
                 url: $("#edifyForm").attr("action"),
@@ -353,12 +364,8 @@ function edify(container) {
                 dataType: "json",
                 success: function(resp) {
                     ajaxLoadingOff();
-                    log("save success", resp, window.location.path);
-                    if( resp.nextHref) {
-                        window.location = resp.nextHref;
-                    } else {
-                        window.location = window.location.pathname;
-                    }
+                    log("common.js: edify: save success", resp, window.location.path);
+                    callback(resp);
                 },
                 error: function(resp) {
                     ajaxLoadingOff();
@@ -424,7 +431,7 @@ function showCreateFolder() {
 
 function createFolder(name, parentHref, callback) {
     var encodedName = name; //$.URLEncode(name);
-//    ajaxLoadingOn();
+    //    ajaxLoadingOn();
     var url = "_DAV/MKCOL";
     if( parentHref ) {
         url = parentHref + "/" + url;
@@ -437,14 +444,14 @@ function createFolder(name, parentHref, callback) {
         },
         dataType: "json",
         success: function(resp) {
-//            ajaxLoadingOff();
+            //            ajaxLoadingOff();
             //window.location = encodedName + "/index.html";
             if( callback ) {
                 callback(name, resp);
             }
         },
         error: function() {
-//            ajaxLoadingOff();
+            //            ajaxLoadingOff();
             alert('There was a problem creating the folder');
         }
     });

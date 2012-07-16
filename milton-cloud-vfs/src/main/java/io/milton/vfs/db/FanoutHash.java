@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import org.hashsplit4j.api.Fanout;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 
 /**
  *
@@ -24,6 +25,7 @@ public class FanoutHash implements Serializable, Fanout{
     private List<FanoutEntry> fanoutEntrys;
 
     @Id
+    @Index(name="ids_fanout_hash")
     public long getFanoutHash() {
         return hash;
     }
