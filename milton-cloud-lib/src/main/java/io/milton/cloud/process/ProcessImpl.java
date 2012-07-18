@@ -48,6 +48,7 @@ public class ProcessImpl implements Serializable, StateProcess {
         this.startState = start;
     }
 
+    @Override
     public State getStartState() {
         return startState;
     }
@@ -61,6 +62,9 @@ public class ProcessImpl implements Serializable, StateProcess {
     @Override
     public void walkStates() {
         statesMap.clear();
+        if( startState == null ) {
+            throw new RuntimeException("Start state is not set");
+        }
         State s = this.startState;
         walkStates(s);
     }

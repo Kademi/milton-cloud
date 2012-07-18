@@ -15,11 +15,13 @@
         var config = $.extend( {
             callback: function() {
                 
-            }
+            },
+            valiationMessageSelector: ".pageMessage"
         }, options);  
         
   
         var container = this;
+        log("msgs", config.valiationMessageSelector, container, $(config.valiationMessageSelector, container));
         $(this).submit(function(e) {
             log("form submit", form);
             e.preventDefault();
@@ -33,9 +35,27 @@
                         data: form.serialize(),
                         dataType: "json",
                         success: function(resp) {
-                            ajaxLoadingOff();
-                            log("save success", resp)
-                            //config.callback(resp)
+                            ajaxLoadingOff();                            
+                            if( resp.status) {
+                                log("save success", resp)
+                                config.callback(resp)
+                            } else {
+                                log("status indicates failure", resp)
+                                try {                                    
+                                    var messagesContainer = $(config.valiationMessageSelector, container);
+                                    if( resp.messages && resp.messages.length > 0 ) {
+                                        for( i=0; i<resp.messages.length; i++) {
+                                            var msg = resp.messages[i];
+                                            messagesContainer.append("<p>" + msg + "</p>");
+                                        }
+                                    } else {
+                                        messagesContainer.append("<p>Sorry, we couldnt process your request</p>");
+                                    }
+                                    messagesContainer.show(100);
+                                } catch(e) {
+                                    log("ex", e);
+                                }
+                            }                            
                         },
                         error: function(resp) {
                             ajaxLoadingOff();

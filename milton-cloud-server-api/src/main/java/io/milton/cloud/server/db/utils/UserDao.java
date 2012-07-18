@@ -63,14 +63,16 @@ public class UserDao {
     /**
      * Look for the given user profile in the given organisation
      *
-     * @param name
+     * @param nameOrEmail
      * @param organisation
      * @param session
      * @return
      */
-    public Profile getProfile(String name, Organisation organisation, Session session) {
+    public Profile getProfile(String nameOrEmail, Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.and(Expression.eq("organisation", organisation), Expression.eq("name", name)));
+        crit.add(Expression.and(Expression.eq("organisation", organisation), 
+                Expression.or(Expression.eq("name", nameOrEmail), Expression.eq("email", nameOrEmail))                
+        ));
         return (Profile) crit.uniqueResult();
     }
 

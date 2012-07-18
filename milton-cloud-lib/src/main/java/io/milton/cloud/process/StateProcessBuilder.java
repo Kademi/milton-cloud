@@ -14,11 +14,12 @@ public class StateProcessBuilder {
 
     public StateProcessBuilder(String name, String startStateName) {
         process = new ProcessImpl(name);
-        State start = process.createState(startStateName);
-        process.setStartState(start);
+        StateBuilder sb = from(startStateName);
+        process.setStartState(sb.state);
     }
 
     public StateProcess getProcess() {
+        process.walkStates();
         return process;
     }
 
@@ -26,10 +27,10 @@ public class StateProcessBuilder {
         return mapOfStates.get(name);
     }
 
-    public StateBuilder from(String name) {
+    public final StateBuilder from(String name) {
         StateBuilder sb = mapOfStates.get(name);
         if (sb == null) {
-            State state = new StateImpl(process, name);
+            State state = process.createState(name);
             sb = new StateBuilder(state);
             mapOfStates.put(name, sb);
         }

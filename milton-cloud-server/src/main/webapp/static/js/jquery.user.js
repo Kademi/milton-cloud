@@ -41,44 +41,9 @@
             
             $(config.valiationMessageSelector, this).hide(100);
             try {
-                $.ajax({
-                    type: 'POST',
-                    url: config.urlSuffix,
-                    data: {
-                        _loginUserName: $("input[type=text]", container).val(),
-                        _loginPassword: $("input[type=password]", container).val()
-                    },
-                    dataType: "json",
-                    success: function(resp) {
-                        log("login success", resp)
-                        initUser();                
-                        if( userUrl ) {
-                            if( config.afterLoginUrl == null) {
-                                window.location.reload();
-                            } else if( config.afterLoginUrl.startsWith("/")) {
-                                //alert("would redirect to: " + config.afterLoginUrl);
-                                //return;
-                                window.location = config.afterLoginUrl;
-                            } else {
-                                //alert("would redirect to: " + userUrl + config.afterLoginUrl);
-                                //return;
-                                window.location = userUrl + config.afterLoginUrl;
-                            }
-                        } else {
-                            // null userurl, so login was not successful
-                            $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
-                            log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
-                            $(config.valiationMessageSelector, container).show(100);                            
-                        }
-                        //window.location = "/index.html";
-                    },
-                    error: function(resp) {
-                        alert("err");
-                        $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
-                        log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
-                        $(config.valiationMessageSelector, container).show(100);
-                    }
-                });                
+                var userName = $("input[type=text]", container).val();
+                var password = $("input[type=password]", container).val();
+                doLogin(userName, password, config);
             } catch(e) {
                 log("exception sending forum comment", e);
             }            
@@ -87,6 +52,48 @@
     };
 })( jQuery );
 
+
+function doLogin(userName, password, config) {
+    $.ajax({
+        type: 'POST',
+        url: config.urlSuffix,
+        data: {
+            _loginUserName: userName,
+            _loginPassword: password
+        },
+        dataType: "json",
+        acceptsMap: "application/x-javascript",
+        success: function(resp) {
+            log("login success", resp)
+            initUser();                
+            if( userUrl ) {
+                if( config.afterLoginUrl == null) {
+                    window.location.reload();
+                } else if( config.afterLoginUrl.startsWith("/")) {
+                    //alert("would redirect to: " + config.afterLoginUrl);
+                    //return;
+                    window.location = config.afterLoginUrl;
+                } else {
+                    //alert("would redirect to: " + userUrl + config.afterLoginUrl);
+                    //return;
+                    window.location = userUrl + config.afterLoginUrl;
+                }
+            } else {
+                // null userurl, so login was not successful
+                $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
+                log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
+                $(config.valiationMessageSelector, container).show(100);                            
+            }
+        //window.location = "/index.html";
+        },
+        error: function(resp) {
+            alert("err");
+            $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
+            log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
+            $(config.valiationMessageSelector, container).show(100);
+        }
+    });      
+}
 
 var userUrl = null;
 var userName = null;

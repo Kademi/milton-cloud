@@ -74,10 +74,13 @@ public class ProcessContext {
         if( state == null ) {
             state = process.getStartState();
             token.setStateName(state.getName());
+            System.out.println("start: current state is now: " + token.getStateName());
+            System.out.println("start: current state is now: " + getCurrentState().getName());
             didTransition = true;
         }
         for( Transition t : state.getTransitions() ) {
             if( evalAndTransition( t, false ) ) {
+                System.out.println("transition to: " + token.getStateName());
                 return true;
             }
         }
@@ -85,7 +88,15 @@ public class ProcessContext {
     }
 
     public State getCurrentState() {
-        return process.getState( token.getStateName() );
+        if( token.getStateName() == null ) {
+            System.out.println("statename is null");
+            return null;
+        }
+        State state = process.getState( token.getStateName() );
+        if( state == null ) {
+            throw new RuntimeException("state not found: " + token.getStateName());
+        }
+        return state;
     }
 
     public boolean fireTransition( String transitionName ) {
