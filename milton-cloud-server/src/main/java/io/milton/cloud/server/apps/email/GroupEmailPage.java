@@ -32,6 +32,7 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.context.Context;
@@ -107,9 +108,8 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
                 }
             }
 
-            BeanUtilsBean bub = BeanUtilsBean.getInstance();
             try {
-                bub.populate(job, parameters);
+                _(DataBinder.class).populate(job, parameters);
             } catch (IllegalAccessException | InvocationTargetException ex) {
                 throw new RuntimeException(ex);
             }

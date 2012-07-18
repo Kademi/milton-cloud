@@ -7,7 +7,8 @@
             <div class="SubContent">
                 <h1>Registration</h1>
                 <div class="MainContent">
-                    <form method="post" id="registerForm" action="$page.name" onsubmit="return createAccount()">                                                
+                    $folder.find("/content/signup/professionals.html").getParam("intro")
+                    <form method="post" id="registerForm" action="$page.name">
                         <fieldset>
                             <legend>Your login details</legend>
                             <div class="Box02">
@@ -21,7 +22,7 @@
                                         <br/>
                                         <label class="first" for="nickName">Nickname</label>
                                         <input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" />
-                                        
+
                                         <label class="last" for="confirmPassword">Confirm</label>
                                         <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Please confirm your password" />
 
@@ -31,10 +32,26 @@
                             </div>
                         </fieldset>
                     </form>
+                    $folder.find("/content/signup/professionals.html").body
                 </div>		
                 <br class="Clear" />
+                
             </div>
         </div> 
+        <script type="text/javascript">
+            jQuery(function() {
+                log("init labels")
+                jQuery("label").each(function(i, n) {
+                    var label = jQuery(n);
+                    var title = label.text();
+                    var input = jQuery("#" + label.attr("for"));
+                    input.attr("title", title);
+                    input.attr("placeholder", title);
+                    label.text(i+1);
+                });
+                jQuery("#registerForm").forms();
+            });
+        </script>        
     </body>    
 </html> 
 

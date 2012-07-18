@@ -1,6 +1,5 @@
 package io.milton.cloud.server.web;
 
-import com.ettrema.logging.LogUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,8 @@ import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReportableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.Resource;
+import io.milton.vfs.db.utils.DbUtils;
 
 /**
  *
@@ -82,11 +83,12 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     }
 
     @Override
-    public boolean authorise(Request request, Method method, Auth auth) {
+    public boolean authorise(Request request, Method method, Auth auth) {        
         boolean b = _(SpliffySecurityManager.class).authorise(request, method, auth, this);
         if (!b) {
 //            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
         }
+        log.info("authorise: " + getName() + " auth: " + auth + " = " + b);
         return b;
     }
 
@@ -223,5 +225,37 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         return false;
     }
     
+    public Resource find(String path) throws NotAuthorizedException, BadRequestException {
+        Path p = Path.path(path);
+        return find(p);
+    }
     
+    public Resource find(Path p) throws NotAuthorizedException, BadRequestException {
+        Resource current = this;
+        if( p.isRelative() ) {
+            current = this;
+        } else {
+            current = WebUtils.findRootFolder(this);
+        }
+        for(String part : p.getParts()) {
+            if( part.equals(".")) {
+                // do nothing
+            } else if( part.equals("..")) {
+                if( current instanceof AbstractResource) {
+                    AbstractResource ar = (AbstractResource) current;
+                    current = ar.getParent();
+                } else {
+                    return null;
+                }
+            } else {
+                if( current instanceof CollectionResource) {
+                    CollectionResource col = (CollectionResource) current;
+                    current = col.child(part);
+                } else {
+                    return null;
+                }                
+            }
+        }
+        return current;
+    }
 }

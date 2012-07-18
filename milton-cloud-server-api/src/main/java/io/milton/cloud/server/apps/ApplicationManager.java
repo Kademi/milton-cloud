@@ -200,6 +200,7 @@ public class ApplicationManager {
     }
 
     private Application initApp(String s) {
+        System.out.println("AppManager class loader: " + this.getClass().getClassLoader().toString());
         try {
             Class c = Class.forName(s);
             Application app = (Application) c.newInstance();

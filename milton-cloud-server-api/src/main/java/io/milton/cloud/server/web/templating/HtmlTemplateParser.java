@@ -22,6 +22,7 @@ import io.milton.common.Path;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLResolver;
@@ -30,6 +31,8 @@ import javax.xml.stream.XMLStreamReader;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 /**
  *
@@ -47,7 +50,7 @@ public class HtmlTemplateParser {
      *
      * @param meta
      */
-    public void parse(HtmlPage meta, Path webPath) throws IOException {
+    public void parse(HtmlPage meta, Path webPath) throws IOException, XMLStreamException {
         log.info("parse");
         Document doc;
         try (InputStream fin = meta.getInputStream()) {
@@ -90,33 +93,27 @@ public class HtmlTemplateParser {
         htmlFormatter.update(r, bout);
     }
 
-    public org.jdom.Document getJDomDocument(InputStream fin) {
-        try {
-            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-            if (!inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
-                throw new RuntimeException(":EEEk");
-            }
-            inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
-            inputFactory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE);
-            inputFactory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
-            inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-            inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
-            XMLResolver xMLResolver = new XMLResolver() {
-
-                @Override
-                public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException {
-                    return new ByteArrayInputStream(new byte[0]);
-                }
-            };
-            inputFactory.setProperty(XMLInputFactory.RESOLVER, xMLResolver);
-            StaxBuilder staxBuilder = new StaxBuilder();
-            XMLStreamReader streamReader = inputFactory.createXMLStreamReader(fin);
-            return staxBuilder.build(streamReader);
-        } catch (XMLStreamException ex) {
-            throw new RuntimeException(ex);
-//        } catch (IOException ex) {
-//            throw new RuntimeException(ex);
+    public org.jdom.Document getJDomDocument(InputStream fin) throws XMLStreamException {
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        if (!inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
+            throw new RuntimeException(":EEEk");
         }
+        inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+        inputFactory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE);
+        inputFactory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
+        inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+        inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+        XMLResolver xMLResolver = new XMLResolver() {
+
+            @Override
+            public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException {
+                return new ByteArrayInputStream(new byte[0]);
+            }
+        };
+        inputFactory.setProperty(XMLInputFactory.RESOLVER, xMLResolver);
+        StaxBuilder staxBuilder = new StaxBuilder();
+        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(fin);
+        return staxBuilder.build(streamReader);
     }
 
     private Element getChild(Element el, String name) {
@@ -155,15 +152,16 @@ public class HtmlTemplateParser {
     }
 
     private void parseWebResourcesFromHtml(Element elHead, HtmlPage meta, Path webPath) {
-        for (Element elHeadTag : children(elHead)) {
-            if (elHeadTag.getName().equals("title")) {
+        for (Element wrTag : children(elHead)) {
+            if (wrTag.getName().equals("title")) {
                 meta.setTitle(getValueOf(elHead, "title"));
             } else {
                 WebResource wr = new WebResource(webPath);
                 meta.getWebResources().add(wr);
-                wr.setTag(elHeadTag.getName());
-                wr.setBody(elHeadTag.getText());
-                for (Object oAtt : elHeadTag.getAttributes()) {
+                wr.setTag(wrTag.getName());
+                String body = getContent(wrTag);
+                wr.setBody(body);
+                for (Object oAtt : wrTag.getAttributes()) {
                     Attribute att = (Attribute) oAtt;
                     wr.getAtts().put(att.getName(), att.getValue());
                 }
@@ -172,6 +170,9 @@ public class HtmlTemplateParser {
     }
 
     private List<org.jdom.Element> children(org.jdom.Element e2) {
+        if( e2 == null ) {
+            return Collections.EMPTY_LIST;
+        }
         List list = e2.getChildren();
         List<org.jdom.Element> els = new ArrayList<>();
         for (Object o : list) {
@@ -179,4 +180,22 @@ public class HtmlTemplateParser {
         }
         return els;
     }
+    
+    public String getContent(org.jdom.Element el) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        transformDocument(out, el);
+        return out.toString().trim();
+    }
+    
+    private void transformDocument(OutputStream out, org.jdom.Element el) {
+        Format f = Format.getPrettyFormat();
+        f.setTextMode(Format.TextMode.PRESERVE);
+        f.setOmitDeclaration(true);
+        XMLOutputter outputter = new XMLOutputter(f);
+        try {
+            outputter.output(el.getContent(), out);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }    
 }

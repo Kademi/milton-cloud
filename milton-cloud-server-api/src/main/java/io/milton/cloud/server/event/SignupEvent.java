@@ -26,7 +26,21 @@ import io.milton.vfs.db.Website;
  *
  * @author brad
  */
-public class SignupEvent implements Event{
+public class SignupEvent implements Event {
+
+    /**
+     * The sorts of things that can happen in a signupevent
+     */
+    public enum SignupAction {
+        AUTOAPPROVED,
+        PENDING,
+        REJECTED,
+        ACCEPTED,
+        DISABLED,
+        LAPSED,
+        PAYMENT_OVERDUE, 
+        RE_ACTIVATED
+    }
     private final Profile profile;
     private final Group group;
     private final Website website;
@@ -36,7 +50,6 @@ public class SignupEvent implements Event{
         this.group = group;
         this.website = website;
     }
-
 
     public Group getGroup() {
         return group;
@@ -48,5 +61,5 @@ public class SignupEvent implements Event{
 
     public Website getWebsite() {
         return website;
-    }       
+    }
 }

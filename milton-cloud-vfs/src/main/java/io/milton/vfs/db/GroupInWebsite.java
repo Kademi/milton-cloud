@@ -85,6 +85,14 @@ public class GroupInWebsite implements Serializable {
         return registrationMode;
     }
 
+    /**
+     * Allowable registration option: - "o" = open, anyone can register and be
+     * immediately active - "c" = closed, no self registration - "a" =
+     * administrator enabled, anyone can register but their account only becomes
+     * active after being enabled
+     *
+     * @return
+     */    
     public void setRegistrationMode(String registrationMode) {
         this.registrationMode = registrationMode;
     }

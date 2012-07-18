@@ -95,7 +95,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
                     }
                 case "files":
                     if (numPathParts == 1) {
-                        return null;
+                        return new FilesFolder(blobStore, hashStore, path, securityManager, org);
                     } else {
                         String sHash = p.getName();
                         long hash = Long.parseLong(sHash);

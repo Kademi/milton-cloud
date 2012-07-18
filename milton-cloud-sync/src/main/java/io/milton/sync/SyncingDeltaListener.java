@@ -18,6 +18,7 @@ class SyncingDeltaListener implements DeltaListener2 {
     private final Archiver archiver;
     private final File root;
     private final SyncStatusStore syncStatusStore;
+    private boolean readonlyLocal;
 
     public SyncingDeltaListener(Syncer syncer, Archiver archiver, File localRoot, SyncStatusStore syncStatusStore) {
         this.syncer = syncer;
@@ -31,6 +32,9 @@ class SyncingDeltaListener implements DeltaListener2 {
         if (remoteTriplet.isDirectory()) {
             final File localFile = toFile(path);
             if (!localFile.exists()) {
+                if (readonlyLocal) {
+                    return;
+                }
                 if (!localFile.mkdirs()) {
                     throw new IOException("Couldnt create local directory: " + localFile.getAbsolutePath());
                 }
@@ -40,6 +44,9 @@ class SyncingDeltaListener implements DeltaListener2 {
         } else {
             final File localChild = toFile(path);
             log.info("new or modified remote file: " + localChild.getAbsolutePath());
+            if (readonlyLocal) {
+                return;
+            }
             syncer.downloadSync(remoteTriplet.getHash(), path);
             syncStatusStore.setBackedupHash(path, remoteTriplet.getHash());
         }
@@ -49,6 +56,9 @@ class SyncingDeltaListener implements DeltaListener2 {
     public void onRemoteDelete(Triplet localTriplet, Path path) {
         final File localChild = toFile(path);
         log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());
+        if (readonlyLocal) {
+            return;
+        }
         archiver.archive(localChild);
         syncStatusStore.clearBackedupHash(path);
     }
@@ -57,7 +67,7 @@ class SyncingDeltaListener implements DeltaListener2 {
     public void onLocalChange(Triplet localTriplet, Path path) throws IOException {
         final File localFile = toFile(path);
         if (localFile.isFile()) {
-            System.out.println("upload locally new or modified file: " + localFile.getAbsolutePath());
+            System.out.println("upload locally new or modified file: " + localFile.getCanonicalPath());
             syncer.upSync(path);
             syncStatusStore.setBackedupHash(path, localTriplet.getHash());
         } else {
@@ -103,9 +113,9 @@ class SyncingDeltaListener implements DeltaListener2 {
                 null,
                 options,
                 options[2]);
-        if( n == JOptionPane.YES_OPTION) {
+        if (n == JOptionPane.YES_OPTION) {
             onLocalChange(localTriplet, path);
-        } else if( n == JOptionPane.NO_OPTION) {
+        } else if (n == JOptionPane.NO_OPTION) {
             onRemoteChange(remoteTriplet, localTriplet, path);
         }
     }
@@ -116,5 +126,13 @@ class SyncingDeltaListener implements DeltaListener2 {
             f = new File(f, fname);
         }
         return f;
+    }
+
+    public boolean isReadonlyLocal() {
+        return readonlyLocal;
+    }
+
+    public void setReadonlyLocal(boolean readonlyLocal) {
+        this.readonlyLocal = readonlyLocal;
     }
 }

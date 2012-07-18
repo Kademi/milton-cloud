@@ -164,6 +164,9 @@
                 <bean class="io.milton.cloud.server.web.ParameterisedResourcePropertySource"/>
             </list>
         </property>      
+        <property name="loginPageTypeHandler">
+            <bean class="io.milton.cloud.server.web.SpliffyLoginTypeHandler"/>
+        </property>
         <property name="enabledCkBrowser" value="true"/>
     </bean>
 

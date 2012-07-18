@@ -13,7 +13,18 @@
                 </li>
                 #end
             </ul>
-            <button type="submit">Save</button>
+            <button type="submit">Save</button>            
         </form>
+        <h2>Groups in website</h2>
+        #set($groupsInWebsite = $page.groupsInWebsite)
+        #if( $groupsInWebsite.empty )
+        <p>There are no groups attached to this website, so no one can join it</p>
+        #else
+        <ul>
+            #foreach($g in $page.groupsInWebsite )
+            <li>$g.userGroup.name</li>
+            #end
+        </ul>
+        #end
     </body>
 </html>

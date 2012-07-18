@@ -67,7 +67,7 @@ public class AvconvConverter implements Closeable {
      * @return - null indicates no file was generated. Oterhwise returns whatever
      * the callback returned
      */
-    public Long generate(FormatSpec format, With<InputStream, Long> with) {
+    public Long generate(FormatSpec format, With<InputStream, Long> with) throws Exception{
         log.info("generateThumb: " + format);
         File dest = getDestFile(format.getOutputType());
         try {
@@ -126,17 +126,14 @@ public class AvconvConverter implements Closeable {
             try {
                 exec.exec();
             } catch (Exception ex) {
-                log.error("Failed to generate alternate format", ex);
-                return null;
+                throw new Exception("Failed to generate alternate format: " + format, ex);
             }
 
             if (!dest.exists()) {
-                log.error("Conversion failed. Dest temp file was not created");
-                return null;
+                throw new Exception("Conversion failed. Dest temp file was not created. Format: " + format);
             }
             if (dest.length() == 0) {
-                log.error("Conversion failed. Dest temp file has size zero.");
-                return null;
+                throw new Exception("Conversion failed. Dest temp file has size zero. format: " + format);
             }
 
             if( sourceLength > 0 ) {

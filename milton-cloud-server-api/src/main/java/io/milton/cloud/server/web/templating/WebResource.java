@@ -18,6 +18,7 @@ package io.milton.cloud.server.web.templating;
 
 import io.milton.common.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +27,21 @@ import java.util.Map;
  */
 public class WebResource {
 
+    public static WebResource param(List<WebResource> webResources, String name) {
+        for (WebResource wr : webResources) {
+            if (wr.getTag().equals("script")) {
+                String type = wr.getAtts().get("type");
+                if ("data/parameter".equals(type)) {
+                    String title = wr.getAtts().get("title");
+                    if (name.equals(title)) {
+                        return wr;
+                    }
+                }
+            }
+        }
+        return null;
+    }    
+    
     private Map<String, String> atts = new HashMap<>();
     private final Path webPath;
     private String tag;

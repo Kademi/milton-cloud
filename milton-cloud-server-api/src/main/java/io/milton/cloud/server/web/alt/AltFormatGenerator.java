@@ -65,7 +65,7 @@ public class AltFormatGenerator implements EventListener {
 
         formats.add(new FormatSpec("video", "flv", 800, 455)); // for non-html video
         formats.add(new FormatSpec("video", "mp4", 800, 455)); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 800, 455)); 
+        formats.add(new FormatSpec("video", "ogv", 800, 455));
         //formats.add(new FormatSpec("video", "webm", 800, 455));
 
         formats.add(new FormatSpec("video", "png", 800, 455));
@@ -83,10 +83,10 @@ public class AltFormatGenerator implements EventListener {
         }
     }
 
-    private void onPut(FileResource fr) {        
+    private void onPut(FileResource fr) {
         log.info("onPut: enqueueing: " + fr.getName());
         GenerateJob job = new GenerateJob(fr.getHash(), fr.getName());
-        asynchProcessor.enqueue(job);            
+        asynchProcessor.enqueue(job);
     }
 
     private void generate(long primaryMediaHash, String name) throws IOException {
@@ -96,7 +96,7 @@ public class AltFormatGenerator implements EventListener {
         if (formats != null) {
             for (FormatSpec f : formats) {
                 if (is(name, f.inputType)) {
-                    generate(f, primaryMediaHash, converter);
+                    generate(f, primaryMediaHash, converter, name);
                 }
             }
         }
@@ -105,19 +105,24 @@ public class AltFormatGenerator implements EventListener {
     public AltFormat generate(FormatSpec f, FileResource fr) throws IOException {
         String ext = FileUtils.getExtension(fr.getName());
         AvconvConverter converter = new AvconvConverter(ffmpeg, fr.getHash(), fr.getName(), ext, contentTypeService, hashStore, blobStore);
-        return generate(f, fr.getHash(), converter);
+        return generate(f, fr.getHash(), converter, fr.getHref());
     }
 
-    public AltFormat generate(FormatSpec f, long primaryHash, AvconvConverter converter) throws IOException {
+    public AltFormat generate(FormatSpec f, long primaryHash, AvconvConverter converter, String primaryName) throws IOException {
         final Parser parser = new Parser();
-        Long altHash = converter.generate(f, new With<InputStream, Long>() {
+        Long altHash;
+        try {
+            altHash = converter.generate(f, new With<InputStream, Long>() {
 
-            @Override
-            public Long use(InputStream t) throws Exception {
-                long numBytes = parser.parse(t, hashStore, blobStore);
-                return numBytes;
-            }
-        });
+                @Override
+                public Long use(InputStream t) throws Exception {
+                    long numBytes = parser.parse(t, hashStore, blobStore);
+                    return numBytes;
+                }
+            });
+        } catch (Exception e) {
+            throw new IOException("Couldnt convert: " + primaryName, e);
+        }
         if (altHash != null) {
             String name = f.getName();
             return AltFormat.insertIfOrUpdate(name, primaryHash, altHash, SessionManager.session());
@@ -125,7 +130,7 @@ public class AltFormatGenerator implements EventListener {
             return null;
         }
     }
-    
+
     public FormatSpec findFormat(String name) {
         for (FormatSpec f : formats) {
             if (f.getName().equals(name)) {
@@ -138,17 +143,18 @@ public class AltFormatGenerator implements EventListener {
     private boolean is(String name, String type) {
         // will return a non-null value if type is contained in any content type
         List<String> list = contentTypeService.findContentTypes(name);
-        if( list != null ) {
-            for(String ct : list ) {
-                if( ct.contains(type)) {
+        if (list != null) {
+            for (String ct : list) {
+                if (ct.contains(type)) {
                     return true;
                 }
             }
-        }        
+        }
         return false;
     }
-    
+
     public class GenerateJob implements Processable {
+
         private static final long serialVersionUID = 1l;
         private long primaryFileHash;
         private String primaryFileName;
@@ -161,10 +167,10 @@ public class AltFormatGenerator implements EventListener {
         @Override
         public void doProcess(Context context) {
             Transaction tx = SessionManager.session().beginTransaction();
-            try {                
+            try {
                 // TODO: this relies on keeping a reference to the AltFormatGenerator. But need to decouple to support
                 // distributed queues
-                generate(primaryFileHash, primaryFileName); 
+                generate(primaryFileHash, primaryFileName);
                 tx.commit();
             } catch (IOException ex) {
                 tx.rollback();
@@ -174,10 +180,6 @@ public class AltFormatGenerator implements EventListener {
 
         @Override
         public void pleaseImplementSerializable() {
-            
         }
-        
-        
     }
-    
 }

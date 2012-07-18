@@ -48,7 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
-import io.milton.vfs.db.Website;
+import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import org.hibernate.Session;
@@ -175,4 +175,13 @@ public class ManageWebsitePage extends AbstractResource implements GetableResour
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
+
+    public Website getWebsite() {
+        return website;
+    }
+    
+    public List<GroupInWebsite> getGroupsInWebsite() {
+        return website.groups(SessionManager.session());
+    }
+    
 }

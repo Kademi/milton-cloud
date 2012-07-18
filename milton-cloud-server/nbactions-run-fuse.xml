@@ -6,7 +6,24 @@
                 <goal>install</goal>
             </goals>
             <properties>
-                <fuse.home>/proj/fuse-admin</fuse.home>
+                <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
             </properties>
+        <activatedProfiles>
+            <activatedProfile>run-fuse</activatedProfile>
+        </activatedProfiles>            
+        </action>
+        <action>
+            <actionName>debug</actionName>
+            <goals>
+                <goal>package</goal>
+            </goals>
+            <properties>
+                <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
+                <jpda.listen>maven</jpda.listen>                
+                <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+            </properties>
+            <activatedProfiles>
+                <activatedProfile>run-fuse</activatedProfile>
+            </activatedProfiles>
         </action>
     </actions>

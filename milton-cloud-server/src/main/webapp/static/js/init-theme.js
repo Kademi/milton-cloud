@@ -25,8 +25,7 @@ function initTheme() {
     $("#content .Login").user();
     
     jQuery('textarea.autoresize').autoResize();    
-    
-    initActiveNav();    
+      
     initEdify();    
     initNav();           
     initExtraInfo();               
@@ -43,20 +42,6 @@ function initTheme() {
          
     log("finished init-theme");
 } 
-
-function initActiveNav() {
-    var url = window.location.pathname;
-    log("initActiveNav", url);
-    $("a").each(function(i, n) {
-        var node = $(n);
-        var href = node.attr("href");
-        if( href ) {
-            if( href.startsWith(url) ) {
-                node.addClass("active");
-            }
-        }
-    });
-}
 
 function initModal() {
     $("body").on("click", ".Modal a.Close", function(e) {

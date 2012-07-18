@@ -77,6 +77,7 @@ public class HtmlTemplateRenderer {
         pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
         pw.write("<html>\n");
         pw.write("<head>\n");
+        pw.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"/>\n");
 
         List<WebResource> pageWebResources = null;
         List<String> pageBodyClasses = null;

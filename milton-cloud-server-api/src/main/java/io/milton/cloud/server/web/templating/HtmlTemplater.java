@@ -37,6 +37,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import javax.servlet.ServletContext;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * Builds pages by plugging a few things in together: - a static skeleton for a
@@ -255,8 +256,11 @@ public class HtmlTemplater {
             TemplateHtmlPage meta;
             try {
                 meta = templateLoader.findTemplateSource(source);
-            } catch (IOException ex) {
-                throw new ResourceNotFoundException(source, ex);
+            } catch (Exception ex) {
+                System.out.println("Exception loading template");
+                ex.printStackTrace();
+                log.error("exception loading template: " + source, ex);
+                return null;
             }
             if (meta == null) {
                 throw new ResourceNotFoundException(source);
@@ -353,7 +357,7 @@ public class HtmlTemplater {
                     if (!templateFile.exists()) {
                         log.warn("Template does not exist: " + templateFile.getAbsolutePath());
                     } else {
-                        System.out.println("found file: " + templateFile.getAbsolutePath());
+                        log.info("found file: " + templateFile.getAbsolutePath());
                         meta = loadFileMeta(templateFile, webPath);
                         break;
                     }
@@ -369,6 +373,8 @@ public class HtmlTemplater {
 
             if (meta != null) {
                 cachedTemplateMetaData.put(path, meta);
+            } else {
+                System.out.println("Failed to find: " + path);
             }
 
             return meta;
@@ -389,19 +395,31 @@ public class HtmlTemplater {
 
         private TemplateHtmlPage loadClassPathMeta(URL resource, Path webPath) throws IOException {
             ClassPathTemplateHtmlPage meta = new ClassPathTemplateHtmlPage(resource);
-            templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
+            try {
+                templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
+            } catch (XMLStreamException ex) {
+                throw new IOException(resource.toString(), ex);
+            }
             return meta;
         }
 
         private TemplateHtmlPage loadFileMeta(File templateFile, Path webPath) throws IOException {
             FileTemplateHtmlPage meta = new FileTemplateHtmlPage(templateFile);
-            templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
+            try {
+                templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
+            } catch (XMLStreamException ex) {
+                throw new IOException(templateFile.getCanonicalPath(), ex);
+            }
             return meta;
         }
 
         private TemplateHtmlPage loadContentMeta(FileResource fr, String websiteName, Path webPath) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
             ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr, websiteName, webPath);
-            templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
+            try {
+                templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
+            } catch (XMLStreamException ex) {
+                throw new IOException(fr.getHref(), ex);
+            }
             return meta;
 
         }

@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.event.EventManager;
+import io.milton.vfs.db.*;
 
 /**
  * Manages registration of a user when signing up to a group
@@ -121,7 +122,9 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             _(SpliffySecurityManager.class).getPasswordManager().setPassword(u, password);
 
             u.addToGroup(parent.getGroup());
-                            
+                  
+            _(SignupApp.class).onNewProfile(u);
+            
             //addRepo("files", u, session);
             // Fire an event so other apps can choose to other apps can setup the user
             // if they need to
@@ -138,14 +141,6 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             jsonResult = new JsonResult(false, e.getMessage());
         }
         return null;
-    }
-
-    private void addRepo(String name, Profile u, Session session) throws HibernateException {
-        Repository r1 = new Repository();
-        r1.setBaseEntity(u);
-        r1.setCreatedDate(new Date());
-        r1.setName(name);            
-        session.save(r1);
     }
 
     @Override
@@ -214,6 +209,11 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
     }
     
     

@@ -45,27 +45,24 @@ public class AdminApp implements MenuApplication {
         if (parent instanceof OrganisationFolder) {
             CommonCollectionResource p = (CommonCollectionResource) parent;
             switch (requestedName) {
-                case "dashboard":
-                    MenuItem.setActiveId("menuDashboard");
-                    return new TemplatedHtmlPage("dashboard", p, "admin/dashboard", "Admin dashboard");
                 case "manageUsers":
-                    MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuUsers");
+                    MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuUsers");
                     return new ManageUsersFolder(requestedName, p.getOrganisation(), p);
                 case "groups":
-                    MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuGroups");
+                    MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
                     return new GroupsAdminPage(requestedName, p.getOrganisation(), p);
                 case "manageWebsites":
-                    MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "menuWebsites");
+                    MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
                     return new ManageWebsitesPage(requestedName, p.getOrganisation(), p);
                 case "manageApps":
-                    MenuItem.setActiveIds("menuManagement", "menuWebsiteManager", "manageApps");
+                    MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
                     
             }
         } else if (parent instanceof OrganisationsFolder) {
             OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
             if (requestedName.equals("manage")) {
-                MenuItem.setActiveIds("menuManagement", "menuGroupsUsers", "menuOrgs");
+                MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
                 return new OrgsAdminPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
             }
         }
@@ -86,10 +83,9 @@ public class AdminApp implements MenuApplication {
         Path parentPath = parentOrg.getPath();
         switch (parentId) {
             case "menuRoot":
-                parent.getOrCreate("menuManagement", "Content management").setOrdering(20);
-                parent.getOrCreate("menuDashboard", "My Dashboard", parentPath.child("dashboard")).setOrdering(10);
+                parent.getOrCreate("menuDashboard", "My Dashboard", parentPath).setOrdering(10);
                 break;
-            case "menuManagement":
+            case "menuDashboard":
                 parent.getOrCreate("menuGroupsUsers", "Groups &amp; users").setOrdering(20);
                 parent.getOrCreate("menuWebsiteManager", "Website manager").setOrdering(30);
                 break;

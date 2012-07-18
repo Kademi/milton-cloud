@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Permission;
@@ -95,9 +96,14 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        MenuItem.setActiveId("menuDashboard");
         _(HtmlTemplater.class).writePage("admin","admin/dashboard", this, params, out);
     }
 
+    public String getTitle() {
+        return "Dashboard";
+    }
+    
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;

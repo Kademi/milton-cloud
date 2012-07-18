@@ -34,13 +34,13 @@ public class SpliffySync {
     private final HttpTripletStore remoteTripletStore;
     private final JdbcLocalTripletStore jdbcTripletStore;
     private final JdbcSyncStatusStore statusStore;
-    private final DeltaListener2 deltaListener2;
+    private final SyncingDeltaListener deltaListener2;
     private final EventManager eventManager;
     private ScheduledExecutorService scheduledExecService;
     private ScheduledFuture<?> scanJob;
     private boolean paused;
 
-    public SpliffySync(File local, Host httpClient, String basePath, Syncer syncer, Archiver archiver, DbInitialiser dbInit, EventManager eventManager) throws IOException {
+    public SpliffySync(File local, Host httpClient, String basePath, Syncer syncer, Archiver archiver, DbInitialiser dbInit, EventManager eventManager, boolean localReadonly) throws IOException {
         this.localRoot = local;
         this.httpClient = httpClient;
         this.basePath = basePath;
@@ -52,6 +52,7 @@ public class SpliffySync {
         jdbcTripletStore = new JdbcLocalTripletStore(dbInit.getUseConnection(), dbInit.getDialect(), localRoot, eventManager);
         statusStore = new JdbcSyncStatusStore(dbInit.getUseConnection(), dbInit.getDialect(), basePath, localRoot);
         deltaListener2 = new SyncingDeltaListener(syncer, archiver, localRoot, statusStore);       
+        deltaListener2.setReadonlyLocal(localReadonly);
     }
 
     /**
@@ -109,15 +110,20 @@ public class SpliffySync {
     private class ScanRunner implements Runnable {
 
         @Override
-        public void run() {
-            log.info("ScanRunner: doing scan..");
+        public void run() {            
             try {
                 if( !paused ) {
+                    log.info("ScanRunner: doing scan of: " + localRoot.getAbsolutePath());
                     scan();
+                } else {
+                    log.info("ScanRunner: is paused: " + localRoot.getAbsolutePath());
                 }
             } catch (HttpException | NotAuthorizedException | BadRequestException | ConflictException | NotFoundException | IOException ex) {
                 log.error("Exception during scan", ex);
+            } catch(Throwable e) {
+                log.error("Exception during scan", e);
             }
+                
         }
     }
 

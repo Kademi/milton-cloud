@@ -48,6 +48,7 @@ public class MCRootContext extends RootContext implements Service{
     private HtmlTemplateParser templateParser;
     private final CurrentDateService currentDateService;
     private final CommentService commentService;
+    private final DataBinder dataBinder;
     
     public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, ContentTypeService contentTypeService, List beans) {
         super();
@@ -63,7 +64,9 @@ public class MCRootContext extends RootContext implements Service{
         put(formatter);
         this.htmlTemplater = new HtmlTemplater(applicationManager, formatter, securityManager, servletContext);
         commentService = new CommentService(currentDateService);        
+        this.dataBinder = new DataBinder();
         
+        put(dataBinder);        
         put(hashStore, blobStore, securityManager, securityManager.getUserDao(), applicationManager, templateParser, textTemplater, currentDateService, htmlTemplater, commentService);
         put(securityManager.getPasswordManager());
         put(resourceFactory);

@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import javax.xml.stream.XMLStreamException;
 
 /**
  *
@@ -119,6 +120,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         try {
             _(HtmlTemplateParser.class).parse(this, Path.root);
+        } catch (XMLStreamException ex) {
+            throw new RuntimeException(getHref(), ex);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -295,22 +298,14 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     private WebResource param(String name) {
-        for (WebResource wr : this.webResources) {
-            if (wr.getTag().equals("script")) {
-                String type = wr.getAtts().get("type");
-                if ("data/parameter".equals(type)) {
-                    String title = wr.getAtts().get("title");
-                    if (name.equals(title)) {
-                        return wr;
-                    }
-                }
-            }
-        }
-        return null;
+        checkParse();
+        WebResource wr = WebResource.param(webResources, name);
+        return wr;
     }
 
     @Override
     public List<String> getParamNames() {
+        checkParse();
         List<String> names = new ArrayList<>();
         for (WebResource wr : this.webResources) {
             if (wr.getTag().equals("script")) {

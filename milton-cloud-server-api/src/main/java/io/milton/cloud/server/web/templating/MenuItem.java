@@ -133,6 +133,8 @@ public class MenuItem implements Comparable<MenuItem> {
             if( !getItems().isEmpty()) {
                 href = getItems().get(0).getHref();
             }
+        } else if( href.length() == 0 ) {
+            return "/";
         }
         return href;
     }

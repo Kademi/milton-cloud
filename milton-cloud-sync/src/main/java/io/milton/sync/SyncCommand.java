@@ -54,14 +54,14 @@ public class SyncCommand {
     public static void runOnce(String sDbFile, String sLocalDir, String sRemoteAddress, String user, String pwd) throws Exception {
         File dbFile = new File(sDbFile);
         File localDir = new File(sLocalDir);
-        SyncJob job = new SyncJob(localDir, sRemoteAddress, user, pwd, false);
+        SyncJob job = new SyncJob(localDir, sRemoteAddress, user, pwd, false, false);
         start(dbFile, Arrays.asList(job));
     }
     
     public static void monitor(String sDbFile, String sLocalDir, String sRemoteAddress, String user, String pwd) throws Exception {
         File dbFile = new File(sDbFile);
         File localDir = new File(sLocalDir);
-        SyncJob job = new SyncJob(localDir, sRemoteAddress, user, pwd, true);
+        SyncJob job = new SyncJob(localDir, sRemoteAddress, user, pwd, true, false);
         start(dbFile, Arrays.asList(job));
     }
 
@@ -93,7 +93,7 @@ public class SyncCommand {
             EventManager eventManager = new EventManagerImpl();
             Syncer syncer = new Syncer(eventManager, localRootDir, httpHashStore, httpBlobStore, client, archiver, url.getPath());
 
-            SpliffySync spliffySync = new SpliffySync(localRootDir, client, url.getPath(), syncer, archiver, dbInit, eventManager);
+            SpliffySync spliffySync = new SpliffySync(localRootDir, client, url.getPath(), syncer, archiver, dbInit, eventManager, job.localReadonly);
             if (job.isMonitor()) {
                 spliffySync.start();
             } else {
@@ -109,13 +109,15 @@ public class SyncCommand {
         private final String user;
         private final String pwd;
         private final boolean monitor;
+        private final boolean localReadonly;
 
-        public SyncJob(File localDir, String sRemoteAddress, String user, String pwd, boolean monitor) {
+        public SyncJob(File localDir, String sRemoteAddress, String user, String pwd, boolean monitor, boolean readonlyLocal) {
             this.localDir = localDir;
             this.remoteAddress = sRemoteAddress;
             this.user = user;
             this.pwd = pwd;
             this.monitor = monitor;
+            this.localReadonly = readonlyLocal;
             if( !localDir.exists()) {
                 throw new RuntimeException("Sync dir does not exist: " + localDir.getAbsolutePath());
             } else if( !localDir.isDirectory()) {
@@ -142,5 +144,9 @@ public class SyncCommand {
         public boolean isMonitor() {
             return monitor;
         }
+
+        public boolean isLocalReadonly() {
+            return localReadonly;
+        }        
     }
 }

@@ -29,7 +29,7 @@
                 try {                    
                     $.ajax({
                         type: 'POST',
-                        url: form.attr("id"),
+                        url: form.attr("action"),
                         data: form.serialize(),
                         dataType: "json",
                         success: function(resp) {
