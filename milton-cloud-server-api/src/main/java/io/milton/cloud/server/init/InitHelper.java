@@ -35,8 +35,19 @@ public class InitHelper {
     }
     
     
-    
-    public Group checkCreateGroup(Organisation org, String name, GroupDao groupDao, int numUsers, Session session, Profile emailSender) throws HibernateException {
+    /**
+     * 
+     * @param org
+     * @param name
+     * @param groupDao
+     * @param numUsers
+     * @param session
+     * @param emailSender
+     * @param registrationMode = eg "o" = open
+     * @return
+     * @throws HibernateException 
+     */
+    public Group checkCreateGroup(Organisation org, String name, GroupDao groupDao, int numUsers, Session session, Profile emailSender, String registrationMode) throws HibernateException {
         Group g = groupDao.findGroup(org, name, session);
         if (g == null) {
             g = new Group();
@@ -44,6 +55,7 @@ public class InitHelper {
             g.setName(name);
             g.setCreatedDate(new Date());
             g.setModifiedDate(new Date());
+            g.setRegistrationMode(registrationMode);
             session.save(g);
 
             for (int i = 0; i < numUsers; i++) {

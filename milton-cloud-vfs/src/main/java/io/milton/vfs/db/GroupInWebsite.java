@@ -42,7 +42,6 @@ public class GroupInWebsite implements Serializable {
     private long id;
     private Group userGroup;
     private Website website;
-    private String registrationMode;
 
     @Id
     @GeneratedValue
@@ -72,28 +71,4 @@ public class GroupInWebsite implements Serializable {
         this.website = website;
     }
 
-    /**
-     * Allowable registration option: - "o" = open, anyone can register and be
-     * immediately active - "c" = closed, no self registration - "a" =
-     * administrator enabled, anyone can register but their account only becomes
-     * active after being enabled
-     *
-     * @return
-     */
-    @Column(nullable = false)
-    public String getRegistrationMode() {
-        return registrationMode;
-    }
-
-    /**
-     * Allowable registration option: - "o" = open, anyone can register and be
-     * immediately active - "c" = closed, no self registration - "a" =
-     * administrator enabled, anyone can register but their account only becomes
-     * active after being enabled
-     *
-     * @return
-     */    
-    public void setRegistrationMode(String registrationMode) {
-        this.registrationMode = registrationMode;
-    }
 }

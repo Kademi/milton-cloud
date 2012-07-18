@@ -228,15 +228,7 @@ public class Website implements Serializable, VfsAcceptor {
         visitor.visit(this);
     }
 
-    /**
-     * Allowable registration option: - "o" = open, anyone can register and be
-     * immediately active - "c" = closed, no self registration - "a" =
-     * administrator enabled, anyone can register but their account only becomes
-     * active after being enabled
-     *
-     * @return
-     */    
-    public void addGroup(Group group, String registrationMode, Session session) {
+    public void addGroup(Group group, Session session) {
         GroupInWebsite cur = null;
         for (GroupInWebsite giw : GroupInWebsite.findByWebsite(this, session)) {
             if (giw.getWebsite() == this && giw.getUserGroup() == group) {
@@ -249,7 +241,6 @@ public class Website implements Serializable, VfsAcceptor {
             cur.setWebsite(this);
             cur.setUserGroup(group);
         }
-        cur.setRegistrationMode(registrationMode);
         session.save(cur);
     }
 

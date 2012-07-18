@@ -104,10 +104,8 @@ public class UserApp implements Application, MenuApplication {
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        log.info("addBrowseablePages: " + parent.getClass());
         if (parent instanceof RootFolder) {
             RootFolder wrf = (RootFolder) parent;
-            log.info("adding users folder to: " + children.hashCode() + " for parent: " + parent.getName() + " - " + parent.getClass() + " - " + parent.hashCode());
             children.add(new UsersFolder(wrf, USERS_FOLDER_NAME));
         } else if (parent instanceof OrganisationFolder) {
             OrganisationFolder organisationFolder = (OrganisationFolder) parent;

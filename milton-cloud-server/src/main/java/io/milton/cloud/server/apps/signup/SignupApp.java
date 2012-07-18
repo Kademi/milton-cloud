@@ -24,12 +24,15 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.event.SignupEvent;
+import io.milton.cloud.server.event.SubscriptionEvent;
+import io.milton.cloud.server.event.SubscriptionEvent.SignupAction;
 import io.milton.cloud.server.web.ResourceList;
-import io.milton.vfs.db.GroupInWebsite;
-import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.ProfileProcess;
-import io.milton.vfs.db.Website;
+import io.milton.cloud.server.web.RootFolder;
+import io.milton.event.EventManager;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 
@@ -41,10 +44,10 @@ public class SignupApp implements Application {
 
     private String signupPageName = "signup";
     private StateProcess userManagementProcess;
-
     private TimerService timerService;
     private CurrentDateService currentDateService;
-    
+    private EventManager eventManager;
+
     public SignupApp() {
     }
 
@@ -56,6 +59,9 @@ public class SignupApp implements Application {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         userManagementProcess = buildProcess();
+        eventManager = resourceFactory.getEventManager();
+        currentDateService = config.getContext().get(CurrentDateService.class);
+        timerService = config.getContext().get(TimerService.class);
     }
 
     @Override
@@ -70,7 +76,7 @@ public class SignupApp implements Application {
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {        
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             Website website = wrf.getWebsite();
@@ -85,17 +91,17 @@ public class SignupApp implements Application {
 
     private StateProcess buildProcess() {
         StateProcessBuilder b = new StateProcessBuilder("userSubscription", "start");
-        b.from("start").transition("autoApproved").to("active").when(autoApproved()).then(signupEvent(SignupEvent.SignupAction.AUTOAPPROVED));
+        b.from("start").transition("autoApproved").to("active").when(autoApproved()).then(signupEvent(SubscriptionEvent.SignupAction.AUTOAPPROVED));
         b.from("start").transition("review").to("pending").when(new TrueRule());
 
-        b.from("pending").transition("accepted").to("active").when(accountEnabled()).then(signupEvent(SignupEvent.SignupAction.ACCEPTED));
-        b.from("pending").transition("rejected").to("disabled").when(hasVariable("rejected", "true")).then(signupEvent(SignupEvent.SignupAction.REJECTED));
+        b.from("pending").transition("accepted").to("active").when(accountEnabled()).then(signupEvent(SubscriptionEvent.SignupAction.ACCEPTED));
+        b.from("pending").transition("rejected").to("disabled").when(rejected()).then(signupEvent(SubscriptionEvent.SignupAction.REJECTED));
 
-        b.from("active").transition("disabled").to("disabled").when(accountDisabled()).then(signupEvent(SignupEvent.SignupAction.DISABLED));
-        b.from("active").transition("lapsed").to("disabled").when(membershipLapsed()).then(signupEvent(SignupEvent.SignupAction.LAPSED));
-        b.from("active").transition("paymentOverdue").to("disabled").when(membershipLapsed()).then(signupEvent(SignupEvent.SignupAction.PAYMENT_OVERDUE));
+        b.from("active").transition("disabled").to("disabled").when(accountDisabled()).then(signupEvent(SubscriptionEvent.SignupAction.DISABLED));
+        b.from("active").transition("lapsed").to("disabled").when(membershipLapsed()).then(signupEvent(SubscriptionEvent.SignupAction.LAPSED));
+        b.from("active").transition("paymentOverdue").to("disabled").when(membershipLapsed()).then(signupEvent(SubscriptionEvent.SignupAction.PAYMENT_OVERDUE));
 
-        b.from("disabled").transition("reActivated").to("active").when(accountEnabled()).then(signupEvent(SignupEvent.SignupAction.RE_ACTIVATED));
+        b.from("disabled").transition("reActivated").to("active").when(accountEnabled()).then(signupEvent(SubscriptionEvent.SignupAction.RE_ACTIVATED));
 
 
 
@@ -107,16 +113,15 @@ public class SignupApp implements Application {
     }
 
     private Rule accountDisabled() {
-        return new AccountDisabled();
+        return new AccountEnabledRule(false);
     }
 
     private Rule accountEnabled() {
-        return new AccountEnabled();
+        return new AccountEnabledRule(true);
     }
 
-    private Rule hasVariable(String rejected, String atrue) {
-        return null;
-        //throw new UnsupportedOperationException("Not yet implemented");
+    private Rule rejected() {
+        return new RejectedRule();
     }
 
     private Rule membershipLapsed() {
@@ -124,18 +129,67 @@ public class SignupApp implements Application {
         //throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private ActionHandler signupEvent(SignupEvent.SignupAction a) {
-        return null;
+    private ActionHandler signupEvent(SubscriptionEvent.SignupAction a) {
+        return new SubscriptionEventActionHandler(a);
     }
 
-    public void onNewProfile(Profile u) {
+    public void onNewProfile(Profile u, RootFolder rf) {
         ProfileProcess pp = new ProfileProcess();
         pp.setProfile(u);
         pp.setProcessName(userManagementProcess.getName());
         pp.setProcessVersion(1);
-        
+
         ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);
+        if (rf instanceof WebsiteRootFolder) {
+            RootFolder wrf = rf;
+            context.addAttribute("website", wrf);
+        }
         context.scan();
+
+    }
+
+    public class SubscriptionEventActionHandler implements ActionHandler {
+
+        private final SubscriptionEvent.SignupAction action;
+
+        public SubscriptionEventActionHandler(SignupAction action) {
+            this.action = action;
+        }
+
+        @Override
+        public void process(ProcessContext context) {
+            ProfileProcess pi = (ProfileProcess) context.getProcessInstance();
+            Profile p = pi.getProfile();
+            WebsiteRootFolder wrf = (WebsiteRootFolder) context.getAttribute("website");
+            Website website = null;
+            if (wrf != null) {
+                website = wrf.getWebsite();
+            }
+            try {
+                if (p.getMemberships() == null || p.getMemberships().isEmpty()) {
+                    SubscriptionEvent e = new SubscriptionEvent(p, null, website, action);
+                    eventManager.fireEvent(e);
+                } else {
+                    for (GroupMembership m : p.getMemberships()) {
+                        SubscriptionEvent e = new SubscriptionEvent(p, m.getGroupEntity(), website, action);
+                        eventManager.fireEvent(e);
+                    }
+                }
+            } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
+                throw new RuntimeException(ex);
+            }
+
+        }
+    }
+    
+    public class RejectedRule implements Rule {
+
+        @Override
+        public boolean eval(ProcessContext context) {
+            ProfileProcess pi = (ProfileProcess) context.getProcessInstance();
+            Profile p = pi.getProfile();
+            return p.isRejected();
+        }
         
     }
 
@@ -143,24 +197,40 @@ public class SignupApp implements Application {
 
         @Override
         public boolean eval(ProcessContext context) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            ProfileProcess pi = (ProfileProcess) context.getProcessInstance();
+            // Check that all groups are open
+            Profile p = pi.getProfile();
+            if (p.getMemberships() == null) {
+                // can't be open if there are no groups
+                return false;
+            }
+            for (GroupMembership gm : p.getMemberships()) {
+                if (!Group.REGO_MODE_OPEN.equals(gm.getGroupEntity().getRegistrationMode())) {
+                    System.out.println("Not open group: " + gm.getGroupEntity().getName());
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
-    public class AccountDisabled implements Rule {
+    /**
+     * This rule is true when the user's account has the given value
+     */
+    public class AccountEnabledRule implements Rule {
 
-        @Override
-        public boolean eval(ProcessContext context) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        private final boolean whenEnabled;
+
+        public AccountEnabledRule(boolean whenEnabled) {
+            this.whenEnabled = whenEnabled;
         }
-    }
-
-    public class AccountEnabled implements Rule {
 
         @Override
         public boolean eval(ProcessContext context) {
-            //context.getProcessInstance();
-            throw new UnsupportedOperationException("Not supported yet.");
+            ProfileProcess pi = (ProfileProcess) context.getProcessInstance();
+            // Check that all groups are open
+            Profile p = pi.getProfile();
+            return p.isEnabled() == whenEnabled;
         }
     }
 }

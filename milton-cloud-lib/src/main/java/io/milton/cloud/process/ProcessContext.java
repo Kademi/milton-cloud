@@ -78,7 +78,9 @@ public class ProcessContext {
             System.out.println("start: current state is now: " + getCurrentState().getName());
             didTransition = true;
         }
+        System.out.println("transitions: " + state.getTransitions().size());
         for( Transition t : state.getTransitions() ) {
+            System.out.println("check transition: " + t.getName());
             if( evalAndTransition( t, false ) ) {
                 System.out.println("transition to: " + token.getStateName());
                 return true;

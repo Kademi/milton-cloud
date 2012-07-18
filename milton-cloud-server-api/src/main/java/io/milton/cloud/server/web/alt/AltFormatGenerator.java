@@ -78,7 +78,12 @@ public class AltFormatGenerator implements EventListener {
             PutEvent pe = (PutEvent) e;
             if (pe.getResource() instanceof FileResource) {
                 FileResource fr = (FileResource) pe.getResource();
-                onPut(fr);
+                if (isMedia(fr)) {
+                    Long l = fr.getContentLength();
+                    if( l != null && l > 20000) { // Must be at least 20k, otherwise don't bother
+                        onPut(fr);
+                    }
+                }
             }
         }
     }
@@ -146,6 +151,18 @@ public class AltFormatGenerator implements EventListener {
         if (list != null) {
             for (String ct : list) {
                 if (ct.contains(type)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isMedia(FileResource fr) {
+        if (formats != null) {
+            String name = fr.getName();
+            for (FormatSpec f : formats) {
+                if (is(name, f.inputType)) {
                     return true;
                 }
             }

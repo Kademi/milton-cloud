@@ -48,6 +48,9 @@ import io.milton.vfs.db.*;
  * @author brad
  */
 public class UsersFolder extends AbstractCollectionResource implements GetableResource {
+    
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UsersFolder.class);
+    
     private final CommonCollectionResource parent;
     private final String name;
     
@@ -77,7 +80,9 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
             List<BaseEntity> entities = BaseEntity.find(getOrganisation(), SessionManager.session());
             for( BaseEntity e : entities ) {
                 CommonResource r = instantiateEntity(e);
-                children.add(r);
+                if( r != null ) {
+                    children.add(r);
+                }
             }
         }
         return children;
@@ -139,10 +144,14 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
      * @return 
      */
     private CommonResource instantiateEntity(BaseEntity e) {
+        instantiated = null;
         if( instantiationVisitor == null ) {
             instantiationVisitor = new InstantiationVisitor();
         }
-        instantiationVisitor.visit(e);
+        e.accept(instantiationVisitor);
+        if( instantiated == null ) {
+            log.warn("Couldnt create resource for entity: " + e.getClass() + " - " + e.getName());
+        }
         return instantiated;
     }
     

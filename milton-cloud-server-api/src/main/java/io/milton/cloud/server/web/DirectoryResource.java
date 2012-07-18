@@ -48,6 +48,8 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.data.DataSession;
+import org.hashsplit4j.api.Fanout;
+import org.hashsplit4j.api.HashStore;
 
 /**
  * Represents a version of a directory, containing the members which are in that
@@ -110,18 +112,24 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     @Override
-    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {        
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         FileNode newFileNode = directoryNode.addFile(newName);
         FileResource fileResource = newFileResource(newFileNode, this, false);
 
         String ct = HttpManager.request().getContentTypeHeader();
-        if (ct != null && ct.equals("spliffy/hash")) {
+        if (ct != null && ct.equals("spliffy/hash")) {            
             // read the new hash and set it on this
             DataInputStream din = new DataInputStream(inputStream);
             long newHash = din.readLong();
+            log.info("Set hash: " + newHash + " on " + newName);
+            Fanout fanout = _(HashStore.class).getFanout(newHash);
+            if( fanout == null ) {
+                throw new RuntimeException("Fanout not found for: " + newName + " with hash: " + newHash);
+            }
             newFileNode.setHash(newHash);
+            log.info("createNew: " + newName + "  set hash: " + newHash + "  content length: " + fanout.getActualContentLength());
             fileResource.updateModDate();
         } else {
             log.info("createNew: set content");
@@ -131,6 +139,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         onAddedChild(fileResource);
         save();
         tx.commit();
+        log.info("Saved and commited: " + fileResource.getHref());
 
         return fileResource;
     }

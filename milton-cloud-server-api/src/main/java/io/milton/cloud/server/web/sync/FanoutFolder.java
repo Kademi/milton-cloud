@@ -16,6 +16,10 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.resource.PutableResource;
+import io.milton.vfs.db.utils.SessionManager;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -23,6 +27,8 @@ import io.milton.resource.PutableResource;
  */
 public class FanoutFolder extends BaseResource implements PutableResource {
 
+    private static Logger log = Logger.getLogger(FanoutFolder.class);
+    
     private final HashStore hashStore;
     private final String name;
 
@@ -40,6 +46,7 @@ public class FanoutFolder extends BaseResource implements PutableResource {
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         long hash = Long.parseLong(newName);
+        log.info("createNew: set hash: " + newName);
         List<Long> list = new ArrayList<>();
         DataInputStream din = new DataInputStream(inputStream);
         long actualFanoutLength = din.readLong(); // first long is the content length of the chunks within the fanout. Ie the actual content length (not length of hashes!)
@@ -50,7 +57,10 @@ public class FanoutFolder extends BaseResource implements PutableResource {
         } catch (EOFException e) {
             // cool
         }
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
         hashStore.setFanout(hash, list, actualFanoutLength);
+        tx.commit();
         FanoutImpl fanoutImpl = new FanoutImpl(list, actualFanoutLength);
         return new FanoutResource(fanoutImpl, hash, securityManager, org);
     }

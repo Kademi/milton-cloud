@@ -55,10 +55,10 @@ class SyncingDeltaListener implements DeltaListener2 {
     @Override
     public void onRemoteDelete(Triplet localTriplet, Path path) {
         final File localChild = toFile(path);
-        log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());
         if (readonlyLocal) {
             return;
         }
+        log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());        
         archiver.archive(localChild);
         syncStatusStore.clearBackedupHash(path);
     }

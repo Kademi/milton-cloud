@@ -16,12 +16,8 @@
  */
 package io.milton.cloud.server.apps.signup;
 
-import io.milton.cloud.server.event.JoinGroupEvent;
-import io.milton.cloud.server.event.SignupEvent;
-import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -39,22 +35,18 @@ import io.milton.resource.PostableResource;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
-import io.milton.event.EventManager;
-import io.milton.vfs.db.*;
 
 /**
  * Manages registration of a user when signing up to a group
@@ -122,15 +114,9 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             _(SpliffySecurityManager.class).getPasswordManager().setPassword(u, password);
 
             u.addToGroup(parent.getGroup());
-                  
-            _(SignupApp.class).onNewProfile(u);
-            
-            //addRepo("files", u, session);
-            // Fire an event so other apps can choose to other apps can setup the user
-            // if they need to
-            _(EventManager.class).fireEvent(new SignupEvent(u, parent.getGroup(), parent.getWebsite()));
-            _(EventManager.class).fireEvent(new JoinGroupEvent(u, parent.getGroup()));
-                       
+            RootFolder rf = WebUtils.findRootFolder(this);
+            _(SignupApp.class).onNewProfile(u, rf);
+                                   
             tx.commit();
 
             String userPath = "/" + u.getName(); // todo: encoding

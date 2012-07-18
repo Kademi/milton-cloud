@@ -47,6 +47,10 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private long photoHash;
     
     private String nickName;
+    
+    private boolean enabled;
+    
+    private boolean rejected;
 
     @OneToMany(mappedBy="profile")
     public List<Credential> getCredentials() {
@@ -125,7 +129,21 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public void setBusinessUnit(Organisation businessUnit) {
         this.businessUnit = businessUnit;
     }
+
+    /**
+     * True means the user can login
+     * 
+     * @return 
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
       
+    
     
     
     /**
@@ -150,5 +168,15 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
-    }   
+    }
+
+    public boolean isRejected() {
+        return rejected;
+    }
+
+    public void setRejected(boolean rejected) {
+        this.rejected = rejected;
+    }
+    
+    
 }

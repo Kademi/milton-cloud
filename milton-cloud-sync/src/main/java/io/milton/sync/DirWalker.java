@@ -45,7 +45,6 @@ public class DirWalker {
         List<Triplet> remoteTriplets = remoteTripletStore.getTriplets(path);
         Map<String, Triplet> remoteMap = Utils.toMap(remoteTriplets);
         List<Triplet> localTriplets = localTripletStore.getTriplets(path);
-        log.info("walk2: " + path);
         Map<String, Triplet> localMap = Utils.toMap(localTriplets);
 
         int numLocal = localTriplets == null ? 0 : localTriplets.size();
@@ -80,7 +79,7 @@ public class DirWalker {
                 }
             }
         }
-
+        log.info("walk finished: " + path);
     }
 
 

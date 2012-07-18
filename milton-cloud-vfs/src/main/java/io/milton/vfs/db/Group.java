@@ -20,6 +20,7 @@ import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -47,6 +48,9 @@ public class Group extends BaseEntity {
         
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
+    public static String REGO_MODE_OPEN = "o";
+    public static String REGO_MODE_ADMIN_REVIEW = "a";
+    public static String REGO_MODE_CLOSED = "c";
 
     public static List<Group> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(Group.class);
@@ -64,6 +68,7 @@ public class Group extends BaseEntity {
     
     private List<GroupMembership> members; // those entities in this group
     private List<GroupRole> groupRoles;
+    private String registrationMode; // whether to allow anyone to join this group    
     
     public boolean isMember(BaseEntity u) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
@@ -99,6 +104,32 @@ public class Group extends BaseEntity {
     public void setGroupRoles(List<GroupRole> groupRoles) {
         this.groupRoles = groupRoles;
     }
+    
+
+    /**
+     * Allowable registration option: - "o" = open, anyone can register and be
+     * immediately active - "c" = closed, no self registration - "a" =
+     * administrator enabled, anyone can register but their account only becomes
+     * active after being enabled
+     *
+     * @return
+     */
+    @Column(nullable = false)
+    public String getRegistrationMode() {
+        return registrationMode;
+    }
+
+    /**
+     * Allowable registration option: - "o" = open, anyone can register and be
+     * immediately active - "c" = closed, no self registration - "a" =
+     * administrator enabled, anyone can register but their account only becomes
+     * active after being enabled
+     *
+     * @return
+     */    
+    public void setRegistrationMode(String registrationMode) {
+        this.registrationMode = registrationMode;
+    }    
     
     
     /**

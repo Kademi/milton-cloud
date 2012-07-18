@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.*;
 import io.milton.cloud.common.HashUtils;
+import io.milton.cloud.common.store.ByteArrayBlobStore;
 import io.milton.event.EventManager;
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
@@ -22,6 +23,8 @@ import io.milton.sync.event.DownloadSyncEvent;
 import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FinishedSyncEvent;
 import io.milton.sync.event.UploadSyncEvent;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -199,22 +202,53 @@ public class Syncer {
 //    }
     public void upSync(Path path) throws FileNotFoundException, IOException {
         File file = toFile(path);
-        log.info("upSync: " + file.getAbsolutePath());
 
+        Parser parser = new Parser();
         FileInputStream fin = null;
         try {
             EventUtils.fireQuietly(eventManager, new UploadSyncEvent());
             fin = new FileInputStream(file);
             BufferedInputStream bufIn = new BufferedInputStream(fin);
-            Parser parser = new Parser();
-            long newHash = parser.parse(bufIn, httpHashStore, httpBlobStore);
 
-            // Now set the new hash on the remote file, which effectively commits the new content
-            updateHashOnRemoteResource(newHash, path);
+            long newHash;
+            Path destPath = baseUrl.add(path);
+            if (file.length() < 5000) {
+                log.info("upSync: upload small file: " + file.getAbsolutePath());
+                // for a small file its quicker just to upload it                
+                try {
+                    ByteArrayBlobStore byteArrayBlobStore = new ByteArrayBlobStore();
+                    newHash = parser.parse(bufIn, new NullHashStore(), byteArrayBlobStore);
+                    byte[] data = byteArrayBlobStore.getBytes();
+                    host.doPut(destPath, data, null);
+                    
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+                if (!checkRemoteHash(newHash, path)) {
+                    throw new RuntimeException("Uploaded file is not valid: " + destPath + " remote hash does not match local");
+                }
+
+            } else {
+                log.info("upSync: chunk larger file: " + file.getAbsolutePath());
+                newHash = parser.parse(bufIn, httpHashStore, httpBlobStore);
+
+                // Now set the new hash on the remote file, which effectively commits the new content
+
+                boolean done = false;
+                int cnt = 0;
+                while (!done) {
+                    updateHashOnRemoteResource(newHash, path);
+                    done = checkRemoteHash(newHash, path);
+                    if( cnt++ > 3 ) {
+                        throw new RuntimeException("Uploaded file is not valid: " + destPath);
+                    }
+                }
+            }
         } finally {
             EventUtils.fireQuietly(eventManager, new FinishedSyncEvent());
             IOUtils.closeQuietly(fin);
         }
+
     }
 
     /**
@@ -241,6 +275,25 @@ public class Syncer {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private boolean checkRemoteHash(long expected, Path path) {
+        Path p = baseUrl.add(path);
+        Map<String, String> params = new HashMap<>();
+        params.put("type", "hash");
+        byte[] arr;
+        try {
+            arr = host.doGet(p, params);
+        } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
+            throw new RuntimeException("Exception checking hash on: " + p);
+        }
+        String sHash = new String(arr);
+        Long actual = Long.parseLong(sHash);
+        boolean  b = (expected == actual);
+        if( !b ) {
+            log.error("checkRemoteHash: hashes do not match: " + expected + " != " + actual);
+        }
+        return b;
     }
 
     public Path getBaseUrl() {

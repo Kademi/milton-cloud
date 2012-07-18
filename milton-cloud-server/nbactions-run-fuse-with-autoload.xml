@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>package</goal>
+        </goals>
+        <activatedProfiles>
+            <activatedProfile>run-fuse-with-autoload</activatedProfile>
+        </activatedProfiles>            
+            
+        <properties>
+            <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
+            <jpda.listen>maven</jpda.listen>
+        </properties>
+    </action>
+</actions>

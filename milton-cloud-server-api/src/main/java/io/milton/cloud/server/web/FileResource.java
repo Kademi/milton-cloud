@@ -47,6 +47,7 @@ import javax.xml.namespace.QName;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.Request;
 
 /**
  *
@@ -132,9 +133,17 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public Long getContentLength() {
-        if( fileNode == null || fileNode.getHash() == 0 ) {
+        Request req = HttpManager.request();
+        if (req != null) {
+            Map<String, String> params = req.getParams();
+            if (params != null && params.containsKey("type") && "hash".equals(params.get("type"))) {
+                String s = fileNode.getHash() + "";
+                return (long) s.length();
+            }
+        }
+        if (fileNode == null || fileNode.getHash() == 0) {
             return null;
-        }        
+        }
         return fileNode.getContentLength();
     }
 
@@ -198,9 +207,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     /**
      * Writes any parsed data in the htmlPage to this file's content
-     * 
+     *
      * @throws BadRequestException
-     * @throws NotAuthorizedException 
+     * @throws NotAuthorizedException
      */
     public void doSaveHtml() throws BadRequestException, NotAuthorizedException {
         // htmlPage will only have been set if html content fields have been set, in which
@@ -210,7 +219,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             _(HtmlTemplateParser.class).update(htmlPage, bout);
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-            setContent(bin);            
+            setContent(bin);
         } else {
             System.out.println("no htmlPage, so no property changes");
         }
@@ -242,9 +251,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
         // will return a non-null value if type is contained in any content type
         List<String> list = _(ContentTypeService.class).findContentTypes(getName());
-        if( list != null ) {
-            for(String ct : list ) {
-                if( ct.contains(type)) {
+        if (list != null) {
+            for (String ct : list) {
+                if (ct.contains(type)) {
                     return true;
                 }
             }

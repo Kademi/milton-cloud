@@ -21,7 +21,7 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.event.JoinGroupEvent;
-import io.milton.cloud.server.event.SignupEvent;
+import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
@@ -57,7 +57,7 @@ public class ContactsApp implements Application, EventListener {
         contactManager = new ContactManager();
         this.resourceFactory = resourceFactory;
         this.applicationManager = resourceFactory.getApplicationManager();
-        resourceFactory.getEventManager().registerEventListener(this, SignupEvent.class);
+        resourceFactory.getEventManager().registerEventListener(this, SubscriptionEvent.class);
 //        SpliffyLdapTransactionManager txManager = new SpliffyLdapTransactionManager(resourceFactory.getSessionManager());                
 //        Integer port = config.getInt("port");        
 //        ldapServer = new LdapServer(txManager, this, resourceFactory.getPropertySources(), port, false, null);

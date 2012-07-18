@@ -72,7 +72,7 @@ public class StateProcessBuilder {
 
             public TransitionBuilder when(Rule r) {
                 if (transition != null) {
-                    transition.setRule(rule);
+                    transition.setRule(r);
                 }
                 this.rule = r;
                 return this;
@@ -82,6 +82,7 @@ public class StateProcessBuilder {
                 StateBuilder sb = from(toStateName);
                 if (transition == null) {
                     transition = process.createTransition(name, state, sb.state, rule);
+                    state.getTransitions().add(transition);
                 } else {
                     transition.setToState(sb.state);
                 }

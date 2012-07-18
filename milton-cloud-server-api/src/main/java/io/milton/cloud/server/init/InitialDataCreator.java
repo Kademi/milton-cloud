@@ -78,21 +78,21 @@ public class InitialDataCreator implements LifecycleApplication {
         Profile admin = initHelper.checkCreateUser(adminUserName, adminPassword, session, rootOrg, null);
 
 
-        Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, 0, session, null);
+        Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, 0, session, null, "c");
         administrators.grantRole(GroupRole.ROLE_ADMIN, true, session);
         administrators.grantRole(GroupRole.ROLE_AUTHOR, true, session);
 
-        Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin);
+        Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin, "o");
         users.grantRole(GroupRole.ROLE_AUTHOR, true, session);
 
         admin.addToGroup(administrators).addToGroup(users);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton.io", "fuse", admin, "milton"); // can be accessed on milton.localhost or milton.io
         initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
-        miltonSite.addGroup(users, "o", session);
+        miltonSite.addGroup(users, session);
 
         Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "my.milton.io", "fuse", admin, "mymilton"); // can be accessed on mymilton.localhost or my.milton.io
         initHelper.enableApps(myMiltonSite, admin, session, "admin", "users", "organisations", "website", "myFiles", "calendar", "contacts", "email");
-        myMiltonSite.addGroup(users, "o", session);
+        myMiltonSite.addGroup(users, session);
 
         tx.commit();
         session.close();

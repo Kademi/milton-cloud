@@ -55,7 +55,7 @@ public class ProcessImpl implements Serializable, StateProcess {
  
     @Override
     public Transition createTransition(String transitionName, State fromState, State toState, Rule rule) {
-        Transition t = new TransitionImpl(this, name, fromState, toState, rule);
+        Transition t = new TransitionImpl(this, transitionName, fromState, toState, rule);
         return t;
     }
 

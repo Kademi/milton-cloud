@@ -272,6 +272,7 @@ public class DataSession {
         }
 
         public void setHash(long hash) {
+            log.info("setHash: " + hash + " on " + getName());
             this.hash = hash;
             setDirty();
         }

@@ -21,7 +21,7 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.event.JoinGroupEvent;
-import io.milton.cloud.server.event.SignupEvent;
+import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -60,7 +60,7 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.applicationManager = resourceFactory.getApplicationManager();
-        resourceFactory.getEventManager().registerEventListener(this, SignupEvent.class);
+        resourceFactory.getEventManager().registerEventListener(this, SubscriptionEvent.class);
     }
 
     @Override

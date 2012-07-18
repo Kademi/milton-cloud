@@ -26,7 +26,7 @@ import io.milton.vfs.db.Website;
  *
  * @author brad
  */
-public class SignupEvent implements Event {
+public class SubscriptionEvent implements Event {
 
     /**
      * The sorts of things that can happen in a signupevent
@@ -44,11 +44,13 @@ public class SignupEvent implements Event {
     private final Profile profile;
     private final Group group;
     private final Website website;
+    private final SignupAction action;
 
-    public SignupEvent(Profile profile, Group group, Website website) {
+    public SubscriptionEvent(Profile profile, Group group, Website website, SignupAction action) {
         this.profile = profile;
         this.group = group;
         this.website = website;
+        this.action = action;
     }
 
     public Group getGroup() {
@@ -62,4 +64,9 @@ public class SignupEvent implements Event {
     public Website getWebsite() {
         return website;
     }
+
+    public SignupAction getAction() {
+        return action;
+    }
+        
 }
