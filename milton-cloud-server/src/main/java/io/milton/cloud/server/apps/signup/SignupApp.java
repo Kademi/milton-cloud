@@ -103,8 +103,6 @@ public class SignupApp implements Application {
 
         b.from("disabled").transition("reActivated").to("active").when(accountEnabled()).then(signupEvent(SubscriptionEvent.SignupAction.RE_ACTIVATED));
 
-
-
         return b.getProcess();
     }
 

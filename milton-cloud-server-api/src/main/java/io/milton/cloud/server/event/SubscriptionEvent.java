@@ -17,28 +17,32 @@
 package io.milton.cloud.server.event;
 
 import io.milton.event.Event;
-import io.milton.vfs.db.Group;
-import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Website;
+import io.milton.vfs.db.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Fired when a user signs up
  *
  * @author brad
  */
-public class SubscriptionEvent implements Event {
+public class SubscriptionEvent implements TriggerEvent {
 
+    public static final String ID = "subscription";
+
+    
     /**
      * The sorts of things that can happen in a signupevent
      */
     public enum SignupAction {
+
         AUTOAPPROVED,
         PENDING,
         REJECTED,
         ACCEPTED,
         DISABLED,
         LAPSED,
-        PAYMENT_OVERDUE, 
+        PAYMENT_OVERDUE,
         RE_ACTIVATED
     }
     private final Profile profile;
@@ -53,10 +57,6 @@ public class SubscriptionEvent implements Event {
         this.action = action;
     }
 
-    public Group getGroup() {
-        return group;
-    }
-
     public Profile getProfile() {
         return profile;
     }
@@ -65,8 +65,51 @@ public class SubscriptionEvent implements Event {
         return website;
     }
 
-    public SignupAction getAction() {
-        return action;
+    public Group getGroup() {
+        return group;
     }
-        
+    
+    
+
+    @Override
+    public List<BaseEntity> getSourceEntities() {
+        List<BaseEntity> list = new ArrayList<>();
+        list.add(profile);
+        return list;
+    }    
+    
+    @Override
+    public String getEventId() {
+        return ID;
+    }
+
+    @Override
+    public Organisation getOrganisation() {
+        return profile.getOrganisation();
+    }
+
+    @Override
+    public String getTriggerItem1() {
+        return group.getId() + "";
+    }
+
+    @Override
+    public String getTriggerItem2() {
+        return website.getId() + "";
+    }
+
+    @Override
+    public String getTriggerItem3() {
+        return action.name();
+    }
+
+    @Override
+    public String getTriggerItem4() {
+        return null;
+    }
+
+    @Override
+    public String getTriggerItem5() {
+        return null;
+    }
 }

@@ -765,6 +765,22 @@ public class Formatter {
     }
     
     /**
+     * Generate an option element
+     * @return 
+     */
+    public String option(String value, String text, String currentValue) {
+        StringBuilder sb = new StringBuilder("<option value='");
+        sb.append(value).append("' ");
+        if( currentValue != null && currentValue.equals(value)) {
+            sb.append("selected='true'");
+        }        
+        sb.append(">");
+        sb.append(text).append("</option>");
+        return sb.toString();
+        
+    }
+    
+    /**
      * Attempts to find the port of the current request, defaults to 80
      * 
      * @return 

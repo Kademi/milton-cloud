@@ -18,6 +18,7 @@ package io.milton.cloud.server.apps;
 
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.mail.EmailTriggerType;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
 import io.milton.cloud.server.web.GroupResource;
@@ -58,6 +59,7 @@ public class ApplicationManager {
     private final CurrentRootFolderService currentRootFolderService;
     private File appsConfigDir;
     private MCRootContext rootContext;
+    private List<EmailTriggerType> emailTriggerTypes = new ArrayList<>();
 
     public ApplicationManager(List<Application> initialApps, CurrentRootFolderService currentRootFolderService) {
         this.currentRootFolderService = currentRootFolderService;
@@ -318,4 +320,18 @@ public class ApplicationManager {
         }
         return null;
     }
+
+    /**
+     * 
+     * Applications can register email trigger types by adding to this list.
+     * 
+     * This will then be used in configuring triggers by other applications
+     * 
+     * @return 
+     */
+    public List<EmailTriggerType> getEmailTriggerTypes() {
+        return emailTriggerTypes;
+    }
+    
+    
 }

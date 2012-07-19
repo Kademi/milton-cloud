@@ -26,7 +26,7 @@ import javax.persistence.*;
 public class GroupRecipient implements Serializable{
     private long id;
     private Group recipient;
-    private GroupEmailJob job;
+    private BaseEmailJob job;
 
     @Id
     @GeneratedValue    
@@ -39,11 +39,11 @@ public class GroupRecipient implements Serializable{
     }
 
     @ManyToOne(optional=false)
-    public GroupEmailJob getJob() {
+    public BaseEmailJob getJob() {
         return job;
     }
 
-    public void setJob(GroupEmailJob job) {
+    public void setJob(BaseEmailJob job) {
         this.job = job;
     }
 

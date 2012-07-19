@@ -14,11 +14,8 @@
  */
 package io.milton.cloud.server.db;
 
-import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.DbUtils;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -31,7 +28,8 @@ import org.hibernate.criterion.Expression;
  * @author brad
  */
 @Entity
-public class GroupEmailJob implements Serializable{
+@DiscriminatorValue("G")
+public class GroupEmailJob extends BaseEmailJob {
 
     public static List<GroupEmailJob> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
@@ -39,92 +37,13 @@ public class GroupEmailJob implements Serializable{
         return DbUtils.toList(crit, GroupEmailJob.class);        
     }
     
-    private List<EmailItem> emailItems;
-    private List<GroupRecipient> groupRecipients;
-    private long id;
-    private Organisation organisation;
-    private String name;
-    private String title;
-    private String notes;
-    private String subject;
-    private String fromAddress;
     private String status;
-    private String html;
     private Date statusDate;
 
-    @Id
-    @GeneratedValue    
-    public long getId() {
-        return id;
+    public GroupEmailJob() {
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    @ManyToOne(optional=false)
-    public Organisation getOrganisation() {
-        return organisation;
-    }
-
-    public void setOrganisation(Organisation organisation) {
-        this.organisation = organisation;
-    }
-
-    @Column(nullable=false)
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Column
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @Column
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    @Column
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    @Column
-    public String getFromAddress() {
-        return fromAddress;
-    }
-
-    public void setFromAddress(String fromAddress) {
-        this.fromAddress = fromAddress;
-    }
-
-    @OneToMany(mappedBy = "job")
-    public List<GroupRecipient> getGroupRecipients() {
-        return groupRecipients;
-    }
-
-    public void setGroupRecipients(List<GroupRecipient> groupRecipients) {
-        this.groupRecipients = groupRecipients;
-    }
-
+    
     /**
      * c=completed
      * r=ready to send (ie as commanded by UI)
@@ -152,37 +71,10 @@ public class GroupEmailJob implements Serializable{
         this.statusDate = statusDate;
     }
 
-    @OneToMany(mappedBy = "job")
-    public List<EmailItem> getEmailItems() {
-        return emailItems;
-    }
-
-    public void setEmailItems(List<EmailItem> emailItems) {
-        this.emailItems = emailItems;
-    }
-
-    public String getHtml() {
-        return html;
-    }
-
-    public void setHtml(String html) {
-        this.html = html;
-    }
 
     public boolean readyToSend() {
         return "r".equals(getStatus());
     }
-    
-    /**
-     * Adds, but does not save, the group recipient
-     */
-    public void addGroupRecipient(Group g) {
-        if( this.getGroupRecipients() == null ) {
-            setGroupRecipients(new ArrayList<GroupRecipient>());
-        }
-        GroupRecipient gr = new GroupRecipient();
-        gr.setJob(this);
-        gr.setRecipient(g);
-        getGroupRecipients().add(gr);
-    }
+
+
 }

@@ -16,13 +16,10 @@
  */
 package io.milton.cloud.server.apps.email;
 
-import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.server.db.GroupEmailJob;
+import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupRecipient;
-import java.util.Date;
 import org.hibernate.Session;
 
-import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,49 +28,44 @@ import java.util.List;
  *
  * @author brad
  */
-public class GroupEmailService {
+public class EmailTriggerService {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GroupEmailService.class);
-
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailTriggerService.class);
     private final BatchEmailService batchEmailService;
 
-    public GroupEmailService(BatchEmailService batchEmailService) {
+    public EmailTriggerService(BatchEmailService batchEmailService) {
         this.batchEmailService = batchEmailService;
-    }
-    
-    
-    
-    public void send(long jobId, Session session) {
-        GroupEmailJob j = (GroupEmailJob) session.get(GroupEmailJob.class, jobId);
-        if (j == null) {
-            log.warn("Job not found: " + jobId);
-        }
-        log.info("send: " + j.getSubject() + " status: " + j.getStatus());
-        if (j.readyToSend()) {
-            generateEmailItems(j, session);
-        } else {
-            log.warn("Job is not ready to send. Current statyus: " + j.getStatus());
-        }
     }
 
     /**
-     * Generate EmailItem records to send. These will be sent by a seperate process
-     * 
-     * @param j
-     * @param session 
+     *
+     * @param jobId
+     * @param sourceEntities - id of the entity(s) which caused the trigger.
+     * Usually the profile id of a user
+     * @param session
      */
-    private void generateEmailItems(GroupEmailJob j, Session session) {
+    public void send(long jobId, List<Long> sourceEntities, Session session) {
+        EmailTrigger j = (EmailTrigger) session.get(EmailTrigger.class, jobId);
+        if (j == null) {
+            log.warn("Job not found: " + jobId);
+        }
+
         List<BaseEntity> directRecips = new ArrayList<>();
         if (j.getGroupRecipients() != null) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
                 directRecips.add(gr.getRecipient());
             }
-        }        
-        batchEmailService.generateEmailItems(j, directRecips, session);
+        }
         
-        Date now = _(CurrentDateService.class).getNow();
-        j.setStatus("p");
-        j.setStatusDate(now);
+        if( j.isIncludeUser()) {
+            for( Long entityId : sourceEntities ) {
+                BaseEntity source = (BaseEntity) session.get(BaseEntity.class, entityId);
+                directRecips.add(source);
+            }
+        }
+        
+        batchEmailService.generateEmailItems(j, directRecips, session);
         session.save(j);
+
     }
 }

@@ -33,6 +33,7 @@ function initTheme() {
     initHelp();
     initModal();
     initShowModalButton();
+    initTabPanel();
     
          
     log("initTheme: run page init functions");
@@ -210,5 +211,44 @@ function initShowModalButton() {
         $.tinybox.close();
     });
 }
+
+function initTabPanel() {
+    var tab_container = $('.TabContainer');
+    log("initTabPanel", tab_container);
+    if(tab_container[0]) {
+        var tab_content = tab_container.find('.TabContent');
+        var tab_nav = tab_container.find('nav a');
+		
+        tab_nav.on('click', function(e) {
+            e.preventDefault();
+			
+            var _this = $(this);
+            var _this_content = tab_content.eq(_this.index());
+			
+            if(!_this.hasClass('Active')) {
+                tab_nav.filter('.Active').removeClass('Active');
+                _this.addClass('Active');
+                tab_content.not(_this_content).addClass('Hidden');
+                _this_content.removeClass('Hidden');
+            }
+        });
+		
+        tab_nav.eq(0).trigger('click');
+    }
+}
+
+if(!String.prototype.trim) {
+    String.prototype.trim = function() {
+        return this.replace(/^\s+|\s+$/g,"");
+    };
+}
+
+var typewatch = (function(){
+    var timer = 0;
+    return function(callback, ms){
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+    }  
+})();
 
 /** End init-theme.js */

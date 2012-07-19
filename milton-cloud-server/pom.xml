@@ -200,7 +200,7 @@
                         </executions>
                         <configuration>
                             <webAppConfig>
-                                <extraClasspath>../../fuse-admin/fuse-app/target/classes/;../../fuse-admin/src/main/resources/</extraClasspath>
+                                <extraClasspath>../../fuse-admin/fuse-app/target/classes/;../../fuse-admin/fuse-war/src/main/resources/</extraClasspath>
                             </webAppConfig>
                             <contextPath>/</contextPath>
                             <connectors>

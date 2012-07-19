@@ -7,10 +7,8 @@ function initManageEmail() {
 }
 
 function initEditEmailPage() {
-    initTabPanel();
     addGroupBtn();
     eventForModal();
-    initCheckbox();
     initGroupCheckbox();
 }
 
@@ -264,8 +262,8 @@ function addGroupBtn() {
 
 function showModal(group) {	
     var _modal = $("#modalGroup");
-	
-    _modal.find("input[type=checkbox]").check(false);
+    log("showModal", _modal, group);
+    _modal.find("input[type=checkbox]").attr("checked", false)
 			
     if(group) {
         var _groupList = _modal.find("ul.ListItem li");

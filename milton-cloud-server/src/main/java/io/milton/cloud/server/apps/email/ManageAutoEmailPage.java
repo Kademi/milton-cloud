@@ -16,11 +16,11 @@
  */
 package io.milton.cloud.server.apps.email;
 
-import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.server.db.GroupEmailJob;
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupRecipient;
-import io.milton.cloud.server.queue.AsynchProcessor;
-import io.milton.cloud.server.queue.Processable;
+import io.milton.cloud.server.mail.EmailTriggerType;
+import io.milton.cloud.server.mail.Option;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -35,7 +35,6 @@ import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
-import io.milton.context.Context;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -59,29 +58,28 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.Group;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.commons.beanutils.BeanUtilsBean;
+import java.util.LinkedHashMap;
 
 /**
  *
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class GroupEmailPage extends AbstractResource implements GetableResource, PostableResource, PropertySourcePatchSetter.CommitableResource {
+public class ManageAutoEmailPage extends AbstractResource implements GetableResource, PostableResource, PropertySourcePatchSetter.CommitableResource {
 
     private static final Logger log = LoggerFactory.getLogger(GroupEmailPage.class);
     private final CommonCollectionResource parent;
-    private final GroupEmailJob job;
-    private final GroupEmailService groupEmailService;
+    private final EmailTrigger job;
     private JsonResult jsonResult;
+    
+    private List<EmailTriggerType> triggerTypes;
 
-    public GroupEmailPage(GroupEmailJob job, CommonCollectionResource parent, GroupEmailService groupEmailService) {
+    public ManageAutoEmailPage(EmailTrigger job, CommonCollectionResource parent) {
         this.job = job;
         this.parent = parent;
-        this.groupEmailService = groupEmailService;
     }
 
     @Override
@@ -89,53 +87,41 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        if (parameters.containsKey("sendMail")) {
-            startSendJob(session);
-            tx.commit();
-            
-            SendMailProcessable processable = new SendMailProcessable(job.getId());
-            _(AsynchProcessor.class).enqueue(processable);
-
-        } else {
-
-            if (parameters.containsKey("group")) {
-                String groupName = parameters.get("group");
-                String sIsRecip = parameters.get("isRecip");
-                if ("true".equals(sIsRecip)) {
-                    addGroup(groupName);
-                } else {
-                    removeGroup(groupName);
-                }
+        if (parameters.containsKey("group")) {
+            String groupName = parameters.get("group");
+            String sIsRecip = parameters.get("isRecip");
+            if ("true".equals(sIsRecip)) {
+                addGroup(groupName);
+            } else {
+                removeGroup(groupName);
             }
+        }
 
-            try {
-                _(DataBinder.class).populate(job, parameters);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new RuntimeException(ex);
-            }
-            session.save(job);
-            tx.commit();
-        }        
+        try {
+            _(DataBinder.class).populate(job, parameters);
+            job.checkNulls();
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            throw new RuntimeException(ex);
+        }
+        session.save(job);
+        tx.commit();
+
         jsonResult = new JsonResult(true);
         return null;
     }
-    
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
-            MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
-            _(HtmlTemplater.class).writePage("admin", "email/groupEmailJob", this, params, out);
+            MenuItem.setActiveIds("menuTalk", "menuEmails", "menuAutoEmail");
+            _(HtmlTemplater.class).writePage("admin", "email/manageAutoEmail", this, params, out);
         }
     }
 
-    public GroupEmailJob getJob() {
+    public EmailTrigger getTrigger() {
         return job;
-    }
-
-    public Date getStatusDate() {
-        return job.getStatusDate();
     }
 
     public String getTitle() {
@@ -172,41 +158,6 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
 
     public String getHtml() {
         return job.getHtml();
-    }
-
-    /**
-     * returns the status code or "draft" if null
-     *
-     * @return
-     */
-    public String getStatusCode() {
-        if (job.getStatus() == null || job.getStatus().length() == 0) {
-            return "Draft";
-        } else {
-            switch (job.getStatus()) {
-                case "c":
-                    return "Completed";
-                case "p":
-                    return "Progress";
-                default:
-                    return "Status" + job.getStatus();
-            }
-        }
-    }
-
-    public String getStatus() {
-        if (job.getStatus() == null || job.getStatus().length() == 0) {
-            return "Draft";
-        } else {
-            switch (job.getStatus()) {
-                case "c":
-                    return "Completed";
-                case "p":
-                    return "In progress";
-                default:
-                    return "Status: " + job.getStatus();
-            }
-        }
     }
 
     @Override
@@ -343,36 +294,69 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         job.getGroupRecipients().add(gr);
 
     }
-
-    private void startSendJob(Session session) {
-        job.setStatus("r");
-        Date now = _(CurrentDateService.class).getNow();
-        job.setStatusDate(now);
-        session.save(job);
+    
+    public Map<String,Map<String,List<Option>>> getEmailTriggerTypes() {
+        if( triggerTypes == null ) {
+            triggerTypes = _(ApplicationManager.class).getEmailTriggerTypes();
+        }
+        Map<String,Map<String,List<Option>>> map = new LinkedHashMap<>();
+        for( EmailTriggerType t : triggerTypes ) {
+            System.out.println("Trigger type: " + t.getEventId());
+            map.put(t.getEventId(), toOptions(t));
+        }
+        System.out.println("map size: " + map.size());
+        return map;
     }
-
-    /**
-     * TODO: this needs to be a static class, but currently needs a reference to
-     * parent
-     *
-     */
-    public class SendMailProcessable implements Serializable, Processable {
-
-        private static final long serialVersionUID = 1l;
-        private long jobId;
-
-        public SendMailProcessable(long jobId) {
-            this.jobId = jobId;
+    
+    public String triggerOptionLabel(String eventId, String optionCode ) {
+        for(EmailTriggerType t : triggerTypes) {
+            if( t.getEventId().equals(eventId)) {
+                return t.label(optionCode);
+            }
         }
-
-        @Override
-        public void doProcess(Context context) {
-            log.warn("doProcess: " + jobId);
-            groupEmailService.send(jobId, SessionManager.session());
+        return null;
+    }
+    
+    public Map<String,List<Option>> toOptions(EmailTriggerType type) {
+        Map<String,List<Option>> map = new LinkedHashMap<>();
+        List<Option> options1 = type.options1(getOrganisation());
+        if(options1 != null ) {
+            map.put("triggerCondition1", options1);
         }
-
-        @Override
-        public void pleaseImplementSerializable() {
+        List<Option> options2 = type.options2(getOrganisation());
+        if(options2 != null ) {
+            map.put("triggerCondition2", options2);
         }
+        List<Option> options3 = type.options3(getOrganisation());
+        if(options3 != null ) {
+            map.put("triggerCondition3", options3);
+        }
+        List<Option> options4 = type.options4(getOrganisation());
+        if(options4 != null ) {
+            map.put("triggerCondition4", options4);
+        }
+        List<Option> options5 = type.options5(getOrganisation());
+        if(options5 != null ) {
+            map.put("triggerCondition5", options5);
+        }
+        System.out.println("options map suze: " + map.size() + " for " + type.getEventId());
+        return map;
+    }
+    
+    public String triggerOptionValue(String optCode) {
+        switch (optCode) {
+            case "triggerCondition1":
+                return getTrigger().getTriggerCondition1();
+            case "triggerCondition2":
+                return getTrigger().getTriggerCondition2();
+            case "triggerCondition3":
+                return getTrigger().getTriggerCondition3();
+            case "triggerCondition4":
+                return getTrigger().getTriggerCondition4();
+            case "triggerCondition5":
+                return getTrigger().getTriggerCondition5();
+                
+        }
+        return null;
     }
 }

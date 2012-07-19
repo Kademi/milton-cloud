@@ -22,12 +22,12 @@
   
         var container = this;
         log("msgs", config.valiationMessageSelector, container, $(config.valiationMessageSelector, container));
-        $(this).submit(function(e) {
-            log("form submit", form);
+        $(this).submit(function(e) {            
             e.preventDefault();
-            var form = $(this);            
+            var form = $(this);     
+            log("form submit", form);
             resetValidation(container);
-            if( checkRequiredFields(container) ) {
+            if( checkRequiredFields(form) ) {
                 try {                    
                     $.ajax({
                         type: 'POST',

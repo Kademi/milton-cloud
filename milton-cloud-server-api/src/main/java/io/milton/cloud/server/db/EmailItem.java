@@ -86,7 +86,8 @@ public class EmailItem implements Serializable {
     }
     private List<EmailSendAttempt> emailSendAttempts;
     private long id;
-    private GroupEmailJob job; // optional, might be linked to a job
+    private BaseEmailJob job; // optional, might be linked to a job
+    private EmailTrigger emailTrigger;
     private Profile sender; // optional, the user account which sent the email if originated internally
     private BaseEntity recipient; // reference to user, possibly null
     private String recipientAddress; // actual email address being sent to
@@ -120,11 +121,11 @@ public class EmailItem implements Serializable {
     }
 
     @ManyToOne
-    public GroupEmailJob getJob() {
+    public BaseEmailJob getJob() {
         return job;
     }
 
-    public void setJob(GroupEmailJob job) {
+    public void setJob(BaseEmailJob job) {
         this.job = job;
     }
 
@@ -333,6 +334,13 @@ public class EmailItem implements Serializable {
     public void setNumAttempts(Integer numRetries) {
         this.numAttempts = numRetries;
     }
-    
-    
+
+    @ManyToOne
+    public EmailTrigger getEmailTrigger() {
+        return emailTrigger;
+    }
+
+    public void setEmailTrigger(EmailTrigger emailTrigger) {
+        this.emailTrigger = emailTrigger;
+    }    
 }

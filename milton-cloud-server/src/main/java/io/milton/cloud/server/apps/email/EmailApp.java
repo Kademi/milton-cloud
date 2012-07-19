@@ -23,9 +23,15 @@ import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
+import io.milton.cloud.server.event.SubscriptionEvent;
+import io.milton.cloud.server.event.TriggerEvent;
+import io.milton.cloud.server.mail.EmailTriggerType;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
+import io.milton.cloud.server.queue.AsynchProcessor;
+import io.milton.cloud.server.queue.Processable;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TextTemplater;
@@ -41,10 +47,13 @@ import org.apache.velocity.context.Context;
 import static io.milton.context.RequestContext._;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
+import io.milton.event.EventManager;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.mail.*;
+import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,6 +75,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private MiltonCloudMailResourceFactory mailResourceFactory;
     private MailServer mailServer;
     private SpliffySecurityManager securityManager;
+    private BatchEmailService batchEmailService;
     private GroupEmailService groupEmailService;
     private Configuration aspirinConfiguration = new Configuration();
     private ListenerManager listenerManager = new ListenerManager();
@@ -73,6 +83,9 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private EmailItemMailStore mailStore;
     private CurrentDateService currentDateService;
     private MCMailFilter mailFilter;
+    private EventManager eventManager;
+    private AsynchProcessor asynchProcessor;
+        
 
     @Override
     public String getInstanceId() {
@@ -81,7 +94,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        groupEmailService = new GroupEmailService();
+        batchEmailService = new BatchEmailService();
+        groupEmailService = new GroupEmailService(batchEmailService);
         securityManager = resourceFactory.getSecurityManager();
         mailResourceFactory = new MiltonCloudMailResourceFactory(resourceFactory);
         this.currentDateService = config.getContext().get(CurrentDateService.class);
@@ -90,6 +104,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf);
         mailFilter = new MCMailFilter(resourceFactory.getSessionManager(), config.getContext());
 
+        resourceFactory.getApplicationManager().getEmailTriggerTypes().add(new SubscriptionEventTriggerType());
+        
         MailServerBuilder mailServerBuilder = new MailServerBuilder();
         mailServerBuilder.setListenerManager(listenerManager);
         mailServerBuilder.setAspirinConfiguration(aspirinConfiguration);
@@ -105,6 +121,11 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         mailServer = mailServerBuilder.build();
         mailStore.setAspirinInternal(mailServerBuilder.getAspirinInternal());
         mailServer.start();
+        
+        eventManager = config.getContext().get(EventManager.class);
+        eventManager.registerEventListener(this, SubscriptionEvent.class);
+        
+        asynchProcessor = config.getContext().get(AsynchProcessor.class);
     }
 
     @Override
@@ -130,6 +151,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
             children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation(), groupEmailService));
+            children.add(new ManageAutoEmailsFolder("autoEmails", orgFolder, orgFolder.getOrganisation()));
         }
         if (parent instanceof BaseEntityResource) {
             BaseEntityResource ur = (BaseEntityResource) parent;
@@ -155,6 +177,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
                 OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
                 if (parentOrg != null) {
                     parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("groupEmails").child("manage")).setOrdering(10);
+                    parent.getOrCreate("menuAutoEmail", "Manage auto emails", parentOrg.getPath().child("autoEmails")).setOrdering(20);
                 }
                 break;
         }
@@ -200,6 +223,10 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void onEvent(Event e) {
+        if( e instanceof TriggerEvent) {
+            TriggerEvent se = (TriggerEvent) e;
+            checkTriggers(se);
+        }
     }
 
     @Override
@@ -256,12 +283,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     }
     
 
-    boolean isAutoReply(MimeMessage mm) {
+    private boolean isAutoReply(MimeMessage mm) {
         String sub = getSubject(mm);
         return isAutoReply(sub);
     }
 
-    boolean isAutoReply(String sub) {
+    private boolean isAutoReply(String sub) {
         sub = sub.toLowerCase();
         if (sub.contains("autoreply")) {
             return true;
@@ -272,11 +299,64 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         return false;
     }
     
-    String getSubject(MimeMessage mm) {
+    private String getSubject(MimeMessage mm) {
         try {
             return mm.getSubject();
         } catch (MessagingException ex) {
             throw new RuntimeException(ex);
         }
-    }    
+    }
+
+
+    private void checkTriggers(TriggerEvent event) {
+        log.info("checkTriggers");
+        Session session = SessionManager.session();
+        List<EmailTrigger> triggers = EmailTrigger.find(session, event.getEventId(), event.getOrganisation(), event.getTriggerItem1(), event.getTriggerItem2(), event.getTriggerItem3(), event.getTriggerItem4(), event.getTriggerItem5());
+        for( EmailTrigger trigger : triggers ) {
+            enqueueTrigger(trigger, event);
+        }
+    }
+
+    private void enqueueTrigger(EmailTrigger trigger, TriggerEvent event) {
+        log.info("enqueueTrigger: " + trigger.getName() + " - " + event.getEventId());
+        List<Long> sourceIds = new ArrayList<>();
+        for( BaseEntity entity :  event.getSourceEntities() ) {
+            sourceIds.add(entity.getId());
+        }
+        EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);
+        asynchProcessor.enqueue(p);
+    }
+    
+    public static class EmailTriggerProcessable implements Processable, Serializable {
+
+        private static final long serialVersionUID = 1l;
+        
+        private final long jobId;
+        private final List<Long> sourceEntityIds;
+
+        public EmailTriggerProcessable(long jobId, List<Long> sourceEntityIds) {
+            this.jobId = jobId;
+            this.sourceEntityIds = sourceEntityIds;
+        }
+                        
+        @Override
+        public void doProcess(io.milton.context.Context context) {
+            log.info("doProcess: " + jobId);
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            try {
+                context.get(EmailTriggerService.class).send(jobId, sourceEntityIds, session);
+            } catch(Exception e) {
+                tx.rollback();
+                log.error("Exception processing email trigger: " + jobId, e);
+            }
+        }
+
+        @Override
+        public void pleaseImplementSerializable() {
+            
+        }
+        
+    }
 }
+

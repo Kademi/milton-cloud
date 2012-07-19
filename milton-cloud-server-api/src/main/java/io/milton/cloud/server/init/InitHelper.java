@@ -4,6 +4,7 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.db.utils.GroupDao;
@@ -34,6 +35,24 @@ public class InitHelper {
         addRandomNames();
     }
     
+    public EmailTrigger createTrigger(Organisation org, String eventId, String name, String html, String triggerCondition1, String triggerCondition2, String triggerCondition3, String triggerCondition4, Session session) {
+        EmailTrigger t = new EmailTrigger();
+        t.setOrganisation(org);
+        t.setEventId(eventId);
+        t.setName(name);
+        t.setEnabled(true);
+        t.setFromAddress("admin@localhost");
+        t.setHtml(html);
+        t.setIncludeUser(true);
+        t.setSubject("Test message");
+        t.setTitle("Test message");
+        t.setTriggerCondition1(triggerCondition1);
+        t.setTriggerCondition2(triggerCondition2);
+        t.setTriggerCondition3(triggerCondition3);
+        t.setTriggerCondition4(triggerCondition4);
+        session.save(t);
+        return t;
+    }
     
     /**
      * 
