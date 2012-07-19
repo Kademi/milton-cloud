@@ -284,8 +284,8 @@ public class Syncer {
         byte[] arr;
         try {
             arr = host.doGet(p, params);
-        } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
-            throw new RuntimeException("Exception checking hash on: " + p);
+        } catch (Throwable ex) {
+            throw new RuntimeException("Exception checking hash on: " + p, ex);
         }
         String sHash = new String(arr);
         Long actual = Long.parseLong(sHash);

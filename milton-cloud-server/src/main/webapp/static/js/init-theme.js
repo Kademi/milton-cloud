@@ -162,6 +162,7 @@ function initHtmlEditors() {
         var inp = $(n);        
 
         var inputClasses = inp.attr("class");
+        var id = inp.attr("id");
         var toolbar = "Default";
         if(inputClasses) {
             c = inputClasses.split(" ");

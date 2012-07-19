@@ -201,7 +201,7 @@ public class InitHelper {
         r.setAttribute("heroColour2", "#88c03f", session);
         r.setAttribute("textColour1", "#1C1D1F", session);
         r.setAttribute("textColour2", "#2F2F2F", session);
-        r.setAttribute("logo", "<img src='/content/images/logo.png' alt='Logo' />", session);
+        r.setAttribute("logo", "<img src='/content/theme/images/logo.png' alt='Logo' />", session);
         
         return w;
     }    

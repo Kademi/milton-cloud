@@ -54,6 +54,7 @@ public class AltFormatGenerator implements EventListener {
     private final AsynchProcessor asynchProcessor;
     private String ffmpeg = "avconv";
     private List<FormatSpec> formats;
+    private boolean doPreGeneration = true;
 
     public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, AsynchProcessor asynchProcessor) {
         this.hashStore = hashStore;
@@ -80,7 +81,12 @@ public class AltFormatGenerator implements EventListener {
                 FileResource fr = (FileResource) pe.getResource();
                 if (isMedia(fr)) {
                     Long l = fr.getContentLength();
-                    if( l != null && l > 20000) { // Must be at least 20k, otherwise don't bother
+                    if (l != null && l > 20000) { // Must be at least 20k, otherwise don't bother
+                        if (!doPreGeneration) {
+                            log.warn("---- NOT doing pregeneration of media");
+                            return;
+                        }
+
                         onPut(fr);
                     }
                 }
@@ -168,6 +174,14 @@ public class AltFormatGenerator implements EventListener {
             }
         }
         return false;
+    }
+
+    public boolean isDoPreGeneration() {
+        return doPreGeneration;
+    }
+
+    public void setDoPreGeneration(boolean doPreGeneration) {
+        this.doPreGeneration = doPreGeneration;
     }
 
     public class GenerateJob implements Processable {

@@ -70,8 +70,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return "br" + branch.getId();
     }
 
-    
-    
     @Override
     public void save() {
         UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
@@ -86,6 +84,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public ResourceList getChildren() {
         if (children == null) {
+            System.out.println("BranchFolder: getChildren - " + getName());
             children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
         }
         return children;
@@ -110,7 +109,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
         DirectoryResource rdr = newDirectoryResource(newNode, this, false);
         onAddedChild(rdr);
-        rdr.updateModDate(); 
+        rdr.updateModDate();
         save();
         return rdr;
     }
@@ -135,17 +134,17 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             newFileNode.setContent(inputStream);
         }
         onAddedChild(fileResource);
-        updateModDate(); 
+        updateModDate();
         save();
         tx.commit();
 
         return fileResource;
     }
-    
+
     protected void updateModDate() {
         Date newDate = _(CurrentDateService.class).getNow();
         loadNodeMeta().setModDate(newDate);
-        if( nodeMeta.getCreatedDate() == null ) {
+        if (nodeMeta.getCreatedDate() == null) {
             nodeMeta.setCreatedDate(newDate);
         }
         try {
@@ -154,8 +153,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             throw new RuntimeException(ex);
         }
     }
-
-  
 
     @Override
     public Date getCreateDate() {
@@ -166,9 +163,9 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Date getModifiedDate() {
         return loadNodeMeta().getModDate();
     }
-    
+
     private NodeMeta loadNodeMeta() {
-        if( nodeMeta == null ) {
+        if (nodeMeta == null) {
             try {
                 nodeMeta = NodeMeta.loadForNode(getDirectoryNode());
             } catch (IOException ex) {
@@ -187,9 +184,8 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
         String type = params.get("type");
         if (type == null) {
-            // output directory listing
-            log.trace("sendContent: render template");
             renderPage(out, params);
+
         } else {
             log.trace("sendContent: " + type);
             switch (type) {
@@ -198,13 +194,20 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
                     break;
                 case "hash":
                     String s = dataSession.getRootDataNode().getHash() + "";
-                    out.write(s.getBytes());                    
+                    out.write(s.getBytes());
                     break;
             }
         }
     }
-    
-    protected void renderPage(OutputStream out, Map<String, String> params) throws IOException {
+
+    protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (renderMode) {
+            if (getIndex() != null) {
+                getIndex().sendContent(out, null, params, null);
+                return;
+            }
+        }
+        log.trace("sendContent: render template");
         getTemplater().writePage(false, "repoHome", this, params, out);
     }
 
@@ -310,7 +313,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public void onRemovedChild(AbstractContentResource aThis) {
         getChildren().remove(aThis);
     }
-    
+
     @Override
     public FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
         return new FileResource(dm, parent);
@@ -319,16 +322,16 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
         return new DirectoryResource(dm, parent, renderMode);
-    }    
-    
+    }
+
     @Override
     public boolean is(String type) {
-        if( "branch".equals(type) || "folder".equals(type) || "directory".equals(type)) {
+        if ("branch".equals(type) || "folder".equals(type) || "directory".equals(type)) {
             return true;
         }
         return super.is(type);
-    }    
-    
+    }
+
     public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
         if (indexPage == null) {
             Resource r = child("index.html");
@@ -354,6 +357,4 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Branch getBranch() {
         return branch;
     }
-    
-    
 }

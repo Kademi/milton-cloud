@@ -77,6 +77,7 @@
         <constructor-arg ref="event.manager" /> 
         <constructor-arg ref="content.type.service" />
         <constructor-arg ref="async.processor"/>
+        <property name="doPreGeneration" value="${pregenerate.media}" />
     </bean>
         
     <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory">

@@ -16,6 +16,7 @@
  */
 package io.milton.vfs.db;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 import org.hibernate.annotations.Cache;
@@ -31,7 +32,7 @@ uniqueConstraints = {
     @UniqueConstraint(columnNames = {"member", "group_entity"})}
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class GroupMembership {
+public class GroupMembership implements Serializable{
     private Long id;
     private BaseEntity member;
     private Group groupEntity;

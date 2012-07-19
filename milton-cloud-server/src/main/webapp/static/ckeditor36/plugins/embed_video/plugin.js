@@ -48,7 +48,7 @@ CKEDITOR.plugins.add( 'embed_video',
 
 // These interfere with page themes, but might need to be put back somehow for editor layout
 // 
-//        editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
+        editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
 //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap.min.css");
 //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-responsive.min.css");
 //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-image-gallery.min.css");
@@ -307,7 +307,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     img = this.element;
  
                     img.setAttribute( "url", url );
-                    img.setAttribute( "src", url + "/alt-720-576.png" );
+                    img.setAttribute( "src", url + "/alt-800-455.png" );
                     img.setAttribute("class", "video");
                     if ( this.insertMode ) {
                         editor.insertElement( img );

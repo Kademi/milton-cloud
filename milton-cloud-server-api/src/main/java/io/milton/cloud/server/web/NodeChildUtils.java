@@ -51,14 +51,14 @@ public class NodeChildUtils {
             return rdr;
         } else if (contentNode instanceof FileNode) {
             FileNode dm = (FileNode) contentNode;
-            FileResource rfr = resourceCreator.newFileResource(dm, parent, renderMode);
+            FileResource fr = resourceCreator.newFileResource(dm, parent, renderMode);
             if (renderMode) {
-                if (isHtml(rfr)) {
-                    return new RenderFileResource(rfr);
+                if (isHtml(fr)) {
+                    return fr.getHtml();
                 }
-                return rfr;
+                return fr;
             } else {
-                return rfr;
+                return fr;
             }
         } else {
             throw new RuntimeException("Unknown resource type: " + contentNode);
@@ -73,7 +73,6 @@ public class NodeChildUtils {
     public static ResourceList toResources(ContentDirectoryResource parent, DirectoryNode dir, boolean renderMode, ResourceCreator resourceCreator) {
         ResourceList list = new ResourceList();
         for (DataNode n : dir ) {
-            String name = n.getName();
             CommonResource r = toResource(parent, n, renderMode, resourceCreator);
             list.add(r);
         }

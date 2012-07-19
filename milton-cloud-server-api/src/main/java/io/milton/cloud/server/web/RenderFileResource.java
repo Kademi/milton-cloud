@@ -89,13 +89,18 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         if (parameters.containsKey("body")) {
             body = parameters.get("body");
+            setBody(parameters.get("body"));
+            System.out.println("set body: " + body);
         }
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        _(HtmlTemplateParser.class).update(this, bout);
-        byte[] arr = bout.toByteArray();
-        ByteArrayInputStream bin = new ByteArrayInputStream(arr);
         boolean didNew = isNewPage();
-        fileResource.replaceContent(bin, (long) arr.length);
+
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        doSaveHtml();
+
+        tx.commit();
+
         if (didNew) {
             jsonResult = new JsonResult(true, "Created page", fileResource.getHref());
         } else {

@@ -315,13 +315,14 @@ function initEdify() {
     if( !$("body").hasClass("edifyIsEditMode")) {
         $("body").addClass("edifyIsViewMode");
     }
-    $(".edifyDelete").click(function() {
+    $("body").on("click", ".edifyDelete", function() {
         var href = window.location.href;
         var name = getFileName(href);
         confirmDelete(href, name, function() {
             alert("Page deleted");
             var folderHref = getFolderPath(href);
-            window.location = folderHref;
+            log("load", folderHref);
+            window.location = folderHref + '/';
         });
     });
 }
@@ -342,9 +343,9 @@ function edify(container, callback) {
     if( !callback ) {
         callback = function(resp) {
             if( resp.nextHref) {
-                window.location = resp.nextHref;
+                //window.location = resp.nextHref;
             } else {
-                window.location = window.location.pathname;
+                //window.location = window.location.pathname;
             }            
         };
     }
@@ -354,13 +355,21 @@ function edify(container, callback) {
     
     $("#edifyForm").submit(function() {
         log("submit form");
+        var data = $("#edifyForm").serialize();
+        $(".htmleditor").each(function(i,n) {
+            var node = $(n);
+            var id = node.attr("id");
+            var val = node.val();            
+            log("setting data property", id, val);
+            data[id] = val;
+        });
         try {
             log("ckeditors", CKEDITOR.instances);
             //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
             $.ajax({
                 type: 'POST',
                 url: $("#edifyForm").attr("action"),
-                data: $("#edifyForm").serialize(),
+                data: data,
                 dataType: "json",
                 success: function(resp) {
                     ajaxLoadingOff();
