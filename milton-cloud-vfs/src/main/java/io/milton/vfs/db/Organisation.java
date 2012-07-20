@@ -165,6 +165,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return w;
     }
 
+    public Organisation createChildOrg(String orgName, Session session) {
+        Organisation o = new Organisation();
+        o.setOrganisation(this);
+        o.setName(orgName);
+        o.setCreatedDate(new Date());
+        o.setModifiedDate(new Date());
+        session.save(o);
+        return o;
+    }        
+    
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);

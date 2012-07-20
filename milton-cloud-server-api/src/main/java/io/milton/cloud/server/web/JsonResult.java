@@ -42,6 +42,10 @@ public class JsonResult {
         this.nextHref = nextHref;
         this.messages = Arrays.asList(message);
     }          
+    
+    public void addFieldMessage(String field, String message) {
+        fieldMessages.add(new FieldMessage(field, message)); 
+    }
 
     public void write(OutputStream out) throws IOException {
         JsonWriter jsonWriter = new JsonWriter();
@@ -126,6 +130,15 @@ public class JsonResult {
         private String field;
         private String message;
 
+        public FieldMessage() {
+        }
+
+        public FieldMessage(String field, String message) {
+            this.field = field;
+            this.message = message;
+        }
+       
+        
         public String getField() {
             return field;
         }

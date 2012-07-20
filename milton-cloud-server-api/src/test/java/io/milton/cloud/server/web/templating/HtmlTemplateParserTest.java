@@ -42,7 +42,6 @@ public class HtmlTemplateParserTest {
         assertNotNull(wrParam);
         assertNotNull(wrScript);
         assertEquals("//", wrScript.getBody());
-        System.out.println(wrParam.getBody());
         assertTrue(wrParam.getBody().startsWith("<p>Registering as a Professional"));
     }
 }

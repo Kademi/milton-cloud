@@ -72,11 +72,6 @@ public class Website implements Serializable, VfsAcceptor {
         return  DbUtils.unique(crit);
     }     
 
-    public static Website findByAlias(String alias, Session session) {
-        Criteria crit = session.createCriteria(Website.class);
-        crit.add(Expression.eq("aliasSubdomain", alias));
-        return  DbUtils.unique(crit);
-    }     
     
     
     private Organisation organisation;

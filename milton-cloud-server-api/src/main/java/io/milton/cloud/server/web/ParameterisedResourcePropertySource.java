@@ -47,7 +47,6 @@ public class ParameterisedResourcePropertySource implements PropertySource {
 
     @Override
     public void setProperty(QName name, Object value, Resource r) throws PropertySetException, NotAuthorizedException {
-        System.out.println("setProperty: " + name);
         if (r instanceof ParameterisedResource) {
             ParameterisedResource pr = (ParameterisedResource) r;
             try {

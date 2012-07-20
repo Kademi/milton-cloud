@@ -157,7 +157,6 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        System.out.println("process form");
         return getCreated(true, parameters).processForm(parameters, files);
     }
 

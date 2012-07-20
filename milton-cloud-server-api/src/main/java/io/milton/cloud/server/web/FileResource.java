@@ -221,7 +221,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);
         } else {
-            System.out.println("no htmlPage, so no property changes");
+
         }
     }
 

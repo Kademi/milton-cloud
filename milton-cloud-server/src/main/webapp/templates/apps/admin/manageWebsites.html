@@ -6,7 +6,39 @@
     </head>
     <body>
         <section id="manageWebsite" class="MainContent">
-            <h3>Available websites</h3>
+            <div class="Left">
+                <a class="SmallBtn Add" onclick="return showAddItem(this)" href="#">Add new website</a>
+                <div class="Modal">
+                    <header>
+                        <h3>Add new website</h3>
+                        <a title="Close" href="#" class="Close"><span class="Hidden">Close</span></a>
+                    </header>
+
+                    <div class="ModalContent">
+                        <form class="addOrg" method="POST" action=".">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th><label for="newName">Enter domain name</label></th>
+                                        <td><input type="text" class="required" placeholder="DNS name, eg www.mylearning.com" id="newName" name="newName"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th><label for="newAlias">Enter website alias</label></th>
+                                        <td><input type="text" class="required" placeholder="Alternative DNS name" id="newAlias" name="newAlias"/></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td class="BtnBar" colspan="2">
+                                            <button class="Btn">Save changes</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>                    
+                </div>
+            </div>
+
             <table class="Summary">
                 #foreach($w in $page.websites)
                 <tr>
@@ -20,12 +52,19 @@
                     </th>
                 </tr>
                 #end
-                
+
             </table>
         </section>
         <script type="text/javascript">
             jQuery(function() {
                 initManageWebsite();
+                $("form.addOrg").forms({
+                    callback: function(resp) {
+                        log("done", resp);
+                        window.location.reload();
+                    }
+                });                
+                
             });
         </script>
     </body>

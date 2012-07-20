@@ -64,7 +64,6 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        System.out.println("template: " + template);
         _(TextTemplater.class).writePage(template, this, params, out);
     }
        

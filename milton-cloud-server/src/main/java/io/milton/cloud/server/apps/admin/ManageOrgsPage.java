@@ -37,33 +37,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
  * @author brad
  */
-public class OrgsAdminPage extends AbstractResource implements GetableResource, PostableResource {
+public class ManageOrgsPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(OrgsAdminPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageOrgsPage.class);
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
 
-    public OrgsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {
+    public ManageOrgsPage(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
     }
 
     @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+        String newTitle = parameters.get("newTitle");
+        if (newTitle != null) {
+            log.info("processForm: newTitle: " + newTitle);
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            String newName = NewPageResource.findAutoName(newTitle, this.getParent(), parameters);
+            Organisation c = getOrganisation().createChildOrg(newName, session);
+            session.save(c);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Created", c.getName());
+        }
+        return null;
+    }
+    
+    public String getTitle() {
+        return "Manage business units";
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        } else {
+            _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
+        }
     }
 
     @Override

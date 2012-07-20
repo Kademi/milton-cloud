@@ -81,7 +81,6 @@ public class HtmlTemplateRenderer {
 
         List<WebResource> pageWebResources = null;
         List<String> pageBodyClasses = null;
-        System.out.println("renderHtml: " + page.getClass());
         if (page instanceof HtmlPage) {
             HtmlPage htmlPage = (HtmlPage) page;
             pageWebResources = htmlPage.getWebResources();
@@ -121,7 +120,6 @@ public class HtmlTemplateRenderer {
         pw.write("</body>\n");
         pw.write("</html>");
         pw.flush();
-        System.out.println("finished rendering page");
     }
 
     private List<WebResource> deDupe(List<WebResource>... webResourceLists) {

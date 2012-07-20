@@ -84,7 +84,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public ResourceList getChildren() {
         if (children == null) {
-            System.out.println("BranchFolder: getChildren - " + getName());
             children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
         }
         return children;

@@ -16,14 +16,11 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-
+import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -46,49 +43,84 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
  * @author brad
  */
-public class ManageWebsitesPage extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class ManageWebsitesFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ManageWebsitesPage.class);
-    
+    private static final Logger log = LoggerFactory.getLogger(ManageWebsitesFolder.class);
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
-    
     private ResourceList children;
+    private JsonResult jsonResult;
 
-    public ManageWebsitesPage(String name, Organisation organisation, CommonCollectionResource parent) {       
+    public ManageWebsitesFolder(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
     }
 
-    @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }    
+    public String getTitle() {
+        return "Manage websites";
+    }
     
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {                
-        _(HtmlTemplater.class).writePage("admin","admin/manageWebsites", this, params, out);
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        String newName = parameters.get("newName");
+        if (newName != null) {
+            log.info("processForm: newName: " + newName);
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            String newAlias = parameters.get("newAlias");
+            
+            Website existing = Website.findByName(newName, session);
+            if( existing != null ) {
+                jsonResult = new JsonResult(false, "Domain name is already registered in this system");
+                jsonResult.addFieldMessage("newName", "Please choose a unique name");
+                return null;
+            }
+            existing = Website.findByName(newAlias, session);
+            if( existing != null ) {
+                jsonResult = new JsonResult(false, "Alias name is already registered in this system");
+                jsonResult.addFieldMessage("newAlias", "Please choose a unique alias");
+                return null;
+            }
+            Profile curUser= _(SpliffySecurityManager.class).getCurrentUser();            
+            Website c = getOrganisation().createWebsite(newName, null, curUser, newAlias, session);
+            session.save(c);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Created", c.getName());
+        }
+        return null;
+    }
+
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            _(HtmlTemplater.class).writePage("admin", "admin/manageWebsites", this, params, out);
+        }
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if( children == null ) {
+        if (children == null) {
             children = new ResourceList();
-            for( Website w : getWebsites()) {
-                ManageWebsitePage p = new ManageWebsitePage(w, this); 
+            for (Website w : getWebsites()) {
+                ManageWebsitePage p = new ManageWebsitePage(w, this);
                 children.add(p);
             }
         }
         return children;
     }
-   
+
     @Override
     public boolean isDir() {
         return true;
@@ -129,7 +161,6 @@ public class ManageWebsitesPage extends AbstractCollectionResource implements Ge
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -149,8 +180,8 @@ public class ManageWebsitesPage extends AbstractCollectionResource implements Ge
     public Organisation getOrganisation() {
         return organisation;
     }
-    
+
     public List<Website> getWebsites() {
         return organisation.websites();
-    }        
+    }
 }

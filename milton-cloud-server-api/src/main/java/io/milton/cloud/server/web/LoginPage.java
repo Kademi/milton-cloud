@@ -37,7 +37,6 @@ public class LoginPage implements GetableResource, CommonResource {
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        System.out.println("LoginPage: sendcontent");
         String template = "login/login";
         if( !isPublic() ) {
             template = "admin/login";
@@ -148,7 +147,6 @@ public class LoginPage implements GetableResource, CommonResource {
     @Override
     public boolean isPublic() {
         boolean b = parent.isPublic();
-        System.out.println("LoginPage: isPubluicL " + b + " from " + parent.getClass());
         return b;
     }
 }

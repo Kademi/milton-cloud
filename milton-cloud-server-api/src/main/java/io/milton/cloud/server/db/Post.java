@@ -41,7 +41,6 @@ public class Post implements Serializable{
         crit.add(Expression.eq("website", website));
         crit.addOrder(Order.desc("postDate"));
         List<Post> list = DbUtils.toList(crit, Post.class);
-        System.out.println("findByWebsite=" + list.size());
         return list;
     }    
     

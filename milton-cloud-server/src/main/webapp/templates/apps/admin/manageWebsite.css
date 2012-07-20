@@ -31,3 +31,9 @@
 	margin-bottom: 4px;
 }
 #manageWebsite table.Summary td p { font-size: 13px; }
+
+.AddItemButton {
+    position: absolute;
+    right: 0;
+    top: 0;
+}

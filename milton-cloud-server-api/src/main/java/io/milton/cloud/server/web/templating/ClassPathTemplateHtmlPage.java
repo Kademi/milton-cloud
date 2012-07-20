@@ -42,7 +42,6 @@ public class ClassPathTemplateHtmlPage extends TemplateHtmlPage{
     
     @Override
     public InputStream getInputStream() {
-        System.out.println("getInputstream: " + resource);
         try {
             return resource.openStream();
         } catch (IOException ex) {

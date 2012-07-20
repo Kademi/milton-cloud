@@ -224,12 +224,6 @@ public class InitHelper {
     }    
     
     public Organisation createChildOrg(Organisation rootOrg, String branch1, Session session) {
-        Organisation o = new Organisation();
-        o.setOrganisation(rootOrg);
-        o.setName(branch1);
-        o.setCreatedDate(new Date());
-        o.setModifiedDate(new Date());
-        session.save(o);
-        return o;
+        return rootOrg.createChildOrg(branch1, session);
     }    
 }

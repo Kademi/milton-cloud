@@ -90,7 +90,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         if (parameters.containsKey("body")) {
             body = parameters.get("body");
             setBody(parameters.get("body"));
-            System.out.println("set body: " + body);
         }
         boolean didNew = isNewPage();
 

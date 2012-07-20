@@ -74,12 +74,13 @@ public class AltFormatResourceFactory implements ResourceFactory {
             if (r instanceof FileResource) {
                 FileResource fr = (FileResource) r;
                 long sourceHash = fr.getHash();
-                AltFormat f = AltFormat.find(sourceHash, p.getName(), SessionManager.session());
+                String formatName = p.getName().replace("alt-", "");
+                AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());                
                 if (f != null) {
                     return new AltFormatResource((FileResource) r, p.getName(), f);
                 } else {
-                    // if the format is valid then create a resource which will generate on demand
-                    String formatName = p.getName().replace("alt-", "");
+                    log.warn("getResource: alt format not found: " + sourceHash + " - " + p.getName());
+                    // if the format is valid then create a resource which will generate on demand                    
                     FormatSpec format = altFormatGenerator.findFormat(formatName);
                     if (format != null) {
                         return new AltFormatResource((FileResource) r, p.getName(), format);

@@ -103,7 +103,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            System.out.println("init children for WebsiteRootFolder");
             children = new ResourceList();
             Branch currentLive = website.currentBranch();
             if (currentLive != null) {
@@ -116,7 +115,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
                     children.add(rf);
                 }
             }
-            System.out.println("add browseable pages");
             applicationManager.addBrowseablePages(this, children);
         }
         return children;

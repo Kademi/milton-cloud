@@ -115,10 +115,8 @@ public class HtmlTemplater {
         if (aThis instanceof CommonResource) {
             CommonResource cr = (CommonResource) aThis;
             isPublic = cr.isPublic();
-            System.out.println("isPublic: " + isPublic + " - from res with parent " + cr.getParent().getClass());
         }
         String theme = findTheme(aThis, isPublic);
-        System.out.println("theme: " + theme);
         writePage(theme, templatePath, aThis, params, out);
     }
 
@@ -146,7 +144,6 @@ public class HtmlTemplater {
      * @throws IOException
      */
     public void writePage(String theme, String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        System.out.println("writePage: theme: " + theme);
         UserResource user = securityManager.getCurrentPrincipal();
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
         if (!templatePath.startsWith("/")) {
@@ -338,7 +335,6 @@ public class HtmlTemplater {
                 // load from website repo
                 RootFolder rootFolder = _(RootFolder.class);
                 WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-                System.out.println("isCustom, load from: " + wrf.getWebsite().getName());
                 try {
                     Resource r = NodeChildUtils.find(p, wrf);
                     FileResource fr = NodeChildUtils.toFileResource(r);
@@ -374,7 +370,7 @@ public class HtmlTemplater {
             if (meta != null) {
                 cachedTemplateMetaData.put(path, meta);
             } else {
-                System.out.println("Failed to find: " + path);
+                log.warn("Failed to find: " + path);
             }
 
             return meta;

@@ -11,9 +11,11 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.ResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
+import org.apache.log4j.Logger;
 
 /**
  * Implements a URL scheme for handling HTTP interactions with a file sync
@@ -38,6 +40,8 @@ import io.milton.vfs.db.utils.SessionManager;
  */
 public class SpliffySyncResourceFactory implements ResourceFactory {
 
+    private static final Logger log = Logger.getLogger(SpliffySyncResourceFactory.class);
+    
     public static final Date LONG_LONG_AGO = new Date(0);
     private String basePath = "/_hashes";
     private final SpliffySecurityManager securityManager;
@@ -121,7 +125,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
     private Resource findFanout(long hash, Organisation org) {
         Fanout fanout = hashStore.getFanout(hash);
         if (fanout == null) {
-            System.out.println("fanout not found");
+            log.warn("fanout not found");
             return null;
         } else {
             return new FanoutResource(fanout, hash, securityManager, org);
@@ -131,7 +135,7 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
     private Resource findGetResource(long hash, Organisation org) {
         Fanout fanout = hashStore.getFanout(hash);
         if (fanout == null) {
-            System.out.println("fanout not found");
+            log.warn("fanout not found");
             return null;
         } else {
             return new GetResource(fanout, hash, securityManager, org, blobStore, hashStore);

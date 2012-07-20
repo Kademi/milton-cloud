@@ -287,13 +287,11 @@ public class ResourceList extends ArrayList<CommonResource> {
     }
 
     public Map<Object, ResourceList> groupByField(final String fieldName) throws NotAuthorizedException, BadRequestException {
-        System.out.println("groupbyfield: " + fieldName);
         Map<Object, ResourceList> groups = new LinkedHashMap<>();
         for (CommonResource t : this) {
             if (t instanceof ParameterisedResource) {
                 ParameterisedResource pr = (ParameterisedResource) t;
                 String key = pr.getParam(fieldName);
-                System.out.println("key: " + key);
                 ResourceList val = groups.get(key);
                 if (val == null) {
                     val = new ResourceList();

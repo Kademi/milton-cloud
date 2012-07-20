@@ -252,4 +252,13 @@ var typewatch = (function(){
     }  
 })();
 
+function showAddItem(source) {
+    var modal = $(source).parent().find(".Modal");
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    }); 
+    return false;
+}
+
 /** End init-theme.js */

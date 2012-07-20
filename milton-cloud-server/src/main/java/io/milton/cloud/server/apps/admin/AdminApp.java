@@ -53,7 +53,7 @@ public class AdminApp implements MenuApplication {
                     return new GroupsAdminPage(requestedName, p.getOrganisation(), p);
                 case "manageWebsites":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
-                    return new ManageWebsitesPage(requestedName, p.getOrganisation(), p);
+                    return new ManageWebsitesFolder(requestedName, p.getOrganisation(), p);
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
@@ -63,7 +63,7 @@ public class AdminApp implements MenuApplication {
             OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
             if (requestedName.equals("manage")) {
                 MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
-                return new OrgsAdminPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
+                return new ManageOrgsPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
             }
         }
         return null;

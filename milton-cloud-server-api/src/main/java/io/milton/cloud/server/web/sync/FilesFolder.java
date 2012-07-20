@@ -81,14 +81,12 @@ class FilesFolder extends BaseResource implements PutableResource, PostableResou
      */
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        System.out.println("processForm");
         if (parameters.containsKey("qqfile")) { 
             try {
                 InputStream in = HttpManager.request().getInputStream();
                 Resource r = createNew(null, in, null, null);
                 jsonResult = new JsonResult(true);
                 jsonResult.setNextHref(r.getName());
-                System.out.println("new name: " + r.getName());
             } catch (IOException ex) {
                 jsonResult = new JsonResult(false);
                 jsonResult.setMessages(Arrays.asList("Failed to save the file"));
