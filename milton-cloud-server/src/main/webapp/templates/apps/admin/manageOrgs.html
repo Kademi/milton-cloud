@@ -41,7 +41,8 @@
                         <p>Stuff goes here</p>
                     </td>
                     <th>
-                        <a href="$org.path" class="Btn Cancel EditWebsite">Edit</a>
+                        <a href="$org.path" class="Btn DeleteOrg">Delete</a>
+                        <a href="$org.path" class="Btn Cancel EditWebsite">Manage</a>
                     </th>
                 </tr>
                 #end
@@ -56,6 +57,16 @@
                         window.location.reload();
                     }
                 });                
+                $("body").on("click", ".DeleteOrg", function(e, n) {
+                    e.preventDefault();
+                    var node = $(e.target);
+                    var href = node.attr("href");
+                    var name = getFileName(href);
+                    confirmDelete(href, name, function() {
+                        window.location.reload();
+                    });                    
+                });
+                
             });
         </script>
     </body>

@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.orgs;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.http.*;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -39,14 +40,17 @@ import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.resource.*;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
- * This is the root folder for the admin site. The admin site is used to setup
- * users and websites accessing the server
+ *
  *
  * @author brad
  */
-public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource {
+public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationFolder.class);
     private final CommonCollectionResource parent;
@@ -56,6 +60,27 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public OrganisationFolder(CommonCollectionResource parent, Organisation organisation) {
         this.parent = parent;
         this.organisation = organisation;
+    }
+
+    @Override
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        if (organisation.getWebsites() != null) {
+            for (Website w : organisation.getWebsites()) {
+                for (AppControl ac : AppControl.find(w, session)) {
+                    session.delete(ac);
+                }
+            }
+        }
+        for (AppControl ac : AppControl.find(organisation, session)) {
+            session.delete(ac);
+        }
+
+        organisation.delete(session);
+
+        tx.commit();
     }
 
     @Override
@@ -97,13 +122,13 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         MenuItem.setActiveId("menuDashboard");
-        _(HtmlTemplater.class).writePage("admin","admin/dashboard", this, params, out);
+        _(HtmlTemplater.class).writePage("admin", "admin/dashboard", this, params, out);
     }
 
     public String getTitle() {
         return "Dashboard";
     }
-    
+
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -162,6 +187,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public boolean isPublic() {
         return false;
     }
-    
-    
+
+    @Override
+    public boolean isLockedOutRecursive(Request request) {
+        return false;
+    }
 }

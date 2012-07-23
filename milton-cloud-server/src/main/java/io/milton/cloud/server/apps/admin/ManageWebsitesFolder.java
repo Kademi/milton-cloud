@@ -16,6 +16,8 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
@@ -94,6 +96,10 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             Profile curUser= _(SpliffySecurityManager.class).getCurrentUser();            
             Website c = getOrganisation().createWebsite(newName, null, curUser, newAlias, session);
             session.save(c);
+            
+            Date now = _(CurrentDateService.class).getNow();
+            AppControl.initDefaultApps(existing, curUser, now, session);
+            
             tx.commit();
             jsonResult = new JsonResult(true, "Created", c.getName());
         }

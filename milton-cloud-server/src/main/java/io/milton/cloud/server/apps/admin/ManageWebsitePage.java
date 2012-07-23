@@ -51,6 +51,7 @@ import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -64,6 +65,7 @@ public class ManageWebsitePage extends AbstractResource implements GetableResour
     private final Website website;
     private final CommonCollectionResource parent;
     private JsonResult jsonResult;
+    private Map<String, String> themeParams;
 
     public ManageWebsitePage(Website website, CommonCollectionResource parent) {
         this.parent = parent;
@@ -78,9 +80,29 @@ public class ManageWebsitePage extends AbstractResource implements GetableResour
             boolean enabled = parameters.containsKey(a.getAppId());
             setStatus(a.getAppId(), enabled, session);
         }
+
+        Repository r = website.getRepository();
+        r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
+        r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
+        r.setAttribute("textColour1", parameters.get("textColour1"), session);
+        r.setAttribute("textColour2", parameters.get("textColour2"), session);
+        r.setAttribute("logo", parameters.get("logo"), session);
+
         tx.commit();
         jsonResult = new JsonResult(true);
         return null;
+    }
+
+    public Map<String, String> getThemeParams() {
+        if (themeParams == null) {
+            themeParams = new HashMap<>();
+            if (website.getRepository().getNvPairs() != null) {
+                for (NvPair pair : website.getRepository().getNvPairs()) {                    
+                    themeParams.put(pair.getName(), pair.getPropValue());
+                }
+            }
+        }
+        return themeParams;
     }
 
     public List<AppControlBean> getApps() {
@@ -179,9 +201,8 @@ public class ManageWebsitePage extends AbstractResource implements GetableResour
     public Website getWebsite() {
         return website;
     }
-    
+
     public List<GroupInWebsite> getGroupsInWebsite() {
         return website.groups(SessionManager.session());
     }
-    
 }

@@ -68,6 +68,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     private String title;
     private String body;
     private JsonResult jsonResult;
+    private boolean isNewPage; // set to true by NewPageResource
 
     public RenderFileResource(FileResource fileResource) {
         this.fileResource = fileResource;
@@ -96,6 +97,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
+        System.out.println("RFR: processform: saving: " + this.fileResource.getName());
         doSaveHtml();
 
         tx.commit();
@@ -257,6 +259,9 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     @Override
     public String getTitle() {
         checkParse();
+        if( title == null) {
+            return "";
+        }
         return title;
     }
 
@@ -391,7 +396,11 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     public boolean isNewPage() {
-        return fileResource.getContentLength() == null; // will be null if its content node is null
+        return isNewPage;
+    }
+    
+    public void setNewPage(boolean  b){
+        isNewPage = b;
     }
 
     public boolean isParsed() {

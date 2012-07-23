@@ -112,20 +112,20 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     @Override
-    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {        
+    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         FileNode newFileNode = directoryNode.addFile(newName);
         FileResource fileResource = newFileResource(newFileNode, this, false);
 
         String ct = HttpManager.request().getContentTypeHeader();
-        if (ct != null && ct.equals("spliffy/hash")) {            
+        if (ct != null && ct.equals("spliffy/hash")) {
             // read the new hash and set it on this
             DataInputStream din = new DataInputStream(inputStream);
             long newHash = din.readLong();
             log.info("Set hash: " + newHash + " on " + newName);
             Fanout fanout = _(HashStore.class).getFanout(newHash);
-            if( fanout == null ) {
+            if (fanout == null) {
                 throw new RuntimeException("Fanout not found for: " + newName + " with hash: " + newHash);
             }
             newFileNode.setHash(newHash);
@@ -209,27 +209,38 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
         if (indexPage == null) {
-            Resource r = child("index.html");
-            if (r == null) {
-                DataSession.FileNode newNode = getDirectoryNode().addFile("index.html");
-                FileResource fr = new FileResource(newNode, this);
-                indexPage = fr.getHtml();
-                indexPage.setParsed(true);
-                if(renderMode) {
-                    children.add(indexPage);
-                } else {
-                    children.add(fr);
-                }
-            } else if (r instanceof FileResource) {
-                FileResource fr = (FileResource) r;
-                indexPage = fr.getHtml();
-            } else if (r instanceof RenderFileResource) {
-                indexPage = (RenderFileResource) r;
-            } else {
-                return null;
-            }
+            indexPage = getHtmlPage("index.html", true);
         }
         return indexPage;
+    }
+
+    public RenderFileResource getHtmlPage(String name, boolean autocreate) throws NotAuthorizedException, BadRequestException {
+        RenderFileResource rfr;
+        Resource r = child(name);
+        if (r == null) {
+            if( !autocreate ) {
+                System.out.println("DirRes: not found and not autocreate");
+                return null;
+            }
+            DataSession.FileNode newNode = getDirectoryNode().addFile(name);
+            FileResource fr = new FileResource(newNode, this);
+            rfr = fr.getHtml();
+            rfr.setParsed(true);
+            if (renderMode) {
+                children.add(rfr);
+            } else {
+                children.add(fr);
+            }
+        } else if (r instanceof FileResource) {
+            FileResource fr = (FileResource) r;
+            rfr = fr.getHtml();
+        } else if (r instanceof RenderFileResource) {
+            rfr = (RenderFileResource) r;
+        } else {
+            return null;
+        }
+        System.out.println("DirRes: rfr=" + rfr);
+        return rfr;
     }
 
     @Override
@@ -240,7 +251,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             if (r != null) {
                 t = r.getTitle();
             }
-            if( t == null) {
+            if (t == null) {
                 t = getName();
             }
             return t;

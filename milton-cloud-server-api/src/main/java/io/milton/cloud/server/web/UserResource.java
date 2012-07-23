@@ -114,8 +114,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        // TODO: should connect template selection to the Application which produced this resource
-        getTemplater().writePage("user/profile", this, params, out);
+        getTemplater().writePage("admin/mnageUser", this, params, out);
     }
 
     @Override

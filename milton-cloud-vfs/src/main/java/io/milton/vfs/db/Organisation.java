@@ -29,6 +29,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -58,6 +60,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.add(Expression.isNull("organisation"));
         return (Organisation) crit.uniqueResult();
     }
+    
     private List<BaseEntity> members;
     private List<Website> websites;
 
@@ -187,5 +190,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public List<Group> groups(Session session) {
         return Group.findByOrg(this, session);
+    }
+
+    public void delete(Session session) {
+        if( getWebsites() != null ) {
+            for( Website w : getWebsites()) {
+                w.delete(session); 
+            }
+        }
+        setWebsites(null);
+        if( getMembers() != null ) {
+            for( BaseEntity m : getMembers()) {
+                m.delete(session);
+            }
+        }
+        session.delete(this);
+        
     }
 }

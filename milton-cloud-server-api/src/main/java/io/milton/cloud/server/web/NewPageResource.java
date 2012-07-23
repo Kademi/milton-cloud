@@ -141,6 +141,9 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             Long l = NamedCounter.increment(folderId, SessionManager.session());
             nameToCreate = nameToCreate.replace("$[counter]", l.toString());
         }
+        if( !nameToCreate.endsWith(".html")) {
+            nameToCreate += ".html";
+        }
         return nameToCreate;
     }
     
@@ -171,12 +174,13 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
                 createdName = findAutoName(params);
                 DataSession.FileNode newNode = parent.getDirectoryNode().addFile(createdName);
                 FileResource newFr = new FileResource(newNode, parent);
-                created = new RenderFileResource(newFr);
+                created = newFr.getHtml();
             } else {
                 FileResource tempFr = new FileResource(null, parent);
-                created = new RenderFileResource(tempFr);
+                created = tempFr.getHtml();
             }
             created.setParsed(true);
+            created.setNewPage(true);
             String t = params.get("template");
             if (t != null) {
                 created.setTemplate(t);

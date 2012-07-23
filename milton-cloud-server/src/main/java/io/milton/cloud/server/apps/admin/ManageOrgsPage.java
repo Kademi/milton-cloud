@@ -14,6 +14,8 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
@@ -69,6 +71,11 @@ public class ManageOrgsPage extends AbstractResource implements GetableResource,
             String newName = NewPageResource.findAutoName(newTitle, this.getParent(), parameters);
             Organisation c = getOrganisation().createChildOrg(newName, session);
             session.save(c);
+            
+            Date now = _(CurrentDateService.class).getNow();
+            Profile curUser= _(SpliffySecurityManager.class).getCurrentUser();            
+            AppControl.initDefaultApps(organisation, curUser, now, session);
+            
             tx.commit();
             jsonResult = new JsonResult(true, "Created", c.getName());
         }

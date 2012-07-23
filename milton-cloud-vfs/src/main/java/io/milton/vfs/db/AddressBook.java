@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -138,5 +139,14 @@ public class AddressBook implements Serializable {
 
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
+    }
+
+    public void delete(Session session) {
+        if( getContacts() != null ) {
+            for( Contact c : getContacts() ) {
+                session.delete(c);
+            }
+            setContacts(null);
+        }
     }
 }

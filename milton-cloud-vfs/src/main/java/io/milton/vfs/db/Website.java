@@ -36,11 +36,9 @@ import org.hibernate.criterion.Expression;
  */
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(
-        uniqueConstraints = {
-            @UniqueConstraint(columnNames = {"name"})
-        }// website DNS names must be unique across whole system
-        
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name"})
+}// website DNS names must be unique across whole system
 )
 public class Website implements Serializable, VfsAcceptor {
 
@@ -49,31 +47,28 @@ public class Website implements Serializable, VfsAcceptor {
         crit.add(Expression.eq("repository", repository));
         return DbUtils.toList(crit, Website.class);
     }
-    
+
     /**
      * Attempts to locate a website with the exact name give. Will follow alias
      * links
-     * 
+     *
      * @param name
      * @param session
-     * @return 
+     * @return
      */
     public static Website findByDomainName(String name, Session session) {
         Website w = findByName(name, session);
-        while( w != null && w.getAliasTo() != null ) {
+        while (w != null && w.getAliasTo() != null) {
             w = w.getAliasTo();
         }
         return w;
-    }         
-    
+    }
+
     public static Website findByName(String name, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.add(Expression.eq("name", name));
-        return  DbUtils.unique(crit);
-    }     
-
-    
-    
+        return DbUtils.unique(crit);
+    }
     private Organisation organisation;
     private long id;
     private String name; // identifies the resource to webdav
@@ -105,13 +100,12 @@ public class Website implements Serializable, VfsAcceptor {
         this.name = name;
     }
 
-    
     /**
      * If set, this website is really just an alias for that one. This means
-     * that users will see exactly the same thing on both. Useful for having
-     * a "local" domain name as well as an externally delegated one.
-     * 
-     * @return 
+     * that users will see exactly the same thing on both. Useful for having a
+     * "local" domain name as well as an externally delegated one.
+     *
+     * @return
      */
     @ManyToOne
     public Website getAliasTo() {
@@ -123,9 +117,10 @@ public class Website implements Serializable, VfsAcceptor {
     }
 
     /**
-     * If set any requests to this website will redirect to the one specified here
-     * 
-     * @return 
+     * If set any requests to this website will redirect to the one specified
+     * here
+     *
+     * @return
      */
     public String getRedirectTo() {
         return redirectTo;
@@ -134,11 +129,6 @@ public class Website implements Serializable, VfsAcceptor {
     public void setRedirectTo(String redirectTo) {
         this.redirectTo = redirectTo;
     }
-
-    
-
-    
-    
 
     /**
      * The internal theme is intended for logged in access
@@ -250,5 +240,9 @@ public class Website implements Serializable, VfsAcceptor {
 
     public List<GroupInWebsite> groups(Session session) {
         return GroupInWebsite.findByWebsite(this, session);
+    }
+
+    public void delete(Session session) {
+        session.delete(this);
     }
 }

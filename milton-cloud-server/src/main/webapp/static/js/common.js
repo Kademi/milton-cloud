@@ -328,7 +328,7 @@ function initEdify() {
 }
 
 function edify(container, callback) {
-    log("edify", container);
+    log("edify", container, callback);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
     
@@ -354,17 +354,24 @@ function edify(container, callback) {
     $("#edifyForm").append("<input type='hidden' name='body' value='' />");
     
     $("#edifyForm").submit(function() {
-        log("submit form");
-        var data = $("#edifyForm").serialize();
-        $(".htmleditor").each(function(i,n) {
-            var node = $(n);
-            var id = node.attr("id");
-            var val = node.val();            
-            log("setting data property", id, val);
-            data[id] = val;
-        });
+        var form = $("#edifyForm");
+        log("submit form", form);
+        for( var key in CKEDITOR.instances) {
+            var editor = CKEDITOR.instances[key];
+            var content = editor.getData();
+            var inp = $("input[name=" + key + "], textarea[name=" + key + "]");
+            if( inp ) {
+                inp.val(content);
+            } else {
+                inp = $("<input type='hidden' name='" + key + "/>");
+                form.append(inp);
+                inp.val(content);
+            }
+        }
+        
+        var data = form.serialize();
+
         try {
-            log("ckeditors", CKEDITOR.instances);
             //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
             $.ajax({
                 type: 'POST',
@@ -374,7 +381,12 @@ function edify(container, callback) {
                 success: function(resp) {
                     ajaxLoadingOff();
                     log("common.js: edify: save success", resp, window.location.path);
-                    callback(resp);
+                    if( callback ) {
+                        log("call callback", callback);
+                        callback(resp);
+                    } else {
+                        log("no callback");
+                    }
                 },
                 error: function(resp) {
                     ajaxLoadingOff();

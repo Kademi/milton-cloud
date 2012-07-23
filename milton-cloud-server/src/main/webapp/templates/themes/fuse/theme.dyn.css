@@ -3098,3 +3098,6 @@ ul.btnList li:hover a, ul.btnList li.active a{
     line-height:1.5em;
     margin-bottom:15px;
 }
+.editableContent {
+    position: relative;
+}

@@ -110,7 +110,7 @@ public class Branch implements Serializable, VfsAcceptor {
      *
      * @return
      */
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "grantedOnBranch")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "grantedOnBranch")
     public List<Permission> getPermissions() {
         return permissions;
     }
@@ -142,5 +142,14 @@ public class Branch implements Serializable, VfsAcceptor {
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
-    }       
+    }
+
+    public void delete(Session session) {
+        if( getPermissions() != null ) {
+            for( Permission p : getPermissions() ) {
+                session.delete(p);
+            }
+        }
+        session.delete(this);
+    }
 }

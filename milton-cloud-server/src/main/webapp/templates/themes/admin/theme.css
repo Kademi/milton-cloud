@@ -1,40 +1,40 @@
 /** Begin Fuse/theme.css **/
 /* Reset */
 html, body, div, span, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, address, code, img, small, strong, dl, dt, dd, ol, ul, li, fieldset, form, label {
-	vertical-align: baseline;
-	background: transparent;
-	text-decoration:none;
-	font-size: 100%;
-	outline: 0;
-	padding: 0;
-	margin: 0;
-	border:0
+    vertical-align: baseline;
+    background: transparent;
+    text-decoration:none;
+    font-size: 100%;
+    outline: 0;
+    padding: 0;
+    margin: 0;
+    border:0
 }
 /* Reset css */
 * {
-	padding: 0;
-	margin: 0;
+    padding: 0;
+    margin: 0;
 }
 img {
-	border: 0;
-	vertical-align: middle;
+    border: 0;
+    vertical-align: middle;
 }
 a {
-	text-decoration: none;
-	color: #333;
+    text-decoration: none;
+    color: #333;
 }
 ol, ul, li {
-	list-style: none;
-	font-size:12px
+    list-style: none;
+    font-size:12px
 }
 table {
-	border-collapse: collapse;
-	border-spacing: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 *:focus, *:active { outline: 0 none; }
 * + html input[type="checkbox"], * + html input[type="radio"] {
-	width: 13px;
-	height: 18px;
+    width: 13px;
+    height: 18px;
 }
 input, select, textarea { font: 13px/1.3em Arial, Helvetica, sans-serif }
 h1, h2, h3, h4, h5, h6 { font-weight:normal }
@@ -43,175 +43,179 @@ p { font-size:12px; }
 a { font-size:11px; }
 h1 { font-size:18px; }
 h2 {
-	font-size:11px;
-	color:#333333
+    color:#333333;
+    border-bottom: solid 1px #DADADA;
+    color: #333333;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    width: 100%;            
 }
 h3 { font-size:15px; }
 h4 { font-size:13px; }
 /*-- END DEFAULT --*/
 ul, li, ol { list-style:none }
 hr {
-	height: 0;
-	border: 0;
-	border-top: solid 1px #dadada;
-	border-bottom: solid 1px #fcfcfc;
+    height: 0;
+    border: 0;
+    border-top: solid 1px #dadada;
+    border-bottom: solid 1px #fcfcfc;
 }
 /* End Reset */
 body.theme { background:#efefef url(images/background.jpg) repeat-x; }
 body {
-	font: 13px/1.3em Arial, sans-serif;
-	color: #333;
-	display:-webkit-box;
-	display: box;
-	-webkit-box-orient: vertical;
-	box-orient: vertical;
+    font: 13px/1.3em Arial, sans-serif;
+    color: #333;
+    display:-webkit-box;
+    display: box;
+    -webkit-box-orient: vertical;
+    box-orient: vertical;
 }
 #logo a {
-	background-image: url(images/logo.png);
-	display: block;
-	width: 34px;
-	height: 40px;
-	text-indent: -9999px;
-	background-position: 0 -7px;
+    background-image: url(images/logo.png);
+    display: block;
+    width: 34px;
+    height: 40px;
+    text-indent: -9999px;
+    background-position: 0 -7px;
 }
 #editor { background: none; }
 #wrapper {
-	min-width:990px;
-	height:100%;
-	padding:0px;
-	display:-webkit-box;
-	display:box;
-	-webkit-box-orient: vertical;
-	-webkit-box-flex: 1;
-	box-flex:1;
+    min-width:990px;
+    height:100%;
+    padding:0px;
+    display:-webkit-box;
+    display:box;
+    -webkit-box-orient: vertical;
+    -webkit-box-flex: 1;
+    box-flex:1;
 }
 /*     ---   HEADER ---    */
 #header {
-	height:55px;
-	margin:0 20px
+    height:55px;
+    margin:0 20px
 }
 nav#nav {
-	margin:15px 0 0 0;
-	float:left;
+    margin:15px 0 0 0;
+    float:left;
 }
 nav#nav li {
-	float:left;
-	display:inline-block;
-	margin:0 10px 0 0;
-	background:#222732;
-	padding:0 12px;
-	height:27px;
-	line-height:25px;
-	border-radius:5px;
+    float:left;
+    display:inline-block;
+    margin:0 10px 0 0;
+    background:#222732;
+    padding:0 12px;
+    height:27px;
+    line-height:25px;
+    border-radius:5px;
 }
 nav#nav li#logo {
-	background:url(images/line-nav.png) right center no-repeat;
-	padding:0 10px 0 0;
+    background:url(images/line-nav.png) right center no-repeat;
+    padding:0 10px 0 0;
 }
 nav#nav li#logo a {
-	width:34px;
-	height:40px
+    width:34px;
+    height:40px
 }
 nav#nav li#logo img { margin: -7px 0 0 0 }
 nav#nav li a {
-	color:#e9e9e9;
-	text-transform:uppercase
+    color:#e9e9e9;
+    text-transform:uppercase
 }
 #nav li a.navActive, nav#nav li a:hover { color:#e12e93 }
 #header aside {
-	background:url(images/bg-user.png) top left repeat-x;
-	margin:15px 0 0 0;
-	padding:0 10px;
-	min-width:110px;
-	height:25px;
-	float:right;
-	line-height:24px;
-	border-radius:3px;
+    background:url(images/bg-user.png) top left repeat-x;
+    margin:15px 0 0 0;
+    padding:0 10px;
+    min-width:110px;
+    height:25px;
+    float:right;
+    line-height:24px;
+    border-radius:3px;
 }
 #header aside h3 {
-	background:url(images/arrow-open.png) center right no-repeat;
-	cursor:pointer;
-	padding:0 25px 0 0;
+    background:url(images/arrow-open.png) center right no-repeat;
+    cursor:pointer;
+    padding:0 25px 0 0;
 }
 #header aside a {
-	padding:2px 0px 2px 0;
-	width:100%;
-	color:#fefefe
+    padding:2px 0px 2px 0;
+    width:100%;
+    color:#fefefe
 }
 /*     ---  END HEADER ---    */
 
 /*     ---  MAIN ---    */
 #Panel-section {
-	clear:both;
-	width:100%;
-	display: -webkit-box;
-	-webkit-box-orient: horizontal;
-	display: -moz-box;
-	-moz-box-orient: horizontal;
-	display: box;
-	box-orient: horizontal;
+    clear:both;
+    width:100%;
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    display: -moz-box;
+    -moz-box-orient: horizontal;
+    display: box;
+    box-orient: horizontal;
 }
 /*     ---  LHS PANEL LEFT ---    */
 #sidebar-nav {
-	width:204px;
-	height:600px;
-	margin:30px 20px 0 20px;
+    width:204px;
+    height:600px;
+    margin:30px 20px 0 20px;
 }
 .sidebar {
-	width: 204px;
-	min-height:100%
+    width: 204px;
+    min-height:100%
 }
 /*** main menu ***/
 .menu {
-	padding-top: 35px;
-	margin-bottom: 30px
+    padding-top: 35px;
+    margin-bottom: 30px
 }
 .menu ul { font-size: 11px }
 .menu li h4 {
-	background:url(images/bg_title_nav.png) top left no-repeat;
-	width:204px;
-	height:37px;
-	margin:0px;
-	padding:0px
+    background:url(images/bg_title_nav.png) top left no-repeat;
+    width:204px;
+    height:37px;
+    margin:0px;
+    padding:0px
 }
 .menu hr { margin:8px 2px; }
 .menu li { padding-bottom: 8px }
 .menu ul li h4 a {
-	display: block;
-	background-image: url(images/arrow-close.png);
-	background-repeat: no-repeat;
-	background-position: 177px;
-	line-height: 36px;
-	height: 36px;
-	color: #FFF;
-	text-decoration: none;
-	font-weight: bold;
-	text-indent: 10px;
+    display: block;
+    background-image: url(images/arrow-close.png);
+    background-repeat: no-repeat;
+    background-position: 177px;
+    line-height: 36px;
+    height: 36px;
+    color: #FFF;
+    text-decoration: none;
+    font-weight: bold;
+    text-indent: 10px;
 }
 .menu li a.closed { background-image:url(images/arrow-open.png); }
 /*
 .menu li a:hover	{ padding-left: 18px; padding-right: 6px; }
 */
 .menu ul ul {
-	font-size: 11px;
-	width: 100%;
-	margin-top: 4px;
-	padding: 6px 0px 0px 0px
+    font-size: 11px;
+    width: 100%;
+    margin-top: 4px;
+    padding: 6px 0px 0px 0px
 }
 .menu li li {
-	background:#FFF;
-	border:solid 1px #dedede;
-	border-radius:5px;
-	-webkit-border-radius:5px;
-	-moz-border-border-radius:5px;
-	margin:0 0 3px 0;
-	padding: 0 0 0 10px;
+    background:#FFF;
+    border:solid 1px #dedede;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-border-radius:5px;
+    margin:0 0 3px 0;
+    padding: 0 0 0 10px;
 }
 .menu li li a {
-	background:url(images/circle.png) left center no-repeat !important;
-	padding:0 0 0 18px !important;
-	font-weight:bold;
-	color:#2e2e2e;
+    background:url(images/circle.png) left center no-repeat !important;
+    padding:0 0 0 18px !important;
+    font-weight:bold;
+    color:#2e2e2e;
     display: block;
     height: 30px;
     line-height: 30px;
@@ -221,224 +225,224 @@ nav#nav li a {
 /*     ---  RHS PANEL RIGHT ---    */
 
 #RHS-Panel {
-	background:#FFF url(images/bg-section.png) top left repeat-x;
-	position:relative;
-	border-radius:10px 0 0 0;
-	-webkit-border-radius:10px 0 0 0;
-	-moz-border-radius:8px 0 0 0;
-	min-height:800px;
-	padding:0 20px;
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-	box-flex: 1;
+    background:#FFF url(images/bg-section.png) top left repeat-x;
+    position:relative;
+    border-radius:10px 0 0 0;
+    -webkit-border-radius:10px 0 0 0;
+    -moz-border-radius:8px 0 0 0;
+    min-height:800px;
+    padding:0 20px;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    box-flex: 1;
 }
 #shadow-left {
-	position:absolute;
-	top:23px;
-	left:-13px;
+    position:absolute;
+    top:23px;
+    left:-13px;
 }
 #head-Panel {
-	width:100%;
-	height:35px;
-	padding:20px 0 0 0;
-	color:#333333;
+    width:100%;
+    height:35px;
+    padding:20px 0 0 0;
+    color:#333333;
 }
 #head-Panel img { float:left; }
 #head-Panel h1 {
-	float:left;
-	height:25px;
-	line-height:25px;
-	margin:0 0 0 10px;
+    float:left;
+    height:25px;
+    line-height:25px;
+    margin:0 0 0 10px;
 }
 /* ------ MainContent ------ */
 section.MainContent { padding: 20px; }
 section.MainContent > header > .Left { float: left; }
 section.MainContent > header > .Right { float: right; }
 section.MainContent > header:after {
-	clear: both;
-	content: ".";
-	display: block;
-	font-size: 0;
-	height: 0;
-	line-height: 0;
-	visibility: hidden;
+    clear: both;
+    content: ".";
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
 }
 /* ------  I Help-------*/
 #head-Panel .helpIcon {
-	float:right;
-	margin:-10px 0 0 0;
+    float:right;
+    margin:-10px 0 0 0;
 }
 .helpIcon {
-	background-image: url(images/i.png);
-	width: 36px;
-	height: 36px;
-	display: block;
-	text-indent: -9999px;
+    background-image: url(images/i.png);
+    width: 36px;
+    height: 36px;
+    display: block;
+    text-indent: -9999px;
 }
 #inline1 {
-	background:#f3f3f3 url(images/bg-model.png) top left repeat-x;
-	padding:10px 20px;
-	display:none;
-	width:420px;
-	border-radius:5px;
-	-webkit-border-radius:5px;
-	-moz-border-radius:5px
+    background:#f3f3f3 url(images/bg-model.png) top left repeat-x;
+    padding:10px 20px;
+    display:none;
+    width:420px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px
 }
 #inline1 header strong {
-	font-size:16px;
-	color:#ffffff;
+    font-size:16px;
+    color:#ffffff;
 }
 #Submit {
-	background:url(images/submit.png) no-repeat;
-	border:none;
-	width:84px;
-	height:32px;
-	float:right;
-	cursor:pointer
+    background:url(images/submit.png) no-repeat;
+    border:none;
+    width:84px;
+    height:32px;
+    float:right;
+    cursor:pointer
 }
 #inline1 section table th {
-	font-size:12px;
-	padding-top:10px;
-	width:120px;
-	color:#333333
+    font-size:12px;
+    padding-top:10px;
+    width:120px;
+    color:#333333
 }
 #inline1 section { margin:20px 0 0 0; }
 #inline1 section table input#text {
-	background:url(images/bg-input.png) top left repeat-x;
-	width:288px;
-	padding-left:10px;
-	margin-bottom:10px;
-	border:solid 1px #d0d0d0;
-	height:30px;
-	line-height:30px;
-	font-size:12px;
-	color:#333333
+    background:url(images/bg-input.png) top left repeat-x;
+    width:288px;
+    padding-left:10px;
+    margin-bottom:10px;
+    border:solid 1px #d0d0d0;
+    height:30px;
+    line-height:30px;
+    font-size:12px;
+    color:#333333
 }
 #inline1 section table textarea {
-	background:#FFF url(images/bg-input.png) top left repeat-x;
-	width:288px;
-	height:170px;
-	padding:10px 0 0 10px;
-	border:solid 1px #d0d0d0;
-	font-size:12px;
-	color:#333333
+    background:#FFF url(images/bg-input.png) top left repeat-x;
+    width:288px;
+    height:170px;
+    padding:10px 0 0 10px;
+    border:solid 1px #d0d0d0;
+    font-size:12px;
+    color:#333333
 }
 /* ------ I help  ----*/
 article.Note {
-	border:solid 1px #dedede;
-	border-radius:3px;
-	-webkit-border-radius:3px;
-	-moz-border-radius:3px;
-	background:#f6f6f6;
-	padding:10px;
-	color:#333333;
+    border:solid 1px #dedede;
+    border-radius:3px;
+    -webkit-border-radius:3px;
+    -moz-border-radius:3px;
+    background:#f6f6f6;
+    padding:10px;
+    color:#333333;
 }
 /* Dropdown Controller */
 .DropdownControl {
-	position: relative;
-	font-size: 11px;
+    position: relative;
+    font-size: 11px;
 }
 .DropdownControl span.Label {
-	font-weight: bold;
-	margin-right: 10px;
-	float: left;
-	height: 24px;
-	cursor: default;
-	line-height: 24px;
+    font-weight: bold;
+    margin-right: 10px;
+    float: left;
+    height: 24px;
+    cursor: default;
+    line-height: 24px;
 }
 .DropdownControl .DropdownWrapper {
-	background-color: #f0f0f0;
-	border: 1px solid #dedede;
-	float: left;
-	border-radius: 2px;
+    background-color: #f0f0f0;
+    border: 1px solid #dedede;
+    float: left;
+    border-radius: 2px;
 }
 .DropdownControl .DropdownWrapper span {
-	display: block;
-	float: left;
-	height: 24px;
-	padding: 0 13px;
-	line-height: 24px;
+    display: block;
+    float: left;
+    height: 24px;
+    padding: 0 13px;
+    line-height: 24px;
 }
 .DropdownControl .DropdownWrapper a.Control {
-	float: left;
-	display: block;
-	width: 24px;
-	height: 24px;
-	border-radius: 0 2px 2px 0;
-	background: #FFF url(images/icon_dialogue.png) 50% 50% no-repeat;
-	text-indent: -9999px;
+    float: left;
+    display: block;
+    width: 24px;
+    height: 24px;
+    border-radius: 0 2px 2px 0;
+    background: #FFF url(images/icon_dialogue.png) 50% 50% no-repeat;
+    text-indent: -9999px;
 }
 .DropdownControl .DropdownContent {
-	position: absolute;
-	background: #fff;
-	top: 27px;
-	left: 0;
-	right: 0;
-	border: 1px solid #ababab;
-	border-radius: 3px;
-	padding: 5px 15px 30px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-	z-index: 999;
+    position: absolute;
+    background: #fff;
+    top: 27px;
+    left: 0;
+    right: 0;
+    border: 1px solid #ababab;
+    border-radius: 3px;
+    padding: 5px 15px 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 999;
 }
 .DropdownControl .DropdownContent header {
-	border-bottom: 1px solid #dadada;
-	line-height: 36px;
-	height: 36px;
-	margin-bottom: 3px;
+    border-bottom: 1px solid #dadada;
+    line-height: 36px;
+    height: 36px;
+    margin-bottom: 3px;
 }
 .DropdownControl .DropdownContent header h3 {
-	font-size: 15px;
-	float: left;
+    font-size: 15px;
+    float: left;
 }
 .DropdownControl .DropdownContent div.Content section {
-	font-size: 12px;
-	float: left;
+    font-size: 12px;
+    float: left;
 }
 .DropdownControl .DropdownContent div.Content section.Loading {
-	background: url(images/loading.gif) no-repeat 50% 50%;
-	height: 50px;
+    background: url(images/loading.gif) no-repeat 50% 50%;
+    height: 50px;
 }
 .DropdownControl .DropdownContent div.Content section > a {
-	display: block;
-	padding: 3px 23px 3px 8px;
-	border-radius: 2px;
-	background: #dcdcdc;
-	margin-top: 2px;
+    display: block;
+    padding: 3px 23px 3px 8px;
+    border-radius: 2px;
+    background: #dcdcdc;
+    margin-top: 2px;
 }
 .DropdownControl .DropdownContent div.Content section > a.Active {
-	color: #FFF;
-	background: #44bbe0 url(images/icon_right.png) no-repeat 100% 50%;
+    color: #FFF;
+    background: #44bbe0 url(images/icon_right.png) no-repeat 100% 50%;
 }
 .DropdownControl .DropdownContent.Rows3 header h3, .DropdownControl .DropdownContent.Rows3 div.Content section {
-	width: 32%;
-	margin-right: 2%;
+    width: 32%;
+    margin-right: 2%;
 }
 .DropdownControl .DropdownContent.Program {
-	right: auto;
-	padding: 4px 8px 8px;
-	width: 300px;
+    right: auto;
+    padding: 4px 8px 8px;
+    width: 300px;
 }
 .DropdownControl .DropdownContent.Program .Content section {
-	float: none
+    float: none
 }
 .DropdownControl .DropdownContent.Rows3 header h3:last-child, .DropdownControl .DropdownContent.Rows3 div.Content section:last-child { margin-right: 0; }
 /* Small Button */
 .SmallBtn {
-	float: left;
-	height: 32px;
-	padding-left: 20px;
-	line-height: 32px;
-	background: 0 50% no-repeat;
-	margin-right: 5px;
-	cursor: pointer;
-	border: 0 none;
+    float: left;
+    height: 32px;
+    padding-left: 20px;
+    line-height: 32px;
+    background: 0 50% no-repeat;
+    margin-right: 5px;
+    cursor: pointer;
+    border: 0 none;
 }
 .SmallBtn.Add { background-image: url(images/btn_add_small.png); }
 .SmallBtn.Delete { background-image: url(images/btn_delete_small.png); }
 .SmallBtn.NoText {
-	padding-left: 0;
-	width: 20px;
-	background-position: 50% 50%;
+    padding-left: 0;
+    width: 20px;
+    background-position: 50% 50%;
 }
 .SmallBtn.NoText span { display: none; }
 /* Button */
@@ -446,345 +450,345 @@ a.Btn {
     display: inline-block;
 }
 .Btn {
-	line-height: 26px;
-	height: 26px;
-	color: #FFF;
-	text-transform: uppercase;
-	padding: 0 10px;
-	background: #45afdf;
-	border: 0 none;
-	border-radius: 3px;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 11px;
+    line-height: 26px;
+    height: 26px;
+    color: #FFF;
+    text-transform: uppercase;
+    padding: 0 10px;
+    background: #45afdf;
+    border: 0 none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 11px;
 }
 button.Btn.Cancel, a.Btn.Cancel { 
     background: #e78b00; 
 }
 /* Dialog Popup */
 div.Dialog {
-	position: absolute;
-	right: 0;
-	top: 33px;
-	z-index: 10;
-	border-radius: 3px;
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.24);
-	background: #FFF;
+    position: absolute;
+    right: 0;
+    top: 33px;
+    z-index: 10;
+    border-radius: 3px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.24);
+    background: #FFF;
 }
 div.Dialog a {
-	display: block;
-	line-height: 34px;
-	height: 32px;
-	font-size: 12px;
-	padding: 0 13px;
-	width: 158px;
-	border-bottom: 1px solid #d0d0d0;
+    display: block;
+    line-height: 34px;
+    height: 32px;
+    font-size: 12px;
+    padding: 0 13px;
+    width: 158px;
+    border-bottom: 1px solid #d0d0d0;
 }
 div.Dialog a.Delete {
-	background: url(images/icon_delete.png) no-repeat 13px 50%;
-	padding-left: 33px;
-	width: 138px;
+    background: url(images/icon_delete.png) no-repeat 13px 50%;
+    padding-left: 33px;
+    width: 138px;
 }
 div.Dialog a:hover {
-	background-color: #525252;
-	border-color: #525252;
-	color: #FFF;
+    background-color: #525252;
+    border-color: #525252;
+    color: #FFF;
 }
 div.Dialog a:first-child { border-radius: 3px 3px 0 0; }
 div.Dialog a:last-child {
-	border-bottom: 0;
-	border-radius: 0 0 3px 3px;
+    border-bottom: 0;
+    border-radius: 0 0 3px 3px;
 }
 /* Tooltip */
 #tooltipPanel {
-	background: #000;
-	border-radius: 3px;
-	color: #FFF;
-	font-size: 10px;
-	line-height: 26px;
-	padding: 0 10px;
-	position: absolute;
+    background: #000;
+    border-radius: 3px;
+    color: #FFF;
+    font-size: 10px;
+    line-height: 26px;
+    padding: 0 10px;
+    position: absolute;
 }
 #tooltipPanel:after {
-	content: "";
-	background: #000;
-	z-index: 999;
-	position: absolute;
-	width: 7px;
-	height: 7px;
-	-webkit-transform: rotate(-45deg);
-	-moz-transform: rotate(-45deg);
-	-o-transform: rotate(-45deg);
-	transform: rotate(-45deg);
-	top: -3px;
-	right: 15px;
+    content: "";
+    background: #000;
+    z-index: 999;
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    top: -3px;
+    right: 15px;
 }
 /* Modal */
 div.Modal {
-	width: 470px;
-	box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
-	-moz-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
-	-webkit-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
-	-o-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
-	border-radius: 5px;
-	display: none;
+    width: 470px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    -moz-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    -webkit-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    -o-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    border-radius: 5px;
+    display: none;
 }
 div#modalHelp {
-	width: 300px;
+    width: 300px;
 }
 div.Modal header {
-	border-radius: 5px 5px 0 0;
-	background-image: linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
-	background-image: -o-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
-	background-image: -moz-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
-	background-image: -webkit-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
-	background-image: -ms-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
-	background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.17, rgb(30,35,48)), color-stop(0.5, rgb(51,58,74)));
-	position: relative;
+    border-radius: 5px 5px 0 0;
+    background-image: linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -o-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -moz-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -webkit-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -ms-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.17, rgb(30,35,48)), color-stop(0.5, rgb(51,58,74)));
+    position: relative;
 }
 div.Modal header h3 {
-	font-size: 16px;
-	line-height: 44px;
-	height: 44px;
-	color: #FFF;
-	font-weight: bold;
-	padding-left: 15px;
+    font-size: 16px;
+    line-height: 44px;
+    height: 44px;
+    color: #FFF;
+    font-weight: bold;
+    padding-left: 15px;
 }
 div.Modal header a.Close {
-	position: absolute;
-	right: 10px;
-	top: 8px;
-	background: url(images/close.png) no-repeat 50% 50%;
-	width: 27px;
-	height: 27px;
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    background: url(images/close.png) no-repeat 50% 50%;
+    width: 27px;
+    height: 27px;
 }
 div.Modal div.ModalContent {
-	background: #f3f3f3;
-	border-radius: 0 0 5px 5px;
-	padding: 15px;
+    background: #f3f3f3;
+    border-radius: 0 0 5px 5px;
+    padding: 15px;
 }
 div.Modal div.ModalContent table { width: 100%; }
 div.Modal div.ModalContent table th {
-	text-align: left;
-	vertical-align: top;
-	font-size: 12px;
-	width: 130px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 12px;
+    width: 130px;
 }
 div.Modal div.ModalContent table th, div.Modal div.ModalContent table td {
-	padding-bottom: 10px;
-	line-height: 30px;
+    padding-bottom: 10px;
+    line-height: 30px;
 }
 div.Modal div.ModalContent table td input, div.Modal div.ModalContent table td textarea {
-	border: 1px solid #d0d0d0;
-	padding: 0 10px;
-	height: 30px;
-	line-height: 30px;
-	font-size: 12px;
-	width: 290px;
-	background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
+    border: 1px solid #d0d0d0;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+    width: 290px;
+    background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
 }
 div.Modal div.ModalContent table td textarea {
-	height: 170px;
-	overflow: auto;
-	resize: none;
+    height: 170px;
+    overflow: auto;
+    resize: none;
 }
 div.Modal div.ModalContent table td.Btn { text-align: right; padding: 0; }
 div.Modal div.ModalContent table td.Btn button {
-	background-image: linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
-	background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(27,113,179)),  color-stop(0.5, rgb(47,150,205)),  color-stop(0.51, rgb(93,177,219)),  color-stop(1, rgb(124,200,232)) );
-	height: 26px;
-	line-height: 26px;
-	border: 0 none;
-	font-size: 11px;
-	font-weight: bold;
-	padding: 0 15px;
-	color: #FFF;
-	text-transform: uppercase;
-	border-radius: 2px;
-	box-shadow: 0 0 5px rgba(0, 0, 0, .39);
-	-moz-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
-	-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
-	-o-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
-	cursor: pointer;
+    background-image: linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(27,113,179)),  color-stop(0.5, rgb(47,150,205)),  color-stop(0.51, rgb(93,177,219)),  color-stop(1, rgb(124,200,232)) );
+    height: 26px;
+    line-height: 26px;
+    border: 0 none;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0 15px;
+    color: #FFF;
+    text-transform: uppercase;
+    border-radius: 2px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    -o-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    cursor: pointer;
 }
 div.Modal div.ModalContent table ul.ListItem li {
-	background: #ededed;
-	border-radius: 3px;
-	margin-top: 3px;
-	padding: 4px 0 4px 10px;
-	line-height: 27px;
-	height: 25px;
+    background: #ededed;
+    border-radius: 3px;
+    margin-top: 3px;
+    padding: 4px 0 4px 10px;
+    line-height: 27px;
+    height: 25px;
 }
 div.Modal div.ModalContent table ul.ListItem li span {
-	float: left;
+    float: left;
 }
 div.Modal div.ModalContent table ul.ListItem li aside {
-	float: right;
+    float: right;
 }
 div.Modal div.ModalContent .FuseChkLabel {
-	width: 18px;
-	overflow: hidden;
-	padding: 0;
-	margin: 3px 5px 0 0;
+    width: 18px;
+    overflow: hidden;
+    padding: 0;
+    margin: 3px 5px 0 0;
 }
 /* FuseCheckbox */
 label.FuseChkLabel {
-	display: inline-block;
-	position: relative;
-	height: 18px;
-	line-height: 20px;
-	padding-left: 24px;
-	background: url(images/icon_chechkbox.png) no-repeat;
-	font-size: 12px;
+    display: inline-block;
+    position: relative;
+    height: 18px;
+    line-height: 20px;
+    padding-left: 24px;
+    background: url(images/icon_chechkbox.png) no-repeat;
+    font-size: 12px;
 }
 label.FuseChkLabel.Checked {
-	background-position: 0 -18px;
+    background-position: 0 -18px;
 }
 label.FuseChkLabel.Disabled {
-	background-position: 0 -36px;
+    background-position: 0 -36px;
 }
 label.FuseChkLabel input[type="checkbox"] {
-	opacity: 0;
-	position: absolute;
-	left: 0;
-	top: 0;
-	height: 18px;
-	width: 18px;
-	cursor: pointer;
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 18px;
+    width: 18px;
+    cursor: pointer;
 }
 label.FuseChkLabel.Disabled input[type="checkbox"] {
-	cursor: default;
+    cursor: default;
 }
 /* Input & Textarea */
 input[type="text"], textarea, input[type="password"] {
-	border: 1px solid #d0d0d0;
-	padding: 0 10px;
-	height: 30px;
-	line-height: 30px;
-	font-size: 12px;
-	width: 290px;
-	background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
+    border: 1px solid #d0d0d0;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+    width: 290px;
+    background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
 }
 input[type="text"].Small { width: 60px; }
 input[type="text"].DateTime {
-	width: 70px;
-	text-align: center;
+    width: 70px;
+    text-align: center;
 }
 img.DateTimeIcon { margin: 4px 0 0 5px; }
 textarea {
-	width: 490px;
-	height: 170px;
-	overflow: auto;
-	resize: none;
-	line-height: 20px;
-	padding: 5px 10px;
+    width: 490px;
+    height: 170px;
+    overflow: auto;
+    resize: none;
+    line-height: 20px;
+    padding: 5px 10px;
 }
 /* Form details for editing purpose */
 .Details {
-	padding: 20px;
-	background-color: #F0F0F0;
-	border-radius: 5px;
+    padding: 20px;
+    background-color: #F0F0F0;
+    border-radius: 5px;
 }
 .Details table { width: 100%; }
 .Details table th {
-	width: 145px;
-	padding-right: 25px;
-	text-align: left;
+    width: 145px;
+    padding-right: 25px;
+    text-align: left;
 }
 .Details table th small, .Details table th a {
-	font-style: italic;
-	font-weight: normal;
-	font-size: 11px;
-	display: block;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 11px;
+    display: block;
 }
 .Details table th small { margin-top: 5px; }
 .Details table th a {
-	text-decoration: underline;
-	color: #77c4e8;
-	margin-top: -5px;
+    text-decoration: underline;
+    color: #77c4e8;
+    margin-top: -5px;
 }
 .Details table td input[type="text"] { float: left; }
 .Details table tbody td, .Details table tbody th {
-	padding-top: 8px;
-	font-size: 12px;
-	vertical-align: top;
+    padding-top: 8px;
+    font-size: 12px;
+    vertical-align: top;
 }
 .Details table tbody th { padding-right: 25px; }
 .Details table tbody td #email {
-	float: left;
-	margin: 0 5px 0 0;
+    float: left;
+    margin: 0 5px 0 0;
 }
 .Details table tbody td > label { float: left; }
 .Details table tbody td select { float: left; }
 .Details table tfoot td {
-	text-align: right;
-	padding-top: 8px;
+    text-align: right;
+    padding-top: 8px;
 }
 .TabContainer .Content .Details {
-	border: 0;
+    border: 0;
 }
 /* Select box */
 select {
-	border-radius: 3px;
-	width: 190px;
-	padding: 5px 3px 5px 6px;
-	border: 1px solid;
-	border-color: #b4b4b4 #e8e8e8 #e8e8e8 #b4b4b4;
-	height: 32px;
-	margin-right: 10px;
+    border-radius: 3px;
+    width: 190px;
+    padding: 5px 3px 5px 6px;
+    border: 1px solid;
+    border-color: #b4b4b4 #e8e8e8 #e8e8e8 #b4b4b4;
+    height: 32px;
+    margin-right: 10px;
 }
 select.Small { width: 80px; }
 select.Medium { width: 100px; }
 /* Tab Panel */
 .TabContainer nav {
-	padding: 0 7px;
+    padding: 0 7px;
 }
 .TabContainer nav a {
-	float: left;
-	display: block;
-	font-weight: bold;
-	font-size: 12px;
-	padding: 0 15px;
-	line-height: 33px;
-	height: 33px;
-	border: solid #dedede;
-	border-width: 1px 1px 0;
-	border-radius: 2px 2px 0 0;
-	margin-right: 5px;
+    float: left;
+    display: block;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 0 15px;
+    line-height: 33px;
+    height: 33px;
+    border: solid #dedede;
+    border-width: 1px 1px 0;
+    border-radius: 2px 2px 0 0;
+    margin-right: 5px;
 }
 .TabContainer nav a.Active {
-	color: #FFF;
-	background: #44bbe0;
+    color: #FFF;
+    background: #44bbe0;
 }
 .TabContainer .TabContent .Content {	
-	border: 1px solid #dedede;
-	border-radius: 5px;
-	background: #f2f2f2;
-        min-height: 300px;
+    border: 1px solid #dedede;
+    border-radius: 5px;
+    background: #f2f2f2;
+    min-height: 300px;
 }
 /* ClearFix */
 .ClearFix:after {
-	clear: both;
-	content: ".";
-	display: block;
-	font-size: 0;
-	height: 0;
-	line-height: 0;
-	visibility: hidden;
+    clear: both;
+    content: ".";
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
 }
 /* ----- */
 .Hidden { display: none; }
@@ -792,134 +796,134 @@ select.Medium { width: 100px; }
 #manageUser > header .Right button.Download { background-image: url(images/icon_download.png); }
 #manageUser > header .Right button.Upload { background-image: url(images/icon_upload.png); }
 #manageUser > header .Left a.Search {
-	background: #f0f0f0 url(images/icon_folder.png) no-repeat 50% 50%;
+    background: #f0f0f0 url(images/icon_folder.png) no-repeat 50% 50%;
 }
 /* Checkbox */
 div.CheckBoxWrapper {
-	height: 18px;
-	padding-left: 26px;
-	background: url(images/icon_chechkbox.png) 0 100% no-repeat;
-	line-height: 20px;
-	-moz-user-select: none;  
+    height: 18px;
+    padding-left: 26px;
+    background: url(images/icon_chechkbox.png) 0 100% no-repeat;
+    line-height: 20px;
+    -moz-user-select: none;  
     -webkit-user-select: none;  
     -ms-user-select: none; 
 }
 div.CheckBoxWrapper input.CheckBox {
-	display: none;
+    display: none;
 }
 div.CheckBoxWrapper.Checked {
-	background-position: 0 0;
+    background-position: 0 0;
 }
 #manageUser div.Info header div.SearchBox a.ClearText {
-	background: url(images/icon_cleartext.png) no-repeat 50% 50%;
+    background: url(images/icon_cleartext.png) no-repeat 50% 50%;
 }
 #manageUser div.Info header div.Setting > a {
-	background: #FFF url(images/icon_setting.png) no-repeat 50% 50%;
+    background: #FFF url(images/icon_setting.png) no-repeat 50% 50%;
 }
 #manageUser div.Info table.Summary td div.Controller a.ShowDialog {
-	background: url(images/icon_dialogue.png) 50% 50% no-repeat;
+    background: url(images/icon_dialogue.png) 50% 50% no-repeat;
 }
 #manageCourse div.Course > ul > li aside a.Move, #manageCourse div.Module > ul > li aside a.Move { 
     background-image: url(images/icon_move_white.png); cursor: move; 
 }
 #manageCourse div.Course > ul > li aside a.Dialogue, #manageCourse div.Module > ul > li aside a.Dialogue {
-	background-image: url(images/icon_dialogue_white.png);
-	border-left: 1px solid #717171;
+    background-image: url(images/icon_dialogue_white.png);
+    border-left: 1px solid #717171;
 }
 #manageCourse div.Module > ul > li.Splitter {
-	background: #FFF url(images/splitter.png) no-repeat 10px 50%;
-	padding-left: 37px;
+    background: #FFF url(images/splitter.png) no-repeat 10px 50%;
+    padding-left: 37px;
 }
 #manageCourse div.Module > ul > li.Active a.Move, #manageCourse div.Module > ul > li.Splitter a.Move { background-image: url(images/icon_move.png); }
 #manageCourse div.Module > ul > li.Active a.Dialogue, #manageCourse div.Module > ul > li.Splitter a.Dialogue {
-	background-image: url(images/icon_dialogue.png);
-	border-color: #d1d1d1 !important;
+    background-image: url(images/icon_dialogue.png);
+    border-color: #d1d1d1 !important;
 }
 #manageModule div.Content div.MainContent article.Quiz { background-image: url(images/icon_quiz.png); }
 #manageModule div.Content div.MainContent article {
-	background: #FFF url(images/icon_document.png) no-repeat 7px 50%;
+    background: #FFF url(images/icon_document.png) no-repeat 7px 50%;
 }
 
 
 #manageGroup > div.Group > header {
-	padding: 14px 14px 14px 50px;
-	border-radius: 5px 5px 0 0;
-	background: #f0f0f0 url(images/icon_groups.png) no-repeat 14px 50%;
-	height: 20px;
-	font-weight: bold;
-	border-bottom: 1px solid #cecece;
+    padding: 14px 14px 14px 50px;
+    border-radius: 5px 5px 0 0;
+    background: #f0f0f0 url(images/icon_groups.png) no-repeat 14px 50%;
+    height: 20px;
+    font-weight: bold;
+    border-bottom: 1px solid #cecece;
 }
 #manageGroup div.Group header > div {
-	background: url(images/icon_dialogue_2.png) no-repeat 100% 0;
-	padding-right: 8px;
-	float: left;
-	line-height: 20px;
-	height: 20px;
-	position: relative;
-	font-size: 13px;
-	cursor: pointer;
+    background: url(images/icon_dialogue_2.png) no-repeat 100% 0;
+    padding-right: 8px;
+    float: left;
+    line-height: 20px;
+    height: 20px;
+    position: relative;
+    font-size: 13px;
+    cursor: pointer;
 }
 
 #manageGroup div.Group div.ContentGroup ul li aside a.Edit { background-image: url(images/icon_edit.png); }
 #manageGroup div.Group div.ContentGroup ul li aside a.Delete { background-image: url(images/icon_delete.png); }
 
 #manageWebsite table.Summary td {
-	background: url(images/bg_websites_item.png) no-repeat 5px 50%;
+    background: url(images/bg_websites_item.png) no-repeat 5px 50%;
 }
 
 #manageReward .Content header a {
-	background: url(images/icon_sortable.png) no-repeat 100% 50%;
+    background: url(images/icon_sortable.png) no-repeat 100% 50%;
 }
 #manageReward .Content ul li > div {
-	background: url(images/icon_reward_stt.png) no-repeat;
+    background: url(images/icon_reward_stt.png) no-repeat;
 }
 #manageReward .Content ul li > div > a {
-	background: url(images/icon_dialogue_2.png) 100% 0 no-repeat;
+    background: url(images/icon_dialogue_2.png) 100% 0 no-repeat;
 }
 #manageReward .Content ul li aside a.Edit { background-image: url(images/icon_edit.png); }
 #manageReward .Content ul li aside a.Delete { background-image: url(images/icon_delete.png); }
 #manageForum div.Forum header {
-	background: #f0f0f0 url(images/icon_forum.png) no-repeat 14px 50%;
+    background: #f0f0f0 url(images/icon_forum.png) no-repeat 14px 50%;
 }
 #manageForum div.Forum header > div {
-	background: url(images/icon_dialogue_2.png) no-repeat 100% 0;
+    background: url(images/icon_dialogue_2.png) no-repeat 100% 0;
 }
 #manageForum div.Forum div.ContentForum ul li aside a.Edit { background-image: url(images/icon_edit.png); }
 #manageForum div.Forum div.ContentForum ul li aside a.Delete { background-image: url(images/icon_delete.png); }
 #manageCourse ul.Program li aside a.EditProgram {
-	background-image: url(images/icon_edit.png);
+    background-image: url(images/icon_edit.png);
 }
 #manageCourse ul.Program li aside a.DeleteProgram {
-	background-image: url(images/icon_delete.png);
+    background-image: url(images/icon_delete.png);
 }
 #manageCourse button.AddProgram {
-	background: #525252 url(images/btn_add.png) no-repeat 9px 50%;
+    background: #525252 url(images/btn_add.png) no-repeat 9px 50%;
 }
 #manageEmail > .Content header a {
-	background: url(images/icon_sortable.png) no-repeat 100% 50%;
+    background: url(images/icon_sortable.png) no-repeat 100% 50%;
 }
 #manageEmail > .Content ul li div span.Status {
-	background: url(images/icon_email_status.png) no-repeat;
+    background: url(images/icon_email_status.png) no-repeat;
 }
 #manageEmail > .Content ul li aside a.Edit { background-image: url(images/icon_edit.png); }
 #manageEmail > .Content ul li aside a.Delete { background-image: url(images/icon_delete.png); }
 #manageEmail > .Content ul li aside a.View { background-image: url(images/icon_view.png); }
 #manageEmail .TabContent .Content ul.GroupList li aside a.Delete { background-image: url(images/icon_delete.png); }
 #manageEmail .TabContent .Content.Success table thead tr th div .Btn {
-	background-image: url(images/icon_download.png);
+    background-image: url(images/icon_download.png);
 }
 
 #managePost .Post.Comment > header {
-	background-image:  url(images/icon_post_comment.png);
+    background-image:  url(images/icon_post_comment.png);
 }
 #managePost .Post.Question > header {
-	background-image:  url(images/icon_post_question.png);
+    background-image:  url(images/icon_post_question.png);
 }
 #managePost .Post > footer a.Edit {
-	background-image: url(images/icon_edit.png);
+    background-image: url(images/icon_edit.png);
 }
 #managePost .Post > footer a.Delete {
-	background-image: url(images/icon_delete.png);
+    background-image: url(images/icon_delete.png);
 }
 .BtnBar button {
     float: right;
@@ -931,4 +935,38 @@ a.Delete { background-image: url(images/icon_delete.png); }
 
 aside.Hidden:hover {
     display: block;
+}
+
+.dropBox {
+    width:110px;
+    position:absolute;
+    top:25px;
+    left:0;
+    background: url("images/bg-user.png") repeat-x scroll left top transparent;
+    border: 0px;
+    border-radius: 3px;
+    z-index:999;
+    padding:0 10px;
+    display:none;
+}
+
+.userBtn {
+    position: relative;
+}
+
+.userBtn:hover .dropBox {
+    display:block;
+}
+.LoginPanel #validationMessage {
+    color: white;
+}
+.inputs label {
+    display: block;
+    float: left;
+    width: 150px;
+}
+.inputs input {
+    display: block;
+    width: 150px;
+    margin-bottom: 10px;
 }

@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -122,6 +123,15 @@ public class Calendar implements Serializable {
 
     public void setEvents(List<CalEvent> events) {
         this.events = events;
+    }
+
+    public void delete(Session session) {
+        if( getEvents() != null ) {
+            for( CalEvent e : getEvents() ) {
+                session.delete(e);
+            }
+            setEvents(null);
+        }
     }
     
     

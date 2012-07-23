@@ -256,5 +256,54 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         
         return r;
     }
+
+    public void delete(Session session) {
+//    private List<Permission> permissions; // permissions granted ON this entity
+//    private List<Permission> grantedPermissions; // permissions granted TO this entity
+//    private List<Repository> repositories;    // has repositories
+//    private List<GroupMembership> memberships; // can belong to groups
+//    private List<AddressBook> addressBooks; // has addressbooks
+//    private List<Calendar> calendars; // has calendars        
+        if( getPermissions() != null ) {
+            for( Permission p : getPermissions()) {
+                session.delete(p);
+            }
+            setPermissions(null);
+        }
+        
+        if( getGrantedPermissions() != null ) {
+            for( Permission gp : getGrantedPermissions()) {
+                session.delete(gp);
+            }
+            setGrantedPermissions(null);
+        }        
+        
+        if( getRepositories() != null ) {
+            for( Repository r : getRepositories()) {
+                r.delete(session);
+            }
+            setRepositories(null);
+        }
+        
+        if( getMemberships() != null ) {
+            for( GroupMembership m : getMemberships() ) {
+                session.delete(m);
+            }
+            setMemberships(null);
+        }
+        if( getAddressBooks() != null ) {
+            for( AddressBook a : getAddressBooks() ) {
+                a.delete(session);
+            }
+            setAddressBooks(null);
+        }
+        if( getCalendars() != null ) {
+            for( Calendar cal : getCalendars() ) {
+                cal.delete(session); 
+            }
+            setCalendars(null);
+        }
+        session.delete(this);
+    }
       
 }

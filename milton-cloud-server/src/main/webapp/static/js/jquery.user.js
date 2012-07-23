@@ -54,6 +54,7 @@
 
 
 function doLogin(userName, password, config) {
+    $(config.valiationMessageSelector).hide();
     $.ajax({
         type: 'POST',
         url: config.urlSuffix,
@@ -87,10 +88,9 @@ function doLogin(userName, password, config) {
         //window.location = "/index.html";
         },
         error: function(resp) {
-            alert("err");
-            $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
+            $(config.valiationMessageSelector).text(config.loginFailedMessage);
             log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
-            $(config.valiationMessageSelector, container).show(100);
+            $(config.valiationMessageSelector).show(300);
         }
     });      
 }

@@ -45,6 +45,13 @@ public class Repository implements Serializable {
         this.id = id;
     }
 
+    /**
+     * The entity that contains this repository. The entity might be a user, organisation, etc
+     * 
+     * The repository name must be unique within its parent entity
+     * 
+     * @return 
+     */
     @ManyToOne(optional=false)
     public BaseEntity getBaseEntity() {
         return baseEntity;
@@ -183,5 +190,21 @@ public class Repository implements Serializable {
         getBranches().add(b);
         
         return b;
+    }
+
+    public void delete(Session session) {
+        if( getBranches() != null ) {
+            for( Branch b : getBranches()) {
+                b.delete(session); 
+            }
+            setBranches(null);
+        }        
+        if( getNvPairs() != null ) {
+            for( NvPair p : getNvPairs() ) {
+                p.delete(session);
+            }
+            setNvPairs(null);
+        }        
+        session.delete(this);
     }
 }

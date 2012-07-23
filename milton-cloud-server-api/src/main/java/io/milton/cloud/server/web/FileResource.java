@@ -216,12 +216,12 @@ public class FileResource extends AbstractContentResource implements Replaceable
         // case we need to generate and persist html content
         if (htmlPage != null) {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            _(HtmlTemplateParser.class).update(htmlPage, bout);
+            _(HtmlTemplateParser.class).update(htmlPage, bout);            
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);
         } else {
-
+            log.warn("No htmlPage, so nothing to save");
         }
     }
 

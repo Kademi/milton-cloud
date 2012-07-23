@@ -6,7 +6,7 @@ function saveApps(form) {
             url: window.location.pathname,
             data: form.serialize(),
             success: function(data) {
-                log("saved ok", data);
+                alert("saved ok", data);
             },
             error: function(resp) {
                 log("error", resp);

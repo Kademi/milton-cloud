@@ -105,6 +105,46 @@ public class AppControl implements Serializable {
         return ac;
         
     }
+
+    /**
+     * Enable all available apps for the given organisation
+     * 
+     * @param organisation
+     * @param session 
+     */
+    public static void initDefaultApps(Organisation organisation, Profile currentUser, Date now, Session session) {
+        if( organisation.getOrganisation() == null ) {
+            // is root org, so nothing to do
+        }
+        for( AppControl ac : find(organisation.getOrganisation(), session)) {
+            AppControl newac = new AppControl();
+            if( ac.isEnabled()) {
+                newac.setEnabled(true);
+                newac.setName(ac.getName());
+                newac.setOrganisation(organisation);
+                newac.setModifiedBy(currentUser);
+                newac.setModifiedDate(now);
+                session.save(newac);
+            }
+            
+        }
+    }
+    
+    public static void initDefaultApps(Website website, Profile currentUser, Date now, Session session) {
+
+        for( AppControl ac : find(website, session)) {
+            AppControl newac = new AppControl();
+            if( ac.isEnabled()) {
+                newac.setEnabled(true);
+                newac.setName(ac.getName());
+                newac.setWebsite(website);
+                newac.setModifiedBy(currentUser);
+                newac.setModifiedDate(now);
+                session.save(newac);
+            }
+            
+        }
+    }    
     
     
     private long id;

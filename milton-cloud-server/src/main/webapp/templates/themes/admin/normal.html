@@ -18,7 +18,7 @@
         <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" >//</script>
         <script type="text/javascript" src="/static/js/toolbars.js" >//</script>         
         <script type="text/javascript" src="/static/js/ajaxupload.js" >//</script>         
-        
+
     </head>
     <body class="theme">
         <!-- page layout goes here -->
@@ -33,9 +33,17 @@
                         #end
                     </ul>
                 </nav>
-                <aside>
+                <aside class="userBtn">
                     #if( $user )
                     <h3><a href="$user.path">Welcome $user.nickName</a></h3>
+                    <div class="dropBox">
+                        <ul class="list requiresuser">
+                            <li>
+                                <a class="logout" href="#">Logout</a>
+                            </li>
+                        </ul>
+                    </div>                
+
                     #end
                 </aside>
             </header>

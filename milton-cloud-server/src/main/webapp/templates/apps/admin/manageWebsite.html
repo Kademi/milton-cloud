@@ -5,6 +5,7 @@
     </head>
     <body class="manageApplications">
         <form method="POST" action="$page.name" onsubmit="return saveApps($(this))">
+            <h2>Control Apps</h2>
             <ul>
                 #foreach($app in $page.apps )
                 <li>
@@ -13,7 +14,21 @@
                 </li>
                 #end
             </ul>
-            <button type="submit">Save</button>            
+            <h2>Theme</h2>
+            <div class="inputs">
+                <label for="heroColour1">heroColour1</label>
+                <input type="text" name="heroColour1" id="heroColour1" value="$!page.themeParams.heroColour1"/>
+                <label for="heroColour2">heroColour2</label>
+                <input type="text" name="heroColour2" id="heroColour2" value="$!page.themeParams.heroColour2"/>
+                <label>textColour1</label>
+                <input type="text" name="textColour1" id="textColour1" value="$!page.themeParams.textColour1"/>
+                <label for="textColour2">textColour2</label>
+                <input type="text" name="textColour2" id="textColour2" value="$!page.themeParams.textColour2"/>
+                <label for="logo">logo</label>
+                <input type="text" name="logo" id="logo" value="$!page.themeParams.logo"/>
+            </div>
+
+            <button type="submit" class="Btn">Save</button>            
         </form>
         <h2>Groups in website</h2>
         #set($groupsInWebsite = $page.groupsInWebsite)

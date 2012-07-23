@@ -16,6 +16,7 @@ package io.milton.vfs.db;
 
 import java.io.Serializable;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -82,6 +83,10 @@ public class NvPair implements Serializable{
 
     public void setBaseEntity(BaseEntity baseEntity) {
         this.baseEntity = baseEntity;
+    }
+
+    public void delete(Session session) {
+        session.delete(this);
     }
     
     

@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 
 /**
  * A RepositoryFolder just holds the branches of the folder
@@ -43,7 +44,7 @@ import static io.milton.context.RequestContext._;
  * @author brad
  */
 @BeanPropertyResource(value="milton")
-public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource {
+public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource{
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
     protected final boolean renderMode;
@@ -182,4 +183,18 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
+    
+    @Override
+    public boolean isLockedOutRecursive(Request request) {
+        return false;
+    }
+
+    @Override
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        this.repo.getBaseEntity().getRepositories().remove(this.repo);
+        this.repo.delete(session);
+        tx.commit();
+    }    
 }

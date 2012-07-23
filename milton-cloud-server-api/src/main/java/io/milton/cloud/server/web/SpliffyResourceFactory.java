@@ -75,6 +75,9 @@ public class SpliffyResourceFactory implements ResourceFactory {
                 return new NewPageResource(parentContentDir, path.getName());
             }
         }
+        if( r != null ) {
+            log.info("Found a resource: " + r.getClass());
+        }
         return r;
     }
 
