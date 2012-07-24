@@ -118,7 +118,12 @@
             <groupId>io.milton</groupId>
             <artifactId>cardme</artifactId>
             <version>1.0.0</version>
-        </dependency>  
+        </dependency>
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>core-renderer</artifactId>
+            <version>R8</version>
+        </dependency>
     </dependencies>    
 
 </project>

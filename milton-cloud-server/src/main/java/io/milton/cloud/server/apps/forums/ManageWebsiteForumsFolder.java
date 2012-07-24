@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.forums;
 
+import io.milton.cloud.server.db.Forum;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -28,6 +29,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -41,37 +43,86 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.Resource;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.Collections;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
+ * Provides a list of forums per website
  *
  * @author brad
  */
-public class ManageForumsPage extends AbstractResource implements GetableResource, PostableResource {
+public class ManageWebsiteForumsFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ManageForumsPage.class);
-    
-    private final String name;
-    private final CommonCollectionResource parent;
+    private static final Logger log = LoggerFactory.getLogger(ManageWebsiteForumsFolder.class);
+    private final ManageForumsFolder parent;
     private final Organisation organisation;
+    private final Website website;
+    private ResourceList children;
+    private JsonResult jsonResult;
 
-    public ManageForumsPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        
+    /**
+     *
+     * @param name
+     * @param organisation
+     * @param parent
+     * @param website - null if none selected
+     */
+    public ManageWebsiteForumsFolder(Organisation organisation, ManageForumsFolder parent, Website website) {
         this.organisation = organisation;
         this.parent = parent;
-        this.name = name;
+        this.website = website;
+    }
+
+    @Override
+    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+        if (children == null) {
+            children = new ResourceList();
+            List<Forum> forums = Forum.findByWebsite(website, SessionManager.session());
+            for (Forum w : forums) {
+                ManageForumFolder p = new ManageForumFolder(w, this);
+                children.add(p);
+            }
+        }
+        return children;
     }
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }    
-        
-    
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        _(HtmlTemplater.class).writePage("admin", "forums/manageForums", this, params, out);
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        String newName = parameters.get("newName");
+        if (newName != null) {
+            createForum(newName, tx, session);
+        }
+        return null;
     }
-        
+
+    public String getTitle() {
+        return "Manage forums: " + website.getName();
+    }
+
+    public List<Website> getWebsites() {
+        return parent.getWebsites();
+    }
+
+    public Website getWebsite() {
+        return website;
+    }
+
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuEditForums");
+            _(HtmlTemplater.class).writePage("admin", "forums/manageForums", this, params, out);
+        }
+    }
+
     @Override
     public boolean isDir() {
         return false;
@@ -94,7 +145,7 @@ public class ManageForumsPage extends AbstractResource implements GetableResourc
 
     @Override
     public String getName() {
-        return name;
+        return website.getName();
     }
 
     @Override
@@ -112,7 +163,6 @@ public class ManageForumsPage extends AbstractResource implements GetableResourc
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -127,19 +177,26 @@ public class ManageForumsPage extends AbstractResource implements GetableResourc
     public Long getContentLength() {
         return null;
     }
-    
+
     @Override
     public Organisation getOrganisation() {
         return organisation;
     }
-        
+
     @Override
     public boolean is(String type) {
-        if( type.equals("manageRewards")) {
+        if (type.equals("manageRewards")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
+
+    private void createForum(String newTitle, Transaction tx, Session session) {
+        Forum f = new Forum();
+        String newName = NewPageResource.findAutoName(newTitle, this, null);
+        newName = newName.replace(".html", ""); // HACK: remove .html suffix added about
+        Forum.addToWebsite(website, newName, newTitle, session);
+        tx.commit();
+        jsonResult = new JsonResult(true, "Created", newName);
+    }
 }

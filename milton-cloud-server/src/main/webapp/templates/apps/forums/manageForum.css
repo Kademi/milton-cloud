@@ -57,3 +57,26 @@
 	top: 15px;
 	right: -185px;
 }
+
+#manageForum section.Control {
+    margin-top: 15px;
+}
+#manageForum ul.Websites li {
+    border: 1px solid #E9E9E9;
+    border-radius: 3px 3px 3px 3px;
+    height: 19px;
+    line-height: 20px;
+    margin-top: 3px;
+    padding: 3px 2px 3px 10px;
+}
+
+#manageForum ul.Websites li a {
+    font-size: 12px;
+}
+
+#manageForum .DropdownContent {
+    width: 300px;
+}
+#manageForum .DropdownContent section {
+    float: none;
+}

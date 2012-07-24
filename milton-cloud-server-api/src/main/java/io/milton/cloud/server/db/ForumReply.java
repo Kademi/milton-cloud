@@ -14,10 +14,9 @@
  */
 package io.milton.cloud.server.db;
 
-import io.milton.cloud.server.db.PostVisitor;
-import io.milton.cloud.server.db.Post;
 import java.io.Serializable;
 import javax.persistence.*;
+import org.hibernate.Session;
 
 /**
  * A reply to a post in a forum
@@ -26,10 +25,11 @@ import javax.persistence.*;
  */
 @Entity
 @DiscriminatorValue("FR")
-public class ForumReply extends Post implements Serializable{
+public class ForumReply extends Post implements Serializable {
+
     private ForumPost post;
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public ForumPost getPost() {
         return post;
     }
@@ -41,5 +41,9 @@ public class ForumReply extends Post implements Serializable{
     @Override
     public void accept(PostVisitor visitor) {
         visitor.visit(this);
-    }       
+    }
+
+    public void delete(Session session) {
+        session.delete(this);
+    }
 }

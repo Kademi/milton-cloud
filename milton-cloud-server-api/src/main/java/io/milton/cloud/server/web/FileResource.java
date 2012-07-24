@@ -127,6 +127,10 @@ public class FileResource extends AbstractContentResource implements Replaceable
      */
     @Override
     public String getContentType(String accepts) {
+        System.out.println("getcontenttype: " + getName());
+        if( getName() == null ) {
+            throw new RuntimeException("no name");
+        }
         String acceptable = ContentTypeUtils.findContentTypes(getName());
         return ContentTypeUtils.findAcceptableContentType(acceptable, accepts);
     }
@@ -154,7 +158,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     public RenderFileResource getHtml() {
         if (htmlPage == null) {
-            if (NodeChildUtils.isHtml(this)) {
+            if (getName() == null || NodeChildUtils.isHtml(this)) { // name will be null when editing new html pages
                 htmlPage = new RenderFileResource(this);
             }
         }

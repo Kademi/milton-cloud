@@ -18,6 +18,7 @@ import io.milton.vfs.db.Organisation;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 
 /**
  *
@@ -101,6 +102,15 @@ public class ForumTopic implements Serializable{
 
     public void setForumPosts(List<ForumPost> forumPosts) {
         this.forumPosts = forumPosts;
+    }
+
+    public void delete(Session session) {
+        if( getForumPosts() != null ) {
+            for( ForumPost p : getForumPosts() ) {
+                p.delete(session);
+            }
+        }
+        session.delete(this);
     }
     
 }

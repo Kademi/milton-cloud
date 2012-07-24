@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 
 /**
  *
@@ -77,5 +78,14 @@ public class ForumPost extends Post implements Serializable{
     @Override
     public void accept(PostVisitor visitor) {
         visitor.visit(this);
-    }       
+    }
+
+    public void delete(Session session) {
+        if( getForumReplys() != null ) {
+            for( ForumReply r : getForumReplys()) {
+                r.delete(session);
+            }
+        }
+        session.delete(this);
+    }
 }

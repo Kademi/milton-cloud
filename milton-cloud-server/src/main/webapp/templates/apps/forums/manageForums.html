@@ -6,31 +6,59 @@
     </head>
     <body>
         <section id="manageForum" class="MainContent">
+
+            <article class="Note">Use this page to create and manage the forums in your websites. Select a website to begin.</article>
+
+            <section class="Control ClearFix">
+                <div class="DropdownControl ClearFix NoLabel">
+                    <div class="DropdownWrapper">
+                        <span>$page.title</span> 
+                        <a href="#" class="Control"><span class="Hidden">Change website</span></a> 
+                    </div>
+                    <div class="DropdownContent Hidden">
+                        <div class="Content ClearFix">
+                            <section>
+                                <ul class="Websites">
+                                #foreach($website in $page.websites)
+                                <li><a href="$website.name">$website.name</a></li>
+                                #end
+                                </ul>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            #if($page.website)            
             <header class="ClearFix">
                 <button class="SmallBtn Add AddForum"><span>Add New Forum</span></button>
             </header>
-            
-            #foreach($forum in $folder.children)
+
+            #foreach($forum in $page.children)
             <div class="Forum">
                 <header class="ClearFix">
-                    <div class="ShowDialog"><span>$forum.title</span></div>
+                    <div class="ShowDialog"><a href="$forum.name">$forum.title</a></div>
                 </header>
                 <div class="ContentForum ClearFix">
                     <h4>Available Topics</h4>
                     <ul class="TopicList">
                         #foreach($topic in $forum.children)
-                        <li><span>$topic.title</span></li>
+                        <li>
+                            <span>$topic.title</span>
+                            <aside>
+                                <a title="Rename this topic" class="Edit RenameTopic" href="$topic.href"><span class="Hidden">Rename this topic</span></a> 
+                                <a title="Delete this topic" class="Delete DeleteTopic" href="$topic.href"><span class="Hidden">Delete this topic</span></a>
+                            </aside>
+                        </li>
                         #end
                     </ul>			
                     <button class="SmallBtn Add AddTopic"><span>Add New Topic</span></button>
                 </div>
             </div>
             #end
-            
+            #end
+
             <div class="Hidden">
-                <div id="topicController">
-                    <aside><a href="" class="Edit RenameTopic" title="Rename this topic"><span class="Hidden">Rename this topic</span></a> <a href="" class="Delete DeleteTopic" title="Delete this topic"><span class="Hidden">Delete this topic</span></a></aside>
-                </div>
                 <div id="dialogForum">
                     <div class="Dialog Hidden">
                         <a href="" class="RenameForum">Rename this forum</a>

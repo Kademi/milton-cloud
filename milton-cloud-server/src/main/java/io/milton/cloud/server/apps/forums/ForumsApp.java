@@ -28,12 +28,8 @@ import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Repository;
-import io.milton.vfs.db.Website;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
@@ -59,22 +55,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if (parent instanceof ForumsAdminFolder) {
-            ForumsAdminFolder faf = (ForumsAdminFolder) parent;
-            if (requestedName.equals("manage")) {
-                MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuEditForums");
-                return new ManageForumsPage(requestedName, faf.getOrganisation(), faf);
-            }
-        } else if (parent instanceof OrganisationFolder) {
-            OrganisationFolder orgFolder = (OrganisationFolder) parent;
-            if (requestedName.equals("manageForums")) {
-                MenuItem.setActiveIds("menuTalk", "menuPrograms", "menuEditForums");
-                return new ManageForumsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
-            } else if (requestedName.equals("managePosts")) {
-                MenuItem.setActiveIds("menuTalk", "menuPrograms", "menuManagePosts");
-                return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
-            }
-        } else if (parent instanceof WebsiteRootFolder) {
+        if (parent instanceof WebsiteRootFolder) {
             if (requestedName.equals("_postSearch")) {                
                 WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
                 return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
@@ -85,15 +66,10 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        if (parent instanceof RepositoryFolder) {
-            RepositoryFolder repoFolder = (RepositoryFolder) parent;
-            Repository r = repoFolder.getRepository();
-            List<Website> list = Website.findByRepository(r, SessionManager.session());
-            if (!list.isEmpty()) {
-                Website w = list.get(0); // should only ever be 1
-                ForumsAdminFolder forumsAdminFolder = new ForumsAdminFolder("forums", repoFolder, w);
-                children.add(forumsAdminFolder);
-            }
+        if (parent instanceof OrganisationFolder) {
+            OrganisationFolder repoFolder = (OrganisationFolder) parent;
+            ManageForumsFolder forumsAdminFolder = new ManageForumsFolder("forums", repoFolder);
+            children.add(forumsAdminFolder);
         } else if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             children.add(new MyForumsFolder("community", wrf, wrf.getWebsite()));

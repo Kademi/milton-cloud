@@ -134,4 +134,13 @@ public class Forum implements Serializable{
         session.save(ft);
         return ft;
     }
+
+    public void delete(Session session) {
+        if( getForumTopics() != null ) {
+            for( ForumTopic t : getForumTopics()) {
+                t.delete(session);
+            }
+        }
+        session.delete(this);
+    }
 }

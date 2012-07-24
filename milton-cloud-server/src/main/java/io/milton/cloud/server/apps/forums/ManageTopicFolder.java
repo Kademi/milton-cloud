@@ -14,19 +14,22 @@
  */
 package io.milton.cloud.server.apps.forums;
 
-import io.milton.cloud.server.db.Forum;
 import io.milton.cloud.server.db.ForumTopic;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.http.Request;
 import io.milton.http.Response;
 import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse;
 import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.principal.Principal;
+import io.milton.property.BeanPropertyResource;
 import io.milton.resource.AccessControlledResource;
+import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
@@ -42,15 +45,15 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ForumAdminFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource {
+@BeanPropertyResource(value = "milton")
+public class ManageTopicFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource, DeletableCollectionResource {
 
-    private final Forum forum;
+    private final ForumTopic forumTopic;
     private final CommonCollectionResource parent;
     private ResourceList children;
 
-    public ForumAdminFolder(Forum forum, CommonCollectionResource parent) {
-        
-        this.forum = forum;
+    public ManageTopicFolder(ForumTopic forumTopic, CommonCollectionResource parent) {        
+        this.forumTopic = forumTopic;
         this.parent = parent;
     }
 
@@ -64,37 +67,38 @@ public class ForumAdminFolder extends AbstractCollectionResource implements Prop
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Response.Status, List<PropFindResponse.NameAndError>> errorProps) {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        session.save(forum);
+        session.save(forumTopic);
         tx.commit();
     }
 
+    @Override
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        forumTopic.delete(session);
+        tx.commit();
+    }    
+    
     public String getTitle() {
-        return forum.getTitle();
+        return forumTopic.getTitle();
     }
 
     public void setTitle(String t) {
-        forum.setTitle(t);
+        forumTopic.setTitle(t);
     }
 
     public String getNotes() {
-        return forum.getNotes();
+        return forumTopic.getNotes();
     }
 
     public void setNotes(String s) {
-        forum.setNotes(s);
+        forumTopic.setNotes(s);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = new ResourceList();
-            List<ForumTopic> topics = forum.getForumTopics();
-            if( topics != null ) {
-                for( ForumTopic t : topics ) {
-                    ForumTopicAdminFolder ftaf = new ForumTopicAdminFolder(t, this);
-                    children.add(ftaf);
-                }
-            }
+            children = new ResourceList();            
         }
         return children;
     }
@@ -121,11 +125,16 @@ public class ForumAdminFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public String getName() {
-        return forum.getName();
+        return forumTopic.getName();
     }
 
     @Override
     public Map<Principal, List<AccessControlledResource.Priviledge>> getAccessControlList() {
         return null;
+    }
+
+    @Override
+    public boolean isLockedOutRecursive(Request request) {
+        return false;
     }
 }
