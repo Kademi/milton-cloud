@@ -39,7 +39,10 @@
                                             <li>
                                                 $role
                                                 <aside rel="$group.name">
-                                                    $formatter.checkbox($role, $page.isSelected($group, $role) )
+                                                    <div class="CheckBoxWrapper">
+                                                        $formatter.checkbox($role, $page.isSelected($group, $role) )
+                                                        <label><!----></label>
+                                                    </div>
                                                 </aside>
                                             </li>
                                             #end

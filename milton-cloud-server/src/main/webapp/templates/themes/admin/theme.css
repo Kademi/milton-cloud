@@ -578,7 +578,7 @@ div.Modal div.ModalContent table th, div.Modal div.ModalContent table td {
     padding-bottom: 10px;
     line-height: 30px;
 }
-div.Modal div.ModalContent table td input, div.Modal div.ModalContent table td textarea {
+div.Modal div.ModalContent table td input[type="text"], div.Modal div.ModalContent table td input[type="password"], div.Modal div.ModalContent table td textarea {
     border: 1px solid #d0d0d0;
     padding: 0 10px;
     height: 30px;

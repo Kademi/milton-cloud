@@ -8,8 +8,10 @@
             <ul>
                 #foreach($app in $page.apps )
                 <li>
-                    $formatter.checkbox($app.appId, $app.enabled)
-                    <label>$app.appId</label>
+                    <div class="CheckBoxWrapper">
+                        $formatter.checkbox($app.appId, $app.enabled)
+                        <label>$app.appId</label>
+                    </div>
                 </li>
                 #end
             </ul>
