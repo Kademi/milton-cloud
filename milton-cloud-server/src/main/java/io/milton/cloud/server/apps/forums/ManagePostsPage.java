@@ -28,6 +28,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -54,8 +55,7 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
     private final CommonCollectionResource parent;
     private final Organisation organisation;
 
-    public ManagePostsPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        
+    public ManagePostsPage(String name, Organisation organisation, CommonCollectionResource parent) {        
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -69,6 +69,7 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
+        MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuManagePosts");
         _(HtmlTemplater.class).writePage("admin","forums/managePosts", this, params, out);
     }
         

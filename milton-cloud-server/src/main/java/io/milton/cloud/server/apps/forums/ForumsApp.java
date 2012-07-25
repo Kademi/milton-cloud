@@ -60,6 +60,11 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
                 WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
                 return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
             }
+        } else if( parent instanceof OrganisationFolder) {
+            OrganisationFolder repoFolder = (OrganisationFolder) parent;
+            if( requestedName.equals("managePosts")) {
+                return new ManagePostsPage(requestedName, repoFolder.getOrganisation(), repoFolder);
+            }
         }
         return null;
     }
@@ -93,7 +98,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
                 OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
                 if (parentOrg != null) {
                     parent.getOrCreate("menuManagePosts", "Manage posts", parentOrg.getPath().child("managePosts")).setOrdering(10);
-                    parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("manageForums")).setOrdering(20);
+                    parent.getOrCreate("menuEditForums", "Create and manage forums", parentOrg.getPath().child("forums")).setOrdering(20);
                 }
                 break;
         }
