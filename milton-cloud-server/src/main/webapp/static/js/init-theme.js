@@ -244,6 +244,16 @@ if(!String.prototype.trim) {
     };
 }
 
+// Function check/uncheck for checkbox
+$.fn.check = function(is_check) {
+     return $(this).attr('checked', is_check);
+};
+
+// Function disable/enable for form control
+$.fn.disable = function(is_disable) {
+    return $(this).attr('disabled', is_disable);
+};
+
 var typewatch = (function(){
     var timer = 0;
     return function(callback, ms){

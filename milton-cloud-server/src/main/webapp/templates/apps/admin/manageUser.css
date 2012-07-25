@@ -77,7 +77,7 @@
 	padding: 15px 5px 5px 15px;
 	width: 180px;
 }
-#manageUser div.Info header div.Setting div.SettingContent header select { padding: 3px; min-width: 60px; }
+#manageUser div.Info header div.Setting div.SettingContent header select { padding: 3px; min-width: 60px; max-width: 170px; height: 26px; }
 #manageUser div.Info header div.Setting div.SettingContent ul { width: 175px; }
 #manageUser div.Info header div.Setting div.SettingContent ul li { margin-top: 7px; }
 #manageUser div.Info header div.Setting div.SettingContent ul li:last-child {

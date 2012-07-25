@@ -3,7 +3,6 @@ function initManageUser() {
     initShowSettingBtn();
     initClearTextBtn();	
     initSettingPanel();
-    initCheckBox();
     initControl();
     initTooltip();
     initSearchBusiness();
@@ -34,34 +33,6 @@ function doSearch() {
             alert("err");
         }
     });      
-}
-
-function initCheckBox() {
-    $("input.CheckBox[type=checkbox]").each(function() {
-        var _self = $(this).wrap("<div class='CheckBoxWrapper'></div>"),
-        _id = _self.attr("id"),
-        _label = $("label[for=" + _id + "]"),
-        _checked = _self.attr("checked"),
-        _wrapper = _self.parent();
-			
-        if(_checked) {
-            _wrapper.addClass("Checked");
-        }
-			
-        _wrapper.append(_label).bind("click", function() {
-            if(_wrapper.hasClass("Checked")) {
-                _wrapper.removeClass("Checked");
-                _self.attr("checked", false);
-            } else {
-                _wrapper.addClass("Checked");
-                _self.attr("checked", true);
-            }
-        });
-		
-        _label.bind("click", function() {
-            _wrapper.trigger("click");
-        });
-    });
 }
 
 // Event for ClearText button
@@ -101,16 +72,17 @@ function initShowBusinessBtn() {
 function initSettingPanel() {	
     // Check cookie for user settings
     var _SettingContent = $("div.SettingContent"),
-    _userSetting = $.cookie("user-setting"),
-    _checkboxes = _SettingContent.find("input[type=checkbox]"),
-    _remember = $("#remember");
+        _userSetting = $.cookie("user-setting"),
+        _checkboxes = _SettingContent.find("input[type=checkbox]"),
+        _remember = $("#remember");
+       
     if(_userSetting) {
         _remember.attr("checked", true);
         _checkboxes.not(_remember).attr("checked", false);
         _userSetting = _userSetting.split("#");
         _SettingContent.find("select").val(_userSetting[0]);
         for(var i = 1, setting; setting = _userSetting[i]; i++) {
-            _checkboxes.filter("#" + setting).attr("checked", true);
+            _checkboxes.filter("#" + setting).check(true);
         }
     }
 	
