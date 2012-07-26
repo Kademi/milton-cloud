@@ -43,8 +43,13 @@ class SyncingDeltaListener implements DeltaListener2 {
             }
         } else {
             final File localChild = toFile(path);
-            log.info("new or modified remote file: " + localChild.getAbsolutePath());
+            if( localChild.exists() ) {
+                log.info("modified remote file: " + localChild.getAbsolutePath() + " remote:" + remoteTriplet.getHash() + " != " + localTriplet.getHash());
+            } else {
+                log.info("new remote file: " + localChild.getAbsolutePath());
+            }            
             if (readonlyLocal) {
+                log.info("in read only mode so not doing anything");
                 return;
             }
             syncer.downloadSync(remoteTriplet.getHash(), path);
@@ -67,11 +72,11 @@ class SyncingDeltaListener implements DeltaListener2 {
     public void onLocalChange(Triplet localTriplet, Path path) throws IOException {
         final File localFile = toFile(path);
         if (localFile.isFile()) {
-            System.out.println("upload locally new or modified file: " + localFile.getCanonicalPath());
+            log.info("upload locally new or modified file: " + localFile.getCanonicalPath());
             syncer.upSync(path);
             syncStatusStore.setBackedupHash(path, localTriplet.getHash());
         } else {
-            System.out.println("create remote directory for locally new directory: " + localFile.getAbsolutePath());
+            log.info("create remote directory for locally new directory: " + localFile.getAbsolutePath());
             try {
                 syncer.createRemoteDir(path); // note that creating a remote directory does not ensure it is in sync
             } catch (ConflictException ex) {

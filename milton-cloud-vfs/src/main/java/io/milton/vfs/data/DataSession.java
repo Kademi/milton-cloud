@@ -19,7 +19,6 @@ import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
-import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.DataItem;
 import io.milton.vfs.db.Profile;
 import java.io.IOException;
@@ -27,9 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 import org.hashsplit4j.api.*;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +43,7 @@ import org.slf4j.LoggerFactory;
 public class DataSession {
 
     private static final Logger log = LoggerFactory.getLogger(DataSession.class);
+    
     
     private DirectoryNode rootDataNode;
     private final Session session;
@@ -90,9 +88,7 @@ public class DataSession {
     }
 
     public List<DataItem> find(long hash) {
-        Criteria crit = session.createCriteria(DataItem.class);
-        crit.add(Expression.eq("parentHash", hash));
-        return DbUtils.toList(crit, DataItem.class);
+        return DataItem.findByHash(hash, session);
     }
 
     /**

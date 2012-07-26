@@ -1,11 +1,15 @@
 package io.milton.vfs.db;
 
+import io.milton.cloud.common.ITriplet;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Expression;
 
 /**
  *
@@ -18,8 +22,14 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
     @UniqueConstraint(columnNames = {"name", "parentHash"})// item names must be unique within a directory
 })
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class DataItem implements Serializable {
+public class DataItem implements Serializable, ITriplet {
 
+    public static  List<DataItem> findByHash(long hash, Session session) {
+        Criteria crit = session.createCriteria(DataItem.class);
+        crit.add(Expression.eq("parentHash", hash));
+        return DbUtils.toList(crit, DataItem.class);
+    }        
+    
     private long id;
     private String type; // "f" = file, "d" = directory
     private String name;
@@ -90,6 +100,16 @@ public class DataItem implements Serializable {
 
     public void setParentHash(long parentHash) {
         this.parentHash = parentHash;
+    }
+
+    /**
+     * Required to implement ITriplet, this is not a persisted property, but
+     * just returns getItemHash()
+     */
+    @Override
+    @Transient
+    public long getHash() {
+        return itemHash;
     }
     
     

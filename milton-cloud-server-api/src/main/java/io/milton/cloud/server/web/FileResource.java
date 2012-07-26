@@ -110,7 +110,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
     }
 
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
+    public final void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
         if (params != null && params.containsKey("type") && "hash".equals(params.get("type"))) {
             String s = fileNode.getHash() + "";
             out.write(s.getBytes());
@@ -127,7 +127,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
      */
     @Override
     public String getContentType(String accepts) {
-        System.out.println("getcontenttype: " + getName());
         if( getName() == null ) {
             throw new RuntimeException("no name");
         }

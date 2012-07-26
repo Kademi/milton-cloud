@@ -18,7 +18,6 @@ package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
-import io.milton.vfs.data.HashCalc;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Response.Status;
@@ -146,18 +145,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        String type = HttpManager.request().getParams().get("type");
-        if (type == null) {
-            // output directory listing
-            getTemplater().writePage("directoryIndex", this, params, out);
-        } else {
-            if (type.equals("hashes")) {
-                HashCalc.getInstance().calcHash(directoryNode, out);
-            } else if (type.equals("hash")) {
-                String s = directoryNode.getHash() + "";
-                out.write(s.getBytes());
-            }
-        }
+        getTemplater().writePage("directoryIndex", this, params, out);
     }
 
     @Override

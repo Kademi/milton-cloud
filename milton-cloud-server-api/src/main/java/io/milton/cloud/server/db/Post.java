@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
@@ -34,15 +35,32 @@ import org.hibernate.criterion.Order;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 2)
 @DiscriminatorValue("P")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Post implements Serializable{
+public abstract class Post implements Serializable{
     
-    public static List<Post> findByWebsite(Website website, Session session) {
+    public static List<Post> findByWebsite(Website website, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
         crit.add(Expression.eq("website", website));
         crit.addOrder(Order.desc("postDate"));
+        if( limit != null ) {
+            crit.setMaxResults(limit);
+        }
         List<Post> list = DbUtils.toList(crit, Post.class);
         return list;
     }    
+    
+    public static List<Post> findByOrg(Organisation org, Integer limit, Session session) {
+        Criteria crit = session.createCriteria(Post.class);
+        Criteria critWebsite = crit.createAlias("website", "w");
+        critWebsite.add(Expression.eq("w.organisation", org));
+        crit.addOrder(Order.desc("postDate"));
+        if( limit != null ) {
+            crit.setMaxResults(limit);
+        }        
+        List<Post> list = DbUtils.toList(crit, Post.class);
+        return list;
+    }       
+    
+    public abstract void delete(Session session);
     
     private long id;
     private Website website;
@@ -108,5 +126,6 @@ public class Post implements Serializable{
     public void accept(PostVisitor visitor) {
         // do nothing, will be overridden
     }
+
     
 }

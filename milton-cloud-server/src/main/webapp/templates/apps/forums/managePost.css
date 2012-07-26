@@ -17,7 +17,7 @@
 }
 #managePost .Post > aside {
 	float: right;
-	padding: 15px;
+	padding: 5px;
 	width: 100px;
 }
 #managePost .Post > footer {
@@ -45,4 +45,10 @@
 }
 #managePost .Post > footer a:hover {
 	background-color: #f0f0f0;
+}
+#managePost aside abbr {
+    font-size: 11px;
+}
+#editPost textarea {
+    width: 95%;
 }

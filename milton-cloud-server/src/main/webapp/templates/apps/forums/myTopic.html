@@ -11,7 +11,7 @@
                 <div class="col1">
                     <h3>Recent community questions</h3>
                 </div>
-                <a href="#postQuestion" class="Button ShowModal"><i class="Icon-add"><!----></i> Post a question</a> 
+                <a href="#postQuestion" class="Button ShowModal border-text1"><i class="Icon-add"><!----></i> Post a question</a> 
                 <div class="clr"></div>
             </div>            
             <ul class="PostList ClearFix">
@@ -20,165 +20,32 @@
                     <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
                     <div class="ReplyNumber"> <strong>15</strong> replies </div>
                     <div class="Details">
-                        <h4>$post.title</h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
+                        <h4><a href="$post.name">$post.title</a></h4>
+                        <p>
+                            <abbr title="$formatter.formatDateISO8601($post.postDate)" class="timeago">$post.postDate</abbr>
+                            <em><a href="#">$post.poster.nickName</a></em>
+                        </p>
                     </div>
                 </li>
                 #end
-                <li class="Post">
-                    <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
-                <li class="Post">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
-                    <div class="Details">
-                        <h4>How do I get off the drugs I am taking!!! </h4>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                    </div>
-                </li>
             </ul>
-            <div class="PostDetails">
-                <div class="Post Question ClearFix">
-                    <div class="Avatar"> <img src="images/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="Details">
-                        <h3>How do I get off the drugs I am taking!!! Please help!</h3>
-                        <p><em>5 minutes ago <a href="">Patrick Hone</a></em></p>
-                        <div class="Description">
-                            <p>Lorem ipsum dolor sit amet, sit vel, wisi quisque, suspendisse rutrum. Eu quam ac vel proin, sed lorem ridiculus cum, dictum donec quis vel morbi sed lobortis, sed turpis risus mollis pretium vestibulum ut, massa vestibulum. Wisi rhoncus dictum nunc vitae risus, non tempus congue, vel massa, diam vel. Posuere odio adipiscing a maecenas. Sed turpis ipsum sapien. Felis amet, et luctus. At dui eros sit at, eleifend neque in ac risus enim et, vitae massa proin lectus tortor necessitatibus, etiam magnis adipiscing, mauris est vehicula.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="ControllerContainer"> <a href="#postComment" class="Button ShowModal">Post a comment</a> </div>
-                <div class="AnswerList">
-                    <h3>Answers</h3>
-                    <div class="Post Answer ClearFix">
-                        <div class="Avatar"> <img src="images/photo02.jpg" width="50" height="50" alt="Sarah Williams" /> </div>
-                        <div class="Details">
-                            <div class="Description">
-                                <p>Lorem ipsum dolor sit amet, sit vel, wisi quisque, suspendisse rutrum. Eu quam ac vel proin, sed lorem ridiculus cum, dictum donec quis vel morbi sed lobortis, sed turpis risus mollis pretium vestibulum ut, massa vestibulum. Wisi rhoncus dictum nunc vitae risus, non tempus congue, vel massa, diam vel. Posuere odio adipiscing a maecenas. Sed turpis ipsum sapien. Felis amet, et luctus. At dui eros sit at, eleifend neque in ac risus enim et, vitae massa proin lectus tortor necessitatibus, etiam magnis adipiscing, mauris est vehicula.</p>
-                            </div>
-                            <p>5 minutes ago <a href="">Sarah Williams</a></p>
-                        </div>
-                    </div>
-                    <div class="Post Answer ClearFix">
-                        <div class="Avatar"> <img src="images/photo02.jpg" width="50" height="50" alt="Sarah Williams" /> </div>
-                        <div class="Details">
-                            <div class="Description">
-                                <p>Lorem ipsum dolor sit amet, sit vel, wisi quisque, suspendisse rutrum. Eu quam ac vel proin, sed lorem ridiculus cum, dictum donec quis vel morbi sed lobortis, sed turpis risus mollis pretium vestibulum ut, massa vestibulum. Wisi rhoncus dictum nunc vitae risus, non tempus congue, vel massa, diam vel. Posuere odio adipiscing a maecenas. Sed turpis ipsum sapien. Felis amet, et luctus. At dui eros sit at, eleifend neque in ac risus enim et, vitae massa proin lectus tortor necessitatibus, etiam magnis adipiscing, mauris est vehicula.</p>
-                            </div>
-                            <p>5 minutes ago <a href="">Sarah Williams</a></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="ControllerContainer"> <a href="#postComment" class="Button ShowModal">Post a comment</a> </div>
-            </div>
         </div>
+
+
 
         <div id="postQuestion" class="Modal"> 
             <a href="" class="Close" title="Close">Close</a>
             <h3 class="Title">Post a question</h3>
-            <form method="POST" action="$page.href">
-                <table class="Form">
-                    <tr>
-                        <td><input type="text" placeholder="Enter your question here" value="" name="newQuestion" class="required HasClearButton" /></td>
-                    </tr>
-                    <tr>
-                        <td><textarea name="comment" placeholder="Leave a comment here" cols="50" rows="10" class="required"></textarea></td>
-                    </tr>
-                </table>
+            <form method="POST" action=".">
+                <input type="text" placeholder="Enter your question here" value="" name="newQuestion" class="required HasClearButton" />
+                <textarea name="comment" placeholder="Leave a comment here" cols="50" rows="10" class="required"></textarea>
                 <div class="ControllerContainer"> 
-                    <a href="" class="Button">Cancel</a> 
+                    <a href="" class="button">Cancel</a> 
                     <button type="submit" class="Button">Post</button> 
                 </div>
             </form>
         </div>
 
-        <div id="postComment" class="Modal"> <a href="" class="Close" title="Close"></a>
-            <h3 class="Title">Post a comment</h3>
-            <table class="Form">
-                <tr>
-                    <td><textarea name="comment" placeholder="Leave a comment here" cols="50" rows="10"></textarea></td>
-                </tr>
-            </table>
-            <div class="ControllerContainer"> <a href="" class="Button">Cancel</a> <a href="" class="Button">Post</a> </div>
-        </div>
         <script type="text/javascript">
             jQuery(function($) {
                 initMyTopic();

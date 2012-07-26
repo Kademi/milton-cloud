@@ -21,7 +21,7 @@
                         #set($activeClass = $formatter.ifEqual("active","",$msg,$targetPage))
                 <div class="$activeClass">
                     <a class="close" href="#">delete</a>                    
-                    <abbr title="$formatter.formatDateISO8601($msg.date)" class="info timeago">$msg.date</abbr>                    
+                    <abbr title="$formatter.formatDateISO8601($msg.date)" class="info timeago">$msg.date</abbr>
                     <h3><a href="$msg.href">$msg.from</a></h3>
                     <p>$msg.subject</p>
                 </div>         

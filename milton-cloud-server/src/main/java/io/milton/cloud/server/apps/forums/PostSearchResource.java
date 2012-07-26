@@ -66,11 +66,9 @@ public class PostSearchResource extends AbstractResource implements GetableResou
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        System.out.println("PostSearchResource: sendContent");
         JsonWriter jsonWriter = new JsonWriter();
         List<PostBean> beans = new ArrayList<>();
-        System.out.println("search posts: " + website.getName());
-        for( Post p : Post.findByWebsite(website, SessionManager.session())) {
+        for( Post p : Post.findByWebsite(website, 100, SessionManager.session())) {
             PostBean b = PostBean.toBean(p);
             beans.add(b);
         }

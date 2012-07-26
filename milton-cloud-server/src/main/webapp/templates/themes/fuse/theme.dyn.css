@@ -3093,11 +3093,14 @@ ul.btnList li:hover a, ul.btnList li.active a{
     padding:30px 0 80px 35px;
 }
 .pBox p{
-    color:$rootFolder.settings.textColour2;
+    color: $rootFolder.settings.textColour2;
     font-size:12px;
     line-height:1.5em;
     margin-bottom:15px;
 }
 .editableContent {
     position: relative;
+}
+.border-text1 {
+    border-color: lightgray;
 }

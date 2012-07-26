@@ -1,9 +1,8 @@
  package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.ForumPost;
-import io.milton.cloud.server.db.ForumTopic;
+import io.milton.cloud.server.db.ForumReply;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -28,7 +27,6 @@ import java.util.Map;
 import io.milton.http.FileItem;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Collections;
 import java.util.Date;
@@ -39,16 +37,16 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class MyTopicFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class MyQuestionFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
 
-    private final ForumTopic forumTopic;
+    private final ForumPost forumPost;
     private final CommonCollectionResource parent;
     private ResourceList children;
 
     private JsonResult jsonResult;
     
-    public MyTopicFolder(ForumTopic forumTopic, CommonCollectionResource parent) {        
-        this.forumTopic = forumTopic;
+    public MyQuestionFolder(ForumPost forumPost, CommonCollectionResource parent) {        
+        this.forumPost = forumPost;
         this.parent = parent;
     }
 
@@ -56,12 +54,11 @@ public class MyTopicFolder extends AbstractCollectionResource implements Getable
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        if( parameters.containsKey("newQuestion")) {
-            String newQuestion = parameters.get("newQuestion");
-            String comment = parameters.get("comment");
-            ForumPost p = createQuestion(newQuestion, comment, session);
+        if( parameters.containsKey("newComment")) {
+            String newComment = parameters.get("newComment");
+            ForumReply p = createComment(newComment, session);
             tx.commit();
-            jsonResult = new JsonResult(true, "Created", p.getName());
+            jsonResult = new JsonResult(true, "Created", p.getId()+"");
         }
         return null;
     }
@@ -75,16 +72,46 @@ public class MyTopicFolder extends AbstractCollectionResource implements Getable
             jsonResult.write(out);
         } else {
             MenuItem.setActiveIds("menuCommunity");
-            _(HtmlTemplater.class).writePage("forums/myTopic", this, params, out);
+            _(HtmlTemplater.class).writePage("forums/myQuestion", this, params, out);
+        }
+    }
+
+    public ForumPost getQuestion() {
+        return forumPost;
+    }
+    
+    public String getTitle() {
+        return forumPost.getTitle();
+    }
+    
+    public String getNotes() {
+        return forumPost.getNotes();
+    }
+    
+    public Date getPostDate() {
+        return forumPost.getPostDate();
+    }
+    
+    public String getPosterName() {
+        Profile p = forumPost.getPoster();
+        if( p != null ) {
+            if( p.getNickName() != null ) {
+                return p.getNickName();
+            } else {
+                return p.getName();
+            }
+        } else {
+            return "";
         }
     }
     
-    public List<ForumPost> getQuestions() {
-        if( forumTopic.getForumPosts() != null ) {
-            return forumTopic.getForumPosts();
+    public List<ForumReply> getReplies() {
+        if( forumPost.getForumReplys() != null ) {
+            return forumPost.getForumReplys();
         } else {
             return Collections.EMPTY_LIST;
         }
+            
     }
     
     
@@ -93,28 +120,14 @@ public class MyTopicFolder extends AbstractCollectionResource implements Getable
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            for( ForumPost p : getQuestions()) {
-                MyQuestionFolder f = new MyQuestionFolder(p, this);
-                children.add(f);
-            }
+ 
         }
         return children;
     }
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        // if children collection is loaded then find it from there
-        if( children != null ) {
-            return super.child(childName);
-        }
-        // otherwise attempt to locate without instantiating the whole collection
-        ForumPost p = ForumPost.findByName(childName, forumTopic, SessionManager.session()); 
-        if( p == null ) {
-            return null;
-        } else {
-            MyQuestionFolder f = new MyQuestionFolder(p, this);
-            return f;
-        }
+        return super.child(childName);
     }
     
     
@@ -141,7 +154,7 @@ public class MyTopicFolder extends AbstractCollectionResource implements Getable
 
     @Override
     public String getName() {
-        return forumTopic.getName();
+        return forumPost.getName();
     }
 
     @Override
@@ -164,30 +177,9 @@ public class MyTopicFolder extends AbstractCollectionResource implements Getable
         return null;
     }
 
-    private ForumPost createQuestion(String newQuestion, String comment, Session session) {                
-        ForumPost p = new ForumPost();
-        p.setTopic(forumTopic);
-        String newName = NewPageResource.findAutoName(newQuestion, this, null);
-        newName = newName.replace(".html", ""); // hack
-        p.setName(newName);
-        p.setTitle(newQuestion);
-        p.setNotes(comment);
+    private ForumReply createComment(String newComment, Session session) {                
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        p.setPoster(currentUser);
-        Date now = _(CurrentDateService.class).getNow();
-        p.setPostDate(now);        
-        p.setWebsite(website());
-        session.save(p);
-        return p;
-    }
-    
-    private Website website() {
-        RootFolder rootFolder = WebUtils.findRootFolder(this);
-        if( rootFolder instanceof WebsiteRootFolder) {
-            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-            return wrf.getWebsite();
-        } else {
-            return null;
-        }
+        Date now = _(CurrentDateService.class).getNow();       
+        return forumPost.addComment(newComment, currentUser, now, session);
     }
 }

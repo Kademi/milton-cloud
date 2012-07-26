@@ -52,7 +52,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private final EventManager eventManager;
     private final SessionManager sessionManager;
     private final CurrentRootFolderService currentRootFolderService;
-    
+
     public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.userDao = userDao;
         this.securityManager = securityManager;
@@ -65,17 +65,28 @@ public class SpliffyResourceFactory implements ResourceFactory {
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
         Path path = Path.path(sPath);
-        Resource r = find(host, path);
-        if( r == null && sPath.endsWith(".new") ) {
-            // Not found, but a html page is requested. If the parent exists and is a collection
-            // then we'll instantiate a placeholder page which will allow new pages to be created
-            Resource rParent = find(host, path.getParent());
-            if( rParent instanceof ContentDirectoryResource) {
-                ContentDirectoryResource parentContentDir = (ContentDirectoryResource) rParent;
-                return new NewPageResource(parentContentDir, path.getName());
+        Resource r;
+        if (path.getName() != null && path.getName().equals("_triplets")) { // special path suffix to get sync triplets for a directory. See HttpTripletStore
+            r = find(host, path.getParent());
+            if( r != null ) {
+                if( r instanceof ContentDirectoryResource) {
+                    ContentDirectoryResource dr = (ContentDirectoryResource) r;
+                    r = new TripletResource(path.getName(), dr); 
+                }
+            }
+        } else {
+            r = find(host, path);
+            if (r == null && sPath.endsWith(".new")) {
+                // Not found, but a html page is requested. If the parent exists and is a collection
+                // then we'll instantiate a placeholder page which will allow new pages to be created
+                Resource rParent = find(host, path.getParent());
+                if (rParent instanceof ContentDirectoryResource) {
+                    ContentDirectoryResource parentContentDir = (ContentDirectoryResource) rParent;
+                    return new NewPageResource(parentContentDir, path.getName());
+                }
             }
         }
-        if( r != null ) {
+        if (r != null) {
             log.info("Found a resource: " + r.getClass());
         }
         return r;
@@ -90,8 +101,8 @@ public class SpliffyResourceFactory implements ResourceFactory {
             Resource rootFolder = currentRootFolderService.getRootFolder();
             if (rootFolder == null) {
                 rootFolder = applicationManager.getPage(null, host);
-                if( rootFolder instanceof RootFolder ) {
-                    currentRootFolderService.setRootFolder((RootFolder)rootFolder);
+                if (rootFolder instanceof RootFolder) {
+                    currentRootFolderService.setRootFolder((RootFolder) rootFolder);
                 }
                 HttpManager.request().getAttributes().put("_spliffy_root_folder", rootFolder);
             }
@@ -130,5 +141,4 @@ public class SpliffyResourceFactory implements ResourceFactory {
     public SessionManager getSessionManager() {
         return sessionManager;
     }
-       
 }

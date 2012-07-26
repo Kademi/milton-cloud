@@ -76,5 +76,10 @@ public class Comment extends Post {
     @Override
     public void accept(PostVisitor visitor) {
         visitor.visit(this);
-    }    
+    }
+
+    @Override
+    public void delete(Session session) {
+        session.delete(this);
+    }
 }

@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="myForums.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="myTopic.js" >//</script>
+    </head>
+    <body class="forums">
+        <!-- Content goes here - NO HEADER/BANNER/MENU! -->
+        <div id="content">            
+            <div class="PostDetails">
+                <div class="Post Question ClearFix">
+                    <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
+                    <div class="Details">
+                        <h3>$page.title</h3>
+
+                        <p>
+                            <abbr title="$formatter.formatDateISO8601($page.postDate)" class="timeago">$page.postDate</abbr>
+                            <em><a href="#">$page.posterName</a></em>
+                        </p>
+                        <div class="Description">
+                            <p>$page.notes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ControllerContainer"> <a href="#postComment" class="button ShowModal">Post a comment</a> </div>
+
+                <div class="AnswerList">
+                    <h3>Answers</h3>
+                    #foreach($reply in $page.replies)
+                    <div class="Post Answer ClearFix">
+                        <div class="Avatar"> <img src="/static/common/photo02.jpg" width="50" height="50" alt="$reply.poster.nickName" /> </div>
+                        <div class="Details">
+                            <div class="Description">
+                                <p>$reply.notes</p>
+                            </div>
+                            <p>
+                                <abbr title="$formatter.formatDateISO8601($reply.postDate)" class="info timeago">$reply.postDate</abbr>
+                                <em><a href="#">$reply.poster.nickName</a></em>
+                            </p>
+                        </div>
+                    </div>
+                    #end
+                </div>
+                <div class="ControllerContainer"> <a href="#postComment" class="button ShowModal">Post a comment</a> </div>
+            </div>
+        </div>
+
+        <div id="postComment" class="Modal"> 
+            <a href="" class="Close" title="Close">Close</a>
+            <h3 class="Title">Post a comment</h3>
+            <form method="POST" action=".">
+                <textarea name="newComment" placeholder="Leave a comment here" cols="50" rows="10" class="required"></textarea>
+                <div class="ControllerContainer"> 
+                    <a href="" class="button">Cancel</a> 
+                    <button type="submit" class="Button">Post</button> 
+                </div>
+            </form>
+        </div>
+
+        <script type="text/javascript">
+            jQuery(function($) {
+                initMyQuestion();
+            });            
+        </script>        
+    </body>
+</html>

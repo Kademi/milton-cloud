@@ -1,199 +1,214 @@
 /* Button */
-.Button {
-	display: inline-block;
- *display: inline;
- *zoom: 1;
-	color: #FFF;
-	padding: 4px 10px;
-	vertical-align: middle;
-	line-height: 19px;
-	font-size: 13px;
-	background: #23a9c8;
-	border-radius: 3px;
+a.Button {
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+    color: #FFF;
+    padding: 4px 10px;
+    vertical-align: middle;
+    line-height: 19px;
+    font-size: 13px;
+    border-radius: 3px;
 }
 /* Icon */
 [class^="Icon-"], [class*=" Icon-"] {
- background-position: 50% 50%;
- background-repeat: no-repeat;
- display: inline-block;
- *display: inline;
- *zoom: 1;
- height: 14px;
- line-height: 14px;
- vertical-align: text-top;
- width: 14px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+    height: 14px;
+    line-height: 14px;
+    vertical-align: text-top;
+    width: 14px;
 }
-.Icon-add { background-image: url(images/icon_add.png); }
+.Icon-add { background-image: url(icon_add.png); }
 /* Content panel */
-#content { padding: 15px; }
-#content > div.Control {
-	background-color: #33a9c8;
-	padding: 0 10px;
-	border-radius: 5px;
-	line-height: 27px;
-	margin-bottom: 3px;
-	color: #FFF;
+.content { padding: 15px; }
+.content > div.Control {
+    background-color: #33a9c8;
+    padding: 0 10px;
+    border-radius: 5px;
+    line-height: 27px;
+    margin-bottom: 3px;
+    color: #FFF;
 }
-#content > div.Control h3 {
-	float: left;
-	font-family: 'FrutigerLTStd-Roman';
-	font-size: 14px;
+.content > div.Control h3 {
+    float: left;
+    font-family: 'FrutigerLTStd-Roman';
+    font-size: 14px;
 }
-#content > div.Control a.Button {
-	float: right;
-	border-left: 1px solid #58b9d2;
-	text-transform: uppercase;
-	font-size: 11px;
+.content .bar a.Button {
+    float: right;
+    border-left-width: 1px;
+    border-left-style: solid;
+    text-transform: uppercase;
+    font-size: 11px;
 }
 ul.PostList {
-	background-color: #eeeeee;
-	border-radius: 5px;
-	padding: 0 5px 5px;
+    background-color: #eeeeee;
+    border-radius: 5px;
+    padding: 0 5px 5px;    
+    text-align: justify;
 }
 ul.PostList li.Post {
-	float: left;
-	margin-top: 5px;
-	padding: 5px;
-	border: 1px solid #dedede;
-	border-radius: 5px;
-	background-color: #FFF;
+    margin-top: 15px;
+    margin-left: 5px;
+    margin-right: 10px;
+    padding: 5px;
+    border: 1px solid #dedede;
+    border-radius: 5px;
+    background-color: #FFF;
+    list-style: none;
+    float: left;
+    width: 45%;
+    max-width: 420px;
 }
 ul.PostList li.Post.Odd { float: right; }
 ul.PostList li.Post div.Reply { float: right; }
 /* Avatar Panel */
 .Avatar {
-	float: left;
-	padding: 5px;
-	width: 50px;
+    float: left;
+    padding: 12px 8px;
+    width: 50px;
 }
 /* Details Panel */
 .Details { margin-left: 60px; *float: left; *padding-left: 5px; *margin-left: 0; }
 .Details h4 {
-	padding-top: 10px;
-	font-size: 15px;
-	margin-bottom: 5px;
+    padding-top: 10px;
+    font-size: 15px;
 }
 .Details h3 {
-	padding-top: 10px;
-	font-size: 18px;
-	margin-bottom: 5px;
+    padding-top: 3px;
+    font-size: 18px;
 }
-.Details > p { margin-bottom: 15px; }
+.Details > p { 
+    margin-bottom: 5px; 
+}
 .Details .Description { margin-bottom: 15px; }
 .Details :last-child { margin-bottom: 0; }
 /* Reply Number Panel */
 .ReplyNumber {
-	float: right;
-	width: 55px;
-	text-align: center;
-	background-color: #ebebeb;
-	border-radius: 5px;
-	text-transform: uppercase;
-	padding: 20px 0;
-	font-size: 10px;
+    float: right;
+    width: 55px;
+    text-align: center;
+    background-color: #ebebeb;
+    border-radius: 5px;
+    text-transform: uppercase;
+    padding: 13px 0;
+    font-size: 10px;
+    margin-left: 20px;
 }
 .ReplyNumber strong {
-	display: block;
-	font-size: 25px;
+    display: block;
+    font-size: 25px;
 }
 /* Post Details Panel */
 .PostDetails div.Post {
-	border: 1px solid #e7e7e7;
-	border-radius: 5px;
-	padding: 15px;
-	margin-bottom: 10px;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
 }
-.PostDetails div.Post div.Avatar { padding: 4px 0 0; }
+.PostDetails div.Post div.Avatar { 
+    padding: 0; 
+}
 .PostDetails div.Post.Question { background-color: #efefef; }
 /* Answer List */
 .AnswerList h3 {
-	color: #23a9c8;
-	border-bottom: 1px solid #eaeaea;
-	margin-bottom: 7px;
-	font-size: 23px;
-	padding-bottom: 7px;
+    color: #23a9c8;
+    border-bottom: 1px solid #eaeaea;
+    margin-bottom: 7px;
+    font-size: 23px;
+    padding-bottom: 7px;
 }
 /* Controller Container */
 .ControllerContainer { text-align: right; }
 /* Clear Button */
 .ClearButtonContainer { position: relative; }
 .ClearButtonContainer a.ClearButton {
-	position: absolute;
-	right: 10px;
-	top: 50%;
-	margin-top: -10px;
-	background: url(images/icon_clear.png) no-repeat 50% 50%;
-	width: 21px;
-	height: 21px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    margin-top: -10px;
+    background: url(icon_clear.png) no-repeat 50% 50%;
+    width: 21px;
+    height: 21px;
 }
 /* Modal */
 .Modal {
-	width: 555px;
-	padding: 20px;
-	border: 1px solid #b2b2b2;
-	border-radius: 5px;
-	box-shadow: 0 0 30px rgba(0, 0, 0, .5);
-	position: relative;
-	display: none;
-	background: #FFF;
+    width: 555px;
+    padding: 20px;
+    border: 1px solid #b2b2b2;
+    border-radius: 5px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    position: relative;
+    display: none;
+    background: #FFF;
 }
 .Modal a.Close {
-	display: block;
-	width: 14px;
-	height: 14px;
-	position: absolute;
-	right: 14px;
-	top: 12px;
-	background: url(images/icon_close.png) no-repeat 50% 50%;
-	z-index: 9;
+    display: block;
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    background: url(icon_close.png) no-repeat 50% 50%;
+    z-index: 9;
+    text-indent: -9999px;
 }
 .Modal .Button {
-	text-align: center;
-	width: 65px;
+    text-align: center;
+    width: 65px;
 }
 .Modal .Title {
-	font-size: 20px;
-	color: #33a9c8;
-	margin-bottom: 15px;
+    font-size: 20px;
+    color: #33a9c8;
+    margin-bottom: 15px;
 }
-.Modal table.Form { width: 100%; }
-.Modal table.Form td { padding-bottom: 10px; }
-.Modal table.Form input, .Modal table.Form textarea {
-	border: 1px solid #c6c6c6;
-	background: #F0F0F0;
-	padding: 10px 13px;
-	width: 527px;
+.Modal input, .Modal textarea {
+    border: 1px solid #c6c6c6;
+    background: #F0F0F0;
+    padding: 10px 13px;
+    width: 527px;
 }
-.Modal table.Form input { font-size: 16px; }
-.Modal table.Form textarea {
-	resize: none;
-	height: 200px;
-	overflow: auto;
+.Modal input { 
+    font-size: 16px; 
+    margin-bottom: 10px;
+}
+.Modal textarea {
+    resize: none;
+    height: 200px;
+    overflow: auto;
 }
 /* Style for placeholder */
 .placeholder {
-	color: #2f2f2f;
-	font-family: 'FrutigerLTStd-Italic';
+    color: #2f2f2f;
+    font-family: 'FrutigerLTStd-Italic';
 }
 :-moz-placeholder {
- color: #2f2f2f;
- font-family: 'FrutigerLTStd-Italic';
+    color: #2f2f2f;
+    font-family: 'FrutigerLTStd-Italic';
 }
 ::-webkit-input-placeholder {
- color: #2f2f2f;
- font-family: 'FrutigerLTStd-Italic';
+    color: #2f2f2f;
+    font-family: 'FrutigerLTStd-Italic';
 }
 /* Hidden component */
 .Hidden { display: none !important; }
 /* Clear fix */
 .ClearFix:after {
-	clear: both;
-	content: ".";
-	display: block;
-	font-size: 0;
-	height: 0;
-	line-height: 0;
-	visibility: hidden;
+    clear: both;
+    content: ".";
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
 }
 * html .ClearFix { zoom: 1; } /* IE6 */
 *:first-child + html .ClearFix { zoom: 1; } /* IE7 */
+
+abbr.timeago {
+    color: #959595;
+}

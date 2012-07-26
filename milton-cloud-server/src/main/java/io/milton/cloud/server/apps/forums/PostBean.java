@@ -44,7 +44,7 @@ public class PostBean {
             @Override
             public void visit(ForumPost p) {
                 b.setContentTitle(p.getTopic().getTitle());
-                b.setContentHref(ForumsApp.toHref(p));                
+                b.setContentHref(ForumsApp.toHref(p));
             }
 
             @Override
@@ -103,6 +103,6 @@ public class PostBean {
     public void setUser(ProfileBean user) {
         this.user = user;
     }
-    
-    
+
+      
 }

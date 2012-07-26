@@ -12,11 +12,12 @@ import io.milton.cloud.common.Triplet;
 import io.milton.httpclient.Host;
 
 /**
- * Loads triplets from a remote server over HTTP
+ * Loads triplets from a remote server over HTTP. Can lookup triplets by path
+ * or by parent directory hash
  *
  * @author brad
  */
-public class HttpTripletStore implements TripletStore {
+public class HttpTripletStore implements ParentHashAwareTripletStore {
     private final Host host;
     private final Path rootPath;
 
@@ -30,13 +31,27 @@ public class HttpTripletStore implements TripletStore {
         this.rootPath = rootPath;
     }
 
-
-
     @Override
     public List<Triplet> getTriplets(Path path) {
         Path p = rootPath.add(path);
+        p = p.child("_triplets");
+        try {            
+            byte[] arrRemoteTriplets = host.doGet(p);
+            List<Triplet> triplets = HashUtils.parseTriplets(new ByteArrayInputStream(arrRemoteTriplets));
+            return triplets;
+        } catch (IOException ex) {
+            throw new RuntimeException(p.toString(), ex);
+        } catch (NotFoundException ex) {
+            return null;
+        } catch(Throwable e) {
+            throw new RuntimeException(p.toString(), e);
+        }
+    }
+
+    @Override
+    public List<Triplet> getTriplets(long hash) {
+        Path p = Path.root.child("_hashes").child("dirhashes").child(hash+"");
         Map<String,String> params = new HashMap<>();
-        params.put("type", "hashes");        
                         
         try {            
             byte[] arrRemoteTriplets = host.doGet(p, params);
@@ -49,5 +64,5 @@ public class HttpTripletStore implements TripletStore {
         } catch(Throwable e) {
             throw new RuntimeException(p.toString(), e);
         }
-    }    
+    }
 }

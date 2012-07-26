@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.forums;
 
+import io.milton.cloud.server.db.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -42,6 +43,10 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -50,12 +55,12 @@ import static io.milton.context.RequestContext._;
 public class ManagePostsPage extends AbstractResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManagePostsPage.class);
-    
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
+    private JsonResult jsonResult;
 
-    public ManagePostsPage(String name, Organisation organisation, CommonCollectionResource parent) {        
+    public ManagePostsPage(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -63,16 +68,49 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }    
-        
-    
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
-        MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuManagePosts");
-        _(HtmlTemplater.class).writePage("admin","forums/managePosts", this, params, out);
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        if (parameters.containsKey("deleteId")) {
+            Long deletePostId = Long.parseLong(parameters.get("deleteId"));
+            Post p = (Post) session.get(Post.class, deletePostId);
+            p.delete(session);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } else if( parameters.containsKey("editId")) {
+            Long editPostId = Long.parseLong(parameters.get("editId"));
+            String newNotes = parameters.get("newText");
+            Post p = (Post) session.get(Post.class, editPostId);
+            p.setNotes(newNotes);
+            session.save(p);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+            
+        }
+        return null;
     }
-        
+
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuManagePosts");
+            _(HtmlTemplater.class).writePage("admin", "forums/managePosts", this, params, out);
+        }
+    }
+
+    public List<RecentPostBean> getLatestPosts() {
+        List<RecentPostBean> beans = new ArrayList<>();
+        for (Post p : Post.findByOrg(getOrganisation(), 100, SessionManager.session())) {
+            beans.add(toBean(p));
+        }
+        return beans;
+    }
+
+    public String getTitle() {
+        return "Manage posts";
+    }
+
     @Override
     public boolean isDir() {
         return false;
@@ -113,7 +151,6 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -128,19 +165,139 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
     public Long getContentLength() {
         return null;
     }
-    
+
     @Override
     public Organisation getOrganisation() {
         return organisation;
     }
-        
+
     @Override
     public boolean is(String type) {
-        if( type.equals("manageRewards")) {
+        if (type.equals("manageRewards")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
+
+    private RecentPostBean toBean(Post p) {
+        final RecentPostBean b = new RecentPostBean();
+        b.setId(p.getId());
+        b.setNotes(p.getNotes());
+        b.setDate(p.getPostDate());
+        b.setUser(ProfileBean.toBean(p.getPoster()));
+
+        PostVisitor visitor = new PostVisitor() {
+
+            @Override
+            public void visit(Comment c) {
+                b.setContentHref(c.getContentHref());
+                b.setContentTitle(c.getContentTitle());
+                b.setType("c"); // comment
+            }
+
+            @Override
+            public void visit(ForumPost p) {
+                b.setForumTitle(p.getTopic().getForum().getTitle());
+                b.setTopicTitle(p.getTopic().getTitle());
+                b.setContentHref(ForumsApp.toHref(p));
+                b.setType("q"); // question
+            }
+
+            @Override
+            public void visit(ForumReply r) {
+                b.setForumTitle(r.getPost().getTopic().getForum().getTitle());
+                b.setTopicTitle(r.getPost().getTopic().getTitle());
+                b.setContentHref(ForumsApp.toHref(r.getPost()));
+                b.setType("r"); // reply
+            }
+        };
+        p.accept(visitor);
+
+        return b;
+    }
+
+    public class RecentPostBean {
+
+        private long id;
+        private ProfileBean user;
+        private String notes;
+        private String forumTitle;
+        private String topicTitle;
+        private String contentTitle;
+        private String contentHref;
+        private Date date;
+        private String type;
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public String getForumTitle() {
+            return forumTitle;
+        }
+
+        public void setForumTitle(String forumTitle) {
+            this.forumTitle = forumTitle;
+        }
+
+        public String getTopicTitle() {
+            return topicTitle;
+        }
+
+        public void setTopicTitle(String parentTitle) {
+            this.topicTitle = parentTitle;
+        }
+
+        public String getContentHref() {
+            return contentHref;
+        }
+
+        public void setContentHref(String contentHref) {
+            this.contentHref = contentHref;
+        }
+
+        public String getContentTitle() {
+            return contentTitle;
+        }
+
+        public void setContentTitle(String contentTitle) {
+            this.contentTitle = contentTitle;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        public String getNotes() {
+            return notes;
+        }
+
+        public void setNotes(String notes) {
+            this.notes = notes;
+        }
+
+        public ProfileBean getUser() {
+            return user;
+        }
+
+        public void setUser(ProfileBean user) {
+            this.user = user;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+    }
 }

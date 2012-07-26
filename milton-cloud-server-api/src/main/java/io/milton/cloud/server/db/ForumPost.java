@@ -14,14 +14,16 @@
  */
 package io.milton.cloud.server.db;
 
-import io.milton.cloud.server.db.PostVisitor;
-import io.milton.cloud.server.db.Post;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
 
 /**
  *
@@ -30,13 +32,18 @@ import org.hibernate.Session;
 @Entity
 @DiscriminatorValue("FP")
 public class ForumPost extends Post implements Serializable{
+
+    public static ForumPost findByName(String childName, ForumTopic forumTopic, Session session) {
+        Criteria c = session.createCriteria(ForumPost.class);
+        c.add(Expression.eq("name", childName));
+        c.add(Expression.eq("topic", forumTopic));
+        return DbUtils.unique(c);
+    }
+    
     private List<ForumReply> forumReplys;
     private ForumTopic topic;
-    private Profile poster;
-    private Date postDate;
     private String name;
     private String title;
-    private String notes;
 
 
     @ManyToOne(optional=false)
@@ -80,6 +87,7 @@ public class ForumPost extends Post implements Serializable{
         visitor.visit(this);
     }
 
+    @Override
     public void delete(Session session) {
         if( getForumReplys() != null ) {
             for( ForumReply r : getForumReplys()) {
@@ -87,5 +95,20 @@ public class ForumPost extends Post implements Serializable{
             }
         }
         session.delete(this);
+    }
+
+    public ForumReply addComment(String newComment, Profile currentUser, Date now, Session session) {
+        ForumReply r = new ForumReply();
+        r.setNotes(newComment);
+        r.setPost(this);
+        r.setPostDate(now);
+        r.setPoster(currentUser);
+        r.setWebsite(this.getWebsite());
+        if( this.getForumReplys() != null ) {
+            this.setForumReplys(new ArrayList<ForumReply>());
+        }
+        this.getForumReplys().add(r);
+        session.save(r);
+        return r;
     }
 }

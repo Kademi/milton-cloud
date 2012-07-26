@@ -3,62 +3,36 @@
         <title>$view.title</title>
         <link href="managePost.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="managePost.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.timeago.js">//</script>
     </head>
     <body>
         <section id="managePost" class="MainContent">
+            #foreach($post in $page.latestPosts)
             <div class="Post Comment ClearFix">
                 <header>
-                    <strong>Forum:</strong> <a href="">How drugs affect young people</a> > <strong>Topic:</strong> <a href="">Getting started</a>
+                    #if( $post.forumTitle )
+                    <strong>Forum:</strong> <a href="">$post.forumTitle</a> > <strong>Topic:</strong> <a href="$post.contentHref">$post.topicTitle</a>
+                    #else
+                    <a href="$post.contentHref">$post.contentTitle</a>
+                    #end
                 </header>		
-                <aside>1hr ago<br />Robert J Brown</aside>
+                <aside>
+                    <abbr title="$formatter.formatDateISO8601($post.date)" class="timeago">$post.date</abbr>
+                    <br />
+                    <a href="$post.user.href">$post.user.name</a>
+                </aside>
                 <div class="Content">
-                    <p>Lorem ipsum dolor sit amet, nullam ipsum, sed arcu fringilla nisl purus. Ac molestie phasellus quis eu elit urna, maecenas vivamus morbi vel ac, vestibulum eros neque arcu rutrum orci odio, etiam urna risus non, cursus consequat nunc egestas nam. Quisque etiam orci, quibusdam phasellus, et eget orci id, purus pellentesque adipiscing justo elit tempus.</p>
-                    <p>Lorem ipsum dolor sit amet, nullam ipsum, sed arcu fringilla nisl purus. Ac molestie.</p>
+                    <p>$post.notes</p>
                 </div>
                 <footer class="ClearFix Clear">
                     <div>
-                        <select class="Small">
-                            <option value="0" selected="selected">Hidden</option>
-                            <option value="1">Visible</option>
-                        </select>
+                        <a href="$post.id" title="Edit this post" class="Edit EditPost"><span class="Hidden">Edit this post</span></a>
+                        <a href="$post.id" title="Delete this post" class="Delete DeletePost"><span class="Hidden">Delete this post</span></a>
                     </div>
                 </footer>
             </div>
-            <div class="Post Question ClearFix">
-                <header>
-                    <strong>Forum:</strong> <a href="">How drugs affect young people</a> > <strong>Topic:</strong> <a href="">Getting started</a>
-                </header>		
-                <aside>1hr ago<br />Robert J Brown</aside>
-                <div class="Content">
-                    <p>How many drugs should I take based on my levels of depression?</p>
-                </div>
-                <footer class="ClearFix Clear">
-                    <div>
-                        <select class="Small">
-                            <option value="0" selected="selected">Hidden</option>
-                            <option value="1">Visible</option>
-                        </select>
-                    </div>
-                </footer>
-            </div>
-            <div class="Post Comment ClearFix">
-                <header>
-                    <strong>Forum:</strong> <a href="">How drugs affect youn dfg fdg dfg fdg fdgfdg dfg dfg fdg fdg dfgg people</a> > <strong>Topic:</strong> <a href="">Getting s dfgdfgdfg tarted dfg fdgdfg fdgfd</a>
-                </header>		
-                <aside>1hr ago<br />Robert J Brown</aside>
-                <div class="Content">
-                    <p>Lorem ipsum dolor sit amet, nullam ipsum, sed arcu fringilla nisl purus. Ac molestie phasellus quis eu elit urna, maecenas vivamus morbi vel ac, vestibulum eros neque arcu rutrum orci odio, etiam urna risus non, cursus consequat nunc egestas nam. Quisque etiam orci, quibusdam phasellus, et eget orci id, purus pellentesque adipiscing justo elit tempus.</p>
-                    <p>Lorem ipsum dolor sit amet, nullam ipsum, sed arcu fringilla nisl purus. Ac molestie.</p>
-                </div>
-                <footer class="ClearFix Clear">
-                    <div>
-                        <select class="Small">
-                            <option value="0" selected="selected">Hidden</option>
-                            <option value="1">Visible</option>
-                        </select>
-                    </div>
-                </footer>
-            </div>
+            #end
+
         </section>
         <div class="Hidden">
             <div id="controller">		
@@ -66,6 +40,25 @@
                 <a class="Delete DeletePost" title="Edit this post" href=""><span class="Hidden">Delete this post</span></a>
             </div>
         </div>
+     
+        <div id="editPost" class="Modal">
+            <header>
+                <h3>Edit Post</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <td><textarea name="editComment" cols="50" rows="10" class="required"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="Btn">
+                            <button>Save changes</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>        
         <script type="text/javascript">
             jQuery(function() {
                 initManagePost();

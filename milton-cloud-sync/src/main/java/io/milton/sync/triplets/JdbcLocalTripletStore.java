@@ -108,7 +108,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             }
         });
     }
-
+  
+    
     @Override
     public List<Triplet> getTriplets(Path path) {
         if (!initialScanDone) {
@@ -116,7 +117,6 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             scan();
             initialScanDone = true;
             log.info("getTriplets: Initial scan finished. Now, proceed with syncronisation...");
-
         }
 
         final File f = Utils.toFile(root, path);
@@ -433,4 +433,5 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             }
         });
     }
+
 }

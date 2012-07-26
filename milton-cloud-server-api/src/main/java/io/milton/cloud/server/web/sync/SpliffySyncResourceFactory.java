@@ -11,10 +11,11 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.ResourceFactory;
+import io.milton.vfs.db.DataItem;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.List;
 import org.apache.log4j.Logger;
 
 /**
@@ -71,45 +72,57 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         }
 
         if (path.startsWith(basePath)) {
-            path = path.substring(basePath.length()); // strip the base path
-            Path p = Path.path(path);
-            int numPathParts = p.getParts().length;
-            if (numPathParts == 0) {
-                return null; // we don't have a meaningful root folder
-            } else if (numPathParts > 2) {
-                return null; // not a recognised depth
-            }
-            String first = p.getFirst();
-            switch (first) {
-                case "fanouts":
-                    if (numPathParts == 1) {
-                        return new FanoutFolder(hashStore, "fanouts", securityManager, org);
-                    } else {
-                        String sHash = p.getName();
-                        long hash = Long.parseLong(sHash);
-                        return findFanout(hash, org);
-                    }
-                case "blobs":
-                    if (numPathParts == 1) {
-                        return new BlobFolder(blobStore, "blobs", securityManager, org);
-                    } else {
-                        String sHash = p.getName();
-                        long hash = Long.parseLong(sHash);
-                        return findBlob(hash, org);
-                    }
-                case "files":
-                    if (numPathParts == 1) {
-                        return new FilesFolder(blobStore, hashStore, path, securityManager, org);
-                    } else {
-                        String sHash = p.getName();
-                        long hash = Long.parseLong(sHash);
-                        return findGetResource(hash, org);
-                    }
-                default:
-                    return null;
-            }
+            return getSyncResource(path, org);
         } else {
             return null;
+        }
+    }
+
+    private Resource getSyncResource(String path, Organisation org) throws NumberFormatException {
+        path = path.substring(basePath.length()); // strip the base path
+        Path p = Path.path(path);
+        int numPathParts = p.getParts().length;
+        if (numPathParts == 0) {
+            return null; // we don't have a meaningful root folder
+        } else if (numPathParts > 2) {
+            return null; // not a recognised depth
+        }
+        String first = p.getFirst();
+        switch (first) {
+            case "fanouts":
+                if (numPathParts == 1) {
+                    return new FanoutFolder(hashStore, "fanouts", securityManager, org);
+                } else {
+                    String sHash = p.getName();
+                    long hash = Long.parseLong(sHash);
+                    return findFanout(hash, org);
+                }
+            case "blobs":
+                if (numPathParts == 1) {
+                    return new BlobFolder(blobStore, "blobs", securityManager, org);
+                } else {
+                    String sHash = p.getName();
+                    long hash = Long.parseLong(sHash);
+                    return findBlob(hash, org);
+                }
+            case "files":
+                if (numPathParts == 1) {
+                    return new FilesFolder(blobStore, hashStore, path, securityManager, org);
+                } else {
+                    String sHash = p.getName();
+                    long hash = Long.parseLong(sHash);
+                    return findGetResource(hash, org);
+                }
+            case "dirhashes":
+                if (numPathParts == 1) {
+                    return new DirectoryHashesFolder(blobStore, hashStore, path, securityManager, org);
+                } else {
+                    String sHash = p.getName();
+                    long hash = Long.parseLong(sHash);
+                    return findDirectoryHashResource(hash, org);
+                }
+            default:
+                return null;
         }
     }
 
@@ -141,6 +154,10 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
             return new GetResource(fanout, hash, securityManager, org, blobStore, hashStore);
         }
         
+    }
+
+    private Resource findDirectoryHashResource(long hash, Organisation org) {
+        return new DirectoryHashResource(hash, securityManager, org);
     }
             
 }

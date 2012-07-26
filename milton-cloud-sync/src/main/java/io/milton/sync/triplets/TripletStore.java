@@ -26,4 +26,5 @@ public interface TripletStore {
      * if the directory was not found
      */
     List<Triplet> getTriplets(Path path);
+    
 }

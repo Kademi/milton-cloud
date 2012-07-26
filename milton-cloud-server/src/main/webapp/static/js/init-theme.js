@@ -254,6 +254,19 @@ $.fn.disable = function(is_disable) {
     return $(this).attr('disabled', is_disable);
 };
 
+// Ensure support for toISOString in all browsers
+if (!Date.prototype.toISOString) {
+    Date.prototype.toISOString = function() {
+        function pad(n) { return n < 10 ? '0' + n : n }
+        return this.getUTCFullYear() + '-'
+            + pad(this.getUTCMonth() + 1) + '-'
+                + pad(this.getUTCDate()) + 'T'
+                    + pad(this.getUTCHours()) + ':'
+                        + pad(this.getUTCMinutes()) + ':'
+                            + pad(this.getUTCSeconds()) + 'Z';
+    };
+}
+
 var typewatch = (function(){
     var timer = 0;
     return function(callback, ms){
@@ -261,6 +274,8 @@ var typewatch = (function(){
         timer = setTimeout(callback, ms);
     }  
 })();
+
+
 
 function showAddItem(source) {
     var modal = $(source).parent().find(".Modal");
