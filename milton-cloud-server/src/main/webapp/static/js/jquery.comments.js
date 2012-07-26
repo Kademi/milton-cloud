@@ -68,7 +68,6 @@ function sendNewForumComment( pageUrl, commentInput, renderComment, currentUser)
             commentInput.val('');
             currentDate = new Date();
             renderComment(currentUser, currentDate, comment);
-            $('#forumReply').dialog("close");
         },
         error: function() {
             ajaxLoadingOff();

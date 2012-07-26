@@ -141,9 +141,13 @@ public class ProcessContext {
         transitionTo( transition.getToState() );
         fireOnEnter( transition.getToState() );
         if( transition.getToState().getInterval() != null ) {
-            timerService.registerTimer(this);
+            if( timerService != null ) {
+                timerService.registerTimer(this);
+            }
         } else {
-            timerService.unRegisterTimer(this);
+            if( timerService != null ) {
+                timerService.unRegisterTimer(this);
+            }
         }
 
         // now scan again in case the next transition is already valid

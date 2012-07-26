@@ -3,7 +3,6 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
@@ -28,7 +27,6 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
-import org.hibernate.LockMode;
 
 /**
  * Represents the current version of a branch in a repository
@@ -258,9 +256,15 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public void addPrivs(List<Priviledge> list, Profile user) {
-        Set<Permission> perms = SecurityUtils.getPermissions(user, branch, SessionManager.session());
-        SecurityUtils.addPermissions(perms, list);
-        parent.addPrivs(list, user);
+//        Set<Permission> perms = SecurityUtils.getPermissions(user, branch, SessionManager.session());
+//        SecurityUtils.addPermissions(perms, list);
+//        parent.addPrivs(list, user);
+        // TODO
+        list.add(Priviledge.ALL);
+        list.add(Priviledge.READ);
+        list.add(Priviledge.READ_ACL);
+        list.add(Priviledge.WRITE);
+        list.add(Priviledge.WRITE_ACL);
     }
 
     /**

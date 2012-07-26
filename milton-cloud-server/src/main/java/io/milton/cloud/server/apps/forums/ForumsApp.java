@@ -21,7 +21,10 @@ import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.Forum;
+import io.milton.cloud.server.db.ForumTopic;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.common.Path;
@@ -33,6 +36,7 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Website;
 
 /**
  *
@@ -41,7 +45,13 @@ import static io.milton.context.RequestContext._;
 public class ForumsApp implements MenuApplication, ResourceApplication, PortletApplication {
 
     public static String toHref(ForumPost r) {
-        return "todo";
+        ForumTopic topic = r.getTopic();
+        Forum forum = topic.getForum();
+        Website website = forum.getWebsite();
+        String sPort = _(Formatter.class).getPortString();
+        String path = "/community/" + forum.getName() + "/" + topic.getName() + "/" + r.getName();
+        String url = "http://" + website.getName() + sPort + path;
+        return url;
     }
 
     @Override

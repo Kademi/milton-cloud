@@ -27,10 +27,10 @@ function processPosts(comments) {
         comments.sort( dateOrd );
         for( i=0; i<comments.length; i++ ) {
             var comment = comments[i];
-            log("processPost", comment);
             var dt = new Date(comment.date);
             displayPost(comment.user, dt, comment.notes, comment.contentTitle, comment.contentHref); // pageTitle and pagePath are only present for aggregated results
         }
+        jQuery(".barList abbr").timeago();
     }
 }
 
@@ -39,14 +39,14 @@ function displayPost(user, date, comment, pageTitle, pagePath) {
         log("missing user, ignore");
         return;
     }
-    log("displayPost",  user);
     var li = $("<li>");
     if( user.photoHref ) {
         li.append("<a class='profilePic' href='#'><img src='" + user.photoHref + "' alt='' /></a>");
     }
     li.append("<a class='user' href='#'>" + user.name + "</a> posted in <a class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
     li.append("<p>" + comment + "</p>");
-    li.append("<em>" + toDisplayDateNoTime(date) + "</em>");
+    var formattedDate = date.toISOString();
+    li.append("<em><abbr class='timeago' title='" + formattedDate + "'>" + formattedDate + "</abbr></em>");
     $(".barList").append(li);
             
 //                <li>
