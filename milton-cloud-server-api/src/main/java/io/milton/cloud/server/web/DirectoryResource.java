@@ -86,6 +86,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         if (children == null) {
             children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
             _(ApplicationManager.class).addBrowseablePages(this, children);
+            children = children.getSortByName(); // ensure a stable and predictable sorting
         }
         return children;
     }

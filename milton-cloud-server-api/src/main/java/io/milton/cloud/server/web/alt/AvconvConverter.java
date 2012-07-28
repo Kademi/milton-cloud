@@ -25,23 +25,28 @@ public class AvconvConverter implements Closeable {
     private final ContentTypeService contentTypeService;
     private final String process;
     private final long primaryMediaHash;
+    private final FormatSpec format;
     private final String inputName;
     private final String inputExt;
     private final HashStore hashStore;
     private final BlobStore blobStore;
-    private File source;    
+    private File source;
+    private final File dest;
     private long sourceLength;
 
-
-    public AvconvConverter(String process, long primaryMediaHash, String inputName, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore) {
+    public AvconvConverter(String process, long primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.process = process;
+        this.format = format;
+        if (format == null) {
+            throw new RuntimeException("Format cannot be null");
+        }
+        dest = new File(TEMP_DIR, "convert_" + System.currentTimeMillis() + "." + format.getOutputType());
         this.contentTypeService = contentTypeService;
         this.primaryMediaHash = primaryMediaHash;
         this.inputName = inputFormat;
         this.inputExt = FileUtils.getExtension(inputName);
-        source = createSourceFile();        
     }
 
     @Override
@@ -58,18 +63,24 @@ public class AvconvConverter implements Closeable {
         }
     }
 
+    public File getDest() {
+        return dest;
+    }
+
     /**
      * Returns whatever the with callback returns, usually hash or content
      * length
      *
      * @param format
      * @param with
-     * @return - null indicates no file was generated. Oterhwise returns whatever
-     * the callback returned
+     * @param out - if not null the generated file will be streamed out as its
+     * generated
+     * @return - null indicates no file was generated. Oterhwise returns
+     * whatever the callback returned
      */
-    public Long generate(FormatSpec format, With<InputStream, Long> with) throws Exception{
-        log.info("generateThumb: " + format);
-        File dest = getDestFile(format.getOutputType());
+    public Long generate(With<InputStream, Long> with) throws Exception {
+        log.info("generateThumb: " + format + " to " + dest.getAbsolutePath());
+        source = createSourceFile();
         try {
             List<String> args = new ArrayList<>();
             // TODO: determine original dimensions, then choose x or y axis to scale on so that 
@@ -81,44 +92,50 @@ public class AvconvConverter implements Closeable {
             args.add("-i");
             args.add(source.getAbsolutePath());
 
+            args.add("-strict");
+            args.add("experimental");
+            args.add("-vf");
+            args.add(scale);
+
             if (isVideoOutput(format.getOutputType())) {
                 // avconv -i MOV008.MOD -b 1024k -vf "scale=800:-1" /tmp/move008.ogv
                 boolean isCopy = inputExt.equals(format.getOutputType());
-                args.add("-strict");
-                args.add("experimental");
-                args.add("-vf");
-                args.add(scale);
-
-                if (format.type.equals("m4v") || format.type.equals("mp4")) {
-                    args.add("-c:v");
-                    args.add("mpeg4");
-                    args.add("-b:v");
-                    args.add("1024k");
-
-                } else if (format.type.equals("flv")) {
-                    args.add("-ar");
-                    args.add("22050");
-                    args.add("-qmax");
-                    args.add("10");
-
-                } else if (isCopy) {
-                    args.add("-vcodec");
-                    args.add("copy");
-                    args.add("-b:v");
-                    args.add("1024k");
-
-                }
+//                if (isCopy) {
+//                    args.add("-vcodec");
+//                    args.add("copy");
+//                }
+//
+//                if (format.type.equals("m4v") || format.type.equals("mp4")) {
+//                    args.add("-c:v");
+//                    args.add("mpeg4");
+//                    args.add("-b:v");
+//                    args.add("1024k");
+//
+//                } else if (format.type.equals("flv")) {
+//                    args.add("-ar");
+//                    args.add("22050");
+//                    args.add("-qmax");
+//                    args.add("10");
+//                } else if (isCopy) {
+//                    args.add("-vcodec");
+//                    args.add("copy");
+//                    args.add("-b:v");
+//                    args.add("1024k");
+//
+//                }
             } else {
                 //String dimensions = format.getWidth() + "x" + format.getHeight();
-                args.add("-vf");
-                args.add(scale);
-                args.add("-ss");
-                args.add("1");
-                args.add("-vframes");
-                args.add("1");
-                args.add("-f");
-                args.add("mjpeg");
+//                args.add("-ss");
+//                args.add("1");
+//                args.add("-vframes");
+//                args.add("1");
+//                args.add("-f");
+//                args.add("mjpeg");
             }
+            for (String s : format.getConverterArgs()) {
+                args.add(s);
+            }
+
             args.add(dest.getAbsolutePath());
 
             int successCode = 0;
@@ -136,11 +153,11 @@ public class AvconvConverter implements Closeable {
                 throw new Exception("Conversion failed. Dest temp file has size zero. format: " + format);
             }
 
-            if( sourceLength > 0 ) {
+            if (sourceLength > 0) {
                 long percent = dest.length() * 100 / sourceLength;
-                log.info("Compression: " + percent + "% of source file: " + sourceLength/1000000 + "Mb");
+                log.info("Compression: " + percent + "% of source file: " + sourceLength / 1000000 + "Mb");
             }
-            
+
             log.debug(" ffmpeg ran ok. reading temp file back to out stream");
             FileInputStream tempIn = null;
             try {
@@ -152,9 +169,9 @@ public class AvconvConverter implements Closeable {
                 FileUtils.close(tempIn);
             }
         } finally {
-            if (dest.exists()) {
-                dest.delete();
-            }
+//            if (dest.exists()) {
+//                dest.delete();
+//            }
         }
     }
 
@@ -182,14 +199,6 @@ public class AvconvConverter implements Closeable {
             FileUtils.close(out);
         }
         return temp;
-    }
-
-    private static File getDestFile(String suffix) {
-        return createTempFile("convert_" + System.currentTimeMillis(), "." + suffix);
-    }
-
-    private static File createTempFile(String prefix, String suffix) {
-        return new File(TEMP_DIR, prefix + suffix);
     }
 
     public long getSourceLength() {

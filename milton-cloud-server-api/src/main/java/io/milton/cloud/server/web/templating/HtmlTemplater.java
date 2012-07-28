@@ -320,9 +320,11 @@ public class HtmlTemplater {
                     cachedTemplateMetaData.remove(path);
                     meta = null;
                 } else {
+                    log.info("cache hit: " + meta.getSource() + " - " + meta.getClass());
                     return meta;
                 }
             }
+            long tm = System.currentTimeMillis();
 
             Boolean isCustom = RequestContext.getCurrent().get("isCustom");
             if (isCustom == null) {
@@ -368,6 +370,8 @@ public class HtmlTemplater {
             }
 
             if (meta != null) {
+                tm = System.currentTimeMillis() - tm;
+                log.info("cache miss: " + meta.getSource() + " - " + meta.getClass() + " parsed in " + tm + "ms");
                 cachedTemplateMetaData.put(path, meta);
             } else {
                 log.warn("Failed to find: " + path);

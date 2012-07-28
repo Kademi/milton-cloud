@@ -18,23 +18,24 @@ package io.milton.cloud.server.web.alt;
 
 import io.milton.cloud.server.db.AltFormat;
 import io.milton.cloud.server.web.FileResource;
+import io.milton.cloud.server.web.alt.AltFormatGenerator.GenerateJob;
 import io.milton.common.ContentTypeUtils;
 import io.milton.common.Path;
-import io.milton.http.Auth;
-import io.milton.http.Range;
-import io.milton.http.Request;
+import io.milton.http.*;
 import io.milton.http.Request.Method;
-import io.milton.http.ResourceFactory;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.http11.auth.DigestResponse;
+import io.milton.resource.BufferingControlResource;
 import io.milton.resource.DigestResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,6 @@ import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Combiner;
 import org.hashsplit4j.api.Fanout;
 import org.hashsplit4j.api.HashStore;
-import org.hibernate.Transaction;
 
 /**
  * Provides access to alternative formats for a given file.
@@ -75,15 +75,18 @@ public class AltFormatResourceFactory implements ResourceFactory {
                 FileResource fr = (FileResource) r;
                 long sourceHash = fr.getHash();
                 String formatName = p.getName().replace("alt-", "");
-                AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());                
+                AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());
+                FormatSpec format = altFormatGenerator.findFormat(formatName);
                 if (f != null) {
-                    return new AltFormatResource((FileResource) r, p.getName(), f);
+                    return new AltFormatResource((FileResource) r, p.getName(), f, format);
                 } else {
-                    log.warn("getResource: alt format not found: " + sourceHash + " - " + p.getName());
-                    // if the format is valid then create a resource which will generate on demand                    
-                    FormatSpec format = altFormatGenerator.findFormat(formatName);
+                    log.warn("getResource: pre-generated alt format not found: " + sourceHash + " - " + p.getName());
+                    // if the format is valid then create a resource which will generate on demand                                        
                     if (format != null) {
+                        System.out.println("created resource for format: " + format);
                         return new AltFormatResource((FileResource) r, p.getName(), format);
+                    } else {
+                        log.warn("getResource: unrecognised format: " + formatName);
                     }
                     return null;
                 }
@@ -99,19 +102,20 @@ public class AltFormatResourceFactory implements ResourceFactory {
      * Used the hash of the resource and the content type embedded in the name
      * to locate an alternative representation of the resource
      */
-    public class AltFormatResource implements GetableResource, DigestResource {
+    public class AltFormatResource implements GetableResource, DigestResource, BufferingControlResource {
 
         private final FileResource r;
         private final String name;
         private final FormatSpec formatSpec;
         private AltFormat altFormat;
         private Fanout fanout;
+        private boolean doneFanoutLookup;
 
-        public AltFormatResource(FileResource r, String name, AltFormat altFormat) {
+        public AltFormatResource(FileResource r, String name, AltFormat altFormat, FormatSpec formatSpec) {
             this.r = r;
             this.name = name;
             this.altFormat = altFormat;
-            formatSpec = null;
+            this.formatSpec = formatSpec;
         }
 
         public AltFormatResource(FileResource r, String name, FormatSpec formatSpec) {
@@ -122,33 +126,100 @@ public class AltFormatResourceFactory implements ResourceFactory {
         }
 
         @Override
-        public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            Combiner combiner = new Combiner();
-            List<Long> fanoutCrcs = getFanout().getHashes();
-            combiner.combine(fanoutCrcs, hashStore, blobStore, out);
-            out.flush();
+        public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {            
+            try {
+                boolean force = params.containsKey("force");
+                if (altFormat == null || force) {
+                    // hack start
+                    if( params.containsKey("args")) {
+                        List<String> args = new ArrayList<>();
+                        for( String s : params.get("args").split(",")) {
+                            args.add(s);
+                        }
+                        String[] arr = new String[args.size()];
+                        args.toArray(arr);
+                        formatSpec.setConverterArgs(arr);
+                        System.out.println("set args: " + arr);                        
+                    }
+                    
+                    // hack end
+                    System.out.println("generate: " + getName());
+                    GenerateJob j = altFormatGenerator.getOrEnqueueJob(r.getHash(), r.getName(), formatSpec);
+                    System.out.println("got job: " + j);
 
+                    // Wait until the file exists
+                    int cnt = 0;
+                    System.out.println("check if exists..." );
+                    while (!j.getDestFile().exists() && !j.done()) {
+                        cnt++;
+                        System.out.println("sleep..." + cnt + " .. " + j.getDestFile().exists() + " - " + j.done());
+                        doSleep(cnt++, 200, 70);
+                    }
+                    System.out.println("finished sleepy check");
+                    if (!j.getDestFile().exists()) {
+                        throw new RuntimeException("Job did not create a destination file: " + j.getDestFile().getAbsolutePath());
+                    }
+                    System.out.println("use dest file: " + j.getDestFile().getAbsolutePath() + " size: " + j.getDestFile().length());
+                    
+                    FileInputStream fin = new FileInputStream(j.getDestFile());
+                    byte[] buf = new byte[1024];
+                    System.out.println("send file...");
+                    // Read the file until the job is done, or we run out of bytes
+                    int s = fin.read(buf);
+                    System.out.println("send file... " + s);
+                    long bytes = 0;
+                    while (!j.done() || s > 0) {
+                        if (s < 0) { // no bytes available, but job is not done, so wait
+                            System.out.println("sleep...");
+                            doSleep(100);
+                        } else {
+                            System.out.println("write bytes: " + s);
+                            bytes += s;
+                            out.write(buf, 0, s);
+                        }
+                        s = fin.read(buf);
+                    }
+                    System.out.println("finished sending file: " + bytes);
+                } else {
+                    System.out.println("using pre-existing al-format");
+                    Combiner combiner = new Combiner();
+                    List<Long> fanoutCrcs = getFanout().getHashes();
+                    combiner.combine(fanoutCrcs, hashStore, blobStore, out);
+                    out.flush();
+                }
+            } catch (Throwable e) {
+                log.error("Exception sending content", e);
+                throw new IOException("Exception sending content");
+            }
+        }
+
+        @Override
+        public Boolean isBufferingRequired() {
+            return false;
         }
 
         private Fanout getFanout() {
-            if (fanout == null) {
-                fanout = hashStore.getFanout(getAltFormat().getAltHash());
+            if (!doneFanoutLookup) {
+                doneFanoutLookup = true;
+                if (altFormat != null && !HttpManager.request().getParams().containsKey("force")) {
+                    fanout = hashStore.getFanout(altFormat.getAltHash());
+                }
             }
             return fanout;
         }
-
-        private AltFormat getAltFormat() {
-            if (altFormat == null) {
-                Transaction tx = SessionManager.session().beginTransaction();
-                try {
-                    altFormat = altFormatGenerator.generate(formatSpec, r);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                tx.commit();
-            }
-            return altFormat;
-        }
+//
+//        private AltFormat getAltFormat() {
+//            if (altFormat == null) {
+//                Transaction tx = SessionManager.session().beginTransaction();
+//                try {
+//                    altFormat = altFormatGenerator.generate(formatSpec, r);
+//                } catch (IOException ex) {
+//                    throw new RuntimeException(ex);
+//                }
+//                tx.commit();
+//            }
+//            return altFormat;
+//        }
 
         @Override
         public Long getMaxAgeSeconds(Auth auth) {
@@ -157,12 +228,22 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
         @Override
         public String getContentType(String accepts) {
-            return ContentTypeUtils.findAcceptableContentType(name, accepts);
+            String canProvide = ContentTypeUtils.findContentTypes(name);
+            String type = ContentTypeUtils.findAcceptableContentType(canProvide, accepts);
+            System.out.println("content type: " + type);
+            return type;
         }
 
         @Override
         public Long getContentLength() {
-            return getFanout().getActualContentLength();
+            System.out.println("getContentLength");
+            if (getFanout() != null) {
+                Long l = getFanout().getActualContentLength();
+                System.out.println("content length=" + l);
+                return l;
+            }
+            System.out.println("no content length");
+            return null;
         }
 
         @Override
@@ -212,6 +293,25 @@ public class AltFormatResourceFactory implements ResourceFactory {
         @Override
         public boolean isDigestAllowed() {
             return r.isDigestAllowed();
+        }
+
+        private void doSleep(long sleepMillis) {
+            try {
+                Thread.sleep(sleepMillis);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        private void doSleep(int cnt, long sleepMillis, int maxCnt) {
+            if (cnt > maxCnt) {
+                throw new RuntimeException("Timeout");
+            }
+            try {
+                Thread.sleep(sleepMillis);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 }

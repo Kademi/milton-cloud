@@ -20,10 +20,7 @@ import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
@@ -162,4 +159,23 @@ public class Group extends BaseEntity {
         session.save(gr);
         getGroupRoles().add(gr);
     }    
+    
+    public boolean hasRole(String roleName) {
+        if( getGroupRoles() == null ) {
+            return false;
+        }
+        for( GroupRole r : getGroupRoles()) {
+            if( r.getRoleName().equals(roleName)) {
+                return true;
+            }
+        }
+        if( getMemberships() != null ) {
+            for( GroupMembership m : getMemberships() ) {
+                if( m.getGroupEntity().hasRole(roleName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

@@ -32,6 +32,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * 
  * The actual permissions will depend on application configuration.
  * 
+ * 
  * Note: when referring here to "the principal" we are talking about the user
  * which is having its permissions calculated, and is a member of a group with a grouprole
  *

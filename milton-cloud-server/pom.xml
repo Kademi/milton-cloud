@@ -199,6 +199,12 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>template.file.roots</name>
+                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                </systemProperty>                                
+                            </systemProperties>                             
                             <webAppConfig>
                                 <extraClasspath>../../fuse-admin/fuse-app/target/classes/;../../fuse-admin/fuse-war/src/main/resources/</extraClasspath>
                             </webAppConfig>

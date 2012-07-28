@@ -68,6 +68,12 @@ public class HtmlFormatterTest {
         String title;
         String body;
         String template;
+
+        @Override
+        public String getSource() {
+            return "simple";
+        }
+        
         
         
         @Override

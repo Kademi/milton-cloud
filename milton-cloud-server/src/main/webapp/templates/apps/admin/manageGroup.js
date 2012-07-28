@@ -13,13 +13,13 @@ function initPermissionCheckboxes() {
         var $chk = $(this);
         log("checkbox click", $chk, $chk.is(":checked"));
         var isRecip = $chk.is(":checked");
-        var groupName = $chk.parent().attr("rel");
+        var groupName = $chk.closest("aside").attr("rel");
         setGroupRole(groupName, $chk.attr("name"), isRecip);
     });    
 }
 
 function setGroupRole(groupName, roleName, isRecip) {
-    log("setGroupRole", name, isRecip);
+    log("setGroupRole", groupName, roleName, isRecip);
     try {
         $.ajax({
             type: 'POST',

@@ -76,10 +76,12 @@ public class GroupsAdminPage extends AbstractResource implements GetableResource
                 log.info("grant or revoke role: " + role + " - " + isRecip);
                 g.grantRole(role, isRecip, session);
                 tx.commit();
+                jsonResult = new JsonResult(true);
+            } else {
+                jsonResult = new JsonResult(false, "Group not found: " + groupName);
             }
         }        
-
-        jsonResult = new JsonResult(true);
+        
         return null;
     }
 

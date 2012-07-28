@@ -76,7 +76,8 @@
         <constructor-arg ref="blob.store"  />        
         <constructor-arg ref="event.manager" /> 
         <constructor-arg ref="content.type.service" />
-        <constructor-arg ref="async.processor"/>
+        <constructor-arg ref="root.context"/>
+        <constructor-arg ref="session.manager"/>
         <property name="doPreGeneration" value="${pregenerate.media}" />
     </bean>
         

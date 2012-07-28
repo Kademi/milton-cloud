@@ -108,7 +108,7 @@ public class JdbcHashCache implements HashCache {
 
     @Override
     public void setHash(final long hash) {
-        System.out.println("setHash-----------------------------------------------------------");
+        System.out.println("JdbcHashCache: setHash: " + hash);
         inserts++;
         final String insertSql = HASH_CACHE.getInsert();
 
@@ -124,7 +124,7 @@ public class JdbcHashCache implements HashCache {
                     stmt.execute();
                     UseConnection.close(stmt);
                     con.commit();
-                    System.out.println("committttttted");
+                    System.out.println("JdbcHashCache: commited");
 
                     return null;
                 }

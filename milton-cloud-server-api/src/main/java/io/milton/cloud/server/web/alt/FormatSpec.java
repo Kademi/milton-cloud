@@ -25,12 +25,14 @@ public class FormatSpec {
     final String type; // eg flv, png
     final int height;
     final int width;
+    private String[] converterArgs;
 
-    public FormatSpec(String inputType, String type, int width, int height) {
+    public FormatSpec(String inputType, String type, int width, int height, String ... converterArgs) {
         this.inputType = inputType;
         this.type = type;
         this.height = height;
         this.width = width;
+        this.converterArgs = converterArgs;
     }
 
     public int getHeight() {
@@ -48,6 +50,17 @@ public class FormatSpec {
     public String getInputType() {
         return inputType;
     }
+
+    public String[] getConverterArgs() {
+        return converterArgs;
+    }
+
+    public void setConverterArgs(String[] converterArgs) {
+        this.converterArgs = converterArgs;
+    }
+    
+    
+    
         
     /**
      * Combines type, width and height, eg

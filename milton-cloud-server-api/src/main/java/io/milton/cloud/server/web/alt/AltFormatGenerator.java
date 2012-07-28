@@ -18,21 +18,23 @@ package io.milton.cloud.server.web.alt;
 
 import io.milton.cloud.common.With;
 import io.milton.cloud.server.db.AltFormat;
-import io.milton.cloud.server.queue.AsynchProcessor;
-import io.milton.cloud.server.queue.Processable;
-import io.milton.cloud.server.web.FileResource;
 import io.milton.common.ContentTypeService;
 import io.milton.common.FileUtils;
 import io.milton.context.Context;
-import io.milton.event.Event;
-import io.milton.event.EventListener;
+import io.milton.context.Executable2;
+import io.milton.context.RootContext;
 import io.milton.event.EventManager;
-import io.milton.event.PutEvent;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hashsplit4j.api.BlobStore;
@@ -45,101 +47,60 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class AltFormatGenerator implements EventListener {
+public class AltFormatGenerator {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AltFormatGenerator.class);
+    private final RootContext rootContext;
+    private final SessionManager sessionManager;
     private final ContentTypeService contentTypeService;
     private final HashStore hashStore;
     private final BlobStore blobStore;
-    private final AsynchProcessor asynchProcessor;
     private String ffmpeg = "avconv";
     private List<FormatSpec> formats;
-    private boolean doPreGeneration = true;
+    private boolean doPreGeneration = false;
+    private ExecutorService consumer = new ThreadPoolExecutor(1, 4, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100));
+    private final List<GenerateJob> currentJobs = new CopyOnWriteArrayList<>();
 
-    public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, AsynchProcessor asynchProcessor) {
+    public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, RootContext rootContext, SessionManager sessionManager) {
+        this.rootContext = rootContext;
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.contentTypeService = contentTypeService;
+        this.sessionManager = sessionManager;
         this.formats = new ArrayList<>();
-        this.asynchProcessor = asynchProcessor;
-        formats.add(new FormatSpec("image", "png", 150, 150));
+        formats.add(new FormatSpec("image", "png", 150, 150, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
 
-        formats.add(new FormatSpec("video", "flv", 800, 455)); // for non-html video
-        formats.add(new FormatSpec("video", "mp4", 800, 455)); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 800, 455));
+        formats.add(new FormatSpec("video", "flv", 800, 455, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "mp4", 800, 455, "-c:v", "mpeg4","-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 800, 455, "-r", "15", "-b:v", "512k"));
         //formats.add(new FormatSpec("video", "webm", 800, 455));
 
-        formats.add(new FormatSpec("video", "png", 800, 455));
-        eventManager.registerEventListener(this, PutEvent.class);
+        formats.add(new FormatSpec("video", "png", 800, 455, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
     }
 
-    @Override
-    public void onEvent(Event e) {
-        if (e instanceof PutEvent) {
-            PutEvent pe = (PutEvent) e;
-            if (pe.getResource() instanceof FileResource) {
-                FileResource fr = (FileResource) pe.getResource();
-                if (isMedia(fr)) {
-                    Long l = fr.getContentLength();
-                    if (l != null && l > 20000) { // Must be at least 20k, otherwise don't bother
-                        if (!doPreGeneration) {
-                            log.warn("---- NOT doing pregeneration of media");
-                            return;
-                        }
-
-                        onPut(fr);
-                    }
+    /**
+     * Returns an existing job if there is one that matches the inputs,
+     * otherwise attempts to create a new job and enqueue it. If it cannot
+     * insert because of capacity constraints it will fail
+     *
+     * @param primaryHash
+     * @param fileName
+     * @param format
+     * @return
+     */
+    public GenerateJob getOrEnqueueJob(long primaryHash, String fileName, FormatSpec format) {
+        for (GenerateJob j : currentJobs) {
+            if (j.primaryFileHash == primaryHash) {
+                if (format.equals(j.formatSpec)) {
+                    return j;
                 }
             }
         }
-    }
-
-    private void onPut(FileResource fr) {
-        log.info("onPut: enqueueing: " + fr.getName());
-        GenerateJob job = new GenerateJob(fr.getHash(), fr.getName());
-        asynchProcessor.enqueue(job);
-    }
-
-    private void generate(long primaryMediaHash, String name) throws IOException {
-        String ext = FileUtils.getExtension(name);
-
-        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryMediaHash, name, ext, contentTypeService, hashStore, blobStore);
-        if (formats != null) {
-            for (FormatSpec f : formats) {
-                if (is(name, f.inputType)) {
-                    generate(f, primaryMediaHash, converter, name);
-                }
-            }
-        }
-    }
-
-    public AltFormat generate(FormatSpec f, FileResource fr) throws IOException {
-        String ext = FileUtils.getExtension(fr.getName());
-        AvconvConverter converter = new AvconvConverter(ffmpeg, fr.getHash(), fr.getName(), ext, contentTypeService, hashStore, blobStore);
-        return generate(f, fr.getHash(), converter, fr.getHref());
-    }
-
-    public AltFormat generate(FormatSpec f, long primaryHash, AvconvConverter converter, String primaryName) throws IOException {
-        final Parser parser = new Parser();
-        Long altHash;
-        try {
-            altHash = converter.generate(f, new With<InputStream, Long>() {
-
-                @Override
-                public Long use(InputStream t) throws Exception {
-                    long numBytes = parser.parse(t, hashStore, blobStore);
-                    return numBytes;
-                }
-            });
-        } catch (Exception e) {
-            throw new IOException("Couldnt convert: " + primaryName, e);
-        }
-        if (altHash != null) {
-            String name = f.getName();
-            return AltFormat.insertIfOrUpdate(name, primaryHash, altHash, SessionManager.session());
-        } else {
-            return null;
-        }
+        GenerateJob j = new GenerateJob(primaryHash, fileName, format);
+        currentJobs.add(j);
+        System.out.println("submitted new job");
+        consumer.submit(j);
+        return j;
     }
 
     public FormatSpec findFormat(String name) {
@@ -151,31 +112,6 @@ public class AltFormatGenerator implements EventListener {
         return null;
     }
 
-    private boolean is(String name, String type) {
-        // will return a non-null value if type is contained in any content type
-        List<String> list = contentTypeService.findContentTypes(name);
-        if (list != null) {
-            for (String ct : list) {
-                if (ct.contains(type)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isMedia(FileResource fr) {
-        if (formats != null) {
-            String name = fr.getName();
-            for (FormatSpec f : formats) {
-                if (is(name, f.inputType)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public boolean isDoPreGeneration() {
         return doPreGeneration;
     }
@@ -184,24 +120,59 @@ public class AltFormatGenerator implements EventListener {
         this.doPreGeneration = doPreGeneration;
     }
 
-    public class GenerateJob implements Processable {
+    public class GenerateJob implements Runnable {
 
         private static final long serialVersionUID = 1l;
-        private long primaryFileHash;
-        private String primaryFileName;
+        private final long primaryFileHash;
+        private final FormatSpec formatSpec;
+        private final String primaryFileName;
+        private final AvconvConverter converter;
+        private boolean jobDone;
 
-        public GenerateJob(long primaryFileHash, String primaryFileName) {
+        public GenerateJob(long primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
             this.primaryFileHash = primaryFileHash;
             this.primaryFileName = primaryFileName;
+            this.formatSpec = formatSpec;
+            if( formatSpec == null ) {
+                throw new RuntimeException("formatSpec cannot be null");
+            }
+            String ext = FileUtils.getExtension(primaryFileName);
+            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore);
+        }
+
+        public File getDestFile() {
+            return converter.getDest();
         }
 
         @Override
+        public void run() {
+            System.out.println("GenerateJob: run");
+            try {
+                rootContext.execute(new Executable2() {
+
+                    @Override
+                    public void execute(Context context) {
+                        sessionManager.open();
+                        try {
+                            doProcess(context);
+                        } finally {
+                            sessionManager.close();
+                        }
+                    }
+                });
+            } catch (Throwable e) {
+                log.error("Exception in generate job", e);
+            } finally {
+                jobDone = true;
+                currentJobs.remove(this);
+            }
+            System.out.println("Generate job finished");
+        }
+
         public void doProcess(Context context) {
             Transaction tx = SessionManager.session().beginTransaction();
             try {
-                // TODO: this relies on keeping a reference to the AltFormatGenerator. But need to decouple to support
-                // distributed queues
-                generate(primaryFileHash, primaryFileName);
+                generate();
                 tx.commit();
             } catch (IOException ex) {
                 tx.rollback();
@@ -209,8 +180,36 @@ public class AltFormatGenerator implements EventListener {
             }
         }
 
-        @Override
-        public void pleaseImplementSerializable() {
+        public AltFormat generate() throws IOException {
+            final Parser parser = new Parser();
+            Long altHash;
+            try {
+                altHash = converter.generate(new With<InputStream, Long>() {
+
+                    @Override
+                    public Long use(InputStream t) throws Exception {
+                        long numBytes = parser.parse(t, hashStore, blobStore);
+                        return numBytes;
+                    }
+                });
+            } catch (Exception e) {
+                throw new IOException("Couldnt convert: " + primaryFileName, e);
+            }
+            if (altHash != null) {
+                String name = formatSpec.getName();
+                return AltFormat.insertIfOrUpdate(name, primaryFileHash, altHash, SessionManager.session());
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * True when the job is completed
+         *
+         * @return
+         */
+        public boolean done() {
+            return jobDone;
         }
     }
 }

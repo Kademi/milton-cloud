@@ -51,7 +51,7 @@ public class HtmlTemplateParser {
      * @param meta
      */
     public void parse(HtmlPage meta, Path webPath) throws IOException, XMLStreamException {
-        log.info("parse");
+        log.info("parse: " + meta.getSource() + " - " + meta.getClass());
         Document doc;
         try (InputStream fin = meta.getInputStream()) {
             if (fin != null) {

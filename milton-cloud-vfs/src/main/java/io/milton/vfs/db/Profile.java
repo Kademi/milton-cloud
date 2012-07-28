@@ -178,5 +178,22 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.rejected = rejected;
     }
     
+    /**
+     * True if the user belongs to a group with the Administrator GroupRole
+     * 
+     * @return 
+     */
+    @Transient
+    public boolean isAdmin() {
+        if( getMemberships() == null ) {
+            return false;
+        }
+        for( GroupMembership m : getMemberships() ) {
+            if( m.getGroupEntity().hasRole(GroupRole.ROLE_ADMIN)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
 }

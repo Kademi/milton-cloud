@@ -38,7 +38,14 @@ public class ClassPathTemplateHtmlPage extends TemplateHtmlPage{
     @Override
     public long getTimestamp() {
         return timestamp;
-    }   
+    }
+
+    @Override
+    public String getSource() {
+        return "cp:" + resource.toString();
+    }
+    
+    
     
     @Override
     public InputStream getInputStream() {

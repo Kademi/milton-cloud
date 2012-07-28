@@ -177,6 +177,13 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     @Override
+    public String getSource() {
+        return "fileRes-" + getFileResource().getHash();
+    }
+    
+    
+
+    @Override
     public Long getContentLength() {
         return null;
     }

@@ -63,5 +63,12 @@ public interface HtmlPage extends  TitledPage{
      * @return 
      */
     InputStream getInputStream();
+
+    /**
+     * Just an identifier so we know where this came from
+     * 
+     * @return 
+     */
+    String getSource();
     
 }

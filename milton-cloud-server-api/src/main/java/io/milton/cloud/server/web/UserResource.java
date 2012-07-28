@@ -23,15 +23,14 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.HrefList;
 import io.milton.mail.Mailbox;
 import io.milton.mail.MessageFolder;
-import io.milton.mail.StandardMessageFactoryImpl;
 import io.milton.resource.*;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.utils.SessionManager;
 import javax.mail.internet.MimeMessage;
 
 import static io.milton.context.RequestContext._;
-import io.milton.http.caldav.CalDavPrincipal;
-import io.milton.http.carddav.CardDavPrincipal;
+import io.milton.principal.CalDavPrincipal;
+import io.milton.principal.CardDavPrincipal;
 
 /**
  *

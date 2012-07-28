@@ -63,6 +63,13 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage{
             return fr.getHash();
         }
     }
+
+    @Override
+    public String getSource() {
+        return "fileRes-" + getHash();
+    }
+    
+    
     
     public FileResource getCurrentFileResource() {
         WebsiteRootFolder wrf = _(WebsiteApp.class).getPage(null, websiteName);

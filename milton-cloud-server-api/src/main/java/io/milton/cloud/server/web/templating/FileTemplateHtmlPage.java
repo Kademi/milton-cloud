@@ -47,6 +47,11 @@ public class FileTemplateHtmlPage extends TemplateHtmlPage{
         return fin;
     }
 
+    @Override
+    public String getSource() {
+        return "file://" + templateFile.getAbsolutePath();
+    }
+
     
     
     @Override
