@@ -97,41 +97,6 @@ public class AvconvConverter implements Closeable {
             args.add("-vf");
             args.add(scale);
 
-            if (isVideoOutput(format.getOutputType())) {
-                // avconv -i MOV008.MOD -b 1024k -vf "scale=800:-1" /tmp/move008.ogv
-                boolean isCopy = inputExt.equals(format.getOutputType());
-//                if (isCopy) {
-//                    args.add("-vcodec");
-//                    args.add("copy");
-//                }
-//
-//                if (format.type.equals("m4v") || format.type.equals("mp4")) {
-//                    args.add("-c:v");
-//                    args.add("mpeg4");
-//                    args.add("-b:v");
-//                    args.add("1024k");
-//
-//                } else if (format.type.equals("flv")) {
-//                    args.add("-ar");
-//                    args.add("22050");
-//                    args.add("-qmax");
-//                    args.add("10");
-//                } else if (isCopy) {
-//                    args.add("-vcodec");
-//                    args.add("copy");
-//                    args.add("-b:v");
-//                    args.add("1024k");
-//
-//                }
-            } else {
-                //String dimensions = format.getWidth() + "x" + format.getHeight();
-//                args.add("-ss");
-//                args.add("1");
-//                args.add("-vframes");
-//                args.add("1");
-//                args.add("-f");
-//                args.add("mjpeg");
-            }
             for (String s : format.getConverterArgs()) {
                 args.add(s);
             }

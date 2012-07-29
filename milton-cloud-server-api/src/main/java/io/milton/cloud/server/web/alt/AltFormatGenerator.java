@@ -18,12 +18,17 @@ package io.milton.cloud.server.web.alt;
 
 import io.milton.cloud.common.With;
 import io.milton.cloud.server.db.AltFormat;
+import io.milton.cloud.server.db.MediaMetaData;
+import io.milton.cloud.server.web.FileResource;
 import io.milton.common.ContentTypeService;
 import io.milton.common.FileUtils;
 import io.milton.context.Context;
 import io.milton.context.Executable2;
 import io.milton.context.RootContext;
+import io.milton.event.Event;
+import io.milton.event.EventListener;
 import io.milton.event.EventManager;
+import io.milton.event.PutEvent;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +52,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class AltFormatGenerator {
+public class AltFormatGenerator implements EventListener {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AltFormatGenerator.class);
     private final RootContext rootContext;
@@ -55,12 +60,14 @@ public class AltFormatGenerator {
     private final ContentTypeService contentTypeService;
     private final HashStore hashStore;
     private final BlobStore blobStore;
+    private final MediaInfoService mediaInfoService;
     private String ffmpeg = "avconv";
     private List<FormatSpec> formats;
-    private boolean doPreGeneration = false;
     private ExecutorService consumer = new ThreadPoolExecutor(1, 4, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100));
     private final List<GenerateJob> currentJobs = new CopyOnWriteArrayList<>();
 
+    private boolean enableMetaData;
+    
     public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, RootContext rootContext, SessionManager sessionManager) {
         this.rootContext = rootContext;
         this.hashStore = hashStore;
@@ -68,14 +75,65 @@ public class AltFormatGenerator {
         this.contentTypeService = contentTypeService;
         this.sessionManager = sessionManager;
         this.formats = new ArrayList<>();
+        this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
         formats.add(new FormatSpec("image", "png", 150, 150, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
 
         formats.add(new FormatSpec("video", "flv", 800, 455, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "mp4", 800, 455, "-c:v", "mpeg4","-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "mp4", 800, 455, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
         formats.add(new FormatSpec("video", "ogv", 800, 455, "-r", "15", "-b:v", "512k"));
         //formats.add(new FormatSpec("video", "webm", 800, 455));
 
         formats.add(new FormatSpec("video", "png", 800, 455, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
+
+        System.out.println("register put event on: " + eventManager);
+        eventManager.registerEventListener(this, PutEvent.class);
+    }
+
+    @Override
+    public void onEvent(Event e) {
+        if( !enableMetaData ) {
+            System.out.println("meta data generation is not enabled");
+            return ;
+        }
+        if (e instanceof PutEvent) {
+            System.out.println("");
+            PutEvent pe = (PutEvent) e;
+            if (pe.getResource() instanceof FileResource) {
+                FileResource fr = (FileResource) pe.getResource();
+                if (isMedia(fr)) {
+                    System.out.println("is media, generate metadata");
+                    findInfo(fr);
+                }
+            }
+        }
+    }
+
+    private void findInfo(FileResource fr) {
+        MediaMetaData mmd = MediaMetaData.find(fr.getHash(), SessionManager.session());
+        if (mmd != null) {
+            System.out.println("already have meta data record");
+            return;
+        }
+
+        try {
+            System.out.println("get nifo");
+            MediaInfo info = mediaInfoService.getInfo(fr);
+            if (info == null) {
+                log.warn("Null info for: " + fr.getHref());
+                return;
+            }
+            System.out.println("create new media metadata");
+            mmd = new MediaMetaData();
+            mmd.setSourceHash(fr.getHash());
+            mmd.setDurationSecs(info.getDurationSecs());
+            mmd.setHeight(info.getHeight());
+            mmd.setWidth(info.getWidth());
+            mmd.setRecordedDate(info.getRecordedDate());
+            SessionManager.session().save(mmd);
+            
+        } catch (IOException ex) {
+            log.error("Couldnt get media info for: " + fr.getHref(), ex);
+        }
     }
 
     /**
@@ -112,12 +170,29 @@ public class AltFormatGenerator {
         return null;
     }
 
-    public boolean isDoPreGeneration() {
-        return doPreGeneration;
+    private boolean isMedia(FileResource fr) {
+        if (formats != null) {
+            String name = fr.getName();
+            for (FormatSpec f : formats) {
+                if (is(name, f.inputType)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public void setDoPreGeneration(boolean doPreGeneration) {
-        this.doPreGeneration = doPreGeneration;
+    private boolean is(String name, String type) {
+        // will return a non-null value if type is contained in any content type
+        List<String> list = contentTypeService.findContentTypes(name);
+        if (list != null) {
+            for (String ct : list) {
+                if (ct.contains(type)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public class GenerateJob implements Runnable {
@@ -133,7 +208,7 @@ public class AltFormatGenerator {
             this.primaryFileHash = primaryFileHash;
             this.primaryFileName = primaryFileName;
             this.formatSpec = formatSpec;
-            if( formatSpec == null ) {
+            if (formatSpec == null) {
                 throw new RuntimeException("formatSpec cannot be null");
             }
             String ext = FileUtils.getExtension(primaryFileName);
@@ -212,4 +287,14 @@ public class AltFormatGenerator {
             return jobDone;
         }
     }
+
+    public boolean isEnableMetaData() {
+        return enableMetaData;
+    }
+
+    public void setEnableMetaData(boolean enableMetaData) {
+        this.enableMetaData = enableMetaData;
+    }
+    
+    
 }

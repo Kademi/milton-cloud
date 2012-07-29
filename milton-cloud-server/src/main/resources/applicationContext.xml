@@ -78,7 +78,7 @@
         <constructor-arg ref="content.type.service" />
         <constructor-arg ref="root.context"/>
         <constructor-arg ref="session.manager"/>
-        <property name="doPreGeneration" value="${pregenerate.media}" />
+        <property name="enableMetaData" value="${media.metadata}" />
     </bean>
         
     <bean id="main.spliffy.resource.factory" class="io.milton.cloud.server.web.SpliffyResourceFactory">

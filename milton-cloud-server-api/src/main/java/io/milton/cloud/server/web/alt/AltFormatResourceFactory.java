@@ -17,6 +17,7 @@
 package io.milton.cloud.server.web.alt;
 
 import io.milton.cloud.server.db.AltFormat;
+import io.milton.cloud.server.db.MediaMetaData;
 import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.alt.AltFormatGenerator.GenerateJob;
 import io.milton.common.ContentTypeUtils;
@@ -104,22 +105,22 @@ public class AltFormatResourceFactory implements ResourceFactory {
      */
     public class AltFormatResource implements GetableResource, DigestResource, BufferingControlResource {
 
-        private final FileResource r;
+        private final FileResource rPrimary;
         private final String name;
         private final FormatSpec formatSpec;
         private AltFormat altFormat;
         private Fanout fanout;
         private boolean doneFanoutLookup;
 
-        public AltFormatResource(FileResource r, String name, AltFormat altFormat, FormatSpec formatSpec) {
-            this.r = r;
+        public AltFormatResource(FileResource rPrimary, String name, AltFormat altFormat, FormatSpec formatSpec) {
+            this.rPrimary = rPrimary;
             this.name = name;
             this.altFormat = altFormat;
             this.formatSpec = formatSpec;
         }
 
-        public AltFormatResource(FileResource r, String name, FormatSpec formatSpec) {
-            this.r = r;
+        public AltFormatResource(FileResource rPrimary, String name, FormatSpec formatSpec) {
+            this.rPrimary = rPrimary;
             this.name = name;
             this.altFormat = null;
             this.formatSpec = formatSpec;
@@ -127,6 +128,17 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {            
+            MediaMetaData mmd = MediaMetaData.find(rPrimary.getHash(), SessionManager.session());
+            if( mmd != null ) {
+                Integer durationSecs = mmd.getDurationSecs();
+                if( durationSecs != null ) {
+                    Response resp = HttpManager.response();
+                    if( resp != null ) {
+                        System.out.println("set duration header: " + durationSecs);
+                        resp.setNonStandardHeader("X-Content-Duration", durationSecs.toString());
+                    }
+                }
+            }
             try {
                 boolean force = params.containsKey("force");
                 if (altFormat == null || force) {
@@ -144,7 +156,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     
                     // hack end
                     System.out.println("generate: " + getName());
-                    GenerateJob j = altFormatGenerator.getOrEnqueueJob(r.getHash(), r.getName(), formatSpec);
+                    GenerateJob j = altFormatGenerator.getOrEnqueueJob(rPrimary.getHash(), rPrimary.getName(), formatSpec);
                     System.out.println("got job: " + j);
 
                     // Wait until the file exists
@@ -262,27 +274,27 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
         @Override
         public Object authenticate(String user, String password) {
-            return r.authenticate(user, password);
+            return rPrimary.authenticate(user, password);
         }
 
         @Override
         public Object authenticate(DigestResponse digestRequest) {
-            return r.authenticate(digestRequest);
+            return rPrimary.authenticate(digestRequest);
         }
 
         @Override
         public boolean authorise(Request request, Method method, Auth auth) {
-            return r.authorise(request, method, auth);
+            return rPrimary.authorise(request, method, auth);
         }
 
         @Override
         public String getRealm() {
-            return r.getRealm();
+            return rPrimary.getRealm();
         }
 
         @Override
         public Date getModifiedDate() {
-            return r.getModifiedDate();
+            return rPrimary.getModifiedDate();
         }
 
         @Override
@@ -292,7 +304,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
         @Override
         public boolean isDigestAllowed() {
-            return r.isDigestAllowed();
+            return rPrimary.isDigestAllowed();
         }
 
         private void doSleep(long sleepMillis) {

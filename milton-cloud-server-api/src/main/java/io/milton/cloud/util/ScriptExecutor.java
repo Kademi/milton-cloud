@@ -46,11 +46,13 @@ public class ScriptExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(com.bradmcevoy.common.ScriptExecutor.class);
     
-    final String process;
-    final String[] args;
-    final int successCode;
-    boolean win32Batch;
+    private final String process;
+    private final String[] args;
+    private final int successCode;
+    private boolean win32Batch;
 
+    private String output;
+    
     /**
      *
      * @param process - name and/or path of the script file. May be a
@@ -134,7 +136,7 @@ public class ScriptExecutor {
             if (output.isAlive()) {
                 output.interrupt();
             }
-            debug("...");
+            this.output = output.toString();
             if (errorDiscarder.isAlive()) {
                 errorDiscarder.interrupt();
             }
@@ -192,7 +194,6 @@ public class ScriptExecutor {
     private static class ScriptOutputReader extends ScriptExecutor.StreamReader {
 
         private StringBuffer sb = new StringBuffer();
-        private boolean found = false;
 
         public ScriptOutputReader(InputStream is) {
             super(is);
@@ -200,7 +201,7 @@ public class ScriptExecutor {
 
         @Override
         protected void processLine(String cmdOut) {
-            sb.append(cmdOut);
+            sb.append(cmdOut).append("\n");
             log.trace(cmdOut);
         }
 
@@ -221,6 +222,10 @@ public class ScriptExecutor {
             s += arg + ",";
         }
         return s;
+    }
+
+    public String getOutput() {
+        return output;
     }
     
     
