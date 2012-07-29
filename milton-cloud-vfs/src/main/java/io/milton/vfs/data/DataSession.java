@@ -438,6 +438,20 @@ public class DataSession {
             combiner.combine(fanoutCrcs, hashStore, blobStore, out);
             out.flush();
         }
+        
+        /**
+         * Write partial content, only 
+         * @param out
+         * @param start
+         * @param finish
+         * @throws IOException 
+         */
+        public void writeContent(OutputStream out, long start, Long finish) throws IOException {
+            Combiner combiner = new Combiner();
+            List<Long> fanoutCrcs = getFanout().getHashes();
+            combiner.combine(fanoutCrcs, hashStore, blobStore, out, start, finish);
+            out.flush();
+        }        
 
         public long getContentLength() {
             return getFanout().getActualContentLength();

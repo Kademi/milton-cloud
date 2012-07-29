@@ -115,7 +115,10 @@ public class FileResource extends AbstractContentResource implements Replaceable
             String s = fileNode.getHash() + "";
             out.write(s.getBytes());
         } else {
-            fileNode.writeContent(out);
+            if (range == null) {
+                fileNode.writeContent(out);
+            } else {
+            }
         }
     }
 
@@ -127,7 +130,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
      */
     @Override
     public String getContentType(String accepts) {
-        if( getName() == null ) {
+        if (getName() == null) {
             throw new RuntimeException("no name");
         }
         String acceptable = ContentTypeUtils.findContentTypes(getName());
@@ -219,7 +222,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         // case we need to generate and persist html content
         if (htmlPage != null) {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            _(HtmlTemplateParser.class).update(htmlPage, bout);            
+            _(HtmlTemplateParser.class).update(htmlPage, bout);
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);

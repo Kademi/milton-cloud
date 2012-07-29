@@ -17,7 +17,7 @@ Any value defined here will override the pom.xml file value but is only applicab
     </properties>
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
         <configurations>
-            <configuration id="run-fuse-linux-no-autoloader" profiles="run-fuse-linux-no-autoloader"/>
+            <configuration id="run-fuse-autoloader" profiles="run-fuse-with-autoload"/>
         </configurations>
     </config-data>
 </project-shared-configuration>
