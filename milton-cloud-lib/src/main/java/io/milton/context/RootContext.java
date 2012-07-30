@@ -59,8 +59,7 @@ public class RootContext extends Context implements Closeable {
     /** Execute without any return value
      */ 
     public void execute( Executable2 exec ) {
-        RequestContext orig = RequestContext.peekInstance();
-        RequestContext.setInstance(null);
+        RequestContext.setCurrent(null);
         RequestContext context = RequestContext.getInstance(this);
         Registration reg = null;
         try{         
@@ -70,11 +69,8 @@ public class RootContext extends Context implements Closeable {
             throw new RuntimeException(e);
         } finally {
             reg.remove();
-            if( RequestContext.peekInstance() != null ) {
-                throw new RuntimeException("Did not close down properly");
-            }
-            context.tearDown();
-            RequestContext.setInstance(orig);
+            context.tearDown();            
+            RequestContext.setCurrent(null);
         }        
     }
     
@@ -101,12 +97,12 @@ public class RootContext extends Context implements Closeable {
     /** Throws an exception if returning null
      */
     @Override
-    Registration getRegistration(Class c) throws IllegalArgumentException {
+    protected Registration getRegistration(Class c) throws IllegalArgumentException {
         return getOrCreateRegistration(c,this);
     }
         
     @Override
-    Registration getRegistration(String id) {        
+    protected Registration getRegistration(String id) {        
         return getOrCreateRegistration(id,this);
     }    
 

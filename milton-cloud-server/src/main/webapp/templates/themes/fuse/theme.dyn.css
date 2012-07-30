@@ -917,7 +917,7 @@ body {
 }
 
 #editor {
-    padding: 5px 10px; /** give the editor a bit of padding around content */
+    padding: 5px 20px; /** give the editor a bit of padding around content */
 }
 
 h1, h1.a, h2, h2.a, h3, h3.a, h4, h4 a {    
@@ -2565,7 +2565,7 @@ body h1, body h1 a {
     padding: 10px 15px;
     margin: 0px 0px 15px 0px;
     border-radius: 6px;
-    width: 920px;
+    width: 100%;
     font-size: 1.6em;
     font-weight: 500;
     left:-15px;

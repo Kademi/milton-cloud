@@ -97,7 +97,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        System.out.println("RFR: processform: saving: " + this.fileResource.getName());
         doSaveHtml();
 
         tx.commit();
@@ -124,6 +123,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         if (parsed) {
             return;
         }
+        parsed = true;
         try {
             _(HtmlTemplateParser.class).parse(this, Path.root);
         } catch (XMLStreamException ex) {
@@ -142,8 +142,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         if (template == null) {
             template = "content/page";
-        }
-        parsed = true;
+        }        
     }
 
     @Override
@@ -260,6 +259,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public void setBody(String b) {
+        checkParse();
         this.body = b;
     }
 
@@ -274,6 +274,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public void setTitle(String t) {
+        checkParse();
         this.title = t;
     }
 

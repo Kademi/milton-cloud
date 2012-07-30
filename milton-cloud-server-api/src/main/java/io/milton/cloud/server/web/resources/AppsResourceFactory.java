@@ -16,11 +16,11 @@
  */
 package io.milton.cloud.server.web.resources;
 
-
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.common.Path;
 import io.milton.http.ResourceFactory;
 import io.milton.http.exceptions.BadRequestException;
@@ -29,7 +29,7 @@ import io.milton.resource.Resource;
 
 /**
  * Locates resources provided by applications
- * 
+ *
  * This can be easier and faster then building a tree structure, especially for
  * static insecure resources such as css files and images
  *
@@ -38,33 +38,30 @@ import io.milton.resource.Resource;
 public class AppsResourceFactory implements ResourceFactory {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AppsResourceFactory.class);
-    
     private final ApplicationManager applicationManager;
 
     public AppsResourceFactory(ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
-    }    
-    
+    }
+
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
         log.info("getResource: " + sPath);
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
-        Resource rootFolder = applicationManager.getPage(null, host);        
-        if (rootFolder instanceof WebsiteRootFolder) {
-            WebsiteRootFolder webRoot = (WebsiteRootFolder) rootFolder;
-            Path p = Path.path(sPath);
-            for( Application app : applicationManager.getApps() ) {
-                if( app instanceof ResourceApplication ) {
-                    ResourceApplication ra = (ResourceApplication) app;
-                    Resource r = ra.getResource(webRoot, sPath);
-                    if( r != null ) {
-                        return r;
-                    }
+        RootFolder rootFolder = (RootFolder) applicationManager.getPage(null, host);
+
+        for (Application app : applicationManager.getApps()) {
+            if (app instanceof ResourceApplication) {
+                ResourceApplication ra = (ResourceApplication) app;
+                Resource r = ra.getResource(rootFolder, sPath);
+                if (r != null) {
+                    return r;
                 }
             }
         }
+
         return null;
     }
 }

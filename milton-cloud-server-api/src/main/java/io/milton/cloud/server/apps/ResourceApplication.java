@@ -16,7 +16,7 @@
  */
 package io.milton.cloud.server.apps;
 
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.resource.Resource;
 
 /**
@@ -28,5 +28,5 @@ public interface ResourceApplication extends Application {
     /**
      * Locate a Resource for this app on the given path and for the given website
      */
-    Resource getResource(WebsiteRootFolder webRoot, String path);    
+    Resource getResource(RootFolder webRoot, String path);    
 }

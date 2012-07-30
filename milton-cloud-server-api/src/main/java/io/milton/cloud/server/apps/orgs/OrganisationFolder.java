@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.orgs;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.website.SettingsMap;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.http.*;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -56,6 +57,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private ResourceList children;
+    private Map<String, String> fakeSettings;
 
     public OrganisationFolder(CommonCollectionResource parent, Organisation organisation) {
         this.parent = parent;
@@ -191,5 +193,21 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     @Override
     public boolean isLockedOutRecursive(Request request) {
         return false;
+    }
+
+    /**
+     * Hardcoded settings to make themes work when editing in the admin console
+     *
+     * @return
+     */
+    public Map<String, String> getSettings() {
+        if (fakeSettings == null) {
+            fakeSettings = new HashMap<>();
+            fakeSettings.put("heroColour1", "#88c03f");
+            fakeSettings.put("heroColour2", "#88c03f");
+            fakeSettings.put("textColour1", "#1C1D1F");
+            fakeSettings.put("textColour2", "#2F2F2F");
+        }
+        return fakeSettings;
     }
 }

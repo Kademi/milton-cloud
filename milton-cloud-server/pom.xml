@@ -12,6 +12,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>ckeditor</artifactId>
+            <version>3.6.2</version>
+            <type>war</type>
+        </dependency>        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>milton-mail-server</artifactId>
             <version>${milton.version}</version>
         </dependency>

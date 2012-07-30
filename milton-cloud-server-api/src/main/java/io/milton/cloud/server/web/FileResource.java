@@ -176,6 +176,16 @@ public class FileResource extends AbstractContentResource implements Replaceable
             return getName();
         }
     }
+    
+    public String getBody() {
+        RenderFileResource r = getHtml();
+        if (r != null) {
+            return r.getBody();
+        } else {
+            return "";
+        }
+        
+    }
 
     @Override
     public String getParam(String name) {
@@ -223,6 +233,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         if (htmlPage != null) {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             _(HtmlTemplateParser.class).update(htmlPage, bout);
+            //System.out.println("doSaveHtml: " + bout.toString());
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);

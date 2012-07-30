@@ -116,7 +116,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
     }
 
     @Override
-    public Resource getResource(WebsiteRootFolder webRoot, String path) {
+    public Resource getResource(RootFolder webRoot, String path) {
         if (!path.startsWith("/templates/apps/forum")) {
             return null;
         }

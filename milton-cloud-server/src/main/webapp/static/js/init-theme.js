@@ -12,6 +12,15 @@ var pageInitFunctions = new Array();
 // Templates should push theme css files into this array, so they will be included in the editor
 var themeCssFiles = new Array();
 
+
+Array.max = function( array ){
+    return Math.max.apply( Math, array );
+};
+
+Array.min = function( array ){
+    return Math.min.apply( Math, array );
+};
+
 function initTheme() {
     log("initTheme: init-theme.js");
     
@@ -246,7 +255,7 @@ if(!String.prototype.trim) {
 
 // Function check/uncheck for checkbox
 $.fn.check = function(is_check) {
-     return $(this).attr('checked', is_check);
+    return $(this).attr('checked', is_check);
 };
 
 // Function disable/enable for form control
@@ -257,13 +266,15 @@ $.fn.disable = function(is_disable) {
 // Ensure support for toISOString in all browsers
 if (!Date.prototype.toISOString) {
     Date.prototype.toISOString = function() {
-        function pad(n) { return n < 10 ? '0' + n : n }
+        function pad(n) {
+            return n < 10 ? '0' + n : n
+        }
         return this.getUTCFullYear() + '-'
-            + pad(this.getUTCMonth() + 1) + '-'
-                + pad(this.getUTCDate()) + 'T'
-                    + pad(this.getUTCHours()) + ':'
-                        + pad(this.getUTCMinutes()) + ':'
-                            + pad(this.getUTCSeconds()) + 'Z';
+        + pad(this.getUTCMonth() + 1) + '-'
+        + pad(this.getUTCDate()) + 'T'
+        + pad(this.getUTCHours()) + ':'
+        + pad(this.getUTCMinutes()) + ':'
+        + pad(this.getUTCSeconds()) + 'Z';
     };
 }
 

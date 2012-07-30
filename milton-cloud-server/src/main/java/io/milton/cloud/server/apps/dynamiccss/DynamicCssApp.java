@@ -18,11 +18,12 @@ package io.milton.cloud.server.apps.dynamiccss;
 
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ResourceApplication;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.TemplatedTextPage;
+import io.milton.cloud.server.web.*;
 import io.milton.common.Path;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 
@@ -32,13 +33,16 @@ import io.milton.resource.Resource;
  */
 public class DynamicCssApp implements ResourceApplication {
 
+    private SpliffyResourceFactory resourceFactory;
+
     @Override
-    public Resource getResource(WebsiteRootFolder webRoot, String path) {
+    public Resource getResource(RootFolder webRoot, String path) {
         if (!path.endsWith(".dyn.css")) {
             return null;
         }
 
         Path p = Path.path(path);
+   
         return new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
     }
 
@@ -49,6 +53,7 @@ public class DynamicCssApp implements ResourceApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        this.resourceFactory = resourceFactory;
     }
 
     @Override
@@ -59,5 +64,4 @@ public class DynamicCssApp implements ResourceApplication {
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
-    
 }

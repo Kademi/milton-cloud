@@ -7,8 +7,8 @@ import java.util.HashMap;
  */
 public abstract class Context implements Contextual { 
     
-    HashMap<Class,Registration> itemByClass = new HashMap<>();
-    HashMap<String,Registration> itemByName = new HashMap<>();
+    protected HashMap<Class,Registration> itemByClass = new HashMap<>();
+    protected HashMap<String,Registration> itemByName = new HashMap<>();
     
     /** If creating, the item is inserted into the given context
      *
@@ -90,12 +90,12 @@ public abstract class Context implements Contextual {
 
     }
     
-    <T> Registration<T> getRegistration(Class<T> c) {
+    protected <T> Registration<T> getRegistration(Class<T> c) {
         Registration<T> reg = itemByClass.get(c);
         return reg;
     }
         
-    <T> Registration<T> getRegistration(String id) {
+    protected <T> Registration<T> getRegistration(String id) {
         Registration<T> o = itemByName.get(id);
         return o;
     }    

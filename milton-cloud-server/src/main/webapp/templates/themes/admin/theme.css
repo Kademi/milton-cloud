@@ -534,7 +534,7 @@ div.Modal {
     display: none;
 }
 div.Modal.wide {
-    width: 800px;
+    width: 850px;
 }
 div#modalHelp {
     width: 300px;
@@ -569,6 +569,8 @@ div.Modal div.ModalContent {
     background: #f3f3f3;
     border-radius: 0 0 5px 5px;
     padding: 15px;
+    max-height: 430px;
+    overflow: auto;
 }
 div.Modal div.ModalContent table { width: 100%; }
 div.Modal div.ModalContent table th {

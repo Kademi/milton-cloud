@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class RequestContext extends Context implements RemovalCallback {
     
-    private static final ThreadLocal<RequestContext> tlContext = new ThreadLocal<RequestContext>();
+    private static final ThreadLocal<RequestContext> tlContext = new ThreadLocal<>();
 
     private RootContext parent;
 
@@ -46,25 +46,30 @@ public class RequestContext extends Context implements RemovalCallback {
         RequestContext c = tlContext.get();
         return c;
     }
+
+    static void setCurrent(RequestContext rc) {
+        if( rc == null ) {
+            tlContext.remove();
+        } else {
+            tlContext.set(rc);
+        }
+    }
+    
     
     public static RequestContext getInstance(RootContext parent) {
-        RequestContext c = tlContext.get();
+        RequestContext c = getCurrent();
         if( c == null ) {
             c = new RequestContext(parent);
-            tlContext.set(c);
+            setCurrent(c);
         }
         return c;
     }
     
     
     public static RequestContext peekInstance() {
-        if( tlContext == null ) return null;
-        return tlContext.get();
+        return getCurrent();
     }
     
-    static void setInstance(RequestContext rc) {
-        tlContext.set(rc);
-    }
     
     private RequestContext(RootContext parent) {
         if( parent == null ) throw new IllegalArgumentException("parent cannot be null");
@@ -76,17 +81,17 @@ public class RequestContext extends Context implements RemovalCallback {
     }
     
     @Override
-    Registration getRegistration(Class c) {
+    protected Registration getRegistration(Class c) {
         return getOrCreateRegistration(c,this);
     }
         
     @Override
-    Registration getRegistration(String id) {
+    protected Registration getRegistration(String id) {
         return getOrCreateRegistration(id,this);
     }
 
     @Override
-    Registration getOrCreateRegistration(Class c, Context context) {
+    protected Registration getOrCreateRegistration(Class c, Context context) {
         Registration reg = super.getRegistration(c);
         if( reg != null ) return reg;
         return parent.getOrCreateRegistration(c,this);

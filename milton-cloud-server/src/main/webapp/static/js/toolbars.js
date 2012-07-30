@@ -16,7 +16,7 @@ toolbarSets["Full"] = [
 	'/',
 	['Style','FontFormat','FontName','FontSize'],
 	['TextColor','BGColor'],
-	['FitWindow','ShowBlocks','-','About']		// No comma for the last row.
+	['Maximize','ShowBlocks','-','About']		// No comma for the last row.
 ] ;
  
 
@@ -39,7 +39,7 @@ toolbarSets["Default"] = [
 	['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],
 	['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
 	['Link','Unlink','Anchor'],
-	['FitWindow','ShowBlocks','-','Templates'],		// No comma for the last row.
+	['Maximize','ShowBlocks','-','Templates'],		// No comma for the last row.
 	['Styles','Format']
 ] ;
 

@@ -139,6 +139,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         onAddedChild(fileResource);
         save();
         tx.commit();
+        
         log.info("Saved and commited: " + fileResource.getHref());
 
         return fileResource;

@@ -157,7 +157,7 @@ public class ResourceList extends ArrayList<CommonResource> {
         });
         return list;
     }
-    
+
     public ResourceList getSortByName() {
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<Resource>() {
@@ -170,7 +170,7 @@ public class ResourceList extends ArrayList<CommonResource> {
             }
         });
         return list;
-    }    
+    }
 
     public ResourceList getRandomSort() {
         CommonResource[] array = new CommonResource[this.size()];
@@ -352,5 +352,66 @@ public class ResourceList extends ArrayList<CommonResource> {
             }
         });
         return list;
+    }
+
+    public ResourceList sortByIntField(final String fieldName) {
+        ResourceList list = new ResourceList(this);
+        Collections.sort(list, new Comparator<CommonResource>() {
+
+            @Override
+            public int compare(CommonResource o1, CommonResource o2) {
+                String val1 = null;
+                String val2 = null;
+                try {
+                    if (o1 instanceof ParameterisedResource) {
+                        ParameterisedResource p = (ParameterisedResource) o1;
+                        val1 = p.getParam(fieldName);
+                    }
+                    if (o2 instanceof ParameterisedResource) {
+                        ParameterisedResource p = (ParameterisedResource) o2;
+                        val2 = p.getParam(fieldName);
+                    }
+                } catch (NotAuthorizedException | BadRequestException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+                if (val1 == null) {
+                    if (val2 == null) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                } else {
+                    Integer i1 = toInt(val1);
+                    Integer i2 = toInt(val2);
+                    try {
+                        if (i2 != null) {
+                            return i1.compareTo(i2);
+                        } else {
+                            return 1;
+                        }
+                    } catch (Throwable e) {
+                        log.warn("failed to compare: " + val1 + " - " + val2);
+                        return -1;
+                    }
+                }
+
+            }
+        });
+        return list;
+    }
+
+    private Integer toInt(String val1) {
+        if (val1 == null) {
+            return null;
+        } else {
+            val1 = val1.trim();
+            if (val1.length() == 0) {
+                return null;
+            } else {
+                return Integer.parseInt(val1);
+            }
+        }
     }
 }
