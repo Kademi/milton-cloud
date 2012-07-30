@@ -800,7 +800,7 @@ a.circle {
 .leftBar{
     background:#f0f0f0;
 }
-a.programBox {
+a.courseBox {
     border-top:8px solid #dbdada;
     padding:20px 20px 20px 20px;
     display:block;
@@ -808,11 +808,11 @@ a.programBox {
     border-bottom:1px solid #dbdada;
 }
 
-a.programBox:nth-child(odd) {
+a.courseBox:nth-child(odd) {
     background-color: #F0F0F0;
 }
 
-a.programBox.active, a.programBox:hover {
+a.courseBox.active, a.courseBox:hover {
     /* For WebKit (Safari, Google Chrome etc) 
     background: -webkit-gradient(linear, left top, left bottom, from(#dfdfdf), to(#fff));*/
     /* For Mozilla/Gecko (Firefox etc) 
@@ -825,7 +825,7 @@ a.programBox.active, a.programBox:hover {
     border-top:8px solid $page.parent.settings.heroColour1;
 
 }
-.content a.programBox:hover {
+.content a.courseBox:hover {
     text-decoration: none;
 }
 a.programBox1 {
@@ -2499,44 +2499,6 @@ a:hover.lnkText{
     display:block;
 }
 
-a.programBox {
-    border-top:8px solid #dbdada;
-    padding:20px 20px 20px 20px;
-    display:block;
-    background-color: white;
-    border-bottom:1px solid #dbdada;
-}
-
-a.programBox:nth-child(odd) {
-    background-color: #F0F0F0;
-}
-
-a.programBox.active, a.programBox:hover {
-    /* For WebKit (Safari, Google Chrome etc) 
-    background: -webkit-gradient(linear, left top, left bottom, from(#dfdfdf), to(#fff));*/
-    /* For Mozilla/Gecko (Firefox etc) 
-    background: -moz-linear-gradient(top, #dfdfdf, #fff);*/
-    /* For Internet Explorer 5.5 - 7 
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#dfdfdf, endColorstr=#FFFFFFFF);*/
-    /* For Internet Explorer 8 
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#dfdfdf, endColorstr=#FFFFFFFF)";   */
-
-    border-top:8px solid $page.parent.settings.heroColour1;
-
-}
-.content a.programBox:hover {
-    text-decoration: none;
-}
-a.programBox1 {
-    background:none;
-    border:none;
-    border-top:1px solid #dbdada;
-    border-bottom:1px solid #dbdada;
-}
-a.programBox2 {
-    background:#fff;
-    border:none;
-}
 
 .modulePage .content {
     padding: 0;

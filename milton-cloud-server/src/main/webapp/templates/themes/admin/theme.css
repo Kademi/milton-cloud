@@ -533,6 +533,9 @@ div.Modal {
     border-radius: 5px;
     display: none;
 }
+div.Modal.wide {
+    width: 800px;
+}
 div#modalHelp {
     width: 300px;
 }
