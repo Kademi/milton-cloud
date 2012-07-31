@@ -455,7 +455,12 @@ function createFolder(name, parentHref, callback) {
     //    ajaxLoadingOn();
     var url = "_DAV/MKCOL";
     if( parentHref ) {
-        url = parentHref + "/" + url;
+        var s = parentHref;
+        if( !s.endsWith("/")) {
+            s+="/";
+        }
+        s += url;        
+        url = s;
     }
     $.ajax({
         type: 'POST',

@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Milton Jquery Tree Demo</title>
+        <script type="text/javascript" src="../../js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="../../js/jquery.jstree.js"></script>
+        <script type="text/javascript" src="../../js/common.js"></script>       
+        <script type="text/javascript" src="../../js/jquery.milton-tree.js"></script>       
+
+        <script type="text/javascript" src="jquery.ui.widget.js"></script>
+        <script type="text/javascript" src="jquery.iframe-transport.js"></script>
+
+        <script type="text/javascript" src="../../js/jquery.fileupload.js"></script>       
+        <script type="text/javascript" src="../../js/jquery.milton-upload.js"></script>       
+        
+        <link rel="stylesheet" href="jquery.fileupload-ui.css"/>
+
+        <style>
+            a {
+                font-size: 10px;
+                font-family: Verdana;
+            }
+            input[type=file] {
+                
+            }
+            .jstree-default a ins.jstree-icon.file {
+                background-image: url(file.png);
+                background-position: 0 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="myTree" style="width: 300px; float: left"></div>
+        <div id="myUploaded" style="width: 300px; float: left"></div>
+        <script type="text/javascript">
+            $(function() {
+                log("init");
+                $("#myTree").mtree({
+                    basePath: "",
+                    excludedEndPaths: [".mil/"],
+                    onselect: function() {
+                        var url = $("#myTree").mtree("getSelectedUrl");
+                        log("onselect", url);
+                        $("#myUploaded").mupload("setUrl", url);
+                    }
+                });                
+                $("#myUploaded").mupload({
+                    oncomplete: function() {
+                        $("#myTree").mtree("refreshSelected");
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

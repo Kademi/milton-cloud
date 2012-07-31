@@ -21,7 +21,7 @@ function initTree(pAccountRoot, pExcludedPaths) {
         accountRoot = "";
     }	
     if( pExcludedPaths) {
-        excludedPaths = pExcludedPaths;
+        excludedPaths = pExcludedPaths; 
     } else {
         excludedPaths = new Array();
     }

@@ -38,6 +38,7 @@ public class AdminApp implements MenuApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        
     }
 
     @Override

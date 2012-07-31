@@ -4,6 +4,9 @@ var url = '';
 var src = '';
 var selObj;
 
+
+
+
 CKEDITOR.plugins.add( 'embed_video',
 {
     init: function( editor ) {
@@ -19,8 +22,7 @@ CKEDITOR.plugins.add( 'embed_video',
         editor.addCommand( 'videoDialog', new CKEDITOR.dialogCommand( 'videoDialog' ) );
         log("done command");
  
-        editor.ui.addButton( 'Video',
-        {
+        editor.ui.addButton( 'Video', {
             label: 'Insert Video',
             command: 'videoDialog',
             icon: iconPath
@@ -48,12 +50,12 @@ CKEDITOR.plugins.add( 'embed_video',
             });
         }
 
-// These interfere with page themes, but might need to be put back somehow for editor layout
-// 
+        // These interfere with page themes, but might need to be put back somehow for editor layout
+        // 
         editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
-//        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap.min.css");
-//        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-responsive.min.css");
-//        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-image-gallery.min.css");
+        //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap.min.css");
+        //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-responsive.min.css");
+        //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-image-gallery.min.css");
 
         /*CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/vendor/jquery.ui.widget.js'));
 		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/tmpl.min.js'));
@@ -119,132 +121,13 @@ CKEDITOR.plugins.add( 'embed_video',
                                 },
                                 {
                                     type : 'html',
-                                    html : '<form id="fileupload" action="_DAV/PUT" method="POST" enctype="multipart/form-data">' +
-                                '	<div class="row fileupload-buttonbar">' +
-                                '		<div class="span7">' +
-                                '			<span class="btn btn-success fileinput-button">' +
-                                '				<span><i class="icon-plus icon-white"></i> Add files...</span>' +
-                                '				<input type="file" name="files[]" id="uploadfile">  ' +
-                                '			</span>' +
-                                '			<button class="btn btn-primary start" style="display:none;">' +
-                                '				<i class="icon-upload icon-white"></i> Start upload' +
-                                '			</button>' +
-                                '		</div>' +
-                                '		<div class="span5">' +
-                                '			<div class="progress progress-success progress-striped active fade">' +
-                                '				<div class="bar" style="width:0%;"></div>' +
-                                '			</div>' +
-                                '		</div>' +
-                                '	</div>' +
-                                '	<div class="fileupload-loading"></div>' +
-                                '	<br>' +
-                                '	<table class="table table-striped" style="position:absolute;left:-2000px"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>' +
-                                '</form>' +
-                                '<script id="template-upload" type="text/x-tmpl">' +
-                                '	{% for (var i=0, files=o.files, l=files.length, file=files[0]; i<l; file=files[++i]) { %}' +
-                                '		<tr class="template-upload fade">' +
-                                '			<td class="preview"><span class="fade"></span></td>' +
-                                '			<td class="name">{%=file.name%}</td>' +
-                                '			<td class="size">{%=o.formatFileSize(file.size)%}</td>' +
-                                '			{% if (file.error) { %}' +
-                                '				<td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>' +
-                                '			{% } else if (o.files.valid && !i) { %}' +
-                                '				<td>' +
-                                '					<div class="progress progress-success progress-striped active"><div class="bar" style="width:0%;"></div></div>' +
-                                '				</td>' +
-                                '				<td class="start">{% if (!o.options.autoUpload) { %}' +
-                                '					<button class="btn btn-primary">' +
-                                '						<i class="icon-upload icon-white"></i> {%=locale.fileupload.start%}' +
-                                '					</button>' +
-                                '				{% } %}</td>' +
-                                '			{% } else { %}' +
-                                '				<td colspan="2"></td>' +
-                                '			{% } %}' +
-                                '			<td class="cancel">{% if (!i) { %}' +
-                                '				<button class="btn btn-warning">' +
-                                '					<i class="icon-ban-circle icon-white"></i> {%=locale.fileupload.cancel%}' +
-                                '				</button>' +
-                                '			{% } %}</td>' +
-                                '		</tr>' +
-                                '	{% } %}' +
-                                '	</script> ' +     
-                                '	<script id="template-download" type="text/x-tmpl">' +
-                                '	{% for (var i=0, files=o.files, l=files.length, file=files[0]; i<l; file=files[++i]) { %}' +
-                                '		<tr class="template-download fade">' +
-                                '			{% if (file.error) { %}' +
-                                '				<td></td>' +
-                                '				<td class="name">{%=file.name%}</td>' +
-                                '				<td class="size">{%=o.formatFileSize(file.size)%}</td>' +
-                                '				<td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>' +
-                                '			{% } else { %}' +
-                                '				<td class="preview">{% if (file.thumbnail_url) { %}' +
-                                '					<a href="{%=file.url%}" title="{%=file.name%}" rel="gallery" download="{%=file.name%}"><img src="{%=file.thumbnail_url%}"></a>' +
-                                '				{% } %}</td>' +
-                                '				<td class="name">' +
-                                '					<a href="{%=file.url%}" title="{%=file.name%}" rel="{%=file.thumbnail_url&&\'gallery\'%}" download="{%=file.name%}">{%=file.name%}</a>' +
-                                '				</td>' +
-                                '				<td class="size">{%=o.formatFileSize(file.size)%}</td>' +
-                                '				<td colspan="2"></td>' +
-                                '			{% } %}' +
-                                '			<td class="delete">' +
-                                '				<button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">' +
-                                '					<i class="icon-trash icon-white"></i> {%=locale.fileupload.destroy%}' +
-                                '				</button>' +
-                                '				<input type="checkbox" name="delete" value="1">' +
-                                '			</td>' +
-                                '		</tr>' +
-                                '	{% } %}' +
-                                '</script>'
+                                    html : '<div id="uploadDiv"></div>'
                                 }
                                 ]
                             },
                             {
                                 type : 'html',
-                                html :	'<div>Preview</div>' +
-                            '<div id="jp_container_1" class="jp-video jp-video-360p" style="width:500px">' +
-                            '	<div class="jp-type-single">' +
-                            '		<div id="jquery_jplayer_1" class="jp-jplayer"></div>' +
-                            '		<div class="jp-gui">' +
-                            '			<div class="jp-video-play">' +
-                            '				<a href="javascript:;" class="jp-video-play-icon" tabindex="1">play</a>' +
-                            '			</div>' +
-                            '			<div class="jp-interface">' +
-                            '				<div class="jp-progress">' +
-                            '					<div class="jp-seek-bar">' +
-                            '						<div class="jp-play-bar"></div>' +
-                            '					</div>' +
-                            '				</div>' +
-                            '				<div class="jp-current-time"></div>' +
-                            '				<div class="jp-duration"></div>' +
-                            '				<div class="jp-controls-holder">' +
-                            '					<ul class="jp-controls">' +
-                            '						<li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>' +
-                            '					</ul>' +
-                            '					<div class="jp-volume-bar">' +
-                            '						<div class="jp-volume-bar-value"></div>' +
-                            '					</div>' +
-                            '					<ul class="jp-toggles">' +
-                            '						<li><a href="javascript:;" class="jp-full-screen" tabindex="1" title="full screen">full screen</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-restore-screen" tabindex="1" title="restore screen">restore screen</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>' +
-                            '						<li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>' +
-                            '					</ul>' +
-                            '				</div>' +
-                            '				<div class="jp-title">' +
-                            '				</div>' +
-                            '			</div>' +
-                            '		</div>' +
-                            '		<div class="jp-no-solution">' +
-                            '			<span>Update Required</span>' +
-                            '			To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.' +
-                            '		</div>' +
-                            '	</div>' +
-                            '</div>'
+                                html :	'<div id="previewDiv"></div>'
                             },
                             ]
                         }
@@ -254,7 +137,9 @@ CKEDITOR.plugins.add( 'embed_video',
                 }
                 ],
                 onShow : function() {
-                    log("onShow");
+                    $("#uploadDiv").html(uploadHtml);
+                    $("#previewDiv").html(previewHtml);
+                    
                     var sel = editor.getSelection(),
                     element = sel.getStartElement();
                     if ( element )
@@ -274,7 +159,7 @@ CKEDITOR.plugins.add( 'embed_video',
                         log("update mode", initialSelect, url, mtype, src);
                     }
 
-                    initTree('', processData, 2);
+                    initTree('/', processData, 2);
  
                     this.element = element;
  
@@ -283,7 +168,7 @@ CKEDITOR.plugins.add( 'embed_video',
                         ready: function () {
                             $(this).jPlayer("setMedia", {
                                 m4v: "",
-//                                webmv: "",
+                                //                                webmv: "",
                                 poster: ""
                             });
                         },
@@ -301,6 +186,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     e=document.createElement('script');
                     e.type='text/javascript';
                     e.src=basePath + 'video/upload/js/ajax-upload.js';
+                    log("ajax upload", e.src);
                     document.getElementsByTagName('head')[0].appendChild(e);
                 },
                 onOk : function() {
@@ -323,6 +209,7 @@ CKEDITOR.plugins.add( 'embed_video',
 } );
 
 function initTree(fullUrl, func, deep){
+    log("initTree", fullUrl, deep);
     $.ajax( {
         url:fullUrl+"_DAV/PROPFIND?fields=name,href,iscollection&depth="+deep, 
         dataType:"JSON", 
@@ -396,9 +283,8 @@ function processData(e, data){
     var folderIcon = "/static/ckeditor36/plugins/embed_video/images/folder.png";
 	
 	
-
-    $("#serverTree")
-    .jstree({
+    log("processData: initialSelect=", initialSelect);
+    $("#serverTree").jstree({
         // the `plugins` array allows you to configure the active plugins on this instance
         "plugins" : ["themes","html_data","ui","crrm","hotkeys", "types", "ui"],
         // each plugin you have included can have its own config object
@@ -455,7 +341,8 @@ function processData(e, data){
             if ( data.args[0][0].getAttribute('rel')=='folder' && data.args[0].children().find('li').text() == '' )
             {
                 selObj = data.args[0][0];
-                initTree('/'+data.args[0][0].id, attachNode, 1);
+                log("expand node", data.args[0][0].id);
+                initTree(data.args[0][0].id, attachNode, 1);
             } 
         }
 			
@@ -463,6 +350,7 @@ function processData(e, data){
 }
 
 function attachNode(e, data){
+    log("attachNode", e, data);
     var content = makeContent(e, data, '');
     selObj.innerHTML = selObj.innerHTML + content;
 }
@@ -475,7 +363,7 @@ function attachNode(e, data){
 function methodInvoke(url) {
     log("methodInvoke", url);
     $("#jquery_jplayer_1").jPlayer("setMedia", {
-//        webmv: url + "/alt-720-576.webm",  
+        //        webmv: url + "/alt-720-576.webm",  
         ogv: url + "/alt-800-455.ogv",        
         flv: url + "/alt-800-455.flv",
         m4v: url + "/alt-800-455.mp4",        
@@ -535,3 +423,20 @@ function startUpload(filename) {
 function getInitialSelect() {
     return initialSelect;
 }
+
+
+
+var uploadHtml;
+var previewHtml;
+
+$(function() {
+    $.get("upload.html", function(resp) {
+        log("got upload html", resp);
+        uploadHtml = resp;
+    });
+    $.get("preview.html", function(resp) {
+        log("got previewHtml", resp);
+        previewHtml = resp;
+    });    
+});
+
