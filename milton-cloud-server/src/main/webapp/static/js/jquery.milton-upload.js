@@ -32,7 +32,7 @@
                     var name = data.files[0].name;
                     var parentHref = form.attr("action").replace("_DAV/PUT", "");
                     var href = parentHref;
-                    if( !href.endsWith("/")) href += "/";
+                    if( href.length > 0 && !href.endsWith("/")) href += "/";
                     href += name;
                     config.oncomplete(data, name, href);
                 },

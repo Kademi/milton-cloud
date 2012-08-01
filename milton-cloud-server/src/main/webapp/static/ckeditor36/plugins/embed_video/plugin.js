@@ -84,7 +84,7 @@ CKEDITOR.plugins.add( 'embed_video',
             return {
                 title : 'Insert/Edit Video',
                 minWidth : 900,
-                minHeight : 530,
+                minHeight : 480,
                 contents :
                 [
                 {

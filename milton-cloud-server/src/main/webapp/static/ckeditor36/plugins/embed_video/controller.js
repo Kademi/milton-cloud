@@ -18,7 +18,7 @@ function initPlugin() {
     });                
     $("#myUploaded").mupload({
         oncomplete: function(data, name, href) {
-            log("oncomplete", data);
+            log("oncomplete2", data, name, href);
             $("#myTree").mtree("addFile", name, href);
             playVideo( "#vidContainer .jp-jplayer", href);
         }

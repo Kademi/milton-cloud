@@ -92,6 +92,7 @@
         },
         // Add a file node to the current node
         addFile: function(name, href) {
+            log("mtree:addFile", name, href);
             var options = this.data("options");
             var tree = this.find(".jstree");
             var js = {
@@ -101,9 +102,15 @@
                 }
             };
             var parentNode = $(options.selectedItem);
-
-            log("is open, so just add it");
-            var r = $.jstree._reference(tree[0]).create_node(options.selectedItem, "inside", js);
+            
+            var r;
+            if( options.selectedItem ) {
+                log("add inside", options.selectedItem);
+                r = $.jstree._reference(tree[0]).create_node(options.selectedItem, "inside", js);
+            } else {
+                log("add root", options.selectedItem);
+                r = $.jstree._reference(tree[0]).create_node(-1, "first", js);
+            }
             log("addFile: r=", r);
             r.find("a ins").addClass("file");  
             parentNode.removeClass("jstree-closed");
