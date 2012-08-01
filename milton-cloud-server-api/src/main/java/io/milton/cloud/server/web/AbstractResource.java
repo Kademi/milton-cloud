@@ -83,7 +83,8 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     }
 
     @Override
-    public boolean authorise(Request request, Method method, Auth auth) {        
+    public boolean authorise(Request request, Method method, Auth auth) {
+        System.out.println("authorise: " + auth); 
         boolean b = _(SpliffySecurityManager.class).authorise(request, method, auth, this);
         if (!b) {
 //            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);

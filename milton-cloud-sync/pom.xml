@@ -33,7 +33,7 @@
         <dependency>
             <groupId>hashsplit4j</groupId>
             <artifactId>hashsplit4j-lib</artifactId>
-            <version>1.0.2</version>
+            <version>${hashsplit4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

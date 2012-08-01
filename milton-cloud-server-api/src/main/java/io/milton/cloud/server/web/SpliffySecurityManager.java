@@ -97,6 +97,7 @@ public class SpliffySecurityManager {
 
     public boolean authorise(Request req, Method method, Auth auth, Resource aThis) {
         if (aThis instanceof AccessControlledResource) {
+            System.out.println("is acr");
             AccessControlledResource acr = (AccessControlledResource) aThis;
             List<Priviledge> privs = acr.getPriviledges(auth);
             boolean result;
@@ -109,10 +110,12 @@ public class SpliffySecurityManager {
                 result = SecurityUtils.hasRead(privs);
                 if (!result) {
                     if (auth != null) {
+                        System.out.println("override result");
                         result = auth.getTag() != null;
                     }
                 }
             }
+            System.out.println("result: " + result);
             if (!result) {
                 if (auth != null && auth.getTag() != null) {
                     log.info("Denied access of: " + auth + " to resource: " + aThis.getName() + " (" + aThis.getClass() + ") because of authorisation failure");
@@ -130,6 +133,7 @@ public class SpliffySecurityManager {
             }
             return result;
         } else {
+            System.out.println("not acr");
             return true; // not access controlled so must be ok!
         }
     }

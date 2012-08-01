@@ -15,8 +15,11 @@
             var form = $("<form action='_DAV/PUT' method='POST' enctype='multipart/form-data'></form>");
             var buttonBar = $("<div class='row fileupload-buttonbar'></div>");
             form.append(buttonBar);
-            var fileInput = $("<input type='file' name='files[]' id='fileupload' />");
-            buttonBar.append(fileInput);
+            var fileInputContainer = $("<div class='muploadBtn'></div>");
+            fileInputContainer.append($("<span>Add files...</span>"));
+            var fileInput = $("<input type='file' name='files[]' id='fileupload' style='opacity: 0; width: 100%' />");
+            fileInputContainer.append(fileInput);
+            buttonBar.append(fileInputContainer);
             buttonBar.append("<div class='progress'><div class='bar'></div></div>");
             container.append(form);
 
@@ -26,9 +29,15 @@
                 progressInterval: 10,
                 done: function (e, data) {
                     log("done", e, data);
-                    config.oncomplete(data);
+                    var name = data.files[0].name;
+                    var parentHref = form.attr("action").replace("_DAV/PUT", "");
+                    var href = parentHref;
+                    if( !href.endsWith("/")) href += "/";
+                    href += name;
+                    config.oncomplete(data, name, href);
                 },
                 progressall: function (e, data) {
+                    log("progress", e, data)
                     var progress = parseInt(data.loaded / data.total * 100, 10);
                     log("progress", progress);
                     $('progress .bar', buttonBar).css('width',progress + '%');

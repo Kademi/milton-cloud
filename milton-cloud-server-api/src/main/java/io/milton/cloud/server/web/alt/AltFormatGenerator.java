@@ -91,6 +91,7 @@ public class AltFormatGenerator implements EventListener {
 
     @Override
     public void onEvent(Event e) {
+        System.out.println("onEvent: " + e);
         if( !enableMetaData ) {
             System.out.println("meta data generation is not enabled");
             return ;

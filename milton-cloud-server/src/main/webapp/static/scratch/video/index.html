@@ -1,8 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!--
-Copyright (c) 2003-2011, CKSource - Frederico Knabben. All rights reserved.
-For licensing, see LICENSE.html or http://ckeditor.com/license
--->
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>BBCode Plugin &mdash; CKEditor Sample</title>
@@ -14,58 +10,14 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
         <link href="sample.css" rel="stylesheet" type="text/css" />
 
         <link href="jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+        
         <script type="text/javascript" src="../../js/jquery-1.7.2.min.js"></script>
         <script type="text/javascript" src="../../js/common.js"></script>        
-        <script type="text/javascript" src="../../jplayer/jquery.jplayer.min.js"></script>
-
-        <script type="text/javascript" src="../../js/jquery.cookie.js"></script>
-        <script type="text/javascript" src="jquery.hotkeys.js"></script>
-        <script type="text/javascript" src="../../js/jquery.jstree.js"></script>
-
-        <link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css"/>
-        <link rel="stylesheet" href="http://blueimp.github.com/Bootstrap-Image-Gallery/css/bootstrap-image-gallery.min.css"/>
-        <link rel="stylesheet" href="style.css"/>
-        <link rel="stylesheet" href="jquery.fileupload-ui.css"/>
+        <script type="text/javascript" src="/static/js/jquery.ui.widget.js"></script>                
 
 
-        <script src="jquery.ui.widget.js"></script>
-        <script src="jquery.iframe-transport.js"></script>
-
-        <script src="canvas-to-blob.js"></script>
-        <script src="jquery.fileupload.js"></script>
     </head>
     <body>
-        <h1 class="samples">
-            CKEditor Sample &mdash; BBCode Plugin
-        </h1>
-        <div class="description">
-            <p>
-                This sample shows how to configure CKEditor to output <a href="http://en.wikipedia.org/wiki/BBCode">BBCode</a> format instead of HTML.
-                Please note that the editor configuration was modified to reflect what is needed in a BBCode editing environment.
-                Smiley images, for example, were stripped to the emoticons that are commonly used in some BBCode dialects.
-            </p>
-            <p>
-                Please note that currently there is no standard for the BBCode markup language, so its implementation
-                for different platforms (message boards, blogs etc.) can vary. This means that before using CKEditor to
-                output BBCode you may need to adjust the implementation to your own environment.
-            </p>
-            <p>
-                A snippet of the configuration code can be seen below; check the source of this page for
-                a full definition:
-            </p>
-        </div>
-
-        <!-- This <div> holds alert messages to be display in the sample page. -->
-        <div id="alerts">
-            <noscript>
-                <p>
-                    <strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript
-                    support, like yours, you should still see the contents (HTML data) and you should
-                    be able to edit it normally, without a rich editor interface.
-                </p>
-            </noscript>
-        </div>
         <form action="sample_posteddata.php" method="post">
             <p>
                 <label for="editor1">

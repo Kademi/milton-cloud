@@ -30,6 +30,9 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.WebUtils;
+import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 
 /**
@@ -45,25 +48,27 @@ public class TextTemplater implements Templater {
     private final SimpleTemplateLoader templateLoader;
     private final VelocityEngine engine;
     private final SpliffySecurityManager securityManager;
+    private final ServletContext servletContext;
 
     public TextTemplater(SpliffySecurityManager securityManager, ServletContext servletContext) {
         this.securityManager = securityManager;
+        this.servletContext = servletContext;
         templateLoader = new SimpleTemplateLoader();
         java.util.Properties p = new java.util.Properties();
         p.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
         engine = new VelocityEngine(p);
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", templateLoader);
-        
+
         roots = new ArrayList<>();
         File fWebappRoot = new File(servletContext.getRealPath("/"));
         roots.add(fWebappRoot);
         log.info("Using webapp root dir: " + fWebappRoot.getAbsolutePath());
-        
-        
+
+
         String extraRoots = System.getProperty(HtmlTemplater.ROOTS_SYS_PROP_NAME);
         if (extraRoots != null && !extraRoots.isEmpty()) {
-            String[] arr = extraRoots.split(",");            
+            String[] arr = extraRoots.split(",");
             for (String s : arr) {
                 File root = new File(s);
                 if (!root.exists()) {
@@ -76,9 +81,9 @@ public class TextTemplater implements Templater {
 
     @Override
     public void writePage(String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        if( !templatePath.startsWith("/")) {
+        if (!templatePath.startsWith("/")) {
             templatePath = "/templates/apps/" + templatePath;
-        }        
+        }
         Template template = engine.getTemplate(templatePath);
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
         Context datamodel = new VelocityContext();
@@ -95,9 +100,9 @@ public class TextTemplater implements Templater {
     }
 
     public void writePage(String templatePath, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if( !templatePath.startsWith("/")) {
+        if (!templatePath.startsWith("/")) {
             templatePath = "/templates/apps/" + templatePath;
-        }        
+        }
         Template template = engine.getTemplate(templatePath);
         Context datamodel = new VelocityContext(context);
         datamodel.put("rootFolder", rootFolder);
@@ -107,8 +112,8 @@ public class TextTemplater implements Templater {
         }
         template.merge(datamodel, writer);
         writer.flush();
-    }    
-    
+    }
+
     public List<File> getTemplateFileRoots() {
         return roots;
     }
@@ -164,7 +169,19 @@ public class TextTemplater implements Templater {
                     }
                 }
             }
-            URL resource = this.getClass().getResource(path);
+            URL resource;
+            if (path.startsWith("/")) {                
+                try {
+                    resource = servletContext.getResource(path);
+                } catch (MalformedURLException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if (resource != null) {
+                    return new ClassPathTemplateSource(resource);
+                }
+            }
+
+            resource = this.getClass().getResource(path);
             if (resource != null) {
                 return new ClassPathTemplateSource(resource);
             }

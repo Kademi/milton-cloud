@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (c) 2003-2011, CKSource - Frederico Knabben. All rights reserved.
+Copyright (c) 2003-2012, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 
@@ -203,7 +203,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 				{
 					var templatesListField = this.getContentElement( 'selectTpl' , 'templatesList' );
 					listContainer = templatesListField.getElement();
-                                        //alert("hi");
+
 					CKEDITOR.loadTemplates( config.templates_files, function()
 						{
 							var templates = ( config.templates || 'default' ).split( ',' );

@@ -355,6 +355,7 @@ public class ResourceList extends ArrayList<CommonResource> {
     }
 
     public ResourceList sortByIntField(final String fieldName) {
+        System.out.println("sortByIntField: " + fieldName);
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<CommonResource>() {
 
@@ -374,7 +375,6 @@ public class ResourceList extends ArrayList<CommonResource> {
                 } catch (NotAuthorizedException | BadRequestException e) {
                     throw new RuntimeException(e);
                 }
-
 
                 if (val1 == null) {
                     if (val2 == null) {

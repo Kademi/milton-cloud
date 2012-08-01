@@ -13,19 +13,25 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ckeditor</artifactId>
-            <version>3.6.2</version>
+            <version>3.6.4</version>
             <type>war</type>
         </dependency>       
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jstree</artifactId>
-            <version>pre1.0fix</version>
+            <version>1.0.0</version>
             <type>war</type>
         </dependency>            
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-mail-server</artifactId>
             <version>${milton.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
@@ -36,6 +42,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-cloud-sync</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>          
         <dependency>
             <groupId>io.milton</groupId>
@@ -54,12 +66,22 @@
                     <artifactId>endrick-context</artifactId>
                     <groupId>com.ettrema</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>             
         <dependency>
             <groupId>io.milton</groupId>
             <artifactId>milton-server</artifactId>
             <version>${milton.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>             
         <dependency>
             <groupId>junit</groupId>
@@ -104,6 +126,16 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.5.8</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mnode.ical4j</groupId>
@@ -129,11 +161,27 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-cloud-vfs</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hibernate</artifactId>
+                    <groupId>org.hibernate</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hibernate-annotations</artifactId>
+                    <groupId>org.hibernate</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.ettrema</groupId>
             <artifactId>endrick-common</artifactId>
             <version>${endrick.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.json-lib</groupId>
@@ -150,6 +198,22 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-cloud-server-api</artifactId>
             <version>${project.version}</version>
+        </dependency>                       
+        
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate</artifactId>
+            <version>3.2.6.ga</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-annotations</artifactId>
+            <version>3.3.1.GA</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
         </dependency>
     </dependencies>
     
@@ -196,6 +260,14 @@
         </profile>  
         <profile>
             <id>run-fuse</id>
+         
+            <dependencies>
+                <dependency>
+                    <groupId>com.fuselms</groupId>
+                    <artifactId>fuse-app</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>            
+            </dependencies>         
             <build>
                 <plugins>                                      
                     <plugin>
@@ -213,12 +285,17 @@
                         <configuration>
                             <systemProperties>
                                 <systemProperty>
+                                    <name>extra.apps</name>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
+                                </systemProperty>
+                                
+                                <systemProperty>
                                     <name>template.file.roots</name>
                                     <value>../../fuse-admin/fuse-app/src/main/resources</value>
-                                </systemProperty>                                
+                                </systemProperty>  
                             </systemProperties>                             
                             <webAppConfig>
-                                <extraClasspath>../../fuse-admin/fuse-app/target/classes/;../../fuse-admin/fuse-war/src/main/resources/</extraClasspath>
+                                <extraClasspath>../../fuse-admin/fuse-app/target/classes/</extraClasspath>
                             </webAppConfig>
                             <contextPath>/</contextPath>
                             <connectors>
@@ -238,12 +315,18 @@
         </profile>  
         <profile>
             <id>run-fuse-with-autoload</id>
-            <build>
+            <dependencies>
+                <dependency>
+                    <groupId>com.fuselms</groupId>
+                    <artifactId>fuse-app</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>            
+            </dependencies>         
+            <build>                
                 <plugins>
                     <plugin>
                         <groupId>org.mortbay.jetty</groupId>
                         <artifactId>maven-jetty-plugin</artifactId>
-                        <version>6.1.26</version>
                         <executions>
                             <execution>
                                 <phase>compile</phase>
@@ -259,7 +342,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
-                                    <value>com.fuselms.apps.autoload.Autoloader</value>
+                                    <value>com.fuselms.apps.autoload.Autoloader,com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>fuse.autoloader.dir</name>

@@ -126,7 +126,8 @@
     <bean id="classpath.resource.factory" class="io.milton.http.fs.ClassPathResourceFactory"></bean>
     
     <bean id="static.resource.factory" class="io.milton.servlet.StaticResourceFactory">
-        <constructor-arg ref="webRoot" /> <!-- injected by SpringMiltonFilter -->
+        <constructor-arg ref="config" /> <!-- injected by SpringMiltonFilter -->
+        <property name="basePath" value=""/>
     </bean>
     
     

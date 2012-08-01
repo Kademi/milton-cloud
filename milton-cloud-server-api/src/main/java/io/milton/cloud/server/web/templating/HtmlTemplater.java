@@ -72,7 +72,7 @@ public class HtmlTemplater {
         templateLoader = new HtmlTemplateLoader();
         java.util.Properties p = new java.util.Properties();
         p.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
-        engine = new VelocityEngine(p);       
+        engine = new VelocityEngine(p);
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", new HtmlTemplateLoaderResourceLoader());
         engine.setProperty("userdirective", VelocityContentDirective.class.getName() + "," + PortletsDirective.class.getName());
@@ -236,7 +236,7 @@ public class HtmlTemplater {
     }
 
     private Template getTemplate(String templatePath) {
-        if( templatePath == null ) {
+        if (templatePath == null) {
             throw new RuntimeException("templatePath is null");
         }
         return engine.getTemplate(templatePath);
@@ -361,6 +361,29 @@ public class HtmlTemplater {
                     }
                 }
             }
+
+            // Not in filesystem, try a servlet resource
+            System.out.println("check web resource");
+            if (meta == null && path.startsWith("/") ) {
+                URL resource = servletContext.getResource(path);
+                if (resource != null) {
+                    meta = loadClassPathMeta(resource, webPath);
+                }
+                
+//                String localWebPath = servletContext.getRealPath(path);
+//                InputStream r = servletContext.getResourceAsStream(path);
+//                System.out.println("res as str: " + r);
+//                System.out.println("localwebpath: " + localWebPath);
+//                if (localWebPath != null) {
+//                    File templateFile = new File(localWebPath);
+//                    System.out.println("f: " + templateFile.getCanonicalPath() + " - " + templateFile.exists());
+//                    if (templateFile.exists()) {
+//                        log.info("found web resource: " + templateFile.getAbsolutePath());
+//                        meta = loadFileMeta(templateFile, webPath);
+//                    }
+//                }
+            }
+
             // if not in filesystem, try classpath
             if (meta == null) {
                 URL resource = this.getClass().getResource(path);

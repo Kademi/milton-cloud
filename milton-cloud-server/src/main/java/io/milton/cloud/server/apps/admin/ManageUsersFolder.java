@@ -68,6 +68,10 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
         this.name = name;
     }
 
+    public String getTitle() {
+        return "Manage users";
+    }
+    
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         Long profileId = Long.parseLong(childName);
@@ -99,7 +103,7 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
         } else {
             searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
         }
-        _(HtmlTemplater.class).writePage("admin","admin/userAdmin", this, params, out);
+        _(HtmlTemplater.class).writePage("admin","admin/manageUsers", this, params, out);
     }
 
     
@@ -193,7 +197,5 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    
+    }        
 }

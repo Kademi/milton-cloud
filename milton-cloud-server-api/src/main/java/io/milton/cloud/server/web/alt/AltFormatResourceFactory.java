@@ -138,6 +138,8 @@ public class AltFormatResourceFactory implements ResourceFactory {
                         resp.setNonStandardHeader("X-Content-Duration", durationSecs.toString());
                     }
                 }
+            } else {
+                System.out.println("no metadata for: " + rPrimary.getHash());
             }
             try {
                 boolean force = params.containsKey("force");
