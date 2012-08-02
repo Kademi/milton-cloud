@@ -53,11 +53,46 @@ import static io.milton.context.RequestContext._;
 import javax.xml.stream.XMLStreamException;
 
 /**
+ * 
+ * This class is for rendering HTML pages.
+ * 
+ * It wraps a normal FileResource and parses its content, expecting it to be a well
+ * formed HTML page. It extracts a template, if present in a link tag, and if
+ * not present defaults it to theme/page, so it will use the page.html template
+ * of the current theme
+ * 
+ * Example:
+ * 
+ * <html>
+ *    <head>        
+ *        <title>home page</title>
+ *        <link rel="template" href="theme/home" />
+ *    </head>
+ *    <body class="home">
+ * 
+ * The title, template and body can be updated with a POST to this 
+ * 
+ * Also supports read/write parameters embedded in the html, such as:
+ * 
+ * <html>
+ *    <head>
+ *        <title>module 1</title>
+ *        <script title="learningTimeMins" type="data/parameter">220</script>
  *
+ * Parameters can be accessed via milton/ajax integration with the milton namespace
+ * 
+ * Eg: module1/_DAV/PROPFIND?fields=milton:learningTimeMins
+ *
+ * And those parameters can be updated via PROPPATCH in a similar manner
+ * 
+ * Creating new html pages is supported by integration with NewPageResource, which
+ * looks for a .new suffix, and creates an instance of RenderFileResource on the
+ * fly
+ * 
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource {
+public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
     private final FileResource fileResource;
@@ -140,8 +175,10 @@ public class RenderFileResource extends AbstractResource implements GetableResou
                 }
             }
         }
+        // If no page template is given defaul to theme/page, this is equivalent to:
+        // <link rel="template" href="theme/page" />
         if (template == null) {
-            template = "content/page";
+            template = "theme/page";
         }        
     }
 
@@ -417,5 +454,10 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     public void setParsed(boolean parsed) {
         this.parsed = parsed;
+    }
+
+    @Override
+    public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
+        this.fileResource.replaceContent(in, length);
     }
 }

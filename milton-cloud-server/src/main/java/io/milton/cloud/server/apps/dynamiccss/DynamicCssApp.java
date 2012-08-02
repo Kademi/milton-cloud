@@ -16,16 +16,14 @@
  */
 package io.milton.cloud.server.apps.dynamiccss;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ResourceApplication;
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.*;
 import io.milton.common.Path;
-import io.milton.http.exceptions.BadRequestException;
-import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import java.util.Date;
 
 /**
  *
@@ -35,6 +33,8 @@ public class DynamicCssApp implements ResourceApplication {
 
     private SpliffyResourceFactory resourceFactory;
 
+    private Date modDate;
+    
     @Override
     public Resource getResource(RootFolder webRoot, String path) {
         if (!path.endsWith(".dyn.css")) {
@@ -43,7 +43,9 @@ public class DynamicCssApp implements ResourceApplication {
 
         Path p = Path.path(path);
    
-        return new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
+        TemplatedTextPage t = new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
+        t.setModifiedDate(modDate);
+        return t;
     }
 
     @Override
@@ -54,6 +56,7 @@ public class DynamicCssApp implements ResourceApplication {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.resourceFactory = resourceFactory;
+        modDate = config.getContext().get(CurrentDateService.class).getNow();
     }
 
     @Override

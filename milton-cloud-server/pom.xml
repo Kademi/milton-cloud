@@ -8,7 +8,19 @@
     </parent>
     <artifactId>milton-cloud-server</artifactId>
     <packaging>war</packaging>
-  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -125,7 +137,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.5.8</version>
+            <version>1.6.1</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
@@ -288,15 +300,15 @@
                                     <name>extra.apps</name>
                                     <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
                                 </systemProperty>
-                                
+                                <systemProperty>
+                                    <name>static.resource.roots</name>
+                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                </systemProperty>                                  
                                 <systemProperty>
                                     <name>template.file.roots</name>
                                     <value>../../fuse-admin/fuse-app/src/main/resources</value>
                                 </systemProperty>  
                             </systemProperties>                             
-                            <webAppConfig>
-                                <extraClasspath>../../fuse-admin/fuse-app/target/classes/</extraClasspath>
-                            </webAppConfig>
                             <contextPath>/</contextPath>
                             <connectors>
                                 <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
@@ -336,14 +348,15 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <webAppConfig>
-                                <extraClasspath>../../fuse-admin/fuse-app/target/classes/;../../fuse-admin/fuse-war/src/main/resources/</extraClasspath>
-                            </webAppConfig>
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
-                                    <value>com.fuselms.apps.autoload.Autoloader,com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.Autoloader</value>
                                 </systemProperty>
+                                <systemProperty>
+                                    <name>static.resource.roots</name>
+                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                </systemProperty>                                                                  
                                 <systemProperty>
                                     <name>fuse.autoloader.dir</name>
                                     <value>../../fuse-admin</value>

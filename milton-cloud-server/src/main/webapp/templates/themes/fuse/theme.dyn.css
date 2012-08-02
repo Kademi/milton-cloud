@@ -897,10 +897,10 @@ ul.treeView ul  {
 }
 
 .treeView li.program {
-   background-image: url(images/icons/program.png);    
+    background-image: url(images/icons/program.png);    
 }
 .treeView li.course {
-   background-image: url(images/icons/course.png);    
+    background-image: url(images/icons/course.png);    
 }
 .treeView li.module {
     display: none;
@@ -917,7 +917,7 @@ body {
 }
 
 #editor {
-    padding: 5px 20px; /** give the editor a bit of padding around content */
+    padding: 5px 10px; /** give the editor a bit of padding around content */
 }
 
 h1, h1.a, h2, h2.a, h3, h3.a, h4, h4 a {    
@@ -996,43 +996,43 @@ table {
     border-spacing: 0;
 }
 
-th {
+th.striped {
     text-align: left;
 }
-table thead th {
+table.striped thead th {
     background-color: #4c4c4c;
     color: white;
 }
-table tbody tr:nth-child(odd) td {
+table.striped tbody tr:nth-child(odd) td {
     background-color: #f1f1f1;
 }
-td, th {
+td.striped, th.striped {
     border-color: #D4D4D4;    
     border-width: 1px;    
     padding: 10px;
     border-style: solid none none none;
 }
 
-table td:first-child {
+table.striped td:first-child {
     border-left-style: solid;
 }
-table td:last-child {
+table.striped td:last-child {
     border-right-style: solid;
 }
 
-table tr:last-child td:first-child {
+table.striped tr:last-child td:first-child {
     border-radius: 0 0 0 8px;    
 }
-table tr:last-child td:last-child {
+table.striped tr:last-child td:last-child {
     border-radius: 0 0 8px 0;    
 }
-table tr:last-child td {
+table.striped tr:last-child td {
     border-bottom-style: solid;
 }
-table thead th:first-child {
+table.striped thead th:first-child {
     border-radius: 8px 0 0 0;
 }
-table thead th:last-child {
+table.striped thead th:last-child {
     border-radius: 0 8px 0 0;
 }
 
@@ -2523,10 +2523,10 @@ ul.treeView ul  {
 }
 
 .treeView li.program {
-   background-image: url(images/icons/program.png);    
+    background-image: url(images/icons/program.png);    
 }
 .treeView li.course {
-   background-image: url(images/icons/course.png);    
+    background-image: url(images/icons/course.png);    
 }
 .treeView li.module {
     display: none;
@@ -2648,14 +2648,14 @@ body p, body p a {
 
 body p a {   
     font-size: 1em !important;
-   
+
 }
 
 body .citation {
     font-size: 0.6em !important;
     font-weight: 400;
     font-style:italic;
-  
+
     padding: 0px 0px 0px 0px;
     margin:0px;
 }
@@ -2677,7 +2677,7 @@ body .panelBox  ul li {
 }
 
 body .panelBox  ul li ul li {
-    
+
 }
 
 
@@ -2698,7 +2698,7 @@ body .panelBox li a {
 
 .activity {
     background-color: #ECF1F7;
-     border: 1px solid #d3dbe1;
+    border: 1px solid #d3dbe1;
 }
 .keyPoint {
     background-color: #f8ecee;
@@ -2725,8 +2725,8 @@ body .panelBox li a {
     position: absolute;
     top: 5px !important;
     width: 35px;
-    
-     
+
+
 }
 
 .activity > span.sprite {
@@ -2737,11 +2737,11 @@ body .lightbulb div h6 {
     line-height: 36px;    
     margin: 0;
     padding: 0px 40px 0px 40px;
-    
-    
-    
-    
-    
+
+
+
+
+
 
 }
 .keyPoint > span.sprite {
@@ -2754,7 +2754,7 @@ body .lightbulb div h6 span.sprite {
     background-position: -93px -47px;
     height: 34px;
     width: 35px;
-   
+
 
 }
 
@@ -2779,13 +2779,13 @@ div.dropdown {
 .btnHideFollowing {
     background-color: #88c140;
     border-radius: 4px;
-   /* border: 1px solid #98a686;*/
+    /* border: 1px solid #98a686;*/
     color: white;
     padding: 8px 38px 8px 12px;
     margin: 0px 0px 0px 0px;
     display: inline-block;
     position: relative;
-   font-weight: 500;    
+    font-weight: 500;    
 }
 
 
@@ -2795,13 +2795,13 @@ div.dropdown {
 
 .lightbulb {
     text-align: right;
-  
+
 }
 
 div.dropdown > div {
-    
-   border-top: 1px solid #d3d3d3;
-    
+
+    border-top: 1px solid #d3d3d3;
+
 }
 
 
@@ -2822,12 +2822,12 @@ div.dropdown > div {
 }
 
 .modulePage .dropdown h6 {
-   /* background-color: #e9e9e9;*/
+    /* background-color: #e9e9e9;*/
 
 }
 
 div.dropdown h6 {
-   line-height: 36px;    
+    line-height: 36px;    
     margin: 0;
     padding: 00px 40px 0px 13px;
 
@@ -3066,3 +3066,42 @@ ul.btnList li:hover a, ul.btnList li.active a{
 .border-text1 {
     border-color: lightgray;
 }
+h1.really-big {
+    font-family: 'FrutigerLTStd45LightRegular';
+    font-size: 45px;
+    line-height: 100%;
+    background: none;
+    color: #333;
+}
+
+/**
+A few fixes to undo the default styles when viewing the editor
+*/
+body .cke_panel_grouptitle {
+    width: auto;
+    position: inherit;
+    left: auto;
+    display: block;
+    border-radius: inherit;
+}
+
+div.textOverImage {
+
+}
+
+div.textOverImage .bgImage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+div.textOverImage div {
+    z-index: 2;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    text-align: center;    
+}
+

@@ -13,10 +13,15 @@ import java.util.List;
  * @author brad
  */
 public class JsonResult {
+    
+    //public static String CONTENT_TYPE = "application/x-javascript; charset=utf-8";
+    public static String CONTENT_TYPE = "application/json; charset=utf-8";
+    
     private boolean status;
     private String nextHref;
     private List<String> messages;
     private List<FieldMessage> fieldMessages;
+    private Object data;
 
     public JsonResult() {
     }
@@ -118,6 +123,20 @@ public class JsonResult {
     public void setFieldMessages(List<FieldMessage> fieldMessages) {
         this.fieldMessages = fieldMessages;
     }
+
+    /**
+     * Any JSON friendly object
+     * @return 
+     */
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
+    }
+    
+    
     
     
     /**

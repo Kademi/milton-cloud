@@ -126,10 +126,13 @@
     <bean id="classpath.resource.factory" class="io.milton.http.fs.ClassPathResourceFactory"></bean>
     
     <bean id="static.resource.factory" class="io.milton.servlet.StaticResourceFactory">
-        <constructor-arg ref="config" /> <!-- injected by SpringMiltonFilter -->
-        <property name="basePath" value=""/>
     </bean>
     
+    <!-- Find resources from the servlet context, which do not pass through the filter via /static -->
+    <bean id="web.resource.factory" class="io.milton.servlet.WebResourceFactory">
+        <constructor-arg ref="config" /> <!-- injected by SpringMiltonFilter -->
+        <property name="basePath" value="" />
+    </bean>
     
     
     <bean id="apps.resource.factory" class="io.milton.cloud.server.web.resources.AppsResourceFactory">
@@ -142,8 +145,9 @@
                 <ref local="sync.spliffy.resource.factory" />
                 <ref local="main.spliffy.resource.factory" />  
                 <ref local="apps.resource.factory"/>
-                <ref local="classpath.resource.factory" />
                 <ref local="static.resource.factory" />
+                <ref local="web.resource.factory" />
+                <ref local="classpath.resource.factory" />                
                 <ref local="altformat.resource.factory" />                
             </list>
         </constructor-arg>

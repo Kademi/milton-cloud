@@ -534,7 +534,7 @@ div.Modal {
     display: none;
 }
 div.Modal.wide {
-    width: 850px;
+    width: 900px;
 }
 div#modalHelp {
     width: 300px;
@@ -922,6 +922,7 @@ select.Medium { width: 100px; }
     float: right;
 }
 a.Edit { background-image: url(images/icon_edit.png); }
+a.View { background-image: url(images/icon_open_new_window.png); }
 a.Move { background-image: url(images/icon_move.png); }
 a.Dialogue { background-image: url(images/icon_dialogue.png); }
 a.Delete { background-image: url(images/icon_delete.png); }
@@ -962,4 +963,7 @@ aside.Hidden:hover {
     display: block;
     width: 150px;
     margin-bottom: 10px;
+}
+body .cke_skin_office2003 .cke_rcombo .cke_openbutton .cke_icon {
+    height: 19px;
 }

@@ -7,8 +7,9 @@
             </goals>
             <properties>
                 <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+
                 <Env.MAVEN_OPTS>-javaagent:/home/home/brad/.netbeans/7.1.2/jrebel/jrebel.jar</Env.MAVEN_OPTS>
-                
+
                 
             </properties>
         <activatedProfiles>
@@ -28,5 +29,15 @@
             <activatedProfiles>
                 <activatedProfile>run-fuse</activatedProfile>
             </activatedProfiles>
+        </action>
+        <action>
+            <actionName>run</actionName>
+            <goals>
+                <goal>compile</goal>
+            </goals>
+            <properties>
+                <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+                <Env.MAVEN_OPTS>-javaagent:/home/home/brad/.netbeans/7.1.2/jrebel/jrebel.jar</Env.MAVEN_OPTS>
+            </properties>
         </action>
     </actions>

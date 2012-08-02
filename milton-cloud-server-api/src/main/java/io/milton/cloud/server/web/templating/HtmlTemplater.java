@@ -144,28 +144,47 @@ public class HtmlTemplater {
      * @throws IOException
      */
     public void writePage(String theme, String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        UserResource user = securityManager.getCurrentPrincipal();
+        System.out.println("HtmlTempater: writePage: " + theme + ", " + templatePath);
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
-        if (!templatePath.startsWith("/")) {
-            templatePath = "/templates/apps/" + templatePath;
+        RequestContext.getCurrent().put(rootFolder);
+        if (theme.equals("custom")) {
+            RequestContext.getCurrent().put("isCustom", Boolean.TRUE); // can't pass params to velocity template loader, so have to workaround
         }
-        templatePath = templatePath + ".html";
+        String themePath; // path that contains the theme templates Eg /templates/themes/admin/ or /content/theme/
+        if (theme.equals("custom")) {
+            themePath = "/content/theme/";
+        } else {
+            themePath = "/templates/themes/" + theme + "/";
+        }        
+        
+        UserResource user = securityManager.getCurrentPrincipal();        
+        if (!templatePath.startsWith("/")) {
+            if( templatePath.startsWith("theme/")) {
+                templatePath = templatePath.replace("theme/", themePath); // Eg change theme/page to /content/theme/page
+            } else {
+                templatePath = "/templates/apps/" + templatePath; // Eg change admin/manageUsers to /templates/apps/admin/manageUsers
+            }
+        }
+        if( !templatePath.endsWith(".html")) {
+            templatePath = templatePath + ".html";
+        }
 
         Template bodyTemplate = getTemplate(templatePath);
+        System.out.println("templatePath: " + templatePath);
         TemplateHtmlPage bodyTemplateMeta = cachedTemplateMetaData.get(templatePath);
 
         String themeTemplateName = findThemeTemplateName(bodyTemplateMeta);
-        String themeTemplatePath;
-        if (theme.equals("custom")) {
-            themeTemplatePath = "/content/theme/" + themeTemplateName + ".html"; // TODO: need branch to be configurable
-            RequestContext.getCurrent().put("isCustom", Boolean.TRUE); // can't pass params to velocity template loader, so have to workaround
-            RequestContext.getCurrent().put(rootFolder);
-        } else if (themeTemplateName.startsWith("/")) {
-            themeTemplatePath = themeTemplateName + ".html";
+        String themeTemplatePath; // if the given themeTemplateName is an absolute path then use it as is, other prefix with themePath
+        if (themeTemplateName.startsWith("/")) {
+            themeTemplatePath = themeTemplateName;
         } else {
-            themeTemplatePath = "/templates/themes/" + theme + "/" + themeTemplateName + ".html";
+            themeTemplatePath = themePath + themeTemplateName;
+        }
+        if( !themeTemplatePath.endsWith(".html")) {
+            themeTemplatePath += ".html"; // this class only does html templates
         }
         Template themeTemplate = getTemplate(themeTemplatePath);
+        System.out.println("themeTemplatePath: " + themeTemplatePath);
         if (themeTemplate == null) {
             throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);
         }
@@ -341,9 +360,12 @@ public class HtmlTemplater {
                     Resource r = NodeChildUtils.find(p, wrf);
                     FileResource fr = NodeChildUtils.toFileResource(r);
                     if (fr == null) {
-                        throw new RuntimeException("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getName());
+                        if( !"VM_global_library.vm".equals(path )) {
+                            log.info("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getName());
+                        }                        
+                    } else {
+                        meta = loadContentMeta(fr, wrf.getWebsite().getName(), webPath);
                     }
-                    meta = loadContentMeta(fr, wrf.getWebsite().getName(), webPath);
                 } catch (NotAuthorizedException | BadRequestException | NotFoundException ex) {
                     throw new IOException(ex);
                 }
@@ -363,13 +385,24 @@ public class HtmlTemplater {
             }
 
             // Not in filesystem, try a servlet resource
-            System.out.println("check web resource");
-            if (meta == null && path.startsWith("/") ) {
-                URL resource = servletContext.getResource(path);
-                if (resource != null) {
-                    meta = loadClassPathMeta(resource, webPath);
+            if (meta == null && path.startsWith("/")) {
+                // try to locate a physical file path, so we can detect file changes
+                String realPath = servletContext.getRealPath(path);
+                if (realPath != null) {
+                    File templateFile = new File(realPath);
+                    if (templateFile.exists() && templateFile.isFile()) {
+                        meta = loadFileMeta(templateFile, webPath);
+                    }
                 }
-                
+                // if we couldnt get a real path might be because its a WAR packaged resource, or overlay, so
+                // try to get url.
+                if (meta == null) {
+                    URL resource = servletContext.getResource(path);
+                    if (resource != null) {
+                        meta = loadClassPathMeta(resource, webPath);
+                    }
+                }
+
 //                String localWebPath = servletContext.getRealPath(path);
 //                InputStream r = servletContext.getResourceAsStream(path);
 //                System.out.println("res as str: " + r);

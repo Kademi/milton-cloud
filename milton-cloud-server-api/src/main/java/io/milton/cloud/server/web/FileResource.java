@@ -134,9 +134,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             throw new RuntimeException("no name");
         }
         String acceptable = ContentTypeUtils.findContentTypes(getName().toLowerCase());
-        System.out.println("FileResoure: getContentType: " + acceptable);
         String ct = ContentTypeUtils.findAcceptableContentType(acceptable, accepts);
-        System.out.println("FileResoure: getContentType: " + ct);
         return ct;
     }
 

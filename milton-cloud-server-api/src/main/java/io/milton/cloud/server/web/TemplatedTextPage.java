@@ -48,6 +48,8 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
     protected final String contentType;
     protected final String template;
     
+    private Date modDate;
+    
     public TemplatedTextPage(String name, CommonCollectionResource parent, String contentType, String template) {
         this.name = name;
         this.parent = parent;
@@ -109,9 +111,13 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
 
     @Override
     public Date getModifiedDate() {
-        return parent.getModifiedDate();
+        return modDate;
     }
 
+    public void setModifiedDate(Date d) {
+        this.modDate = d;
+    }
+    
     @Override
     public Date getCreateDate() {
         return null;
@@ -126,6 +132,5 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
-    
     
 }

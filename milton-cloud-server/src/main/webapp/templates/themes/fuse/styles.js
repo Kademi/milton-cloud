@@ -6,6 +6,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 CKEDITOR.stylesSet.add( 'myStyles',
 [
 
-	//{ name : 'Show/Hide Button'	, element : 'h4', attributes : { 'class' : 'btnHideFollowing' } },
+	{ name : 'Big heading'	, element : 'h1', attributes : { 'class' : 'really-big' } },
 	{ name : 'Citation'	, element : 'p', attributes : { 'class' : 'citation' } },
 ]);

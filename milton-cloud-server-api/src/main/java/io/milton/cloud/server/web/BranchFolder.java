@@ -39,8 +39,7 @@ import org.hashsplit4j.api.HashStore;
 public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource, NodeChildUtils.ResourceCreator {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-    
-    private static Map<Long,Long> mapOfCommitIds = new HashMap<>();
+        
     
     protected final boolean renderMode;
     protected final CommonCollectionResource parent;
@@ -68,22 +67,23 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public void save() {
-        Long myHeadId = null;
+    public void save() {        
+        Long lastHash = null;
+        Long lastId = null;
         if( branch != null && branch.getHead() != null ) {
-            myHeadId = branch.getHead().getId();
+            lastId = branch.getHead().getId();                    
+            lastHash = branch.getHead().getItemHash();
         }
-        Long lastCommitHeadId = mapOfCommitIds.get(branch.getId());
-        if( lastCommitHeadId != null && myHeadId != null ) {
-            if( !lastCommitHeadId.equals(myHeadId)) {
-                throw new RuntimeException("Concurrency failure. last synced head is different to what i was loaded on : " + myHeadId + " != " + lastCommitHeadId);
-            }
-        }
-        
+                
         UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
         dataSession.save(currentUser.getThisUser());
         
-        mapOfCommitIds.put(branch.getId(), branch.getHead().getId());
+        System.out.println("----------------------------------");
+        System.out.println("branch head ID: " + branch.getHead().getId());
+        System.out.println("branch head hash: " + branch.getHead().getItemHash());
+        System.out.println("last hash: " + lastHash);
+        System.out.println("Last head id: " + lastId);
+        System.out.println("----------------------------------");
     }
 
     @Override

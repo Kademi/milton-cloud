@@ -3,20 +3,18 @@ var editorSkin = "office2003";
 var toolbarSets = {};
 
 toolbarSets["Full"] = [
-	['Source','DocProps','-'],
-	['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print','SpellChecker'],
-	['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-	['Form','Checkbox','Radio','TextField','Textarea','Select','Button','ImageButton','HiddenField'],
+	{ name: 'document', items : [ 'Source','-' ] },
+	{ name: 'clipboard', items : [ 'Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
+	{ name: 'editing', items : [ 'Find','Replace','-','SelectAll','-','SpellChecker' ] },
+	{ name: 'forms', items : [ 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select'] },
+        { name: 'links', items : [ 'Link','Unlink','Anchor' ] },
+	{ name: 'insert', items : [ 'Video', 'Image','Table','HorizontalRule','SpecialChar' ] },        
+	{ name: 'tools', items : [ 'Maximize', 'ShowBlocks' ] },
 	'/',
-	['Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript'],
-	['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],
-	['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
-	['Link','Unlink','Anchor'],
-	['Image','Flash','Table','Rule','Smiley','SpecialChar','PageBreak'],
-	'/',
-	['Style','FontFormat','FontName','FontSize'],
-	['TextColor','BGColor'],
-	['Maximize','ShowBlocks','-','About']		// No comma for the last row.
+	{ name: 'styles', items : [ 'Styles','Format','FontSize','Templates' ] },        
+	{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
+	{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote',
+	'-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
 ] ;
  
 
@@ -42,6 +40,8 @@ toolbarSets["Default"] = [
 	['Maximize','ShowBlocks','-','Templates'],		// No comma for the last row.
 	['Styles','Format']
 ] ;
+
+
 
 toolbarSets["Lite"] = [
 	['Bold','Italic','-','Image','Link','Unlink']

@@ -43,6 +43,7 @@ function initTheme() {
     initModal();
     initShowModalButton();
     initTabPanel();
+    initRotation();
     
          
     log("initTheme: run page init functions");
@@ -202,7 +203,7 @@ function initHtmlEditors() {
             format_tags : 'p;h2;h3;h4;h5'
         };    
     
-        //config.stylesSet = 'myStyles:/templates/themes/3dn/js/styles.js';
+        config.stylesSet = 'myStyles:/templates/themes/fuse/styles.js'; // TODO: needs to be configurable, based on theme
         log("create editor", inp, config)
         inp.ckeditor(config);
     });  
@@ -295,6 +296,23 @@ function showAddItem(source) {
         opacity: 0
     }); 
     return false;
+}
+
+function initRotation() {
+    $(function() {
+        var degree = 0;
+	
+        setInterval(function() {
+            if(degree === 360) {
+                degree = 0;
+            } else {
+                degree += 2;
+            }
+		
+            $('.rotate.anticlockwise').rotate(-degree);
+            $('.rotate.clockwise').rotate(degree);
+        }, 50);
+    });            
 }
 
 /** End init-theme.js */

@@ -27,10 +27,16 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     
     public static List<Profile> findByBusinessUnit(Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.eq("adminOrg", organisation));        
+        crit.add(Expression.eq("organisation", organisation));        
         return DbUtils.toList(crit, Profile.class);        
     }
-    
+
+    public static Profile findByEmail(String email, Organisation organisation, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.add(Expression.eq("organisation", organisation));        
+        crit.add(Expression.eq("email", email));        
+        return DbUtils.unique(crit);
+    }    
      
     private Organisation businessUnit; // users may be assigned to a business unit within their administrative organisation
     

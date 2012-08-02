@@ -183,7 +183,7 @@ public class EmailItem implements Serializable {
         this.subject = subject;
     }
 
-    @Column(nullable = true)
+    @Column(nullable = true, length=20000)
     public String getHtml() {
         return html;
     }
@@ -192,7 +192,7 @@ public class EmailItem implements Serializable {
         this.html = html;
     }
 
-    @Column(nullable = true)
+    @Column(nullable = true, length=20000)
     public String getText() {
         return text;
     }
@@ -211,6 +211,15 @@ public class EmailItem implements Serializable {
         this.createdDate = createdDate;
     }
 
+    /**
+     * The send status. Initially null, then set to:
+     * - f = failed
+     * - c = completed
+     * - p = pending/in progress
+     * - r = retry
+     * 
+     * @return 
+     */
     public String getSendStatus() {
         return sendStatus;
     }
@@ -219,6 +228,11 @@ public class EmailItem implements Serializable {
         this.sendStatus = sendStatus;
     }
 
+    /**
+     * Required field
+     * 
+     * @return 
+     */
     @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getSendStatusDate() {

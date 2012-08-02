@@ -14,4 +14,10 @@
             <jpda.listen>maven</jpda.listen>
         </properties>
     </action>
+    <action>
+            <actionName>run</actionName>
+            <goals>
+                <goal>compile</goal>
+            </goals>
+        </action>
 </actions>

@@ -4,53 +4,51 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 
 CKEDITOR.addTemplates('default',{
-    imagesPath:CKEDITOR.getUrl(CKEDITOR.plugins.getPath('templates')+'templates/images/'),
+    imagesPath: "/static/editor/",
     templates:[
     
     {
         title:'Activity box',
-        image:'activity.png',
+        image:'icon_activity.gif',
         description:'A box for a learning activity',
         html:"<div class='activity'><p>Type the text here</p></div>"
-    },
+    },    
     {
         title:'Dropdown1',
-        image:'dropdownSH1.png',
+        image:'icon_dropdown.gif',
         description:'A sub-heading with a dropdown button which reveals its content.',
         html:"<div class='dropdown'><h6>Type the title here</h6><div><p>Type the text here</p></div></div>"
     },
     
-    /*
-    {
-        title:'Dropdown 2',
-        image:'dropdownSH2.png',
-        description:'A sub-heading 2 with a dropdown button which reveals its content.',
-        html:"<div class='dropdown sh2'><h4>Type the title here</h4><div><p>Type the text here</p></div></div>"
-    },*/
-    
     {
         title:'Show/Hide Button',
-        image:'dropdownSH2.png',
+        image:'icon_show.gif',
         description:'A button which causes all following content to be initially hidden, and is only shown when clicked',
         html:"<h6 class='btnHideFollowing'>Type the title here</h6>"
     },
     {
         title:'Accentuated box',
-        image:'accentuated.png',
+        image:'icon_accentuated.gif',
         description:'A box to add empasis to any block of content',
         html:"<div class='accentuated'><p>Type the text here</p></div>"
     },
     {
-        title:'Lightbuld dropdown section',
-        image:'dropdownSH2.png',
+        title:'Lightbulb dropdown section',
+        image:'icon_lightbulb.gif',
         description:'A sub-heading 2 with a dropdown button which reveals its content.',
         html:"<div class='lightbulb'><div class='dropdown'><h6>Type the title here</h6><div><p>Type the text here</p></div></div></div>"
     },
     {
         title:'Key learning point section',
-        image:'keyLearningPoint.png',
+        image:'icon_key_learning.gif',
         description:'A sub-heading 2 with a dropdown button which reveals its content.',
         html:"<div class='keyPoint'><h4>Key learning point</h4><div><p>Type the text here</p></div></div>"
+    },
+    {
+        title:'Text over image',
+        image:'icon_floating_type.gif',
+        description:'A resizable box with text floating over an image',
+        html:"<div class='textOverImage' style='position: absolute; width: 221px; height: 218px;'><img src='/static/editor/gear.png' width='221' height='218' class='bgImage'/><div>Text goes here</div></div>"
     }
     ]
 });

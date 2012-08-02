@@ -93,10 +93,12 @@ public class UserApp implements Application, MenuApplication {
 
             }
         }
-        if (parent instanceof RootFolder) {
+        if (parent instanceof RootFolder) {            
             RootFolder rf = (RootFolder) parent;
             if (requestedName.equals("login.html")) {
                 return new LoginPage(rf);
+            } else if( requestedName.equals("password-reset")) {
+                return new PasswordResetPage(requestedName, rf);
             }
         }
         return null;

@@ -78,8 +78,9 @@
 
 
 function resetValidation(container) {
-    $(".validationError", container).remove();
+    $(".validationError", container).remove();    
     $(".pageMessage", container).hide(300);
+    $(".pageMessage", container).html("");
     $(".error > *", container).unwrap();
     $(".errorField", container).removeClass("errorField");
 }
