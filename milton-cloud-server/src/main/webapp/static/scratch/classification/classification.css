@@ -1,0 +1,67 @@
+/* Classification */
+.classification .controller-wrapper {
+	float: left;
+	width: 191px;
+}
+.classification .controller-wrapper [class^="controller-"] {
+	background: url(button.png) no-repeat;
+	height: 56px;
+	margin-top: 5px;
+	padding: 14px 0 0 10px;
+	position: relative;
+	cursor: pointer;
+}
+.classification .controller-wrapper [class^="controller-"] span.arrow {
+	position: absolute;
+	background: url(icon_right_sprite.png) no-repeat;
+	width: 24px;
+	height: 48px;
+	top: 11px;
+	right: 10px;
+}
+.classification .controller-wrapper [class^="controller-"] h3 { font-size: 18px; }
+.classification .controller-wrapper [class^="controller-"] p {
+	font-size: 12px;
+	line-height: 110%;
+}
+.classification .controller-wrapper [class^="controller-"]:first-child { margin-top: 0; }
+.classification .controller-wrapper .controller-profound.active span.arrow { background-position: 0 -49px; }
+.classification .controller-wrapper .controller-severe.active span.arrow { background-position: 0 -97px; }
+.classification .controller-wrapper .controller-moderate.active span.arrow { background-position: 0 -144px; }
+.classification .controller-wrapper .controller-mild.active span.arrow { background-position: 0 -192px; }
+.classification .content-wrapper { margin-left: 194px; }
+.classification .content-wrapper > [class^="content-"] {
+	background: url(content_panel.png) no-repeat;
+}
+.classification .content-wrapper > [class^="content-"].active {
+	display: block !important;
+}
+.classification .content-wrapper > [class^="content-"] h3 {
+	text-align: center;
+	font-size: 18px;
+	font-family: 'FrutigerLTStd55RomanRegular';
+	margin-top: 90px;
+}
+.classification .content-wrapper > [class^="content-"] ul {
+	margin: 50px 0 0 55px;
+	list-style: inside disc;
+	font-size: 14px;
+}
+.classification .content-wrapper > [class^="content-"] ul ul {
+	margin: 0 0 0 20px;
+	list-style: none;
+}
+.classification .content-wrapper > [class^="content-"] ul ul li {
+	background: url(bullet_01.png) no-repeat 0 9px;
+	padding-left: 10px;
+}
+.classification .content-wrapper > [class^="content-"] .content-background {	
+	padding: 14px 17px 0;
+	width: 682px;
+	height: 281px;
+	background: no-repeat 50% 50%;
+}
+.classification .content-wrapper .content-profound .content-background { background-image: url(bg_profound.png); }
+.classification .content-wrapper .content-severe .content-background { background-image: url(bg_severe.png); }
+.classification .content-wrapper .content-moderate .content-background { background-image: url(bg_moderate.png); }
+.classification .content-wrapper .content-mild .content-background { background-image: url(bg_mild.png); }
