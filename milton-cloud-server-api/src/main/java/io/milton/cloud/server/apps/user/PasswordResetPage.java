@@ -58,6 +58,8 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
     
     private JsonResult jsonResult;
     
+    private PasswordReset passwordReset;
+    
     public PasswordResetPage(String name, CommonCollectionResource parent) {
         super(name, parent, "theme/passwordReset", "Password reset");
     }
@@ -114,10 +116,14 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         }
         String returnUrl = this.getHref();
         Date now = _(CurrentDateService.class).getNow();
-        PasswordReset r = PasswordReset.create(user, now, returnUrl, website, session);
-        log.info("created resetddd: " + r.getToken());
+        passwordReset = PasswordReset.create(user, now, returnUrl, website, session);
+        log.info("created resetddd: " + passwordReset.getToken());
         
-        String emailHtml = createEmailHtml(r, session);
+        System.out.println("passwordReset: " + this.getPasswordReset());
+        System.out.println("do email gen");
+        String emailHtml = createEmailHtml();
+        System.out.println(emailHtml);
+        System.out.println("done email gen");
         
         EmailItem emailItem = new EmailItem();
         emailItem.setCreatedDate(now);
@@ -134,7 +140,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         return true;
     }
 
-    private String createEmailHtml(PasswordReset r, Session session) throws IOException {
+    private String createEmailHtml() throws IOException {
         model = buildModel(null);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         _(HtmlTemplater.class).writePage("theme/passwordResetEmail", this, null, out);
@@ -146,7 +152,11 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         return true;
     }
 
+    public PasswordReset getPasswordReset() {
+        return passwordReset;
+    }
 
+    
     
 
 }

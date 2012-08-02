@@ -139,8 +139,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         }
         if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
-            if (requestedName.equals("inbox")) {
-                return new MyInboxPage(requestedName, wrf);
+            if (requestedName.equals("inbox")) {                                
+                return new EmailFolder(wrf, requestedName, null);
             }
         }
         return null;
@@ -155,7 +155,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         }
         if (parent instanceof BaseEntityResource) {
             BaseEntityResource ur = (BaseEntityResource) parent;
-            EmailFolder f = new EmailFolder(ur, "inbox");
+            EmailFolder f = new EmailFolder(ur, "inbox", ur.getBaseEntity());
             children.add(f);
         }
     }

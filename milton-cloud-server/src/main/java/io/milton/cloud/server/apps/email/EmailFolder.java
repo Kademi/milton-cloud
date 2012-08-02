@@ -48,14 +48,16 @@ import static io.milton.context.RequestContext._;
  * @author brad
  */
 public class EmailFolder extends AbstractCollectionResource implements GetableResource, MessageFolder {
-    private final BaseEntityResource parent;
+    private final CommonCollectionResource parent;
     private final String name;
+    private BaseEntity baseEntity;
     
     private ResourceList children;
 
-    public EmailFolder(BaseEntityResource parent, String name) {       
+    public EmailFolder(CommonCollectionResource parent, String name, BaseEntity baseEntity) {       
         this.parent = parent;
         this.name = name;
+        this.baseEntity = baseEntity;
     }
     
     @Override
@@ -88,7 +90,21 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     }
 
     @Override
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        System.out.println("EmailFolder: child: " + childName);
+        Long id = Long.parseLong(childName);
+        EmailItem item = (EmailItem) SessionManager.session().get(EmailItem.class, id);
+        if( item != null ) {
+            return  new EmailItemFolder(this, item);
+        }
+        
+        return super.child(childName);
+    }
+
+        
+    @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+        System.out.println("getchildren - " + baseEntity);
         if( children == null ) {
             children = new ResourceList();
             _(ApplicationManager.class).addBrowseablePages(this, children);
@@ -102,7 +118,10 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     }
     
     public BaseEntity getEntity() {
-        return parent.getBaseEntity();
+        if( baseEntity == null ) {
+            baseEntity = _(SpliffySecurityManager.class).getCurrentUser();
+        }
+        return baseEntity;
     }
 
     

@@ -13,10 +13,12 @@
         <div class="contentLeft">  
             <div class="leftBar notificationBox">
                 #set($messages = $page.inbox.children)
-                
+                                
                 #if($messages.isEmpty())
+
                 <div><h3>You have no notifications</h3></div>
                 #else
+
                     #foreach($msg in $messages)
                         #set($activeClass = $formatter.ifEqual("active","",$msg,$targetPage))
                 <div class="$activeClass">
