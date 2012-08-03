@@ -22,7 +22,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Commit implements Serializable {
     private long id;
-    private long itemHash; // this is the root directory for the repository (in this version)   
+    private String itemHash; // this is the root directory for the repository (in this version)   
     private Date createdDate; 
     private Profile editor;
 
@@ -30,11 +30,11 @@ public class Commit implements Serializable {
     }
 
     @Column
-    public long getItemHash() {
+    public String getItemHash() {
         return itemHash;
     }
 
-    public void setItemHash(long itemHash) {
+    public void setItemHash(String itemHash) {
         this.itemHash = itemHash;
     }
 

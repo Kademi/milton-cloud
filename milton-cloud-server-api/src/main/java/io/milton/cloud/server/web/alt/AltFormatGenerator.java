@@ -147,7 +147,7 @@ public class AltFormatGenerator implements EventListener {
      * @param format
      * @return
      */
-    public GenerateJob getOrEnqueueJob(long primaryHash, String fileName, FormatSpec format) {
+    public GenerateJob getOrEnqueueJob(String primaryHash, String fileName, FormatSpec format) {
         for (GenerateJob j : currentJobs) {
             if (j.primaryFileHash == primaryHash) {
                 if (format.equals(j.formatSpec)) {
@@ -199,13 +199,13 @@ public class AltFormatGenerator implements EventListener {
     public class GenerateJob implements Runnable {
 
         private static final long serialVersionUID = 1l;
-        private final long primaryFileHash;
+        private final String primaryFileHash;
         private final FormatSpec formatSpec;
         private final String primaryFileName;
         private final AvconvConverter converter;
         private boolean jobDone;
 
-        public GenerateJob(long primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
+        public GenerateJob(String primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
             this.primaryFileHash = primaryFileHash;
             this.primaryFileName = primaryFileName;
             this.formatSpec = formatSpec;
@@ -258,14 +258,14 @@ public class AltFormatGenerator implements EventListener {
 
         public AltFormat generate() throws IOException {
             final Parser parser = new Parser();
-            Long altHash;
+            String altHash;
             try {
-                altHash = converter.generate(new With<InputStream, Long>() {
+                altHash = converter.generate(new With<InputStream, String>() {
 
                     @Override
-                    public Long use(InputStream t) throws Exception {
-                        long numBytes = parser.parse(t, hashStore, blobStore);
-                        return numBytes;
+                    public String use(InputStream t) throws Exception {
+                        String newFileHash = parser.parse(t, hashStore, blobStore);
+                        return newFileHash;
                     }
                 });
             } catch (Exception e) {
@@ -274,7 +274,7 @@ public class AltFormatGenerator implements EventListener {
             if (altHash != null) {
                 String name = formatSpec.getName();
                 return AltFormat.insertIfOrUpdate(name, primaryFileHash, altHash, SessionManager.session());
-            } else {
+            } else { 
                 return null;
             }
         }

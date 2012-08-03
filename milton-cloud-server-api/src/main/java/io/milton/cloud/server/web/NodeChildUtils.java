@@ -14,7 +14,6 @@
  */
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -103,7 +102,7 @@ public class NodeChildUtils {
         return r;
     }
     
-    public static long getHash(Resource r) {
+    public static String getHash(Resource r) {
         if( r instanceof FileResource) {
             FileResource fr = (FileResource) r;
             return fr.getHash();
@@ -111,7 +110,7 @@ public class NodeChildUtils {
             RenderFileResource rfr = (RenderFileResource) r;
             return getHash(rfr.getFileResource());                    
         } else {
-            return -1;
+            return null;
         }
     }
     

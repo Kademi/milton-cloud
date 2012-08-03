@@ -21,6 +21,7 @@ import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
+import io.milton.cloud.server.web.sync.DirectoryHashResource;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
@@ -71,7 +72,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
             if( r != null ) {
                 if( r instanceof ContentDirectoryResource) {
                     ContentDirectoryResource dr = (ContentDirectoryResource) r;
-                    r = new TripletResource(path.getName(), dr); 
+                    r = new DirectoryHashResource(dr.getDirectoryNode().getHash(), securityManager, dr.getOrganisation()); 
                 }
             }
         } else {

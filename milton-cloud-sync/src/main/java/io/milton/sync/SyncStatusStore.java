@@ -3,21 +3,20 @@ package io.milton.sync;
 import io.milton.common.Path;
 
 /**
- * Represents a means of recording what version of a resource was last
- * synced 
+ * Represents a means of recording what version of a resource was last synced
  *
  * @author brad
  */
 public interface SyncStatusStore {
-    
-    Long findBackedUpHash(Path path);
 
-    void setBackedupHash(Path path, long hash);    
-    
+    String findBackedUpHash(Path path);
+
+    void setBackedupHash(Path path, String hash);
+
     /**
      * Called when the syncronisation has removed a file
-     * 
-     * @param path 
+     *
+     * @param path
      */
-    void clearBackedupHash(Path path);    
+    void clearBackedupHash(Path path);
 }

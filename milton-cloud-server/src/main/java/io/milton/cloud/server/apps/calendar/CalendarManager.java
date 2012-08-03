@@ -16,7 +16,7 @@
  */
 package io.milton.cloud.server.apps.calendar;
 
-import io.milton.cloud.common.HashUtils;
+import io.milton.cloud.common.HashCalc;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.CalEvent;
 import java.io.*;
@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.logging.Level;
 
 /**
  *
@@ -237,11 +238,11 @@ public class CalendarManager {
     private void updateCtag(CalEvent event) {
         OutputStream nulOut = new NullOutputStream();
         CheckedOutputStream cout = new CheckedOutputStream(nulOut, new Adler32());
-        HashUtils.appendLine(event.getDescription(), cout);
-        HashUtils.appendLine(event.getSummary(), cout);
-        HashUtils.appendLine(event.getTimezone(), cout);
-        HashUtils.appendLine(event.getStartDate(), cout);
-        HashUtils.appendLine(event.getEndDate(), cout);
+        appendLine(event.getDescription(), cout);
+        appendLine(event.getSummary(), cout);
+        appendLine(event.getTimezone(), cout);
+        appendLine(event.getStartDate(), cout);
+        appendLine(event.getEndDate(), cout);
         Checksum check = cout.getChecksum();
         long crc = check.getValue();
         event.setCtag(crc);
@@ -252,18 +253,36 @@ public class CalendarManager {
         OutputStream nulOut = new NullOutputStream();
         CheckedOutputStream cout = new CheckedOutputStream(nulOut, new Adler32());
 
-        HashUtils.appendLine(sourceCal.getColor(), cout);
+        appendLine(sourceCal.getColor(), cout);
         if (sourceCal.getEvents() != null) {
             for (CalEvent r : sourceCal.getEvents()) {
                 String name = r.getName();
-                String line = HashUtils.toHashableText(name, r.getCtag(), "");
-                HashUtils.appendLine(line, cout);
+                String line = HashCalc.getInstance().toHashableText(name, r.getCtag()+"", "");
+                appendLine(line, cout);
             }
         }
         Checksum check = cout.getChecksum();
         long crc = check.getValue();
         sourceCal.setCtag(crc);
     }
+    
+    private void appendLine(String text, OutputStream out) {
+        try {
+            out.write(text.getBytes());
+            out.write("\n".getBytes());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
+    private void appendLine(Date d, OutputStream out) {
+        try {
+            out.write(d.toString().getBytes());
+            out.write("\n".getBytes());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }    
 
     public String getDefaultColor() {
         return defaultColor;

@@ -72,22 +72,22 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
         });
     }
 
-    @Override
-    public Long findBackedUpHash(Path path) {
+    @Override 
+    public String findBackedUpHash(Path path) {
         final File f = toFile(path);
         final String sql = SYNC_TABLE.getSelect() + " WHERE " + SYNC_TABLE.localPath.getName() + " = ? AND " + SYNC_TABLE.remoteRoot.getName() + " = ?";
-        Long crc = useConnection.use(new With<Connection, Long>() {
+        String hash = useConnection.use(new With<Connection, String>() {
 
             @Override
-            public Long use(Connection con) throws Exception {
+            public String use(Connection con) throws Exception {
                 PreparedStatement stmt = con.prepareStatement(sql);
                 stmt.setString(1, f.getAbsolutePath());
                 stmt.setString(2, baseRemoteAddress);
                 ResultSet rs = stmt.executeQuery();
                 try {
                     if (rs.next()) {
-                        Long crc = SYNC_TABLE.crc.get(rs);
-                        return crc;
+                        String hash = SYNC_TABLE.crc.get(rs);
+                        return hash;
                     } else {
                         return null;
                     }
@@ -97,11 +97,11 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
                 }
             }
         });
-        return crc;
+        return hash;
     }
 
     @Override
-    public void setBackedupHash(Path path, final long hash) {        
+    public void setBackedupHash(Path path, final String hash) {        
         final File f = toFile(path);
 //        log.trace("setBackedupHash: " + path + " hash: " + hash);
         final String deleteSql = SYNC_TABLE.getDeleteBy(SYNC_TABLE.localPath);
@@ -164,7 +164,7 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
          * Base address for the remote server
          */
         public final Table.Field<String> remoteRoot = add("remoteRoot", FieldTypes.CHARACTER_VARYING, false);
-        public final Table.Field<Long> crc = add("crc", FieldTypes.LONG, false); // the last backed up crc of this local file
+        public final Table.Field<String> crc = add("crc", FieldTypes.CHARACTER_VARYING, false); // the last backed up crc of this local file
         public final Table.Field<java.sql.Timestamp> date = add("date_modified", FieldTypes.TIMESTAMP, false); // the date/time which the file was backed up, or that it was first discoverd assert having been backed up;
 
         public LastBackedUpTable() {

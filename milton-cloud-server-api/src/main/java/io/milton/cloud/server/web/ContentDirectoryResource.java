@@ -14,8 +14,10 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.vfs.data.DataSession.DirectoryNode;
+import java.io.IOException;
 
 /**
  * Implemented by content resources, which dont save themselves, but delegate
@@ -23,12 +25,12 @@ import io.milton.vfs.data.DataSession.DirectoryNode;
  *
  * @author brad
  */
-public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource, MakeCollectionableResource{
+public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource, MakeCollectionableResource, ResourceCreator{
     /**
      * Either save this content session, or delegate to a parent who can
      * 
      */
-    void save();    
+    void save() throws IOException;    
     
     /**
      * Get the underlying directory node for this instance

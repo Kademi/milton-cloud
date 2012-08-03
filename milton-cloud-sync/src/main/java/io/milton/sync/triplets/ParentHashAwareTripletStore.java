@@ -1,5 +1,6 @@
 package io.milton.sync.triplets;
 
+import io.milton.cloud.common.ITriplet;
 import io.milton.cloud.common.Triplet;
 import java.util.List;
 
@@ -16,5 +17,5 @@ public interface ParentHashAwareTripletStore extends TripletStore {
      * @param hash
      * @return 
      */
-    List<Triplet> getTriplets(long hash);    
+    List<ITriplet> getTriplets(String hash);    
 }

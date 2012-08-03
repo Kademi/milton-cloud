@@ -34,13 +34,13 @@ uniqueConstraints = {
 )
 public class AltFormat implements Serializable {
     
-    public static AltFormat find(long sourceHash, String name, Session session) {
+    public static AltFormat find(String sourceHash, String name, Session session) {
         Criteria crit = session.createCriteria(AltFormat.class);
         crit.add(Expression.and(Expression.eq("sourceHash", sourceHash), Expression.eq("name", name)));        
         return DbUtils.unique(crit);
     }    
     
-    public static AltFormat insertIfOrUpdate(String name, long sourceHash, long altHash, Session session) {
+    public static AltFormat insertIfOrUpdate(String name, String sourceHash, String altHash, Session session) {
         AltFormat f = find(sourceHash, name, session);
         if( f != null ) {
             if( f.getAltHash() == altHash) {
@@ -57,9 +57,9 @@ public class AltFormat implements Serializable {
     }
     
     private long id;
-    private long sourceHash; // the hash of the file from which the alternative was derived
+    private String sourceHash; // the hash of the file from which the alternative was derived
     private String name; // the name of the alt format: eg thumb-120x120.png
-    private long altHash; // the hash of the alternative file
+    private String altHash; // the hash of the alternative file
     
     @Id
     @GeneratedValue    
@@ -72,20 +72,20 @@ public class AltFormat implements Serializable {
     }
 
     @Column(nullable=false)
-    public long getSourceHash() {
+    public String getSourceHash() {
         return sourceHash;
     }
 
-    public void setSourceHash(long sourceHash) {
+    public void setSourceHash(String sourceHash) {
         this.sourceHash = sourceHash;
     }
 
     @Column(nullable=false)
-    public long getAltHash() {
+    public String getAltHash() {
         return altHash;
     }
 
-    public void setAltHash(long altHash) {
+    public void setAltHash(String altHash) {
         this.altHash = altHash;
     }
 

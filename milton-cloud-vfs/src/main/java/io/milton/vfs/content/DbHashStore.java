@@ -13,39 +13,47 @@ import io.milton.vfs.db.utils.SessionManager;
  * @author brad
  */
 public class DbHashStore implements HashStore{
-
+ 
+    
     @Override
-    public void setFanout(long hash, List<Long> childCrcs, long actualContentLength) {
-        if( hasFanout(hash)) {
+    public void setChunkFanout(String hash, List<String> childCrcs, long actualContentLength) {
+        if( hasChunk(hash)) {
             return ;
         }
-        FanoutHash fanout = new FanoutHash();
-        fanout.setFanoutHash(hash);
-        fanout.setActualContentLength(actualContentLength);
-        List<FanoutEntry> list = new ArrayList<>(childCrcs.size());
-        for( Long l : childCrcs){
-            FanoutEntry fe = new FanoutEntry();
-            fe.setChunkHash(l);
-            fe.setFanout(fanout);
-            list.add(fe);
-        }
-        fanout.setFanoutEntrys(list);
-        SessionManager.session().save(fanout); 
+        FanoutHash.insertFanout("c", hash, childCrcs, actualContentLength, SessionManager.session());
     }
 
     @Override
-    public Fanout getFanout(long hash) {
-        FanoutHash fanoutHash = (FanoutHash) SessionManager.session().get(FanoutHash.class, hash); 
-        if( fanoutHash == null ) {
-            return null;
-        } else {
-            return fanoutHash;
-        }
+    public Fanout getChunkFanout(String hash) {
+        return getFanout(hash, "c");
     }
 
     @Override
-    public boolean hasFanout(long hash) {
-        FanoutHash fanoutHash = (FanoutHash) SessionManager.session().get(FanoutHash.class, hash); 
-        return fanoutHash != null;
+    public boolean hasChunk(String hash) {
+        return getFanout(hash, "c") != null;
     }
+
+
+    @Override
+    public void setFileFanout(String hash, List<String> fanoutHashes, long actualContentLength) {
+        if( hasFile(hash)) {
+            return ;
+        }
+        FanoutHash.insertFanout("f", hash, fanoutHashes, actualContentLength, SessionManager.session());
+
+    }
+
+    @Override
+    public Fanout getFileFanout(String fileHash) {
+        return getFanout(fileHash, "f");
+    }
+
+    @Override
+    public boolean hasFile(String fileHash) {
+        return getFileFanout(fileHash) != null;
+    }    
+    
+    private Fanout getFanout(String hash, String type) {
+        return FanoutHash.findByHashAndType(hash, type, SessionManager.session());
+    }         
 }

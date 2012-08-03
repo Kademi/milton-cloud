@@ -1,8 +1,8 @@
 package io.milton.sync.triplets;
 
+import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import java.util.List;
-import io.milton.cloud.common.Triplet;
 
 /**
  * A Triplet describes a member within a directory/collection, but its
@@ -25,6 +25,6 @@ public interface TripletStore {
      * @return - the list of triplets defining the state of the directory, or null
      * if the directory was not found
      */
-    List<Triplet> getTriplets(Path path);
+    List<ITriplet> getTriplets(Path path);
     
 }

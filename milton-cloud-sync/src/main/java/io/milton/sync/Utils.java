@@ -1,5 +1,6 @@
 package io.milton.sync;
 
+import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import java.io.File;
 import java.util.HashMap;
@@ -29,10 +30,10 @@ public class Utils {
         return map;
     }
     
-    public static Map<String, Triplet> toMap(List<Triplet> triplets) {
-        Map<String, Triplet> map = new HashMap<>();
+    public static Map<String, ITriplet> toMap(List<ITriplet> triplets) {
+        Map<String, ITriplet> map = new HashMap<>();
         if (triplets != null) {
-            for (Triplet r : triplets) {
+            for (ITriplet r : triplets) {
                 map.put(r.getName(), r);
             }
         }

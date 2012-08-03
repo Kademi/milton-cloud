@@ -31,7 +31,7 @@ public class HttpBlobStore implements BlobStore {
     }
 
     @Override
-    public void setBlob(long hash, byte[] bytes) {
+    public void setBlob(String hash, byte[] bytes) {
         if (hasBlob(hash)) {
             return;
         }
@@ -40,7 +40,7 @@ public class HttpBlobStore implements BlobStore {
     }
 
     @Override
-    public boolean hasBlob(long hash) {
+    public boolean hasBlob(String hash) {
         if (hashCache != null) {
             if (hashCache.hasHash(hash)) { // say that 3 times quickly!!!  :)
                 return true;
@@ -61,7 +61,7 @@ public class HttpBlobStore implements BlobStore {
     }
 
     @Override
-    public byte[] getBlob(long hash) {
+    public byte[] getBlob(String hash) {
         Path destPath = basePath.child(hash + "");
         try {
             return host.doGet(destPath);

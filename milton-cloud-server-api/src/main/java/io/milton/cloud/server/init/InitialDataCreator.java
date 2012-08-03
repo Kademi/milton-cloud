@@ -40,6 +40,7 @@ public class InitialDataCreator implements LifecycleApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        System.out.println("--- Initial Data ---");
         initialRootOrgName = config.get("initialRootOrgName");
         adminUserName = config.get("adminUserName");
         adminPassword = config.get("adminPassword");
@@ -86,11 +87,11 @@ public class InitialDataCreator implements LifecycleApplication {
         users.grantRole(GroupRole.ROLE_AUTHOR, true, session);
 
         admin.addToGroup(administrators).addToGroup(users);
-        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton.io", "fuse", admin, "milton"); // can be accessed on milton.localhost or milton.io
+        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton.io", "fuse", admin, "milton.localhost"); // can be accessed on milton.localhost or milton.io
         initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
         miltonSite.addGroup(users, session);
 
-        Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "my.milton.io", "fuse", admin, "mymilton"); // can be accessed on mymilton.localhost or my.milton.io
+        Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "my.milton.io", "fuse", admin, "mymilton.localhost"); // can be accessed on mymilton.localhost or my.milton.io
         initHelper.enableApps(myMiltonSite, admin, session, "admin", "users", "organisations", "website", "myFiles", "calendar", "contacts", "email");
         myMiltonSite.addGroup(users, session);
 

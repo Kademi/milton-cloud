@@ -21,9 +21,9 @@ import io.milton.resource.GetableResource;
 public class BlobResource extends BaseResource implements GetableResource{
 
     private final byte[] blob;
-    private final long hash;
+    private final String hash;
     
-    public BlobResource(byte[] blob, long hash, SpliffySecurityManager securityManager, Organisation org) {
+    public BlobResource(byte[] blob, String hash, SpliffySecurityManager securityManager, Organisation org) {
         super(securityManager, org);
         this.blob = blob;
         this.hash = hash;
@@ -42,12 +42,12 @@ public class BlobResource extends BaseResource implements GetableResource{
 
     @Override
     public String getUniqueId() {
-        return hash + "";
+        return hash;
     }
 
     @Override
     public String getName() {
-        return hash + "";
+        return hash;
     }
 
     @Override

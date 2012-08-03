@@ -1,5 +1,6 @@
 package io.milton.sync.triplets;
 
+import io.milton.cloud.common.ITriplet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,8 +19,8 @@ import io.milton.sync.Utils;
  */
 public class BlobUtils {
 
-    public static List<Triplet> toTriplets(File parent, List<CrcDao.CrcRecord> records) {
-        List<Triplet> list = new ArrayList<>();
+    public static List<ITriplet> toTriplets(File parent, List<CrcDao.CrcRecord> records) {
+        List<ITriplet> list = new ArrayList<>();
         for (CrcDao.CrcRecord r : records) {
             File child = new File(parent, r.name);
             if (!child.exists()) {

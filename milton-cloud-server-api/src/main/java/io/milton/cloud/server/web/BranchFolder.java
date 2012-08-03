@@ -6,7 +6,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
-import io.milton.vfs.data.HashCalc;
+import io.milton.cloud.common.HashCalc;
 import io.milton.http.*;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -67,16 +67,19 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public void save() {        
-        Long lastHash = null;
+    public void save() throws IOException{        
+        String lastHash = null;
         Long lastId = null;
         if( branch != null && branch.getHead() != null ) {
             lastId = branch.getHead().getId();                    
             lastHash = branch.getHead().getItemHash();
         }
                 
-        UserResource currentUser = (UserResource) HttpManager.request().getAuthorization().getTag();
-        dataSession.save(currentUser.getThisUser());
+        Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if( currentUser == null ) {
+            throw new RuntimeException("No current user!");
+        }
+        dataSession.save(currentUser);
         
         System.out.println("----------------------------------");
         System.out.println("branch head ID: " + branch.getHead().getId());
@@ -109,45 +112,28 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         log.info("createCollection: " + newName);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        DirectoryResource rdr = createDirectoryResource(newName, session);
+        DirectoryResource rdr;
+        try {
+            rdr = createDirectoryResource(newName, session);
+        } catch (IOException ex) {
+            throw new BadRequestException("ioex", ex);
+        }
         tx.commit();
         return rdr;
     }
 
-    public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException {
+    public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException, IOException {
         DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
         DirectoryResource rdr = newDirectoryResource(newNode, this, false);
         onAddedChild(rdr);
-        rdr.updateModDate();
+        //rdr.updateModDate();
         save();
         return rdr;
     }
 
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        DirectoryNode thisNode = dataSession.getRootDataNode();
-        FileNode newFileNode = thisNode.addFile(newName);
-        FileResource fileResource = newFileResource(newFileNode, this, false);
-
-        String ct = HttpManager.request().getContentTypeHeader();
-        if (ct != null && ct.equals("spliffy/hash")) {
-            // read the new hash and set it on this
-            DataInputStream din = new DataInputStream(inputStream);
-            long newHash = din.readLong();
-            newFileNode.setHash(newHash);
-        } else {
-            log.info("createNew: set content");
-            // parse data and persist to stores
-            newFileNode.setContent(inputStream);
-        }
-        onAddedChild(fileResource);
-        updateModDate();
-        save();
-        tx.commit();
-
-        return fileResource;
+        return UploadUtils.createNew(this, newName, inputStream, length, contentType);
     }
 
     protected void updateModDate() {
@@ -165,12 +151,14 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public Date getCreateDate() {
-        return loadNodeMeta().getCreatedDate();
+        return null;
+        //return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return loadNodeMeta().getModDate();
+        return null;
+        //return loadNodeMeta().getModDate();
     }
 
     private NodeMeta loadNodeMeta() {

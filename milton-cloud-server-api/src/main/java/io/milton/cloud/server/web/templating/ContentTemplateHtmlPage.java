@@ -30,20 +30,18 @@ import java.util.Objects;
 import static io.milton.context.RequestContext._;
 import io.milton.resource.Resource;
 
-
 /**
  * Provides access to a template stored in the content repository
  *
  * @author brad
  */
-public class ContentTemplateHtmlPage extends TemplateHtmlPage{
+public class ContentTemplateHtmlPage extends TemplateHtmlPage {
 
     private final byte[] data;
-    private final long loadedHash;
+    private final String loadedHash;
     private String websiteName;
     private final Path path;
-    
-    
+
     public ContentTemplateHtmlPage(FileResource fr, String websiteName, Path path) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         super(fr.getHref());
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -57,10 +55,10 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage{
     @Override
     public long getTimestamp() {
         FileResource fr = getCurrentFileResource();
-        if( fr == null ) {
+        if (fr == null) {
             return -1;
         } else {
-            return fr.getHash();
+            return fr.getHash().hashCode();
         }
     }
 
@@ -68,12 +66,10 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage{
     public String getSource() {
         return "fileRes-" + getHash();
     }
-    
-    
-    
+
     public FileResource getCurrentFileResource() {
         WebsiteRootFolder wrf = _(WebsiteApp.class).getPage(null, websiteName);
-        if( wrf == null ) {
+        if (wrf == null) {
             return null;
         }
         try {
@@ -83,17 +79,17 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage{
         } catch (NotAuthorizedException | BadRequestException ex) {
             throw new RuntimeException(ex);
         }
-    }    
+    }
 
-    public long getHash() {
+    public String getHash() {
         return loadedHash;
     }
-            
+
     @Override
     public InputStream getInputStream() {
         return new ByteArrayInputStream(data);
     }
-        
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -115,6 +111,6 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage{
 
     @Override
     boolean isValid() {
-        return loadedHash == getTimestamp();
+        return loadedHash.equals(getCurrentFileResource().getHash());
     }
 }

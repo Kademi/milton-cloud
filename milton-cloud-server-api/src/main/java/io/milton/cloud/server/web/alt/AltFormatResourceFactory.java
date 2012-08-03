@@ -74,7 +74,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
             Resource r = wrapped.getResource(host, p.getParent().toString());
             if (r instanceof FileResource) {
                 FileResource fr = (FileResource) r;
-                long sourceHash = fr.getHash();
+                String sourceHash = fr.getHash();
                 String formatName = p.getName().replace("alt-", "");
                 AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());
                 FormatSpec format = altFormatGenerator.findFormat(formatName);
@@ -197,7 +197,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                 } else {
                     System.out.println("using pre-existing al-format");
                     Combiner combiner = new Combiner();
-                    List<Long> fanoutCrcs = getFanout().getHashes();
+                    List<String> fanoutCrcs = getFanout().getHashes();
                     combiner.combine(fanoutCrcs, hashStore, blobStore, out);
                     out.flush();
                 }
@@ -216,7 +216,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
             if (!doneFanoutLookup) {
                 doneFanoutLookup = true;
                 if (altFormat != null && !HttpManager.request().getParams().containsKey("force")) {
-                    fanout = hashStore.getFanout(altFormat.getAltHash());
+                    fanout = hashStore.getFileFanout(altFormat.getAltHash());
                 }
             }
             return fanout;

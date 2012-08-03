@@ -62,7 +62,7 @@ public class JdbcHashCache implements HashCache {
     }
 
     @Override
-    public boolean hasHash(final long hash) {
+    public boolean hasHash(final String hash) {
         final String sql = HASH_CACHE.getSelect() + " WHERE " + HASH_CACHE.crc.getName() + " = ? AND " + HASH_CACHE.group.getName() + " = ?";         
         Boolean result = useConnection.use(new With<Connection, Boolean>() {
 
@@ -107,7 +107,7 @@ public class JdbcHashCache implements HashCache {
     
 
     @Override
-    public void setHash(final long hash) {
+    public void setHash(final String hash) {
         System.out.println("JdbcHashCache: setHash: " + hash);
         inserts++;
         final String insertSql = HASH_CACHE.getInsert();
@@ -134,7 +134,7 @@ public class JdbcHashCache implements HashCache {
 
     public static class CrcCacheTable extends com.ettrema.db.Table {
 
-        public final Table.Field<Long> crc = add("crc", FieldTypes.LONG, false); // use "crc" instead of "hash" because hash is a reserved word
+        public final Table.Field<String> crc = add("crc", FieldTypes.CHARACTER_VARYING, false); // use "crc" instead of "hash" because hash is a reserved word
         public final Table.Field<String> group = add("crc_group", FieldTypes.CHARACTER_VARYING, false);
         public final Table.Field<java.sql.Timestamp> date = add("date_verified", FieldTypes.TIMESTAMP, false);
 

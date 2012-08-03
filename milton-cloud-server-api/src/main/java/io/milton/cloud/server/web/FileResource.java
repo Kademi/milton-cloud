@@ -18,7 +18,6 @@ package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.web.templating.HtmlTemplateParser;
 import io.milton.common.ContentTypeService;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,26 +67,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-
-        String ct = HttpManager.request().getContentTypeHeader();
-        if (ct != null && ct.equals("spliffy/hash")) {
-            // read the new hash and set it on this            
-            DataInputStream din = new DataInputStream(in);
-            try {
-                long hash = din.readLong();
-                fileNode.setHash(hash);
-                updateModDate();
-            } catch (IOException ex) {
-                throw new BadRequestException("Couldnt read the new hash", ex);
-            }
-
-        } else {
-            setContent(in);
-        }
-        parent.save();
-        tx.commit();
+        UploadUtils.replaceContent(this, in, length);
     }
 
     /**
@@ -98,15 +78,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
      * @throws BadRequestException
      */
     public void setContent(InputStream in) throws BadRequestException {
-        log.info("replaceContent: set content");
-        try {
-            // parse data and persist to stores
-            fileNode.setContent(in);
-            updateModDate();
-        } catch (IOException ex) {
-            throw new BadRequestException("exception", ex);
-        }
-
+        UploadUtils.setContent(this, in);
     }
 
     @Override
@@ -148,7 +120,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
                 return (long) s.length();
             }
         }
-        if (fileNode == null || fileNode.getHash() == 0) {
+        if (fileNode == null || fileNode.getHash() == null) {
             return null;
         }
         return fileNode.getContentLength();
@@ -217,7 +189,11 @@ public class FileResource extends AbstractContentResource implements Replaceable
         Transaction tx = session.beginTransaction();
 
         doSaveHtml();
-        parent.save();
+        try {
+            parent.save();
+        } catch (IOException ex) {
+            throw new BadRequestException("ioex", ex);
+        }
 
         tx.commit();
     }
@@ -253,9 +229,15 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     }
 
-    public long getHash() {
+    public String getHash() {
         return this.contentNode.getHash();
     }
+
+    public FileNode getFileNode() {
+        return fileNode;
+    }
+    
+    
 
     @Override
     public boolean is(String type) {

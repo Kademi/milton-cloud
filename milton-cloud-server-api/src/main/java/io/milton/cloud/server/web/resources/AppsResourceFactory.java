@@ -46,7 +46,6 @@ public class AppsResourceFactory implements ResourceFactory {
 
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
-        log.info("getResource ---: " + sPath);
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }

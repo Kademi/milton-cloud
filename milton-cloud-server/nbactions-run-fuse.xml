@@ -37,7 +37,7 @@
             </goals>
             <properties>
                 <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
-                <Env.MAVEN_OPTS>-javaagent:/home/home/brad/.netbeans/7.1.2/jrebel/jrebel.jar</Env.MAVEN_OPTS>
+                
             </properties>
         </action>
     </actions>

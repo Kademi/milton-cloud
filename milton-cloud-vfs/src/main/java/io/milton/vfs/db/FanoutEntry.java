@@ -15,15 +15,15 @@ import org.hibernate.annotations.Index;
 public class FanoutEntry implements Serializable{
     private long id;
     private FanoutHash fanout;
-    private long chunkHash;
+    private String chunkHash;
 
     @Column
     @Index(name="ids_chunk_hash")
-    public long getChunkHash() {
+    public String getChunkHash() {
         return chunkHash;
     }
 
-    public void setChunkHash(long chunkHash) {
+    public void setChunkHash(String chunkHash) {
         this.chunkHash = chunkHash;
     }
 

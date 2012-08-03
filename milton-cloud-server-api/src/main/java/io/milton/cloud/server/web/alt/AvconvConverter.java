@@ -24,7 +24,7 @@ public class AvconvConverter implements Closeable {
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
     private final ContentTypeService contentTypeService;
     private final String process;
-    private final long primaryMediaHash;
+    private final String primaryMediaHash;
     private final FormatSpec format;
     private final String inputName;
     private final String inputExt;
@@ -34,7 +34,7 @@ public class AvconvConverter implements Closeable {
     private final File dest;
     private long sourceLength;
 
-    public AvconvConverter(String process, long primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore) {
+    public AvconvConverter(String process, String primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.process = process;
@@ -76,9 +76,9 @@ public class AvconvConverter implements Closeable {
      * @param out - if not null the generated file will be streamed out as its
      * generated
      * @return - null indicates no file was generated. Oterhwise returns
-     * whatever the callback returned
+     * whatever the callback returned, generally the hash of the new file
      */
-    public Long generate(With<InputStream, Long> with) throws Exception {
+    public String generate(With<InputStream, String> with) throws Exception {
         log.info("generateThumb: " + format + " to " + dest.getAbsolutePath());
         source = createSourceFile();
         try {
@@ -149,7 +149,7 @@ public class AvconvConverter implements Closeable {
             if (temp.exists()) {
                 temp = File.createTempFile("convert_vid_in_" + inputName, "." + inputExt);
             }
-            Fanout fanout = hashStore.getFanout(primaryMediaHash);
+            Fanout fanout = hashStore.getFileFanout(primaryMediaHash);
             out = new FileOutputStream(temp);
             out2 = new BufferedOutputStream(out);
             Combiner combiner = new Combiner();

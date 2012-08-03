@@ -20,6 +20,7 @@ import io.milton.event.EventManager;
 import io.milton.event.EventManagerImpl;
 import io.milton.httpclient.Host;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -32,15 +33,11 @@ import java.util.List;
 public class SyncCommand {
 
     /**
-     * Run once over a single local directory:
-     *         sDbFile
-        sLocalDir
-        sRemoteAddress
-        user
-        pwd
-     * 
+     * Run once over a single local directory: sDbFile sLocalDir sRemoteAddress
+     * user pwd
+     *
      * @param args
-     * @throws Exception 
+     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
         String sDbFile = args[0];
@@ -57,7 +54,7 @@ public class SyncCommand {
         SyncJob job = new SyncJob(localDir, sRemoteAddress, user, pwd, false, false);
         start(dbFile, Arrays.asList(job));
     }
-    
+
     public static void monitor(String sDbFile, String sLocalDir, String sRemoteAddress, String user, String pwd) throws Exception {
         File dbFile = new File(sDbFile);
         File localDir = new File(sLocalDir);
@@ -65,12 +62,13 @@ public class SyncCommand {
         start(dbFile, Arrays.asList(job));
     }
 
-    public static void start(File dbFile, List<SyncJob> jobs) throws Exception {        
+    public static void start(File dbFile, List<SyncJob> jobs) throws Exception {
         System.out.println("Using database: " + dbFile.getAbsolutePath());
 
         DbInitialiser dbInit = new DbInitialiser(dbFile);
 
-        JdbcHashCache fanoutsHashCache = new JdbcHashCache(dbInit.getUseConnection(), dbInit.getDialect(), "h");
+        JdbcHashCache chunkFanoutsHashCache = new JdbcHashCache(dbInit.getUseConnection(), dbInit.getDialect(), "c");
+        JdbcHashCache fileFanoutsHashCache = new JdbcHashCache(dbInit.getUseConnection(), dbInit.getDialect(), "f");
         JdbcHashCache blobsHashCache = new JdbcHashCache(dbInit.getUseConnection(), dbInit.getDialect(), "b");
 
         for (SyncJob job : jobs) {
@@ -84,8 +82,9 @@ public class SyncCommand {
 
             System.out.println("Sync: " + localRootDir.getAbsolutePath() + " - " + job.getRemoteAddress());
 
-            HttpHashStore httpHashStore = new HttpHashStore(client, fanoutsHashCache);
-            httpHashStore.setBaseUrl("/_hashes/fanouts/");
+            HttpHashStore httpHashStore = new HttpHashStore(client, chunkFanoutsHashCache, fileFanoutsHashCache);
+            httpHashStore.setChunksBaseUrl("/_hashes/chunkFanouts/");
+            httpHashStore.setFilesBasePath("/_hashes/fileFanouts/");
             HttpBlobStore httpBlobStore = new HttpBlobStore(client, blobsHashCache);
             httpBlobStore.setBaseUrl("/_hashes/blobs/");
 
@@ -118,10 +117,14 @@ public class SyncCommand {
             this.pwd = pwd;
             this.monitor = monitor;
             this.localReadonly = readonlyLocal;
-            if( !localDir.exists()) {
-                throw new RuntimeException("Sync dir does not exist: " + localDir.getAbsolutePath());
-            } else if( !localDir.isDirectory()) {
-                throw new RuntimeException("Sync path is not a directory: " + localDir.getAbsolutePath());
+            try {
+                if (!localDir.exists()) {
+                    throw new RuntimeException("Sync dir does not exist: " + localDir.getCanonicalPath());
+                } else if (!localDir.isDirectory()) {
+                    throw new RuntimeException("Sync path is not a directory: " + localDir.getCanonicalPath());
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
 
@@ -147,6 +150,6 @@ public class SyncCommand {
 
         public boolean isLocalReadonly() {
             return localReadonly;
-        }        
+        }
     }
 }

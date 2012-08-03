@@ -19,9 +19,10 @@ public class FileSystemBlobStore implements BlobStore{
         
     
     @Override
-    public void setBlob( long hash, byte[] bytes) {
+    public void setBlob( String hash, byte[] bytes) {
         File blob = FsHashUtils.toFile(root, hash);
         if (blob.exists()) {
+            System.out.println("FileSystemBlobStore: setBlob: file exists: " + blob.getAbsolutePath());
             return; // already exists, so dont overwrite
         }
         File dir = blob.getParentFile();
@@ -40,10 +41,11 @@ public class FileSystemBlobStore implements BlobStore{
         } finally {
             IOUtils.closeQuietly(fout);
         }
+        System.out.println("FileSystemBlobStore: setBlob: wrote file: " + blob.getAbsolutePath() + " with bytes: " + bytes.length);
     }
 
     @Override
-    public byte[] getBlob( long hash) {
+    public byte[] getBlob( String hash) {
         File blob = FsHashUtils.toFile(root, hash);
         if (!blob.exists()) {
             return null;
@@ -53,7 +55,9 @@ public class FileSystemBlobStore implements BlobStore{
             fin = new FileInputStream(blob);
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             IOUtils.copy(fin, bout);
-            return bout.toByteArray();
+            byte[] arr = bout.toByteArray();
+            System.out.println("FileSystemBlobStore: getBlob: loaded file: " + blob.getAbsolutePath() + " with bytes: " + arr.length + " for hash: " + hash);
+            return arr;
         } catch (IOException ex) {
             throw new RuntimeException(blob.getAbsolutePath(), ex);
         } finally {
@@ -62,7 +66,7 @@ public class FileSystemBlobStore implements BlobStore{
     }
 
     @Override
-    public boolean hasBlob(long hash) {
+    public boolean hasBlob(String hash) {
         File blob = FsHashUtils.toFile(root, hash);
         return blob.exists();
     }

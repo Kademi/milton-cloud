@@ -36,7 +36,6 @@ import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,8 +46,9 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.data.DataSession;
-import org.hashsplit4j.api.Fanout;
-import org.hashsplit4j.api.HashStore;
+import io.milton.vfs.db.Profile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a version of a directory, containing the members which are in that
@@ -93,13 +93,24 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
+        // Defensive check
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if( curUser == null ) {
+            log.warn("req: " + HttpManager.request());
+            throw new RuntimeException("No current user!!");
+        }
+        
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         DirectoryNode newNode = directoryNode.addDirectory(newName);
         DirectoryResource rdr = new DirectoryResource(newNode, this, renderMode);
-        rdr.updateModDate();
+        //rdr.updateModDate();
         onAddedChild(this);
-        save();
+        try {
+            save();
+        } catch (IOException ex) {
+            throw new BadRequestException("io ex", ex);
+        }
 
         tx.commit();
 
@@ -107,42 +118,18 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     @Override
-    public void save() {
+    public void save() throws IOException {
+        // Defensive check
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if( curUser == null ) {
+            throw new RuntimeException("No current user!!");
+        }
         parent.save();
     }
 
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        FileNode newFileNode = directoryNode.addFile(newName);
-        FileResource fileResource = newFileResource(newFileNode, this, false);
-
-        String ct = HttpManager.request().getContentTypeHeader();
-        if (ct != null && ct.equals("spliffy/hash")) {
-            // read the new hash and set it on this
-            DataInputStream din = new DataInputStream(inputStream);
-            long newHash = din.readLong();
-            log.info("Set hash: " + newHash + " on " + newName);
-            Fanout fanout = _(HashStore.class).getFanout(newHash);
-            if (fanout == null) {
-                throw new RuntimeException("Fanout not found for: " + newName + " with hash: " + newHash);
-            }
-            newFileNode.setHash(newHash);
-            log.info("createNew: " + newName + "  set hash: " + newHash + "  content length: " + fanout.getActualContentLength());
-            fileResource.updateModDate();
-        } else {
-            log.info("createNew: set content");
-            // parse data and persist to stores
-            newFileNode.setContent(inputStream);
-        }
-        onAddedChild(fileResource);
-        save();
-        tx.commit();
-        
-        log.info("Saved and commited: " + fileResource.getHref());
-
-        return fileResource;
+        return UploadUtils.createNew(this, newName, inputStream, length, contentType);
     }
 
     @Override
@@ -292,8 +279,11 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        doSaveHtml();
+        try {
+            doSaveHtml();
+        } catch (IOException ex) {
+            throw new BadRequestException("io ex", ex);
+        }
 
         tx.commit();
     }
@@ -301,7 +291,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     /**
      * Save any parameters which have been set to HTML content
      */
-    public void doSaveHtml() throws NotAuthorizedException, BadRequestException {
+    public void doSaveHtml() throws NotAuthorizedException, BadRequestException, IOException {
         if (updatedIndex = true) {
             RenderFileResource html = getIndex();
             if (html != null) {

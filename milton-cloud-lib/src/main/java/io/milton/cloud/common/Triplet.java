@@ -9,21 +9,29 @@ import java.util.List;
  * @author brad
  */
 public class Triplet implements ITriplet {
+    
+    public static boolean isDirectory(ITriplet t) {
+        String type = t.getType();
+        return type != null && type.equals("d"); // d for directory
+    }
+    
     private String name;
-    private long hash;
+    private String hash;
     private String type;
     
     private List<Triplet> children;
 
-    public long getHash() {
+    @Override
+    public String getHash() {
         return hash;
     }
 
-    public void setHash(long hash) {
+    public void setHash(String hash) {
         this.hash = hash;
     }
 
 
+    @Override
     public String getName() {
         return name;
     }
@@ -40,6 +48,7 @@ public class Triplet implements ITriplet {
         this.children = children;
     }
 
+    @Override
     public String getType() {
         return type;
     }
@@ -49,7 +58,7 @@ public class Triplet implements ITriplet {
     }
         
     public boolean isDirectory() {
-        return type != null && type.equals("d"); // d for directory
+        return Triplet.isDirectory(this);
     }
     
     

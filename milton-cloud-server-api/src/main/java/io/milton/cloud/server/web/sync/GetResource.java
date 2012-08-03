@@ -24,11 +24,11 @@ import org.hashsplit4j.api.HashStore;
 public class GetResource extends BaseResource implements GetableResource {
 
     private final Fanout fanout;
-    private final long hash;
+    private final String hash;
     private final BlobStore blobStore;
     private final HashStore hashStore;
 
-    public GetResource(Fanout fanout, long hash, SpliffySecurityManager securityManager, Organisation org, BlobStore blobStore, HashStore hashStore) {
+    public GetResource(Fanout fanout, String hash, SpliffySecurityManager securityManager, Organisation org, BlobStore blobStore, HashStore hashStore) {
         super(securityManager, org);
         this.fanout = fanout;
         this.hash = hash;
@@ -44,7 +44,7 @@ public class GetResource extends BaseResource implements GetableResource {
 
     @Override
     public String getName() {
-        return hash + "";
+        return hash;
     }
 
     @Override

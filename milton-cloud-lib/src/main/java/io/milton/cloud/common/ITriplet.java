@@ -21,10 +21,25 @@ import java.util.List;
  * @author brad
  */
 public interface ITriplet {
-    long getHash();
+    /**
+     * Hex representation of the 160 bit SHA1 hash for this item
+     * 
+     * @return 
+     */
+    String getHash();
 
+    /**
+     * The local name of the item within its directory
+     * 
+     * @return 
+     */
     String getName();
 
+    /**
+     * The item type, f=file, d=directory
+     * 
+     * @return 
+     */
     String getType();
     
 }

@@ -50,45 +50,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import java.util.logging.Level;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * 
- * This class is for rendering HTML pages.
- * 
- * It wraps a normal FileResource and parses its content, expecting it to be a well
- * formed HTML page. It extracts a template, if present in a link tag, and if
- * not present defaults it to theme/page, so it will use the page.html template
- * of the current theme
- * 
- * Example:
- * 
- * <html>
- *    <head>        
- *        <title>home page</title>
- *        <link rel="template" href="theme/home" />
- *    </head>
- *    <body class="home">
- * 
- * The title, template and body can be updated with a POST to this 
- * 
- * Also supports read/write parameters embedded in the html, such as:
- * 
- * <html>
- *    <head>
- *        <title>module 1</title>
- *        <script title="learningTimeMins" type="data/parameter">220</script>
  *
- * Parameters can be accessed via milton/ajax integration with the milton namespace
- * 
+ * This class is for rendering HTML pages.
+ *
+ * It wraps a normal FileResource and parses its content, expecting it to be a
+ * well formed HTML page. It extracts a template, if present in a link tag, and
+ * if not present defaults it to theme/page, so it will use the page.html
+ * template of the current theme
+ *
+ * Example:
+ *
+ * <html> <head> <title>home page</title> <link rel="template" href="theme/home"
+ * /> </head> <body class="home">
+ *
+ * The title, template and body can be updated with a POST to this
+ *
+ * Also supports read/write parameters embedded in the html, such as:
+ *
+ * <html> <head> <title>module 1</title> <script title="learningTimeMins"
+ * type="data/parameter">220</script>
+ *
+ * Parameters can be accessed via milton/ajax integration with the milton
+ * namespace
+ *
  * Eg: module1/_DAV/PROPFIND?fields=milton:learningTimeMins
  *
  * And those parameters can be updated via PROPPATCH in a similar manner
- * 
- * Creating new html pages is supported by integration with NewPageResource, which
- * looks for a .new suffix, and creates an instance of RenderFileResource on the
- * fly
- * 
+ *
+ * Creating new html pages is supported by integration with NewPageResource,
+ * which looks for a .new suffix, and creates an instance of RenderFileResource
+ * on the fly
+ *
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
@@ -131,16 +127,19 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        doSaveHtml();
-
-        tx.commit();
-
-        if (didNew) {
-            jsonResult = new JsonResult(true, "Created page", fileResource.getHref());
-        } else {
-            jsonResult = new JsonResult(true);
+        try {
+            doSaveHtml();
+            tx.commit();
+            if (didNew) {
+                jsonResult = new JsonResult(true, "Created page", fileResource.getHref());
+            } else {
+                jsonResult = new JsonResult(true);
+            }
+        } catch (IOException ex) {
+            log.error("io ex", ex);
+            jsonResult = new JsonResult(false, "IO Exception");
         }
+
         return null;
     }
 
@@ -179,7 +178,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         // <link rel="template" href="theme/page" />
         if (template == null) {
             template = "theme/page";
-        }        
+        }
     }
 
     @Override
@@ -216,8 +215,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public String getSource() {
         return "fileRes-" + getFileResource().getHash();
     }
-    
-    
 
     @Override
     public Long getContentLength() {
@@ -303,7 +300,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     @Override
     public String getTitle() {
         checkParse();
-        if( title == null) {
+        if (title == null) {
             return "";
         }
         return title;
@@ -398,13 +395,16 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        doSaveHtml();
-
-        tx.commit();
+        try {
+            doSaveHtml();
+            tx.commit();
+        } catch (IOException ex) {
+            tx.rollback();
+            throw new BadRequestException("io ex", ex);
+        }
     }
 
-    public void doSaveHtml() throws BadRequestException, NotAuthorizedException {
+    public void doSaveHtml() throws BadRequestException, NotAuthorizedException, IOException {
         fileResource.doSaveHtml();
         fileResource.getParent().save();
     }
@@ -443,8 +443,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public boolean isNewPage() {
         return isNewPage;
     }
-    
-    public void setNewPage(boolean  b){
+
+    public void setNewPage(boolean b) {
         isNewPage = b;
     }
 

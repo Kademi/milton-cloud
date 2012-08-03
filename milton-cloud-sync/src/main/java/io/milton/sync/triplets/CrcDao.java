@@ -33,7 +33,7 @@ public class CrcDao {
         }
     }
 
-    public void insertCrc(Connection c, String path, String name, long crc, long modDate) throws SQLException {
+    public void insertCrc(Connection c, String path, String name, String crc, long modDate) throws SQLException {
         String sql = CRC.getInsert();
         try (PreparedStatement stmt = c.prepareStatement(sql)) {
             CRC.crc.set(stmt, 1, crc);
@@ -64,7 +64,7 @@ public class CrcDao {
             CRC.path.set(stmt, 1, path);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    long crc = CRC.crc.get(rs);
+                    String crc = CRC.crc.get(rs);
                     String name = CRC.name.get(rs);
                     Timestamp date = CRC.date.get(rs);
                     CrcRecord r = new CrcRecord(crc, name, date);
@@ -80,11 +80,11 @@ public class CrcDao {
     
     public class CrcRecord {
 
-        long crc;
+        String crc;
         String name;
         Timestamp date;
 
-        CrcRecord(long crc, String name, Timestamp date) {
+        CrcRecord(String crc, String name, Timestamp date) {
             this.crc = crc;
             this.name = name;
             this.date = date;
@@ -94,7 +94,7 @@ public class CrcDao {
 
     public static class CrcTable extends com.ettrema.db.Table {
 
-        public final Table.Field<Long> crc = add("crc", FieldTypes.LONG, false); // use "crc" instead of "hash" because hash is a reserved word
+        public final Table.Field<String> crc = add("crc", FieldTypes.CHARACTER_VARYING, false); // use "crc" instead of "hash" because hash is a reserved word
         public final Table.Field<String> path = add("path", FieldTypes.CHARACTER_VARYING, false);
         public final Table.Field<String> name = add("name", FieldTypes.CHARACTER_VARYING, false);
         public final Table.Field<java.sql.Timestamp> date = add("date_verified", FieldTypes.TIMESTAMP, false);

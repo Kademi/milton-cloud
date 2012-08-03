@@ -191,6 +191,7 @@ public class InitHelper {
                 return w;
             }
         }
+        System.out.println("-- Create website: " + webName + " with alias: " + alias);
         Website w = org.createWebsite(webName, theme, user, alias, session);
 
         Branch trunk = w.currentBranch();

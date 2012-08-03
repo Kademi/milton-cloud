@@ -175,7 +175,7 @@ public class Repository implements Serializable {
         Commit head = new Commit();
         head.setCreatedDate(new Date());
         head.setEditor(user);
-        head.setItemHash(0);
+        head.setItemHash(null);
         session.save(head);
                 
         Branch b = new Branch();

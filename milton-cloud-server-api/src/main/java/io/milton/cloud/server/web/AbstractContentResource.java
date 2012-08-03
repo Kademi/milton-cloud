@@ -1,8 +1,6 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.db.Version;
 import io.milton.cloud.server.manager.CommentService;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
@@ -74,7 +72,11 @@ public abstract class AbstractContentResource extends AbstractResource implement
         parent = newParent;
         newParent.onAddedChild(this);
         oldParent.onRemovedChild(this);
-        newParent.save();
+        try {
+            newParent.save();
+        } catch (IOException ex) {
+            throw new BadRequestException("io ex", ex);
+        }
         tx.commit();
     }
 
@@ -87,7 +89,11 @@ public abstract class AbstractContentResource extends AbstractResource implement
             ContentDirectoryResource newParent = (ContentDirectoryResource) toCollection;
             DirectoryNode newDir = newParent.getDirectoryNode().addDirectory(newName);
             contentNode.copy(newDir, newName);
-            parent.save();
+            try {
+                parent.save();
+            } catch (IOException ex) {
+                throw new BadRequestException("io ex", ex);
+            }
             tx.commit();
         } else {
             throw new ConflictException(this, "Can't copy to collection of type: " + toCollection.getClass());
@@ -99,7 +105,11 @@ public abstract class AbstractContentResource extends AbstractResource implement
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         doDelete();
-        parent.save();
+        try {
+            parent.save();
+        } catch (IOException ex) {
+            throw new BadRequestException("io ex", ex);
+        }
         tx.commit();
     }
     
@@ -115,39 +125,41 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public Date getCreateDate() {
-        return loadNodeMeta().getCreatedDate();
+        return null;
+        //return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return loadNodeMeta().getModDate();
+        return null;
+        //return loadNodeMeta().getModDate();
     }
 
-    protected void updateModDate() {
-        long previousProfileId = loadNodeMeta().getProfileId();
-        Date previousModDate = loadNodeMeta().getModDate();
-        long previousResourceHash = contentNode.getLoadedHash();
-
-        long newResourceHash = contentNode.getHash();
-        Date newDate = _(CurrentDateService.class).getNow();
-        long newProfileId = 0;
-        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-        if (p != null) {
-            newProfileId = p.getId();
-        }
-
-        Version.insert(previousResourceHash, previousModDate, previousProfileId, newResourceHash, newDate, newProfileId, SessionManager.session());
-
-        nodeMeta.setModDate(newDate);
-        nodeMeta.setProfileId(newProfileId);
-        if (nodeMeta.getCreatedDate() == null) {
-            nodeMeta.setCreatedDate(newDate);
-        }
-        try {
-            NodeMeta.saveMeta(contentNode, nodeMeta);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+    protected void updateModDate() {        
+//        long previousProfileId = loadNodeMeta().getProfileId();
+//        Date previousModDate = loadNodeMeta().getModDate();
+//        long previousResourceHash = contentNode.getLoadedHash();
+//
+//        long newResourceHash = contentNode.getHash();
+//        Date newDate = _(CurrentDateService.class).getNow();
+//        long newProfileId = 0;
+//        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+//        if (p != null) {
+//            newProfileId = p.getId();
+//        }
+//
+//        Version.insert(previousResourceHash, previousModDate, previousProfileId, newResourceHash, newDate, newProfileId, SessionManager.session());
+//
+//        nodeMeta.setModDate(newDate);
+//        nodeMeta.setProfileId(newProfileId);
+//        if (nodeMeta.getCreatedDate() == null) {
+//            nodeMeta.setCreatedDate(newDate);
+//        }
+//        try {
+//            NodeMeta.saveMeta(contentNode, nodeMeta);
+//        } catch (IOException ex) {
+//            throw new RuntimeException(ex);
+//        }
     }
 
     public NodeMeta loadNodeMeta() {

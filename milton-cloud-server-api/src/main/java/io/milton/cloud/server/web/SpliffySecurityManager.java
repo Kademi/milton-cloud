@@ -42,13 +42,18 @@ public class SpliffySecurityManager {
 
     public UserResource getCurrentPrincipal() {
         if( HttpManager.request() == null ) {
+            log.warn("XXXXX   No current request  XXXXX");
             return null;
         }
         Auth auth = HttpManager.request().getAuthorization();
         if (auth == null || auth.getTag() == null) {
+            log.warn("no auth object");
             return null;
         }
         UserResource ur = (UserResource) auth.getTag();
+        if( ur == null ) {
+            log.warn("Got auth object but null tag");
+        }
         return ur;
     }
 
@@ -61,7 +66,7 @@ public class SpliffySecurityManager {
         } else {
             // only the password hash is stored on the user, so need to generate an expected hash
             if (passwordManager.verifyPassword(user, requestPassword)) {
-                HttpManager.request().getAttributes().put("_current_user", user);
+                //HttpManager.request().getAttributes().put("_current_user", user);
                 return user;
             } else {
                 return null;
@@ -83,7 +88,7 @@ public class SpliffySecurityManager {
         }
         if (passwordManager.verifyDigest(digest, user)) {
 //            log.info("digest auth ok: " + user.getName());
-            HttpManager.request().getAttributes().put("_current_user", user);
+            //HttpManager.request().getAttributes().put("_current_user", user);
             return user;
         } else {
             log.warn("password verifuication failed");

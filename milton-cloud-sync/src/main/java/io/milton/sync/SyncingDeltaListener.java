@@ -1,5 +1,6 @@
 package io.milton.sync;
 
+import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import io.milton.http.exceptions.ConflictException;
 import java.io.File;
@@ -11,7 +12,7 @@ import io.milton.cloud.common.Triplet;
  *
  * @author brad
  */
-class SyncingDeltaListener implements DeltaListener2 {
+class SyncingDeltaListener implements DeltaListener {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SyncingDeltaListener.class);
     private final Syncer syncer;
@@ -28,8 +29,8 @@ class SyncingDeltaListener implements DeltaListener2 {
     }
 
     @Override
-    public void onRemoteChange(Triplet remoteTriplet, Triplet localTriplet, Path path) throws IOException {
-        if (remoteTriplet.isDirectory()) {
+    public void onRemoteChange(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {        
+        if (Triplet.isDirectory(remoteTriplet)) {
             final File localFile = toFile(path);
             if (!localFile.exists()) {
                 if (readonlyLocal) {
@@ -58,7 +59,7 @@ class SyncingDeltaListener implements DeltaListener2 {
     }
 
     @Override
-    public void onRemoteDelete(Triplet localTriplet, Path path) {
+    public void onRemoteDelete(ITriplet localTriplet, Path path) {
         final File localChild = toFile(path);
         if (readonlyLocal) {
             return;
@@ -69,7 +70,7 @@ class SyncingDeltaListener implements DeltaListener2 {
     }
 
     @Override
-    public void onLocalChange(Triplet localTriplet, Path path) throws IOException {
+    public void onLocalChange(ITriplet localTriplet, Path path) throws IOException {
         final File localFile = toFile(path);
         if (localFile.isFile()) {
             log.info("upload locally new or modified file: " + localFile.getCanonicalPath());
@@ -86,7 +87,7 @@ class SyncingDeltaListener implements DeltaListener2 {
     }
 
     @Override
-    public void onLocalDeletion(Path path, Triplet remoteTriplet) {
+    public void onLocalDeletion(Path path, ITriplet remoteTriplet) {
         final File localChild = toFile(path);
         System.out.println("Delete file from server for locally deleted file: " + localChild.getAbsolutePath());
         syncer.deleteRemote(path);
@@ -94,14 +95,14 @@ class SyncingDeltaListener implements DeltaListener2 {
     }
 
     @Override
-    public void onTreeConflict(Triplet remoteTriplet, Triplet localTriplet, Path path) {
+    public void onTreeConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) {
         Thread.dumpStack();
         final File localChild = toFile(path);
         JOptionPane.showMessageDialog(null, "Oh oh, remote is a file but local is a directory: " + localChild.getAbsolutePath());
     }
 
     @Override
-    public void onFileConflict(Triplet remoteTriplet, Triplet localTriplet, Path path) throws IOException {
+    public void onFileConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {
         Thread.dumpStack();
         final File localChild = toFile(path);
 

@@ -7,6 +7,7 @@ import com.ettrema.db.TableCreatorService;
 import com.ettrema.db.TableDefinitionSource;
 import com.ettrema.db.UseConnection;
 import com.ettrema.db.dialects.Dialect;
+import io.milton.cloud.common.HashCalc;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.*;
@@ -20,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.NullHashStore;
 import org.hashsplit4j.api.Parser;
-import io.milton.cloud.common.HashUtils;
-import io.milton.cloud.common.Triplet;
+import io.milton.cloud.common.ITriplet;
 import io.milton.event.EventManager;
 import io.milton.sync.Utils;
 import io.milton.sync.event.EventUtils;
@@ -64,11 +64,12 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private final EventManager eventManager;
     private File currentScanFile;
     private long currentOffset;
-    private long lastBlobHash;
+    private String lastBlobHash;
     private byte[] lastBlob;
     private boolean initialScanDone;
     private ScheduledFuture<?> futureScan;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final HashCalc hashCalc = HashCalc.getInstance();
 
     /**
      *
@@ -111,7 +112,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
   
     
     @Override
-    public List<Triplet> getTriplets(Path path) {
+    public List<ITriplet> getTriplets(Path path) {
         if (!initialScanDone) {
             log.info("getTriplets: Initial scan not done, doing it now...");
             scan();
@@ -142,15 +143,15 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      * @param bytes
      */
     @Override
-    public void setBlob(long hash, byte[] bytes) {
+    public void setBlob(String hash, byte[] bytes) {
         blobDao.insertBlob(hash, bytes, currentScanFile.getAbsolutePath(), currentOffset, con());
         currentOffset += bytes.length;
     }
 
     @Override
-    public byte[] getBlob(long hash) {
+    public byte[] getBlob(String hash) {
         try {
-            if (hash == lastBlobHash) {  // this will often happen because hasBlob will be called first for same hash
+            if (hash.equals(lastBlobHash) ) {  // this will often happen because hasBlob will be called first for same hash
                 return lastBlob;
             }
             List<BlobVector> list = blobDao.listBlobsByHash(con(), hash);
@@ -175,7 +176,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     }
 
     @Override
-    public boolean hasBlob(long hash) {
+    public boolean hasBlob(String hash) {
         return getBlob(hash) != null;
     }
 
@@ -332,7 +333,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         }
         this.currentScanFile = f; // will be used by setBlob
         this.currentOffset = 0;
-        long crc = Parser.parse(f, this, new NullHashStore()); // will generate blobs into this blob store
+        String crc = Parser.parse(f, this, new NullHashStore()); // will generate blobs into this blob store
         this.currentScanFile = null;
         crcDao.insertCrc(c, f.getParentFile().getAbsolutePath(), f.getName(), crc, f.lastModified());
     }
@@ -343,14 +344,14 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      *
      * @param dir
      */
-    private void generateDirectoryRecord(Connection c, File dir) throws SQLException {
+    private void generateDirectoryRecord(Connection c, File dir) throws SQLException, IOException {
         crcDao.deleteCrc(con(), dir.getParent(), dir.getName());
         // Note that we're reloading triplets, strictly not necessary but is a bit safer then
         // reusing the list we've been changing
 
         List<CrcRecord> crcRecords = crcDao.listCrcRecords(con(), dir.getAbsolutePath());
-        List<Triplet> triplets = BlobUtils.toTriplets(dir, crcRecords);
-        long newHash = HashUtils.calcTreeHash(triplets);
+        List<ITriplet> triplets = BlobUtils.toTriplets(dir, crcRecords);
+        String newHash = hashCalc.calcHash(triplets);
         log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
         crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
     }

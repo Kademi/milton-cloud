@@ -12,10 +12,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.vfs;
+package io.milton.cloud.common;
 
-import io.milton.vfs.data.HashCalc;
+import io.milton.cloud.common.HashCalc;
 import io.milton.cloud.common.Triplet;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -39,23 +40,23 @@ public class HashCalcTest {
      * Test of calcHash method, of class HashCalc.
      */
     @Test
-    public void testCalcHash_NoItems() {
+    public void testCalcHash_NoItems() throws IOException {
         ArrayList<Triplet> list = new ArrayList<>();
-        long hash = hashCalc.calcHash(list); 
-        assertEquals(1, hash);
+        String hash = hashCalc.calcHash(list); 
+        assertEquals("be1bdec0aa74b4dcb079943e70528096cca985f8", hash);
     }
     
     @Test
-    public void testCalcHash_OneItem() {
+    public void testCalcHash_OneItem() throws IOException {
         ArrayList<Triplet> list = new ArrayList<>();
         Triplet t = new Triplet();
         t.setName("a");
         t.setType("f");
-        t.setHash(1);
+        t.setHash("1");
         list.add(t);
-        long hash = hashCalc.calcHash(list);
+        String hash = hashCalc.calcHash(list);
         System.out.println("hash: " + hash);
-        assertEquals(95814007, hash);
+        assertEquals("27f807e686f714a769b6bdd52f848446e8565b59", hash);
     }
     
 }

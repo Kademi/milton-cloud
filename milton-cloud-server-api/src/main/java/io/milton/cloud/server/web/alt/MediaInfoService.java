@@ -48,7 +48,7 @@ public class MediaInfoService {
         return runner.getInfo(file);
     }
     
-    private File createSourceFile(long fileHash, String ext) {
+    private File createSourceFile(String fileHash, String ext) {
         File temp = null;
         FileOutputStream out = null;
         BufferedOutputStream out2 = null;
@@ -56,7 +56,7 @@ public class MediaInfoService {
             String name = "mediainfo_in_" + System.currentTimeMillis();
             temp = File.createTempFile(name, "." + ext);
             System.out.println("write to : " + temp.getCanonicalPath());
-            Fanout fanout = hashStore.getFanout(fileHash);
+            Fanout fanout = hashStore.getFileFanout(fileHash);
             out = new FileOutputStream(temp);
             out2 = new BufferedOutputStream(out);
             Combiner combiner = new Combiner();

@@ -7,19 +7,13 @@ import java.io.File;
  * @author brad
  */
 public class FsHashUtils {
-    public static String toHex(long hash) {
-        String hex = Long.toHexString(hash);
-        return hex;
-    }
-
-    public static File toFile(File root, long hash) {
+    public static File toFile(File root, String hex) {        
         File f = root;
-        String hex = toHex(hash);
         String name = hex;
         while( name.length() > 3) {
-            String subdir = name.substring(0, 2);
+            String subdir = name.substring(0, 3);
             f = new File(f, subdir);
-            name = name.substring(2);
+            name = name.substring(3);
         }
         return new File(f, hex);
     }

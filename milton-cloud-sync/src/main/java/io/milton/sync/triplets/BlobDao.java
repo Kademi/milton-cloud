@@ -15,14 +15,14 @@ public class BlobDao {
     public static final BlobTable BLOB = new BlobTable();
     
     
-    public List<BlobVector> listBlobsByHash(Connection c, long hash) throws SQLException {
+    public List<BlobVector> listBlobsByHash(Connection c, String hash) throws SQLException {
         final String q = BLOB.getSelect() + " WHERE " + BLOB.crc.getName() + " = ?";
         List<BlobVector> blobVectors = new ArrayList<>();
         try (PreparedStatement stmt = c.prepareStatement(q)) {
             BLOB.crc.set(stmt, 1, hash);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    long crc = BLOB.crc.get(rs);
+                    String crc = BLOB.crc.get(rs);
                     String path = BLOB.path.get(rs);
                     Timestamp date = BLOB.date.get(rs);
                     long offset = BLOB.offset.get(rs);
@@ -35,7 +35,7 @@ public class BlobDao {
         return blobVectors;
     }
 
-    public void insertBlob(long hash, byte[] bytes,String path, long offset, Connection con) throws RuntimeException {
+    public void insertBlob(String hash, byte[] bytes,String path, long offset, Connection con) throws RuntimeException {
         String sql = BLOB.getInsert();
         try {
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -52,7 +52,7 @@ public class BlobDao {
         }
     }
 
-    public void deleteBlob(String path, long crc, long offset, Connection c) throws SQLException {
+    public void deleteBlob(String path, String crc, long offset, Connection c) throws SQLException {
         String sql = "DELETE FROM " + BLOB.tableName + " WHERE " + BLOB.path.getName() + " = ?" + " AND " + BLOB.crc.getName() + " = ? AND " + BLOB.offset.getName() + " = ?";
         try (PreparedStatement stmt = c.prepareStatement(sql)) {
             BLOB.path.set(stmt, 1, path);
@@ -66,7 +66,7 @@ public class BlobDao {
     public static class BlobTable extends com.ettrema.db.Table {
 
         public final Table.Field<String> path = add("path", FieldTypes.CHARACTER_VARYING, false);
-        public final Table.Field<Long> crc = add("crc", FieldTypes.LONG, false);
+        public final Table.Field<String> crc = add("crc", FieldTypes.CHARACTER_VARYING, false);
         public final Table.Field<Long> offset = add("offset", FieldTypes.LONG, false);
         public final Table.Field<Integer> length = add("length", FieldTypes.INTEGER, false);
         public final Table.Field<java.sql.Timestamp> date = add("date_verified", FieldTypes.TIMESTAMP, false);
@@ -85,12 +85,12 @@ public class BlobDao {
     public class BlobVector {
 
         final String path;
-        final long crc;
+        final String crc;
         final long offset;
         final int length;
         final Timestamp date;
 
-        public BlobVector(String path, long crc, long offset, int length, Timestamp date) {
+        public BlobVector(String path, String crc, long offset, int length, Timestamp date) {
             this.path = path;
             this.crc = crc;
             this.offset = offset;

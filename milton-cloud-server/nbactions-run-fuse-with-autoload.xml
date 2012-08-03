@@ -3,11 +3,8 @@
     <action>
         <actionName>debug</actionName>
         <goals>
-            <goal>package</goal>
-        </goals>
-        <activatedProfiles>
-            <activatedProfile>run-fuse-with-autoload</activatedProfile>
-        </activatedProfiles>            
+            <goal>compile</goal>
+        </goals>            
             
         <properties>
             <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>

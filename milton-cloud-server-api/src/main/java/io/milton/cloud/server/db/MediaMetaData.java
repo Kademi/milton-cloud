@@ -36,7 +36,7 @@ uniqueConstraints = {
 )
 public class MediaMetaData implements Serializable {
     
-    public static MediaMetaData find(long sourceHash, Session session) {
+    public static MediaMetaData find(String sourceHash, Session session) {
         Criteria crit = session.createCriteria(MediaMetaData.class);
         crit.add(Expression.eq("sourceHash", sourceHash));        
         return DbUtils.unique(crit);
@@ -51,7 +51,7 @@ public class MediaMetaData implements Serializable {
      * @param session
      * @return 
      */
-    public static MediaMetaData getOrCreate( long sourceHash, Session session) {
+    public static MediaMetaData getOrCreate( String sourceHash, Session session) {
         MediaMetaData f = find(sourceHash, session);
         if( f != null ) {
             return f;
@@ -64,7 +64,7 @@ public class MediaMetaData implements Serializable {
 
     
     private long id;
-    private long sourceHash; // the hash of the file from which the information was derived
+    private String sourceHash; // the hash of the file from which the information was derived
     private Integer durationSecs; // the name of the alt format: eg thumb-120x120.png
     private Date recordedDate;
     private Integer width;
@@ -81,11 +81,11 @@ public class MediaMetaData implements Serializable {
     }
 
     @Column(nullable=false)
-    public long getSourceHash() {
+    public String getSourceHash() {
         return sourceHash;
     }
 
-    public void setSourceHash(long sourceHash) {
+    public void setSourceHash(String sourceHash) {
         this.sourceHash = sourceHash;
     }
 

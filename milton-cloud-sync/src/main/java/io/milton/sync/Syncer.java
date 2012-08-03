@@ -1,5 +1,6 @@
 package io.milton.sync;
 
+import io.milton.cloud.common.HashCalc;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -13,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.*;
-import io.milton.cloud.common.HashUtils;
 import io.milton.cloud.common.store.ByteArrayBlobStore;
 import io.milton.event.EventManager;
 import io.milton.httpclient.Host;
@@ -44,6 +44,7 @@ public class Syncer {
     private final Archiver archiver;
     private final File root;
     private final Path baseUrl;
+    private final HashCalc hashCalc = HashCalc.getInstance();
     private boolean paused;
     private boolean readonlyLocal;
 
@@ -93,7 +94,7 @@ public class Syncer {
         }
     }
 
-    public void downloadSync(long hash, Path path) throws IOException {
+    public void downloadSync(String hash, Path path) throws IOException {
         if (readonlyLocal) {
             log.warn("Not downsyncing because local is readonly");
             return;
@@ -106,7 +107,7 @@ public class Syncer {
         }
     }
 
-    private void _downloadSync(long hash, Path path) throws IOException {
+    private void _downloadSync(String fileHash, Path path) throws IOException {
         System.out.println("downloadSync: " + path);
         File localFile = toFile(path);
         List<HashStore> hashStores = new ArrayList<>();
@@ -150,11 +151,11 @@ public class Syncer {
             HashStore multiHashStore = new MultipleHashStore(hashStores);
             BlobStore multiBlobStore = new MultipleBlobStore(blobStores);
 
-            Fanout rootRemoteFanout = multiHashStore.getFanout(hash);
+            Fanout rootRemoteFanout = multiHashStore.getFileFanout(fileHash);
             if (rootRemoteFanout == null) {
-                throw new RuntimeException("Coudlnt find remote hash: " + hash);
+                throw new RuntimeException("Coudlnt find remote hash: " + fileHash);
             }
-            List<Long> rootHashes = rootRemoteFanout.getHashes();
+            List<String> rootHashes = rootRemoteFanout.getHashes();
 
             FileOutputStream fout = null;
             try {
@@ -178,7 +179,7 @@ public class Syncer {
         }
 
         // Verify the CRC
-        HashUtils.verifyHash(fTemp, hash);
+        hashCalc.verifyHash(fTemp, fileHash);
 
         // Downloaded to temp file, so now swap with real file
         if (localFile.exists()) {
@@ -210,22 +211,31 @@ public class Syncer {
             fin = new FileInputStream(file);
             BufferedInputStream bufIn = new BufferedInputStream(fin);
 
-            long newHash;
+            String newHash;
             Path destPath = baseUrl.add(path);
             if (file.length() < 5000) {
                 log.info("upSync: upload small file: " + file.getAbsolutePath());
-                // for a small file its quicker just to upload it                
-                try {
-                    ByteArrayBlobStore byteArrayBlobStore = new ByteArrayBlobStore();
-                    newHash = parser.parse(bufIn, new NullHashStore(), byteArrayBlobStore);
-                    byte[] data = byteArrayBlobStore.getBytes();
-                    host.doPut(destPath, data, null);
-                    
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-                if (!checkRemoteHash(newHash, path)) {
-                    throw new RuntimeException("Uploaded file is not valid: " + destPath + " remote hash does not match local");
+                // for a small file its quicker just to upload it     
+                boolean done = false;
+                int cnt = 0;
+                while (!done) {
+                    if (cnt++ > 3) {
+                        throw new RuntimeException("Uploaded file is not valid: " + destPath);
+                    }
+                    try {
+                        ByteArrayBlobStore byteArrayBlobStore = new ByteArrayBlobStore();
+                        newHash = parser.parse(bufIn, new NullHashStore(), byteArrayBlobStore);
+                        byte[] data = byteArrayBlobStore.getBytes();
+                        host.doPut(destPath, data, null);
+
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if (checkRemoteHash(newHash, path)) {
+                        done = true;
+                    } else {
+                        log.warn("Uploaded file, but then couldnt find it: " + destPath);
+                    }
                 }
 
             } else {
@@ -234,15 +244,15 @@ public class Syncer {
 
                 // Now set the new hash on the remote file, which effectively commits the new content
 
-                boolean done = false;
-                int cnt = 0;
-                while (!done) {
+//                boolean done = false;
+//                int cnt = 0;
+//                while (!done) {
+//                    if (cnt++ > 3) {
+//                        throw new RuntimeException("Uploaded file is not valid: " + destPath);
+//                    }
                     updateHashOnRemoteResource(newHash, path);
-                    done = checkRemoteHash(newHash, path);
-                    if( cnt++ > 3 ) {
-                        throw new RuntimeException("Uploaded file is not valid: " + destPath);
-                    }
-                }
+//                    done = checkRemoteHash(newHash, path);
+//                }
             }
         } finally {
             EventUtils.fireQuietly(eventManager, new FinishedSyncEvent());
@@ -258,26 +268,20 @@ public class Syncer {
      * @param hash
      * @param encodedPath
      */
-    private void updateHashOnRemoteResource(long hash, Path path) {
+    private void updateHashOnRemoteResource(String hash, Path path) {
         // Copy longs into a byte array
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(bout);
         try {
-            dos.writeLong(hash); // send the actualContentLength first
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-        byte[] data = bout.toByteArray();
-
-        try {
+            hashCalc.writeHash(hash, bout);
+            byte[] data = bout.toByteArray();
             Path p = baseUrl.add(path);
             host.doPut(p, data, "spliffy/hash");
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private boolean checkRemoteHash(long expected, Path path) {
+    private boolean checkRemoteHash(String expectedFileHash, Path path) {
         Path p = baseUrl.add(path);
         Map<String, String> params = new HashMap<>();
         params.put("type", "hash");
@@ -285,13 +289,18 @@ public class Syncer {
         try {
             arr = host.doGet(p, params);
         } catch (Throwable ex) {
-            throw new RuntimeException("Exception checking hash on: " + p, ex);
+            return false;
         }
-        String sHash = new String(arr);
-        Long actual = Long.parseLong(sHash);
-        boolean  b = (expected == actual);
-        if( !b ) {
-            log.error("checkRemoteHash: hashes do not match: " + expected + " != " + actual);
+        ByteArrayInputStream in = new ByteArrayInputStream(arr);
+        String actualFileHash;
+        try {
+            actualFileHash = hashCalc.readHash(in);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        boolean b = expectedFileHash.equals(actualFileHash);
+        if (!b) {
+            log.error("checkRemoteHash: hashes do not match: " + expectedFileHash + " != " + actualFileHash);
         }
         return b;
     }

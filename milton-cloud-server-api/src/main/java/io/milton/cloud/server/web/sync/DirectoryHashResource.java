@@ -7,32 +7,55 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
-import io.milton.vfs.data.HashCalc;
-import io.milton.vfs.db.DataItem;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
+
+import static io.milton.context.RequestContext._;
+import org.apache.log4j.Logger;
+import org.hashsplit4j.api.BlobStore;
 
 /**
  *
  * @author brad
  */
-public class DirectoryHashResource  extends BaseResource implements GetableResource {
+public class DirectoryHashResource extends BaseResource implements GetableResource {
 
-    private final long hash;
+    private static final Logger log = Logger.getLogger(DirectoryHashResource.class);
+    
+    private final String hash;
 
-    public DirectoryHashResource(long hash, SpliffySecurityManager securityManager, Organisation org) {
+    public DirectoryHashResource(String hash, SpliffySecurityManager securityManager, Organisation org) {
         super(securityManager, org);
         this.hash = hash;
     }
 
+    /**
+     * The directory list is stored as a list of triplets as a blob, with the
+     * hash being the hash of the triplet list. To send content we just look up
+     * the blob and write it directly to the outputstream
+     *
+     * @param out
+     * @param range
+     * @param map
+     * @param string
+     * @throws IOException
+     * @throws NotAuthorizedException
+     * @throws BadRequestException
+     * @throws NotFoundException
+     */
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> map, String string) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        List<DataItem> list = DataItem.findByHash(hash, SessionManager.session());
-        HashCalc.getInstance().calcHash(list, out);
+        if (hash != null && hash.length() > 0) {
+            byte[] dirList = _(BlobStore.class).getBlob(hash);
+            if( hash == null ) {
+                throw new RuntimeException("Failed to find directory list for hash: " + hash);
+            }
+            out.write(dirList);
+        } else {
+            log.warn("No hash, so no contents");
+        }
     }
 
     @Override
@@ -55,4 +78,3 @@ public class DirectoryHashResource  extends BaseResource implements GetableResou
         return null;
     }
 }
-

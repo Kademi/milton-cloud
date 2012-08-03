@@ -26,6 +26,8 @@ import org.hashsplit4j.api.Parser;
 /**
  * Implements raw access to file data. These are assembled blobs referenced by
  * hash
+ * 
+ * Allows files to be uploaded whole, but without being connected to a directory
  *
  * @author brad
  */
@@ -54,7 +56,7 @@ class FilesFolder extends BaseResource implements PutableResource, PostableResou
         Parser parser = new Parser();
 
         InputStream in = HttpManager.request().getInputStream();
-        long hash = parser.parse(in, hashStore, blobStore);
+        String hash = parser.parse(in, hashStore, blobStore);
 
         return new GetResource(null, hash, securityManager, org, blobStore, hashStore);
     }

@@ -16,7 +16,7 @@ public class ByteArrayBlobStore implements BlobStore{
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     
     @Override
-    public void setBlob(long l, byte[] bytes) {
+    public void setBlob(String l, byte[] bytes) {
         try {
             bout.write(bytes);
         } catch (IOException ex) {
@@ -29,12 +29,12 @@ public class ByteArrayBlobStore implements BlobStore{
     }
     
     @Override
-    public byte[] getBlob(long l) {
+    public byte[] getBlob(String l) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public boolean hasBlob(long l) {
+    public boolean hasBlob(String l) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     

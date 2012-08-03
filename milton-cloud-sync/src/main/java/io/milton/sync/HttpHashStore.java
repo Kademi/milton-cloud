@@ -1,5 +1,6 @@
 package io.milton.sync;
 
+import io.milton.cloud.common.FanoutSerializationUtils;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -8,10 +9,8 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import org.hashsplit4j.api.Fanout;
-import org.hashsplit4j.api.FanoutImpl;
 import org.hashsplit4j.api.HashCache;
 import org.hashsplit4j.api.HashStore;
 
@@ -20,76 +19,69 @@ import org.hashsplit4j.api.HashStore;
  *
  * Can use an optional HashCache to record knowledge of the existence of objects
  * in the remote repository
+ * 
+ * Reads fanouts as a text file, with the first line being the actual content length
+ * of the chunk/file, and then with newlines delimiting hashes
  *
  * @author brad
  */
 public class HttpHashStore implements HashStore {
 
     private final Host host;
-    private final HashCache hashCache;
+    private final HashCache chunksHashCache;
+    private final HashCache filesHashCache;
     private int timeout = 30000;
-    private Path basePath;
+    private Path chunksBasePath;
+    private Path filesBasePath;
     private long gets;
     private long sets;
 
     /**
      *
      * @param client
-     * @param hashCache - optional, may be null. If provided will be used to
+     * @param chunksHashCache - optional, may be null. If provided will be used to
      * optimise hasFanout
      */
-    public HttpHashStore(Host host, HashCache hashCache) {
+    public HttpHashStore(Host host, HashCache chunksHashCache, HashCache filesHashCache) {
         this.host = host;
-        this.hashCache = hashCache;
+        this.chunksHashCache = chunksHashCache;
+        this.filesHashCache = filesHashCache;
     }
 
     @Override
-    public void setFanout(long hash, List<Long> childCrcs, long actualContentLength) {
-        if (hasFanout(hash)) {
+    public void setChunkFanout(String hash, List<String> childCrcs, long actualContentLength) {
+        if (hasChunk(hash)) {
             return;
         }
 
         sets++;
 
         // Copy longs into a byte array
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(bout);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();        
         try {
-            dos.writeLong(actualContentLength); // send the actualContentLength first
-            for (Long l : childCrcs) {
-                dos.writeLong(l);
-            }
+            FanoutSerializationUtils.writeFanout(childCrcs, actualContentLength, bout);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
         byte[] bytes = bout.toByteArray();
 
-        Path destPath = basePath.child(hash + "");
+        Path destPath = chunksBasePath.child(hash + "");
         host.doPut(destPath, bytes, null);
     }
 
     @Override
-    public Fanout getFanout(long fanoutHash) {
+    public Fanout getChunkFanout(String fanoutHash) {
         gets++;
-        Path destPath = basePath.child(fanoutHash + "");
+        Path destPath = chunksBasePath.child(fanoutHash + "");
         try {
             byte[] arr = host.doGet(destPath);
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-            List<Long> list = new ArrayList<>();
-            DataInputStream din = new DataInputStream(bin);
-            long actualContentLength = din.readLong();
-            try {
-                while (true) {
-                    list.add(din.readLong());
-                }
-            } catch (EOFException e) {
-                // cool
-            }
+            Fanout fanout = FanoutSerializationUtils.readFanout(bin);
 
-            if (hashCache != null) {
-                hashCache.setHash(fanoutHash);
+            if (chunksHashCache != null) {
+                chunksHashCache.setHash(fanoutHash);
             }
-            return new FanoutImpl(list, actualContentLength);
+            return fanout;
         } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
             throw new RuntimeException(ex);
         }
@@ -97,17 +89,17 @@ public class HttpHashStore implements HashStore {
     }
 
     @Override
-    public boolean hasFanout(long fanoutHash) {
-        if (hashCache != null) {
-            if (hashCache.hasHash(fanoutHash)) { // say that 3 times quickly!!!  :)
+    public boolean hasChunk(String fanoutHash) {
+        if (chunksHashCache != null) {
+            if (chunksHashCache.hasHash(fanoutHash)) { // say that 3 times quickly!!!  :)
                 return true;
             }
         }
-        Path destPath = basePath.child(fanoutHash + "");
+        Path destPath = chunksBasePath.child(fanoutHash + "");
         try {
             host.doOptions(destPath);
-            if (hashCache != null) {
-                hashCache.setHash(fanoutHash);
+            if (chunksHashCache != null) {
+                chunksHashCache.setHash(fanoutHash);
             }
             return true;
         } catch (NotFoundException ex) {
@@ -117,6 +109,68 @@ public class HttpHashStore implements HashStore {
         }
 
     }
+
+
+    @Override
+    public void setFileFanout(String hash, List<String> fanoutHashes, long actualContentLength) {
+        if (hasFile(hash)) {
+            return;
+        }
+
+        sets++;
+
+        // Copy longs into a byte array
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();        
+        try {
+            FanoutSerializationUtils.writeFanout(fanoutHashes, actualContentLength, bout);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        byte[] bytes = bout.toByteArray();
+
+        Path destPath = filesBasePath.child(hash + "");
+        host.doPut(destPath, bytes, null);
+    }
+
+    @Override
+    public Fanout getFileFanout(String fileHash) {
+        gets++;
+        Path destPath = filesBasePath.child(fileHash + "");
+        try {
+            byte[] arr = host.doGet(destPath);
+            ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+            Fanout fanout = FanoutSerializationUtils.readFanout(bin);
+
+            if (filesHashCache != null) {
+                filesHashCache.setHash(fileHash);
+            }
+            return fanout;
+        } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public boolean hasFile(String fileHash) {
+        if (filesHashCache != null) {
+            if (filesHashCache.hasHash(fileHash)) { // say that 3 times quickly!!!  :)
+                return true;
+            }
+        }
+        Path destPath = filesBasePath.child(fileHash + "");
+        try {
+            host.doOptions(destPath);
+            if (filesHashCache != null) {
+                filesHashCache.setHash(fileHash);
+            }
+            return true;
+        } catch (NotFoundException ex) {
+            return false;
+        } catch ( IOException | HttpException | NotAuthorizedException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
 
     public int getTimeout() {
         return timeout;
@@ -133,13 +187,23 @@ public class HttpHashStore implements HashStore {
      *
      * @return
      */
-    public String getBaseUrl() {
-        return basePath.toString();
+    public String getChunksBaseUrl() {
+        return chunksBasePath.toString();
     }
 
-    public void setBaseUrl(String baseUrl) {
-        this.basePath = Path.path(baseUrl);
+    public void setChunksBaseUrl(String baseUrl) {
+        this.chunksBasePath = Path.path(baseUrl);
     }
+
+    public String getFilesBasePath() {
+        return filesBasePath.toString();
+    }
+
+    public void setFilesBasePath(String filesBasePath) {
+        this.filesBasePath = Path.path(filesBasePath);
+    }
+    
+    
 
     public long getGets() {
         return gets;
@@ -147,5 +211,5 @@ public class HttpHashStore implements HashStore {
 
     public long getSets() {
         return sets;
-    }
+    }    
 }

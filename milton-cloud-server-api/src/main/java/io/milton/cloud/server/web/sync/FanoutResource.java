@@ -1,11 +1,11 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.common.FanoutSerializationUtils;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
@@ -23,9 +23,9 @@ import io.milton.resource.GetableResource;
 public class FanoutResource extends BaseResource implements GetableResource {
 
     private final Fanout fanout;
-    private final long hash;
+    private final String hash;
 
-    public FanoutResource(Fanout fanout, long hash, SpliffySecurityManager securityManager, Organisation org) {
+    public FanoutResource(Fanout fanout, String hash, SpliffySecurityManager securityManager, Organisation org) {
         super(securityManager, org);
         this.fanout = fanout;
         this.hash = hash;
@@ -33,18 +33,13 @@ public class FanoutResource extends BaseResource implements GetableResource {
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> map, String string) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        DataOutputStream dos = new DataOutputStream(out);
-        dos.writeLong(fanout.getActualContentLength());
-        for (Long l : fanout.getHashes()) {
-            dos.writeLong(l);
-        }
-        dos.flush();
+        FanoutSerializationUtils.writeFanout(fanout.getHashes(), fanout.getActualContentLength(), out);
         out.flush();
     }
 
     @Override
     public String getName() {
-        return hash + "";
+        return hash;
     }
 
     @Override

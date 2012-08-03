@@ -1,5 +1,6 @@
 package io.milton.sync.triplets;
 
+import io.milton.cloud.common.HashCalc;
 import io.milton.common.Path;
 import io.milton.http.exceptions.NotFoundException;
 import java.io.ByteArrayInputStream;
@@ -7,8 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import io.milton.cloud.common.HashUtils;
-import io.milton.cloud.common.Triplet;
+import io.milton.cloud.common.ITriplet;
 import io.milton.httpclient.Host;
 
 /**
@@ -20,6 +20,7 @@ import io.milton.httpclient.Host;
 public class HttpTripletStore implements ParentHashAwareTripletStore {
     private final Host host;
     private final Path rootPath;
+    private final HashCalc hashCalc = HashCalc.getInstance();
 
     /**
      * 
@@ -32,12 +33,12 @@ public class HttpTripletStore implements ParentHashAwareTripletStore {
     }
 
     @Override
-    public List<Triplet> getTriplets(Path path) {
+    public List<ITriplet> getTriplets(Path path) {
         Path p = rootPath.add(path);
         p = p.child("_triplets");
         try {            
             byte[] arrRemoteTriplets = host.doGet(p);
-            List<Triplet> triplets = HashUtils.parseTriplets(new ByteArrayInputStream(arrRemoteTriplets));
+            List<ITriplet> triplets = hashCalc.parseTriplets(new ByteArrayInputStream(arrRemoteTriplets));
             return triplets;
         } catch (IOException ex) {
             throw new RuntimeException(p.toString(), ex);
@@ -49,13 +50,13 @@ public class HttpTripletStore implements ParentHashAwareTripletStore {
     }
 
     @Override
-    public List<Triplet> getTriplets(long hash) {
+    public List<ITriplet> getTriplets(String hash) {
         Path p = Path.root.child("_hashes").child("dirhashes").child(hash+"");
         Map<String,String> params = new HashMap<>();
                         
         try {            
             byte[] arrRemoteTriplets = host.doGet(p, params);
-            List<Triplet> triplets = HashUtils.parseTriplets(new ByteArrayInputStream(arrRemoteTriplets));
+            List<ITriplet> triplets = hashCalc.parseTriplets(new ByteArrayInputStream(arrRemoteTriplets));
             return triplets;
         } catch (IOException ex) {
             throw new RuntimeException(p.toString(), ex);
