@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js">//</script>
+<script type="text/javascript" src="/static/ckeditor36/ckeditor.js">//</script>
+<script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js">//</script>
+<script type="text/javascript" src="/static/ckeditor36/config.js">//</script>
+<link rel="stylesheet" type="text/css" href="/static/ckeditor36/contents.css" />
+<link rel="stylesheet" type="text/css" href="sample.css"/>
+</head>
+<body>
+<form action="/static/demo.php" method="post">
+	<p>
+		<label for="editor">Editor:</label>
+		<textarea cols="80" id="editor" name="editor_office2003" rows="10">This is some [b]sample text[/b]. You are using [url=http://ckeditor.com/]CKEditor[/url].</textarea>
+		<script type="text/javascript">
+	CKEDITOR.replace('editor', {
+		skin: 'office2003',
+		extraPlugins : 'modal',
+			toolbar :[
+				[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
+				[ 'Modal' ]
+			]
+	});
+	</script> 
+	</p>
+	<p>
+		<input type="submit" value="Submit" />
+	</p>
+</form>
+</body>
+</html>
