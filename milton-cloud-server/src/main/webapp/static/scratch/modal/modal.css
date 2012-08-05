@@ -1,0 +1,18 @@
+a.anchor-modal { cursor: pointer; }
+.linked-modal {
+	background: #FFF;
+	box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+	padding: 25px;
+}
+.linked-modal a.close-modal {
+	background: transparent url(btn_modal_close.png) no-repeat 50% 50%;
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	top: 7px;
+	right: 7px;
+	border: 0 none;
+	color: transparent;
+	font: 0px/0 a;
+	text-shadow: none;
+}
