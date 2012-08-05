@@ -315,6 +315,14 @@ public class Formatter {
         return formatMinsAsDuration(o, true);
     }
 
+    /**
+     * Given a value which can be parsed to a Long, return it formatted as a human
+     * readable duration such as 12:30 (12 mins, 30 seconds) or 12 mins, 3 hrs 20
+     * 
+     * @param o
+     * @param numeric
+     * @return 
+     */
     public String formatMinsAsDuration(Object o, boolean numeric) {
         Long l = toLong(o);
         if (l == null) {
@@ -617,6 +625,20 @@ public class Formatter {
         Duration d = new Duration(jodaSt, jodaFn);
         return d.getStandardSeconds();
     }
+    
+    /**
+     * Get the duration from the start to the finish date in seconds.
+     *
+     * @param start - any object which can be converted to a jodadate
+     * @param finish - any object which can be converted to a jodadate
+     * @return
+     */
+    public long durationHours(Object start, Object finish) {
+        DateTime jodaSt = toJodaDate(start);
+        DateTime jodaFn = toJodaDate(finish);
+        Duration d = new Duration(jodaSt, jodaFn);
+        return d.getStandardSeconds()/(60 * 60);
+    }    
 
     public String getMonthName(int i) {
         switch (i) {

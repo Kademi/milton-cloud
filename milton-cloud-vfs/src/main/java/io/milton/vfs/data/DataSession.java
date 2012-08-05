@@ -211,10 +211,9 @@ public class DataSession {
         }
 
         public void delete() {
-            throw new RuntimeException("DELETE");
-//            parent.getChildren().remove(this);
-//            parent.checkConsistency(parent);
-//            setDirty();
+            parent.getChildren().remove(this);
+            parent.checkConsistency(parent);
+            setDirty();
         }
 
         public DirectoryNode getParent() {

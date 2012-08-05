@@ -16,6 +16,7 @@ package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -26,7 +27,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
 
 /**
  * Created when a user requests a password reset
@@ -49,6 +52,12 @@ public class PasswordReset implements Serializable {
         r.setToken(UUID.randomUUID().toString());
         session.save(r);
         return r;
+    }
+
+    public static PasswordReset find(String token, Session session) {
+        Criteria crit = session.createCriteria(PasswordReset.class);
+        crit.add(Expression.eq("token", token));
+        return DbUtils.unique(crit);
     }
     
     private long id;

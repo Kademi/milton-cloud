@@ -22,6 +22,7 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.config.HttpManagerBuilder;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
@@ -30,6 +31,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.http11.auth.CookieAuthenticationHandler;
 import io.milton.vfs.db.BaseEntity;
 
 /**
@@ -62,6 +64,7 @@ public class UserApp implements Application, MenuApplication {
         return null;
     }
     private SpliffySecurityManager securityManager;
+    private CookieAuthenticationHandler cookieAuthenticationHandler; // Needed for logging users in on password reset
 
     @Override
     public String getInstanceId() {
@@ -71,6 +74,9 @@ public class UserApp implements Application, MenuApplication {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         securityManager = resourceFactory.getSecurityManager();
+        HttpManagerBuilder httpManagerBuilder = config.getContext().get(HttpManagerBuilder.class);
+        cookieAuthenticationHandler = httpManagerBuilder.getCookieAuthenticationHandler();
+        log.info("init UserApp: cookieAuthenticationHandler: " + cookieAuthenticationHandler);
     }
 
     @Override
@@ -87,18 +93,21 @@ public class UserApp implements Application, MenuApplication {
             switch (requestedName) {
                 case "dashboard":
                     MenuItem.setActiveIds("menuDashboard");
-                    DashboardPage page = new DashboardPage(requestedName, wrf);
-                    page.setForceLogin(true);
-                    return page;
-
+                    return new DashboardPage(requestedName, wrf);                    
+                case "profile":
+                    MenuItem.setActiveIds("menuDashboard");
+                    return new ProfilePage(requestedName, wrf);
             }
         }
         if (parent instanceof RootFolder) {            
             RootFolder rf = (RootFolder) parent;
-            if (requestedName.equals("login.html")) {
-                return new LoginPage(rf);
-            } else if( requestedName.equals("password-reset")) {
-                return new PasswordResetPage(requestedName, rf);
+            switch (requestedName) {
+                case "login.html":
+                    return new LoginPage(rf);
+                case "password-reset":
+                    return new PasswordResetPage(requestedName, rf);
+                case "do-reset":
+                    return new DoPasswordResetPage(requestedName, rf, cookieAuthenticationHandler);
             }
         }
         return null;

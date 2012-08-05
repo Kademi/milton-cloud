@@ -22,9 +22,6 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.*;
 import io.milton.common.ContentTypeService;
-import io.milton.common.Service;
-import io.milton.context.Context;
-import io.milton.context.Executable2;
 import io.milton.context.RootContext;
 import io.milton.event.EventManager;
 import java.util.List;
@@ -36,7 +33,7 @@ import org.hashsplit4j.api.HashStore;
  *
  * @author brad
  */
-public class MCRootContext extends RootContext implements Service{
+public class MCRootContext extends RootContext {
 
     private final SpliffyResourceFactory resourceFactory;
     private final HashStore hashStore;
@@ -57,6 +54,7 @@ public class MCRootContext extends RootContext implements Service{
         this.blobStore = blobStore;        
         this.securityManager = securityManager;
         this.applicationManager = applicationManager;
+        applicationManager.setRootContext(this);
         templateParser = new HtmlTemplateParser();
         this.textTemplater = new TextTemplater(securityManager, servletContext);
         currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
@@ -81,20 +79,5 @@ public class MCRootContext extends RootContext implements Service{
         
     }
     
-    @Override
-    public void start() {
-        applicationManager.setRootContext(this);
-        this.execute(new Executable2() {
-
-            @Override
-            public void execute(Context context) {
-                applicationManager.init(resourceFactory);
-            }
-        });        
-    }
-
-    @Override
-    public void stop() {
-        applicationManager.shutDown();
-    }    
+    
 }

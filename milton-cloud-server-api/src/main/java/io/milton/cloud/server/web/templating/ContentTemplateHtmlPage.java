@@ -42,14 +42,14 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
     private String websiteName;
     private final Path path;
 
-    public ContentTemplateHtmlPage(FileResource fr, String websiteName, Path path) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+    public ContentTemplateHtmlPage(FileResource fr, String websiteName) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         super(fr.getHref());
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         fr.sendContent(bout, null, null, "text/html");
         data = bout.toByteArray();
         loadedHash = fr.getHash();
         this.websiteName = websiteName;
-        this.path = path;
+        this.path = fr.getPath();
     }
 
     @Override
@@ -70,11 +70,18 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
     public FileResource getCurrentFileResource() {
         WebsiteRootFolder wrf = _(WebsiteApp.class).getPage(null, websiteName);
         if (wrf == null) {
+            System.out.println("no website root folder");
             return null;
         }
         try {
             Resource r = NodeChildUtils.find(path, wrf);
+            if( r == null ) {
+                System.out.println("did not find: " + path + " in " + wrf.getName());
+            }
             FileResource fr = NodeChildUtils.toFileResource(r);
+            if( fr == null ) {
+                System.out.println("couldnt find fr from r: " + path + " => " + r.getClass() + " - " + r.getName());
+            }
             return fr;
         } catch (NotAuthorizedException | BadRequestException ex) {
             throw new RuntimeException(ex);
@@ -97,7 +104,7 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
         }
         if (obj instanceof ContentTemplateHtmlPage) {
             ContentTemplateHtmlPage other = (ContentTemplateHtmlPage) obj;
-            return (other.loadedHash == loadedHash);
+            return (other.loadedHash.equals(loadedHash));
         }
         return false;
     }
@@ -111,6 +118,13 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
 
     @Override
     boolean isValid() {
-        return loadedHash.equals(getCurrentFileResource().getHash());
+        if( loadedHash == null ) {
+            throw new RuntimeException("loadedHash is null");
+        }
+        FileResource r = getCurrentFileResource();
+        if( r == null ) {
+            throw new RuntimeException("no current resource");
+        }
+        return loadedHash.equals(r.getHash());
     }
 }

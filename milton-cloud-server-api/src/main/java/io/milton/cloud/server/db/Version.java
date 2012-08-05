@@ -14,12 +14,10 @@
  */
 package io.milton.cloud.server.db;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedOutputStream;
-import java.util.zip.Checksum;
 import javax.persistence.*;
 import org.apache.commons.io.output.NullOutputStream;
 import org.hibernate.Session;
@@ -42,23 +40,17 @@ import org.hibernate.Session;
 @Entity
 public class Version implements Serializable {
 
-    public static long calcModHash(long versionHash, long modDate, long modProfileId) {
+    public static String calcModHash(String versionHash, long modDate, long modProfileId) {
         NullOutputStream out = new NullOutputStream();
         CheckedOutputStream cout = new CheckedOutputStream(out, new Adler32());
         String hashableText = versionHash + ":" + modDate + ":" + modProfileId;
-        try {
-            cout.write(hashableText.getBytes());
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-        Checksum check = cout.getChecksum();
-        return check.getValue();
+        return hashableText;
     }
 
-    public static void insert(long previousResourceHash, Date previousModDate, long previousProfileId, long newResourceHash, Date newModDate, long newProfileId, Session session) {
+    public static void insert(String previousResourceHash, Date previousModDate, long previousProfileId, String newResourceHash, Date newModDate, long newProfileId, Session session) {
         long previousModDateLong = previousModDate == null ? 0 : previousModDate.getTime();
-        long previousModHash = calcModHash(previousResourceHash, previousModDateLong, previousProfileId);
-        long newModHash = calcModHash(newResourceHash, newModDate.getTime(), newProfileId);
+        String previousModHash = calcModHash(previousResourceHash, previousModDateLong, previousProfileId);
+        String newModHash = calcModHash(newResourceHash, newModDate.getTime(), newProfileId);
         Version v = new Version();
         v.setModHash(newModHash);
         v.setPreviousModHash(previousModHash);
@@ -68,11 +60,11 @@ public class Version implements Serializable {
     }
     
     private long id;
-    private long modHash;
-    private long previousModHash;
+    private String modHash;
+    private String previousModHash;
     private long profileId;
     private Date modDate;
-    private long resourceHash;
+    private String resourceHash;
 
     @Id
     @GeneratedValue
@@ -90,11 +82,11 @@ public class Version implements Serializable {
      * @return 
      */
     @Column(nullable = false)
-    public long getResourceHash() {
+    public String getResourceHash() {
         return resourceHash;
     }
 
-    public void setResourceHash(long versionHash) {
+    public void setResourceHash(String versionHash) {
         this.resourceHash = versionHash;
     }
 
@@ -106,11 +98,11 @@ public class Version implements Serializable {
      * @return 
      */
     @Column(nullable = false)
-    public long getPreviousModHash() {
+    public String getPreviousModHash() {
         return previousModHash;
     }
 
-    public void setPreviousModHash(long previousHash) {
+    public void setPreviousModHash(String previousHash) {
         this.previousModHash = previousHash;
     }
     
@@ -139,11 +131,11 @@ public class Version implements Serializable {
     }
 
     @Column(nullable = false)
-    public long getModHash() {
+    public String getModHash() {
         return modHash;
     }
 
-    public void setModHash(long modHash) {
+    public void setModHash(String modHash) {
         this.modHash = modHash;
     }
 

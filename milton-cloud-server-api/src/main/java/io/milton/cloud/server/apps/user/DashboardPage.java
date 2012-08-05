@@ -42,6 +42,7 @@ public class DashboardPage extends TemplatedHtmlPage {
 
     public DashboardPage(String name, CommonCollectionResource parent) {
         super(name, parent, "user/dashboard", "Dashboard");
+        setForceLogin(true);
     }
     
 

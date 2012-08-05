@@ -487,7 +487,7 @@ a:hover.lnkText{
     text-decoration:underline;
 }
 /*notification*/
-.nav .nav-myInbox span {
+.nav .nav-menuNotifications span {
     background: none repeat scroll 0 0 $page.parent.settings.heroColour1;
     border-radius: 15px 15px 15px 15px;
     color: #FFFFFF;
@@ -1047,6 +1047,9 @@ input, textarea {
     background-color: white;
     margin-right: 10px; 
     padding: 5px;
+}
+td input, td textarea {
+    margin-right: 0;
 }
 
 blockquote{
@@ -3105,3 +3108,9 @@ div.textOverImage div {
     text-align: center;    
 }
 
+/**
+Initially hidden message, is displayed after successful processing
+*/
+p.confirm {
+    display: none; 
+}

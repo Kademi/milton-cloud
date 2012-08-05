@@ -138,7 +138,6 @@ public class SpliffySecurityManager {
             }
             return result;
         } else {
-            System.out.println("not acr");
             return true; // not access controlled so must be ok!
         }
     }

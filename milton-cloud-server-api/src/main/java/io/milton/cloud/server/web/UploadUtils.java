@@ -68,7 +68,7 @@ public class UploadUtils {
             newFileNode.setContent(inputStream);
         }
         col.onAddedChild(fileResource);
-        //updateModDate();
+        fileResource.updateModDate();
         col.save();
         tx.commit();
 
@@ -110,7 +110,7 @@ public class UploadUtils {
         try {
             // parse data and persist to stores
             fr.getFileNode().setContent(in);
-            //updateModDate();
+            fr.updateModDate();
         } catch (IOException ex) {
             throw new BadRequestException("exception", ex);
         }

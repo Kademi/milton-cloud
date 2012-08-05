@@ -9,8 +9,8 @@ import java.util.Properties;
  */
 public class AppConfig {
 
-    private Properties properties;
-    private RootContext context;
+    private final Properties properties;
+    private final RootContext context;
 
     public AppConfig(Properties properties, RootContext context) {
         this.properties = properties;

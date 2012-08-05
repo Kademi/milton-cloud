@@ -1,6 +1,8 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.Version;
 import io.milton.cloud.server.manager.CommentService;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
@@ -125,41 +127,39 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public Date getCreateDate() {
-        return null;
-        //return loadNodeMeta().getCreatedDate();
+        return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return null;
-        //return loadNodeMeta().getModDate();
+        return loadNodeMeta().getModDate();
     }
 
     protected void updateModDate() {        
-//        long previousProfileId = loadNodeMeta().getProfileId();
-//        Date previousModDate = loadNodeMeta().getModDate();
-//        long previousResourceHash = contentNode.getLoadedHash();
-//
-//        long newResourceHash = contentNode.getHash();
-//        Date newDate = _(CurrentDateService.class).getNow();
-//        long newProfileId = 0;
-//        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-//        if (p != null) {
-//            newProfileId = p.getId();
-//        }
-//
-//        Version.insert(previousResourceHash, previousModDate, previousProfileId, newResourceHash, newDate, newProfileId, SessionManager.session());
-//
-//        nodeMeta.setModDate(newDate);
-//        nodeMeta.setProfileId(newProfileId);
-//        if (nodeMeta.getCreatedDate() == null) {
-//            nodeMeta.setCreatedDate(newDate);
-//        }
-//        try {
-//            NodeMeta.saveMeta(contentNode, nodeMeta);
-//        } catch (IOException ex) {
-//            throw new RuntimeException(ex);
-//        }
+        long previousProfileId = loadNodeMeta().getProfileId();
+        Date previousModDate = loadNodeMeta().getModDate();
+        String previousResourceHash = contentNode.getLoadedHash();
+
+        String newResourceHash = contentNode.getHash();
+        Date newDate = _(CurrentDateService.class).getNow();
+        long newProfileId = 0;
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+        if (p != null) {
+            newProfileId = p.getId();
+        }
+
+        Version.insert(previousResourceHash, previousModDate, previousProfileId, newResourceHash, newDate, newProfileId, SessionManager.session());
+
+        nodeMeta.setModDate(newDate);
+        nodeMeta.setProfileId(newProfileId);
+        if (nodeMeta.getCreatedDate() == null) {
+            nodeMeta.setCreatedDate(newDate);
+        }
+        try {
+            NodeMeta.saveMeta(contentNode, nodeMeta);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public NodeMeta loadNodeMeta() {

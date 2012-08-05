@@ -126,7 +126,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
         DirectoryResource rdr = newDirectoryResource(newNode, this, false);
         onAddedChild(rdr);
-        //rdr.updateModDate();
+        rdr.updateModDate();
         save();
         return rdr;
     }
@@ -151,14 +151,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public Date getCreateDate() {
-        return null;
-        //return loadNodeMeta().getCreatedDate();
+        return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return null;
-        //return loadNodeMeta().getModDate();
+        return loadNodeMeta().getModDate();
     }
 
     private NodeMeta loadNodeMeta() {

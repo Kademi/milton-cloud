@@ -18,6 +18,7 @@ import io.milton.cloud.common.store.ByteArrayBlobStore;
 import io.milton.event.EventManager;
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
+import io.milton.httpclient.HttpResult;
 import io.milton.httpclient.MethodNotAllowedException;
 import io.milton.sync.event.DownloadSyncEvent;
 import io.milton.sync.event.EventUtils;
@@ -226,8 +227,10 @@ public class Syncer {
                         ByteArrayBlobStore byteArrayBlobStore = new ByteArrayBlobStore();
                         newHash = parser.parse(bufIn, new NullHashStore(), byteArrayBlobStore);
                         byte[] data = byteArrayBlobStore.getBytes();
-                        host.doPut(destPath, data, null);
-
+                        HttpResult result = host.doPut(destPath, data, null);
+                        if( result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
+                            throw new IOException("HTTP result code indicates failure: " + result.getStatusCode() + " uploading: " + destPath);
+                        }
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }

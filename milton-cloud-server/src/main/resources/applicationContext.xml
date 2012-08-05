@@ -106,7 +106,7 @@
         <constructor-arg ref="alt.format.generator" />
     </bean>    
     
-    <bean id="root.context" class="io.milton.cloud.server.manager.MCRootContext" init-method="start" destroy-method="stop">        
+    <bean id="root.context" class="io.milton.cloud.server.manager.MCRootContext">        
         <constructor-arg ref="servletContext" />        
         <constructor-arg ref="main.spliffy.resource.factory" />        
         <constructor-arg ref="hash.store"/>
@@ -157,8 +157,18 @@
         <constructor-arg ref="session.manager"/>
         <constructor-arg ref="root.context" />
     </bean>
+    
+    <!-- This takes care of starting the ApplicationManager and RootContext. Is hooked into HttpManagerBuilder event to start -->
+    <bean id="applicationStarter" class="io.milton.cloud.server.ApplicationStarter" destroy-method="stop">
+        <constructor-arg ref="root.context" />
+    </bean>    
 
     <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
+        <property name="listeners">
+            <list>
+                <ref local="applicationStarter" />
+            </list>
+        </property>
         <property name="mainResourceFactory" ref="resource.factory" /> 
         <property name="eventManager" ref="event.manager" />
         <property name="filters">
@@ -176,6 +186,7 @@
         </property>
         <property name="enabledCkBrowser" value="true"/>
     </bean>
+    
 
 
     <!--

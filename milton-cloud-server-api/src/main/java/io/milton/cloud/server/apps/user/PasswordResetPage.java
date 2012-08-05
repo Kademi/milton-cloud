@@ -119,11 +119,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         passwordReset = PasswordReset.create(user, now, returnUrl, website, session);
         log.info("created resetddd: " + passwordReset.getToken());
         
-        System.out.println("passwordReset: " + this.getPasswordReset());
-        System.out.println("do email gen");
         String emailHtml = createEmailHtml();
-        System.out.println(emailHtml);
-        System.out.println("done email gen");
         
         EmailItem emailItem = new EmailItem();
         emailItem.setCreatedDate(now);

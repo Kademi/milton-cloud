@@ -79,14 +79,11 @@ public class HashCalc {
         BufferedReader bufIn = new BufferedReader(reader);
         List<ITriplet> list = new ArrayList<>();
         String line = bufIn.readLine();
-        System.out.println("Load Triplets");
         while (line != null) {
-            System.out.println(" - " + line);
             Triplet triplet = parse(line);
             list.add(triplet);
             line = bufIn.readLine();
         }
-        System.out.println("--- End load triplets");
         return list;
     }
 

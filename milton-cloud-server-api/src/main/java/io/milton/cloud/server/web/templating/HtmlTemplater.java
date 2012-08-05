@@ -470,7 +470,7 @@ public class HtmlTemplater {
         }
 
         private TemplateHtmlPage loadContentMeta(FileResource fr, String websiteName, Path webPath) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr, websiteName, webPath);
+            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr, websiteName);
             try {
                 templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
             } catch (XMLStreamException ex) {

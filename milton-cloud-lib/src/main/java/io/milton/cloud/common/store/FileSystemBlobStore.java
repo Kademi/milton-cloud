@@ -11,6 +11,8 @@ import org.hashsplit4j.api.BlobStore;
  */
 public class FileSystemBlobStore implements BlobStore{
 
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileSystemBlobStore.class);
+    
     private final File root;
 
     public FileSystemBlobStore(File root) {
@@ -22,7 +24,7 @@ public class FileSystemBlobStore implements BlobStore{
     public void setBlob( String hash, byte[] bytes) {
         File blob = FsHashUtils.toFile(root, hash);
         if (blob.exists()) {
-            System.out.println("FileSystemBlobStore: setBlob: file exists: " + blob.getAbsolutePath());
+            log.trace("FileSystemBlobStore: setBlob: file exists: {}", blob.getAbsolutePath());
             return; // already exists, so dont overwrite
         }
         File dir = blob.getParentFile();
@@ -41,7 +43,7 @@ public class FileSystemBlobStore implements BlobStore{
         } finally {
             IOUtils.closeQuietly(fout);
         }
-        System.out.println("FileSystemBlobStore: setBlob: wrote file: " + blob.getAbsolutePath() + " with bytes: " + bytes.length);
+        log.trace("FileSystemBlobStore: setBlob: wrote file: {} with bytes: {}", blob.getAbsolutePath(),  bytes.length);
     }
 
     @Override
@@ -56,7 +58,7 @@ public class FileSystemBlobStore implements BlobStore{
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             IOUtils.copy(fin, bout);
             byte[] arr = bout.toByteArray();
-            System.out.println("FileSystemBlobStore: getBlob: loaded file: " + blob.getAbsolutePath() + " with bytes: " + arr.length + " for hash: " + hash);
+            log.trace("FileSystemBlobStore: getBlob: loaded file: {} for hash: {}",blob.getAbsolutePath(), hash);
             return arr;
         } catch (IOException ex) {
             throw new RuntimeException(blob.getAbsolutePath(), ex);

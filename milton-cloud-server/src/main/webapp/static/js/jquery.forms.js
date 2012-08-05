@@ -4,7 +4,9 @@
  *  
  *  Depends on common.js
  *  
- *  The target should be a 
+ *  Takes a config object with the following properties:
+ *  - callback(resp, form): called after successful processing with the response
+ *  object and the form
  * 
  */
 
@@ -38,7 +40,7 @@
                             ajaxLoadingOff();                            
                             if( resp.status) {
                                 log("save success", resp)
-                                config.callback(resp)
+                                config.callback(resp, form)
                             } else {
                                 log("status indicates failure", resp)
                                 try {                                    

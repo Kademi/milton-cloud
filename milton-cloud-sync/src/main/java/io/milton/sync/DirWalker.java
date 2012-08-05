@@ -75,7 +75,7 @@ public class DirWalker {
                     log.info("No localtriplet: " + remoteTriplet.getName() + " in folder: " + path);
                     doMissingLocal(remoteTriplet, childPath);
                 } else {
-                    if (localTriplet.getHash() == remoteTriplet.getHash()) {
+                    if (localTriplet.getHash().equals(remoteTriplet.getHash()) ) {
                         // clean, nothing to do
                         //log.info("in sync: " + childPath);
                         syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());

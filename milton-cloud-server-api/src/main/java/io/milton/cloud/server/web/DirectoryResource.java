@@ -104,7 +104,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Transaction tx = session.beginTransaction();
         DirectoryNode newNode = directoryNode.addDirectory(newName);
         DirectoryResource rdr = new DirectoryResource(newNode, this, renderMode);
-        //rdr.updateModDate();
+        rdr.updateModDate();
         onAddedChild(this);
         try {
             save();
