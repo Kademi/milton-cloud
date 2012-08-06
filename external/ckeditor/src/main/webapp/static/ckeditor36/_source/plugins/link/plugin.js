@@ -91,7 +91,7 @@ CKEDITOR.plugins.add( 'link',
 
 				if ( !element.isReadOnly() )
 				{
-					if ( element.is( 'a' ) )
+					if ( element.is( 'a' ) && !element.$.className === 'anchor-modal' )
 					{
 						evt.data.dialog = ( element.getAttribute( 'name' ) && ( !element.getAttribute( 'href' ) || !element.getChildCount() ) ) ? 'anchor' : 'link';
 						editor.getSelection().selectElement( element );
@@ -269,7 +269,7 @@ CKEDITOR.plugins.link =
 			if ( selection.getType() == CKEDITOR.SELECTION_ELEMENT )
 			{
 				var selectedElement = selection.getSelectedElement();
-				if ( selectedElement.is( 'a' ) )
+				if ( selectedElement.is( 'a' ) && !selectedElement.$.className === 'anchor-modal')
 					return selectedElement;
 			}
 
