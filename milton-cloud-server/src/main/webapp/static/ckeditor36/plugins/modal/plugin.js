@@ -3,16 +3,31 @@ var required_string = '<sup style="color: #ff4000">*</sup>';
 
 CKEDITOR.plugins.add('modal', {
 	init: function(editor) {
-		editor.addCommand('modalLinkDialog', new CKEDITOR.dialogCommand('modalLinkDialog'));
+		editor.addCommand('insertModalLink', new CKEDITOR.dialogCommand('modalLinkDialog'));
 			
 		editor.ui.addButton('Modal', {
 			label: 'Insert modal',
-			command: 'modalLinkDialog',
+			command: 'insertModalLink',
 			icon: this.path + 'images/modal.png'
 		});
 		
-		editor.on( 'doubleclick', function( evt ) {
-			var element = CKEDITOR.plugins.link.getSelectedLink( editor ) || evt.data.element;
+		 editor.on('selectionChange', function(evt) {
+			if(editor.readOnly) {
+				return;
+			}
+			
+			var command = editor.getCommand('insertModalLink'),
+				element = evt.data.path.lastElement && evt.data.path.lastElement.getAscendant( 'a', true );
+			
+			if(element && element.getName() === 'a' && element.getAttribute('href') && element.getChildCount() && element.$.className === 'anchor-modal') {
+				command.setState(CKEDITOR.TRISTATE_ON);
+			} else {
+				command.setState(CKEDITOR.TRISTATE_OFF);
+			}
+		});
+		
+		editor.on('doubleclick', function(evt) {
+			var element = CKEDITOR.plugins.link.getSelectedLink(editor) || evt.data.element;
 
 			if(!element.isReadOnly()) {
 				if (element.is('a') && element.$.className === 'anchor-modal') {
@@ -123,7 +138,8 @@ CKEDITOR.plugins.add('modal', {
 				onShow: function() {
 					var editor = this.getParentEditor(),
 						selection = editor.getSelection(),
-						element = null;
+						element = null,
+						text = selection.getSelectedText();
 					
 					if((element = CKEDITOR.plugins.modalLink.getSelectedLink(editor)) && element.hasAttribute('href')) {
 						selection.selectElement( element );
@@ -133,7 +149,13 @@ CKEDITOR.plugins.add('modal', {
 					
 					if(element) {					
 						this.setupContent(parseModalLink.apply(this,[editor,element]));
-					}					
+					} else {
+						if(text) {
+							this.setupContent({
+								text: text
+							})
+						}
+					}
 				},
 				onOk: function() {
 					var dialog = this,
@@ -146,7 +168,7 @@ CKEDITOR.plugins.add('modal', {
 						var target = this._.selectedElement,
 							modal = editor.document.getById(target.getAttribute('href').replace('#', '')),
 							style = 'display: none;',
-							width = (data.width || this.defaults.width) - 50; // Subtract 25px from padding left and right
+							width = (data.width || default_width) - 50; // Subtract 25px from padding left and right
 						
 						style += 'width: ' + width + 'px;';
 						
@@ -189,7 +211,7 @@ CKEDITOR.plugins.add('modal', {
 					}
 				}
 			};
-		} );
+		});
 	}
 });
 
@@ -210,7 +232,7 @@ CKEDITOR.plugins.modalLink = {
 		}
 		catch( e ) { return null; }
 	}
-}
+};
 
 
 }(CKEDITOR));
