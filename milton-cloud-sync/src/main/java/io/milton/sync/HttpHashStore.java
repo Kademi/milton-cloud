@@ -8,6 +8,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
+import io.milton.httpclient.HttpResult;
 import java.io.*;
 import java.util.List;
 import org.hashsplit4j.api.Fanout;
@@ -19,9 +20,9 @@ import org.hashsplit4j.api.HashStore;
  *
  * Can use an optional HashCache to record knowledge of the existence of objects
  * in the remote repository
- * 
- * Reads fanouts as a text file, with the first line being the actual content length
- * of the chunk/file, and then with newlines delimiting hashes
+ *
+ * Reads fanouts as a text file, with the first line being the actual content
+ * length of the chunk/file, and then with newlines delimiting hashes
  *
  * @author brad
  */
@@ -39,8 +40,8 @@ public class HttpHashStore implements HashStore {
     /**
      *
      * @param client
-     * @param chunksHashCache - optional, may be null. If provided will be used to
-     * optimise hasFanout
+     * @param chunksHashCache - optional, may be null. If provided will be used
+     * to optimise hasFanout
      */
     public HttpHashStore(Host host, HashCache chunksHashCache, HashCache filesHashCache) {
         this.host = host;
@@ -57,7 +58,7 @@ public class HttpHashStore implements HashStore {
         sets++;
 
         // Copy longs into a byte array
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();        
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try {
             FanoutSerializationUtils.writeFanout(childCrcs, actualContentLength, bout);
         } catch (IOException ex) {
@@ -66,7 +67,8 @@ public class HttpHashStore implements HashStore {
         byte[] bytes = bout.toByteArray();
 
         Path destPath = chunksBasePath.child(hash + "");
-        host.doPut(destPath, bytes, null);
+        HttpResult result = host.doPut(destPath, bytes, null);
+        checkResult(result);
     }
 
     @Override
@@ -104,12 +106,11 @@ public class HttpHashStore implements HashStore {
             return true;
         } catch (NotFoundException ex) {
             return false;
-        } catch ( IOException | HttpException | NotAuthorizedException ex) {
+        } catch (IOException | HttpException | NotAuthorizedException ex) {
             throw new RuntimeException(ex);
         }
 
     }
-
 
     @Override
     public void setFileFanout(String hash, List<String> fanoutHashes, long actualContentLength) {
@@ -120,7 +121,7 @@ public class HttpHashStore implements HashStore {
         sets++;
 
         // Copy longs into a byte array
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();        
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try {
             FanoutSerializationUtils.writeFanout(fanoutHashes, actualContentLength, bout);
         } catch (IOException ex) {
@@ -129,7 +130,8 @@ public class HttpHashStore implements HashStore {
         byte[] bytes = bout.toByteArray();
 
         Path destPath = filesBasePath.child(hash + "");
-        host.doPut(destPath, bytes, null);
+        HttpResult result = host.doPut(destPath, bytes, null);
+        checkResult(result);
     }
 
     @Override
@@ -166,11 +168,10 @@ public class HttpHashStore implements HashStore {
             return true;
         } catch (NotFoundException ex) {
             return false;
-        } catch ( IOException | HttpException | NotAuthorizedException ex) {
+        } catch (IOException | HttpException | NotAuthorizedException ex) {
             throw new RuntimeException(ex);
         }
     }
-    
 
     public int getTimeout() {
         return timeout;
@@ -202,8 +203,6 @@ public class HttpHashStore implements HashStore {
     public void setFilesBasePath(String filesBasePath) {
         this.filesBasePath = Path.path(filesBasePath);
     }
-    
-    
 
     public long getGets() {
         return gets;
@@ -211,5 +210,12 @@ public class HttpHashStore implements HashStore {
 
     public long getSets() {
         return sets;
-    }    
+    }
+
+    private void checkResult(HttpResult result) {
+        if (result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
+            throw new RuntimeException("Failed to upload - " + result.getStatusCode());
+        }
+
+    }
 }

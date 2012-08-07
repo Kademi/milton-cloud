@@ -1,17 +1,11 @@
 package io.milton.vfs.db;
 
-import io.milton.resource.AccessControlledResource;
-import io.milton.vfs.db.Permission.DynamicPrincipal;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.criterion.Expression;
 
 /**
  * A Commit is a link between a Repository and an TreeItem
@@ -39,7 +33,6 @@ public class Branch implements Serializable, VfsAcceptor {
     private Commit head;
     private Repository repository;
     private Date createdDate;
-    private List<Permission> permissions; // can be granted permissions
 
     public Branch() {
     }
@@ -105,39 +98,6 @@ public class Branch implements Serializable, VfsAcceptor {
         return head;
     }
 
-    /**
-     * Permissions which have been granted on this Branch
-     *
-     * @return
-     */
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "grantedOnBranch")
-    public List<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(List<Permission> grantedPermissions) {
-        this.permissions = grantedPermissions;
-    }
-
-    public void grant(AccessControlledResource.Priviledge priviledge, DynamicPrincipal grantee) {
-        if (isGranted(priviledge, grantee)) {
-            return;
-        }
-        Permission p = new Permission();
-        p.setGrantedOnBranch(this);
-        p.setGranteePrincipal(grantee.name());
-        p.setPriviledge(priviledge);
-        SessionManager.session().save(p);
-    }
-
-    public boolean isGranted(AccessControlledResource.Priviledge priviledge, DynamicPrincipal grantee) {
-        Session session = SessionManager.session();
-        Criteria crit = session.createCriteria(Permission.class);
-        crit.add(
-                Expression.and(Expression.eq("granteePrincipal", grantee.name()), Expression.and(Expression.eq("grantedOnBranch", this), Expression.eq("priviledge", priviledge))));
-        List list = crit.list();
-        return list != null && !list.isEmpty();
-    }
     
     @Override
     public void accept(VfsVisitor visitor) {
@@ -145,11 +105,6 @@ public class Branch implements Serializable, VfsAcceptor {
     }
 
     public void delete(Session session) {
-        if( getPermissions() != null ) {
-            for( Permission p : getPermissions() ) {
-                session.delete(p);
-            }
-        }
         session.delete(this);
     }
 }

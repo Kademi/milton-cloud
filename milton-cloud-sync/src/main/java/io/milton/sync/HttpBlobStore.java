@@ -7,6 +7,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
+import io.milton.httpclient.HttpResult;
 import java.io.IOException;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashCache;
@@ -36,7 +37,8 @@ public class HttpBlobStore implements BlobStore {
             return;
         }
         Path destPath = basePath.child(hash + "");
-        host.doPut(destPath, bytes, null);
+        HttpResult result = host.doPut(destPath, bytes, null);
+        checkResult(result);
     }
 
     @Override
@@ -100,4 +102,11 @@ public class HttpBlobStore implements BlobStore {
     public long getSets() {
         return sets;
     }
+    
+    private void checkResult(HttpResult result) {
+        if (result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
+            throw new RuntimeException("Failed to upload - " + result.getStatusCode());
+        }
+
+    }    
 }

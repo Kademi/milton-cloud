@@ -217,10 +217,6 @@ public abstract class AbstractContentResource extends AbstractResource implement
         return parent;
     }
 
-    @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner(); // go up until we get an entity
-    }
 
     /**
      * Get all allowed priviledges for all principals on this resource. Note
@@ -232,12 +228,6 @@ public abstract class AbstractContentResource extends AbstractResource implement
     @Override
     public Map<Principal, List<AccessControlledResource.Priviledge>> getAccessControlList() {
         return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        // TODO: if this is a linked folder this won't be right!!!
-        parent.addPrivs(list, user);
     }
 
     @Override

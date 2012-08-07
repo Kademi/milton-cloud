@@ -71,35 +71,43 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
     public String getTitle() {
         return "Manage websites";
     }
-    
+
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         String newName = parameters.get("newName");
         if (newName != null) {
+            newName = newName.trim();
             log.info("processForm: newName: " + newName);
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
             String newAlias = parameters.get("newAlias");
-            
+
             Website existing = Website.findByName(newName, session);
-            if( existing != null ) {
+            if (existing != null) {
                 jsonResult = new JsonResult(false, "Domain name is already registered in this system");
                 jsonResult.addFieldMessage("newName", "Please choose a unique name");
                 return null;
             }
-            existing = Website.findByName(newAlias, session);
-            if( existing != null ) {
-                jsonResult = new JsonResult(false, "Alias name is already registered in this system");
-                jsonResult.addFieldMessage("newAlias", "Please choose a unique alias");
-                return null;
+            if (newAlias != null && newAlias.trim().length() > 0) {
+                newAlias = newAlias.trim();
+                existing = Website.findByName(newAlias, session);
+                if (existing != null) {
+                    jsonResult = new JsonResult(false, "Alias name is already registered in this system");
+                    jsonResult.addFieldMessage("newAlias", "Please choose a unique alias");
+                    return null;
+                }
             }
-            Profile curUser= _(SpliffySecurityManager.class).getCurrentUser();            
-            Website c = getOrganisation().createWebsite(newName, null, curUser, newAlias, session);
+            Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+            Website c = getOrganisation().createWebsite(newName, null, curUser, session);
             session.save(c);
             
+            if( newAlias != null && newAlias.length() > 0 ) {
+                c.createAlias(newAlias, session);
+            }
+
             Date now = _(CurrentDateService.class).getNow();
             AppControl.initDefaultApps(existing, curUser, now, session);
-            
+
             tx.commit();
             jsonResult = new JsonResult(true, "Created", c.getName());
         }
@@ -135,16 +143,6 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
     @Override
     public CommonCollectionResource getParent() {
         return parent;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
     }
 
     @Override

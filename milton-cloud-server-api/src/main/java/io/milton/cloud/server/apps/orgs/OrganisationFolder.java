@@ -30,7 +30,6 @@ import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.Profile;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -149,20 +148,6 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     @Override
     public CommonCollectionResource getParent() {
         return parent;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        Set<Permission> perms = SecurityUtils.getPermissions(user, organisation, SessionManager.session());
-        SecurityUtils.addPermissions(perms, list);
-        if (parent != null) {
-            parent.addPrivs(list, user);
-        }
     }
 
     @Override

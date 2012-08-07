@@ -49,10 +49,9 @@ public class DirectoryHashResource extends BaseResource implements GetableResour
     public void sendContent(OutputStream out, Range range, Map<String, String> map, String string) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (hash != null && hash.length() > 0) {
             byte[] dirList = _(BlobStore.class).getBlob(hash);
-            if( hash == null ) {
-                throw new RuntimeException("Failed to find directory list for hash: " + hash);
-            }
-            out.write(dirList);
+            if( dirList != null ) { // is null for an empty repository
+                out.write(dirList);
+            }            
         } else {
             log.warn("No hash, so no contents");
         }

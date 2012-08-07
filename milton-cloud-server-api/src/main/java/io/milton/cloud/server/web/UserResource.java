@@ -137,11 +137,6 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return user;
-    }
-
-    @Override
     public PrincipleId getIdenitifer() {
         return new HrefPrincipleId(getHref());
     }
@@ -181,21 +176,6 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         return getHref() + "abs/";
     }
 
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile u) {
-        // Give this user special permissions
-        if (u != null) {
-            if (user.getName().equals(u.getName())) {
-                list.add(Priviledge.READ);
-                list.add(Priviledge.WRITE);
-                list.add(Priviledge.READ_ACL);
-                list.add(Priviledge.UNLOCK);
-                list.add(Priviledge.WRITE_CONTENT);
-                list.add(Priviledge.WRITE_PROPERTIES);
-            }
-        }
-        parent.addPrivs(list, u);
-    }
 
     /**
      * Get all allowed priviledges for all principals on this resource. Note
@@ -208,7 +188,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     public Map<Principal, List<AccessControlledResource.Priviledge>> getAccessControlList() {
         Map<Principal, List<AccessControlledResource.Priviledge>> map = new HashMap<>();
         List<Priviledge> list = new ArrayList<>();
-        addPrivs(list, user);
+        //addPrivs(list, user);
         map.put(this, list);
         return map;
     }

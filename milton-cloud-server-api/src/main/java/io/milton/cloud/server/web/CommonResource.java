@@ -1,12 +1,7 @@
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import java.util.List;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.common.Path;
-import io.milton.resource.AccessControlledResource;
 import io.milton.resource.DigestResource;
 
 /**
@@ -24,13 +19,7 @@ public interface CommonResource extends DigestResource{
      */
     CommonCollectionResource getParent();
     
-    
-    /**
-     * Find whatever entity (user or other) which owns the given resource
-     * 
-     * @return 
-     */
-    BaseEntity getOwner();
+   
     
 
     /**
@@ -39,14 +28,7 @@ public interface CommonResource extends DigestResource{
      * @return 
      */
     Organisation getOrganisation();
-        
-    /**
-     * Add whatever permissions are defined on this resource for the given user
-     * 
-     * @param list
-     * @param user 
-     */
-    void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user);    
+         
     
     /*
      * A simple "is" test to see if this resource represents something in particular.

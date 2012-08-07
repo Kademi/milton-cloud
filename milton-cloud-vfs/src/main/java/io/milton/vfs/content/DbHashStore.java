@@ -1,10 +1,8 @@
 package io.milton.vfs.content;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.hashsplit4j.api.Fanout;
 import org.hashsplit4j.api.HashStore;
-import io.milton.vfs.db.FanoutEntry;
 import io.milton.vfs.db.FanoutHash;
 import io.milton.vfs.db.utils.SessionManager;
 
@@ -40,7 +38,6 @@ public class DbHashStore implements HashStore{
             return ;
         }
         FanoutHash.insertFanout("f", hash, fanoutHashes, actualContentLength, SessionManager.session());
-
     }
 
     @Override

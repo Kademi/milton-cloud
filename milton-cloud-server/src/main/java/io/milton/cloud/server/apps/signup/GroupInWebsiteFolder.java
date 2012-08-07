@@ -86,16 +86,6 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return websiteRootFolder.getOrganisation();
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        
-    }
-
-    @Override
     public String getName() {
         return giw.getUserGroup().getName();
     }

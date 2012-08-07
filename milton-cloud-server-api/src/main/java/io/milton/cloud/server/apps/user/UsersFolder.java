@@ -96,15 +96,6 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
         return parent;
     }
 
-    @Override
-    public BaseEntity getOwner() {
-        return getParent().getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        getParent().addPrivs(list, user);
-    }
 
     @Override
     public String getName() {

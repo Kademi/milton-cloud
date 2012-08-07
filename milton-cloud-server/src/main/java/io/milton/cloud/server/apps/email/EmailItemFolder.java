@@ -105,16 +105,6 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return getParent().getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        getParent().addPrivs(list, user);
-    }
-
-    @Override
     public String getName() {
         return emailItem.getId() + "";
     }

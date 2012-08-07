@@ -196,7 +196,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         Resource r = child(name);
         if (r == null) {
             if( !autocreate ) {
-                System.out.println("DirRes: not found and not autocreate");
                 return null;
             }
             DataSession.FileNode newNode = getDirectoryNode().addFile(name);
@@ -216,7 +215,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         } else {
             return null;
         }
-        System.out.println("DirRes: rfr=" + rfr);
         return rfr;
     }
 

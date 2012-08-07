@@ -73,17 +73,7 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     public CommonCollectionResource getParent() {
         return parent;
     }
-
-    @Override
-    public BaseEntity getOwner() {
-        return getParent().getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        getParent().addPrivs(list, user);
-    }
-
+    
     @Override
     public String getName() {
         return name;

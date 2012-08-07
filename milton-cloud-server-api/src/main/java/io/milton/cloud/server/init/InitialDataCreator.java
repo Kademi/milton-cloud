@@ -86,7 +86,7 @@ public class InitialDataCreator implements LifecycleApplication {
         Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin, "o");
         users.grantRole(GroupRole.ROLE_AUTHOR, true, session);
 
-        admin.addToGroup(administrators).addToGroup(users);
+        admin.addToGroup(administrators, rootOrg).addToGroup(users, rootOrg);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton.io", "fuse", admin, "milton.localhost"); // can be accessed on milton.localhost or milton.io
         initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
         miltonSite.addGroup(users, session);

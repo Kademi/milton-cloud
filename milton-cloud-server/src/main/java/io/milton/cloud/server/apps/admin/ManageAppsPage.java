@@ -122,17 +122,7 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
     public CommonCollectionResource getParent() {
         return parent;
     }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
-
+    
     @Override
     public String getName() {
         return name;

@@ -199,7 +199,7 @@ public class Website implements Serializable, VfsAcceptor {
         this.organisation = organisation;
     }
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     public Repository getRepository() {
         return repository;
     }
@@ -244,5 +244,19 @@ public class Website implements Serializable, VfsAcceptor {
 
     public void delete(Session session) {
         session.delete(this);
+    }
+
+    public Website createAlias(String aliasDnsName, Session session) {
+        Website aliasWebsite = new Website();
+        aliasWebsite.setOrganisation(getOrganisation());
+        aliasWebsite.setCreatedDate(new Date());
+        aliasWebsite.setName(aliasDnsName);
+        aliasWebsite.setPublicTheme(null);
+        aliasWebsite.setInternalTheme(null);
+        aliasWebsite.setCurrentBranch(Branch.TRUNK);
+        aliasWebsite.setAliasTo(this);
+        session.save(aliasWebsite);
+        return aliasWebsite;
+
     }
 }

@@ -118,16 +118,6 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
-
-    @Override
     public String getName() {
         return name;
     }

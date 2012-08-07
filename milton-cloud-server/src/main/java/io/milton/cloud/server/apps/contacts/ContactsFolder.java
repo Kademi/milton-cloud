@@ -85,16 +85,6 @@ public class ContactsFolder extends AbstractCollectionResource implements Addres
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return getParent().getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        getParent().addPrivs(list, user);
-    }
-
-    @Override
     public String getName() {
         return addressBook.getName();
     }

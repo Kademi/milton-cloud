@@ -45,6 +45,7 @@ import java.util.logging.Logger;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import org.hashsplit4j.api.Parser;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 /**
@@ -81,7 +82,7 @@ public class AltFormatGenerator implements EventListener {
         formats.add(new FormatSpec("video", "flv", 800, 455, "-r", "15", "-b:v", "512k")); // for non-html video
         formats.add(new FormatSpec("video", "mp4", 800, 455, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
         formats.add(new FormatSpec("video", "ogv", 800, 455, "-r", "15", "-b:v", "512k"));
-        //formats.add(new FormatSpec("video", "webm", 800, 455));
+        formats.add(new FormatSpec("video", "webm", 800, 455, "-r", "15", "-b:v", "512k"));
 
         formats.add(new FormatSpec("video", "png", 800, 455, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
 
@@ -124,6 +125,8 @@ public class AltFormatGenerator implements EventListener {
                 return;
             }
             System.out.println("create new media metadata");
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
             mmd = new MediaMetaData();
             mmd.setSourceHash(fr.getHash());
             mmd.setDurationSecs(info.getDurationSecs());
@@ -131,7 +134,7 @@ public class AltFormatGenerator implements EventListener {
             mmd.setWidth(info.getWidth());
             mmd.setRecordedDate(info.getRecordedDate());
             SessionManager.session().save(mmd);
-            
+            tx.commit();            
         } catch (IOException ex) {
             log.error("Couldnt get media info for: " + fr.getHref(), ex);
         }

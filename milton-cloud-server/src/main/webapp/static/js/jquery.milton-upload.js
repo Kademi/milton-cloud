@@ -40,7 +40,8 @@
                     log("progress", e, data)
                     var progress = parseInt(data.loaded / data.total * 100, 10);
                     log("progress", progress);
-                    $('progress .bar', buttonBar).css('width',progress + '%');
+                    $('.progress').show();
+                    $('.progress .bar', buttonBar).css('width',progress + '%');
                 }        
             });
             log("done fileupload init");

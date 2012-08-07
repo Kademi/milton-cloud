@@ -79,8 +79,8 @@ public class BatchEmailService {
 
             @Override
             public void visit(Group r) {
-                if (r.getMembers() != null) {
-                    for (GroupMembership m : r.getMembers()) {
+                if (r.getGroupMemberships() != null) {
+                    for (GroupMembership m : r.getGroupMemberships()) {
                         append(m.getMember(), profiles);
                     }
                 }

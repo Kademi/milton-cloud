@@ -16,8 +16,6 @@
  */
 package io.milton.vfs.db;
 
-import io.milton.vfs.db.Repository;
-import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -29,8 +27,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -54,6 +50,7 @@ import org.hibernate.criterion.Expression;
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
+    
 
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
@@ -63,6 +60,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     
     private List<BaseEntity> members;
     private List<Website> websites;
+    private List<Group> groups;
 
     @OneToMany(mappedBy = "organisation")
     public List<BaseEntity> getMembers() {
@@ -139,7 +137,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * creates an alias subdomain if the alias argument is not null
      *
      */
-    public Website createWebsite(String webName, String theme, Profile user, String alias, Session session) {
+    public Website createWebsite(String webName, String theme, Profile user, Session session) {
         Repository r = createRepository(webName, user, session);
 
         Website w = new Website();
@@ -151,19 +149,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         w.setCurrentBranch(Branch.TRUNK);
         w.setRepository(r);
         session.save(w);
-
-        if (alias != null) {
-            Website aliasWebsite = new Website();
-            aliasWebsite.setOrganisation(this);
-            aliasWebsite.setCreatedDate(new Date());
-            aliasWebsite.setName(alias);
-            aliasWebsite.setPublicTheme(null);
-            aliasWebsite.setInternalTheme(null);
-            aliasWebsite.setCurrentBranch(Branch.TRUNK);
-            aliasWebsite.setRepository(r);
-            aliasWebsite.setAliasTo(w);
-            session.save(w);
-        }
 
         return w;
     }
@@ -192,6 +177,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return Group.findByOrg(this, session);
     }
 
+    @Override
     public void delete(Session session) {
         if( getWebsites() != null ) {
             for( Website w : getWebsites()) {
@@ -207,4 +193,35 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         session.delete(this);
         
     }
+
+    @OneToMany(mappedBy = "organisation")
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
+    }
+
+    /**
+     * Check if this organisation is within, or is, the given org
+     * 
+     * @param withinOrg
+     * @return 
+     */
+    public boolean isWithin(Organisation withinOrg) {
+        if( withinOrg == null ) {
+            return false;
+        }
+        if( withinOrg == this ) {
+            return true;
+        }
+        Organisation parent = getOrganisation();
+        if( parent != null ) {
+            return parent.isWithin(withinOrg);
+        }
+        return false;
+    }
+    
+    
 }

@@ -1,11 +1,9 @@
 package io.milton.cloud.server.apps.calendar;
 
 
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.CalEvent;
 import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,16 +60,6 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
     @Override
     public CommonCollectionResource getParent() {
         return parent;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return getParent().getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        getParent().addPrivs(list, user);
     }
 
     @Override

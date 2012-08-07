@@ -9,7 +9,6 @@ import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.db.utils.GroupDao;
 import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.*;
 import java.util.*;
 import org.hibernate.HibernateException;
@@ -22,11 +21,8 @@ import org.hibernate.Session;
 public class InitHelper {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(InitHelper.class);
-    
     private final ApplicationManager applicationManager;
-    
     private final PasswordManager passwordManager;
-    
     private List<String> names = new ArrayList<>();
 
     public InitHelper(PasswordManager passwordManager, ApplicationManager applicationManager) {
@@ -34,7 +30,7 @@ public class InitHelper {
         this.applicationManager = applicationManager;
         addRandomNames();
     }
-    
+
     public EmailTrigger createTrigger(Organisation org, String eventId, String name, String html, String triggerCondition1, String triggerCondition2, String triggerCondition3, String triggerCondition4, Session session) {
         EmailTrigger t = new EmailTrigger();
         t.setOrganisation(org);
@@ -53,9 +49,9 @@ public class InitHelper {
         session.save(t);
         return t;
     }
-    
+
     /**
-     * 
+     *
      * @param org
      * @param name
      * @param groupDao
@@ -64,7 +60,7 @@ public class InitHelper {
      * @param emailSender
      * @param registrationMode = eg "o" = open
      * @return
-     * @throws HibernateException 
+     * @throws HibernateException
      */
     public Group checkCreateGroup(Organisation org, String name, GroupDao groupDao, int numUsers, Session session, Profile emailSender, String registrationMode) throws HibernateException {
         Group g = groupDao.findGroup(org, name, session);
@@ -80,8 +76,7 @@ public class InitHelper {
             for (int i = 0; i < numUsers; i++) {
                 String pname = name + i;
                 Profile p = checkCreateUser(pname, "password8", session, org, emailSender);
-
-                p.addToGroup(g);
+                p.addToGroup(g, org);
             }
         }
         return g;
@@ -120,23 +115,22 @@ public class InitHelper {
     }
 
     /**
-     * Creates the profile and, optionally, can populate the user account with
-     * a bnuch of emails
-     * 
+     * Creates the profile and, optionally, can populate the user account with a
+     * bnuch of emails
+     *
      * @param name
      * @param password
      * @param session
      * @param org
      * @param emailSender
      * @return
-     * @throws HibernateException 
+     * @throws HibernateException
      */
     public Profile checkCreateUser(String name, String password, Session session, Organisation org, Profile emailSender) throws HibernateException {
         BaseEntity be = BaseEntity.find(org, name, session);
         if (be == null) {
             Profile t = new Profile();
             t.setOrganisation(org);
-            t.setBusinessUnit(org);
             t.setName(name);
             t.setNickName(name);
             t.setCreatedDate(new Date());
@@ -164,10 +158,9 @@ public class InitHelper {
                 }
             }
             return t;
-        }        
+        }
         return (Profile) be;
-    }    
-    
+    }
 
     public String randomName() {
         int item = new Random().nextInt(names.size());
@@ -183,48 +176,49 @@ public class InitHelper {
         int item = new Random().nextInt(9999999);
         return item + "";
     }
-    
 
-    public Website checkCreateWebsite(Session session, Organisation org, String webName, String theme, Profile user, String alias) {
+    public Website checkCreateWebsite(Session session, Organisation org, String webName, String theme, Profile user, String... aliases) {
         for (Website w : org.websites()) {
             if (w.getName().equals(webName)) {
                 return w;
             }
         }
-        System.out.println("-- Create website: " + webName + " with alias: " + alias);
-        Website w = org.createWebsite(webName, theme, user, alias, session);
 
-        Branch trunk = w.currentBranch();
-        trunk.grant(AccessControlledResource.Priviledge.READ, Permission.DynamicPrincipal.All);
+        Website mainWebsite = org.createWebsite(webName, theme, user, session);
 
-        Repository r = w.getRepository();
+        Repository r = mainWebsite.getRepository();
         r.setAttribute("heroColour1", "#88c03f", session);
         r.setAttribute("heroColour2", "#88c03f", session);
         r.setAttribute("textColour1", "#1C1D1F", session);
         r.setAttribute("textColour2", "#2F2F2F", session);
         r.setAttribute("logo", "<img src='/content/theme/images/logo.png' alt='Logo' />", session);
-        
-        return w;
-    }    
-    
-    public void enableAllApps(Website w, Profile user, Session session) {
-        for( Application app : applicationManager.getApps() ) {
-            AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
-        }        
+
+        for (String alias : aliases) {
+            System.out.println("-- Create website: " + webName + " with alias: " + alias);
+            mainWebsite.createAlias(alias, session);
+        }
+
+        return mainWebsite;
     }
-    
-    public void enableApps(Website w, Profile user, Session session, String ... appIds) {
-        for( String appId : appIds ) {
+
+    public void enableAllApps(Website w, Profile user, Session session) {
+        for (Application app : applicationManager.getApps()) {
+            AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
+        }
+    }
+
+    public void enableApps(Website w, Profile user, Session session, String... appIds) {
+        for (String appId : appIds) {
             Application app = applicationManager.get(appId);
-            if( app != null ) {
+            if (app != null) {
                 AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
             } else {
                 log.error("App not found: " + appId);
             }
-        }        
-    }    
-    
+        }
+    }
+
     public Organisation createChildOrg(Organisation rootOrg, String branch1, Session session) {
         return rootOrg.createChildOrg(branch1, session);
-    }    
+    }
 }

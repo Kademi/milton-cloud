@@ -82,18 +82,8 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
     }
 
     @Override

@@ -89,19 +89,19 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         switch (first) {
             case "fileFanouts": // for getting the fanouts that make up a file
                 if (numPathParts == 1) {
-                    return new FanoutFolder(hashStore, "fanouts", securityManager, org, false);
+                    return new FanoutFolder(hashStore, first, securityManager, org, false);
                 } else {
                     return findFanout(p.getName(), org, false);
                 }
             case "chunkFanouts": // for getting the list of blobs within a fanout
                 if (numPathParts == 1) {
-                    return new FanoutFolder(hashStore, "fanouts", securityManager, org, true);
+                    return new FanoutFolder(hashStore, first, securityManager, org, true);
                 } else {
                     return findFanout(p.getName(), org, true);
                 }
             case "blobs": // For writing blobs, ie chunks of files
                 if (numPathParts == 1) {
-                    return new BlobFolder(blobStore, "blobs", securityManager, org);
+                    return new BlobFolder(blobStore, first, securityManager, org);
                 } else {
                     return findBlob(p.getName(), org);
                 }

@@ -232,18 +232,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return fileResource.getOwner();
-    }
-
-    @Override
     public Organisation getOrganisation() {
         return fileResource.getOrganisation();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        fileResource.addPrivs(list, user);
     }
 
     @Override

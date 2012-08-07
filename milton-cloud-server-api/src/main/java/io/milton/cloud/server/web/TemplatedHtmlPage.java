@@ -24,9 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -107,19 +105,10 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
 
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
 
     @Override
     public String getName() {

@@ -23,17 +23,31 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
+ * Represents that some entity (normally a user) is a member of a group within
+ * an organisation or business unit.
+ * 
+ * Note that the concept of user groups is common, but is not usually qualified
+ * the way we do it here. This is because frequently there is only a single
+ * administrative domain, but milton-cloud supports multiple, nested business
+ * units.
+ * 
+ * Examples:
+ *  - Sally is a pharmacist in "Cronulla Amcal Pharmacy"
+ *  - Bob is in the "Sales Rep" group for the "Southern Region"
+ *  - Bob is also in the "Report Viewers" group for the "ACME Corporation"
+ *  - Susan is in the "Administrators" group for "ACME Corporation"
  *
  * @author brad
  */
 @Entity
 @Table(
 uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"member", "group_entity"})}
+    @UniqueConstraint(columnNames = {"member", "group_entity", "within_org"})}
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupMembership implements Serializable{
     private Long id;
+    private Organisation withinOrg;
     private BaseEntity member;
     private Group groupEntity;
     private Date createdDate;
@@ -49,6 +63,17 @@ public class GroupMembership implements Serializable{
         this.id = id;
     }
 
+    @ManyToOne(optional=false)    
+    public Organisation getWithinOrg() {
+        return withinOrg;
+    }
+
+    public void setWithinOrg(Organisation withinOrg) {
+        this.withinOrg = withinOrg;
+    }
+
+    
+    
     @ManyToOne(optional=false)
     public BaseEntity getMember() {
         return member;

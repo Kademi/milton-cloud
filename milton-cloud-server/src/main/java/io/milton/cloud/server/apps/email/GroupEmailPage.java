@@ -220,16 +220,6 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
-
-    @Override
     public String getName() {
         return job.getName();
     }

@@ -50,23 +50,13 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
     
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
-        Calendar calendar = calendarManager.createCalendar(parent.getOwner(), newName);
+        Calendar calendar = calendarManager.createCalendar(parent.getThisUser(), newName);
         return new CalendarFolder(this, calendar, calendarManager);
     }
 
     @Override
     public CommonCollectionResource getParent() {
         return parent;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
     }
 
     @Override
@@ -92,7 +82,7 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            List<Calendar> calendarList = this.getOwner().getCalendars();
+            List<Calendar> calendarList = this.parent.getThisUser().getCalendars();
             children = new ArrayList<>();
             if (calendarList != null) {
                 for (Calendar cal : calendarList) {

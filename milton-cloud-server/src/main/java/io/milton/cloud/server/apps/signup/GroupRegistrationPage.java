@@ -99,7 +99,6 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
             Profile u = new Profile();
             u.setOrganisation(parent.getOrganisation());
-            u.setBusinessUnit(parent.getOrganisation()); // TODO: need to allow registration within a child business unit
             u.setName(newName);
             u.setNickName(nickName);
             u.setEmail(parameters.get("email"));
@@ -113,7 +112,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
             _(SpliffySecurityManager.class).getPasswordManager().setPassword(u, password);
 
-            u.addToGroup(parent.getGroup());
+            u.addToGroup(parent.getGroup(), parent.getOrganisation());
             RootFolder rf = WebUtils.findRootFolder(this);
             _(SignupApp.class).onNewProfile(u, rf);
                                    
@@ -150,16 +149,6 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     @Override
     public CommonCollectionResource getParent() {
         return parent;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        list.add(Priviledge.READ);
     }
 
     @Override

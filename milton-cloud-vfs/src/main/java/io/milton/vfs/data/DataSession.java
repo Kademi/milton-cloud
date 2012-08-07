@@ -148,8 +148,6 @@ public class DataSession {
             byte[] arrTriplets = bout.toByteArray();
             blobStore.setBlob(newHash, arrTriplets);
             log.info("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
-            System.out.println(bout.toString());
-            log.info("--- End " + item.name);
 
         }
     }
@@ -284,7 +282,6 @@ public class DataSession {
 
         private List<DataNode> getChildren() {
             if (members == null) {
-                System.out.println("Load Children for: " + name + " hash=" + hash);
                 members = new ArrayList<>();
                 if (hash != null) {
                     List<ITriplet> list = find(hash);

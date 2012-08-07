@@ -2556,6 +2556,7 @@ body li {
 body textarea {
     width: 98%;
     background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
 }
 body h1, body h1 a,body h2, body h2 a,body h3, body h3 a,body h4, body h4 a {
     margin-top: 5px;
@@ -2777,6 +2778,9 @@ div.dropdown {
     text-align: left;
 }
 
+div.dropdown.dropdown2 {
+    border: 1px solid #D3D3D3;
+}
 
 
 .btnHideFollowing {

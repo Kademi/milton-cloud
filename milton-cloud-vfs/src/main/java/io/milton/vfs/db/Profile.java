@@ -1,8 +1,6 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
-import io.milton.vfs.db.utils.SessionManager;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
@@ -13,9 +11,9 @@ import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
 
 /**
- * A user profile is defined within an organisation. Might change this in the future so
- * that the user profile is within an organsiation, but the credentials probably should exist
- * in a global space.
+ * A user profile is defined within an organisation. Might change this in the
+ * future so that the user profile is within an organsiation, but the
+ * credentials probably should exist in a global space.
  *
  * @author brad
  */
@@ -23,42 +21,30 @@ import org.hibernate.criterion.Expression;
 @DiscriminatorValue("U")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Profile extends BaseEntity implements VfsAcceptor {
-    
-    
+
     public static List<Profile> findByBusinessUnit(Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.eq("organisation", organisation));        
-        return DbUtils.toList(crit, Profile.class);        
+        crit.add(Expression.eq("organisation", organisation));
+        return DbUtils.toList(crit, Profile.class);
     }
 
     public static Profile findByEmail(String email, Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.eq("organisation", organisation));        
-        crit.add(Expression.eq("email", email));        
+        crit.add(Expression.eq("organisation", organisation));
+        crit.add(Expression.eq("email", email));
         return DbUtils.unique(crit);
-    }    
-     
-    private Organisation businessUnit; // users may be assigned to a business unit within their administrative organisation
-    
+    }
     private List<Credential> credentials;
-                
     private String firstName;
-    
     private String surName;
-    
     private String phone;
-
     private String email;
-    
     private long photoHash;
-    
     private String nickName;
-    
     private boolean enabled;
-    
     private boolean rejected;
 
-    @OneToMany(mappedBy="profile")
+    @OneToMany(mappedBy = "profile")
     public List<Credential> getCredentials() {
         return credentials;
     }
@@ -66,18 +52,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public void setCredentials(List<Credential> credentials) {
         this.credentials = credentials;
     }
-               
+
     public void setEmail(String email) {
         this.email = email;
     }
 
     @Column
-    @Index(name="ids_profile_email")
+    @Index(name = "ids_profile_email")
     public String getEmail() {
         return email;
     }
-    
-        
+
     public String getSurName() {
         return surName;
     }
@@ -89,7 +74,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public String getFirstName() {
         return firstName;
     }
-    
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -111,10 +96,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.photoHash = photoHash;
     }
 
-    
-    
-    
-
     public String getPhone() {
         return phone;
     }
@@ -124,22 +105,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Users may be assigned to a business unit within their administative organisation
-     * 
-     */
-    @ManyToOne(optional=true)
-    public Organisation getBusinessUnit() {
-        return businessUnit;
-    }
-
-    public void setBusinessUnit(Organisation businessUnit) {
-        this.businessUnit = businessUnit;
-    }
-
-    /**
      * True means the user can login
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean isEnabled() {
         return enabled;
@@ -147,28 +115,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-      
-    
-    
-    
-    /**
-     * Create a GroupMembership linking this profile to the given group. Is immediately saved
-     * 
-     * @param g
-     * @return 
-     */
-    public Profile addToGroup(Group g) {
-        if( g.isMember(this)) {
-            return this;
-        }
-        GroupMembership gm = new GroupMembership();
-        gm.setCreatedDate(new Date());
-        gm.setGroupEntity(g);
-        gm.setMember(this);
-        gm.setModifiedDate(new Date());
-        SessionManager.session().save(gm);
-        return this;
     }
 
     @Override
@@ -183,23 +129,29 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public void setRejected(boolean rejected) {
         this.rejected = rejected;
     }
-    
+
     /**
-     * True if the user belongs to a group with the Administrator GroupRole
-     * 
-     * @return 
+     * True if the user belongs to a group with the Administrator GroupRole for
+     * the given organisation
+     *
+     * @return
      */
-    @Transient
-    public boolean isAdmin() {
-        if( getMemberships() == null ) {
+    public boolean isAdmin(Organisation org) {
+        if (getMemberships() == null) {
             return false;
         }
-        for( GroupMembership m : getMemberships() ) {
-            if( m.getGroupEntity().hasRole(GroupRole.ROLE_ADMIN)) {
-                return true;
+        for (GroupMembership m : getMemberships()) {
+            if (m.getWithinOrg() == org) {
+                if (m.getGroupEntity().hasRole(GroupRole.ROLE_ADMIN)) {
+                    return true;
+                }
             }
         }
         return false;
     }
-    
+
+    @Override
+    public Profile addToGroup(Group g, Organisation hasGroupInOrg) {
+        return (Profile) super.addToGroup(g, hasGroupInOrg);
+    }
 }

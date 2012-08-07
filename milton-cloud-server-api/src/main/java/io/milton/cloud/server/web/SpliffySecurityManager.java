@@ -1,20 +1,26 @@
 package io.milton.cloud.server.web;
 
-import java.util.List;
 import org.hibernate.Session;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.resource.AccessControlledResource;
-import io.milton.resource.AccessControlledResource.Priviledge;
+import io.milton.cloud.server.role.Role;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.http.http11.auth.DigestResponse;
-import io.milton.resource.Resource;
+import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.GroupRole;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -26,10 +32,16 @@ public class SpliffySecurityManager {
     private String realm = "spliffy";
     private final UserDao userDao;
     private final PasswordManager passwordManager;
+    private final Map<String, Role> mapOfRoles = new ConcurrentHashMap<>();
+    private String publicGroupName = "Public";
 
     public SpliffySecurityManager(UserDao userDao, PasswordManager passwordManager) {
         this.userDao = userDao;
         this.passwordManager = passwordManager;
+    }
+
+    public void add(Role role) {
+        mapOfRoles.put(role.getName(), role);
     }
 
     public Profile getCurrentUser() {
@@ -41,7 +53,7 @@ public class SpliffySecurityManager {
     }
 
     public UserResource getCurrentPrincipal() {
-        if( HttpManager.request() == null ) {
+        if (HttpManager.request() == null) {
             log.warn("XXXXX   No current request  XXXXX");
             return null;
         }
@@ -51,7 +63,7 @@ public class SpliffySecurityManager {
             return null;
         }
         UserResource ur = (UserResource) auth.getTag();
-        if( ur == null ) {
+        if (ur == null) {
             log.warn("Got auth object but null tag");
         }
         return ur;
@@ -100,46 +112,35 @@ public class SpliffySecurityManager {
         return realm;
     }
 
-    public boolean authorise(Request req, Method method, Auth auth, Resource aThis) {
-        if (aThis instanceof AccessControlledResource) {
-            System.out.println("is acr");
-            AccessControlledResource acr = (AccessControlledResource) aThis;
-            List<Priviledge> privs = acr.getPriviledges(auth);
-            boolean result;
-            if (method.isWrite) {
-                //result = SecurityUtils.hasWrite(privs);
-
-                // Currently doesnt give administrators (ie users defined on parent orgs) access
-                result = (auth != null && auth.getTag() != null);
-            } else {
-                result = SecurityUtils.hasRead(privs);
-                if (!result) {
-                    if (auth != null) {
-                        System.out.println("override result");
-                        result = auth.getTag() != null;
-                    }
-                }
+    public boolean authorise(Request req, Method method, Auth auth, CommonResource resource) {
+        // look through all the user's groups to find one which permites this request
+        Profile curUser = null;
+        if (auth != null) {
+            UserResource ur = (UserResource) auth.getTag();
+            if (ur != null) {
+                curUser = ur.getThisUser();
             }
-            System.out.println("result: " + result);
-            if (!result) {
-                if (auth != null && auth.getTag() != null) {
-                    log.info("Denied access of: " + auth + " to resource: " + aThis.getName() + " (" + aThis.getClass() + ") because of authorisation failure");
-                    log.info("Requires " + (method.isWrite ? "writable" : "read") + "access");
-                    log.info("Allowed privs of current user are:");
-                    for (Priviledge p : privs) {
-                        log.info("   - " + p);
-                    }
-                    if (log.isTraceEnabled()) {
-                        log.trace("stack trace so you know whats going on", new Exception("not a real exception"));
-                    }
-                } else {
-                    log.info("Authorisation declined, not logged in");
-                }
-            }
-            return result;
-        } else {
-            return true; // not access controlled so must be ok!
         }
+        Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
+        if (curUser != null) {
+            if (curUser.getMemberships() != null) {
+                for (GroupMembership m : curUser.getMemberships()) {
+                    System.out.println("append privs: " + m.getGroupEntity().getName());
+                    appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
+                }
+            }
+            System.out.println("privs: " + privs.size());
+        } else {
+            log.info("No current user, so check for a public group");
+            Group publicGroup = findPublicGroup(resource.getOrganisation());
+            if (publicGroup != null) {
+                appendPriviledges(publicGroup, resource.getOrganisation(), resource, privs);
+            }
+        }
+        AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource);
+        boolean allows = containsPriviledge(required, privs);
+        log.info("allows = " + allows);
+        return allows;
     }
 
     public PasswordManager getPasswordManager() {
@@ -148,5 +149,78 @@ public class SpliffySecurityManager {
 
     public UserDao getUserDao() {
         return userDao;
+    }
+
+    private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {        
+        if (g.getGroupRoles() != null) {
+            System.out.println("appendPriviledges: " + g.getGroupRoles().size());
+            for (GroupRole gr : g.getGroupRoles()) {
+                String roleName = gr.getRoleName();
+                System.out.println("roleName: " + roleName);
+                Role role = mapOfRoles.get(roleName);
+                if (role != null) {
+                    System.out.println("role: " + role);
+                    if (role.appliesTo(resource, withinOrg)) {
+                        System.out.println("does apply");
+                        privs.addAll(role.getPriviledges());
+                    } else {
+                        System.out.println("does not apply");
+                    }
+                           
+                } else {
+                    log.warn("Role not found: " + roleName + " in roles: " + mapOfRoles.size());
+                }
+            }
+        } else {
+            System.out.println("appendPriviledges: no grs for: " + g.getName());
+        }
+    }
+
+    private Group findPublicGroup(Organisation org) {
+        if (org.getGroups() == null) {
+            return null;
+        }
+        for (Group g : org.getGroups()) {
+            if (g.getName().equals(publicGroupName)) {
+                return g;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * TODO: implement per method privs as in RFP -
+     * http://tools.ietf.org/html/rfc3744
+     *
+     * @param method
+     * @param resource
+     * @return
+     */
+    private Priviledge findRequiredPrivs(Method method, CommonResource resource) {
+        if (method.isWrite) {
+            return Priviledge.WRITE;
+        } else {
+            return Priviledge.READ;
+        }
+    }
+
+    /**
+     * TODO: implement proper encapsulation, eg ALL contains READ,WRITE, READ
+     * contains READ-CONTENT, etc
+     *
+     * @param required
+     * @param privs
+     * @return
+     */
+    private boolean containsPriviledge(Priviledge required, Set<Priviledge> privs) {
+        for (Priviledge p : privs) {
+            if (p.equals(Priviledge.ALL)) {
+                return true;
+            }
+            if (p.equals(required)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

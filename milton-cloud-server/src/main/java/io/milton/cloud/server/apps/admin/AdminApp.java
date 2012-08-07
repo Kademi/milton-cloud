@@ -14,15 +14,20 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
+import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Organisation;
+import java.util.Set;
 
 
 /**
@@ -38,7 +43,7 @@ public class AdminApp implements MenuApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        
+        resourceFactory.getSecurityManager().add(new AdminRole());
     }
 
     @Override
@@ -103,4 +108,76 @@ public class AdminApp implements MenuApplication {
                 break;
         }
     }
+    
+    public class AdminRole implements Role {
+
+        @Override
+        public String getName() {
+            return "Administrator";
+        }
+
+  
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+            Organisation resourceOrg = resource.getOrganisation();
+            boolean  b = resourceOrg.isWithin(withinOrg); 
+            System.out.println("appliesTo: " + resourceOrg.getName() + " - " + withinOrg.getName() + " = " + b);
+            return b;
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges() {
+            return Collections.singleton(Priviledge.ALL);
+        }
+        
+    }
+    
+    public class ContentAuthorRole implements Role {
+
+        @Override
+        public String getName() {
+            return "Content author";
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+            if( resource instanceof AbstractContentResource ) {
+                AbstractContentResource acr = (AbstractContentResource) resource;
+                return acr.getOrganisation().isWithin(withinOrg);
+            }
+            if( resource instanceof RenderFileResource ) {
+                RenderFileResource acr = (RenderFileResource) resource;
+                return acr.getOrganisation().isWithin(withinOrg);
+            }
+            return false;
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges() {
+            return Role.READ_WRITE;
+        }
+    }    
+    
+    public class UserAdminRole implements Role {
+
+        @Override
+        public String getName() {
+            return "User Administrator";
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+            if( resource instanceof UserResource) {
+                UserResource ur = (UserResource) resource;
+                return ur.getOrganisation().isWithin(withinOrg);
+            }
+            return false;
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges() {
+            return Role.READ_WRITE;
+        }
+
+    }      
 }

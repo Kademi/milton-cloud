@@ -156,15 +156,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return parent;
     }
 
-    @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
 
     /**
      * Get all allowed priviledges for all principals on this resource. Note

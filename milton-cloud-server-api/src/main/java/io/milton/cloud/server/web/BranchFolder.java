@@ -247,24 +247,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return parent;
     }
 
-    @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-//        Set<Permission> perms = SecurityUtils.getPermissions(user, branch, SessionManager.session());
-//        SecurityUtils.addPermissions(perms, list);
-//        parent.addPrivs(list, user);
-        // TODO
-        list.add(Priviledge.ALL);
-        list.add(Priviledge.READ);
-        list.add(Priviledge.READ_ACL);
-        list.add(Priviledge.WRITE);
-        list.add(Priviledge.WRITE_ACL);
-    }
-
     /**
      * Get all allowed priviledges for all principals on this resource. Note
      * that a principal might be a user, a group, or a built-in webdav group

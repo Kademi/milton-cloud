@@ -24,6 +24,8 @@ import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +68,7 @@ public class GroupEmailService {
         List<BaseEntity> directRecips = new ArrayList<>();
         if (j.getGroupRecipients() != null) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
-                directRecips.add(gr.getRecipient());
+                addGroup(gr.getRecipient(), directRecips);
             }
         }        
         batchEmailService.generateEmailItems(j, directRecips, session);
@@ -76,4 +78,12 @@ public class GroupEmailService {
         j.setStatusDate(now);
         session.save(j);
     }
+    
+    private void addGroup(Group g, List<BaseEntity> recipients) {
+        if( g.getGroupMemberships() != null ) {
+            for( GroupMembership gm : g.getGroupMemberships() ) {
+                recipients.add(gm.getMember());
+            }
+        }
+    }    
 }

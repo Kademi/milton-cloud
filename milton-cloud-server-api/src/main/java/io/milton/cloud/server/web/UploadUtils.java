@@ -58,8 +58,9 @@ public class UploadUtils {
                 throw new BadRequestException(col, "content type is spliffy/hash, but no hash was given");
             }
             newHash = newHash.trim();
-            if (!_(HashStore.class).hasFile(newHash)) {
-                throw new BadRequestException(col, "Attempted to set file hash on file which is not in the hashstore: " + newHash);
+            HashStore hashStore = _(HashStore.class);
+            if (!hashStore.hasFile(newHash)) {
+                throw new BadRequestException(col, "Attempted to set file hash on file which is not in the hashstore: " + newHash + " - " + hashStore);
             }
             newFileNode.setHash(newHash);
         } else {

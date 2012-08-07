@@ -66,23 +66,13 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
 
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
-        AddressBook addressBook = contactManager.createAddressBook(parent.getOwner(), newName);
+        AddressBook addressBook = contactManager.createAddressBook(parent.getThisUser(), newName);
         return new ContactsFolder(this, addressBook, contactManager);
     }
 
     @Override
     public CommonCollectionResource getParent() {
         return parent;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
     }
 
     @Override
@@ -108,7 +98,7 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            List<AddressBook> addressBooks = this.getOwner().getAddressBooks();
+            List<AddressBook> addressBooks = parent.getThisUser().getAddressBooks();
             children = new ArrayList<>();
             if (addressBooks != null) {
                 for (AddressBook cal : addressBooks) {

@@ -152,6 +152,7 @@ CKEDITOR.plugins.add( 'embed_video',
                             oncomplete: function(data, name, href) {
                                 log("oncomplete", data);
                                 $("#myTree").mtree("addFile", name, href);
+                                url = href;
                                 playVideo( "#vidContainer .jp-jplayer", href);
                             }
                         });
@@ -161,6 +162,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     }
                 },
                 onOk : function() {
+                    $("#vidContainer .jp-jplayer").jPlayer("stop");
                     var dialog = this,
                     img = this.element;
                     var returnUrl = url;

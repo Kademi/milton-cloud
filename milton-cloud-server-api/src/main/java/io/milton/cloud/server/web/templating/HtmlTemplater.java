@@ -144,7 +144,6 @@ public class HtmlTemplater {
      * @throws IOException
      */
     public void writePage(String theme, String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        System.out.println("HtmlTempater: writePage: " + theme + ", " + templatePath);
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
         RequestContext.getCurrent().put(rootFolder);
         if (theme.equals("custom")) {
@@ -170,7 +169,6 @@ public class HtmlTemplater {
         }
 
         Template bodyTemplate = getTemplate(templatePath);
-        System.out.println("templatePath: " + templatePath);
         TemplateHtmlPage bodyTemplateMeta = cachedTemplateMetaData.get(templatePath);
 
         String themeTemplateName = findThemeTemplateName(bodyTemplateMeta);
@@ -184,7 +182,6 @@ public class HtmlTemplater {
             themeTemplatePath += ".html"; // this class only does html templates
         }
         Template themeTemplate = getTemplate(themeTemplatePath);
-        System.out.println("themeTemplatePath: " + themeTemplatePath);
         if (themeTemplate == null) {
             throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);
         }

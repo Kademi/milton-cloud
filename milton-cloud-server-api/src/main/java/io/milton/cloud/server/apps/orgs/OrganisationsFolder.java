@@ -135,16 +135,6 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<AccessControlledResource.Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
-
-    @Override
     public Date getCreateDate() {
         return null;
     }

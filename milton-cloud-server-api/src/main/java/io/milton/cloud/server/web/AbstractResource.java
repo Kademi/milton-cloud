@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource;
@@ -25,7 +24,6 @@ import io.milton.resource.ReportableResource;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.utils.DbUtils;
 
 /**
  *
@@ -84,7 +82,6 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        System.out.println("authorise: " + auth); 
         boolean b = _(SpliffySecurityManager.class).authorise(request, method, auth, this);
         if (!b) {
 //            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
@@ -142,12 +139,15 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public String getPrincipalURL() {
-        BaseEntity entity = getOwner();
-        if (entity == null) {
-            return null;
-        } else {
-            return "/" + entity.getName(); // probably would be good to put this into a UrlMapper interface
+        CommonResource r = this;
+        while( !(r instanceof PrincipalResource)) {
+            r = r.getParent();
         }
+        if( r != null ) {
+            PrincipalResource pr = (PrincipalResource) r;
+            return pr.getHref() ;
+        }
+        return null;
     }
 
     /**
@@ -165,7 +165,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
             UserResource userRes = (UserResource) auth.getTag();
             user = userRes.getThisUser();
         }
-        addPrivs(list, user);
+        //addPrivs(list, user);
 
         return list;
     }

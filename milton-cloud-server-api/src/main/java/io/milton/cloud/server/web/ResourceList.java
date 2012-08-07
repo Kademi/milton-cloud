@@ -355,7 +355,6 @@ public class ResourceList extends ArrayList<CommonResource> {
     }
 
     public ResourceList sortByIntField(final String fieldName) {
-        System.out.println("sortByIntField: " + fieldName);
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<CommonResource>() {
 

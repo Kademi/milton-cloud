@@ -147,17 +147,7 @@ public class ManageWebsitePage extends AbstractResource implements GetableResour
     public CommonCollectionResource getParent() {
         return parent;
     }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
-    }
-
+  
     @Override
     public String getName() {
         return website.getName();

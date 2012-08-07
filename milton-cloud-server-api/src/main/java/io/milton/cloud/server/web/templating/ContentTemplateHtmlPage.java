@@ -37,6 +37,8 @@ import io.milton.resource.Resource;
  */
 public class ContentTemplateHtmlPage extends TemplateHtmlPage {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ContentTemplateHtmlPage.class);
+    
     private final byte[] data;
     private final String loadedHash;
     private String websiteName;
@@ -70,7 +72,7 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
     public FileResource getCurrentFileResource() {
         WebsiteRootFolder wrf = _(WebsiteApp.class).getPage(null, websiteName);
         if (wrf == null) {
-            System.out.println("no website root folder");
+            log.info("no website root folder");
             return null;
         }
         try {

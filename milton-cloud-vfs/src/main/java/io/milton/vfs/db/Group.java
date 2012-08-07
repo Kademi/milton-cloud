@@ -18,31 +18,33 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 
 /**
- * A user group, is a list of users and other groups. Is typically used to convey priviledges
- * to a selected set of users.
- * 
- * A group is defined within an organisation and can only convey privs within that
- * organisation, although that could be passed down to child organisations
+ * A user group, is a list of users and other groups. Is typically used to
+ * convey priviledges to a selected set of users.
+ *
+ * A group is defined within an organisation and can only convey privs within
+ * that organisation, although that could be passed down to child organisations
  *
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name="GROUP_ENTITY")
-@DiscriminatorValue("G")
+@Table(name = "GROUP_ENTITY")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Group extends BaseEntity {
-        
+public class Group implements Serializable, VfsAcceptor {
+
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
     public static String REGO_MODE_OPEN = "o";
@@ -55,45 +57,88 @@ public class Group extends BaseEntity {
         crit.addOrder(Order.asc("name"));
         return DbUtils.toList(crit, Group.class);
     }
-    
+
     public static Group findByOrgAndName(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Group.class);
         crit.add(Expression.eq("organisation", org));
         crit.add(Expression.eq("name", name));
         return (Group) crit.uniqueResult();
-    }    
+    }
     
-    private List<GroupMembership> members; // those entities in this group
+    private long id;
+    private String name;    
+    private Date createdDate;
+    private Date modifiedDate;
+    
+    private Organisation organisation;
+    private List<GroupMembership> groupMemberships; // those entities in this group
     private List<GroupRole> groupRoles;
     private String registrationMode; // whether to allow anyone to join this group    
+
+    @Id
+    @GeneratedValue
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
     
-    public boolean isMember(BaseEntity u) {
-        Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
-        List list = crit.add(Expression.and(Expression.eq("member", u), Expression.eq("groupEntity", this))).list();
-        boolean b = ( list != null && !list.isEmpty());
-        return b;
+
+    @ManyToOne(optional=false)
+    public Organisation getOrganisation() {
+        return organisation;
     }
 
-    @Override
-    public boolean containsUser(BaseEntity entity) {
-        return isMember(entity);
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
     }
 
+    @Column(nullable = false)
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }    
+    
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
     }
 
-    @OneToMany(mappedBy="groupEntity")
-    public List<GroupMembership> getMembers() {
-        return members;
+    @OneToMany(mappedBy = "groupEntity")
+    public List<GroupMembership> getGroupMemberships() {
+        return groupMemberships;
     }
 
-    public void setMembers(List<GroupMembership> members) {
-        this.members = members;
+    public void setGroupMemberships(List<GroupMembership> members) {
+        this.groupMemberships = members;
     }
 
-    @OneToMany(mappedBy="grantee")
+    @OneToMany(mappedBy = "grantee")
     public List<GroupRole> getGroupRoles() {
         return groupRoles;
     }
@@ -101,7 +146,6 @@ public class Group extends BaseEntity {
     public void setGroupRoles(List<GroupRole> groupRoles) {
         this.groupRoles = groupRoles;
     }
-    
 
     /**
      * Allowable registration option: - "o" = open, anyone can register and be
@@ -123,28 +167,29 @@ public class Group extends BaseEntity {
      * active after being enabled
      *
      * @return
-     */    
+     */
     public void setRegistrationMode(String registrationMode) {
         this.registrationMode = registrationMode;
-    }    
+    }
+  
     
     
     /**
      * Add or remove the role to this group. Updates the groupRoles list and
      * also saves the change in the session
-     * 
+     *
      * @param roleName
      * @param isGrant
-     * @param session 
+     * @param session
      */
     public void grantRole(String roleName, boolean isGrant, Session session) {
-        if( getGroupRoles() == null ) {
+        if (getGroupRoles() == null) {
             setGroupRoles(new ArrayList<GroupRole>());
         }
-        
+
         for (GroupRole gr : getGroupRoles()) {
             if (gr.getRoleName().equals(roleName)) {
-                if( isGrant ) {
+                if (isGrant) {
                     // nothing to do
                 } else {
                     session.delete(gr);
@@ -158,24 +203,45 @@ public class Group extends BaseEntity {
         gr.setRoleName(roleName);
         session.save(gr);
         getGroupRoles().add(gr);
-    }    
-    
+    }
+
     public boolean hasRole(String roleName) {
-        if( getGroupRoles() == null ) {
+        if (getGroupRoles() == null) {
             return false;
         }
-        for( GroupRole r : getGroupRoles()) {
-            if( r.getRoleName().equals(roleName)) {
+        for (GroupRole r : getGroupRoles()) {
+            if (r.getRoleName().equals(roleName)) {
                 return true;
-            }
-        }
-        if( getMemberships() != null ) {
-            for( GroupMembership m : getMemberships() ) {
-                if( m.getGroupEntity().hasRole(roleName)) {
-                    return true;
-                }
             }
         }
         return false;
     }
+    
+    public boolean isMember(BaseEntity u, Organisation withinOrg) {
+        Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
+        crit.add(Expression.eq("member", u));
+        crit.add(Expression.eq("groupEntity", this));
+        crit.add(Expression.eq("withinOrg", withinOrg));
+        boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
+        return b;
+    }
+
+    public boolean containsUser(BaseEntity entity, Organisation withinOrg) {
+        return isMember(entity, withinOrg);
+    }
+
+    /**
+     * Is the given entity a member of this group, regardless of organisation
+     * 
+     * @param entity
+     * @return 
+     */
+    public boolean isMember(BaseEntity entity) {
+        Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
+        crit.add(Expression.eq("member", entity));
+        crit.add(Expression.eq("groupEntity", this));
+        boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
+        return b;        
+    }
+    
 }

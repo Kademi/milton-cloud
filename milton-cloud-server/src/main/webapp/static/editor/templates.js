@@ -19,6 +19,12 @@ CKEDITOR.addTemplates('default',{
         description:'A sub-heading with a dropdown button which reveals its content.',
         html:"<div class='dropdown'><h6>Type the title here</h6><div><p>Type the text here</p></div></div>"
     },
+    {
+        title:'Dropdown2',
+        image:'icon_dropdown.gif',
+        description:'A sub-heading with a dropdown button which reveals its content, with an accentuated bacground.',
+        html:"<div class='dropdown accentuated'><h6>Type the title here</h6><div><p>Type the text here</p></div></div>"
+    },
     
     {
         title:'Show/Hide Button',

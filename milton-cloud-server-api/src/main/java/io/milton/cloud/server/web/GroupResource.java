@@ -1,8 +1,6 @@
 package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Profile;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,7 +21,6 @@ import javax.mail.internet.MimeMessage;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.*;
-import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
@@ -45,15 +42,6 @@ public class GroupResource extends AbstractCollectionResource implements Collect
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            if (group.getRepositories() != null) {
-                for (Repository r : group.getRepositories()) {
-                    Branch b = r.trunk(SessionManager.session());
-                    if (b != null) {
-                        BranchFolder rr = new BranchFolder(r.getName(), this, b, false);
-                        children.add(rr);
-                    }
-                }
-            }
             _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
@@ -101,18 +89,10 @@ public class GroupResource extends AbstractCollectionResource implements Collect
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return group;
-    }
-
-    @Override
     public PrincipleId getIdenitifer() {
         return new HrefPrincipleId(getHref());
     }
 
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile u) {
-    }
 
     /**
      * Get all allowed priviledges for all principals on this resource. Note

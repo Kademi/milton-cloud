@@ -129,21 +129,6 @@ public class ContactResource extends AbstractResource implements GetableResource
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        if (user != null && getOwner().containsUser(user)) {
-            list.add(Priviledge.READ);
-            list.add(Priviledge.WRITE);
-            list.add(Priviledge.WRITE_ACL);
-            list.add(Priviledge.WRITE_PROPERTIES);
-        }
-    }
-
-    @Override
     public Map<Principal, List<Priviledge>> getAccessControlList() {
         return null;
     }

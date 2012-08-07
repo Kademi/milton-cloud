@@ -11,5 +11,5 @@ import io.milton.principal.DiscretePrincipal;
  * @author brad
  */
 public interface PrincipalResource  extends DiscretePrincipal, CommonCollectionResource { //, LdapPrincipal {
-    
+    String getHref();
 }

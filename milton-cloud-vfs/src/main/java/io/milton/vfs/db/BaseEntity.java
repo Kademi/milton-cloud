@@ -2,6 +2,7 @@ package io.milton.vfs.db;
 
 import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.utils.DbUtils;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -64,8 +65,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     private Organisation organisation;
     private Date createdDate;
     private Date modifiedDate;
-    private List<Permission> permissions; // permissions granted ON this entity
-    private List<Permission> grantedPermissions; // permissions granted TO this entity
     private List<Repository> repositories;    // has repositories
     private List<GroupMembership> memberships; // can belong to groups
     private List<AddressBook> addressBooks; // has addressbooks
@@ -100,24 +99,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.name = name;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "grantee")
-    public List<Permission> getGrantedPermissions() {
-        return grantedPermissions;
-    }
-
-    public void setGrantedPermissions(List<Permission> grantedPermissions) {
-        this.grantedPermissions = grantedPermissions;
-    }
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "grantedOnEntity")
-    public List<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(List<Permission> permissions) {
-        this.permissions = permissions;
-    }
-    
     
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseEntity")
@@ -155,8 +136,8 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
      * @param user
      * @return
      */
-    public boolean containsUser(BaseEntity user) {
-        return user.getName().equals(this.getName()); // very simple because currenly only have users
+    public boolean containsUser(BaseEntity user, Organisation withinOrg) {
+        return this == user;
     }
 
     @OneToMany(mappedBy = "owner")
@@ -211,35 +192,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
     
     
-
-    /**
-     * Give this entity the given priviledge to access the grantedOn entity or resource
-     * 
-     * Usually "this" is a user or group, and grantedOn is a resource like an organisation
-     *
-     * @param priviledge
-     * @param grantedOn
-     */
-    public void grant(AccessControlledResource.Priviledge priviledge, BaseEntity grantedOn, Session session) {
-        if (isGranted(priviledge, grantedOn, session)) {
-            return;
-        }
-        Permission p = new Permission();
-        p.setGrantedOnEntity(grantedOn);
-        p.setGrantee(this);
-        p.setPriviledge(priviledge);
-        session.save(p);
-    }
-
-    public boolean isGranted(AccessControlledResource.Priviledge priviledge, BaseEntity grantedOn, Session session) {
-        Criteria crit = session.createCriteria(Permission.class);
-        
-        crit.add(
-                Expression.and(Expression.eq("grantee", this), Expression.and(Expression.eq("grantedOnEntity", grantedOn), Expression.eq("priviledge", priviledge))));
-        List list = crit.list();
-        return list != null && !list.isEmpty();
-    }
-    
     public Repository createRepository(String name, Profile user, Session session) {
         if( getRepositories() == null ) {
             setRepositories(new ArrayList<Repository>());
@@ -257,26 +209,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         return r;
     }
 
-    public void delete(Session session) {
-//    private List<Permission> permissions; // permissions granted ON this entity
-//    private List<Permission> grantedPermissions; // permissions granted TO this entity
-//    private List<Repository> repositories;    // has repositories
-//    private List<GroupMembership> memberships; // can belong to groups
-//    private List<AddressBook> addressBooks; // has addressbooks
-//    private List<Calendar> calendars; // has calendars        
-        if( getPermissions() != null ) {
-            for( Permission p : getPermissions()) {
-                session.delete(p);
-            }
-            setPermissions(null);
-        }
-        
-        if( getGrantedPermissions() != null ) {
-            for( Permission gp : getGrantedPermissions()) {
-                session.delete(gp);
-            }
-            setGrantedPermissions(null);
-        }        
+    public void delete(Session session) {      
         
         if( getRepositories() != null ) {
             for( Repository r : getRepositories()) {
@@ -305,5 +238,26 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         }
         session.delete(this);
     }
-      
+     
+    
+    /**
+     * Create a GroupMembership linking this profile to the given group, within the given
+     * organisation. Is immediately saved
+     * 
+     * @param g
+     * @return 
+     */
+    public BaseEntity addToGroup(Group g, Organisation withinOrg) {
+        if( g.isMember(this, withinOrg)) {
+            return this;
+        }
+        GroupMembership gm = new GroupMembership();
+        gm.setCreatedDate(new Date());
+        gm.setGroupEntity(g);
+        gm.setMember(this);
+        gm.setWithinOrg(withinOrg);
+        gm.setModifiedDate(new Date());
+        SessionManager.session().save(gm);
+        return this;
+    }    
 }

@@ -38,7 +38,7 @@ function insertJPlayer(container, src, title, height, width, cssClass) {
         log("setup jplayer", $("#" + containerId));
         $(".jp-jplayer", container).jPlayer({
             swfPath: "/static/jplayer",
-            supplied: "mp4, ogv, flv",
+            supplied: "mp4, webmv, flv",
             size: {
                 width: width,
                 height: height,
@@ -61,8 +61,8 @@ function playVideo(playerSel, primaryUrl) {
     log("filename", primaryUrl);
     var posterUrl = primaryUrl + "/alt-800-455.png";
     $(playerSel).jPlayer("setMedia", {
-        //webmv: primaryUrl + "/alt-800-455.webm",  
-        ogv: primaryUrl + "/alt-800-455.ogv",        
+        webmv: primaryUrl + "/alt-800-455.webm",  
+        //ogv: primaryUrl + "/alt-800-455.ogv",        
         flv: primaryUrl + "/alt-800-455.flv",
         m4v: primaryUrl + "/alt-800-455.mp4",   
         //                m4v: "http://www.jplayer.org/video/m4v/Big_Buck_Bunny_Trailer_480x270_h264aac.m4v",

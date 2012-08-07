@@ -18,9 +18,7 @@ package io.milton.cloud.server.apps.website;
 
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Permission;
 import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Profile;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
@@ -37,7 +35,6 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
-import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
 
@@ -150,23 +147,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     @Override
     public CommonCollectionResource getParent() {
         return null;
-    }
-
-    @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        // TODO: also include priviledges on the repo, eg:
-        //List<Permission> perms = itemVersion.getItem().grantedPermissions(user);
-        //SecurityUtils.addPermissions(perms, list);
-        Set<Permission> perms = SecurityUtils.getPermissions(user, website.getRepository().getBaseEntity(), SessionManager.session());
-        // TODO: need a pluggable mechanism to inject permissions based on enrolements
-                
-        SecurityUtils.addPermissions(perms, list);
-        _(ApplicationManager.class).appendPriviledges(list, user, this); 
     }
 
     @Override

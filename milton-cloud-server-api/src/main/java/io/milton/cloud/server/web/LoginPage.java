@@ -116,15 +116,6 @@ public class LoginPage implements GetableResource, CommonResource {
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return null;
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-    }
-
-    @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }

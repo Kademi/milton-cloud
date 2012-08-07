@@ -90,18 +90,8 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
     }
 
     @Override
-    public BaseEntity getOwner() {
-        return parent.getOwner();
-    }
-
-    @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
-    }
-
-    @Override
-    public void addPrivs(List<Priviledge> list, Profile user) {
-        parent.addPrivs(list, user);
     }
 
     @Override
