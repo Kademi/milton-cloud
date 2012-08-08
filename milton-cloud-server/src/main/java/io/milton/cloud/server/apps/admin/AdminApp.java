@@ -26,6 +26,7 @@ import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import java.util.Set;
 
@@ -44,6 +45,7 @@ public class AdminApp implements MenuApplication {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         resourceFactory.getSecurityManager().add(new AdminRole());
+        resourceFactory.getSecurityManager().add(new UserAdminRole());
     }
 
     @Override
@@ -56,7 +58,7 @@ public class AdminApp implements MenuApplication {
                     return new ManageUsersFolder(requestedName, p.getOrganisation(), p);
                 case "groups":
                     MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
-                    return new GroupsAdminPage(requestedName, p.getOrganisation(), p);
+                    return new ManageGroupsPage(requestedName, p.getOrganisation(), p);
                 case "manageWebsites":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
                     return new ManageWebsitesFolder(requestedName, p.getOrganisation(), p);
@@ -118,7 +120,7 @@ public class AdminApp implements MenuApplication {
 
   
         @Override
-        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             Organisation resourceOrg = resource.getOrganisation();
             boolean  b = resourceOrg.isWithin(withinOrg); 
             System.out.println("appliesTo: " + resourceOrg.getName() + " - " + withinOrg.getName() + " = " + b);
@@ -126,37 +128,12 @@ public class AdminApp implements MenuApplication {
         }
 
         @Override
-        public Set<Priviledge> getPriviledges() {
+        public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Collections.singleton(Priviledge.ALL);
         }
         
     }
     
-    public class ContentAuthorRole implements Role {
-
-        @Override
-        public String getName() {
-            return "Content author";
-        }
-
-        @Override
-        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
-            if( resource instanceof AbstractContentResource ) {
-                AbstractContentResource acr = (AbstractContentResource) resource;
-                return acr.getOrganisation().isWithin(withinOrg);
-            }
-            if( resource instanceof RenderFileResource ) {
-                RenderFileResource acr = (RenderFileResource) resource;
-                return acr.getOrganisation().isWithin(withinOrg);
-            }
-            return false;
-        }
-
-        @Override
-        public Set<Priviledge> getPriviledges() {
-            return Role.READ_WRITE;
-        }
-    }    
     
     public class UserAdminRole implements Role {
 
@@ -166,7 +143,7 @@ public class AdminApp implements MenuApplication {
         }
 
         @Override
-        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if( resource instanceof UserResource) {
                 UserResource ur = (UserResource) resource;
                 return ur.getOrganisation().isWithin(withinOrg);
@@ -175,7 +152,7 @@ public class AdminApp implements MenuApplication {
         }
 
         @Override
-        public Set<Priviledge> getPriviledges() {
+        public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Role.READ_WRITE;
         }
 

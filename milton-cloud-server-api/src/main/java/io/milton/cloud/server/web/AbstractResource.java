@@ -24,6 +24,7 @@ import io.milton.resource.ReportableResource;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.Resource;
+import java.util.Set;
 
 /**
  *
@@ -160,13 +161,10 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     @Override
     public List<AccessControlledResource.Priviledge> getPriviledges(Auth auth) {
         List<AccessControlledResource.Priviledge> list = new ArrayList<>();
-        Profile user = null;
-        if (auth != null && auth.getTag() != null) {
-            UserResource userRes = (UserResource) auth.getTag();
-            user = userRes.getThisUser();
-        }
-        //addPrivs(list, user);
-
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        Set<AccessControlledResource.Priviledge> privs = _(SpliffySecurityManager.class).getPriviledges(curUser, this);
+        list.addAll(privs);
+        System.out.println("AbstractRes: getPrivs: " + privs);
         return list;
     }
 

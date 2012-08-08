@@ -130,28 +130,36 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.rejected = rejected;
     }
 
-    /**
-     * True if the user belongs to a group with the Administrator GroupRole for
-     * the given organisation
-     *
-     * @return
-     */
-    public boolean isAdmin(Organisation org) {
-        if (getMemberships() == null) {
-            return false;
-        }
-        for (GroupMembership m : getMemberships()) {
-            if (m.getWithinOrg() == org) {
-                if (m.getGroupEntity().hasRole(GroupRole.ROLE_ADMIN)) {
-                    return true;
+    @Override
+    public Profile addToGroup(Group g, Organisation hasGroupInOrg) {
+        return (Profile) super.addToGroup(g, hasGroupInOrg);
+    }
+
+    public boolean isInGroup(String groupName, Organisation org) {
+        if (getMemberships() != null) {
+            for (GroupMembership m : getMemberships()) {
+                if (m.getGroupEntity().getName().equals(groupName)) {
+                    if (org.isWithin(m.getWithinOrg())) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
-    @Override
-    public Profile addToGroup(Group g, Organisation hasGroupInOrg) {
-        return (Profile) super.addToGroup(g, hasGroupInOrg);
+    public boolean hasRole(String roleName, Organisation org) {
+        if (getMemberships() != null) {
+            for (GroupMembership m : getMemberships()) {
+                if (org.isWithin(m.getWithinOrg())) {
+                    for (GroupRole r  : m.getGroupEntity().getGroupRoles()) {
+                        if( r.getRoleName().equals(roleName)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

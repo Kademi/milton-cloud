@@ -26,6 +26,7 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
+import io.milton.property.BeanProperty;
 
 /**
  *
@@ -249,7 +250,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
             return list.size();
         }
     }
-
+    
     public void setNewComment(String s) throws NotAuthorizedException {
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         if (rootFolder instanceof WebsiteRootFolder) {
@@ -264,6 +265,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
      *
      * @return
      */
+    @BeanProperty(writeRole= Priviledge.READ)
     public String getNewComment() {
         return null;
     }

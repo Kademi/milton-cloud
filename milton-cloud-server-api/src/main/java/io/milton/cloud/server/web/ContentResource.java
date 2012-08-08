@@ -19,6 +19,6 @@ package io.milton.cloud.server.web;
  *
  * @author brad
  */
-public interface ContentResource {
+public interface ContentResource extends CommonResource{
     
 }

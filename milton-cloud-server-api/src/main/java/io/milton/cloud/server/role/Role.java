@@ -17,10 +17,10 @@ package io.milton.cloud.server.role;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,15 +68,17 @@ public interface Role {
      * Returning false does not necessarily reject the request, it merely doesnt
      * accept it. Some other Role may choose to accept it.
      * 
-     * @param resource
+     * @param resource - the resource which is being checked
+     * @param withinOrg - this is the organisation in which the group membership of the current user applies
+     * @param requesting - the group which has the role being checked. Some roles might use the group as a factor
      * @return 
      */
-    boolean appliesTo(CommonResource resource, Organisation withinOrg);
+    boolean appliesTo(CommonResource resource, Organisation withinOrg, Group requesting);
     
     /**
      * For a user who does have this role on some resource (as determined by appliesTo)
      * 
      * @return 
      */
-    Set<AccessControlledResource.Priviledge> getPriviledges();
+    Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g);
 }

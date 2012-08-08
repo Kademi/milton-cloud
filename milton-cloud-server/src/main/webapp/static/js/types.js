@@ -41,7 +41,7 @@ function getFileTypeByExt(file) {
 function findIcon(file) {
     if( isDisplayableFile(file)) {
         if( file.iscollection ) {
-            return "/templates/images/icons/folder.png";
+            return "/static/icons/folder.png";
         } else {
             return findIconByExt(file.href);
         }
@@ -52,7 +52,7 @@ function findIcon(file) {
  
 function findIconByExt(filePath) {
     var ext = getExt(filePath);
-    return "/templates/images/icons/" + ext + "_48x48-32.png";
+    return "/static/icons/" + ext + "_48x48-32.png";
 }
 
 function getExt(fileName) {

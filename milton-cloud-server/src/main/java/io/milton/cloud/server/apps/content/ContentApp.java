@@ -27,6 +27,7 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import java.util.Set;
 
@@ -46,6 +47,7 @@ public class ContentApp implements Application {
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         resourceFactory.getSecurityManager().add(new ContentViewerRole());
+        resourceFactory.getSecurityManager().add(new ContentAuthorRole());
     }
 
     @Override
@@ -66,7 +68,7 @@ public class ContentApp implements Application {
         }
 
         @Override
-        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if( isContentResource(resource) ) {
                 AbstractContentResource acr = (AbstractContentResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
@@ -75,7 +77,7 @@ public class ContentApp implements Application {
         }
 
         @Override
-        public Set<AccessControlledResource.Priviledge> getPriviledges() {
+        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Collections.singleton(AccessControlledResource.Priviledge.READ);
         }
 
@@ -83,4 +85,30 @@ public class ContentApp implements Application {
             return resource instanceof RenderFileResource || resource instanceof AbstractContentResource;
         }
     }
+    
+    public class ContentAuthorRole implements Role {
+
+        @Override
+        public String getName() {
+            return "Content author";
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
+            if( resource instanceof AbstractContentResource ) {
+                AbstractContentResource acr = (AbstractContentResource) resource;
+                return acr.getOrganisation().isWithin(withinOrg);
+            }
+            if( resource instanceof RenderFileResource ) {
+                RenderFileResource acr = (RenderFileResource) resource;
+                return acr.getOrganisation().isWithin(withinOrg);
+            }
+            return false;
+        }
+
+        @Override
+        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
+            return Role.READ_WRITE;
+        }
+    }        
 }

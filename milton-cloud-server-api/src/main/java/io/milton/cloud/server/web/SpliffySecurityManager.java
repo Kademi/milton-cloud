@@ -6,6 +6,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.role.Role;
+import io.milton.http.AclUtils;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
@@ -17,6 +18,8 @@ import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.GroupRole;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -120,18 +123,9 @@ public class SpliffySecurityManager {
                 curUser = ur.getThisUser();
             }
         }
-        Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
-        if (curUser != null) {
-            if (curUser.getMemberships() != null) {
-                for (GroupMembership m : curUser.getMemberships()) {
-                    System.out.println("authorise: found membership: " + m.getGroupEntity().getName());
-                    appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
-                }
-            }
-            System.out.println("privs size: " + privs.size());
-        }
+        Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource);
-        boolean allows = containsPriviledge(required, privs);
+        boolean allows = AclUtils.containsPriviledge(required, privs);
         log.info("allows = " + allows);
         return allows;
     }
@@ -143,6 +137,20 @@ public class SpliffySecurityManager {
     public UserDao getUserDao() {
         return userDao;
     }
+    
+    public Set<AccessControlledResource.Priviledge> getPriviledges(Profile curUser, CommonResource resource) {
+        Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
+        if (curUser != null) {
+            if (curUser.getMemberships() != null) {
+                for (GroupMembership m : curUser.getMemberships()) {
+                    System.out.println("authorise: found membership: " + m.getGroupEntity().getName());
+                    appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
+                }
+            }
+            System.out.println("privs size: " + privs.size());
+        }
+        return privs;
+    }
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {        
         if (g.getGroupRoles() != null) {
@@ -153,9 +161,9 @@ public class SpliffySecurityManager {
                 Role role = mapOfRoles.get(roleName);
                 if (role != null) {
                     System.out.println("role: " + role);
-                    if (role.appliesTo(resource, withinOrg)) {
+                    if (role.appliesTo(resource, withinOrg, g)) {
                         System.out.println("does apply");
-                        privs.addAll(role.getPriviledges());
+                        privs.addAll(role.getPriviledges(resource, withinOrg, g));
                     } else {
                         System.out.println("does not apply");
                     }
@@ -179,30 +187,17 @@ public class SpliffySecurityManager {
      * @return
      */
     private Priviledge findRequiredPrivs(Method method, CommonResource resource) {
-        if (method.isWrite) {
+        if( method.equals(Method.POST)) {
+            return Priviledge.WRITE_CONTENT;
+        } else if (method.isWrite) {            
             return Priviledge.WRITE;
         } else {
             return Priviledge.READ;
         }
     }
 
-    /**
-     * TODO: implement proper encapsulation, eg ALL contains READ,WRITE, READ
-     * contains READ-CONTENT, etc
-     *
-     * @param required
-     * @param privs
-     * @return
-     */
-    private boolean containsPriviledge(Priviledge required, Set<Priviledge> privs) {
-        for (Priviledge p : privs) {
-            if (p.equals(Priviledge.ALL)) {
-                return true;
-            }
-            if (p.equals(required)) {
-                return true;
-            }
-        }
-        return false;
+    
+    public Collection<Role> getGroupRoles() {
+        return Collections.unmodifiableCollection(mapOfRoles.values());        
     }
 }

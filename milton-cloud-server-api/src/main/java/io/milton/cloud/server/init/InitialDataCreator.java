@@ -80,11 +80,11 @@ public class InitialDataCreator implements LifecycleApplication {
 
 
         Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, 0, session, null, "c");
-        administrators.grantRole(GroupRole.ROLE_ADMIN, true, session);
-        administrators.grantRole(GroupRole.ROLE_AUTHOR, true, session);
+        administrators.grantRole("Administrator", true, session);
+        administrators.grantRole("Content author", true, session);
 
         Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin, "o");
-        users.grantRole(GroupRole.ROLE_AUTHOR, true, session);
+        users.grantRole("Content author", true, session);
 
         admin.addToGroup(administrators, rootOrg).addToGroup(users, rootOrg);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton.io", "fuse", admin, "milton.localhost"); // can be accessed on milton.localhost or milton.io

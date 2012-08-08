@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
@@ -27,9 +28,7 @@ import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -46,15 +45,15 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class GroupsAdminPage extends AbstractResource implements GetableResource, PostableResource {
+public class ManageGroupsPage extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(GroupsAdminPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageGroupsPage.class);
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
 
-    public GroupsAdminPage(String name, Organisation organisation, CommonCollectionResource parent) {
+    public ManageGroupsPage(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
@@ -111,7 +110,12 @@ public class GroupsAdminPage extends AbstractResource implements GetableResource
     }
     
     public List<String> getAllRoles() {
-        return GroupRole.ROLES;
+        List<String> names = new ArrayList<>();
+        for( Role r : _(SpliffySecurityManager.class).getGroupRoles() ) {
+            names.add(r.getName());
+        }
+        
+        return names;
     }
 
     public String getTitle() {

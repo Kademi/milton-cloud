@@ -297,7 +297,7 @@ public class DataSession {
                         }
                     }
                 }
-                log.info("DirectoryNode: loaded children for " + getName() + " = " + members.size() + " from hash: " + hash);
+                //log.info("DirectoryNode: loaded children for " + getName() + " = " + members.size() + " from hash: " + hash);
             }
             return members;
         }

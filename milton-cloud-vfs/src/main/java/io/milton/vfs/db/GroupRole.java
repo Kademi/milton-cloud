@@ -45,14 +45,6 @@ uniqueConstraints = {
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupRole implements Serializable{
-    /**
-     * Gives permission for all activities within the administrative organisation
-     * that defines the principal
-     */
-    public static final String ROLE_ADMIN = "Administrator";
-    public static final String ROLE_AUTHOR = "Content author";
-    public static final String ROLE_USER = "User administrator";
-    public static final List<String> ROLES = Arrays.asList(ROLE_ADMIN, ROLE_AUTHOR, ROLE_USER);
     
     private long id;
     private String roleName;

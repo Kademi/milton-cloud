@@ -8,15 +8,14 @@ table {
     border-collapse: collapse;
 }
 
+table td {
+    vertical-align:top;
+}
+
 abbr {
     border: none;    
 }
 
-table td {
-
-    vertical-align:top;
-
-}
 
 .tabularBox {
     min-height: 300px;
@@ -282,24 +281,7 @@ a.arrowL {
     padding-top:6px;
     padding-left:7px;
 }
-ul.pagi {
-    float:left;
-}
-ul.pagi li {
-    list-style:none;
-    float:left;
-    font-size:13px;
-    font-weight:bold;
-    margin-left:16px;
-    margin-top:5px;
-}
-ul.pagi li a {
-    text-decoration:none;
-    color:$page.parent.settings.heroColour1;
-}
-ul.pagi li:hover a {
-    text-decoration:underline;
-}
+
 a.arrowR {
     float:right;
     padding-left:10px;
@@ -1585,13 +1567,39 @@ table h1, table h2, table h3, table h4 {
 table.bar thead * {
     color: white;
 }
+table.bar .left {
+    text-align: left;
+}
 
+table.bar td, table.bar th {
+    padding: 5px;
+    vertical-align: central;
+    text-align: center;
+}
 table.bar thead tr th {
     background:$page.parent.settings.heroColour1;
     border: none;
-    font-size: 11px;
+    font-size: 0.9em;
     font-style: italic;    
-    font-weight: 400;
+    font-weight: 400;    
+}
+
+table.bar thead th:first-child {
+    border-radius: 5px 0 0 5px;
+    font-style: normal;
+    text-align: left;
+}
+
+table.bar th:first-child, table.bar td:first-child {
+    padding-left: 10px;    
+}
+
+table.bar th:last-child, table.bar td:last-child {
+    padding-right: 10px;    
+}
+
+table.bar thead tr th:last-child {
+    border-radius: 0 5px 5px 0;
 }
 table.bar tr:nth-child(odd) td {
     background-color: white;
@@ -1599,14 +1607,6 @@ table.bar tr:nth-child(odd) td {
 tr.seperator {
     display: block;
     height: 10px;
-}
-
-table.bar thead tr th:first-child {
-    border-radius: 5px 0 0 5px;
-}
-
-table.bar thead tr th:last-child {
-    border-radius: 0 5px 5px 0;
 }
 
 
@@ -1833,23 +1833,6 @@ a.crossSign{
     color:$page.parent.settings.textColour2;
 }
 
-html {
-    font-size: 1em;
-}
-
-table { 
-    border-collapse: collapse;
-}
-
-abbr {
-    border: none;    
-}
-
-table td {
-
-    vertical-align:top;
-
-}
 
 .tabularBox .row {
     font-weight:bold;
@@ -1927,11 +1910,12 @@ small.col2.row {
 }
 .downloadIcon {
     display:block;
-    background-image: url(images/download.png);
+    background-image: url(../images/download.png);
     background-position: center center;
     background-repeat: no-repeat;    
     text-indent: -10000px;
     cursor: pointer;
+    height: 31px;
 }
 
 .tabularBox .infoIcon {
@@ -1997,6 +1981,7 @@ body .tabularBox div.wBox:hover {
     font-style:italic;
     display:block;
 }
+
 .imageL{
     float:left;
     display:block;

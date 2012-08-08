@@ -14,13 +14,11 @@
  */
 package io.milton.cloud.server.apps.forums;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
-import io.milton.cloud.server.apps.content.ContentApp;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.Forum;
@@ -39,7 +37,9 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.AclUtils;
 import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import java.util.Set;
@@ -151,7 +151,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         }
 
         @Override
-        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if( resource instanceof IForumResource ) {
                 IForumResource acr = (IForumResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
@@ -160,8 +160,8 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         }
 
         @Override
-        public Set<AccessControlledResource.Priviledge> getPriviledges() {
-            return Collections.singleton(AccessControlledResource.Priviledge.READ);
+        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {            
+            return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE_CONTENT);
         }
     }    
 }
