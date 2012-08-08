@@ -194,13 +194,14 @@ function initHtmlEditors() {
             templates_files : [ '/static/editor/templates.js' ],
             templates_replaceContent: false,
             toolbar: toolbarSets[toolbar],
-            extraPlugins : 'autogrow,embed_video',
+            extraPlugins : 'autogrow,embed_video,modal',  // see /static/js/toolbars.js
             removePlugins : 'resize',
             enterMode: "P",
             forceEnterMode:true,
             filebrowserBrowseUrl : '/static/fckfilemanager/browser/default/browser.html?Type=Image&Connector=/fck_connector.html',
             filebrowserUploadUrl : '/uploader/upload',
-            format_tags : 'p;h2;h3;h4;h5'
+            format_tags : 'p;p2;h2;h3;h4;h5',
+            format_p2 : { element : 'p', attributes : { 'class' : 'lessSpace' } }
         };    
     
         config.stylesSet = 'myStyles:/templates/themes/fuse/styles.js'; // TODO: needs to be configurable, based on theme

@@ -295,6 +295,10 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <webAppConfig>
+                                <contextPath>/</contextPath>
+                                <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
+                            </webAppConfig>                            
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
@@ -308,8 +312,7 @@
                                     <name>template.file.roots</name>
                                     <value>../../fuse-admin/fuse-app/src/main/resources</value>
                                 </systemProperty>  
-                            </systemProperties>                             
-                            <contextPath>/</contextPath>
+                            </systemProperties>    
                             <connectors>
                                 <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
                                     <port>8080</port>  <!-- Run on non-priviledged port 8080 for linux -->
@@ -348,6 +351,10 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <webAppConfig>
+                                <contextPath>/</contextPath>
+                                <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
+                            </webAppConfig>                                 
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
@@ -361,8 +368,7 @@
                                     <name>fuse.autoloader.dir</name>
                                     <value>../../fuse-admin</value>
                                 </systemProperty>
-                            </systemProperties>                            
-                            <contextPath>/</contextPath>
+                            </systemProperties>           
                             <connectors>
                                 <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
                                     <port>8080</port>  <!-- Run on non-priviledged port 8080 for linux -->

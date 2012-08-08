@@ -55,6 +55,12 @@ CKEDITOR.addTemplates('default',{
         image:'icon_floating_type.gif',
         description:'A resizable box with text floating over an image',
         html:"<div class='textOverImage' style='position: absolute; width: 221px; height: 218px;'><img src='/static/editor/gear.png' width='221' height='218' class='bgImage'/><div>Text goes here</div></div>"
+    },
+    {
+        title:'Striped table',
+        image:'',
+        description:'A table with alternating row colours',
+        html:"<table width='100%' class='striped'><thead><tr><th></th><th></th><th></th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>"
     }
     ]
 });

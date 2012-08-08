@@ -48,6 +48,17 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         this.user = u;
     }
 
+    public String getTitle() {
+        String s = user.getNickName();
+        if( s == null ) {
+            s = user.getFirstName();
+        }
+        if( s == null ) {
+            s = user.getName();
+        }
+        return s;
+    }
+    
     public List<BranchFolder> getRepositories() throws NotAuthorizedException, BadRequestException {
         List<BranchFolder> list = new ArrayList<>();
         for (Resource r : getChildren()) {

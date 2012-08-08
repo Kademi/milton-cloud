@@ -366,7 +366,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 										{
 											type : 'text',
 											id : 'txtBorder',
-											'default' : 1,
+											'default' : 0,
 											label : editor.lang.table.border,
 											controlStyle : 'width:3em',
 											validate : CKEDITOR.dialog.validate['number']( editor.lang.table.invalidBorder ),
@@ -424,7 +424,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 													controlStyle : 'width:5em',
 													label : editor.lang.common.width,
 													title : editor.lang.common.cssLengthTooltip,
-													'default' : 500,
+													'default' : "100%",
 													getValue : defaultToPixel,
 													validate : CKEDITOR.dialog.validate.cssLength( editor.lang.common.invalidCssLength.replace( '%1', editor.lang.common.width ) ),
 													onChange : function()
@@ -479,7 +479,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 											id : 'txtCellSpace',
 											controlStyle : 'width:3em',
 											label : editor.lang.table.cellSpace,
-											'default' : 1,
+											'default' : 0,
 											validate : CKEDITOR.dialog.validate.number( editor.lang.table.invalidCellSpacing ),
 											setup : function( selectedTable )
 											{
@@ -498,7 +498,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 											id : 'txtCellPad',
 											controlStyle : 'width:3em',
 											label : editor.lang.table.cellPad,
-											'default' : 1,
+											'default' : 0,
 											validate : CKEDITOR.dialog.validate.number( editor.lang.table.invalidCellPadding ),
 											setup : function( selectedTable )
 											{

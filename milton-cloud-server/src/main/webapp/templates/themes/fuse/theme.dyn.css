@@ -2,8 +2,162 @@
 /** Start learning.css **/
 html {
     font-size: 1em;
+    height:100%;
 }
 
+input, textarea {
+    border-style: solid;
+    border-width: 1px;
+    background-color: white;
+    margin-right: 10px; 
+    padding: 5px;
+}
+
+blockquote{
+    background: url("images/blockquote.gif") no-repeat scroll left 6px #FAFAFA;
+    margin: 10px 0 10px 0;
+    padding: 10px 10px 10px 50px;
+    line-height: 22px;
+}
+
+
+
+body {
+    font-family: 'Arial', sans-serif;
+    font-size: 1em;
+}
+body.normal {
+    margin:0;
+    padding:0;
+    color:$page.parent.settings.textColour2;
+    height:100%;    
+}
+div, h1, h2, h3, h4, ul, form {
+    margin:0;
+    padding:0;
+}
+ul, ol {
+    line-height: 22px;
+    list-style-position: inside;
+}
+a, img {
+    border:none;
+    outline:none;
+}
+a:link, a:visited {
+    color:$page.parent.settings.heroColour1;
+    text-decoration:none;
+    outline:none;
+}
+a:hover {
+    text-decoration:none;
+}
+body h2, body h2 a {
+    color: $rootFolder.settings.heroColour1;
+    font-weight: 500;
+    font-size: 1.6em;    
+    padding: 0px 0px 15px 0px;
+    margin:0px;
+}
+
+body h3, body h3 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.4em;
+    font-weight: 500;
+
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+body h4, body h4 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.1em;
+    font-weight: 400;    
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+body h5, body h5 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.1em;
+    font-weight: 400;
+    font-style: italic;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+
+body h6, body h6 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 0.9em;
+    font-weight: 400;
+    line-height:18px;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+
+
+body p, body p a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 0.8em;
+    font-weight: 400;
+    margin:0px;
+}
+
+p, ul, ol {
+    padding: 0px 0px 5px 0px;    
+    line-height:18px;    
+}
+
+body p a {   
+    font-size: 1em !important;
+
+}
+
+ ul {
+    margin: 0px 0px 0px 40px;
+    font-size: 0.8em;
+    color: $rootFolder.settings.textColour1;
+    font-weight: 400;
+    list-style:outside;
+}
+
+ul ul {
+    font-size: 1em;
+}
+
+li {
+    margin: 0 0 0 40px;
+    padding:0 0 5px 0;    
+}
+
+li a {
+    color: #88c03f;
+    font-weight: 600;
+    text-decoration:underline;
+}
+
+textarea {
+    width: 98%;
+    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+}
+body h1, body h1 a,body h2, body h2 a,body h3, body h3 a,body h4, body h4 a {
+    margin-top: 5px;
+}
+body h1, body h1 a {
+    position:relative;
+    background-color: $rootFolder.settings.heroColour1;
+    display: inline-block;
+    color: white;
+    padding: 10px 15px;
+    margin: 0px 0px 15px 0px;
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1.6em;
+    font-weight: 500;
+    left:-15px;
+}
 table { 
     border-collapse: collapse;
 }
@@ -11,6 +165,10 @@ table {
 table td {
     vertical-align:top;
 }
+td input, td textarea {
+    margin-right: 0;
+}
+
 
 abbr {
     border: none;    
@@ -992,7 +1150,7 @@ table.striped thead th {
 table.striped tbody tr:nth-child(odd) td {
     background-color: #f1f1f1;
 }
-td.striped, th.striped {
+table.striped td, table.striped th {
     border-color: #D4D4D4;    
     border-width: 1px;    
     padding: 10px;
@@ -1027,55 +1185,11 @@ table.verticalFields tbody tr td, table.verticalFields tbody tr th {
     border: none;
 }
 
-input, textarea {
-    border-style: solid;
-    border-width: 1px;
-    background-color: white;
-    margin-right: 10px; 
-    padding: 5px;
-}
-td input, td textarea {
-    margin-right: 0;
-}
-
-blockquote{
-    background: url("images/blockquote.gif") no-repeat scroll left 6px #FAFAFA;
-    margin: 10px 0 10px 0;
-    padding: 10px 10px 10px 50px;
-    line-height: 22px;
-}
-
-
-html{
-    height:100%;
-}
-body {
-    font-family: 'Arial', sans-serif;
-    font-size: 1em;
-}
-body.normal {
-    margin:0;
-    padding:0;
-    color:$page.parent.settings.textColour2;
-    height:100%;    
-}
-div, h1, h2, h3, h4, ul, form {
-    margin:0;
-    padding:0;
-}
-p {
-    margin: 3px 0 3px 0;
-    padding: 0;
-    line-height: 20px;
-}
 .content {
     background: white;
     padding:15px 15px 70px 15px;
 }
-ul, ol {
-    line-height: 22px;
-    list-style-position: inside;
-}
+
 .content a:hover {
     text-decoration: underline;
 }
@@ -1084,18 +1198,7 @@ ul, ol {
     overflow:hidden;
     height:0;
 }
-a, img {
-    border:none;
-    outline:none;
-}
-a:link, a:visited {
-    color:$page.parent.settings.heroColour1;
-    text-decoration:none;
-    outline:none;
-}
-a:hover {
-    text-decoration:none;
-}
+
 .spacer {
     height:150px;
 }
@@ -1335,6 +1438,10 @@ body.myDashboard li.nav-myDashboard, body.myLearning li.nav-myLearning, body.com
     text-align:center;
     text-transform:capitalize;
     display: inline-block;
+}
+
+.header ul li a {
+    font-weight: 400;    
 }
 
 .nav ul li a {
@@ -2496,6 +2603,14 @@ a:hover.lnkText{
     padding: 0;
 }
 
+body .citation {
+    font-size: 0.6em !important;
+    font-weight: 400;
+    font-style:italic;
+
+    padding: 0px 0px 0px 0px;
+    margin:0px;
+}
 
 /** ADMIN screens **/
 div.treeView {
@@ -2539,30 +2654,6 @@ body.myDashboard li.nav-myDashboard, body.myLearning li.nav-myLearning, body.com
 
 
 
-body li {
-    margin-left: 40px;
-}
-body textarea {
-    width: 98%;
-    background-color: #f4f4f4;
-    font-family: Arial, sans-serif;
-}
-body h1, body h1 a,body h2, body h2 a,body h3, body h3 a,body h4, body h4 a {
-    margin-top: 5px;
-}
-body h1, body h1 a {
-    position:relative;
-    background-color: $rootFolder.settings.heroColour1;
-    display: inline-block;
-    color: white;
-    padding: 10px 15px;
-    margin: 0px 0px 15px 0px;
-    border-radius: 6px;
-    width: 100%;
-    font-size: 1.6em;
-    font-weight: 500;
-    left:-15px;
-}
 
 /** cke_panel_listItem is part of the CKEditor toolbar, which shows the h1 style. Must not be display:block for toolbar */
 body .cke_panel_listItem h1 {
@@ -2570,116 +2661,7 @@ body .cke_panel_listItem h1 {
     padding-left: 0;
 }
 
-body h2, body h2 a {
-    color: $rootFolder.settings.heroColour1;
-    font-weight: 500;
-    font-size: 1.6em;    
-    padding: 0px 0px 15px 0px;
-    margin:0px;
-}
 
-body h3, body h3 a {
-    color: $rootFolder.settings.textColour1;
-    font-size: 1.4em;
-    font-weight: 500;
-
-    padding: 0px 0px 7px 0px;
-    margin:0px;
-}
-body h4, body h4 a {
-    color: $rootFolder.settings.textColour1;
-    font-size: 1.1em;
-    font-weight: 400;    
-    padding: 0px 0px 7px 0px;
-    margin:0px;
-}
-
-body h5, body h5 a {
-    color: $rootFolder.settings.textColour1;
-    font-size: 1.1em;
-    font-weight: 400;
-    font-style: italic;
-    padding: 0px 0px 7px 0px;
-    margin:0px;
-}
-
-
-body h6, body h6 a {
-    color: $rootFolder.settings.textColour1;
-    font-size: 0.9em;
-    font-weight: 400;
-    line-height:18px;
-    padding: 0px 0px 7px 0px;
-    margin:0px;
-}
-
-
-
-
-/** This is the new Dropdown header style 
-div.dropdown .dropDownStyle {
-  color: $rootFolder.settings.texColour1;
-    font-size: 1.0em;
-    font-weight: 400;
-    
-    padding: 10px 38px 10px 15px;
-    
-     display: inline-block;
-   
-    } */
-
-
-
-body p, body p a {
-    color: $rootFolder.settings.textColour1;
-    font-size: 0.8em;
-    font-weight: 400;
-    line-height:20px;
-    padding: 0px 0px 7px 0px;
-    margin:0px;
-}
-
-body p a {   
-    font-size: 1em !important;
-
-}
-
-body .citation {
-    font-size: 0.6em !important;
-    font-weight: 400;
-    font-style:italic;
-
-    padding: 0px 0px 0px 0px;
-    margin:0px;
-}
-
-
-body .panelBox  ul {
-    margin: 0px 0px 0px 40px;
-    padding:0px;
-    font-size: 0.9em;
-    color: $rootFolder.settings.textColour1;
-    font-weight: 400;
-    list-style:outside;
-}
-
-body .panelBox  ul li {
-    margin: 0px;
-    padding:0px;
-    line-height:22px; 
-}
-
-body .panelBox  ul li ul li {
-
-}
-
-
-
-body .panelBox li a {
-    color: #88c03f;
-    font-weight: 600;
-    text-decoration:underline;
-}
 
 .activity, .keyPoint {
     position: relative;    
@@ -2939,7 +2921,7 @@ div.adminToolbar {
     display: block;
     float: left;
     list-style-type: none;
-    margin: 8px;
+    margin: 0 8px 8px;
 }
 .pages li a{
     display: inline-block;
@@ -2987,6 +2969,7 @@ div.adminToolbar {
     background:$rootFolder.settings.heroColour1;
     border-radius: 5px 5px;
     padding-top:5px;    
+    margin-top: 5px;
 }
 
 .modulePage a.prevBtn{    
@@ -3106,4 +3089,124 @@ Initially hidden message, is displayed after successful processing
 */
 p.confirm {
     display: none; 
+}
+
+p.lessSpace {
+    padding-bottom: 0;
+}
+a.external {
+    background: url("/static/common/icon_external_link.gif")  no-repeat scroll right center transparent;
+    margin-right: 5px;
+    padding-right: 10px;
+}
+
+/**
+    For links which open modal dialogs
+*/
+a.anchor-modal { cursor: pointer; }
+.linked-modal {
+	background: #FFF;
+	box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+	40px 25px 25px 25px
+    min-height: 100px;
+}
+.linked-modal a.close-modal {
+	background: transparent url(btn_modal_close.png) no-repeat 50% 50%;
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	border: 0 none;
+	color: transparent;
+	font: 0px/0 a;
+	text-shadow: none;
+}
+
+/* Classification */
+.classifer h3 { font-weight: normal; }
+.classifer .controller-wrapper {
+	float: left;
+	width: 191px;
+}
+.classifer .controller-wrapper .controller {
+	background: url(images/button.png) no-repeat;
+	height: 56px;
+	margin-bottom: 5px;
+	padding: 14px 0 0 10px;
+	position: relative;
+	cursor: pointer;
+}
+.classifer .controller-wrapper .controller span.arrow {
+	position: absolute;
+	background: url(images/icon_right_sprite.png) no-repeat;
+	width: 24px;
+	height: 48px;
+	top: 11px;
+	right: 10px;
+}
+.classifer .controller-wrapper .controller h3 {
+	font-size: 18px;
+	margin: 0;
+}
+.classifer .controller-wrapper .controller p {
+	font-size: 12px;
+	line-height: 110%;
+	margin: 0;
+}
+.classifer .controller-wrapper .button-placeholder {
+	font-size: 15px;
+	color: #c30;
+}
+.classifer .content-wrapper { margin-left: 194px; }
+.classifer .content-wrapper > .content {
+	background: url(images/content_panel.png) no-repeat;
+	position: relative;
+	width: 716px;
+	height: 295px;
+}
+.classifer .content-wrapper > .content.active { display: block !important; }
+.classifer .content-wrapper > .content h3.notice {
+	font-size: 18px;
+	text-align: center;
+	margin-top: 55px;
+}
+.classifer .content-wrapper > .content > img {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 1;
+}
+.classifer .content-wrapper > .content .main-content {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	background: url(images/rule.png) no-repeat 50% 15px;
+	padding: 80px 15px 0;
+}
+.hide {
+	display: none;
+}
+.hide-force {
+	display: none !important;
+}
+.hide-text {
+	background-color: transparent;
+	border: 0 none;
+	color: transparent;
+	font: 0px/0 a;
+	text-shadow: none;
+}
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before, .clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
 }

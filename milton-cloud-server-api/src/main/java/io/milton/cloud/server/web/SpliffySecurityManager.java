@@ -126,7 +126,7 @@ public class SpliffySecurityManager {
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource);
         boolean allows = AclUtils.containsPriviledge(required, privs);
-        log.info("allows = " + allows);
+        log.info("allows = " + allows + " rsource: " + resource.getClass());
         return allows;
     }
 
@@ -188,7 +188,7 @@ public class SpliffySecurityManager {
      */
     private Priviledge findRequiredPrivs(Method method, CommonResource resource) {
         if( method.equals(Method.POST)) {
-            return Priviledge.WRITE_CONTENT;
+            return Priviledge.READ_CONTENT; // generally POST is just an interactive part of consuming content
         } else if (method.isWrite) {            
             return Priviledge.WRITE;
         } else {

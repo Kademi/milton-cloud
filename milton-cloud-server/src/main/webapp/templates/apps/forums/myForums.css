@@ -50,6 +50,7 @@ ul.PostList {
     border-radius: 5px;
     padding: 0 5px 5px;    
     text-align: justify;
+    margin: 0;
 }
 ul.PostList li.Post {
     margin-top: 15px;

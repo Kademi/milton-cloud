@@ -7,7 +7,7 @@ toolbarSets["Full"] = [
 	{ name: 'clipboard', items : [ 'Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
 	{ name: 'editing', items : [ 'Find','Replace','-','SelectAll','-','SpellChecker' ] },
 	{ name: 'forms', items : [ 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select'] },
-        { name: 'links', items : [ 'Link','Unlink','Anchor' ] },
+        { name: 'links', items : [ 'Link','Unlink','Anchor','Modal' ] },
 	{ name: 'insert', items : [ 'Video', 'Image','Table','HorizontalRule','SpecialChar' ] },        
 	{ name: 'tools', items : [ 'Maximize', 'ShowBlocks' ] },
 	'/',

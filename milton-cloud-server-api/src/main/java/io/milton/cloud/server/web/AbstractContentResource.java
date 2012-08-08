@@ -32,7 +32,7 @@ import io.milton.property.BeanProperty;
  *
  * @author brad
  */
-public abstract class AbstractContentResource extends AbstractResource implements CommonResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
+public abstract class AbstractContentResource extends AbstractResource implements ContentResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractContentResource.class);
     protected ContentDirectoryResource parent;
