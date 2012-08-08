@@ -55,12 +55,10 @@ public class PostSearchResource extends AbstractResource implements GetableResou
     private final Website website;
     
 
-    public PostSearchResource(String name, Website website, CommonCollectionResource parent) {
-        
+    public PostSearchResource(String name, Website website, CommonCollectionResource parent) {        
         this.website = website;
         this.parent = parent;
         this.name = name;
-        System.out.println("hello from PostSearchResource");
     }
         
     
@@ -77,7 +75,7 @@ public class PostSearchResource extends AbstractResource implements GetableResou
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        return super.authorise(request, method, auth);
+        return true;
     }
     
     

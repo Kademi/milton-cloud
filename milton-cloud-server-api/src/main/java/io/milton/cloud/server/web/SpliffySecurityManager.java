@@ -33,7 +33,6 @@ public class SpliffySecurityManager {
     private final UserDao userDao;
     private final PasswordManager passwordManager;
     private final Map<String, Role> mapOfRoles = new ConcurrentHashMap<>();
-    private String publicGroupName = "Public";
 
     public SpliffySecurityManager(UserDao userDao, PasswordManager passwordManager) {
         this.userDao = userDao;
@@ -125,17 +124,11 @@ public class SpliffySecurityManager {
         if (curUser != null) {
             if (curUser.getMemberships() != null) {
                 for (GroupMembership m : curUser.getMemberships()) {
-                    System.out.println("append privs: " + m.getGroupEntity().getName());
+                    System.out.println("authorise: found membership: " + m.getGroupEntity().getName());
                     appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
                 }
             }
-            System.out.println("privs: " + privs.size());
-        } else {
-            log.info("No current user, so check for a public group");
-            Group publicGroup = findPublicGroup(resource.getOrganisation());
-            if (publicGroup != null) {
-                appendPriviledges(publicGroup, resource.getOrganisation(), resource, privs);
-            }
+            System.out.println("privs size: " + privs.size());
         }
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource);
         boolean allows = containsPriviledge(required, privs);
@@ -153,7 +146,7 @@ public class SpliffySecurityManager {
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {        
         if (g.getGroupRoles() != null) {
-            System.out.println("appendPriviledges: " + g.getGroupRoles().size());
+            System.out.println("appendPriviledges: group roles size: " + g.getGroupRoles().size() + " for group: " + g.getName());
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();
                 System.out.println("roleName: " + roleName);
@@ -176,17 +169,6 @@ public class SpliffySecurityManager {
         }
     }
 
-    private Group findPublicGroup(Organisation org) {
-        if (org.getGroups() == null) {
-            return null;
-        }
-        for (Group g : org.getGroups()) {
-            if (g.getName().equals(publicGroupName)) {
-                return g;
-            }
-        }
-        return null;
-    }
 
     /**
      * TODO: implement per method privs as in RFP -

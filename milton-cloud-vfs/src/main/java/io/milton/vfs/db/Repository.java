@@ -30,6 +30,7 @@ public class Repository implements Serializable {
     private String name; // identifies the resource to webdav
     private String title; // user friendly title
     private String notes;
+    private boolean publicContent; // allow anonymous users to view this content
     private Date createdDate;
     private BaseEntity baseEntity; // the direct owner of this repository
     private List<Branch> branches;
@@ -117,6 +118,17 @@ public class Repository implements Serializable {
     public void setNvPairs(List<NvPair> nvPairs) {
         this.nvPairs = nvPairs;
     }    
+
+    @Column(nullable=false)
+    public boolean isPublicContent() {
+        return publicContent;
+    }
+
+    public void setPublicContent(boolean publicContent) {
+        this.publicContent = publicContent;
+    }
+    
+    
 
     public Repository setAttribute(String name, String value, Session session) {
         List<NvPair> list = getNvPairs();

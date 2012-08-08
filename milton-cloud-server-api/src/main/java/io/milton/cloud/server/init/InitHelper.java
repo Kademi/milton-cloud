@@ -187,6 +187,7 @@ public class InitHelper {
         Website mainWebsite = org.createWebsite(webName, theme, user, session);
 
         Repository r = mainWebsite.getRepository();
+        r.setPublicContent(true); // allow public access
         r.setAttribute("heroColour1", "#88c03f", session);
         r.setAttribute("heroColour2", "#88c03f", session);
         r.setAttribute("textColour1", "#1C1D1F", session);

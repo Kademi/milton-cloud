@@ -14,15 +14,18 @@
  */
 package io.milton.cloud.server.apps.forums;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
+import io.milton.cloud.server.apps.content.ContentApp;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.Forum;
 import io.milton.cloud.server.db.ForumTopic;
+import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -36,7 +39,10 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import java.util.Set;
 
 /**
  *
@@ -44,6 +50,8 @@ import io.milton.vfs.db.Website;
  */
 public class ForumsApp implements MenuApplication, ResourceApplication, PortletApplication {
 
+    public static final String ROLE_FORUM_USER = "Forums user";
+    
     public static String toHref(ForumPost r) {
         ForumTopic topic = r.getTopic();
         Forum forum = topic.getForum();
@@ -61,6 +69,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        resourceFactory.getSecurityManager().add(new ForumUserRole());
     }
 
     @Override
@@ -133,4 +142,26 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
             _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
         }
     }
+    
+    public class ForumUserRole implements Role {
+
+        @Override
+        public String getName() {
+            return ROLE_FORUM_USER;
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg) {
+            if( resource instanceof IForumResource ) {
+                IForumResource acr = (IForumResource) resource;
+                return acr.getOrganisation().isWithin(withinOrg);
+            }            
+            return false;
+        }
+
+        @Override
+        public Set<AccessControlledResource.Priviledge> getPriviledges() {
+            return Collections.singleton(AccessControlledResource.Priviledge.READ);
+        }
+    }    
 }

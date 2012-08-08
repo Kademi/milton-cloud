@@ -327,6 +327,12 @@ function initEdify() {
     });
 }
 
+function resetForm($form) {
+    $form.each(function(){
+        this.reset();
+    });
+}
+
 function edify(container, callback) {
     log("edify", container, callback);
     $("body").removeClass("edifyIsViewMode");
@@ -343,9 +349,9 @@ function edify(container, callback) {
     if( !callback ) {
         callback = function(resp) {
             if( resp.nextHref) {
-                //window.location = resp.nextHref;
+            //window.location = resp.nextHref;
             } else {
-                //window.location = window.location.pathname;
+            //window.location = window.location.pathname;
             }            
         };
     }

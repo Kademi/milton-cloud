@@ -17,6 +17,7 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.vfs.data.DataSession.DirectoryNode;
+import io.milton.vfs.db.Branch;
 import java.io.IOException;
 
 /**
@@ -42,4 +43,12 @@ public interface ContentDirectoryResource extends CommonCollectionResource, Cont
     void onAddedChild(AbstractContentResource aThis);
 
     void onRemovedChild(AbstractContentResource aThis);
+    
+    /**
+     * Get the branch that contains this content (or is this content, if the resource
+     * is itself the BranchFolder
+     * 
+     * @return 
+     */
+    Branch getBranch();
 }

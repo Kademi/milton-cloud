@@ -24,6 +24,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 
 /**
  *
@@ -267,7 +269,30 @@ public abstract class AbstractContentResource extends AbstractResource implement
     }
 
     @Override
-    public boolean isPublic() {
-        return parent.isPublic();
+    public boolean isPublic() {        
+        return parent.getBranch().getRepository().isPublicContent();
     }
+
+    /**
+     * For public repositories we allow all READ operations
+     * 
+     * TODO: should limit this to not include PROPFIND
+     * TODO: a POST is often available to anonymous users but will be rejected
+     * 
+     * @param request
+     * @param method
+     * @param auth
+     * @return 
+     */
+    @Override
+    public boolean authorise(Request request, Method method, Auth auth) {
+        if( !method.isWrite ) {
+            if( isPublic() ) {
+                return true;
+            }
+        }
+        return super.authorise(request, method, auth);
+    }
+    
+    
 }

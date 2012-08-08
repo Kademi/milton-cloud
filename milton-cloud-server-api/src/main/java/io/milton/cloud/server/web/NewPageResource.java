@@ -83,9 +83,25 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             throw new RuntimeException(ex);
         }
     }
-    
-    public static String findAutoName(String baseName, CollectionResource folder, Map<String, String> parameters) {        
-        String nameToUse = getImpliedName(baseName, parameters, folder);
+
+    /**
+     * Just like findAutoName, but does not add .html
+     *
+     * @param baseName
+     * @param folder
+     * @param parameters
+     * @return
+     */
+    public static String findAutoCollectionName(String baseName, CollectionResource folder, Map<String, String> parameters) {
+        return findAutoName(baseName, folder, parameters, false);
+    }
+
+    public static String findAutoName(String baseName, CollectionResource folder, Map<String, String> parameters) {
+        return findAutoName(baseName, folder, parameters, true);
+    }
+
+    public static String findAutoName(String baseName, CollectionResource folder, Map<String, String> parameters, boolean isHtml) {
+        String nameToUse = getImpliedName(baseName, parameters, folder, isHtml);
         if (nameToUse != null) {
             nameToUse = nameToUse.toLowerCase().replace("/", "");
             nameToUse = nameToUse.replace("'", "");
@@ -102,16 +118,15 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
         }
         return nameToUse;
     }
-    
-    
+
     /**
-     * 
+     *
      * @param baseName
      * @param parameters
      * @param folder
-     * @return 
+     * @return
      */
-    public static String getImpliedName(String baseName, Map<String, String> parameters, CollectionResource folder) {        
+    public static String getImpliedName(String baseName, Map<String, String> parameters, CollectionResource folder, boolean isHtml) {
         String nameToCreate = baseName;
         if (nameToCreate.equals("_autoname.html")) {
             if (parameters.containsKey("name")) {
@@ -141,13 +156,13 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             Long l = NamedCounter.increment(folderId, SessionManager.session());
             nameToCreate = nameToCreate.replace("$[counter]", l.toString());
         }
-        if( !nameToCreate.endsWith(".html")) {
-            nameToCreate += ".html";
+        if (isHtml) {
+            if (!nameToCreate.endsWith(".html")) {
+                nameToCreate += ".html";
+            }
         }
         return nameToCreate;
     }
-    
-    
     private final ContentDirectoryResource parent;
     private final String name;
     private RenderFileResource created;
@@ -196,7 +211,6 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
         return findAutoName(baseName, parent, parameters);
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -234,7 +248,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        if( auth == null || auth.getTag() == null ) {
+        if (auth == null || auth.getTag() == null) {
             return false;
         }
         return parent.authorise(request, method, auth);

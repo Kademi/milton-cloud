@@ -3,7 +3,6 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
@@ -334,9 +333,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public boolean isPublic() {
-        return parent.isPublic();
+        return branch.getRepository().isPublicContent();
     }
 
+    @Override
     public Branch getBranch() {
         return branch;
     }

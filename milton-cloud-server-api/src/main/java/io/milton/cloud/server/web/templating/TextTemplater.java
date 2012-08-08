@@ -110,6 +110,7 @@ public class TextTemplater implements Templater {
         if (user != null) {
             datamodel.put("user", user);
         }
+        log.info("writePage: " + templatePath);
         template.merge(datamodel, writer);
         writer.flush();
     }
@@ -130,6 +131,7 @@ public class TextTemplater implements Templater {
 
         @Override
         public InputStream getResourceStream(String path) throws ResourceNotFoundException {
+            log.info("SimpleTemplateLoader: getResourceStream: " + path);
             TemplateSource source = findTemplateSource(path);
             if (source != null) {
                 try {

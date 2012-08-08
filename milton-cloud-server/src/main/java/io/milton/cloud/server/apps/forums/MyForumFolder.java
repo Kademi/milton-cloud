@@ -31,7 +31,7 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class MyForumFolder extends AbstractCollectionResource implements GetableResource{
+public class MyForumFolder extends AbstractCollectionResource implements GetableResource, IForumResource {
    
     private final Forum forum;
     private final CommonCollectionResource parent;

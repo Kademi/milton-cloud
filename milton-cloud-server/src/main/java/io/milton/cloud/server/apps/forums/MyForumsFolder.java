@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class MyForumsFolder extends AbstractCollectionResource implements GetableResource {
+public class MyForumsFolder extends AbstractCollectionResource implements GetableResource, IForumResource {
 
     private static final Logger log = LoggerFactory.getLogger(MyForumsFolder.class);
     

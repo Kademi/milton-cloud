@@ -18,6 +18,10 @@ table td {
 
 }
 
+.tabularBox {
+    min-height: 300px;
+}
+
 .tabularBox .row {
     font-weight:bold;
     font-size:0.90em;

@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import java.util.logging.Level;
 import javax.xml.stream.XMLStreamException;
 
@@ -450,4 +451,25 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
         this.fileResource.replaceContent(in, length);
     }
+    
+    /**
+     * For public repositories we allow all READ operations
+     * 
+     * TODO: should limit this to not include PROPFIND
+     * TODO: a POST is often available to anonymous users but will be rejected
+     * 
+     * @param request
+     * @param method
+     * @param auth
+     * @return 
+     */
+    @Override
+    public boolean authorise(Request request, Request.Method method, Auth auth) {
+        if( !method.isWrite ) {
+            if( isPublic() ) {
+                return true;
+            }
+        }
+        return super.authorise(request, method, auth);
+    }    
 }

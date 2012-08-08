@@ -27,7 +27,7 @@
         $(this).submit(function(e) {            
             e.preventDefault();
             var form = $(this);     
-            log("form submit", form);
+            log("form submit", form, "to" , form.attr("action"));
             resetValidation(container);
             if( checkRequiredFields(form) ) {
                 try {                    

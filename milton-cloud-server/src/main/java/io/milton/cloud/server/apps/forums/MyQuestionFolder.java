@@ -37,7 +37,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class MyQuestionFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class MyQuestionFolder extends AbstractCollectionResource implements GetableResource, PostableResource, IForumResource {
 
     private final ForumPost forumPost;
     private final CommonCollectionResource parent;

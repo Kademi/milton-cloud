@@ -46,6 +46,7 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -315,4 +316,11 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         }
         return super.is(type);
     }
+
+    @Override
+    public Branch getBranch() {
+        return parent.getBranch();
+    }
+    
+    
 }
