@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js">//</script>
+<script type="text/javascript" src="/static/ckeditor36/ckeditor.js">//</script>
+<script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js">//</script>
+<script type="text/javascript" src="/static/ckeditor36/config.js">//</script>
+<link rel="stylesheet" type="text/css" href="/static/ckeditor36/contents.css" />
+<link rel="stylesheet" type="text/css" href="sample.css"/>
+</head>
+<body>
+<form action="/static/demo.php" method="post">
+	<p>
+		<label for="editor">Editor:</label>
+		<textarea cols="80" id="editor" name="editor_office2003" rows="10"><div id="classifer_101768_1344401121269" class="classifer clearfix">						<div class="controller-wrapper">							<div class="button-placeholder">Please right click to add button at here.</div>						</div>						<div class="content-wrapper">							<div class="content active">								<div class="main-content">									<h3 class="notice">Roll over a button on the left for more information.</h3>								</div>							</div>						</div>					</div>
+</textarea>
+		<script type="text/javascript">
+	CKEDITOR.replace('editor', {
+		height: 500,
+		skin: 'office2003',
+		extraPlugins : 'classifer',
+		toolbar :[
+			[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
+			[ 'Classifer', 'ClassiferItem' ]
+		],
+		contentsCss: ['/static/css/font.css?' + Math.round(Math.random() * Math.random() * 10000), '/static/ckeditor36/scratch/classifer/classifer.css?' + Math.round(Math.random() * Math.random() * 10000)]
+	});
+	</script> 
+	</p>
+	<p>
+		<input type="submit" value="Submit" />
+	</p>
+</form>
+</body>
+</html>
