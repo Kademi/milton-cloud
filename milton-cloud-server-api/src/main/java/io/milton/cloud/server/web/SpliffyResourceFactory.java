@@ -33,6 +33,9 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.utils.SessionManager;
 
 /**
+ * 
+ * See DefaultCurrentRootFolderService for notes on domain name resolution
+ * 
  *
  * @author brad
  */
@@ -53,6 +56,8 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private final EventManager eventManager;
     private final SessionManager sessionManager;
     private final CurrentRootFolderService currentRootFolderService;
+    
+    
 
     public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.userDao = userDao;
@@ -99,14 +104,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
         }
 
         if (p.isRoot()) {
-            Resource rootFolder = currentRootFolderService.getRootFolder();
-            if (rootFolder == null) {
-                rootFolder = applicationManager.getPage(null, host);
-                if (rootFolder instanceof RootFolder) {
-                    currentRootFolderService.setRootFolder((RootFolder) rootFolder);
-                }
-                HttpManager.request().getAttributes().put("_spliffy_root_folder", rootFolder);
-            }
+            Resource rootFolder = currentRootFolderService.getRootFolder(host);
             return rootFolder;
         } else {
             Resource rParent = find(host, p.getParent());
@@ -142,4 +140,5 @@ public class SpliffyResourceFactory implements ResourceFactory {
     public SessionManager getSessionManager() {
         return sessionManager;
     }
+    
 }

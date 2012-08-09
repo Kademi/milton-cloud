@@ -110,7 +110,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         String subject; // subject for the email
         if( rootFolder instanceof WebsiteRootFolder) {
             website = ((WebsiteRootFolder)rootFolder).getWebsite();
-            subject = "Password reset for " + website.getName();
+            subject = "Password reset for " + website.getDomainName();
         } else {
             subject = "Password reset for " + org.getName();
         }

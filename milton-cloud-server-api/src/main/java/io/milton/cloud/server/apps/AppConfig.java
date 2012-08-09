@@ -93,7 +93,7 @@ public class AppConfig {
     
     public void set(String settingName, Website w, String settingValue) {
         AppControl appControl = AppControl.find(w, applicationId, SessionManager.session());
-        System.out.println("find for website: " + w.getName() + " = " + appControl);
+        System.out.println("find for website: " + w.getDomainName() + " = " + appControl);
         if( appControl == null ) {
             throw new RuntimeException("Cant save setting because there is no Appcontrol record");
         }

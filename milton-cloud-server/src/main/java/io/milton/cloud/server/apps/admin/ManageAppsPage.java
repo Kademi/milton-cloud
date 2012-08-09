@@ -76,7 +76,7 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
     public String getTitle() {
         String s;
         if (website != null) {
-            s = website.getName();
+            s = website.getDomainName();
         } else {
             s = organisation.getName();
         }

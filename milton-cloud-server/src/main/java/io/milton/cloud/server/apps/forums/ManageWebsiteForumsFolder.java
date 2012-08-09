@@ -102,7 +102,7 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
     }
 
     public String getTitle() {
-        return "Manage forums: " + website.getName();
+        return "Manage forums: " + website.getDomainName();
     }
 
     public List<Website> getWebsites() {
@@ -135,7 +135,7 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
 
     @Override
     public String getName() {
-        return website.getName();
+        return website.getDomainName();
     }
 
     @Override

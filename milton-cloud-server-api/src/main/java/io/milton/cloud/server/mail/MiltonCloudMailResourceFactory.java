@@ -59,7 +59,7 @@ public class MiltonCloudMailResourceFactory implements MailResourceFactory{
         // Now look for a profile which has a admin org that owns the website
         BaseEntity p = BaseEntity.find(w.getOrganisation(), add.user, SessionManager.session());
         if( p == null ) {
-            log.info("baseentity not found: " + add.user + " in website: " + w.getName());
+            log.info("baseentity not found: " + add.user + " in website: " + w.getDomainName());
             return null;
         } else {
             PrincipalResource pr;

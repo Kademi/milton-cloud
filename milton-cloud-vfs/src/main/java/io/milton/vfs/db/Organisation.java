@@ -20,13 +20,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
 
 /**
@@ -46,7 +49,10 @@ import org.hibernate.criterion.Expression;
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name = "ORG_ENTITY")
+@Table(name = "ORG_ENTITY", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"orgId"}),
+}// website DNS names must be unique across whole system
+)
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
@@ -58,10 +64,29 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return (Organisation) crit.uniqueResult();
     }
     
+    public static Organisation findByOrgId(String orgId, Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.add(Expression.eq("orgId", orgId));
+        return (Organisation) crit.uniqueResult();
+    }    
+    
+    private String orgId; // globally unique; used for web addresses for this organisation
     private List<BaseEntity> members;
     private List<Website> websites;
     private List<Group> groups;
 
+    @Column(nullable=false)
+    @Index(name = "idx_orgId")
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
+    
+    
     @OneToMany(mappedBy = "organisation")
     public List<BaseEntity> getMembers() {
         return members;
@@ -143,7 +168,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Website w = new Website();
         w.setOrganisation(this);
         w.setCreatedDate(new Date());
-        w.setName(webName);
+        w.setDomainName(webName);
         w.setPublicTheme(theme);
         w.setInternalTheme(null);
         w.setCurrentBranch(Branch.TRUNK);

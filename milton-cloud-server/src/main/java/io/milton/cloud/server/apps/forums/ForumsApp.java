@@ -58,7 +58,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         Website website = forum.getWebsite();
         String sPort = _(Formatter.class).getPortString();
         String path = "/community/" + forum.getName() + "/" + topic.getName() + "/" + r.getName();
-        String url = "http://" + website.getName() + sPort + path;
+        String url = "http://" + website.getDomainName() + sPort + path;
         return url;
     }
 

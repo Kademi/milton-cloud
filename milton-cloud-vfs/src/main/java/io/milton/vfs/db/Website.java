@@ -37,7 +37,8 @@ import org.hibernate.criterion.Expression;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})
+    @UniqueConstraint(columnNames = {"name"}),
+    @UniqueConstraint(columnNames = {"domainName"}),
 }// website DNS names must be unique across whole system
 )
 public class Website implements Serializable, VfsAcceptor {
@@ -57,23 +58,40 @@ public class Website implements Serializable, VfsAcceptor {
      * @return
      */
     public static Website findByDomainName(String name, Session session) {
-        Website w = findByName(name, session);
+        Website w = findByDomainNameDirect(name, session);
         while (w != null && w.getAliasTo() != null) {
             w = w.getAliasTo();
         }
         return w;
     }
+    
+    public static Website findByDomainNameDirect(String domainName, Session session) {
+        Criteria crit = session.createCriteria(Website.class);
+        crit.add(Expression.eq("domainName", domainName));
+        return DbUtils.unique(crit);
+    }    
 
     public static Website findByName(String name, Session session) {
+        Website w = findByNameDirect(name, session);
+        while (w != null && w.getAliasTo() != null) {
+            w = w.getAliasTo();
+        }
+        return w;        
+    }
+    
+    public static Website findByNameDirect(String name, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.add(Expression.eq("name", name));
         return DbUtils.unique(crit);
     }
+    
     private Organisation organisation;
-    private long id;
-    private String name; // identifies the resource to webdav
+    private long id;    
+    private String name; // the logical name for the website, this will be accessible on an internal domain name, eg bradsite.milton.io
+    private String domainName; // identifies the resource to webdav. This is the DNS name, eg www.bradsite.com
     private Website aliasTo; // if not null, this website is really just an alias for that one
     private String redirectTo; // if not null, this website will redirect to that one
+    private String mailServer; // if not null, will be used for email sending and generating MX records
     private Repository repository;
     private String internalTheme;
     private String publicTheme;
@@ -98,6 +116,16 @@ public class Website implements Serializable, VfsAcceptor {
 
     public void setName(String name) {
         this.name = name;
+    }    
+    
+    @Column(length = 255, nullable = false)
+    @Index(name = "idx_domain_name")
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String name) {
+        this.domainName = name;
     }
 
     /**
@@ -208,6 +236,16 @@ public class Website implements Serializable, VfsAcceptor {
         this.repository = repository;
     }
 
+    public String getMailServer() {
+        return mailServer;
+    }
+
+    public void setMailServer(String mailServer) {
+        this.mailServer = mailServer;
+    }
+    
+    
+
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
@@ -250,7 +288,7 @@ public class Website implements Serializable, VfsAcceptor {
         Website aliasWebsite = new Website();
         aliasWebsite.setOrganisation(getOrganisation());
         aliasWebsite.setCreatedDate(new Date());
-        aliasWebsite.setName(aliasDnsName);
+        aliasWebsite.setDomainName(aliasDnsName);
         aliasWebsite.setPublicTheme(null);
         aliasWebsite.setInternalTheme(null);
         aliasWebsite.setCurrentBranch(Branch.TRUNK);

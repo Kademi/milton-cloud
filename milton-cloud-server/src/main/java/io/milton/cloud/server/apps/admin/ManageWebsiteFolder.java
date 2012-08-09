@@ -87,7 +87,7 @@ public class ManageWebsiteFolder extends AbstractCollectionResource implements G
     }    
     
     public String getTitle() {
-        return "Manage website: " + website.getName();
+        return "Manage website: " + website.getDomainName();
     }
     
     @Override
@@ -168,7 +168,7 @@ public class ManageWebsiteFolder extends AbstractCollectionResource implements G
   
     @Override
     public String getName() {
-        return website.getName();
+        return website.getDomainName();
     }
 
     @Override

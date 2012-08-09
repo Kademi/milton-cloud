@@ -109,7 +109,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             AppControl.initDefaultApps(existing, curUser, now, session);
 
             tx.commit();
-            jsonResult = new JsonResult(true, "Created", c.getName());
+            jsonResult = new JsonResult(true, "Created", c.getDomainName());
         }
         return null;
     }

@@ -24,6 +24,21 @@ import io.milton.cloud.server.web.RootFolder;
  * @author brad
  */
 public interface CurrentRootFolderService {
+    
+    /**
+     * Get the root folder for the current request
+     * 
+     * @return 
+     */
     RootFolder getRootFolder();
-    void setRootFolder(RootFolder r);
+    
+    /**
+     * get the root folder for the given host, returning a previously
+     * resolved one if available for that host
+     * 
+     * @param host
+     * @return 
+     */
+    RootFolder getRootFolder(String host);
+    
 }

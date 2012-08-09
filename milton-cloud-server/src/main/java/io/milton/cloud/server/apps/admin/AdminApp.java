@@ -16,9 +16,12 @@ package io.milton.cloud.server.apps.admin;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
+import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -29,8 +32,10 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.Set;
 
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -38,6 +43,8 @@ import java.util.Set;
  */
 public class AdminApp implements MenuApplication {
 
+    private ApplicationManager applicationManager;
+    
     @Override
     public String getInstanceId() {
         return "admin";
@@ -45,6 +52,7 @@ public class AdminApp implements MenuApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        applicationManager = _(ApplicationManager.class);
         resourceFactory.getSecurityManager().add(new AdminRole());
         resourceFactory.getSecurityManager().add(new UserAdminRole());
     }

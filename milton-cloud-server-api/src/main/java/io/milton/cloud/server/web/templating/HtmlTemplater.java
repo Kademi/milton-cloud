@@ -362,10 +362,10 @@ public class HtmlTemplater {
                     FileResource fr = NodeChildUtils.toFileResource(r);
                     if (fr == null) {
                         if( !"VM_global_library.vm".equals(path )) {
-                            log.info("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getName());
+                            log.info("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getDomainName());
                         }                        
                     } else {
-                        meta = loadContentMeta(fr, wrf.getWebsite().getName(), webPath);
+                        meta = loadContentMeta(fr, wrf.getWebsite().getDomainName(), webPath);
                     }
                 } catch (NotAuthorizedException | BadRequestException | NotFoundException ex) {
                     throw new IOException(ex);
