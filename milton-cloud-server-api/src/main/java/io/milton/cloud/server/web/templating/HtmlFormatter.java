@@ -15,9 +15,7 @@
 package io.milton.cloud.server.web.templating;
 
 import io.milton.http.XmlWriter;
-import io.milton.http.XmlWriter.Element;
 import java.io.ByteArrayOutputStream;
-import java.util.Map.Entry;
 
 /**
  *
@@ -33,7 +31,7 @@ public class HtmlFormatter {
         XmlWriter.Element head = html.begin("head");
         head.writeText("\n");
         if (r.getTitle() != null) {
-            head.begin(null, "title", false).writeText(r.getTitle()).close(true);
+            head.begin(null, "title", false).writeText(r.getTitle(), false).close(true);
         }
         for (WebResource wr : r.getWebResources()) {
             write(writer, wr);
@@ -64,5 +62,6 @@ public class HtmlFormatter {
 
     private void write(XmlWriter writer, WebResource wr) {
         writer.writeText(wr.getRawHtml());
+        writer.newLine();
     }
 }

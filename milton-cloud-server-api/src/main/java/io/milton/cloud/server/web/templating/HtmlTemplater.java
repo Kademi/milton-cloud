@@ -150,7 +150,7 @@ public class HtmlTemplater {
         RequestContext.getCurrent().put(rootFolder);
         if (theme.equals("custom")) {
             RequestContext.getCurrent().put("isCustom", Boolean.TRUE); // can't pass params to velocity template loader, so have to workaround
-        }
+        }        
         String themePath; // path that contains the theme templates Eg /templates/themes/admin/ or /content/theme/
         if (theme.equals("custom")) {
             themePath = "/content/theme/";
@@ -162,6 +162,7 @@ public class HtmlTemplater {
         if (!templatePath.startsWith("/")) {
             if( templatePath.startsWith("theme/")) {
                 templatePath = templatePath.replace("theme/", themePath); // Eg change theme/page to /content/theme/page
+                System.out.println("writePage: replaced theme => " + templatePath);
             } else {
                 templatePath = "/templates/apps/" + templatePath; // Eg change admin/manageUsers to /templates/apps/admin/manageUsers
             }
@@ -183,6 +184,7 @@ public class HtmlTemplater {
         if( !themeTemplatePath.endsWith(".html")) {
             themeTemplatePath += ".html"; // this class only does html templates
         }
+
         Template themeTemplate = getTemplate(themeTemplatePath);
         if (themeTemplate == null) {
             throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);

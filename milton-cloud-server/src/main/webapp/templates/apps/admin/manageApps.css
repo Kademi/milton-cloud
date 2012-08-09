@@ -38,3 +38,8 @@ body .settings {
 div.settings {
     display: none;
 }
+.manageApplications article {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    padding-left: 20px;
+}

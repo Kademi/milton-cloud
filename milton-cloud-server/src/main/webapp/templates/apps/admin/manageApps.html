@@ -6,25 +6,39 @@
     </head>
     <body class="manageApplications">
 
-            <table class="Summary">
-                #foreach($app in $page.apps )
-                <tr>
-                    <td class="CheckBoxWrapper">
-                        $formatter.checkbox("chk_${app.appId}", $app.appId, $app.enabled, $app.appId)
-                        <label for="chk_${app.appId}"></label>
-                    </td>
-                    <td>
-                        <h5>$app.appId</h5>
-                        <p>$page.getSummary($app.appId)</p>
-                    </td>
-                    <td>
-                        #if( $page.hasSettings($app) )
-                        <button class="settings" rel="$app.appId">Manage</button>
-                        #end
-                    </td>
-                </tr>
-                #end
-            </table>            
+        <article class="Note">
+            <p>Applications control large chunks of functionality, like forums or emails. You can add them to websites</p>
+            <p>
+                Applications are made available for websites by activating them on your organisation's Manage Applications page. Available apps are then shown on the website apps list where they can be turned on or off as required.
+            </p>
+        </article>
+
+        #set($apps = $page.apps)
+        #if( $apps.isEmpty() )
+        <article class="Note">
+            <p>No applications are available. This means that the parent organisation has disabled them</p>
+        </article>        
+        #end
+
+        <table class="Summary">            
+            #foreach($app in $apps )
+            <tr>
+                <td class="CheckBoxWrapper">
+                    $formatter.checkbox("chk_${app.appId}", $app.appId, $app.enabled, $app.appId)
+                    <label for="chk_${app.appId}"></label>
+                </td>
+                <td>
+                    <h5>$app.appId</h5>
+                    <p>$page.getSummary($app.appId)</p>
+                </td>
+                <td>
+                    #if( $page.hasSettings($app) )
+                    <button class="settings" rel="$app.appId">Manage</button>
+                    #end
+                </td>
+            </tr>
+            #end
+        </table>            
 
         #foreach($app in $page.apps )
         #if( $page.hasSettings($app) )

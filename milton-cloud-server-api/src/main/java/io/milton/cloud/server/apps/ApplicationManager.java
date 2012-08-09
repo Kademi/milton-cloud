@@ -39,8 +39,8 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import javax.mail.internet.MimeMessage;
 
 /**
@@ -244,37 +244,50 @@ public class ApplicationManager {
     }
 
     public List<Application> findActiveApps(io.milton.vfs.db.Website website) {
-        List<AppControl> list = AppControl.find(website, SessionManager.session());
-        List<Application> activApps = new ArrayList<>();
-        Set<Application> set = new HashSet<>();
-        for (AppControl appC : list) {
-            if (appC.isEnabled()) {
-                Application app = get(appC.getName());
-                if (app != null && !set.contains(app)) {
-                    activApps.add(app);
-                    set.add(app);
-                }
-            }
-        }
-        return activApps;
+        List<Application> available = findActiveApps(website.getOrganisation());        
+        List<AppControl> appControls = AppControl.find(website, SessionManager.session());
+        return findActiveApps(available, appControls);
     }
 
+    /**
+     * Active apps are those which are active for the parent organisation, and
+     * have an AppControl record which has enabled = true
+     * 
+     * @param org
+     * @return 
+     */
     public List<Application> findActiveApps(Organisation org) {
-//        if (org.getOrganisation() == null) {
-//            return apps;
-//        }
-//
-        List<AppControl> list = AppControl.find(org, SessionManager.session());
+        List<Application> available;
+        if( org.getOrganisation() == null ) {
+            available = getApps();
+        } else {
+            available = findActiveApps(org.getOrganisation());
+        }
+        List<AppControl> appControls = AppControl.find(org, SessionManager.session());
+        return findActiveApps(available, appControls);
+    }
+    
+    public List<Application> findActiveApps(List<Application> available, List<AppControl> appControls) {        
+        Map<String,Boolean> enablement = toEnabledMap(appControls);
         List<Application> activApps = new ArrayList<>();
-        for (AppControl appC : list) {
-            if (appC.isEnabled()) {
-                Application app = get(appC.getName());
+        for (Application app : available) {
+            Boolean enabled = enablement.get(app.getInstanceId());
+            if (enabled != null && enabled.booleanValue()) {
                 if (app != null) {
                     activApps.add(app);
                 }
             }
         }
         return activApps;
+    }    
+    
+    private Map<String,Boolean> toEnabledMap(List<AppControl> appControls) {
+        Map<String,Boolean> map = new HashMap<>();
+        for( AppControl ac : appControls ) {
+            map.put(ac.getName(), ac.isEnabled());
+        }
+        return map;
+                
     }
 
     public boolean isActive(Application aThis, Website website) {

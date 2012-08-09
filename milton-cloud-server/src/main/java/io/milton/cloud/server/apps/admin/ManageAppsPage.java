@@ -72,10 +72,10 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
         this.website = website;
         appManager = _(ApplicationManager.class);
     }
-    
+
     public String getTitle() {
         String s;
-        if( website != null ) {
+        if (website != null) {
             s = website.getName();
         } else {
             s = organisation.getName();
@@ -88,7 +88,7 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("settingsAppId")) {
-            String appId = parameters.get("settingsAppId");            
+            String appId = parameters.get("settingsAppId");
             Application app = appManager.get(appId);
             if (app instanceof SettingsApplication) {
                 SettingsApplication settingsApp = (SettingsApplication) app;
@@ -102,7 +102,7 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
                 tx.rollback();
                 jsonResult = new JsonResult(false, "Application does not support settings");
             }
-        } else if( parameters.containsKey("appId")) {
+        } else if (parameters.containsKey("appId")) {
             String appId = parameters.get("appId");
             String sEnabled = parameters.get("enabled");
             Boolean isEnabled = Boolean.parseBoolean(sEnabled);
@@ -139,15 +139,15 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
     public List<AppControlBean> getApps() {
         List<Application> availableApps;
         List<Application> activeApps;
-        if( website != null ) {
+        if (website != null) {
             availableApps = appManager.findActiveApps(website.getOrganisation());
             activeApps = appManager.findActiveApps(website);
         } else {
-            if( organisation.getOrganisation() == null ) {
+            if (organisation.getOrganisation() == null) {
                 availableApps = appManager.getApps(); // all of them
             } else {
                 availableApps = appManager.findActiveApps(organisation.getOrganisation()); // from parent
-            }            
+            }
             activeApps = appManager.findActiveApps(organisation);
         }
         List<AppControlBean> beans = new ArrayList<>();
@@ -167,7 +167,11 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
         log.info("setStatus: " + appId + " = " + enabled);
         Date currentDate = _(CurrentDateService.class).getNow();
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        AppControl.setStatus(appId, organisation, enabled, currentUser, currentDate, session);
+        if (website != null) {
+            AppControl.setStatus(appId, website, enabled, currentUser, currentDate, session);
+        } else {
+            AppControl.setStatus(appId, organisation, enabled, currentUser, currentDate, session);
+        }
     }
 
     @Override

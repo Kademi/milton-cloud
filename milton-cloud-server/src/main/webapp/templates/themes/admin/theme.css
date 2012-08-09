@@ -657,17 +657,17 @@ div.CheckBoxWrapper {
     top: 0;
     
 }
-td.CheckBoxWrapper {
-    width: 80px;
-    height: 80px;    
+td.CheckBoxWrapper, td.CheckBoxWrapper label {
+   height: 80px;
+    width: 105px;
+    cursor: pointer;
 }
 td.CheckBoxWrapper input:checked + label {
-    background: url("images/bg_websites_item.png") no-repeat scroll 5px 50% transparent;
+    background: url("/static/common/icon_app_on.png") no-repeat scroll 5px 50% transparent;
 }
 td.CheckBoxWrapper label {
-    display: block;
-    width: 80px;
-    height: 80px;    
+    display: block;  
+    background: url("/static/common/icon_app_off.png") no-repeat scroll 5px 50% transparent;
 }
 
 .CheckBoxWrapper input[type="checkbox"] {
@@ -994,4 +994,10 @@ button.settings {
     width: 66px;
     text-indent: -9999px;
     border: none;
+}
+.report #module-Course {
+    padding: 20px;
+}
+.dateRange {
+    text-align: right;
 }

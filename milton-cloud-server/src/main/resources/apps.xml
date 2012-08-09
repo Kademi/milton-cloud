@@ -18,7 +18,7 @@
                 <bean class="io.milton.cloud.server.apps.contacts.ContactsApp"/>
                 <bean class="io.milton.cloud.server.apps.signup.SignupApp"/>
                 <bean class="io.milton.cloud.server.apps.admin.AdminApp"/>
-                <bean class="io.milton.cloud.server.apps.admin.reporting.ReportingApp"/>
+                <bean class="io.milton.cloud.server.apps.reporting.ReportingApp"/>
                 <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
                 <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
                 <bean class="io.milton.cloud.server.apps.user.UserApp"/>
