@@ -29,7 +29,9 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.GroupInWebsite;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
@@ -52,6 +54,13 @@ public class ContactsApp implements Application, EventListener {
         return null;
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides end users with address books, which can be accessed and synced from email clients and mobile devices";
+    }
+
+    
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws IOException {
         contactManager = new ContactManager();

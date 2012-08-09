@@ -23,10 +23,12 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Organisation;
 
 /**
  *
@@ -45,6 +47,13 @@ public class WebsiteApp implements Application {
         return "website";
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Required to enable websites. If disabled no websites other then the admin console will be available";
+    }
+
+    
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         applicationManager = _(ApplicationManager.class);

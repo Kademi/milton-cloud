@@ -28,6 +28,7 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.util.Set;
 
 
@@ -49,6 +50,13 @@ public class AdminApp implements MenuApplication {
     }
 
     @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides most admin console functionality, such as managing users, groups, websites, etc";
+    }
+    
+    
+
+    @Override
     public Resource getPage(Resource parent, String requestedName) {
         if (parent instanceof OrganisationFolder) {
             CommonCollectionResource p = (CommonCollectionResource) parent;
@@ -64,7 +72,7 @@ public class AdminApp implements MenuApplication {
                     return new ManageWebsitesFolder(requestedName, p.getOrganisation(), p);
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
-                    return new ManageAppsPage(requestedName, p.getOrganisation(), p);
+                    return new ManageAppsPage(requestedName, p.getOrganisation(), p, null);
                     
             }
         } else if (parent instanceof OrganisationsFolder) {
@@ -72,6 +80,12 @@ public class AdminApp implements MenuApplication {
             if (requestedName.equals("manage")) {
                 MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
                 return new ManageOrgsPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
+            }
+        } else if( parent instanceof ManageWebsiteFolder )  {
+            if( requestedName.equals("apps")) {
+                CommonCollectionResource p = (CommonCollectionResource) parent;
+                ManageWebsiteFolder mwp = (ManageWebsiteFolder) parent;
+                return new ManageAppsPage(requestedName, p.getOrganisation(), p, mwp.getWebsite());
             }
         }
         return null;

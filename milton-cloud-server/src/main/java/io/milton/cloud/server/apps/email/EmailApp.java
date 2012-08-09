@@ -52,6 +52,8 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.mail.*;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -92,6 +94,13 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         return "email";
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides end users with an email inbox, and allows administrators to send emails to groups of users";
+    }
+
+    
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         batchEmailService = new BatchEmailService();

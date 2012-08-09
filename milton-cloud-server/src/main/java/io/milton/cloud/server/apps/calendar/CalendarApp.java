@@ -27,7 +27,9 @@ import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.GroupInWebsite;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +50,13 @@ public class CalendarApp implements Application, EventListener {
     public String getInstanceId() {
         return "calendar";
     }
+
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides users with calendars";
+    }
+    
+    
 
     @Override
     public Resource getPage(Resource parent, String childName) {

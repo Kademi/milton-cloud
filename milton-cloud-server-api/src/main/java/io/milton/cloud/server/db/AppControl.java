@@ -17,6 +17,7 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -37,6 +38,7 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 public class AppControl implements Serializable {
+    private List<AppSetting> appSettings;
 
     public static List<AppControl> find(Website c, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
@@ -219,6 +221,57 @@ public class AppControl implements Serializable {
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
+
+    @OneToMany(mappedBy = "appControl")
+    public List<AppSetting> getAppSettings() {
+        return appSettings;
+    }
+
+    public void setAppSettings(List<AppSetting> appSettings) {
+        this.appSettings = appSettings;
+    }
+
+    public String getSetting(String setting) {
+        if( getAppSettings() != null ) {
+            for( AppSetting appSetting : getAppSettings() ) {
+                if( appSetting.getName().equals(setting)) {
+                    System.out.println("Get setting: " + appSetting.getName() + " = " + appSetting.getPropValue());
+                    return appSetting.getPropValue();
+                }
+            }
+        }
+        return null;
+    }
     
+    public void setSetting(String name, String settingValue, Session session) {
+        AppSetting setting = null;
+        if( getAppSettings() != null ) {
+            for( AppSetting appSetting : getAppSettings() ) {
+                if( appSetting.getName().equals(name)) {
+                    setting = appSetting;
+                    break;
+                }
+            }
+        }
+        if( setting == null ) {
+            if( settingValue == null ) {
+                return ; // DONE
+            }
+            setting = new AppSetting();
+            setting.setAppControl(this);
+            setting.setName(name);
+            if( getAppSettings() == null ) {
+                setAppSettings(new ArrayList<AppSetting>());
+            }
+            getAppSettings().add(setting);
+        }
+        if( settingValue == null ) {
+            session.delete(setting);
+        } else {            
+            setting.setPropValue(settingValue);        
+            session.save(setting);
+            System.out.println("Set setting: " + setting.getName() + " = " + setting.getPropValue());
+        }
+    }    
     
 }

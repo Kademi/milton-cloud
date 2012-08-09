@@ -23,10 +23,19 @@ import org.apache.velocity.context.Context;
 /**
  * An Application which can render portlets. These are sections that can
  * be displayed in other pages
+ * 
+ * See constants in this interface for standard portlet section names, but 
+ * templates are free to choose their own names
  *
  * @author brad
  */
 public interface PortletApplication extends Application{
+    
+    public static final String PORTLET_SECTION_HEADER = "header";
+    public static final String PORTLET_SECTION_DASH_MESSAGES = "dashboardMessages";
+    public static final String PORTLET_SECTION_DASH_PRIMARY = "dashboardPrimary";
+    public static final String PORTLET_SECTION_DASH_SECONDARY = "dashboardSecondary";
+    
     /**
      * 
      * @param portletSection - the name of the section being rendered

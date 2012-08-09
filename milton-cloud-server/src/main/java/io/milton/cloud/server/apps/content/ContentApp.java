@@ -23,12 +23,14 @@ import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.util.Set;
 
 /**
@@ -43,6 +45,13 @@ public class ContentApp implements Application {
     public String getInstanceId() {
         return "content";
     }
+
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides content viewing functions, such as generating menus based on folders";
+    }
+    
+    
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {

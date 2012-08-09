@@ -556,6 +556,7 @@ div.Modal header h3 {
     color: #FFF;
     font-weight: bold;
     padding-left: 15px;
+    margin: 0;
 }
 div.Modal header a.Close {
     position: absolute;
@@ -646,16 +647,36 @@ div.Modal div.ModalContent .FuseChkLabel {
     margin: 3px 5px 0 0;
 }
 /* FuseCheckbox */
+.CheckBoxWrapper {
+    position: relative;    
+}
 div.CheckBoxWrapper {
     display: inline-block;
-    position: relative;
     height: 18px;
-}
-div.CheckBoxWrapper input[type="checkbox"] {
-    opacity: 0;
-    position: absolute;
     left: 0;
     top: 0;
+    
+}
+td.CheckBoxWrapper {
+    width: 80px;
+    height: 80px;    
+}
+td.CheckBoxWrapper input:checked + label {
+    background: url("images/bg_websites_item.png") no-repeat scroll 5px 50% transparent;
+}
+td.CheckBoxWrapper label {
+    display: block;
+    width: 80px;
+    height: 80px;    
+}
+
+.CheckBoxWrapper input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+}
+
+
+div.CheckBoxWrapper input[type="checkbox"] {
     height: 18px;
     width: 18px;
     cursor: pointer;
@@ -966,4 +987,11 @@ aside.Hidden:hover {
 }
 body .cke_skin_office2003 .cke_rcombo .cke_openbutton .cke_icon {
     height: 19px;
+}
+button.settings {
+    background-image: url(images/gear.png);
+    height: 66px;
+    width: 66px;
+    text-indent: -9999px;
+    border: none;
 }

@@ -25,6 +25,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
@@ -59,12 +60,12 @@ public class HtmlTemplateRenderer {
         }
         datamodel.put("page", page);
         datamodel.put("params", params);
-        Profile p = null;        
+        Profile profile = null;        
         if (user != null) {
             datamodel.put("user", user);
-            p = user.getThisUser();
+            profile = user.getThisUser();
         }
-        MenuItem menu = applicationManager.getRootMenuItem(page, p, rootFolder);
+        MenuItem menu = applicationManager.getRootMenuItem(page, profile, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
 
@@ -99,6 +100,7 @@ public class HtmlTemplateRenderer {
             String html = wr.toHtml(themeName);
             pw.write(html + "\n");
         }
+        applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel , pw); 
         pw.write("</head>\n");
         pw.write("<body class=\"");
         List<String> bodyClasses = deDupeBodyClasses(themeTemplateTemplateMeta.getBodyClasses(), bodyTemplateMeta.getBodyClasses(), pageBodyClasses);

@@ -23,6 +23,8 @@ import io.milton.cloud.server.web.*;
 import io.milton.common.Path;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.util.Date;
 
 /**
@@ -34,6 +36,13 @@ public class DynamicCssApp implements ResourceApplication {
     private SpliffyResourceFactory resourceFactory;
 
     private Date modDate;
+
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Allows CSS files to have parameterised which can be configured through the website";
+    }
+    
+    
     
     @Override
     public Resource getResource(RootFolder webRoot, String path) {

@@ -33,6 +33,8 @@ import io.milton.vfs.db.utils.SessionManager;
 import static io.milton.context.RequestContext._;
 import io.milton.http.http11.auth.CookieAuthenticationHandler;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 
 /**
  *
@@ -70,6 +72,13 @@ public class UserApp implements Application, MenuApplication {
     public String getInstanceId() {
         return "userApp";
     }
+
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Core application which provides user functions, such as dashboard, login and profile pages";
+    }
+    
+    
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {

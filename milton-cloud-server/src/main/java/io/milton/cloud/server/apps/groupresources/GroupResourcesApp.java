@@ -4,10 +4,13 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 
 /**
  *
@@ -20,6 +23,13 @@ public class GroupResourcesApp implements MenuApplication {
         return "groupResources";
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Allows users groups to have folders of files, which members of the group can download";
+    }
+
+    
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
 

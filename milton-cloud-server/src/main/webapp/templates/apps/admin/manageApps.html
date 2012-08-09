@@ -2,20 +2,46 @@
     <head>
         <title>$view.title</title>
         <script type="text/javascript" src="manageApps.js">//</script>
+        <link href="manageApps.css" rel="stylesheet" type="text/css" />
     </head>
     <body class="manageApplications">
-        <form method="POST" action="$page.name" onsubmit="return saveApps($(this))">
-            <ul>
+
+            <table class="Summary">
                 #foreach($app in $page.apps )
-                <li>
-                    <div class="CheckBoxWrapper">
-                        $formatter.checkbox($app.appId, $app.enabled)
-                        <label>$app.appId</label>
-                    </div>
-                </li>
+                <tr>
+                    <td class="CheckBoxWrapper">
+                        $formatter.checkbox("chk_${app.appId}", $app.appId, $app.enabled, $app.appId)
+                        <label for="chk_${app.appId}"></label>
+                    </td>
+                    <td>
+                        <h5>$app.appId</h5>
+                        <p>$page.getSummary($app.appId)</p>
+                    </td>
+                    <td>
+                        #if( $page.hasSettings($app) )
+                        <button class="settings" rel="$app.appId">Manage</button>
+                        #end
+                    </td>
+                </tr>
                 #end
-            </ul>
-            <button type="submit">Save</button>
-        </form>
+            </table>            
+
+        #foreach($app in $page.apps )
+        #if( $page.hasSettings($app) )
+        <div class="Modal settings" id="settings_${app.appId}">
+            <header>
+                <h3>Edit Application: $app.appId</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>                           
+            <div class="ModalContent">
+                <form method="POST" action="$page.name">
+                    <input type="hidden" name="settingsAppId" value="$app.appId"/>
+                    #appSettings($app.appId)
+                    <button type="submit" class="Btn" style="float: right">Save</button>
+                </form>
+            </div>
+        </div>
+        #end
+        #end
     </body>
 </html>

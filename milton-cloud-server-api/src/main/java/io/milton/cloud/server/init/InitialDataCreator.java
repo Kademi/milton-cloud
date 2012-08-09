@@ -1,8 +1,10 @@
 package io.milton.cloud.server.init;
 
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.LifecycleApplication;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.db.utils.GroupDao;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.vfs.db.Website;
@@ -15,6 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
@@ -53,6 +56,13 @@ public class InitialDataCreator implements LifecycleApplication {
         initTestData();
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Runs on startup and checks that a minimum core set of data is present in the database";
+    }
+
+    
+    
     /**
      * Can be called from spring init-method
      *
@@ -78,7 +88,11 @@ public class InitialDataCreator implements LifecycleApplication {
 
         Profile admin = initHelper.checkCreateUser(adminUserName, adminPassword, session, rootOrg, null);
 
+        for (Application app : applicationManager.getApps()) {
+            AppControl.setStatus(app.getInstanceId(), rootOrg, true, admin, new Date(), session);
+        }
 
+        
         Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, 0, session, null, "c");
         administrators.grantRole("Administrator", true, session);
         administrators.grantRole("Content author", true, session);

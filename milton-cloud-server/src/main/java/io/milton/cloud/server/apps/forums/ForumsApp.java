@@ -68,6 +68,13 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
     }
 
     @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides forums for end users to ask questions and answer them, and gives administrators functions to manage them";
+    }
+    
+    
+
+    @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         resourceFactory.getSecurityManager().add(new ForumUserRole());
     }

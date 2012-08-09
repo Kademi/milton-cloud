@@ -42,6 +42,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.io.IOException;
 
 /**
@@ -57,6 +59,13 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
         return "myFiles";
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides end users with file storage, which they can syncronise with their own computers";
+    }
+
+    
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.applicationManager = resourceFactory.getApplicationManager();

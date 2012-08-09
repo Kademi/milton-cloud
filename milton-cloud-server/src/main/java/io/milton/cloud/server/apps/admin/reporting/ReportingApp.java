@@ -21,6 +21,8 @@ import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 
 /**
  *
@@ -33,6 +35,13 @@ public class ReportingApp implements MenuApplication {
         return "reporting";
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides reporting and analytics of user behaviour";
+    }
+
+    
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
     }

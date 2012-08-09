@@ -20,6 +20,8 @@ import io.milton.cloud.server.web.ResourceList;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 
 /**
  * Defines an extensibility mechanism for Spliffy.
@@ -66,6 +68,14 @@ public interface Application {
      */
     void addBrowseablePages(CollectionResource parent, ResourceList children);
     
+    /**
+     * Return a textual summary of the application and its configuration (if any)
+     * for the given org and (optionally) website
+     * 
+     * @param rootFolder
+     * @return 
+     */
+    String getSummary(Organisation organisation, Website website);
 
 
     

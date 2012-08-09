@@ -57,6 +57,13 @@ public class SignupApp implements Application {
     }
 
     @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides signup pages, which allows people to join your websites and groups";
+    }
+
+    
+    
+    @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         userManagementProcess = buildProcess();
         eventManager = resourceFactory.getEventManager();

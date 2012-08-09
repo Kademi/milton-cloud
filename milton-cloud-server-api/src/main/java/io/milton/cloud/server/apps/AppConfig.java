@@ -1,6 +1,12 @@
 package io.milton.cloud.server.apps;
 
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.context.RootContext;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.Properties;
 
 /**
@@ -9,10 +15,12 @@ import java.util.Properties;
  */
 public class AppConfig {
 
+    private final String applicationId;
     private final Properties properties;
     private final RootContext context;
 
-    public AppConfig(Properties properties, RootContext context) {
+    public AppConfig(String applicationId, Properties properties, RootContext context) {
+        this.applicationId = applicationId;
         this.properties = properties;
         this.context = context;
     }
@@ -20,8 +28,7 @@ public class AppConfig {
     public RootContext getContext() {
         return context;
     }
-            
-    
+
     public Integer getInt(String name) {
         String s = properties.getProperty(name);
         if (s == null) {
@@ -30,20 +37,67 @@ public class AppConfig {
             return Integer.parseInt(s);
         }
     }
-    
+
     public void setInt(String name, Integer value) {
-        if( value == null ) {
+        if (value == null) {
             properties.remove(name);
         } else {
             properties.setProperty(name, value.toString());
         }
     }
-    
+
     public void add(String name, String val) {
         properties.put(name, val);
     }
 
+    /**
+     * Get a statically configured system wide property for this application
+     *
+     * @param key
+     * @return
+     */
     public String get(String key) {
         return properties.getProperty(key);
     }
+
+    /**
+     * Get a setting for this application within the RootFolder given (ie an
+     * organisation or website setting)
+     *
+     * @param setting
+     * @param rootFolder
+     * @return
+     */
+    public String get(String setting, Organisation org) {
+        AppControl appControl = AppControl.find(org, applicationId, SessionManager.session());        
+        if( appControl == null ) {
+            return null;
+        }
+        return appControl.getSetting(setting);
+    }
+    
+    public String get(String setting, Website w) {
+        AppControl appControl = AppControl.find(w, applicationId, SessionManager.session());
+        return appControl.getSetting(setting);
+    }    
+    
+    public void set(String settingName, Organisation org, String settingValue) {
+        AppControl appControl = AppControl.find(org, applicationId, SessionManager.session());
+        System.out.println("find for org: " + org.getName() + " = " + appControl);
+        if( appControl == null ) {
+            throw new RuntimeException("Cant save setting because there is no Appcontrol record");
+        }
+        appControl.setSetting(settingName, settingValue, SessionManager.session());
+        
+    }
+    
+    public void set(String settingName, Website w, String settingValue) {
+        AppControl appControl = AppControl.find(w, applicationId, SessionManager.session());
+        System.out.println("find for website: " + w.getName() + " = " + appControl);
+        if( appControl == null ) {
+            throw new RuntimeException("Cant save setting because there is no Appcontrol record");
+        }
+        appControl.setSetting(settingName, settingValue, SessionManager.session());
+        
+    }    
 }

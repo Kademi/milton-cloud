@@ -25,6 +25,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
 
@@ -50,6 +51,13 @@ public class OrganisationsApp implements Application {
         this.resourceFactory = resourceFactory;
     }
 
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        return "Core appliation which allows organisations to be configured. If disabled the organisation cannot be directly accessed";
+    }
+
+    
+    
     /**
      * For a root resource (ie where parent is null) the requestedname will be
      * the hostname

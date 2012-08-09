@@ -87,7 +87,12 @@ public class ApplicationManager {
 
     public List<Application> getActiveApps() {
         RootFolder rootFolder = currentRootFolderService.getRootFolder();
+        return getActiveApps(rootFolder);
+    }
+    
+    public List<Application> getActiveApps(RootFolder rootFolder) {
         if (rootFolder == null) {
+            log.warn("No root folder, all apps are active");
             return apps;
         } else {
             List<Application> active = (List<Application>) rootFolder.getAttributes().get("activeApps");
@@ -98,8 +103,7 @@ public class ApplicationManager {
             }
             return active;
         }
-
-    }
+    }    
 
     public void init(SpliffyResourceFactory resourceFactory) {
         if (appsConfigDir == null) {
@@ -176,7 +180,7 @@ public class ApplicationManager {
     }
 
     /**
-     * TODO: make this read from per-app properties
+     * TODO: make this read from the database
      *
      * @param app
      * @return
@@ -188,9 +192,9 @@ public class ApplicationManager {
             try (InputStream fin = new FileInputStream(configFile)) {
                 props.load(fin);
             }
-            return new AppConfig(props, rootContext);
+            return new AppConfig(app.getInstanceId(), props, rootContext);
         } else {
-            AppConfig config = new AppConfig(props, rootContext);
+            AppConfig config = new AppConfig(app.getInstanceId(),props, rootContext);
             if (app instanceof LifecycleApplication) {
                 ((LifecycleApplication) app).initDefaultProperties(config);
                 try (FileOutputStream fout = new FileOutputStream(configFile)) {
@@ -256,10 +260,10 @@ public class ApplicationManager {
     }
 
     public List<Application> findActiveApps(Organisation org) {
-        if (org.getOrganisation() == null) {
-            return apps;
-        }
-
+//        if (org.getOrganisation() == null) {
+//            return apps;
+//        }
+//
         List<AppControl> list = AppControl.find(org, SessionManager.session());
         List<Application> activApps = new ArrayList<>();
         for (AppControl appC : list) {
@@ -284,7 +288,7 @@ public class ApplicationManager {
     }
 
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, org.apache.velocity.context.Context context, Writer writer) throws IOException {
-        for (Application app : getActiveApps()) {
+        for (Application app : getActiveApps(rootFolder)) {
             if (app instanceof PortletApplication) {
                 ((PortletApplication) app).renderPortlets(portletSection, currentUser, rootFolder, context, writer);
             }

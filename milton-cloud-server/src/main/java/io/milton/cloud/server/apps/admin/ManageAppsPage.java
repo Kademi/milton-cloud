@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -59,24 +61,55 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
+    private final Website website; // optional
     private JsonResult jsonResult;
+    ApplicationManager appManager;
 
-    public ManageAppsPage(String name, Organisation organisation, CommonCollectionResource parent) {
+    public ManageAppsPage(String name, Organisation organisation, CommonCollectionResource parent, Website website) {
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
+        this.website = website;
+        appManager = _(ApplicationManager.class);
+    }
+    
+    public String getTitle() {
+        String s;
+        if( website != null ) {
+            s = website.getName();
+        } else {
+            s = organisation.getName();
+        }
+        return "Manage applications: " + s;
     }
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        for (AppControlBean a : getApps()) {
-            boolean enabled = parameters.containsKey(a.getAppId());
-            setStatus(a.getAppId(), enabled, session);
+        if (parameters.containsKey("settingsAppId")) {
+            String appId = parameters.get("settingsAppId");            
+            Application app = appManager.get(appId);
+            if (app instanceof SettingsApplication) {
+                SettingsApplication settingsApp = (SettingsApplication) app;
+                jsonResult = settingsApp.processForm(parameters, files, organisation, website);
+                if (jsonResult.isStatus()) {
+                    tx.commit();
+                } else {
+                    tx.rollback();
+                }
+            } else {
+                tx.rollback();
+                jsonResult = new JsonResult(false, "Application does not support settings");
+            }
+        } else if( parameters.containsKey("appId")) {
+            String appId = parameters.get("appId");
+            String sEnabled = parameters.get("enabled");
+            Boolean isEnabled = Boolean.parseBoolean(sEnabled);
+            setStatus(appId, isEnabled, session);
+            tx.commit();
+            jsonResult = new JsonResult(true);
         }
-        tx.commit();
-        jsonResult = new JsonResult(true);
         return null;
     }
 
@@ -89,12 +122,36 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
         }
     }
 
+    public boolean hasSettings(AppControlBean appBean) {
+        Application app = appManager.get(appBean.getAppId());
+        return (app instanceof SettingsApplication);
+    }
+
+    public String getSummary(String appId) {
+        Application app = appManager.get(appId);
+        if (app != null) {
+            return app.getSummary(organisation, website);
+        } else {
+            return "Unknown app: " + appId;
+        }
+    }
+
     public List<AppControlBean> getApps() {
-        ApplicationManager appManager = _(ApplicationManager.class);
+        List<Application> availableApps;
         List<Application> activeApps;
-        activeApps = appManager.findActiveApps(organisation);
+        if( website != null ) {
+            availableApps = appManager.findActiveApps(website.getOrganisation());
+            activeApps = appManager.findActiveApps(website);
+        } else {
+            if( organisation.getOrganisation() == null ) {
+                availableApps = appManager.getApps(); // all of them
+            } else {
+                availableApps = appManager.findActiveApps(organisation.getOrganisation()); // from parent
+            }            
+            activeApps = appManager.findActiveApps(organisation);
+        }
         List<AppControlBean> beans = new ArrayList<>();
-        for (Application app : appManager.getApps()) {
+        for (Application app : availableApps) {
             boolean enabled = isEnabled(app, activeApps);
             AppControlBean bean = new AppControlBean(app.getInstanceId(), enabled);
             beans.add(bean);
@@ -122,7 +179,7 @@ public class ManageAppsPage extends AbstractResource implements GetableResource,
     public CommonCollectionResource getParent() {
         return parent;
     }
-    
+
     @Override
     public String getName() {
         return name;

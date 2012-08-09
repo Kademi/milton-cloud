@@ -19,13 +19,17 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.forums.ManageTopicFolder;
 import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.db.ForumTopic;
+import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -48,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
@@ -59,19 +64,32 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageWebsitePage extends AbstractResource implements GetableResource, PostableResource {
+public class ManageWebsiteFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ManageWebsitePage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageWebsiteFolder.class);
     private final Website website;
     private final CommonCollectionResource parent;
     private JsonResult jsonResult;
     private Map<String, String> themeParams;
+    private ResourceList children;
 
-    public ManageWebsitePage(Website website, CommonCollectionResource parent) {
+    public ManageWebsiteFolder(Website website, CommonCollectionResource parent) {
         this.parent = parent;
         this.website = website;
     }
 
+   @Override
+    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+        if (children == null) {
+            children = new ResourceList();
+        }
+        return children;
+    }    
+    
+    public String getTitle() {
+        return "Manage website: " + website.getName();
+    }
+    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
@@ -195,4 +213,5 @@ public class ManageWebsitePage extends AbstractResource implements GetableResour
     public List<GroupInWebsite> getGroupsInWebsite() {
         return website.groups(SessionManager.session());
     }
+
 }
