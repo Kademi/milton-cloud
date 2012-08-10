@@ -333,19 +333,11 @@ function resetForm($form) {
     });
 }
 
-function edify(container, callback) {
+function edify(container, cssFiles, callback) {
     log("edify", container, callback);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
-    
-    initHtmlEditors(["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
-    
-    $(".inputTextEditor").each(function(i, n) {
-        var $n = $(n);
-        var s = $n.text();
-        $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
-    });
-    
+        
     if( !callback ) {
         callback = function(resp) {
             if( resp.nextHref) {
@@ -356,55 +348,85 @@ function edify(container, callback) {
         };
     }
     
-    container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
-    $("#edifyForm").append("<input type='hidden' name='body' value='' />");
+    container.animate({
+        opacity: 0
+    }, 200, function() {
+        initHtmlEditors(cssFiles);
     
-    $("#edifyForm").submit(function() {
-        var form = $("#edifyForm");
-        log("submit form", form);
-        for( var key in CKEDITOR.instances) {
-            var editor = CKEDITOR.instances[key];
-            var content = editor.getData();
-            var inp = $("input[name=" + key + "], textarea[name=" + key + "]");
-            if( inp ) {
-                inp.val(content);
-            } else {
-                inp = $("<input type='hidden' name='" + key + "/>");
-                form.append(inp);
-                inp.val(content);
-            }
-        }
-        
-        var data = form.serialize();
-
-        try {
-            //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
-            $.ajax({
-                type: 'POST',
-                url: $("#edifyForm").attr("action"),
-                data: data,
-                dataType: "json",
-                success: function(resp) {
-                    ajaxLoadingOff();
-                    log("common.js: edify: save success", resp, window.location.path);
-                    if( callback ) {
-                        log("call callback", callback);
-                        callback(resp);
-                    } else {
-                        log("no callback");
-                    }
-                },
-                error: function(resp) {
-                    ajaxLoadingOff();
-                    alert("err");
-                }
-            });     
-        } catch(e) {
-            log("exception", e);
-        }
-        return false;
+        $(".inputTextEditor").each(function(i, n) {
+            var $n = $(n);
+            var s = $n.text();
+            $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
+        });        
+        container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
+        $("#edifyForm").append("<input type='hidden' name='body' value='' />");
+        var buttons = $("<div class='buttons'></div>");
+        $("#edifyForm").prepend(buttons);
+        var title = $("<input type='text' name='title' id='title' />");
+        title.val(document.title);
+        buttons.append(title);
+        buttons.append("<button class='save' type='submit'>Save</button>");
+        var btnCancel = $("<button class='cancel' type='button'>Cancel</button>");
+        btnCancel.click(function() {
+            window.location.reload()
+        });
+        buttons.append(btnCancel);
+            
+        $("#edifyForm").submit(function() {
+            submitEdifiedForm();
+        });
+        log("done hide, now show again");
+        container.animate({
+            opacity: 1
+        },500);
     });
-//$("#edifyBody").wrap("<textarea></textarea>");
+
+}
+
+function submitEdifiedForm() {
+    var form = $("#edifyForm");
+    log("submit form", form);
+    for( var key in CKEDITOR.instances) {
+        var editor = CKEDITOR.instances[key];
+        var content = editor.getData();
+        var inp = $("input[name=" + key + "], textarea[name=" + key + "]");
+        if( inp ) {
+            inp.val(content);
+        } else {
+            inp = $("<input type='hidden' name='" + key + "/>");
+            form.append(inp);
+            inp.val(content);
+        }
+    }
+        
+    var data = form.serialize();
+
+    try {
+        //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
+        $.ajax({
+            type: 'POST',
+            url: $("#edifyForm").attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(resp) {
+                ajaxLoadingOff();
+                log("common.js: edify: save success", resp, window.location.path);
+                if( callback ) {
+                    log("call callback", callback);
+                    callback(resp);
+                } else {
+                    log("no callback");
+                }
+            },
+            error: function(resp) {
+                ajaxLoadingOff();
+                alert("err");
+            }
+        });     
+    } catch(e) {
+        log("exception", e);
+    }
+    return false;    
 }
 
 function confirmDelete(href, name, callback) {

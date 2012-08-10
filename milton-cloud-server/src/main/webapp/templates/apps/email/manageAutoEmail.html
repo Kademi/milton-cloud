@@ -197,7 +197,7 @@
             jQuery(function() {
                 initEditEmailPage();
                 $("form").forms();
-                edify($("form.Details"));
+                edify($("form.Details"), ["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
                 $("#eventId").change(function() {
                     showAppropriateTriggerOptions();
                 });
