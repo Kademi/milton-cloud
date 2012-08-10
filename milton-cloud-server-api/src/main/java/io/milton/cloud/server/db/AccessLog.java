@@ -14,10 +14,13 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 
 /**
@@ -30,6 +33,8 @@ public class AccessLog {
     
     
     private long id;
+    private Organisation organisation;
+    private Website website;
     private String reqHost;
     private String url;
     private String referrer;
@@ -56,6 +61,26 @@ public class AccessLog {
         this.id = id;
     }    
 
+    @ManyToOne
+    public Organisation getOrganisation() {
+        return organisation;
+    }
+
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
+    }
+
+    @ManyToOne
+    public Website getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(Website website) {
+        this.website = website;
+    }
+
+    
+    
     public String getReqHost() {
         return reqHost;
     }

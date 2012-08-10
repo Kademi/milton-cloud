@@ -16,8 +16,8 @@
  */
 package io.milton.cloud.server.web.templating;
 
-import io.milton.cloud.server.apps.website.WebsiteApp;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.common.Path;
@@ -70,7 +70,8 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
     }
 
     public FileResource getCurrentFileResource() {
-        WebsiteRootFolder wrf = _(WebsiteApp.class).getPage(null, websiteName);
+        CurrentRootFolderService currentRootFolderService = _(CurrentRootFolderService.class);
+        WebsiteRootFolder wrf = (WebsiteRootFolder) currentRootFolderService.getRootFolder(websiteName);
         if (wrf == null) {
             log.info("no website root folder");
             return null;

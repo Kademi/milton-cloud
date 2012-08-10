@@ -177,14 +177,14 @@ public class InitHelper {
         return item + "";
     }
 
-    public Website checkCreateWebsite(Session session, Organisation org, String webName, String theme, Profile user, String... aliases) {
+    public Website checkCreateWebsite(Session session, Organisation org, String name, String dnsName, String theme, Profile user, String... aliases) {
         for (Website w : org.websites()) {
-            if (w.getDomainName().equals(webName)) {
+            if (w.getDomainName().equals(dnsName)) {
                 return w;
             }
         }
 
-        Website mainWebsite = org.createWebsite(webName, theme, user, session);
+        Website mainWebsite = org.createWebsite(name, dnsName, theme, user, session);
 
         Repository r = mainWebsite.getRepository();
         r.setPublicContent(true); // allow public access
@@ -195,7 +195,7 @@ public class InitHelper {
         r.setAttribute("logo", "<img src='/content/theme/images/logo.png' alt='Logo' />", session);
 
         for (String alias : aliases) {
-            System.out.println("-- Create website: " + webName + " with alias: " + alias);
+            System.out.println("-- Create website: " + dnsName + " with alias: " + alias);
             mainWebsite.createAlias(alias, session);
         }
 

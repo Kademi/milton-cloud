@@ -24,6 +24,14 @@ import java.util.Date;
  * @author brad
  */
 public interface JsonReport {
+    
+    /**
+     * Just a simple unique identifier for this report
+     * 
+     * @return 
+     */
+    String getReportId();
+    
     /**
      * Run the report and return the data in the GraphData object. If there
      * are problems you can set messages as appropriate in the jsonResult
@@ -37,4 +45,13 @@ public interface JsonReport {
      * @return 
      */
     GraphData runReport(Organisation org, Website website, Date start, Date finish, JsonResult jsonResult);
+
+    /**
+     * Get the title for this report, given the organisation and website
+     * 
+     * @param organisation
+     * @param website
+     * @return 
+     */
+    String getTitle(Organisation organisation, Website website);
 }

@@ -14,16 +14,17 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
-import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -32,18 +33,28 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
-import io.milton.vfs.db.utils.SessionManager;
 import java.util.Set;
 
 import static io.milton.context.RequestContext._;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author brad
  */
-public class AdminApp implements MenuApplication {
+public class AdminApp implements MenuApplication, ReportingApplication {
 
     private ApplicationManager applicationManager;
+    
+    private List<JsonReport> reports;
+
+    public AdminApp() {
+        reports = new ArrayList<>();
+        reports.add(new WebsiteAccessReport());
+    }
+    
+    
     
     @Override
     public String getInstanceId() {
@@ -131,6 +142,11 @@ public class AdminApp implements MenuApplication {
                 parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;
         }
+    }
+
+    @Override
+    public List<JsonReport> getReports(Organisation org, Website website) {
+        return reports;
     }
     
     public class AdminRole implements Role {

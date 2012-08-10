@@ -881,7 +881,7 @@ select.Medium { width: 100px; }
 #manageGroup div.Group div.ContentGroup ul li aside a.Edit { background-image: url(images/icon_edit.png); }
 #manageGroup div.Group div.ContentGroup ul li aside a.Delete { background-image: url(images/icon_delete.png); }
 
-#manageWebsite table.Summary td {
+.tick td , #manageWebsite table.Summary td {
     background: url(images/bg_websites_item.png) no-repeat 5px 50%;
 }
 

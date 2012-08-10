@@ -41,4 +41,11 @@ public interface CurrentRootFolderService {
      */
     RootFolder getRootFolder(String host);
     
+    /**
+     * The primary domain is the one which the server instance is initially configured on
+     * 
+     * @return 
+     */
+    String getPrimaryDomain();
+    
 }

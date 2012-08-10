@@ -14,10 +14,17 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -56,16 +63,32 @@ public class WebsiteReportsFolder extends AbstractCollectionResource implements 
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        MenuItem.setActiveIds("menuReporting", "menuReportingHome", "menuReportsWebsite" + website.getName());
+        _(HtmlTemplater.class).writePage("reporting/websiteHome", this, params, out);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if( children == null ) {
-            
+            children = new ResourceList();
+            RootFolder rootFolder = WebUtils.findRootFolder(this);
+            for( Application app : applicationManager.getActiveApps(rootFolder) ) {
+                if( app instanceof ReportingApplication ) {
+                    ReportingApplication rapp = (ReportingApplication) app;
+                    for( JsonReport r : rapp.getReports(getOrganisation(), website)) {
+                        ReportPage p = new ReportPage(r.getReportId(), this, r.getTitle(getOrganisation(), website), r, website);
+                        children.add(p);
+                    }
+                }
+            }
             applicationManager.addBrowseablePages(this, children);
         }
         return children;
     }    
+    
+    public String getTitle() {
+        return "Reports home";
+    }
     
     @Override
     public CommonCollectionResource getParent() {
@@ -79,7 +102,7 @@ public class WebsiteReportsFolder extends AbstractCollectionResource implements 
 
     @Override
     public String getName() {
-        return website.getDomainName();
+        return website.getName();
     }
 
     @Override

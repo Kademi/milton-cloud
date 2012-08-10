@@ -162,13 +162,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * creates an alias subdomain if the alias argument is not null
      *
      */
-    public Website createWebsite(String webName, String theme, Profile user, Session session) {
-        Repository r = createRepository(webName, user, session);
+    public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {
+        Repository r = createRepository(dnsName, user, session);
 
         Website w = new Website();
         w.setOrganisation(this);
         w.setCreatedDate(new Date());
-        w.setDomainName(webName);
+        w.setName(name);
+        w.setDomainName(dnsName);
         w.setPublicTheme(theme);
         w.setInternalTheme(null);
         w.setCurrentBranch(Branch.TRUNK);
@@ -178,10 +179,19 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return w;
     }
 
+    /**
+     * Creates an organisation with an orgId the same as its name. Note that
+     * orgId must be unique globally, so this might not always work
+     * 
+     * @param orgName
+     * @param session
+     * @return 
+     */
     public Organisation createChildOrg(String orgName, Session session) {
         Organisation o = new Organisation();
         o.setOrganisation(this);
         o.setName(orgName);
+        o.setOrgId(orgName);
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
         session.save(o);

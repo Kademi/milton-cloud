@@ -44,6 +44,13 @@ public interface RootFolder extends CommonCollectionResource {
      * @return 
      */
     Map<String,Object> getAttributes();
+
+    /**
+     * Identifier for this root folder
+     * 
+     * @return 
+     */
+    String getId();
     
 
 }

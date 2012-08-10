@@ -18,6 +18,8 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -56,11 +58,14 @@ public class ReportsHomeFolder extends AbstractCollectionResource implements Get
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        MenuItem.setActiveIds("menuReporting");
+        _(HtmlTemplater.class).writePage("reporting/home", this, params, out);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if( children == null ) {
+            children = new ResourceList();
             if( getOrganisation().getWebsites() != null ) {
                 for( Website w : getOrganisation().getWebsites() ) {
                     WebsiteReportsFolder f = new WebsiteReportsFolder(w, parent);

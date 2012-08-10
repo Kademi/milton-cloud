@@ -38,15 +38,16 @@ function runReport() {
         }
     });                
 }
-function showGraph(data) {
+function showGraph(graphData) {
+    log("showGraph", graphData);
     $("#annual").html("");
-    if( data ) {
+    if( graphData ) {
         Morris.Line({
             element: 'annual',
-            data: data,
-            xkey: 'date',
-            ykeys: ['value'],
-            labels: ['Series A']
+            data: graphData.data,
+            xkey: graphData.xkey,
+            ykeys: graphData.ykeys,
+            labels: graphData.labels
         });
     }
 }

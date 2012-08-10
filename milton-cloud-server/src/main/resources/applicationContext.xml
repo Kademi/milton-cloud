@@ -62,7 +62,9 @@
             
     <bean id="event.manager" class="io.milton.event.EventManagerImpl"/>
     
-    <bean id="current.root.folder.service" class="io.milton.cloud.server.manager.DefaultCurrentRootFolderService"></bean>
+    <bean id="current.root.folder.service" class="io.milton.cloud.server.manager.DefaultCurrentRootFolderService">
+        <property name="primaryDomain" value="${primary.domain}"  />
+    </bean>
         
     <bean id="content.type.service" class="io.milton.common.DefaultContentTypeService"/>
     
@@ -118,6 +120,7 @@
         <constructor-arg>
             <list>
                 <ref local="event.manager" />
+                <ref local="current.root.folder.service"/>
             </list>
         </constructor-arg>
     </bean>       

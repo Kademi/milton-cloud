@@ -14,22 +14,21 @@
  */
 package io.milton.cloud.server.mail;
 
-import io.milton.cloud.server.apps.website.WebsiteApp;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.mail.MailResourceFactory;
 import io.milton.mail.Mailbox;
 import io.milton.mail.MailboxAddress;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 
-import static io.milton.context.RequestContext._;         
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Group;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -40,6 +39,7 @@ public class MiltonCloudMailResourceFactory implements MailResourceFactory{
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MiltonCloudMailResourceFactory.class);
     
     private final SpliffyResourceFactory resourceFactory;
+    
 
     public MiltonCloudMailResourceFactory(SpliffyResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
@@ -49,7 +49,8 @@ public class MiltonCloudMailResourceFactory implements MailResourceFactory{
     @Override
     public Mailbox getMailbox(MailboxAddress add) {
         log.info("getMailbox: " + add);
-        WebsiteRootFolder wrf = _(WebsiteApp.class).getPage(null, add.domain);
+        CurrentRootFolderService currentRootFolderService = _(CurrentRootFolderService.class);
+        WebsiteRootFolder wrf = (WebsiteRootFolder) currentRootFolderService.getRootFolder(add.domain);
         if( wrf == null ) {
             log.info("web not found: " + add.domain);
             return null;

@@ -21,12 +21,15 @@ import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.Utils;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * Stores the root folder in a request attribute. Is null safe, ie does nothing
@@ -66,12 +69,7 @@ import org.hibernate.Session;
 public class DefaultCurrentRootFolderService implements CurrentRootFolderService {
 
     public static String ROOT_FOLDER_NAME = "_spliffy_root_folder";
-    private final ApplicationManager applicationManager;
     private String primaryDomain = "localhost";
-
-    public DefaultCurrentRootFolderService(ApplicationManager applicationManager) {
-        this.applicationManager = applicationManager;
-    }
 
     @Override
     public RootFolder getRootFolder() {
@@ -100,6 +98,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         return rootFolder;
     }
 
+    @Override
     public String getPrimaryDomain() {
         return primaryDomain;
     }
@@ -112,20 +111,27 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
+        System.out.println("resolve: " + host);
         Session session = SessionManager.session();
-        if (host.endsWith(primaryDomain)) {
-            String subdomain = stripSuffix(host, primaryDomain);
+        ApplicationManager applicationManager = _(ApplicationManager.class);
+        String primaryDomainSuffix = "." + primaryDomain;
+        if (host.endsWith(primaryDomainSuffix)) {
+            String subdomain = Utils.stripSuffix(host, primaryDomainSuffix);
+            System.out.println("subdoman: " + subdomain);
             // If starts with admin. then look for an organisation, will go to admin console
             if (subdomain.startsWith("admin.")) {
-                String orgName = stripPrefix(subdomain, ".admin");
+                String orgName = Utils.stripPrefix(subdomain, "admin.");
+                System.out.println("look for org: " + orgName);
                 Organisation org = Organisation.findByOrgId(orgName, session);
                 if (org != null) {
+                    System.out.println("found: " + org.getName());
                     return new OrganisationRootFolder(applicationManager, org);
                 }
             }
             // otherwise, look for a website with a name that matches the subdomain
             Website website = Website.findByName(subdomain, session);
             if (website != null) {
+                System.out.println("found website: " + website.getName());
                 return new WebsiteRootFolder(applicationManager, website);
             }
         }
@@ -141,14 +147,8 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         if (org == null) {
             throw new RuntimeException("No root organisation");
         }
+        System.out.println("fall through to rootorg: " + org.getOrgId());
         return new OrganisationRootFolder(applicationManager, org);
     }
 
-    private String stripSuffix(String host, String primaryDomain) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    private String stripPrefix(String subdomain, String admin) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 }

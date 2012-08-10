@@ -18,10 +18,10 @@ package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -80,7 +80,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             log.info("processForm: newName: " + newName);
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
-            String newAlias = parameters.get("newAlias");
+            String newDnsName = parameters.get("newDnsName");
 
             Website existing = Website.findByName(newName, session);
             if (existing != null) {
@@ -88,23 +88,10 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
                 jsonResult.addFieldMessage("newName", "Please choose a unique name");
                 return null;
             }
-            if (newAlias != null && newAlias.trim().length() > 0) {
-                newAlias = newAlias.trim();
-                existing = Website.findByName(newAlias, session);
-                if (existing != null) {
-                    jsonResult = new JsonResult(false, "Alias name is already registered in this system");
-                    jsonResult.addFieldMessage("newAlias", "Please choose a unique alias");
-                    return null;
-                }
-            }
             Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-            Website c = getOrganisation().createWebsite(newName, null, curUser, session);
+            Website c = getOrganisation().createWebsite( newName, newDnsName, null, curUser, session);
             session.save(c);
             
-            if( newAlias != null && newAlias.length() > 0 ) {
-                c.createAlias(newAlias, session);
-            }
-
             Date now = _(CurrentDateService.class).getNow();
             AppControl.initDefaultApps(existing, curUser, now, session);
 
@@ -187,5 +174,9 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
 
     public List<Website> getWebsites() {
         return organisation.websites();
+    }
+    
+    public String websiteAddress(Website w) {
+        return w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
     }
 }

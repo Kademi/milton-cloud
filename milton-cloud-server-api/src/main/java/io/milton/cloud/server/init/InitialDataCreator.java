@@ -17,11 +17,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,11 +99,11 @@ public class InitialDataCreator implements LifecycleApplication {
         users.grantRole("Content author", true, session);
 
         admin.addToGroup(administrators, rootOrg).addToGroup(users, rootOrg);
-        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton.io", "fuse", admin, "milton.localhost"); // can be accessed on milton.localhost or milton.io
+        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "fuse", admin); // can be accessed on milton.localhost or milton.io
         initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
         miltonSite.addGroup(users, session);
 
-        Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "my.milton.io", "fuse", admin, "mymilton.localhost"); // can be accessed on mymilton.localhost or my.milton.io
+        Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "fuse", admin); // can be accessed on mymilton.localhost or my.milton.io
         initHelper.enableApps(myMiltonSite, admin, session, "admin", "users", "organisations", "website", "myFiles", "calendar", "contacts", "email");
         myMiltonSite.addGroup(users, session);
 

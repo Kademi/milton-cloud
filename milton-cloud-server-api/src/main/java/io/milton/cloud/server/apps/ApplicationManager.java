@@ -95,11 +95,12 @@ public class ApplicationManager {
             log.warn("No root folder, all apps are active");
             return apps;
         } else {
-            List<Application> active = (List<Application>) rootFolder.getAttributes().get("activeApps");
+            String attName = "activeApps_" + rootFolder.getId();
+            List<Application> active = (List<Application>) rootFolder.getAttributes().get(attName);
             if (active == null) {
                 active = findActiveApps(rootFolder);
                 log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
-                rootFolder.getAttributes().put("activeApps", active);
+                rootFolder.getAttributes().put(attName, active);
             }
             return active;
         }
