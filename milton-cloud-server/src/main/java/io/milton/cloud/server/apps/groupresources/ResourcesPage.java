@@ -82,3 +82,4 @@ public class ResourcesPage extends TemplatedHtmlPage {
         }
     }
 }
+

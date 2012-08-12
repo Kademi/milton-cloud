@@ -324,6 +324,12 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public String getHash() {
         return directoryNode.getHash();
     }
+
+    @Override
+    public void setHash(String s) {
+        directoryNode.setHash(s);
+    }
+    
     
     
     

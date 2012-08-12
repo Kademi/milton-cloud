@@ -26,12 +26,7 @@ import java.io.IOException;
  *
  * @author brad
  */
-public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource2, MakeCollectionableResource, ResourceCreator{
-    /**
-     * Either save this content session, or delegate to a parent who can
-     * 
-     */
-    void save() throws IOException;    
+public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource, MakeCollectionableResource, ResourceCreator{
     
     /**
      * Get the underlying directory node for this instance

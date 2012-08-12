@@ -15,15 +15,35 @@
 package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Profile;
+import java.io.IOException;
 
 /**
  * Base interface for all classes which represent items from a content repository
  *
  * @author brad
  */
-public interface ContentResource2 extends CommonResource{
+public interface ContentResource extends CommonResource{
     
+    /**
+     * Get the "fingerprint" of the current version of this resource
+     * 
+     * @return 
+     */
     String getHash();
+    
+    /**
+     * Used for reverting to an earlier version
+     * 
+     * @param s 
+     */
+    void setHash(String s);
 
     Profile getModifiedBy();
+    
+    /**
+     * Save changes to the database. This will usually invoke save on a parent, 
+     * except for the branch which will set the commit record
+     */
+    void save() throws IOException;    
+    
 }

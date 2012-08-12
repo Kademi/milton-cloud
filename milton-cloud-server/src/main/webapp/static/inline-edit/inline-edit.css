@@ -29,14 +29,16 @@ div.adminToolbar button:hover {
     opacity: 1;
     cursor: pointer;
 }
-.edifyIsEditMode .buttons button {
+.edifyIsEditMode .buttons button, .version button {
     height: 40px;
     width: 42px;
     border: none;
     text-indent: -9999px;
     margin-left: 10px;
     cursor: pointer;
-    float: right;
+}
+.edifyIsEditMode .buttons button {
+    float: right;    
 }
 .edifyIsEditMode .buttons .save {
     background: url("save-icon.png");
@@ -44,7 +46,7 @@ div.adminToolbar button:hover {
 .edifyIsEditMode .buttons .cancel {
     background: url("cancel-icon.png");
 }
-.edifyIsEditMode .buttons .history {
+.edifyIsEditMode .buttons .history, .version .history {
     background: url("history-icon.png");
 }
 .edifyIsEditMode .buttons {
@@ -55,4 +57,8 @@ div.adminToolbar button:hover {
     font-size: 19px;
     padding: 3px 6px;
     width: 600px;
+}
+.Modal.history .ModalContent {
+    max-height: 300px;
+    overflow: scroll;
 }

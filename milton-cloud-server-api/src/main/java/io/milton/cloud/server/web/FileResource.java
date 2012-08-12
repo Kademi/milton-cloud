@@ -54,7 +54,7 @@ import io.milton.http.Request;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource {
+public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     private final FileNode fileNode;
@@ -256,5 +256,16 @@ public class FileResource extends AbstractContentResource implements Replaceable
             }
         }
         return false;
+    }    
+
+    @Override
+    public void setHash(String s) {
+        if( htmlPage != null ) {
+            log.warn("Set hash, but htmlpage representation exists and will not be updated"); // TODO: should we flush the htmlpage?
+        }        
+        super.setHash(s);
     }
+    
+    
+    
 }

@@ -35,13 +35,13 @@ public class ColorPickerApp implements PortletApplication {
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (portletSection.equals("header")) {
             if (currentUser != null) { // don't bother if no one logged in
-                writer.append("<script type='text/javascript' src='/static/colorpicker/js/eye.js'>//</script>\n");
-                writer.append("<script type='text/javascript' src='/static/colorpicker/js/layout.js'>//</script>\n");
-                writer.append("<script type='text/javascript' src='/static/colorpicker/js/utils.js'>//</script>\n");
-                writer.append("<script type='text/javascript' src='/static/colorpicker/js/colorpicker.js'>//</script>\n");
-                writer.append("<script type='text/javascript' src='/static/init-colorpicker.js'>//</script>\n");
-                writer.append("<link href='/static/colorpicker/css/colorpicker.css' rel='stylesheet' type='text/css' />\n");
-                writer.append("<link href='/static/colorpicker-layout.css' rel='stylesheet' type='text/css' />\n");
+                writer.append("<script type='text/javascript' src='/static/colorpicker/jquery.colorpicker/js/eye.js'>//</script>\n");
+                writer.append("<script type='text/javascript' src='/static/colorpicker/jquery.colorpicker/js/layout.js'>//</script>\n");
+                writer.append("<script type='text/javascript' src='/static/colorpicker/jquery.colorpicker/js/utils.js'>//</script>\n");
+                writer.append("<script type='text/javascript' src='/static/colorpicker/jquery.colorpicker/js/colorpicker.js'>//</script>\n");
+                writer.append("<script type='text/javascript' src='/static/colorpicker/init-colorpicker.js'>//</script>\n");
+                writer.append("<link href='/static/colorpicker/jquery.colorpicker/css/colorpicker.css' rel='stylesheet' type='text/css' />\n");
+                writer.append("<link href='/static/colorpicker/colorpicker-layout.css' rel='stylesheet' type='text/css' />\n");
             }
         }
     }

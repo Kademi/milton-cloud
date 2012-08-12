@@ -87,7 +87,7 @@ import javax.xml.stream.XMLStreamException;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource, ContentResource2 {
+public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource, ContentResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
     private final FileResource fileResource;
@@ -479,6 +479,16 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     @Override
     public Profile getModifiedBy() {
         return fileResource.getModifiedBy();
+    }
+
+    @Override
+    public void save() throws IOException {
+        fileResource.save();
+    }
+
+    @Override
+    public void setHash(String s) {
+        fileResource.setHash(s);
     }
     
     

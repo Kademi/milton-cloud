@@ -353,6 +353,13 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
+    public void setHash(String s) {
+        this.dataSession.getRootDataNode().setHash(s);        
+    }
+    
+    
+
+    @Override
     public Profile getModifiedBy() {
         Commit h = branch.getHead();
         if( h == null ) {
@@ -361,4 +368,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             return h.getEditor();
         }
     }                
+
+    public DataSession getDataSession() {
+        return dataSession;
+    }
+    
+    
 }

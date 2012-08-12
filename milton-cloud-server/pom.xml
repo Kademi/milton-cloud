@@ -36,12 +36,6 @@
         </dependency>            
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>colorpicker</artifactId>
-            <version>1.5</version>
-            <type>war</type>
-        </dependency>            
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>milton-mail-server</artifactId>
             <version>${milton.version}</version>
             <exclusions>

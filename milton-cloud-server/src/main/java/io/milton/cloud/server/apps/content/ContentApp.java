@@ -23,7 +23,7 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommonResource;
-import io.milton.cloud.server.web.ContentResource2;
+import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -49,6 +49,8 @@ import org.apache.velocity.context.Context;
 public class ContentApp implements Application, PortletApplication, ResourceApplication {
 
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
+    public static final String PATH_SUFFIX_HISTORY = ".history";
+    public static final String PATH_SUFFIX_PREVIEW = ".preview";
     private SpliffyResourceFactory resourceFactory;
 
     @Override
@@ -88,28 +90,27 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
     @Override
     public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
         System.out.println("getResource: " + path);
-        if (path.endsWith("/.history")) {
-            Path p = Path.path(path);
-            Resource r = findFromRoot(webRoot, p.getParent());
+        if (path.endsWith(PATH_SUFFIX_HISTORY)) {
+            String resourcePath = path.substring(0, path.length()-PATH_SUFFIX_HISTORY.length()); // chop off suffix to get real resource path
+            Path p = Path.path(resourcePath);
+            Resource r = findFromRoot(webRoot, p);
             if (r != null) {
-                System.out.println("got: " + r.getName() + " - " + r.getClass());
-                if( r instanceof RenderFileResource) { // unnecesary hack, something weird gonig on
-                    RenderFileResource rfr = (RenderFileResource) r;
-                    r = rfr.getFileResource();
-                }
-                System.out.println("r is a : " + r.getClass());
-                if (r instanceof ContentResource2) {
-                    System.out.println("yay");
-                    ContentResource2 cr = (ContentResource2) r;
+                if (r instanceof ContentResource) {
+                    ContentResource cr = (ContentResource) r;
                     return new HistoryResource(p.getName(), cr);
-                } else {                    
-                    System.out.println("not content resource: " + r.getClass());
                 }
-            } else {
-                System.out.println("not found");
             }
-        } else {
-            System.out.println("not one of mine");
+        } else if (path.endsWith(PATH_SUFFIX_PREVIEW)) {
+            String resourcePath = path.substring(0, path.length()-PATH_SUFFIX_PREVIEW.length()); // chop off suffix to get real resource path
+            Path p = Path.path(resourcePath);
+            Resource r = findFromRoot(webRoot, p);
+            if (r != null) {
+                if (r instanceof ContentResource) {
+                    ContentResource cr = (ContentResource) r;
+                    return new ViewFromHistoryResource(p.getName(), cr);
+                }
+            }
+            
         }
         return null;
     }

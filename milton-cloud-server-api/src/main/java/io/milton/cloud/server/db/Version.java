@@ -20,6 +20,7 @@ import java.util.Date;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -46,6 +47,10 @@ public class Version implements Serializable {
     }
 
     public static void insert(String previousResourceHash, Date previousModDate, long previousProfileId, String newResourceHash, Date newModDate, long newProfileId, Session session) {
+        if( newResourceHash == null ) {
+            //throw new RuntimeException("newResourceHash cannot be null");
+            return ;
+        }
         long previousModDateLong = previousModDate == null ? 0 : previousModDate.getTime();
         String previousModHash = calcModHash(previousResourceHash, previousModDateLong, previousProfileId);
         String newModHash = calcModHash(newResourceHash, newModDate.getTime(), newProfileId);
@@ -64,6 +69,12 @@ public class Version implements Serializable {
         crit.add(Restrictions.eq("modHash", modHash));
         return DbUtils.unique(crit);
     }
+    
+    public static Version find(String modHash, Session session) {
+        Criteria crit = session.createCriteria(Version.class);
+        crit.add(Restrictions.eq("modHash", modHash));
+        return DbUtils.unique(crit);
+    }    
     
     private long id;
     private String modHash;
@@ -136,7 +147,8 @@ public class Version implements Serializable {
         this.modDate = modDate;
     }
 
-    @Column(nullable = false)
+    @Column(nullable = false)    
+    @Index(name="idx_version_modhash")
     public String getModHash() {
         return modHash;
     }
@@ -146,7 +158,7 @@ public class Version implements Serializable {
     }
 
     public Version previousVersion(Session session) {
-        Version prev = (Version) session.get(Version.class, getPreviousModHash());
+        Version prev = find(getPreviousModHash(), session);
         return prev;
     }
 
