@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.reporting;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class ReportingApp implements MenuApplication, EventListener, LifecycleApplication {
+public class ReportingApp implements MenuApplication, EventListener, LifecycleApplication, ChildPageApplication {
 
     private static final Logger log = LoggerFactory.getLogger(ReportingApp.class);
     private final java.util.concurrent.LinkedBlockingQueue<Access> queue = new LinkedBlockingQueue<>();
@@ -80,6 +81,13 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
     public String getInstanceId() {
         return "Reporting";
     }
+
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Reports";
+    }
+    
+    
 
     @Override
     public String getSummary(Organisation organisation, Website website) {
@@ -111,10 +119,6 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
             }
         }
         return null;
-    }
-
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
     @Override

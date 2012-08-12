@@ -1,0 +1,123 @@
+/* Modal */
+div.Modal {
+    width: 470px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    -moz-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    -webkit-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    -o-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    border-radius: 5px;
+    display: none;
+}
+div.Modal.wide {
+    width: 920px;
+}
+div#modalHelp {
+    width: 300px;
+}
+div.Modal header {
+    border-radius: 5px 5px 0 0;
+    background-image: linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -o-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -moz-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -webkit-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -ms-linear-gradient(bottom, rgb(30,35,48) 17%, rgb(51,58,74) 50%);
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.17, rgb(30,35,48)), color-stop(0.5, rgb(51,58,74)));
+    position: relative;
+}
+div.Modal header h3 {
+    font-size: 16px;
+    line-height: 44px;
+    height: 44px;
+    color: #FFF;
+    font-weight: bold;
+    padding-left: 15px;
+    margin: 0;
+}
+div.Modal header a.Close {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    background: url(close.png) no-repeat 50% 50%;
+    width: 27px;
+    height: 27px;
+}
+div.Modal div.ModalContent {
+    background: #f3f3f3;
+    border-radius: 0 0 5px 5px;
+    padding: 15px;
+    max-height: 430px;
+    overflow: auto;
+}
+div.Modal div.ModalContent table { width: 100%; }
+div.Modal div.ModalContent table th {
+    text-align: left;
+    vertical-align: top;
+    font-size: 12px;
+    width: 130px;
+}
+div.Modal div.ModalContent table th, div.Modal div.ModalContent table td {
+    padding-bottom: 10px;
+    line-height: 30px;
+}
+div.Modal div.ModalContent table td input[type="text"], div.Modal div.ModalContent table td input[type="password"], div.Modal div.ModalContent table td textarea {
+    border: 1px solid #d0d0d0;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+    width: 290px;
+    background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
+}
+div.Modal div.ModalContent table td textarea {
+    height: 170px;
+    overflow: auto;
+    resize: none;
+}
+div.Modal div.ModalContent table td.Btn { text-align: right; padding: 0; }
+div.Modal div.ModalContent table td.Btn button {
+    background-image: linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(27,113,179) 0%, rgb(47,150,205) 50%, rgb(93,177,219) 51%, rgb(124,200,232) 100%);
+    background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(27,113,179)),  color-stop(0.5, rgb(47,150,205)),  color-stop(0.51, rgb(93,177,219)),  color-stop(1, rgb(124,200,232)) );
+    height: 26px;
+    line-height: 26px;
+    border: 0 none;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0 15px;
+    color: #FFF;
+    text-transform: uppercase;
+    border-radius: 2px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    -o-box-shadow: 0 0 5px rgba(0, 0, 0, .39);
+    cursor: pointer;
+}
+div.Modal div.ModalContent table ul.ListItem li {
+    background: #ededed;
+    border-radius: 3px;
+    margin-top: 3px;
+    padding: 4px 0 4px 10px;
+    line-height: 27px;
+    height: 25px;
+}
+div.Modal div.ModalContent table ul.ListItem li span {
+    float: left;
+}
+div.Modal div.ModalContent table ul.ListItem li aside {
+    float: right;
+}
+div.Modal div.ModalContent .FuseChkLabel {
+    width: 18px;
+    overflow: hidden;
+    padding: 0;
+    margin: 3px 5px 0 0;
+}

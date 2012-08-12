@@ -48,8 +48,6 @@ import static io.milton.context.RequestContext._;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a version of a directory, containing the members which are in that
@@ -321,6 +319,12 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public Branch getBranch() {
         return parent.getBranch();
     }
+
+    @Override
+    public String getHash() {
+        return directoryNode.getHash();
+    }
+    
     
     
 }

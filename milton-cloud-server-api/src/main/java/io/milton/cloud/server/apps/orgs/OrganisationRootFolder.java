@@ -54,6 +54,13 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     }
 
     @Override
+    public String getId() {
+        return organisation.getName();
+    }
+
+    
+    
+    @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         Resource r = applicationManager.getPage(this, childName);
         if (r != null) {
@@ -78,8 +85,9 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
                 }
             }
             children.add(new OrganisationsFolder("organisations", this, organisation));
-            
+            System.out.println("OrganisationRootFolder add children: " + children.size());
             _(ApplicationManager.class).addBrowseablePages(this, children);
+            System.out.println("OrganisationRootFolder add children2: " + children.size());
         }
         return children;
     }

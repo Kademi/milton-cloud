@@ -14,11 +14,12 @@ function initPermissionCheckboxes() {
         log("checkbox click", $chk, $chk.is(":checked"));
         var isRecip = $chk.is(":checked");
         var groupName = $chk.closest("aside").attr("rel");
-        setGroupRole(groupName, $chk.attr("name"), isRecip);
+        var permissionList = $chk.closest(".ContentGroup").find(".PermissionList");
+        setGroupRole(groupName, $chk.attr("name"), isRecip, permissionList);
     });    
 }
 
-function setGroupRole(groupName, roleName, isRecip) {
+function setGroupRole(groupName, roleName, isRecip, permissionList) {
     log("setGroupRole", groupName, roleName, isRecip);
     try {
         $.ajax({
@@ -32,11 +33,10 @@ function setGroupRole(groupName, roleName, isRecip) {
             success: function(data) {
                 log("saved ok", data);
                 if( isRecip ) {
-                    $(".PermissionList").append("<li>" + roleName + "</li>");
+                    permissionList.append("<li>" + roleName + "</li>");
                 } else {
-                    log("remove", $(".PermissionList li:contains('" + roleName + "')") );
-                    log("remove", ".PermissionList li:contains('" + roleName + "')" )
-                    $(".PermissionList li:contains('" + roleName + "')").remove();
+                    log("remove", permissionList.find("li:contains('" + roleName + "')") );
+                    permissionList.find("li:contains('" + roleName + "')").remove();
                 }
             },
             error: function(resp) {
@@ -215,7 +215,7 @@ function addGroupButton() {
 
 function showPermissionModal(source) {
     log("showPermissionModal", source);
-    var modal = $(source).parent().parent().find(".Modal");
+    var modal = $(source).parent().parent().find(".Modal.roles");
     log("modal", modal);
     $.tinybox.show(modal, {
         overlayClose: false,

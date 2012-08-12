@@ -24,7 +24,7 @@
 #manageGroup div.Group div.ContentGroup ul li span {
 	float: left;
 }
-#manageGroup div.Group div.ContentGroup ul li aside { float: right; padding-top:  3px; }
+#manageGroup div.Group div.ContentGroup ul li aside { float: right; }
 #manageGroup div.Group div.ContentGroup ul li aside a {
 	float: left;
 	display: block;

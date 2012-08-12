@@ -89,7 +89,7 @@ public class ApplicationManager {
         RootFolder rootFolder = currentRootFolderService.getRootFolder();
         return getActiveApps(rootFolder);
     }
-    
+
     public List<Application> getActiveApps(RootFolder rootFolder) {
         if (rootFolder == null) {
             log.warn("No root folder, all apps are active");
@@ -104,7 +104,7 @@ public class ApplicationManager {
             }
             return active;
         }
-    }    
+    }
 
     public void init(SpliffyResourceFactory resourceFactory) {
         if (appsConfigDir == null) {
@@ -157,10 +157,14 @@ public class ApplicationManager {
     }
 
     public Resource getPage(Resource parent, String name) {
+        log.info("getPage: " + name);
         for (Application app : getActiveApps()) {
-            Resource child = app.getPage(parent, name);
-            if (child != null) {
-                return child;
+            if (app instanceof ChildPageApplication) {
+                ChildPageApplication cpa = (ChildPageApplication)app;
+                Resource child = cpa.getPage(parent, name);
+                if (child != null) {
+                    return child;
+                }
             }
         }
         return null;
@@ -168,7 +172,10 @@ public class ApplicationManager {
 
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         for (Application app : getActiveApps()) {
-            app.addBrowseablePages(parent, children);
+            if( app instanceof BrowsableApplication ) {
+                BrowsableApplication ba = (BrowsableApplication)app;
+                ba.addBrowseablePages(parent, children);
+            }
         }
     }
 
@@ -195,7 +202,7 @@ public class ApplicationManager {
             }
             return new AppConfig(app.getInstanceId(), props, rootContext);
         } else {
-            AppConfig config = new AppConfig(app.getInstanceId(),props, rootContext);
+            AppConfig config = new AppConfig(app.getInstanceId(), props, rootContext);
             if (app instanceof LifecycleApplication) {
                 ((LifecycleApplication) app).initDefaultProperties(config);
                 try (FileOutputStream fout = new FileOutputStream(configFile)) {
@@ -245,7 +252,7 @@ public class ApplicationManager {
     }
 
     public List<Application> findActiveApps(io.milton.vfs.db.Website website) {
-        List<Application> available = findActiveApps(website.getOrganisation());        
+        List<Application> available = findActiveApps(website.getOrganisation());
         List<AppControl> appControls = AppControl.find(website, SessionManager.session());
         return findActiveApps(available, appControls);
     }
@@ -253,13 +260,13 @@ public class ApplicationManager {
     /**
      * Active apps are those which are active for the parent organisation, and
      * have an AppControl record which has enabled = true
-     * 
+     *
      * @param org
-     * @return 
+     * @return
      */
     public List<Application> findActiveApps(Organisation org) {
         List<Application> available;
-        if( org.getOrganisation() == null ) {
+        if (org.getOrganisation() == null) {
             available = getApps();
         } else {
             available = findActiveApps(org.getOrganisation());
@@ -267,9 +274,9 @@ public class ApplicationManager {
         List<AppControl> appControls = AppControl.find(org, SessionManager.session());
         return findActiveApps(available, appControls);
     }
-    
-    public List<Application> findActiveApps(List<Application> available, List<AppControl> appControls) {        
-        Map<String,Boolean> enablement = toEnabledMap(appControls);
+
+    public List<Application> findActiveApps(List<Application> available, List<AppControl> appControls) {
+        Map<String, Boolean> enablement = toEnabledMap(appControls);
         List<Application> activApps = new ArrayList<>();
         for (Application app : available) {
             Boolean enabled = enablement.get(app.getInstanceId());
@@ -280,15 +287,15 @@ public class ApplicationManager {
             }
         }
         return activApps;
-    }    
-    
-    private Map<String,Boolean> toEnabledMap(List<AppControl> appControls) {
-        Map<String,Boolean> map = new HashMap<>();
-        for( AppControl ac : appControls ) {
+    }
+
+    private Map<String, Boolean> toEnabledMap(List<AppControl> appControls) {
+        Map<String, Boolean> map = new HashMap<>();
+        for (AppControl ac : appControls) {
             map.put(ac.getName(), ac.isEnabled());
         }
         return map;
-                
+
     }
 
     public boolean isActive(Application aThis, Website website) {
@@ -339,16 +346,14 @@ public class ApplicationManager {
     }
 
     /**
-     * 
+     *
      * Applications can register email trigger types by adding to this list.
-     * 
+     *
      * This will then be used in configuring triggers by other applications
-     * 
-     * @return 
+     *
+     * @return
      */
     public List<EmailTriggerType> getEmailTriggerTypes() {
         return emailTriggerTypes;
     }
-    
-    
 }

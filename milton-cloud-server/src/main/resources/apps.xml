@@ -24,6 +24,7 @@
                 <bean class="io.milton.cloud.server.apps.groupresources.GroupResourcesApp"/>
                 <bean class="io.milton.cloud.server.apps.myfiles.MyFilesApp"/>                
                 <bean class="io.milton.cloud.server.apps.content.ContentApp"/>                
+                <bean class="io.milton.cloud.server.apps.colorpicker.ColorPickerApp"/> <!-- loaded from colorpicker overlay. see external/colorpicker -->
                 <bean class="io.milton.cloud.server.apps.googleanalytics.GaApp"/>
             </list>
         </constructor-arg>

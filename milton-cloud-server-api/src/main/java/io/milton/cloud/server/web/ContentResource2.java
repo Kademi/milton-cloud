@@ -14,11 +14,16 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.vfs.db.Profile;
+
 /**
  * Base interface for all classes which represent items from a content repository
  *
  * @author brad
  */
-public interface ContentResource extends CommonResource{
+public interface ContentResource2 extends CommonResource{
     
+    String getHash();
+
+    Profile getModifiedBy();
 }

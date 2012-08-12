@@ -17,6 +17,8 @@
 package io.milton.cloud.server.apps;
 
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.Resource;
 
 /**
@@ -28,5 +30,5 @@ public interface ResourceApplication extends Application {
     /**
      * Locate a Resource for this app on the given path and for the given website
      */
-    Resource getResource(RootFolder webRoot, String path);    
+    Resource getResource(RootFolder webRoot, String path)  throws NotAuthorizedException, BadRequestException;    
 }

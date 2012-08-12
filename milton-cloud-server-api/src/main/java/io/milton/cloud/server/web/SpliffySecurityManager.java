@@ -126,6 +126,14 @@ public class SpliffySecurityManager {
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource);
         boolean allows = AclUtils.containsPriviledge(required, privs);
+        if( !allows ) {
+            if( curUser != null ) {
+                log.info("Authorisation declined for user: " + curUser.getName() );
+            } else {
+                log.info("Authorisation declined for anonymous access");
+            }
+            log.info("Required priviledge: " + required + " was not found in assigned priviledge list of size: " + privs.size());
+        }
         log.info("allows = " + allows + " rsource: " + resource.getClass());
         return allows;
     }

@@ -1,38 +1,235 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>$view.title</title>
+        <script type="text/javascript" src="manageWebsite.js">//</script>
+        <link href="manageWebsite.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageApps.js">//</script>
+        <link href="manageApps.css" rel="stylesheet" type="text/css" />
     </head>
-    <body class="manageApplications">
-        <form method="POST" action="$page.name" onsubmit="return saveApps($(this))">
-            <h2>Manage applications for this website</h2>
-            <a href="apps" class="Btn">Manage apps</a>
-            <h2>Theme</h2>
-            <div class="inputs">
-                <label for="heroColour1">heroColour1</label>
-                <input type="text" name="heroColour1" id="heroColour1" value="$!page.themeParams.heroColour1"/>
-                <label for="heroColour2">heroColour2</label>
-                <input type="text" name="heroColour2" id="heroColour2" value="$!page.themeParams.heroColour2"/>
-                <label>textColour1</label>
-                <input type="text" name="textColour1" id="textColour1" value="$!page.themeParams.textColour1"/>
-                <label for="textColour2">textColour2</label>
-                <input type="text" name="textColour2" id="textColour2" value="$!page.themeParams.textColour2"/>
-                <label for="logo">logo</label>
-                <input type="text" name="logo" id="logo" value="$!page.themeParams.logo"/>
-            </div>
+    <body class="manageWebsite">
+        <section class="MainContent">
+            <div class="TabContainer">
+                <nav class="ClearFix"><a href="">Details</a><a href="">Themes</a><a href="">Group Access</a><a href="">Mail server</a><a href="">Apps</a></nav>
+                <div class="TabContent">
+                    <div class="Content">
+                        <form name="frmDetails" action="." method="post" class="Details">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>Website name</th>
+                                        <td>
+                                            <input type="text" name="name" value="$!page.name" class="required" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Domain name</th>
+                                        <td><input type="text" name="domainName" value="$!page.website.domainName"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Alias for</th>
+                                        <td>
+                                            <select>
+                                                <option value="">[None]</option>
+                                                #foreach($w in $page.otherWebsites)
+                                                $formatter.option($w.name, $w.name, $page.website.aliasTo)
+                                                #end
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Redirect to</th>
+                                        <td><input type="text" name="redirectTo" value="$!page.website.redirectTo"/></td>
+                                    </tr>                                    
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button class="Btn">Save Changes</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>                                
+                            </table>
+                        </form>
+                    </div>
+                </div>	
+                <div class="TabContent">
+                    <div class="Content">
+                        <form name="frmDetails" action="" method="post" class="Details">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th class="Short">Choose a theme</th>
+                                        <td>
+                                            <select name="template" class="Medium">
+                                                <option value="fuse">Fuse</option>
+                                                <option value="custom">Custom</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="Short">Logo</th>
+                                        <td>
+                                            <textarea class="htmleditor required toolbar-Logo" id="logo" rows="4" cols="20">$!page.themeParams.logo</textarea>
+                                        </td>
+                                    </tr>                                    
+                                    <tr>
+                                        <th class="Short">Hero colour 1</th>
+                                        <td><input type="text" name="heroColour1" value="$!page.themeParams.heroColour1" class="required color" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="Short">Hero colour 2</th>
+                                        <td><input type="text" name="heroColour2" value="$!page.themeParams.heroColour2" class="required color" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="Short">Text colour 1</th>
+                                        <td><input type="text" name="textColour1" value="$!page.themeParams.textColour1" class="required color" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="Short">Text colour 2</th>
+                                        <td><input type="text" name="textColour2" value="$!page.themeParams.textColour2" class="required color" /></td>
+                                    </tr>                                    
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button class="Btn">Save Changes</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>                                                                
+                            </table>
+                        </form>
+                    </div>
+                </div>
+                <div class="TabContent">
+                    <div class="Content Recipient">
+                        <header class="ClearFix">
+                            <button class="SmallBtn Add AddGroup"><span>Add/remove groups</span></button>
+                        </header>
+                        <ul class="GroupList ClearFix">
+                            #foreach($g in $page.selectedGroups)
+                            <li class="$g.name">$g.name</li>
+                            #end
+                        </ul>
+                    </div>
+                </div>
+                <div class="TabContent">
+                    <div class="Content">
+                        <form name="frmDetails" action="$page.name" method="post" class="Details">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>Mail server host</th>
+                                        <td><input type="text" name="mailServer" value="$!page.mailServer" class="required" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>User name</th>
+                                        <td><input type="text" name="mailUser" value="$!page.mailUser"/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Password</th>
+                                        <td><input type="text" name="mailPassword" value="$!page.mailPassword"/></td>
+                                    </tr>                                    
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button class="Btn">Save Changes</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>                                
 
-            <button type="submit" class="Btn">Save</button>            
-        </form>
-        <h2>Groups in website</h2>
-        #set($groupsInWebsite = $page.groupsInWebsite)
-        #if( $groupsInWebsite.empty )
-        <p>There are no groups attached to this website, so no one can join it</p>
-        #else
-        <ul>
-            #foreach($g in $page.groupsInWebsite )
-            <li>$g.userGroup.name</li>
-            #end
-        </ul>
-        #end
+                            </table>
+                        </form>
+                    </div>
+                </div>	
+                <div class="TabContent">
+                    <div class="Content appsContainer">
+
+                        <article class="Note">
+                            <p>Applications control large chunks of functionality, like forums or emails. You can add them to websites</p>
+                            <p>
+                                Applications are made available for websites by activating them on your organisation's Manage Applications page. Available apps are then shown on the website apps list where they can be turned on or off as required.
+                            </p>
+                        </article>
+
+                        #set($apps = $page.apps)
+                        #if( $apps.isEmpty() )
+                        <article class="Note">
+                            <p>No applications are available. This means that the parent organisation has disabled them</p>
+                        </article>        
+                        #end
+
+                        <table class="apps">            
+                            #foreach($app in $apps )
+                            <tr>
+                                <td class="CheckBoxWrapper">
+                                    $formatter.checkbox("chk_${app.appId}", $app.appId, $app.enabled, $app.appId)
+                                    <label for="chk_${app.appId}"></label>
+                                </td>
+                                <td>
+                                    <h5>$page.getTitle($app.appId)</h5>
+                                    <p>$page.getSummary($app.appId)</p>
+                                </td>
+                                <td>
+                                    #if( $page.hasSettings($app) )
+                                    <button class="settings" rel="$app.appId">Manage</button>
+                                    #end
+                                </td>
+                            </tr>
+                            #end
+                        </table>            
+
+                        #foreach($app in $page.apps )
+                        #if( $page.hasSettings($app) )
+                        <div class="Modal settings" id="settings_${app.appId}">
+                            <header>
+                                <h3>Edit Application: $app.appId</h3>
+                                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+                            </header>                           
+                            <div class="ModalContent">
+                                <form method="POST" action="$page.name">
+                                    <input type="hidden" name="settingsAppId" value="$app.appId"/>
+                                    #appSettings($app.appId)
+                                    <button type="submit" class="Btn" style="float: right">Save</button>
+                                </form>
+                            </div>
+                        </div>
+                        #end
+                        #end                        
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div id="modalGroup" class="Modal">
+            <header>
+                <h3>Choose groups</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <ul class="ListItem">
+                                #foreach($g in $page.allGroups)
+                                <li>
+                                    <span>$g.name</span>
+                                    <aside>
+                                        $formatter.checkbox($g.name, $page.isSelected($g) )
+                                    </aside>
+                                </li>
+                                #end
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            jQuery(function() {
+                initManageWebsite();
+                initHtmlEditors($(".htmleditor"), "60px", "200px", 'embed_video,modal', 'resize,elementspath');
+                $("form").forms();
+            });
+        </script>        
     </body>
 </html>

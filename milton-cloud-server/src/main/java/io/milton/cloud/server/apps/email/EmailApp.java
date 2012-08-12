@@ -16,6 +16,8 @@ package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.EmailApplication;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
@@ -28,7 +30,6 @@ import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.event.TriggerEvent;
-import io.milton.cloud.server.mail.EmailTriggerType;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
 import io.milton.cloud.server.queue.AsynchProcessor;
 import io.milton.cloud.server.queue.Processable;
@@ -70,7 +71,7 @@ import org.masukomi.aspirin.core.listener.ListenerManager;
  *
  * @author brad
  */
-public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication, EventListener, EmailApplication {
+public class EmailApp implements MenuApplication, LifecycleApplication, PortletApplication, EventListener, EmailApplication, ChildPageApplication, BrowsableApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailApp.class);
     
@@ -94,6 +95,13 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         return "email";
     }
 
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Email";
+    }
+
+    
+    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides end users with an email inbox, and allows administrators to send emails to groups of users";
@@ -222,7 +230,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 //            <div>                
 //                <div class="txtR">
 //                    <h3>Hi Patrick, Welcome to your dashboard!</h3>
-//                    <p>Below you will find a list of your most recent and active modules.  A panel which gives you an overview of your eLearning progress and a snapshot of what people are talking about in the community.  Happy learning.</p>
+//                    <p>Below you will findFromRoot a list of your most recent and active modules.  A panel which gives you an overview of your eLearning progress and a snapshot of what people are talking about in the community.  Happy learning.</p>
 //                </div>
 //                <div class="clr"></div>
 //                <a class="close" href="#">close</a>

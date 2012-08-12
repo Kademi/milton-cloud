@@ -65,23 +65,12 @@
 	padding: 0px;
 	border: 1px solid #dedede;
 }
-#manageEmail .TabContent .Content { padding: 5px 15px 15px; }
 #manageEmail .TabContent .Content header {
 	margin-bottom: 7px;
 	border-bottom: 1px solid #dadada;
 }
 #manageEmail .TabContent .Content button.Btn { float: right; margin-left: 10px; }
-#manageEmail .TabContent .Content ul.GroupList li {
-	background: #ededed;
-	border: 1px solid #dadada;
-	border-radius: 3px;
-	margin-top: 3px;
-	padding: 4px 10px 4px 10px;
-	line-height: 25px;
-	height: 24px;
-	float: left;
-	margin-right: 10px;
-}
+
 #manageEmail .TabContent .Content ul.GroupList li span { float: left; }
 #manageEmail .TabContent .Content ul.GroupList li aside {
 	float: right;

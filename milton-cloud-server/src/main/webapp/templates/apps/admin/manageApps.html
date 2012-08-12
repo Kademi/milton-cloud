@@ -4,7 +4,7 @@
         <script type="text/javascript" src="manageApps.js">//</script>
         <link href="manageApps.css" rel="stylesheet" type="text/css" />
     </head>
-    <body class="manageApplications">
+    <body class="manageApplications appsContainer">
 
         <article class="Note">
             <p>Applications control large chunks of functionality, like forums or emails. You can add them to websites</p>
@@ -20,7 +20,7 @@
         </article>        
         #end
 
-        <table class="Summary">            
+        <table class="apps">            
             #foreach($app in $apps )
             <tr>
                 <td class="CheckBoxWrapper">
@@ -28,7 +28,7 @@
                     <label for="chk_${app.appId}"></label>
                 </td>
                 <td>
-                    <h5>$app.appId</h5>
+                    <h5>$page.getTitle($app.appId)</h5>
                     <p>$page.getSummary($app.appId)</p>
                 </td>
                 <td>

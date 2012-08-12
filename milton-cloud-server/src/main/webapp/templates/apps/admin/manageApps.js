@@ -1,6 +1,10 @@
 $(function() {
+    initApps();
+});
+function initApps() {
+    log("initApps");
     $("td.CheckBoxWrapper input:checked").closest("tr").addClass("enabled");
-    $("table.Summary").on("change", ".CheckBoxWrapper input", function() {
+    $("table.apps").on("change", ".CheckBoxWrapper input", function() {
         log("changed", this);
         $chk = $(this);
         if($chk.is(":checked")) {                        
@@ -29,7 +33,8 @@ $(function() {
             window.location.reload();
         }
     });
-});
+    
+}
 function setEnabled(appId, isEnabled, success) {
     $.ajax({
         type: 'POST',

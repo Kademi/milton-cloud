@@ -19,17 +19,11 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.apps.forums.ManageTopicFolder;
 import io.milton.cloud.server.db.AppControl;
-import io.milton.cloud.server.db.ForumTopic;
-import io.milton.cloud.server.web.AbstractCollectionResource;
-import io.milton.cloud.server.web.AbstractResource;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -52,10 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
-import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -64,58 +58,94 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageWebsiteFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class ManageWebsitePage extends AbstactAppsPage implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ManageWebsiteFolder.class);
-    private final Website website;
-    private final CommonCollectionResource parent;
-    private JsonResult jsonResult;
+    private static final Logger log = LoggerFactory.getLogger(ManageWebsitePage.class);
     private Map<String, String> themeParams;
-    private ResourceList children;
 
-    public ManageWebsiteFolder(Website website, CommonCollectionResource parent) {
-        this.parent = parent;
-        this.website = website;
+    public ManageWebsitePage(Website website, CommonCollectionResource parent) {
+        super(website.getName(), website.getOrganisation(), parent, website);
     }
 
-   @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if (children == null) {
-            children = new ResourceList();
-        }
-        return children;
-    }    
-    
     public String getTitle() {
-        return "Manage website: " + website.getDomainName();
+        return "Manage website: " + website.getName();
     }
-    
+
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        for (AppControlBean a : getApps()) {
-            boolean enabled = parameters.containsKey(a.getAppId());
-            setStatus(a.getAppId(), enabled, session);
+        if (parameters.containsKey("isRecip")) {
+            // is adding/removing a group
+            String groupName = parameters.get("group");
+            String sIsRecip = parameters.get("isRecip");
+            if ("true".equals(sIsRecip)) {
+                addGroup(groupName);
+            } else {
+                removeGroup(groupName);
+            }
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } else if (parameters.containsKey("template")) {
+            // is the theme tab
+            for (AppControlBean a : getApps()) {
+                boolean enabled = parameters.containsKey(a.getAppId());
+                setStatus(a.getAppId(), enabled, session);
+            }
+
+            Repository r = website.getRepository();
+            r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
+            r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
+            r.setAttribute("textColour1", parameters.get("textColour1"), session);
+            r.setAttribute("textColour2", parameters.get("textColour2"), session);
+            r.setAttribute("logo", parameters.get("logo"), session);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } else if (parameters.containsKey("name")) {
+            try {
+                // the details tab
+                website.setName(parameters.get("name"));
+                website.setDomainName(parameters.get("domainName"));
+                website.setRedirectTo(parameters.get("redirectTo"));
+                System.out.println("redirect: " + website.getRedirectTo());
+                Website aliasTo = null;
+                String sAlias = parameters.get("aliasTo");
+                if (sAlias != null && sAlias.trim().length() != 0) {
+                    aliasTo = Website.findByName(sAlias.trim(), session);
+                }
+                website.setAliasTo(aliasTo);
+
+                session.save(website);
+                tx.commit();
+                jsonResult = new JsonResult(true);
+            } catch (Exception ex) {
+                jsonResult = new JsonResult(false, ex.getLocalizedMessage());
+                tx.rollback();
+            }
+        } else if (parameters.containsKey("settingsAppId")) {
+            updateApplicationSettings(parameters, files, tx);
+        } else if (parameters.containsKey("appId")) {
+            updateApplicationEnabled(parameters, session, tx);
         }
 
-        Repository r = website.getRepository();
-        r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
-        r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
-        r.setAttribute("textColour1", parameters.get("textColour1"), session);
-        r.setAttribute("textColour2", parameters.get("textColour2"), session);
-        r.setAttribute("logo", parameters.get("logo"), session);
-
-        tx.commit();
-        jsonResult = new JsonResult(true);
         return null;
+    }
+
+    private void removeGroup(String groupName) {
+        Group group = website.getOrganisation().group(groupName, SessionManager.session());
+        website.removeGroup(group, SessionManager.session());
+    }
+
+    private void addGroup(String groupName) {
+        Group group = website.getOrganisation().group(groupName, SessionManager.session());
+        website.addGroup(group, SessionManager.session());
     }
 
     public Map<String, String> getThemeParams() {
         if (themeParams == null) {
             themeParams = new HashMap<>();
             if (website.getRepository().getNvPairs() != null) {
-                for (NvPair pair : website.getRepository().getNvPairs()) {                    
+                for (NvPair pair : website.getRepository().getNvPairs()) {
                     themeParams.put(pair.getName(), pair.getPropValue());
                 }
             }
@@ -165,10 +195,10 @@ public class ManageWebsiteFolder extends AbstractCollectionResource implements G
     public CommonCollectionResource getParent() {
         return parent;
     }
-  
+
     @Override
     public String getName() {
-        return website.getDomainName();
+        return website.getName();
     }
 
     @Override
@@ -210,8 +240,28 @@ public class ManageWebsiteFolder extends AbstractCollectionResource implements G
         return website;
     }
 
-    public List<GroupInWebsite> getGroupsInWebsite() {
-        return website.groups(SessionManager.session());
+    public List<Website> getOtherWebsites() {
+        List<Website> websites = website.getOrganisation().getWebsites();
+        if (websites == null) {
+            websites = Collections.EMPTY_LIST;
+        }
+        websites.remove(website);
+        return websites;
     }
 
+    public List<Group> getSelectedGroups() {
+        List<Group> list = new ArrayList<>();
+        for (GroupInWebsite giw : website.groups(SessionManager.session())) {
+            list.add(giw.getUserGroup());
+        }
+        return list;
+    }
+
+    public List<Group> getAllGroups() {
+        return getOrganisation().groups(SessionManager.session());
+    }
+
+    public boolean isSelected(Group g) {
+        return getSelectedGroups().contains(g);
+    }
 }

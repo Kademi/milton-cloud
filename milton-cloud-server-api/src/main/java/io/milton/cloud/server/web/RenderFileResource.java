@@ -17,7 +17,6 @@
 package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import java.io.*;
 import java.util.ArrayList;
@@ -51,7 +50,6 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
-import java.util.logging.Level;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -89,7 +87,7 @@ import javax.xml.stream.XMLStreamException;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource {
+public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource, ContentResource2 {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
     private final FileResource fileResource;
@@ -472,4 +470,18 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         return super.authorise(request, method, auth);
     }    
+
+    @Override
+    public String getHash() {
+        return fileResource.getHash();
+    }
+
+    @Override
+    public Profile getModifiedBy() {
+        return fileResource.getModifiedBy();
+    }
+    
+    
+    
+    
 }

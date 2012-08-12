@@ -161,14 +161,23 @@ function getSavedFontSize() {
 /**
  * Make sure you push any required css files into "themeCssFiles" before calling
  */
-function initHtmlEditors() {    
+function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {    
     log("initHtmlEditors");
     if( !$('.htmleditor').ckeditor ) {
         log("ckeditor jquery adapter is not loaded");
         return;
     }
-    log("prepare html editors");
-    $(".htmleditor").each(function(i,n) {
+    if( !elements ) {
+        elements = $(".htmleditor");
+    }
+    if( !extraPlugins ) {
+        extraPlugins = 'autogrow,embed_video,modal';  // see /static/js/toolbars.js
+    }
+    if( !removePlugins ) {
+        removePlugins = 'resize';
+    }    
+    log("prepare html editors", elements);
+    elements.each(function(i,n) {
         var inp = $(n);        
 
         var inputClasses = inp.attr("class");
@@ -194,18 +203,29 @@ function initHtmlEditors() {
             templates_files : [ '/static/editor/templates.js' ],
             templates_replaceContent: false,
             toolbar: toolbarSets[toolbar],
-            extraPlugins : 'autogrow,embed_video,modal',  // see /static/js/toolbars.js
-            removePlugins : 'resize',
+            extraPlugins : extraPlugins,
+            removePlugins : removePlugins,
             enterMode: "P",
             forceEnterMode:true,
             filebrowserBrowseUrl : '/static/fckfilemanager/browser/default/browser.html?Type=Image&Connector=/fck_connector.html',
             filebrowserUploadUrl : '/uploader/upload',
             format_tags : 'p;p2;h2;h3;h4;h5',
-            format_p2 : { element : 'p', attributes : { 'class' : 'lessSpace' } }
+            format_p2 : {
+                element : 'p', 
+                attributes : {
+                    'class' : 'lessSpace'
+                }
+            }
         };    
+        if( height ) {
+            config.height = height;            
+        }
+        if( width ) {
+            config.width = width;
+        }
     
         config.stylesSet = 'myStyles:/templates/themes/fuse/styles.js'; // TODO: needs to be configurable, based on theme
-        log("create editor", inp, config)
+        log("create editor", inp, config);
         inp.ckeditor(config);
     });  
 }
@@ -315,5 +335,7 @@ function initRotation() {
         }, 50);
     });            
 }
+
+
 
 /** End init-theme.js */

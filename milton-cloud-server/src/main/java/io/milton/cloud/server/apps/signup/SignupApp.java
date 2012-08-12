@@ -21,7 +21,8 @@ import io.milton.cloud.process.*;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
-import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
@@ -40,7 +41,7 @@ import java.util.List;
  *
  * @author brad
  */
-public class SignupApp implements Application {
+public class SignupApp implements ChildPageApplication, BrowsableApplication {
 
     private String signupPageName = "signup";
     private StateProcess userManagementProcess;
@@ -56,6 +57,13 @@ public class SignupApp implements Application {
         return "signup";
     }
 
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "User registration and signup";
+    }
+
+    
+    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides signup pages, which allows people to join your websites and groups";

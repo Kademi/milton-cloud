@@ -38,6 +38,11 @@ public class DynamicCssApp implements ResourceApplication {
     private Date modDate;
 
     @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Dynamic CSS files";
+    }
+        
+    @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Allows CSS files to have parameterised which can be configured through the website";
     }
@@ -66,14 +71,5 @@ public class DynamicCssApp implements ResourceApplication {
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.resourceFactory = resourceFactory;
         modDate = config.getContext().get(CurrentDateService.class).getNow();
-    }
-
-    @Override
-    public Resource getPage(Resource parent, String path) {
-        return null;
-    }
-
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 }

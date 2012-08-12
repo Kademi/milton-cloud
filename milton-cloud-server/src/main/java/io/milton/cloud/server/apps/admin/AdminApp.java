@@ -14,10 +14,10 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
@@ -28,7 +28,6 @@ import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
-import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
@@ -43,7 +42,7 @@ import java.util.List;
  *
  * @author brad
  */
-public class AdminApp implements MenuApplication, ReportingApplication {
+public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication {
 
     private ApplicationManager applicationManager;
     
@@ -60,6 +59,13 @@ public class AdminApp implements MenuApplication, ReportingApplication {
     public String getInstanceId() {
         return "admin";
     }
+
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Administration";
+    }
+    
+    
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
@@ -91,7 +97,7 @@ public class AdminApp implements MenuApplication, ReportingApplication {
                     return new ManageWebsitesFolder(requestedName, p.getOrganisation(), p);
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
-                    return new ManageAppsPage(requestedName, p.getOrganisation(), p, null);
+                    return new ManageAppsPage(requestedName, p.getOrganisation(), p);
                     
             }
         } else if (parent instanceof OrganisationsFolder) {
@@ -100,19 +106,10 @@ public class AdminApp implements MenuApplication, ReportingApplication {
                 MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
                 return new ManageOrgsPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
             }
-        } else if( parent instanceof ManageWebsiteFolder )  {
-            if( requestedName.equals("apps")) {
-                CommonCollectionResource p = (CommonCollectionResource) parent;
-                ManageWebsiteFolder mwp = (ManageWebsiteFolder) parent;
-                return new ManageAppsPage(requestedName, p.getOrganisation(), p, mwp.getWebsite());
-            }
         }
         return null;
     }
 
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-    }
 
     @Override
     public void appendMenu(MenuItem parent) {

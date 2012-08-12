@@ -17,56 +17,121 @@ package io.milton.cloud.server.apps.content;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
-import io.milton.cloud.server.apps.admin.AdminApp;
+import io.milton.cloud.server.apps.PortletApplication;
+import io.milton.cloud.server.apps.ResourceApplication;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommonResource;
+import io.milton.cloud.server.web.ContentResource2;
 import io.milton.cloud.server.web.RenderFileResource;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.common.Path;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Set;
+import org.apache.velocity.context.Context;
 
 /**
  *
  * @author brad
  */
-public class ContentApp implements Application {
+public class ContentApp implements Application, PortletApplication, ResourceApplication {
 
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
-    
+    private SpliffyResourceFactory resourceFactory;
+
     @Override
     public String getInstanceId() {
         return "content";
     }
 
     @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Content viewing and authoring";
+    }
+
+    @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides content viewing functions, such as generating menus based on folders";
     }
-    
-    
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        this.resourceFactory = resourceFactory;
         resourceFactory.getSecurityManager().add(new ContentViewerRole());
         resourceFactory.getSecurityManager().add(new ContentAuthorRole());
     }
 
     @Override
-    public Resource getPage(Resource parent, String requestedName) {
-        return null;
+    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        if (rootFolder instanceof WebsiteRootFolder) {
+            if (portletSection.equals("header")) {
+                if (currentUser != null) { // don't bother if no one logged in
+                    writer.append("<script type='text/javascript' src='/static/inline-edit/inline-edit.js'>//</script>\n");
+                    writer.append("<link href='/static/inline-edit/inline-edit.css' rel='stylesheet' type='text/css' />\n");
+                }
+            }
+        }
     }
 
     @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        
+    public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
+        System.out.println("getResource: " + path);
+        if (path.endsWith("/.history")) {
+            Path p = Path.path(path);
+            Resource r = findFromRoot(webRoot, p.getParent());
+            if (r != null) {
+                System.out.println("got: " + r.getName() + " - " + r.getClass());
+                if( r instanceof RenderFileResource) { // unnecesary hack, something weird gonig on
+                    RenderFileResource rfr = (RenderFileResource) r;
+                    r = rfr.getFileResource();
+                }
+                System.out.println("r is a : " + r.getClass());
+                if (r instanceof ContentResource2) {
+                    System.out.println("yay");
+                    ContentResource2 cr = (ContentResource2) r;
+                    return new HistoryResource(p.getName(), cr);
+                } else {                    
+                    System.out.println("not content resource: " + r.getClass());
+                }
+            } else {
+                System.out.println("not found");
+            }
+        } else {
+            System.out.println("not one of mine");
+        }
+        return null;
+    }
+
+    private Resource findFromRoot(RootFolder rootFolder, Path p) throws NotAuthorizedException, BadRequestException {
+        CollectionResource col = rootFolder;
+        Resource r = null;
+        for (String s : p.getParts()) {
+            if (col == null) {
+                return null;
+            }
+            r = col.child(s);
+            if (r == null) {
+                return null;
+            }
+            if (r instanceof CollectionResource) {
+                col = (CollectionResource) r;
+            } else {
+                col = null;
+            }
+        }
+        return r;
     }
 
     public class ContentViewerRole implements Role {
@@ -78,10 +143,10 @@ public class ContentApp implements Application {
 
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
-            if( isContentResource(resource) ) {
+            if (isContentResource(resource)) {
                 AbstractContentResource acr = (AbstractContentResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
-            }            
+            }
             return false;
         }
 
@@ -94,7 +159,7 @@ public class ContentApp implements Application {
             return resource instanceof RenderFileResource || resource instanceof AbstractContentResource;
         }
     }
-    
+
     public class ContentAuthorRole implements Role {
 
         @Override
@@ -104,11 +169,11 @@ public class ContentApp implements Application {
 
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
-            if( resource instanceof AbstractContentResource ) {
+            if (resource instanceof AbstractContentResource) {
                 AbstractContentResource acr = (AbstractContentResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
             }
-            if( resource instanceof RenderFileResource ) {
+            if (resource instanceof RenderFileResource) {
                 RenderFileResource acr = (RenderFileResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
             }
@@ -119,5 +184,5 @@ public class ContentApp implements Application {
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Role.READ_WRITE;
         }
-    }        
+    }
 }

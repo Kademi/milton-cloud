@@ -22,14 +22,11 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.event.JoinGroupEvent;
 import io.milton.cloud.server.event.SubscriptionEvent;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
-import io.milton.resource.CollectionResource;
-import io.milton.resource.Resource;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
@@ -60,6 +57,11 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     }
 
     @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "My files";
+    }
+        
+    @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides end users with file storage, which they can syncronise with their own computers";
     }
@@ -70,15 +72,6 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.applicationManager = resourceFactory.getApplicationManager();
         resourceFactory.getEventManager().registerEventListener(this, SubscriptionEvent.class);
-    }
-
-    @Override
-    public Resource getPage(Resource parent, String requestedName) {
-        return null;
-    }
-
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 
     @Override

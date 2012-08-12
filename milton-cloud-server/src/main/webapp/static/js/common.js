@@ -360,13 +360,53 @@ function edify(container, cssFiles, callback) {
         });        
         container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
         $("#edifyForm").append("<input type='hidden' name='body' value='' />");
+            
+        $("#edifyForm").submit(function() {
+            submitEdifiedForm();
+        });
+        log("done hide, now show again");
+        container.animate({
+            opacity: 1
+        },500);
+    });
+
+}
+
+function edifyPage(container, cssFiles, callback) {
+    log("edify", container, callback);
+    $("body").removeClass("edifyIsViewMode");
+    $("body").addClass("edifyIsEditMode");
+        
+    if( !callback ) {
+        callback = function(resp) {
+            if( resp.nextHref) {
+            //window.location = resp.nextHref;
+            } else {
+            //window.location = window.location.pathname;
+            }            
+        };
+    }
+    
+    container.animate({
+        opacity: 0
+    }, 200, function() {
+        initHtmlEditors(container.find(".htmleditor"), cssFiles);
+    
+        $(".inputTextEditor").each(function(i, n) {
+            var $n = $(n);
+            var s = $n.text();
+            $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
+        });        
+        container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
+        $("#edifyForm").append("<input type='hidden' name='body' value='' />");
         var buttons = $("<div class='buttons'></div>");
         $("#edifyForm").prepend(buttons);
-        var title = $("<input type='text' name='title' id='title' />");
+        var title = $("<input type='text' name='title' id='title' title='Enter the page title here' />");
         title.val(document.title);
         buttons.append(title);
-        buttons.append("<button class='save' type='submit'>Save</button>");
-        var btnCancel = $("<button class='cancel' type='button'>Cancel</button>");
+        buttons.append("<button title='Save edits to the page' class='save' type='submit'>Save</button>");
+        buttons.append("<button title='View page history' class='history' type='button'>History</button>");
+        var btnCancel = $("<button title='Return to view mode without saving. Any changes will be lost' class='cancel' type='button'>Cancel</button>");
         btnCancel.click(function() {
             window.location.reload()
         });
@@ -383,20 +423,22 @@ function edify(container, cssFiles, callback) {
 
 }
 
-function submitEdifiedForm() {
+
+function submitEdifiedForm(callback) {
     var form = $("#edifyForm");
     log("submit form", form);
     for( var key in CKEDITOR.instances) {
         var editor = CKEDITOR.instances[key];
         var content = editor.getData();
         var inp = $("input[name=" + key + "], textarea[name=" + key + "]");
-        if( inp ) {
+        if( inp.length > 0 ) {
             inp.val(content);
         } else {
             inp = $("<input type='hidden' name='" + key + "/>");
             form.append(inp);
             inp.val(content);
         }
+        log("copied html editor val to:", inp, "for", key);
     }
         
     var data = form.serialize();

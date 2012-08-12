@@ -55,6 +55,13 @@ public class InitialDataCreator implements LifecycleApplication {
     }
 
     @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Initial data creator";
+    }
+
+    
+    
+    @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Runs on startup and checks that a minimum core set of data is present in the database";
     }
@@ -136,14 +143,5 @@ public class InitialDataCreator implements LifecycleApplication {
     @Override
     public String getInstanceId() {
         return "initialDataCreator";
-    }
-
-    @Override
-    public Resource getPage(Resource parent, String requestedName) {
-        return null;
-    }
-
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
     }
 }

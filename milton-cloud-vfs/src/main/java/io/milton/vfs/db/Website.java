@@ -118,7 +118,7 @@ public class Website implements Serializable, VfsAcceptor {
         this.name = name;
     }    
     
-    @Column(length = 255, nullable = false)
+    @Column(length = 255, nullable = true)
     @Index(name = "idx_domain_name")
     public String getDomainName() {
         return domainName;
@@ -268,7 +268,6 @@ public class Website implements Serializable, VfsAcceptor {
     }
 
     public void removeGroup(Group group, Session session) {
-        GroupInWebsite cur = null;
         for (GroupInWebsite giw : GroupInWebsite.findByWebsite(this, session)) {
             if (giw.getWebsite() == this && giw.getUserGroup() == group) {
                 session.delete(giw);

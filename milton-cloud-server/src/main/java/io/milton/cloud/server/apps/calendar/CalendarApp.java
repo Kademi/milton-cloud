@@ -21,6 +21,7 @@ import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.event.JoinGroupEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.event.Event;
@@ -40,7 +41,7 @@ import org.hibernate.Session;
  *
  * @author brad
  */
-public class CalendarApp implements Application, EventListener {
+public class CalendarApp implements Application, EventListener, BrowsableApplication {
 
     public static final String CALENDAR_HOME_NAME = "cal";
     private CalendarManager calendarManager;
@@ -52,15 +53,15 @@ public class CalendarApp implements Application, EventListener {
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
-        return "Provides users with calendars";
+    public String getTitle(Organisation organisation, Website website) {
+        return "Calendars and events";
     }
     
     
 
     @Override
-    public Resource getPage(Resource parent, String childName) {
-        return null;
+    public String getSummary(Organisation organisation, Website website) {
+        return "Provides users with calendars";
     }
 
     @Override

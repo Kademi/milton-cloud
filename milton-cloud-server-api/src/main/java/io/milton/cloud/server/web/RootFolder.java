@@ -46,7 +46,8 @@ public interface RootFolder extends CommonCollectionResource {
     Map<String,Object> getAttributes();
 
     /**
-     * Identifier for this root folder
+     * Identifier for this root folder. This is used for building urls which identify
+     * the root folder in other contexts (Eg administration)
      * 
      * @return 
      */

@@ -1,13 +1,11 @@
 package io.milton.cloud.server.apps.groupresources;
 
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.templating.MenuItem;
-import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
@@ -16,13 +14,20 @@ import io.milton.vfs.db.Website;
  *
  * @author brad
  */
-public class GroupResourcesApp implements MenuApplication {
+public class GroupResourcesApp implements MenuApplication, ChildPageApplication {
 
     @Override
     public String getInstanceId() {
         return "groupResources";
     }
 
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Group resources and files";
+    }
+
+    
+    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Allows users groups to have folders of files, which members of the group can download";
@@ -48,11 +53,6 @@ public class GroupResourcesApp implements MenuApplication {
         }
 
         return null;
-    }
-
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-
     }
 
     @Override

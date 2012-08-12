@@ -19,13 +19,14 @@ package io.milton.cloud.server.web.resources;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.ResourceApplication;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.RootFolder;
-import io.milton.common.Path;
 import io.milton.http.ResourceFactory;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.Resource;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * Locates resources provided by applications
@@ -49,7 +50,7 @@ public class AppsResourceFactory implements ResourceFactory {
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
-        RootFolder rootFolder = (RootFolder) applicationManager.getPage(null, host);
+        RootFolder rootFolder = _(CurrentRootFolderService.class).getRootFolder(host);
 
         for (Application app : applicationManager.getApps()) {
             if (app instanceof ResourceApplication) {

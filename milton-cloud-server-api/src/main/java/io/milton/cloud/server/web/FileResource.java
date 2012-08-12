@@ -229,9 +229,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     }
 
-    public String getHash() {
-        return this.contentNode.getHash();
-    }
 
     public FileNode getFileNode() {
         return fileNode;

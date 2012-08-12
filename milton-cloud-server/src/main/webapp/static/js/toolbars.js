@@ -56,3 +56,7 @@ toolbarSets["BasicAndStyle"] = [
 toolbarSets["Image"] = [
 	['Bold','Italic','-','Link','Unlink','-','Image','Flash']
 ] ;
+
+toolbarSets["Logo"] = [
+	['Bold','Italic','-','Image','-','Source']
+] ;

@@ -14,13 +14,13 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.zip.Adler32;
-import java.util.zip.CheckedOutputStream;
 import javax.persistence.*;
-import org.apache.commons.io.output.NullOutputStream;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Holds information about a version of a resource.
@@ -41,8 +41,6 @@ import org.hibernate.Session;
 public class Version implements Serializable {
 
     public static String calcModHash(String versionHash, long modDate, long modProfileId) {
-        NullOutputStream out = new NullOutputStream();
-        CheckedOutputStream cout = new CheckedOutputStream(out, new Adler32());
         String hashableText = versionHash + ":" + modDate + ":" + modProfileId;
         return hashableText;
     }
@@ -57,6 +55,14 @@ public class Version implements Serializable {
         v.setModDate(newModDate);
         v.setProfileId(newProfileId);
         v.setResourceHash(newResourceHash);
+        session.save(v);
+    }
+    
+    public static Version find(String currentHash, Date currentModDate, long modUserId, Session session) {
+        String modHash = calcModHash(currentHash, currentModDate.getTime(), modUserId);
+        Criteria crit = session.createCriteria(Version.class);
+        crit.add(Restrictions.eq("modHash", modHash));
+        return DbUtils.unique(crit);
     }
     
     private long id;
@@ -137,6 +143,11 @@ public class Version implements Serializable {
 
     public void setModHash(String modHash) {
         this.modHash = modHash;
+    }
+
+    public Version previousVersion(Session session) {
+        Version prev = (Version) session.get(Version.class, getPreviousModHash());
+        return prev;
     }
 
 }

@@ -67,6 +67,13 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     }
 
     @Override
+    public String getId() {
+        return website.getName();
+    }
+    
+    
+
+    @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
         if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
             return _(SpliffySecurityManager.class).getCurrentUser() != null;

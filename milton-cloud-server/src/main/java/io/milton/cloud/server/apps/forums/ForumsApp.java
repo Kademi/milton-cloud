@@ -16,6 +16,8 @@ package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
@@ -48,7 +50,7 @@ import java.util.Set;
  *
  * @author brad
  */
-public class ForumsApp implements MenuApplication, ResourceApplication, PortletApplication {
+public class ForumsApp implements MenuApplication, ResourceApplication, PortletApplication, ChildPageApplication, BrowsableApplication {
 
     public static final String ROLE_FORUM_USER = "Forums user";
     
@@ -67,6 +69,13 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         return "forums";
     }
 
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Forums, topics and questions";
+    }
+
+    
+    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides forums for end users to ask questions and answer them, and gives administrators functions to manage them";

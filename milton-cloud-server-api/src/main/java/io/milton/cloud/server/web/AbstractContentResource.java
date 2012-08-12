@@ -32,7 +32,7 @@ import io.milton.property.BeanProperty;
  *
  * @author brad
  */
-public abstract class AbstractContentResource extends AbstractResource implements ContentResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
+public abstract class AbstractContentResource extends AbstractResource implements ContentResource2, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractContentResource.class);
     protected ContentDirectoryResource parent;
@@ -296,5 +296,17 @@ public abstract class AbstractContentResource extends AbstractResource implement
         return super.authorise(request, method, auth);
     }
     
-    
+    @Override
+    public String getHash() {
+        return this.contentNode.getHash();
+    }    
+
+    @Override
+    public Profile getModifiedBy() {
+        NodeMeta meta = loadNodeMeta();
+        if( meta == null ) {
+            return null;
+        }
+        return Profile.get(meta.getProfileId(), SessionManager.session());
+    }     
 }

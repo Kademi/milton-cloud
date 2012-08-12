@@ -37,3 +37,7 @@
     right: 0;
     top: 0;
 }
+
+.manageWebsite input.color {
+    width: 50px;
+}

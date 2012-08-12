@@ -1,0 +1,58 @@
+
+div.adminToolbar {
+   position: fixed;
+   top: 50%;
+   right: 0px;
+   z-index: 1000;
+}
+.edifyIsEditMode div.adminToolbar {
+    display: none;
+}
+div.adminToolbar, div.adminToolbar button {
+    width: 65px;
+}
+div.adminToolbar button { 
+   height: 64px; 
+}
+div.adminToolbar button {
+    border: none;    
+    text-indent: -9999px;
+    opacity: 0.3;
+}
+div.adminToolbar button.edit {
+    background: url("edit-icon.png");
+}
+div.adminToolbar button.new {
+    background: url("new-icon.png");
+}
+div.adminToolbar button:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+.edifyIsEditMode .buttons button {
+    height: 40px;
+    width: 42px;
+    border: none;
+    text-indent: -9999px;
+    margin-left: 10px;
+    cursor: pointer;
+    float: right;
+}
+.edifyIsEditMode .buttons .save {
+    background: url("save-icon.png");
+}
+.edifyIsEditMode .buttons .cancel {
+    background: url("cancel-icon.png");
+}
+.edifyIsEditMode .buttons .history {
+    background: url("history-icon.png");
+}
+.edifyIsEditMode .buttons {
+    height: 48px;
+}
+.edifyIsEditMode .buttons input {
+    border: 1px solid lightgray;
+    font-size: 19px;
+    padding: 3px 6px;
+    width: 600px;
+}

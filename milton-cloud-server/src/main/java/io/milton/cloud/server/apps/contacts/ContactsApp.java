@@ -20,13 +20,13 @@ import java.io.IOException;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.event.JoinGroupEvent;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.resource.CollectionResource;
-import io.milton.resource.Resource;
 import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
@@ -42,7 +42,7 @@ import org.hibernate.Session;
  *
  * @author brad
  */
-public class ContactsApp implements Application, EventListener {
+public class ContactsApp implements Application, EventListener, BrowsableApplication {
 
     public static final String ADDRESS_BOOK_HOME_NAME = "abs";
     private ContactManager contactManager;
@@ -50,10 +50,12 @@ public class ContactsApp implements Application, EventListener {
     private SpliffyResourceFactory resourceFactory;
 
     @Override
-    public Resource getPage(Resource parent, String childName) {
-        return null;
+    public String getTitle(Organisation organisation, Website website) {
+        return "Contacts and address books";
     }
 
+    
+    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides end users with address books, which can be accessed and synced from email clients and mobile devices";

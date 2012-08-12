@@ -34,6 +34,10 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         crit.add(Expression.eq("email", email));
         return DbUtils.unique(crit);
     }
+
+    public static Profile get(long profileId, Session session) {
+        return (Profile) session.get(Profile.class, profileId);
+    }
     private List<Credential> credentials;
     private String firstName;
     private String surName;

@@ -48,25 +48,15 @@ public interface Application {
     void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception;
     
     /**
-     * Return a resource for the given parent of the given name if this
-     * application defines one, and if it is not returned from addBrowseablePages. Or return null otherwise
+     * Get the title for the application. This should be a simple, one line
+     * string
      * 
-     * Usually an Application will check the type of the parent and only
-     * return a resource if the type is something its handling, like a UserResource
-     * 
-     * @param parent
-     * @param requestedName
+     * @param organisation
+     * @param website
      * @return 
      */
-    Resource getPage(Resource parent, String requestedName);
+    String getTitle(Organisation organisation, Website website);
 
-    /**
-     * Add instances of resources which should be browseable from webdav clients
-     * 
-     * @param parent
-     * @param children 
-     */
-    void addBrowseablePages(CollectionResource parent, ResourceList children);
     
     /**
      * Return a textual summary of the application and its configuration (if any)

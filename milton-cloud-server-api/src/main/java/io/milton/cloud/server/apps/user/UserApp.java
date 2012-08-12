@@ -16,6 +16,8 @@ package io.milton.cloud.server.apps.user;
 
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
@@ -40,7 +42,7 @@ import io.milton.vfs.db.Website;
  *
  * @author brad
  */
-public class UserApp implements Application, MenuApplication {
+public class UserApp implements Application, MenuApplication, ChildPageApplication, BrowsableApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
@@ -73,6 +75,11 @@ public class UserApp implements Application, MenuApplication {
         return "userApp";
     }
 
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Users";
+    }
+        
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Core application which provides user functions, such as dashboard, login and profile pages";

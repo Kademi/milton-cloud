@@ -115,7 +115,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
         if (children == null) {
             children = new ResourceList();
             for (Website w : getWebsites()) {
-                ManageWebsiteFolder p = new ManageWebsiteFolder(w, this);
+                ManageWebsitePage p = new ManageWebsitePage(w, this);
                 children.add(p);
             }
         }

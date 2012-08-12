@@ -19,15 +19,12 @@ import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.http.FileItem;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.resource.CollectionResource;
-import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -52,6 +49,13 @@ public class GaApp implements PortletApplication, SettingsApplication{
     }
 
     @Override
+    public String getTitle(Organisation organisation, Website website) {
+        return "Google Analytics";
+    }
+    
+    
+
+    @Override
     public String getSummary(Organisation organisation, Website website) {
         String gaAccNum;
         if( website != null ) {
@@ -71,16 +75,6 @@ public class GaApp implements PortletApplication, SettingsApplication{
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.config = config;
-    }
-
-    @Override
-    public Resource getPage(Resource parent, String requestedName) {
-        return null;
-    }
-
-    @Override
-    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        
     }
 
     @Override

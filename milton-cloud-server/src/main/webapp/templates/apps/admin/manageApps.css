@@ -3,8 +3,8 @@
 	font-weight: bold;
 	margin-bottom: 5px;
 }
-.manageApplications table.Summary { width: 100%; }
-.manageApplications table.Summary tr {
+table.apps { width: 100%; }
+table.apps tr {
 	background-image: linear-gradient(bottom, rgb(240,240,240) 0%, rgb(255,255,255) 100%);
 	background-image: -o-linear-gradient(bottom, rgb(240,240,240) 0%, rgb(255,255,255) 100%);
 	background-image: -moz-linear-gradient(bottom, rgb(240,240,240) 0%, rgb(255,255,255) 100%);
@@ -12,22 +12,25 @@
 	background-image: -ms-linear-gradient(bottom, rgb(240,240,240) 0%, rgb(255,255,255) 100%);
 	background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(240,240,240)),  color-stop(1, rgb(255,255,255))  );
 }
-.manageApplications table.Summary td, #manageWebsite table.Summary th {
+table.apps td, #manageWebsite table.Summary th {
 	border: solid #dadada;
 	border-width: 1px 0;
 	vertical-align: central;
 }
-.manageApplications table.Summary th {
+table.apps td:last-child {
+    padding-right: 10px;
+}
+table.apps th {
 	padding: 25px 0;
 }
 
-.manageApplications table.Summary th { width: 140px; }
-.manageApplications table.Summary td h5 {
+table.apps th { width: 140px; }
+table.apps td h5 {
 	font-size: 18px;
 	font-weight: bold;
 	margin-bottom: 4px;
 }
-.manageApplications table.Summary td p { font-size: 13px; }
+table.apps td p { font-size: 13px; }
 
 body .enabled button.settings {
     display: inline-block;
@@ -38,7 +41,7 @@ body .settings {
 div.settings {
     display: none;
 }
-.manageApplications article {
+div.appsContainer article {
     margin-bottom: 20px;
     margin-top: 20px;
     padding-left: 20px;

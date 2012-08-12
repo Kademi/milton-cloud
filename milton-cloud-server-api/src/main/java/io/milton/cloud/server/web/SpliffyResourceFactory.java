@@ -120,6 +120,26 @@ public class SpliffyResourceFactory implements ResourceFactory {
             }
         }
     }
+    
+    public Resource findFromRoot(RootFolder rootFolder, Path p) throws NotAuthorizedException, BadRequestException {
+        CollectionResource col = rootFolder;
+        Resource r = null;
+        for( String s : p.getParts() ) {
+            if( col == null ) {
+                return null;
+            }
+            r = col.child(s);
+            if( r == null ) {
+                return null;
+            }
+            if( r instanceof CollectionResource ) {
+                col = (CollectionResource) r;
+            } else {
+                col = null;
+            }
+        }
+        return r;
+    }
 
     public ApplicationManager getApplicationManager() {
         return applicationManager;

@@ -92,7 +92,8 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Resource child(String childName) {
         return NodeChildUtils.childOf(getChildren(), childName);
     }
-
+            
+    
     @Override
     public ResourceList getChildren() {
         if (children == null) {
@@ -340,4 +341,24 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Branch getBranch() {
         return branch;
     }
+
+    @Override
+    public String getHash() {
+        Commit c = branch.getHead();
+        if( c == null ) {
+            return null;
+        } else {
+            return c.getItemHash();
+        }
+    }
+
+    @Override
+    public Profile getModifiedBy() {
+        Commit h = branch.getHead();
+        if( h == null ) {
+            return null;
+        } else {
+            return h.getEditor();
+        }
+    }                
 }

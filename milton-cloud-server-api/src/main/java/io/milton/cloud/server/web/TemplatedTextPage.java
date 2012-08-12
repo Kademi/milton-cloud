@@ -55,6 +55,9 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
         this.parent = parent;
         this.contentType = contentType;
         this.template = template;
+        if( parent == null ) {
+            throw new IllegalArgumentException("Parent cannot be null");
+        }
     }
 
     @Override
