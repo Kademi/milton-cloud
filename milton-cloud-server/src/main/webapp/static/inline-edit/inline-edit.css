@@ -34,7 +34,7 @@ div.adminToolbar button:hover {
     width: 42px;
     border: none;
     text-indent: -9999px;
-    margin-left: 10px;
+    margin: 0 0 0 10px;
     cursor: pointer;
 }
 .edifyIsEditMode .buttons button {

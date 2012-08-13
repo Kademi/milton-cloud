@@ -79,7 +79,8 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (rootFolder instanceof WebsiteRootFolder) {
             if (portletSection.equals("header")) {
-                if (currentUser != null) { // don't bother if no one logged in
+                // Inject resources to permit inline editing
+                if (currentUser != null) { // but don't bother if no one logged in
                     writer.append("<script type='text/javascript' src='/static/inline-edit/inline-edit.js'>//</script>\n");
                     writer.append("<link href='/static/inline-edit/inline-edit.css' rel='stylesheet' type='text/css' />\n");
                 }

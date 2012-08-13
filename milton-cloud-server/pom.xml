@@ -366,7 +366,11 @@
                                 <systemProperty>
                                     <name>static.resource.roots</name>
                                     <value>../../fuse-admin/fuse-app/src/main/resources</value>
-                                </systemProperty>                                                                  
+                                </systemProperty>                                  
+                                <systemProperty>
+                                    <name>template.file.roots</name>
+                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                </systemProperty>  
                                 <systemProperty>
                                     <name>fuse.autoloader.dir</name>
                                     <value>../../fuse-admin</value>

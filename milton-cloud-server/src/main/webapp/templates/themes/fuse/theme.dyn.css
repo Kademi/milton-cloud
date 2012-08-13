@@ -1,5 +1,5 @@
-
-/** Start learning.css **/
+/** Start theme.dyn.css **/
+@import url("/static/common/modal.css");
 html {
     font-size: 1em;
     height:100%;
@@ -2880,14 +2880,7 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
 
 
 /** Start moduleLayout.css **/
-div.adminToolbar {
-    border: 1px dashed gray;
-    position: absolute;
-    right: 10px;
-    top: -55px;
-    padding: 10px;
-    z-index: 100;
-}
+
 .modulePage .content {
     min-height: 350px;
     background-color:#eeeeee;

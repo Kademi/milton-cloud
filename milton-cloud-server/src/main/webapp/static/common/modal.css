@@ -1,4 +1,5 @@
 /* Modal */
+.Hidden { display: none; }
 div.Modal {
     width: 470px;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
@@ -31,7 +32,7 @@ div.Modal header h3 {
     color: #FFF;
     font-weight: bold;
     padding-left: 15px;
-    margin: 0;
+    margin: 0 !important;
 }
 div.Modal header a.Close {
     position: absolute;
