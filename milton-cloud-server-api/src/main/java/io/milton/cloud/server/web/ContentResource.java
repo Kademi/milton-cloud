@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import java.io.IOException;
 
@@ -45,5 +46,5 @@ public interface ContentResource extends CommonResource{
      * except for the branch which will set the commit record
      */
     void save() throws IOException;    
-    
+        
 }

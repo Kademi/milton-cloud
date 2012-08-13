@@ -145,8 +145,8 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (isContentResource(resource)) {
-                AbstractContentResource acr = (AbstractContentResource) resource;
-                return acr.getOrganisation().isWithin(withinOrg);
+                ContentResource cr = (ContentResource) resource;
+                return cr.getOrganisation().isWithin(withinOrg);
             }
             return false;
         }
@@ -157,7 +157,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         }
 
         private boolean isContentResource(CommonResource resource) {
-            return resource instanceof RenderFileResource || resource instanceof AbstractContentResource;
+            return resource instanceof ContentResource;
         }
     }
 

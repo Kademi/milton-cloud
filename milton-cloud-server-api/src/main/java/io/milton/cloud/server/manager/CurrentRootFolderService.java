@@ -33,6 +33,14 @@ public interface CurrentRootFolderService {
     RootFolder getRootFolder();
     
     /**
+     * Just return a root folder if it is associated with this request, do not 
+     * locate one if it isnt
+     * 
+     * @return 
+     */
+    RootFolder peekRootFolder();
+    
+    /**
      * get the root folder for the given host, returning a previously
      * resolved one if available for that host
      * 

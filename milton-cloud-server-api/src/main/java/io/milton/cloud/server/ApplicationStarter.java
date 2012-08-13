@@ -15,6 +15,7 @@
 package io.milton.cloud.server;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.common.Service;
@@ -64,6 +65,7 @@ public class ApplicationStarter implements InitListener, Service{
         rootContext.put(m);
         final ApplicationManager applicationManager = rootContext.get(ApplicationManager.class);
         final SpliffyResourceFactory resourceFactory = rootContext.get(SpliffyResourceFactory.class);
+        rootContext.get(DefaultCurrentRootFolderService.class).setApplicationManager(applicationManager);
         rootContext.execute(new Executable2() {
 
             @Override

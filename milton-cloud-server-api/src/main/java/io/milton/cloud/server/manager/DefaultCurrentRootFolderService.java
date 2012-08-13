@@ -71,14 +71,32 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
     public static String ROOT_FOLDER_NAME = "_spliffy_root_folder";
     private String primaryDomain = "localhost";
 
+    private ApplicationManager applicationManager;
+    
+    public DefaultCurrentRootFolderService() {
+    }
+
+    
+    
     @Override
     public RootFolder getRootFolder() {
         Request req = HttpManager.request();
         if (req == null) {
             return null;
         }
-        return getRootFolder(req.getHostHeader(), req);
+        return getRootFolder(req.getHostHeader(), req, true);
     }
+
+    @Override
+    public RootFolder peekRootFolder() {
+        Request req = HttpManager.request();
+        if (req == null) {
+            return null;
+        }
+        return getRootFolder(req.getHostHeader(), req, false);
+    }
+    
+    
 
     @Override
     public RootFolder getRootFolder(String host) {
@@ -86,12 +104,12 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         if (req == null) {
             return null;
         }
-        return getRootFolder(host, req);
+        return getRootFolder(host, req, true);
     }
 
-    private RootFolder getRootFolder(String host, Request req) {
+    private RootFolder getRootFolder(String host, Request req, boolean resolve) {
         RootFolder rootFolder = (RootFolder) req.getAttributes().get(ROOT_FOLDER_NAME);
-        if (rootFolder == null) {
+        if (rootFolder == null && resolve) {
             rootFolder = resolve(host);
             req.getAttributes().put(ROOT_FOLDER_NAME, rootFolder);
         }
@@ -113,7 +131,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         }
         System.out.println("resolve: " + host);
         Session session = SessionManager.session();
-        ApplicationManager applicationManager = _(ApplicationManager.class);
         String primaryDomainSuffix = "." + primaryDomain;
         if (host.endsWith(primaryDomainSuffix)) {
             String subdomain = Utils.stripSuffix(host, primaryDomainSuffix);
@@ -151,4 +168,13 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         return new OrganisationRootFolder(applicationManager, org);
     }
 
+    public ApplicationManager getApplicationManager() {
+        return applicationManager;
+    }
+
+    public void setApplicationManager(ApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+    }
+
+    
 }
