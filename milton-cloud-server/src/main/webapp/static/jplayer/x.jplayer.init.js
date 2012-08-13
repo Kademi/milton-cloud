@@ -69,5 +69,5 @@ function playVideo(playerSel, primaryUrl) {
         //                ogv: "http://www.jplayer.org/video/ogv/Big_Buck_Bunny_Trailer_480x270.ogv",
         poster: posterUrl //"http://www.jplayer.org/video/poster/Big_Buck_Bunny_Trailer_480x270.png"
     });
-    $(playerSel).jPlayer("play");
+    //$(playerSel).jPlayer("play");
 }

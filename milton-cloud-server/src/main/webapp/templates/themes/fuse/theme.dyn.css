@@ -125,7 +125,9 @@ body p a {
 ul ul {
     font-size: 1em;
 }
-
+ul ul li {
+    list-style-type: circle;
+}
 li {
     margin: 0 0 0 40px;
     padding:0 0 5px 0;    

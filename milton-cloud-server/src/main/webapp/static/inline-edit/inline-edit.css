@@ -49,6 +49,9 @@ div.adminToolbar button:hover {
 .edifyIsEditMode .buttons .history, .version .history {
     background: url("history-icon.png");
 }
+.version td {
+    font-size: 12px;
+}
 .edifyIsEditMode .buttons {
     height: 48px;
 }
