@@ -2,32 +2,31 @@ $(function() {
     var adminToolbar = $("<div class='adminToolbar'>");
     var btnEdit = $("<button class='edit'>Edit page</button>");
     btnEdit.click(function() {
-        edifyPage($('.contentForm'), ['/templates/themes/3dn/theme.css']);
+        edifyPage($('.contentForm'));
     });
     var btnNew = $("<button class='new'>New Page</button>");
     adminToolbar.append(btnEdit).append(btnNew);
     $("body").append(adminToolbar);
+        
+    $("link").each(function(i ,n){
+        var link = $(n);
+        if( link.attr("rel") == "stylesheet" && link.attr("media") == "screen" ) {
+            var href = link.attr("href");
+            log("push theme css file", href);
+            themeCssFiles.push(href);
+        }
+    });
 });
 
-function edifyPage(container, cssFiles, callback) {
-    log("edifyPage", container, callback);
+function edifyPage(container) {
+    log("edifyPage", container);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
-        
-    if( !callback ) {
-        callback = function(resp) {
-            if( resp.nextHref) {
-            //window.location = resp.nextHref;
-            } else {
-            //window.location = window.location.pathname;
-            }            
-        };
-    }
-    
+            
     container.animate({
         opacity: 0
     }, 200, function() {
-        initHtmlEditors(container.find(".htmleditor"), cssFiles);
+        initHtmlEditors(container.find(".htmleditor"));
     
         $(".inputTextEditor").each(function(i, n) {
             var $n = $(n);

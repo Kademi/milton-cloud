@@ -1,0 +1,53 @@
+table.classifier tr td {
+    vertical-align: top;
+}
+table.classifier tr td:last-child {
+    width: 700px;
+    background-image: url(shade.png);
+    background-repeat: no-repeat;
+}
+table.classifier div.rule {
+    background-repeat: no-repeat;
+    height: 155px;
+    width: 656px;
+    background-position: top center;
+    padding: 100px 20px 20px 20px;
+}
+table.classifier div.graph {
+    margin: 7px;
+    background-repeat: no-repeat;
+}
+table.classifier tr td:first-child {
+    background-image: url(button.png);
+    background-repeat: no-repeat;
+    width: 191px;
+    height: 71px;
+}
+
+table.classifier tr td:first-child div {
+    height: 50px;
+    padding: 10px;
+    position: relative;
+}
+table.classifier td span {
+    background-image: url(arrows.png);
+    height: 45px;
+    width: 24px;  
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 12px;
+    background-position: 0 0px;
+}
+table.classifier .clasContent {
+    padding: 0 70px;
+}
+table.classifier h3 {
+    margin: 0;
+}
+table.classifier p {
+    margin: 0;
+}
+table.classifier .intro p {
+    text-align: center;
+}

@@ -162,7 +162,7 @@ function getSavedFontSize() {
  * Make sure you push any required css files into "themeCssFiles" before calling
  */
 function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {    
-    log("initHtmlEditors");
+    log("initHtmlEditors: css files=", themeCssFiles);
     if( !$('.htmleditor').ckeditor ) {
         log("ckeditor jquery adapter is not loaded");
         return;
