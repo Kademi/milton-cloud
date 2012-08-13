@@ -163,7 +163,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      *
      */
     public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {
-        Repository r = createRepository(dnsName, user, session);
+        Repository r = createRepository(name, user, session);
 
         Website w = new Website();
         w.setOrganisation(this);

@@ -78,6 +78,9 @@ public class AppConfig {
     
     public String get(String setting, Website w) {
         AppControl appControl = AppControl.find(w, applicationId, SessionManager.session());
+        if( appControl == null ) {
+            return null;
+        }
         return appControl.getSetting(setting);
     }    
     

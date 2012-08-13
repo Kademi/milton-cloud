@@ -3,6 +3,7 @@ package io.milton.vfs.db;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
@@ -17,9 +18,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @javax.persistence.Entity
 @Table(
 uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "base_entity"})}
-)
-
+    @UniqueConstraint(columnNames = {"name", "base_entity"})})
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -47,13 +46,14 @@ public class Repository implements Serializable {
     }
 
     /**
-     * The entity that contains this repository. The entity might be a user, organisation, etc
-     * 
+     * The entity that contains this repository. The entity might be a user,
+     * organisation, etc
+     *
      * The repository name must be unique within its parent entity
-     * 
-     * @return 
+     *
+     * @return
      */
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public BaseEntity getBaseEntity() {
         return baseEntity;
     }
@@ -62,9 +62,7 @@ public class Repository implements Serializable {
         this.baseEntity = baseEntity;
     }
 
-    
-    
-    @Column(length = 255, nullable=false)
+    @Column(length = 255, nullable = false)
     public String getName() {
         return name;
     }
@@ -73,7 +71,7 @@ public class Repository implements Serializable {
         this.name = name;
     }
 
-    @Column(length=255)
+    @Column(length = 255)
     public String getTitle() {
         return title;
     }
@@ -81,7 +79,7 @@ public class Repository implements Serializable {
     public void setTitle(String title) {
         this.title = title;
     }
-    
+
     @Column
     public String getNotes() {
         return notes;
@@ -89,8 +87,8 @@ public class Repository implements Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }    
-    
+    }
+
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(nullable = false)
     public Date getCreatedDate() {
@@ -109,7 +107,7 @@ public class Repository implements Serializable {
     public void setBranches(List<Branch> branches) {
         this.branches = branches;
     }
-    
+
     @OneToMany(mappedBy = "repository")
     public List<NvPair> getNvPairs() {
         return nvPairs;
@@ -117,9 +115,9 @@ public class Repository implements Serializable {
 
     public void setNvPairs(List<NvPair> nvPairs) {
         this.nvPairs = nvPairs;
-    }    
+    }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public boolean isPublicContent() {
         return publicContent;
     }
@@ -127,61 +125,79 @@ public class Repository implements Serializable {
     public void setPublicContent(boolean publicContent) {
         this.publicContent = publicContent;
     }
-    
-    
 
     public Repository setAttribute(String name, String value, Session session) {
+        if (value != null) {
+            value = value.trim();
+            if (value.length() == 0) {
+                value = null;
+            }
+        }
         List<NvPair> list = getNvPairs();
-        if( list == null ) {
+        if (list == null) {
             list = new ArrayList<>();
             setNvPairs(list);
         }
-        for( NvPair nv : list ) {
-            if( nv.getName().equals(name)) {
-                nv.setPropValue(value);
-                session.save(nv);
+        if (value == null) {
+            Iterator<NvPair> it = list.iterator();
+            while( it.hasNext() ) {
+                NvPair nv = it.next();
+                if (nv.getName().equals(name)) {
+                    session.delete(nv);
+                    it.remove();
+                }
             }
+        } else {
+            NvPair found = null;
+            for (NvPair nv : list) {
+                if (nv.getName().equals(name)) {
+                    found = nv;
+                    break;
+                }
+            }
+            if( found == null ) {
+                found = new NvPair();
+                found.setRepository(this);
+                found.setName(name);
+                list.add(found);
+            }
+            found.setPropValue(value);            
+            session.save(found);
         }
-        NvPair nv = new NvPair();
-        nv.setRepository(this);
-        nv.setName(name);
-        nv.setPropValue(value);
-        list.add(nv);
-        session.save(nv);
         return this;
     }
-    
+
     public String getAttribute(String name) {
         List<NvPair> list = getNvPairs();
-        if( list == null ) {
+        if (list == null) {
             return null;
         }
-        for( NvPair nv : list ) {
-            if( nv.getName().equals(name)) {
+        for (NvPair nv : list) {
+            if (nv.getName().equals(name)) {
                 return nv.getPropValue();
             }
         }
         return null;
-    }    
-    
+    }
+
     public Branch trunk(Session session) {
         if (getBranches() != null) {
             for (Branch b : getBranches()) {
-                if (Branch.TRUNK.equals(b.getName())) { 
+                if (Branch.TRUNK.equals(b.getName())) {
                     return b;
                 }
             }
         }
         return null;
-    }  
-    
+    }
+
     /**
      * Creates and saves a new branch, including setting up initial commit etc
-     * 
+     *
      * @param name
      * @param user
      * @param session
-     * @return 
+     * @return
      */
     public Branch createBranch(String name, Profile user, Session session) {
         Commit head = new Commit();
@@ -189,34 +205,34 @@ public class Repository implements Serializable {
         head.setEditor(user);
         head.setItemHash(null);
         session.save(head);
-                
+
         Branch b = new Branch();
         b.setName(Branch.TRUNK);
         b.setRepository(this);
         b.setHead(head);
-        session.save(b);    
-        
-        if( getBranches() == null ) {
+        session.save(b);
+
+        if (getBranches() == null) {
             setBranches(new ArrayList<Branch>());
         }
         getBranches().add(b);
-        
+
         return b;
     }
 
     public void delete(Session session) {
-        if( getBranches() != null ) {
-            for( Branch b : getBranches()) {
-                b.delete(session); 
+        if (getBranches() != null) {
+            for (Branch b : getBranches()) {
+                b.delete(session);
             }
             setBranches(null);
-        }        
-        if( getNvPairs() != null ) {
-            for( NvPair p : getNvPairs() ) {
+        }
+        if (getNvPairs() != null) {
+            for (NvPair p : getNvPairs()) {
                 p.delete(session);
             }
             setNvPairs(null);
-        }        
+        }
         session.delete(this);
     }
 }
