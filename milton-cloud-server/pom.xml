@@ -253,8 +253,11 @@
                                     <value>io.milton.cloud.server.init.InitialDataCreator</value>
                                 </systemProperty>                                
                             </systemProperties> 
-                            <overrideWebXml>src/test/resources/web.xml</overrideWebXml>
-                            <contextPath>/</contextPath>
+                            <webAppConfig>
+                                <contextPath>/</contextPath>
+                                <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
+                            </webAppConfig>     
+
                             <connectors>
                                 <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
                                     <port>8080</port>  <!-- Run on non-priviledged port 8080 for linux -->
