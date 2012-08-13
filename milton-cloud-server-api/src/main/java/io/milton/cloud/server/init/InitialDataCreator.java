@@ -84,6 +84,7 @@ public class InitialDataCreator implements LifecycleApplication {
             newOrg = true;
             rootOrg = new Organisation();
             rootOrg.setName(initialRootOrgName);
+            rootOrg.setOrgId(initialRootOrgName);
             rootOrg.setModifiedDate(new Date());
             rootOrg.setCreatedDate(new Date());
             session.save(rootOrg);
