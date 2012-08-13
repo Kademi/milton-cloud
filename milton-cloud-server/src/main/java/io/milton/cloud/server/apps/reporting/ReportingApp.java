@@ -190,7 +190,7 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
         if (profile != null) {
             user = profile.getName();
         }
-        RootFolder rootFolder = currentRootFolderService.getRootFolder();
+        RootFolder rootFolder = currentRootFolderService.peekRootFolder();
         Long orgId = null;
         Long websiteId = null;
         if (rootFolder != null) {
