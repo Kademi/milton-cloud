@@ -115,7 +115,7 @@ body p a {
 
 }
 
- ul {
+ul {
     margin: 0px 0px 0px 40px;
     font-size: 0.8em;
     color: $rootFolder.settings.textColour1;
@@ -1408,71 +1408,11 @@ table h1, table h2, table h3, table h4 {
     font-style: normal;    
 }
 
-table.bar thead * {
-    color: white;
-}
-table.bar .left {
-    text-align: left;
-}
-
-table.bar td, table.bar th {
-    padding: 5px;
-    vertical-align: central;
-    text-align: center;
-}
-table.bar thead tr th {
-    background:$page.parent.settings.heroColour1;
-    border: none;
-    font-size: 0.9em;
-    font-style: italic;    
-    font-weight: 400;    
-}
-
-table.bar thead th:first-child {
-    border-radius: 5px 0 0 5px;
-    font-style: normal;
-    text-align: left;
-}
-
-table.bar th:first-child, table.bar td:first-child {
-    padding-left: 10px;    
-}
-
-table.bar th:last-child, table.bar td:last-child {
-    padding-right: 10px;    
-}
-
-table.bar thead tr th:last-child {
-    border-radius: 0 5px 5px 0;
-}
-table.bar tr:nth-child(odd) td {
-    background-color: white;
-}
-tr.seperator {
-    display: block;
-    height: 10px;
-}
-
-div.bar, .courcesBox {
-    height: 1.9em;
-}
-div.bar {
-    background:$page.parent.settings.heroColour1;
-    line-height: 2em;
-    margin-bottom:2px;
-    border-radius: 5px;
-    padding: 0 8px;
-}
-div.bar.alt {
-    background:$page.parent.settings.heroColour2;
-}
-
-
 #comments input, #comments textarea{
-    padding:7px 10px 6px;
-    width:75%;
-    margin-right:3px;
+    padding: 4px 10px;
+    width:95%;
     height:19px;
+    margin: 0;
 }
 .fBox{
     margin:0 auto;
@@ -1497,10 +1437,6 @@ div.bar.alt {
 }
 #comments button {
     margin: 0;
-    position: absolute;
-    bottom: 5px;
-    right: 0;
-    display: block;
 }
 .error, .validationError, #validationMessage {
     font-size: 0.8em;
@@ -1624,82 +1560,8 @@ a.gBox1{
     font-weight:bold;
     margin-top:10px;
 }
-.pagiBox {
-    width:160px;
-    position:absolute;
-    bottom:10px;
-    left:38%;
-}
-.pagiBox1{
-    left:42%;
-}
-a.arrowL {
-    background:$page.parent.settings.heroColour1;
-    width:18px;
-    height:19px;
-    border-bottom-left-radius: 15px 15px;
-    border-bottom-right-radius: 15px 15px;
-    border-top-left-radius: 15px 15px;
-    border-top-right-radius: 15px 15px;
-    float:left;
-    display:block;
-    padding-top:6px;
-    padding-left:7px;
-}
-ul.pagi {
-    float:left;
-}
-ul.pagi li {
-    list-style:none;
-    float:left;
-    font-size:13px;
-    font-weight:bold;
-    margin-left:16px;
-    margin-top:5px;
-}
-ul.pagi li a {
-    text-decoration:none;
-    color:$page.parent.settings.heroColour1;
-}
-ul.pagi li:hover a {
-    text-decoration:underline;
-}
-a.arrowR {
-    float:right;
-    padding-left:10px;
-}
 
 
-/*sideBar*/
-.sideBar{
-    width:29%;
-    float:right;
-}
-body ul.barList {
-    margin: 0;
-}
-ul.barList li{
-    list-style:none;
-    border-top:1px solid #dbdada;
-    padding:7px 0 7px 10px;
-    margin: 0;
-    font-size: 0.75em;    
-}
-ul.barList li:last-child {
-    border-bottom: 1px solid #dbdada;
-}
-.profilePic{
-    float:left;
-    margin-right:8px;
-}
-ul.barList li .textBox{
-    float:left;
-    width:70%;
-}
-ul.barList p {    
-    line-height: 12px;
-    margin: 0;
-}
 .textBox h3{
     color:#262626;
     font-size:12px;
@@ -1721,21 +1583,6 @@ ul.barList p {
     font-size:10px;
     margin-bottom:4px;
 }
-ul.barList em, ul.barList small, ul.barList p {
-    font-size: 1em;
-}
-ul.barList em{
-    color:#262626;    
-    margin-right:7px;
-}
-ul.barList small{
-    color:$page.parent.settings.heroColour1;    
-    font-style:italic;
-    background:url(images/plus.gif) top left no-repeat;
-    padding-left:10px;
-    background-position:0 4px;
-}
-
 a.module {
     color: $page.parent.settings.heroColour1;
     font-weight: bold;
@@ -2274,7 +2121,11 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
 
 .modulePage .content {
     min-height: 350px;
-    background-color:#eeeeee;
+    background-color: white;
+    background-image: url("images/h-shade.jpg");
+    background-position: center top;
+    background-repeat: repeat-y;
+    min-height: 350px;
 }
 .modulePage .nav, .modulePage .formBox {
     display: none;
@@ -2298,8 +2149,10 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
     font-size: 13px;
     padding-left: 20px;
 }
-.content ul.pages {
+ul.pages {
     display: inline-block;
+    margin: 0;
+    max-width: 780px;
 }
 .pages li {
     display: block;
@@ -2308,19 +2161,20 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
     margin: 0 8px 8px;
 }
 .pages li a{
-    display: inline-block;
     background-color: $rootFolder.settings.heroColour1;
-    border-radius: 18px;
-    border: solid 2px $rootFolder.settings.heroColour1;
-    padding: 6px 6px;
-    margin: 0;    
-    font-size: 14px;
-    width: 18px;
-    height: 18px;
+    border: solid 6px $rootFolder.settings.heroColour1;
+    border-radius: 15px;
+    display: inline-block;
+    font-size: 12px;
+    height: 4px;
+    margin: 0;
+    padding: 6px;
+    text-indent: -9999px;
+    width: 4px;
 }
 .content .pages li a:hover, .content .pages li a.active {   
     background-color: white;
-    border: solid 2px $rootFolder.settings.heroColour1;
+    border: solid 6px $rootFolder.settings.heroColour1;
     padding: 6px 6px;
     margin: 0;     
     font-size: 14px;   
@@ -2332,11 +2186,26 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
     bottom:-3px;
     right:0;
 }
+div.pages {
+    background-color: white;
+    max-width: 950px;
+    padding: 0 15px;
+}
 .commetnArea{
+    max-width: 950px;    
+    background-color: #EEEEEE;
+    padding: 0 15px;
+}
+.commetnArea, div.pages, .panelBox{
+    border-left: solid 1px #d2d2d2;
+    border-right: solid 1px #d2d2d2;    
+}
+.commetnArea, div.pages{
     text-align: center;
     margin:16px 15px 0;
     position:relative;
     overflow:hidden;
+    margin: 0 auto;
 }
 
 .modulePage a.nextBtn, .modulePage a.prevBtn{
@@ -2357,10 +2226,10 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
 }
 
 .modulePage a.prevBtn{    
-    left:0;
+    left: 15px;
 }
 .modulePage a.nextBtn{
-    right:0;
+    right: 15px;
 }
 ul.btnList{
     width:225px;
@@ -2396,7 +2265,7 @@ ul.btnList li:hover a, ul.btnList li.active a{
 .content .hideBtn a{
     text-decoration:none;
     color:#fff;
-    background:url(images/wArrow.gif) top right no-repeat;
+    background:url(images/wArrow.png) top right no-repeat;
     background-position:100% 5px;
     padding-right:18px;
     font-size:0.6875em;
@@ -2489,110 +2358,110 @@ a.external {
 */
 a.anchor-modal { cursor: pointer; }
 .linked-modal {
-	background: #FFF;
-	box-shadow: 0 0 30px rgba(0, 0, 0, .5);
-	40px 25px 25px 25px
+    background: #FFF;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    40px 25px 25px 25px
     min-height: 100px;
 }
 .linked-modal a.close-modal {
-	background: transparent url(btn_modal_close.png) no-repeat 50% 50%;
-	width: 30px;
-	height: 30px;
-	position: absolute;
-	top: 4px;
-	right: 4px;
-	border: 0 none;
-	color: transparent;
-	font: 0px/0 a;
-	text-shadow: none;
+    background: transparent url(btn_modal_close.png) no-repeat 50% 50%;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    border: 0 none;
+    color: transparent;
+    font: 0px/0 a;
+    text-shadow: none;
 }
 
 /* Classification */
 .classifer h3 { font-weight: normal; }
 .classifer .controller-wrapper {
-	float: left;
-	width: 191px;
+    float: left;
+    width: 191px;
 }
 .classifer .controller-wrapper .controller {
-	background: url(images/button.png) no-repeat;
-	height: 56px;
-	margin-bottom: 5px;
-	padding: 14px 0 0 10px;
-	position: relative;
-	cursor: pointer;
+    background: url(images/button.png) no-repeat;
+    height: 56px;
+    margin-bottom: 5px;
+    padding: 14px 0 0 10px;
+    position: relative;
+    cursor: pointer;
 }
 .classifer .controller-wrapper .controller span.arrow {
-	position: absolute;
-	background: url(images/icon_right_sprite.png) no-repeat;
-	width: 24px;
-	height: 48px;
-	top: 11px;
-	right: 10px;
+    position: absolute;
+    background: url(images/icon_right_sprite.png) no-repeat;
+    width: 24px;
+    height: 48px;
+    top: 11px;
+    right: 10px;
 }
 .classifer .controller-wrapper .controller h3 {
-	font-size: 18px;
-	margin: 0;
+    font-size: 18px;
+    margin: 0;
 }
 .classifer .controller-wrapper .controller p {
-	font-size: 12px;
-	line-height: 110%;
-	margin: 0;
+    font-size: 12px;
+    line-height: 110%;
+    margin: 0;
 }
 .classifer .controller-wrapper .button-placeholder {
-	font-size: 15px;
-	color: #c30;
+    font-size: 15px;
+    color: #c30;
 }
 .classifer .content-wrapper { margin-left: 194px; }
 .classifer .content-wrapper > .content {
-	background: url(images/content_panel.png) no-repeat;
-	position: relative;
-	width: 716px;
-	height: 295px;
+    background: url(images/content_panel.png) no-repeat;
+    position: relative;
+    width: 716px;
+    height: 295px;
 }
 .classifer .content-wrapper > .content.active { display: block !important; }
 .classifer .content-wrapper > .content h3.notice {
-	font-size: 18px;
-	text-align: center;
-	margin-top: 55px;
+    font-size: 18px;
+    text-align: center;
+    margin-top: 55px;
 }
 .classifer .content-wrapper > .content > img {
-	position: absolute;
-	left: 0;
-	top: 0;
-	z-index: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
 }
 .classifer .content-wrapper > .content .main-content {
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 2;
-	background: url(images/rule.png) no-repeat 50% 15px;
-	padding: 80px 15px 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    background: url(images/rule.png) no-repeat 50% 15px;
+    padding: 80px 15px 0;
 }
 .hide {
-	display: none;
+    display: none;
 }
 .hide-force {
-	display: none !important;
+    display: none !important;
 }
 .hide-text {
-	background-color: transparent;
-	border: 0 none;
-	color: transparent;
-	font: 0px/0 a;
-	text-shadow: none;
+    background-color: transparent;
+    border: 0 none;
+    color: transparent;
+    font: 0px/0 a;
+    text-shadow: none;
 }
 .clearfix {
-  *zoom: 1;
+    *zoom: 1;
 }
 .clearfix:before, .clearfix:after {
-  display: table;
-  content: "";
+    display: table;
+    content: "";
 }
 .clearfix:after {
-  clear: both;
+    clear: both;
 }
 
 table.dashboard {
@@ -2601,3 +2470,129 @@ table.dashboard {
 table.dashboard td.gap, table.myLearning td.gap {
     width: 1em;
 }
+
+
+
+
+
+
+div.bar {
+    background: none repeat scroll 0 0 #4899BF;
+    border-radius: 5px 5px 5px 5px;
+    font-size: 0.9em;
+    height: 2em;
+    line-height: 2em;
+    margin-bottom: 2px;
+    padding: 0 8px;
+}
+div.bar h3 {
+    color: #FFFFFF;
+    float: left;
+    font-size: 0.9em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
+.sideBar{
+    width:29%;
+    float:right;
+}
+body ul.barList {
+    margin: 0;
+}
+ul.barList li{
+    list-style:none;
+    border-top:1px solid #dbdada;
+    padding:7px 0 7px 10px;
+    margin: 0;
+    font-size: 0.75em;    
+}
+ul.barList li:last-child {
+    border-bottom: 1px solid #dbdada;
+}
+.profilePic{
+    float:left;
+    margin-right:8px;
+}
+ul.barList li .textBox{
+    float:left;
+    width:70%;
+}
+ul.barList p {    
+    line-height: 12px;
+    margin: 0;
+}
+
+
+ul.barList em, ul.barList small, ul.barList p {
+    font-size: 1em;
+}
+ul.barList em{
+    color:#262626;    
+    margin-right:7px;
+}
+ul.barList small{
+    color:$page.parent.settings.heroColour1;    
+    font-style:italic;
+    background:url(images/plus.gif) top left no-repeat;
+    padding-left:10px;
+    background-position:0 4px;
+}
+
+table.bar thead * {
+    color: white;
+}
+table.bar .left {
+    text-align: left;
+}
+
+table.bar td, table.bar th {
+    padding: 5px;
+    vertical-align: central;
+    text-align: center;
+}
+table.bar thead tr th {
+    background:$page.parent.settings.heroColour1;
+    border: none;
+    font-size: 0.9em;
+    font-style: italic;    
+    font-weight: 400;    
+}
+
+table.bar thead th:first-child {
+    border-radius: 5px 0 0 5px;
+    font-style: normal;
+    text-align: left;
+}
+
+table.bar th:first-child, table.bar td:first-child {
+    padding-left: 10px;    
+}
+
+table.bar th:last-child, table.bar td:last-child {
+    padding-right: 10px;    
+}
+
+table.bar thead tr th:last-child {
+    border-radius: 0 5px 5px 0;
+}
+table.bar tr:nth-child(odd) td {
+    background-color: white;
+}
+tr.seperator {
+    display: block;
+    height: 10px;
+}
+
+div.bar {
+    height: 2.0em;
+    background:$page.parent.settings.heroColour1;
+    line-height: 2em;
+    margin-bottom:2px;
+    border-radius: 5px;
+    padding: 0 8px;
+}
+div.bar.alt {
+    background:$page.parent.settings.heroColour2;
+}
+

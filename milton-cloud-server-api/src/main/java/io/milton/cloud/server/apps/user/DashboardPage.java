@@ -18,9 +18,6 @@ package io.milton.cloud.server.apps.user;
 
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
-import io.milton.http.Auth;
-import io.milton.http.Request;
-import io.milton.http.Request.Method;
 
 /**
  * Dashboard for the user. Most functions will be provided by PortletApplications
@@ -44,6 +41,15 @@ public class DashboardPage extends TemplatedHtmlPage {
         super(name, parent, "user/dashboard", "Dashboard");
         setForceLogin(true);
     }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("dashboard")) {
+            return true;
+        }
+        return super.is(type);
+    }
+
     
 
 }
