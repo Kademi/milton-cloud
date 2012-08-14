@@ -40,8 +40,10 @@ function displayPost(user, date, comment, pageTitle, pagePath) {
         return;
     }
     var li = $("<li>");
-    if( user.photoHref ) {
-        li.append("<a class='profilePic' href='#'><img src='" + user.photoHref + "' alt='' /></a>");
+    if( user.photoHash ) {
+        li.append("<a class='profilePic' href='#'><img src='/_hashes/files/" + user.photoHash + "' alt='' /></a>");
+    } else {
+        li.append("<a class='profilePic' href='#'><img src='/templates/apps/user/profile.png' alt='' /></a>");
     }
     li.append("<a class='user' href='#'>" + user.name + "</a> posted in <a class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
     li.append("<p>" + comment + "</p>");
