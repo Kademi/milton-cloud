@@ -4,7 +4,7 @@
 function initFuseTheme() {
     log("initFuseTheme");
     
-    initActiveNav();
+    initActiveNav("body");
     initTabPanel();
     initMenuEffects ();
     initDropDownControl();
@@ -51,19 +51,6 @@ function initMenuEffects () {
     }	
 }
 
-function initActiveNav() {
-    var url = window.location.pathname;
-    log("initActiveNav", url);
-    $("a").each(function(i, n) {
-        var node = $(n);
-        var href = node.attr("href");
-        if( href ) {
-            if( href.startsWith(url) ) {
-                node.addClass("active");
-            }
-        }
-    });
-}
 
 function initDropDownControl() {
     // Functionality for DropDown Control

@@ -34,6 +34,7 @@ public class LocalAsynchProcessor implements AsynchProcessor {
 
     @Override
     public void enqueue(Processable p) {
+        log.info("Enqueued: " + p.getClass());
         this.queue.add(p);
     }
 
@@ -99,11 +100,12 @@ public class LocalAsynchProcessor implements AsynchProcessor {
     }
 
     void runProcessable(final Processable p) {
+        log.info("runProcessable: " + p);
         rootContext.execute(new Executable2() {
 
             @Override
             public void execute(Context context) {
-                log.info("execite: " + p.getClass());
+                log.info("execute: " + p.getClass());
                 Session session = sessionManager.open();
                 context.put(session);
                 p.doProcess(context);

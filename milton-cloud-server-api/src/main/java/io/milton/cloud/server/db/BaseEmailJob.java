@@ -36,6 +36,8 @@ import javax.persistence.*;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class BaseEmailJob  implements Serializable{
 
+    public abstract void accept(EmailJobVisitor visitor);
+    
     private List<EmailItem> emailItems;
     private List<GroupRecipient> groupRecipients;
     private long id;

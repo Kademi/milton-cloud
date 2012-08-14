@@ -19,6 +19,10 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 @DiscriminatorValue("U")
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"email"})}// item names must be unique within a directory
+)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Profile extends BaseEntity implements VfsAcceptor {
 
@@ -32,7 +36,12 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Criteria crit = session.createCriteria(Profile.class);
         crit.add(Expression.eq("organisation", organisation));
         crit.add(Expression.eq("email", email));
-        return DbUtils.unique(crit);
+        List<Profile> list = DbUtils.toList(crit, Profile.class);
+        if( list.isEmpty() ) {
+            return null;
+        } else {
+            return list.get(0);
+        }
     }
 
     public static Profile get(long profileId, Session session) {

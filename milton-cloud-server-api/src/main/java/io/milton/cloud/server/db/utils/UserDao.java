@@ -73,7 +73,12 @@ public class UserDao {
         crit.add(Expression.and(Expression.eq("organisation", organisation), 
                 Expression.or(Expression.eq("name", nameOrEmail), Expression.eq("email", nameOrEmail))                
         ));
-        return (Profile) crit.uniqueResult();
+        List<Profile> list = DbUtils.toList(crit, Profile.class);
+        if( list.isEmpty() ) {
+            return null;
+        } else {
+            return list.get(0);
+        }
     }
 
     /**

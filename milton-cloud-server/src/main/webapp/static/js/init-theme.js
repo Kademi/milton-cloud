@@ -36,14 +36,15 @@ function initTheme() {
     jQuery('textarea.autoresize').autoResize();    
       
     initEdify();    
-    initNav();           
-    initExtraInfo();               
+    initNav();
+    initActiveNav(".initActive");
     initFontSwitching();
     initHelp();
     initModal();
     initShowModalButton();
     initTabPanel();
     initRotation();
+    initPlaceholder();
     
          
     log("initTheme: run page init functions");
@@ -79,16 +80,6 @@ function initNav() {
             jQuery(".nav-" + c[i]).addClass("active");
         }    
     }    
-}
-
-function initExtraInfo() {    
-    jQuery(".infoIcon").click(function(item) {
-        var expandContainer = $(item.target).parents(".wBox");
-        log("clicked. container=", expandContainer);
-        jQuery(".extraInfo", expandContainer).toggle(100);
-        return false;
-    });    
-    
 }
 
 function initFontSwitching() {    
@@ -149,7 +140,7 @@ function initFontSwitching() {
 }
 
 function saveFontSizeInCookie(fontSize) {    
-    $.cookie("font-size", fontSize, {
+    $.cookie("font-size", "", {
         expires: 99999, 
         path: "/" 
     });   
@@ -336,6 +327,9 @@ function initRotation() {
     });            
 }
 
+function initPlaceholder() {
+    $('input, textarea').placeholder();    
+}
 
 
 /** End init-theme.js */

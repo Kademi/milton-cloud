@@ -29,15 +29,13 @@ public class GroupEmailAdminFolder extends AbstractCollectionResource {
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation org;
-    private final GroupEmailService groupEmailService;
     private ResourceList children;
     
 
-    public GroupEmailAdminFolder(String name, CommonCollectionResource parent, Organisation org, GroupEmailService groupEmailService) {        
+    public GroupEmailAdminFolder(String name, CommonCollectionResource parent, Organisation org) {
         this.name = name;
         this.parent = parent;
         this.org = org;
-        this.groupEmailService = groupEmailService;
     }
     
 
@@ -47,7 +45,7 @@ public class GroupEmailAdminFolder extends AbstractCollectionResource {
             children = new ResourceList();
             List<GroupEmailJob> jobs = GroupEmailJob.findByOrg(org, SessionManager.session()); 
             for( GroupEmailJob f : jobs ) {
-                GroupEmailPage faf = new GroupEmailPage(f, parent, groupEmailService);
+                GroupEmailPage faf = new GroupEmailPage(f, parent);
                 children.add(faf);
             }
         }

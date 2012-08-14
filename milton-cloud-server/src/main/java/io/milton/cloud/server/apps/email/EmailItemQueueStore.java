@@ -15,8 +15,11 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.db.AbstractEmailJobVisitor;
+import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailSendAttempt;
+import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.*;
 import javax.mail.MessagingException;
@@ -43,7 +46,7 @@ public class EmailItemQueueStore implements QueueStore {
     private final ListenerManager listenerManager;
     private final CurrentDateService currentDateService;
     private List<QueueInfo> currentQueue;
-    private long retryIntervalMs = 60 * 1000l; // 60secs
+    private long retryIntervalMs = 5 * 1000l; // 5secs
     private int maxAttempts = 5;
 
     public EmailItemQueueStore(SessionManager sessionManager, Configuration aspirinConfiguration, ListenerManager listenerManager, CurrentDateService currentDateService) {
@@ -159,7 +162,7 @@ public class EmailItemQueueStore implements QueueStore {
     @Override
     public void setSendingResult(QueueInfo qi) {
         log.info("setSendingResult: " + qi.getMailid() + " - " + qi.getResultInfo() + " - " + qi.getAttempt());
-        Session session = sessionManager.open();
+        final Session session = sessionManager.open();
         try {
             Long id = Long.parseLong(qi.getMailid());
             EmailItem i = (EmailItem) session.get(EmailItem.class, id);
@@ -195,7 +198,20 @@ public class EmailItemQueueStore implements QueueStore {
 
             }
             session.save(i);
-
+            // Check if this is the last email in a batch job, in which case we mark it as completed
+            BaseEmailJob job = i.getJob();
+            if( job != null  ) {
+                job.accept(new AbstractEmailJobVisitor() {
+                    @Override
+                    public void visit(GroupEmailJob r) {
+                        r.setStatus(GroupEmailJob.STATUS_COMPLETED);
+                        Date now = currentDateService.getNow();
+                        r.setStatusDate(now);
+                        session.save(r);
+                    }
+                });
+            }
+            
         } finally {
             sessionManager.close();
         }

@@ -135,7 +135,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 break;
             case "menuWebsiteManager":
                 parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("manageWebsites")).setOrdering(10);
-                parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
+                //parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
                 parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;
         }

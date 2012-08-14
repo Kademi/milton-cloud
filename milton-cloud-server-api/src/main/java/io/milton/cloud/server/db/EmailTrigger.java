@@ -15,6 +15,7 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.VfsVisitor;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.List;
@@ -190,4 +191,10 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
             triggerCondition5 = null;
         }        
     }
+    
+    @Override
+    public void accept(EmailJobVisitor visitor) {
+        visitor.visit(this);
+    }
+    
 }

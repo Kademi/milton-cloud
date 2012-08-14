@@ -20,7 +20,6 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.queue.AsynchProcessor;
-import io.milton.cloud.server.queue.Processable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -28,14 +27,11 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
-import io.milton.context.Context;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -59,11 +55,9 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.Group;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.commons.beanutils.BeanUtilsBean;
 
 /**
  *
@@ -75,13 +69,11 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     private static final Logger log = LoggerFactory.getLogger(GroupEmailPage.class);
     private final CommonCollectionResource parent;
     private final GroupEmailJob job;
-    private final GroupEmailService groupEmailService;
     private JsonResult jsonResult;
 
-    public GroupEmailPage(GroupEmailJob job, CommonCollectionResource parent, GroupEmailService groupEmailService) {
+    public GroupEmailPage(GroupEmailJob job, CommonCollectionResource parent) {
         this.job = job;
         this.parent = parent;
-        this.groupEmailService = groupEmailService;
     }
 
     @Override
@@ -339,30 +331,5 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         Date now = _(CurrentDateService.class).getNow();
         job.setStatusDate(now);
         session.save(job);
-    }
-
-    /**
-     * TODO: this needs to be a static class, but currently needs a reference to
-     * parent
-     *
-     */
-    public class SendMailProcessable implements Serializable, Processable {
-
-        private static final long serialVersionUID = 1l;
-        private long jobId;
-
-        public SendMailProcessable(long jobId) {
-            this.jobId = jobId;
-        }
-
-        @Override
-        public void doProcess(Context context) {
-            log.warn("doProcess: " + jobId);
-            groupEmailService.send(jobId, SessionManager.session());
-        }
-
-        @Override
-        public void pleaseImplementSerializable() {
-        }
     }
 }

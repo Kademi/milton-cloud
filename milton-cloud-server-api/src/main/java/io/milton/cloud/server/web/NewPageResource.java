@@ -200,7 +200,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             if (t != null) {
                 created.setTemplate(t);
             } else {
-                created.setTemplate("content/page");
+                created.setTemplate(RenderFileResource.DEFAULT_TEMPLATE);
             }
         }
         return created;

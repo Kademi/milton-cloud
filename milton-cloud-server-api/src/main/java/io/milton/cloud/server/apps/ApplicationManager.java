@@ -125,6 +125,10 @@ public class ApplicationManager {
                 log.error("Application: " + app.getInstanceId() + " failed to start", ex);
             }
         }
+        System.out.println("Listing applications:");
+        for (Application app : apps) {
+            System.out.println(" - " + app.getInstanceId() + " : " + app.getClass());
+        }
     }
 
     public Application get(String name) {
@@ -157,7 +161,6 @@ public class ApplicationManager {
     }
 
     public Resource getPage(Resource parent, String name) {
-        log.info("getPage: " + name);
         for (Application app : getActiveApps()) {
             if (app instanceof ChildPageApplication) {
                 ChildPageApplication cpa = (ChildPageApplication)app;

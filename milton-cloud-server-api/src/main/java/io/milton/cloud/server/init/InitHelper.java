@@ -135,7 +135,7 @@ public class InitHelper {
             t.setNickName(name);
             t.setCreatedDate(new Date());
             t.setModifiedDate(new Date());
-            t.setEmail(name + "@fuselms.org");
+            t.setEmail(name + "@fuselms.com");
             session.save(t);
             passwordManager.setPassword(t, password);
 

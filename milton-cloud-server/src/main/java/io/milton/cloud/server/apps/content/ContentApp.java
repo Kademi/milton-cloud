@@ -84,6 +84,11 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                     writer.append("<script type='text/javascript' src='/static/inline-edit/inline-edit.js'>//</script>\n");
                     writer.append("<link href='/static/inline-edit/inline-edit.css' rel='stylesheet' type='text/css' />\n");
                 }
+                // Resources for classifier - TODO: make this configurable somehow
+                writer.append("<script type='text/javascript' src='/static/classifier/jquery.mc-classifier.js'>//</script>\n");
+                writer.append("<script type='text/javascript' src='/static/classifier/init-classifier.js'>//</script>\n");
+                writer.append("<script type='text/javascript' src='/static/common/jquery.debounce-1.0.5.js'>//</script>\n");
+                writer.append("<link href='/static/classifier/classifier.css' rel='stylesheet' type='text/css' />\n");
             }
         }
     }
@@ -92,7 +97,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
     public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
         System.out.println("getResource: " + path);
         if (path.endsWith(PATH_SUFFIX_HISTORY)) {
-            String resourcePath = path.substring(0, path.length()-PATH_SUFFIX_HISTORY.length()); // chop off suffix to get real resource path
+            String resourcePath = path.substring(0, path.length() - PATH_SUFFIX_HISTORY.length()); // chop off suffix to get real resource path
             Path p = Path.path(resourcePath);
             Resource r = findFromRoot(webRoot, p);
             if (r != null) {
@@ -102,7 +107,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                 }
             }
         } else if (path.endsWith(PATH_SUFFIX_PREVIEW)) {
-            String resourcePath = path.substring(0, path.length()-PATH_SUFFIX_PREVIEW.length()); // chop off suffix to get real resource path
+            String resourcePath = path.substring(0, path.length() - PATH_SUFFIX_PREVIEW.length()); // chop off suffix to get real resource path
             Path p = Path.path(resourcePath);
             Resource r = findFromRoot(webRoot, p);
             if (r != null) {
@@ -111,7 +116,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                     return new ViewFromHistoryResource(p.getName(), cr);
                 }
             }
-            
+
         }
         return null;
     }

@@ -54,6 +54,13 @@
                                         messagesContainer.append("<p>Sorry, we couldnt process your request</p>");
                                     }
                                     messagesContainer.show(100);
+                                    if( resp.fieldMessages ) {
+                                        $.each(resp.fieldMessages, function(i, n) {
+                                            log("field message", n);
+                                            var target = $("#" + n.field);
+                                            showValidation(target, n.message, container);
+                                        });
+                                    }
                                 } catch(e) {
                                     log("ex", e);
                                 }

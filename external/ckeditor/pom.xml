@@ -4,10 +4,26 @@
     
     <groupId>io.milton</groupId>
     <artifactId>ckeditor</artifactId>
-    <version>3.6.4</version>
+    
+    <!-- 
+    Change log from vendor supplied version:
+     - editor.css: remove editor border so looks nicer in 3DN content
+    -->
+    <version>3.6.4.1</version>
+    
     
     <packaging>war</packaging>
   
-
+    <distributionManagement>
+        <repository>
+            <id>ettrema-repo</id>
+            <url>http://www.ettrema.com/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>ettrema-repo</id>
+            <url>http://www.ettrema.com/maven2</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
 

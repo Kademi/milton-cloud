@@ -54,21 +54,20 @@
         options = optionsFor(container, options)
 
         var link = event.currentTarget
-        log("pjax: link", link.href);
 
         // Middle click, cmd click, and ctrl click should open
         // links in a new tab as normal.
         if ( event.which > 1 || event.metaKey )
-            return;
+            return
 
         // Ignore cross origin links
         if ( location.protocol !== link.protocol || location.host !== link.host )
-            return;
+            return
 
         // Ignore anchors on the same page
         if ( link.hash && link.href.replace(link.hash, '') ===
             location.href.replace(location.hash, '') )
-            return;
+            return
 
         var defaults = {
             url: link.href,
@@ -320,8 +319,7 @@
                     direction : "right"
                 };
                 //this.hide("slide", effectOptions, 500);
-                //this.fadeOut(200);
-                this.animate({opacity: 0}, 1000);
+                this.fadeOut(200);
                 log("pjax: done hide");
             }
         },

@@ -351,7 +351,8 @@ function edify(container, cssFiles, callback) {
     container.animate({
         opacity: 0
     }, 200, function() {
-        initHtmlEditors(cssFiles);
+        //initHtmlEditors(cssFiles);
+        initHtmlEditors();
     
         $(".inputTextEditor").each(function(i, n) {
             var $n = $(n);
@@ -553,4 +554,20 @@ function createFolder(name, parentHref, callback) {
     });
 }
 
-
+/**
+ * Find links which begin with the current url (or are equal) within the given
+ * containerSelector, and add the 'active' class to them
+ */
+function initActiveNav(containerSelector) {
+    var url = window.location.pathname;
+    log("initActiveNav", url);
+    $(containerSelector + " a").each(function(i, n) {
+        var node = $(n);
+        var href = node.attr("href");
+        if( href ) {
+            if( href.startsWith(url) ) {
+                node.addClass("active");
+            }
+        }
+    });
+}

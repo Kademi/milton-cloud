@@ -34,10 +34,6 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractResource.class);
 
-    /**
-     * For templating, return true if this is a directory, false for a file
-     */
-    public abstract boolean isDir();
 
     public AbstractResource() {
     }
@@ -257,4 +253,9 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         }
         return current;
     }
+    
+    public boolean isDir() {
+        return this instanceof CollectionResource;
+    }
+    
 }

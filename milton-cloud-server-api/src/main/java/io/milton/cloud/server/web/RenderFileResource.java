@@ -90,6 +90,9 @@ import javax.xml.stream.XMLStreamException;
 public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource, ContentResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
+    
+    public static final String DEFAULT_TEMPLATE = "theme/page";
+    
     private final FileResource fileResource;
     private final List<String> bodyClasses = new ArrayList<>();
     private final List<WebResource> webResources = new ArrayList<>();
@@ -176,7 +179,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         // If no page template is given defaul to theme/page, this is equivalent to:
         // <link rel="template" href="theme/page" />
         if (template == null) {
-            template = "theme/page";
+            template = DEFAULT_TEMPLATE;
         }
     }
 

@@ -32,6 +32,26 @@ import java.util.Map;
  */
 public class WebUtils {
     
+    /**
+     * Returns a trimmed, nulled, string value. If present the value is trimmed, and
+     * if empty returns null
+     * 
+     * @param params
+     * @param name
+     * @return 
+     */
+    public static String getParam(Map<String,String> params, String name) {
+        String s = params.get(name);
+        if( s == null ) {
+            return null;
+        }
+        s = s.trim();
+        if( s.length() == 0 ) {
+            return null;
+        }
+        return s;
+    }
+    
     public static OrganisationFolder findParentOrg(Resource page) {
         if( page instanceof OrganisationFolder ) {
             return (OrganisationFolder) page;

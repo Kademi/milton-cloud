@@ -31,6 +31,21 @@ import org.hibernate.criterion.Expression;
 @DiscriminatorValue("G")
 public class GroupEmailJob extends BaseEmailJob {
 
+    /**
+     * When set to READY_TO_SEND the job will be queued for sending by the dispatcher
+     */
+    public static final String STATUS_READY_TO_SEND = "r";
+    
+    /**
+     * This status indicates that the email dispatcher is processing the job
+     */
+    public static final String STATUS_IN_PROGRESS = "p";
+    
+    /**
+     * Completed: the dispatcher has completed sending the job
+     */
+    public static final String STATUS_COMPLETED = "c";
+    
     public static List<GroupEmailJob> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
         crit.add(Expression.eq("organisation", org));
@@ -73,8 +88,11 @@ public class GroupEmailJob extends BaseEmailJob {
 
 
     public boolean readyToSend() {
-        return "r".equals(getStatus());
+        return STATUS_READY_TO_SEND.equals(getStatus());
     }
 
-
+    @Override
+    public void accept(EmailJobVisitor visitor) {
+        visitor.visit(this);
+    }
 }

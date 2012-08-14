@@ -113,6 +113,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         batchEmailService = new BatchEmailService();
         groupEmailService = new GroupEmailService(batchEmailService);
+        config.getContext().put(groupEmailService);
         securityManager = resourceFactory.getSecurityManager();
         mailResourceFactory = new MiltonCloudMailResourceFactory(resourceFactory);
         this.currentDateService = config.getContext().get(CurrentDateService.class);
@@ -167,7 +168,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
-            children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation(), groupEmailService));
+            children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation()));
             children.add(new ManageAutoEmailsFolder("autoEmails", orgFolder, orgFolder.getOrganisation()));
         }
         if (parent instanceof BaseEntityResource) {

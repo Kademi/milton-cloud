@@ -26,6 +26,7 @@
                 <bean class="io.milton.cloud.server.apps.content.ContentApp"/>                
                 <bean class="io.milton.cloud.server.apps.colorpicker.ColorPickerApp"/> <!-- loaded from colorpicker overlay. see external/colorpicker -->
                 <bean class="io.milton.cloud.server.apps.googleanalytics.GaApp"/>
+                <bean class="io.milton.cloud.server.apps.contactus.ContactUsApp"/>
             </list>
         </constructor-arg>
         <constructor-arg ref="current.root.folder.service"/>

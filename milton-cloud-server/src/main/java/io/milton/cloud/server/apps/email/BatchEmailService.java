@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class BatchEmailService {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GroupEmailService.class);
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BatchEmailService.class);
 
     /**
      * Generate EmailItem records to send. These will be sent by a seperate
@@ -46,7 +46,7 @@ public class BatchEmailService {
      */
     public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, Session session) {
         if (j.getGroupRecipients() == null) {
-            log.warn("No recipients");
+            log.warn("No recipients!! For job: " + j.getId());
             return;
         }
         Set<Profile> profiles = new HashSet<>();

@@ -1,8 +1,12 @@
 $(function() {
+    var formContainer = $(".contentForm");
+    if( formContainer.length == 0 ) {
+        return;
+    }
     var adminToolbar = $("<div class='adminToolbar'>");
     var btnEdit = $("<button class='edit'>Edit page</button>");
     btnEdit.click(function() {
-        edifyPage($('.contentForm'));
+        edifyPage(formContainer);
     });
     var btnNew = $("<button class='new'>New Page</button>");
     adminToolbar.append(btnEdit).append(btnNew);

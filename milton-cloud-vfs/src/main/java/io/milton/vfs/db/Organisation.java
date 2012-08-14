@@ -203,8 +203,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         visitor.visit(this);
     }
 
+    /**
+     * Recursive method, goes up through parent orgs to find the group
+     * 
+     * @param groupName
+     * @param session
+     * @return 
+     */
     public Group group(String groupName, Session session) {
         Group g = Group.findByOrgAndName(this, groupName, session);
+        if( g == null ) {
+            Organisation parent = getOrganisation();
+            if( parent != null ) {
+                g = parent.group(groupName, session);
+            }
+        }
         return g;
     }
 

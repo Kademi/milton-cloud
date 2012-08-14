@@ -84,24 +84,38 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         try {
-            String nickName = parameters.get("nickName");
+            Organisation org = parent.getOrganisation();
+            
+            String nickName = WebUtils.getParam(parameters,"nickName");
             if( nickName != null ) {
                 nickName = nickName.trim();
-                if( nickName.length() == 0 ) nickName = null;
+                if( nickName.length() == 0 ) {
+                    nickName = null;
+                }
             }
-            String newName = parameters.get("name");            
+            
+            String newName = WebUtils.getParam(parameters,"name");
             if( newName == null || newName.trim().length() == 0 ) {
                 if( nickName == null  ) {
-                    jsonResult = new JsonResult(false, "No name was provided", null);
+                    jsonResult = JsonResult.fieldError("nickName", "Please enter a name or nick name");
                     return null;
                 }
-                newName = parent.getOrganisation().findUniqueName(nickName, session);
+                newName = org.findUniqueName(nickName, session);
             }
+            
+            // Check email is unique within the org
+            String email = WebUtils.getParam(parameters,"email");
+            Profile p = Profile.findByEmail(email, org, session);
+            if( p != null ) {
+                jsonResult = JsonResult.fieldError("email", "There is already a user registered with that email");
+                return null;
+            }
+            
             Profile u = new Profile();
-            u.setOrganisation(parent.getOrganisation());
+            u.setOrganisation(org);
             u.setName(newName);
             u.setNickName(nickName);
-            u.setEmail(parameters.get("email"));
+            u.setEmail(email);
             u.setCreatedDate(new Date());
             u.setModifiedDate(new Date());
             session.save(u);

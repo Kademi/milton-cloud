@@ -1,5 +1,6 @@
 /** Start theme.dyn.css **/
 @import url("/static/common/modal.css");
+@import url("params.dyn.css");
 html {
     font-size: 1em;
     height:100%;
@@ -176,138 +177,6 @@ abbr {
     border: none;    
 }
 
-
-.tabularBox {
-    min-height: 300px;
-}
-
-.tabularBox .row {
-    font-weight:bold;
-    font-size:0.90em;
-    color: $page.parent.settings.textColour2;
-    line-height: 1.35em;
-}
-div.bar h3{
-    float:left;
-    color:#fff;
-    font-size:0.9em;
-    font-weight:normal;
-    margin: 0;
-    padding: 0;
-}
-
-.bar .col1 {
-    padding-left: 5px;
-}
-
-.col1 { 
-    width:60%;
-    float:left;    
-}
-
-.wBox a.description {
-    display: block;
-    min-height:3.25em;
-}
-
-.wBox .col1 { 
-    margin-top: 1em;
-}
-
-/** Next line compensates for the image pusing the row over **/
-.wBox .col2 {
-}
-
-.col2 {
-    width:10%;
-    float:left;
-    text-align:center;
-}
-span.col2.row { 
-    line-height: 3.25em
-}
-small.col2.row { 
-    margin-top: 10px;
-    color: gray;
-    font-size: 0.6em;
-    font-weight: 400;
-}
-.colLast {
-    float: right;
-    width: 5%;
-    text-align: right;
-    margin-right: 15px;
-    margin-top:7px;
-
-}
-.col22 {
-    min-width:60px;
-}
-.col23 {
-    min-width:72px;
-}
-.col22 small{
-    color:#fff;
-    font-size:0.6875em;
-    font-style:italic;
-    display:block;
-}
-.col24{
-    width:7%;
-}
-.downloadIcon {
-    display:block;
-    background-image: url(images/download.png);
-    background-position: center center;
-    background-repeat: no-repeat;    
-    text-indent: -10000px;
-    cursor: pointer;
-}
-
-.tabularBox .infoIcon {
-    line-height: 2em;    
-}
-
-.wBox {
-    padding:5px 5px 5px 5px;
-    background:#fff;
-    display:block;
-    min-height:3.25em;
-    border-top:1px solid #dbdada;
-    height:auto;    
-}
-body .tabularBox div.wBox:hover {
-    /*background: -moz-linear-gradient(center top , #e7f8e6, #FFFFFF) repeat scroll 0 0 transparent;*/
-}
-.tabularBox div.wBox:nth-child(odd) {
-    background-color: #F0F0F0;
-}
-.wBox a img {
-    float: left;
-    margin-left: 3px;
-    border-radius: 4px; 
-}
-
-.wBox span {
-    display:block;
-}
-
-.infoIcon {
-    background:$page.parent.settings.heroColour1;
-    border-radius: 15px;
-    color: white;
-    padding: 5px 11px;    
-    cursor: pointer;
-    font-size: 15px;
-}
-.extraInfo {
-    display: none;
-    clear: both;
-    padding: 3px 0px 20px 0px;
-    border-top:1px solid #dbdada;  
-
-
-}
 
 /*resourcefinal*/
 .myResources .col11{
@@ -825,124 +694,8 @@ a.view{
 a:hover.view{
     text-decoration:none;
 }
-/*contentLeft*/
-.myLearning .contentLeft, .myInbox .contentLeft {
-    width:29%;
-    float:left;
-}
-.courcesBox {
-    height:2em;
-    line-height: 2em;
-    margin-bottom:2px;
-    border-radius: 5px;
-    padding: 0 8px;            
-    background:#3a3c3f;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;                                 
-}
-.content a.cources {
-    font-size:0.9em;
-    color:#fff;
-    text-decoration:none;
-    float:left;
-    display:block;
 
-}
-.content .courcesBox .role {
-    position:relative;
-    z-index:999;
-    height:2em;
-    line-height: 1.4em;
-    float:right;
-    border-left:1px solid #707070;
-    font-size:0.7em;
-    background:url(images/wArrrow.gif) top right no-repeat;
-    display:block;
-    background-position:100% 13px;
-    padding:8px 16px 0 12px;
-}
-.content .role span{
-    height:30px;
-    text-decoration:none;
-    color:#fff;
-    display:block;
-}
-/*dropdown1*/
-.dropBox1 {
-    width:144px;
-    position:absolute;
-    top:31px;
-    right:-8px;
-    background:#fff;
-    border:1px solid #cbcbcb;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    z-index:999;
-    padding:3px 3px 0 3px;
-    display:none;
-}
-.content ul.list {
-}
-.content ul.list li {
-    list-style:none;
-    font-size:11px;
-    height:32px;
-    margin: 0;
-}
-.content ul.list li a {
-    text-decoration:none;
-    color:$page.parent.settings.textColour2;
-    display:block;
-    height:24px;
-    line-height: 24px;
-    padding:0 0 0 10px;
-}
-ul.list li:hover a {
-    background:#e6e6e6;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
-}
-.accessBox {
-    border-top:1px solid #cbcbcb;
-    margin-right:2px;
-    padding:6px 10px;
-    margin-top:1px;
-}
-.greyBox {
-    width:52px;
-    height:20px;
-    background:#f2f2f2;
-    padding:2px 8px;
-}
-.content a.linkText {
-    float:left;
-    text-decoration:underline;
-    color:#444;
-    font-size:12px;
-    display:block;
-    margin-top:2px;
-}
-.content a.linkTxt {
-    font-weight:bold;
-    font-size:16px;
-    text-decoration:none;
-    margin:0 10px;
-}
-a.circle {
-    float:left;
-    display:block;
-    margin-top:4px;
-    height:15px;
-}
-.role:hover>.dropBox1 {
-    display:block;
-}
+
 .leftBar{
     background:#f0f0f0;
 }
@@ -1327,7 +1080,7 @@ a.Link {
 }
 /*dropdown*/
 .dropBox {
-    width:200px;
+    min-width: 145px;
     position:absolute;
     top:35px;
     right:0;
@@ -1340,6 +1093,9 @@ a.Link {
     z-index:999;
     padding:3px 3px 3px 3px;
     display:none;
+}
+.dropBox ul {
+    margin: 0;
 }
 .Login form label {
     display: inline-block;
@@ -1358,27 +1114,6 @@ a.Link {
 }
 .Login form a, .Login button {
     margin-left: 70px;    
-}
-ul.list {
-}
-ul.list li {
-    list-style:none;
-    font-size:11px;
-    line-height:32px;    
-}
-ul.list li a {
-    text-decoration:none;
-    color:$page.parent.settings.textColour2;
-    display:block;
-    line-height:32px;
-    padding:0 0 0 10px;
-}
-ul.list li:hover a {
-    background:#e6e6e6;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
 }
 .accessBox {
     border-top:1px solid #cbcbcb;
@@ -1718,15 +1453,18 @@ tr.seperator {
     height: 10px;
 }
 
-
+div.bar, .courcesBox {
+    height: 1.9em;
+}
 div.bar {
     background:$page.parent.settings.heroColour1;
-    height:2em;
     line-height: 2em;
     margin-bottom:2px;
     border-radius: 5px;
     padding: 0 8px;
-    font-size:0.9em;
+}
+div.bar.alt {
+    background:$page.parent.settings.heroColour2;
 }
 
 
@@ -1768,308 +1506,9 @@ div.bar {
     font-size: 0.8em;
 }
 
-.strongTxt {
-    font-weight:bold;
-    font-size:1.15em;
-    color:#242424;
-    margin-bottom:10px;
-    line-height:1em;
-    display:block;
-}
-.smllTxt {
-    color:$page.parent.settings.textColour2;
-    font-size:0.7em;
-    font-style:italic;
-    display:block;
-    margin-bottom:7px;
-    display:block;
-}
-.p_Txt {
-    color:$page.parent.settings.textColour2;
-    font-size:0.7em;
-    line-height:1.4em;
-    display:block;
-}
-/*contentRight*/
-.contentRight {
-    width:70%;
-    float:right;
-}
-
-
-.strongText {
-    color:#fff;
-    font-size:14px;
-    font-weight:normal;
-    display:block;
-    line-height: 30px;
-}
 
 .leftBar{
     background:#f0f0f0;
-}
-
-/*dropdown1*/
-.dropBox1 {
-    width:144px;
-    position:absolute;
-    top:31px;
-    right:-8px;
-    background:#fff;
-    border:1px solid #cbcbcb;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    z-index:999;
-    padding:3px 3px 0 3px;
-    display:none;
-}
-.content ul.list {
-}
-.content ul.list li {
-    list-style:none;
-    font-size:11px;
-    height:32px;
-    margin: 0;
-}
-.content ul.list li a {
-    text-decoration:none;
-    color:$page.parent.settings.textColour2;
-    display:block;
-    height:24px;
-    line-height: 24px;
-    padding:0 0 0 10px;
-}
-ul.list li:hover a {
-    background:#e6e6e6;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
-}
-.accessBox {
-    border-top:1px solid #cbcbcb;
-    margin-right:2px;
-    padding:6px 10px;
-    margin-top:1px;
-}
-.greyBox {
-    width:52px;
-    height:20px;
-    background:#f2f2f2;
-    padding:2px 8px;
-}
-.content a.linkText {
-    float:left;
-    text-decoration:underline;
-    color:#444;
-    font-size:12px;
-    display:block;
-    margin-top:2px;
-}
-.content a.linkTxt {
-    font-weight:bold;
-    font-size:16px;
-    text-decoration:none;
-    margin:0 10px;
-}
-a.circle {
-    float:left;
-    display:block;
-    margin-top:4px;
-    height:15px;
-}
-
-/*colLeft*/
-.colLeft{
-    float:left;
-    width:70%;
-}
-.progressBox{
-    background:#fff;
-    padding-top:7px;
-}
-a.view{
-    text-decoration:underline;
-    color:$page.parent.settings.textColour2;
-    font-size:11px;
-    text-align:center;
-    display:block;
-}
-a:hover.view{
-    text-decoration:none;
-}
-
-/*dashBoardfinal*/
-.welcomeBox{
-    background:#ebebeb;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    padding:10px 0 10px 100px;
-    position:relative;
-    margin-bottom:15px;
-    overflow:hidden;    
-    display: none;
-}
-a.crossSign{
-    display:block;
-    position:absolute;
-    top:8px;
-    right:8px;
-    width:12px;
-    height:13px;
-}
-.tree{
-    float:left;
-    margin-right:5px;
-}
-.txtR{
-    width:85%;
-    float:left;
-    margin-top:12px;
-}
-.txtR h3{
-    color:$page.parent.settings.textColour2;
-    font-size:15px;
-    font-weight:bold;
-    margin-bottom:4px;
-}
-.txtR p{
-    font-size:13px;
-    color:$page.parent.settings.textColour2;
-}
-
-
-.tabularBox .row {
-    font-weight:bold;
-    font-size:0.90em;
-    color: $page.parent.settings.textColour2;
-    line-height: 1.35em;
-}
-div.bar h3{
-    float:left;
-    color:#fff;
-    font-size:0.9em;
-    font-weight:normal;
-    margin: 0;
-    padding: 0;
-}
-
-.bar .col1 {
-    padding-left: 5px;
-}
-
-.col1 { 
-    width:60%;
-    float:left;    
-}
-
-.wBox a.description {
-    display: block;
-    min-height:3.25em;
-}
-
-.wBox .col1 { 
-    margin-top: 1em;
-}
-
-/** Next line compensates for the image pusing the row over **/
-.wBox .col2 {
-}
-
-.col2 {
-    width:10%;
-    float:left;
-    text-align:center;
-}
-span.col2.row { 
-    line-height: 3.25em
-}
-small.col2.row { 
-    margin-top: 10px;
-    color: gray;
-    font-size: 0.6em;
-    font-weight: 400;
-}
-.colLast {
-    float: right;
-    width: 5%;
-    text-align: right;
-    margin-right: 15px;
-    margin-top:7px;
-
-}
-.col22 {
-    min-width:60px;
-}
-.col23 {
-    min-width:72px;
-}
-.col22 small{
-    color:#fff;
-    font-size:0.6875em;
-    font-style:italic;
-    display:block;
-}
-.col24{
-    width:7%;
-}
-.downloadIcon {
-    display:block;
-    background-image: url(../images/download.png);
-    background-position: center center;
-    background-repeat: no-repeat;    
-    text-indent: -10000px;
-    cursor: pointer;
-    height: 31px;
-}
-
-.tabularBox .infoIcon {
-    line-height: 2em;    
-}
-
-.wBox {
-    padding:5px 5px 5px 5px;
-    background:#fff;
-    display:block;
-    min-height:3.25em;
-    border-top:1px solid #dbdada;
-    height:auto;    
-}
-body .tabularBox div.wBox:hover {
-    /*background: -moz-linear-gradient(center top , #e7f8e6, #FFFFFF) repeat scroll 0 0 transparent;*/
-}
-.tabularBox div.wBox:nth-child(odd) {
-    background-color: #F0F0F0;
-}
-.wBox a img {
-    float: left;
-    margin-left: 3px;
-    border-radius: 4px; 
-}
-
-.wBox span {
-    display:block;
-}
-
-.infoIcon {
-    background:$page.parent.settings.heroColour1;
-    border-radius: 15px;
-    color: white;
-    padding: 5px 11px;    
-    cursor: pointer;
-    font-size: 15px;
-}
-.extraInfo {
-    display: none;
-    clear: both;
-    padding: 3px 0px 20px 0px;
-    border-top:1px solid #dbdada;  
-
-
 }
 
 /** Start learning.css **/
@@ -2283,7 +1722,7 @@ ul.barList p {
     margin-bottom:4px;
 }
 ul.barList em, ul.barList small, ul.barList p {
-    font-size: 0.8333em;
+    font-size: 1em;
 }
 ul.barList em{
     color:#262626;    
@@ -2550,56 +1989,6 @@ a:hover.lnkText{
 .moduleBox1 {
     float:right;
 }
-
-/*contentLeft*/
-.myLearning .contentLeft, .myInbox .contentLeft {
-    width:29%;
-    float:left;
-}
-.courcesBox {
-    height:2em;
-    line-height: 2em;
-    margin-bottom:2px;
-    border-radius: 5px;
-    padding: 0 8px;            
-    background:#3a3c3f;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;                                 
-}
-.content a.cources {
-    font-size:0.9em;
-    color:#fff;
-    text-decoration:none;
-    float:left;
-    display:block;
-
-}
-.content .courcesBox .role {
-    position:relative;
-    z-index:999;
-    height:2em;
-    line-height: 1.4em;
-    float:right;
-    border-left:1px solid #707070;
-    font-size:0.7em;
-    background:url(images/wArrrow.gif) top right no-repeat;
-    display:block;
-    background-position:100% 13px;
-    padding:8px 16px 0 12px;
-}
-.content .role span{
-    height:30px;
-    text-decoration:none;
-    color:#fff;
-    display:block;
-}
-
-.role:hover>.dropBox1 {
-    display:block;
-}
-
 
 .modulePage .content {
     padding: 0;
@@ -3204,4 +2593,11 @@ a.anchor-modal { cursor: pointer; }
 }
 .clearfix:after {
   clear: both;
+}
+
+table.dashboard {
+    width: 100%;
+}
+table.dashboard td.gap, table.myLearning td.gap {
+    width: 1em;
 }

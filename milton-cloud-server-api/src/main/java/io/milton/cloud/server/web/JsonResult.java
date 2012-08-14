@@ -2,6 +2,7 @@ package io.milton.cloud.server.web;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,6 +17,12 @@ public class JsonResult {
     
     //public static String CONTENT_TYPE = "application/x-javascript; charset=utf-8";
     public static String CONTENT_TYPE = "application/json; charset=utf-8";
+    
+    public static JsonResult fieldError(String field, String fieldMessage) {
+        JsonResult r = new JsonResult(false, "Validation error");
+        r.addFieldMessage(field, fieldMessage);
+        return r;
+    }
     
     private boolean status;
     private String nextHref;
@@ -49,6 +56,9 @@ public class JsonResult {
     }          
     
     public void addFieldMessage(String field, String message) {
+        if( fieldMessages == null ) {
+            fieldMessages = new ArrayList<>();
+        }
         fieldMessages.add(new FieldMessage(field, message)); 
     }
 

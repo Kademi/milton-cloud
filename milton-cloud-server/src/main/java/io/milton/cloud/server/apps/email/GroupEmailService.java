@@ -28,6 +28,7 @@ import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -52,7 +53,9 @@ public class GroupEmailService {
         }
         log.info("send: " + j.getSubject() + " status: " + j.getStatus());
         if (j.readyToSend()) {
+            Transaction tx = session.beginTransaction();
             generateEmailItems(j, session);
+            tx.commit();
         } else {
             log.warn("Job is not ready to send. Current statyus: " + j.getStatus());
         }
@@ -66,24 +69,29 @@ public class GroupEmailService {
      */
     private void generateEmailItems(GroupEmailJob j, Session session) {
         List<BaseEntity> directRecips = new ArrayList<>();
-        if (j.getGroupRecipients() != null) {
+        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty() ) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
                 addGroup(gr.getRecipient(), directRecips);
             }
-        }        
+        } else {
+            log.warn("No group recipients for job: " + j.getId());
+        }  
         batchEmailService.generateEmailItems(j, directRecips, session);
         
         Date now = _(CurrentDateService.class).getNow();
         j.setStatus("p");
         j.setStatusDate(now);
         session.save(j);
+        
     }
     
     private void addGroup(Group g, List<BaseEntity> recipients) {
-        if( g.getGroupMemberships() != null ) {
+        if( g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty() ) {
             for( GroupMembership gm : g.getGroupMemberships() ) {
                 recipients.add(gm.getMember());
             }
+        } else {
+            log.warn("No members in recipient group: " + g.getName());
         }
     }    
 }
