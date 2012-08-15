@@ -38,6 +38,22 @@ a.anchor-modal { cursor: pointer; }
 	font-size: 15px;
 	padding: 0 10px;
 }
+.modal-table tbody th {
+	font-size: 13px;
+}
+.modal-table tbody a {
+	font-style: italic;
+	color: #141414;
+	font-size: 13px;
+	text-decoration: underline;
+}
+.modal-table tbody ul, .modal-table tbody ul li {
+	margin: 0;
+	list-style-position: inside;
+}
+.modal-table tbody ul {
+	padding-left: 10px;
+}
 .modal-table thead th:last-child {
 	background: url(bg_header_modal_table_right.png) no-repeat;
 }
