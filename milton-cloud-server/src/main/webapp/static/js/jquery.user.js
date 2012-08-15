@@ -28,6 +28,7 @@
             afterLoginUrl: "index.html",
             logoutSelector: ".logout",
             valiationMessageSelector: "#validationMessage",
+            requiredFieldsMessage: "Please enter your credentials",
             loginFailedMessage: "Sorry, those login details were not recognised"
         }, options);  
   
@@ -39,10 +40,17 @@
         $("form", this).submit(function() {
             log("login", window.location);
             
+            $("input", container).removeClass("errorField");
             $(config.valiationMessageSelector, this).hide(100);
             try {
                 var userName = $("input[type=text]", container).val();
                 var password = $("input[type=password]", container).val();
+                if( userName == null || userName.length == 0 ) {
+                    $("input[type=text]", container).addClass("errorField");
+                    $(config.valiationMessageSelector, container).text(config.requiredFieldsMessage);
+                    $(config.valiationMessageSelector, container).show(200);
+                    return false;
+                }
                 doLogin(userName, password, config);
             } catch(e) {
                 log("exception sending forum comment", e);
@@ -83,7 +91,7 @@ function doLogin(userName, password, config) {
                 // null userurl, so login was not successful
                 $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
                 log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
-                $(config.valiationMessageSelector, container).show(100);                            
+                $(config.valiationMessageSelector, container).show(200);
             }
         //window.location = "/index.html";
         },
