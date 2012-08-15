@@ -52,7 +52,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private String surName;
     private String phone;
     private String email;
-    private long photoHash;
+    private String photoHash;
     private String nickName;
     private boolean enabled;
     private boolean rejected;
@@ -101,11 +101,11 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.nickName = nickName;
     }
 
-    public long getPhotoHash() {
+    public String getPhotoHash() {
         return photoHash;
     }
 
-    public void setPhotoHash(long photoHash) {
+    public void setPhotoHash(String photoHash) {
         this.photoHash = photoHash;
     }
 

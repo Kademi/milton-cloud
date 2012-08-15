@@ -260,4 +260,15 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         SessionManager.session().save(gm);
         return this;
     }    
+    
+    public Repository repository(String name) {
+        if( getRepositories() != null ) {
+            for( Repository r : getRepositories() ) {
+                if( r.getName().equals(name)) {
+                    return r;
+                }
+            }
+        }        
+        return null;
+    }
 }

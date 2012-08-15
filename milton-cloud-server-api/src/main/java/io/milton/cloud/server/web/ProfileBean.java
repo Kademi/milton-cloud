@@ -35,7 +35,7 @@ public class ProfileBean {
     
     private String href;
     private String name;
-    private long photoHash;
+    private String photoHash;
 
     public String getHref() {
         return href;
@@ -53,11 +53,11 @@ public class ProfileBean {
         this.name = name;
     }
 
-    public long getPhotoHash() {
+    public String getPhotoHash() {
         return photoHash;
     }
 
-    public void setPhotoHash(long photoHash) {
+    public void setPhotoHash(String photoHash) {
         this.photoHash = photoHash;
     }
 

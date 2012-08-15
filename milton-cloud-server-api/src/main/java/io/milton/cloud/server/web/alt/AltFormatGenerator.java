@@ -66,9 +66,9 @@ public class AltFormatGenerator implements EventListener {
     private List<FormatSpec> formats;
     private ExecutorService consumer = new ThreadPoolExecutor(1, 4, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100));
     private final List<GenerateJob> currentJobs = new CopyOnWriteArrayList<>();
-
+    private final FormatSpec profileSpec;
     private boolean enableMetaData;
-    
+
     public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, RootContext rootContext, SessionManager sessionManager) {
         this.rootContext = rootContext;
         this.hashStore = hashStore;
@@ -78,6 +78,8 @@ public class AltFormatGenerator implements EventListener {
         this.formats = new ArrayList<>();
         this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
         formats.add(new FormatSpec("image", "png", 150, 150, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
+        profileSpec = new FormatSpec("image", "png", 52, 52, "-ss", "1", "-vframes", "1", "-f", "mjpeg");
+        formats.add(profileSpec);
 
         formats.add(new FormatSpec("video", "flv", 800, 455, "-r", "15", "-b:v", "512k")); // for non-html video
         formats.add(new FormatSpec("video", "mp4", 800, 455, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
@@ -88,14 +90,15 @@ public class AltFormatGenerator implements EventListener {
 
         System.out.println("register put event on: " + eventManager);
         eventManager.registerEventListener(this, PutEvent.class);
+        rootContext.put(this);
     }
 
     @Override
     public void onEvent(Event e) {
         System.out.println("onEvent: " + e);
-        if( !enableMetaData ) {
+        if (!enableMetaData) {
             System.out.println("meta data generation is not enabled");
-            return ;
+            return;
         }
         if (e instanceof PutEvent) {
             System.out.println("");
@@ -134,7 +137,7 @@ public class AltFormatGenerator implements EventListener {
             mmd.setWidth(info.getWidth());
             mmd.setRecordedDate(info.getRecordedDate());
             SessionManager.session().save(mmd);
-            tx.commit();            
+            tx.commit();
         } catch (IOException ex) {
             log.error("Couldnt get media info for: " + fr.getHref(), ex);
         }
@@ -199,6 +202,27 @@ public class AltFormatGenerator implements EventListener {
         return false;
     }
 
+    /**
+     * Generate a profile image (as defined in profileSpec) and return its hash
+     * 
+     * @param primaryFileHash
+     * @param primaryFileName
+     * @return 
+     */
+    public String generateProfileImage(String primaryFileHash, String primaryFileName) throws Exception {
+        final Parser parser = new Parser();
+        String ext = FileUtils.getExtension(primaryFileName);
+        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore);
+        String altHash = converter.generate(new With<InputStream, String>() {
+            @Override
+            public String use(InputStream t) throws Exception {
+                String newFileHash = parser.parse(t, hashStore, blobStore);
+                return newFileHash;
+            }
+        });
+        return altHash;
+    }
+
     public class GenerateJob implements Runnable {
 
         private static final long serialVersionUID = 1l;
@@ -228,7 +252,6 @@ public class AltFormatGenerator implements EventListener {
             System.out.println("GenerateJob: run");
             try {
                 rootContext.execute(new Executable2() {
-
                     @Override
                     public void execute(Context context) {
                         sessionManager.open();
@@ -264,7 +287,6 @@ public class AltFormatGenerator implements EventListener {
             String altHash;
             try {
                 altHash = converter.generate(new With<InputStream, String>() {
-
                     @Override
                     public String use(InputStream t) throws Exception {
                         String newFileHash = parser.parse(t, hashStore, blobStore);
@@ -277,7 +299,7 @@ public class AltFormatGenerator implements EventListener {
             if (altHash != null) {
                 String name = formatSpec.getName();
                 return AltFormat.insertIfOrUpdate(name, primaryFileHash, altHash, SessionManager.session());
-            } else { 
+            } else {
                 return null;
             }
         }
@@ -299,6 +321,4 @@ public class AltFormatGenerator implements EventListener {
     public void setEnableMetaData(boolean enableMetaData) {
         this.enableMetaData = enableMetaData;
     }
-    
-    
 }

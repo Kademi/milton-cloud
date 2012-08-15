@@ -1,0 +1,120 @@
+body.profile .details form, body.profile .changePassword form, body.profile div.profilePic {
+    border: solid lightgray 1px;
+    border-radius: 5px;
+    padding: 0.6em 1.2em 3em;
+    position: relative;
+    margin-top: 0.6em;
+}
+div.details, div.profilePic {
+    width: 48%;
+}
+div.details {
+    float: left;
+}    
+div.profilePic {
+    float: right;
+    margin-right: 0;
+}
+div.profilePic img { 
+    float: left;
+    margin-right: 1em;
+    height: 52px;
+    width: 52px;
+}
+body.profile legend {
+    font-size: 0.8em;
+}
+body.profile label {
+    display: inline-block;
+}
+body.profile form h4 {
+    margin-top: 0;
+}
+body.profile input {
+    width: 70%;
+    margin-right: 0;
+}
+div.input {
+    background-color: #F0F0F0;
+    border-radius: 5px;
+    padding: 0.6em 1em;
+    margin-top: 0.6em;
+    border: 1px solid #D3D3D3;
+}
+body.profile div.email {
+    margin-top: 1.2em;
+}
+body.profile fieldset.image input {
+    margin: 1em;
+    
+}
+body.profile label {
+    width: 20%;
+}
+body.profile .content button {
+    position: absolute;
+    bottom: 0;
+    right: 0.6em;
+    width: 9em;
+}
+body.profile .changePassword form {    
+}
+body.profile .changePassword .input {
+    width: 45%;
+}
+body.profile .changePassword .input.first {
+    float: left;
+}
+body.profile .changePassword .input.last {
+    float: right;
+}
+
+body.profile #fileupload {
+    height: 2em;
+    margin: 0;
+    padding: 0;
+}
+
+body.profile .muploadBtn {        
+    background-repeat: repeat-x;
+    border-color: #5B5B5B;
+    color: #FFFFFF;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);                
+    border-radius: 4px 4px 4px 4px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    display: inline-block;
+    font-size: 13px;
+    line-height: 18px;
+    padding: 4px 10px;
+    text-align: center;
+    vertical-align: middle;                
+    position: relative;    
+    cursor: pointer;
+    background-color: #5B5B5B;
+    width: 30%;    
+}
+body.profile .muploadBtn span {
+    position: absolute;
+    top: 7px;
+    left: 40px;
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+}
+body.profile .fileupload-buttonbar .progress {
+    border: 1px solid #51A351;
+    border-radius: 5px 5px 5px 5px;
+    display: none;
+    width: 65%;
+    float: right;
+}
+body.profile .fileupload-buttonbar .progress div {
+    background-color: #51A351;
+    height: 2em;
+    width: 0;
+    padding: 0;
+    margin: 0;
+}

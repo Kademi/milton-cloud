@@ -7,16 +7,18 @@
         init : function( options ) { 
             var container = this;
             var config = $.extend( {
+                url: "",
+                buttonText: "Add files...",
                 oncomplete: function(data) {
                     log("finished upload", data);
                 }
                 }, options);  
             log("init milton uploads", container);
-            var form = $("<form action='_DAV/PUT' method='POST' enctype='multipart/form-data'></form>");
+            var form = $("<form action='" + config.url + "_DAV/PUT' method='POST' enctype='multipart/form-data'></form>");
             var buttonBar = $("<div class='row fileupload-buttonbar'></div>");
             form.append(buttonBar);
             var fileInputContainer = $("<div class='muploadBtn'></div>");
-            fileInputContainer.append($("<span>Add files...</span>"));
+            fileInputContainer.append($("<span>" + config.buttonText + "</span>"));
             var fileInput = $("<input type='file' name='files[]' id='fileupload' style='opacity: 0; width: 100%' />");
             fileInputContainer.append(fileInput);
             buttonBar.append(fileInputContainer);

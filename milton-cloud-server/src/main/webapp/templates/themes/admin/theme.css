@@ -180,7 +180,9 @@ nav#nav li a {
     padding:0px
 }
 .menu hr { margin:8px 2px; }
-.menu li { padding-bottom: 8px }
+.menu li { 
+    padding-bottom: 0px 
+}
 .menu ul li h4 a {
     display: block;
     background-image: url(images/arrow-close.png);
@@ -199,9 +201,8 @@ nav#nav li a {
 */
 .menu ul ul {
     font-size: 11px;
-    width: 100%;
-    margin-top: 4px;
-    padding: 6px 0px 0px 0px
+    width: 100%;    
+    padding: 2px 0px 0px 0px
 }
 .menu li li {
     background:#FFF;
