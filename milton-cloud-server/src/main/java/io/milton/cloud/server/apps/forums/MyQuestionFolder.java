@@ -104,14 +104,22 @@ public class MyQuestionFolder extends AbstractCollectionResource implements Geta
             return "";
         }
     }
-    
+        
     public List<ForumReply> getReplies() {
         if( forumPost.getForumReplys() != null ) {
             return forumPost.getForumReplys();
         } else {
             return Collections.EMPTY_LIST;
-        }
-            
+        }            
+    }
+    
+    /**
+     * Get the profile of the person who posted this question
+     * 
+     * @return 
+     */
+    public Profile getPoster() {
+        return forumPost.getPoster();
     }
     
     

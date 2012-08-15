@@ -41,7 +41,6 @@ function initTheme() {
     initFontSwitching();
     initHelp();
     initModal();
-    initShowModalButton();
     initTabPanel();
     initRotation();
     initPlaceholder();
@@ -57,9 +56,15 @@ function initTheme() {
 
 function initModal() {
     $("body").on("click", ".Modal a.Close", function(e) {
+        log("close tinybox");
         $.tinybox.close();
         e.preventDefault();
     });
+    $('a.ShowModal').tinybox({
+        overlayClose: false,
+        opacity: 0
+    });
+    
 }
 
 function initHelp () {
@@ -221,19 +226,6 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
     });  
 }
 
-
-function initShowModalButton() {
-    $('a.ShowModal').tinybox({
-        overlayClose: false,
-        opacity: 0
-    });
-
-    $('body').on('click', '.Modal > a.Close', function(e) {
-        e.preventDefault();
-
-        $.tinybox.close();
-    });
-}
 
 function initTabPanel() {
     var tab_container = $('.TabContainer');

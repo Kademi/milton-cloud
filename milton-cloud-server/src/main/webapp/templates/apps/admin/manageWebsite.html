@@ -55,6 +55,7 @@
                 <div class="TabContent">
                     <div class="Content">
                         <form name="frmDetails" action="$page.name" method="post" class="Details">
+                            <p class="pageMessage"></p>
                             <table>
                                 <tbody>
                                     <tr>
@@ -69,7 +70,7 @@
                                     <tr>
                                         <th class="Short">Logo</th>
                                         <td>
-                                            <textarea class="htmleditor required toolbar-Logo" id="logo" rows="4" cols="20">$!page.themeParams.logo</textarea>
+                                            <textarea class="htmleditor required toolbar-Logo" name="logo" id="logo" rows="4" cols="20">$!page.themeParams.logo</textarea>
                                         </td>
                                     </tr>                                    
                                     <tr>
@@ -115,6 +116,7 @@
                 <div class="TabContent">
                     <div class="Content">
                         <form name="frmDetails" action="$page.name" method="post" class="Details">
+                            <p class="pageMessage"></p>
                             <table>
                                 <tbody>
                                     <tr>
@@ -228,7 +230,11 @@
             jQuery(function() {
                 initManageWebsite();
                 initHtmlEditors($(".htmleditor"), "60px", "200px", 'embed_video,modal', 'resize,elementspath');
-                $("form").forms();
+                $("form").forms({
+                    callback: function() {
+                        alert("Saved ok");
+                    }
+                });
             });
         </script>        
     </body>

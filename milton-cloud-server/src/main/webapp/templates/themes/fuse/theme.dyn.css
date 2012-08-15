@@ -1,6 +1,32 @@
 /** Start theme.dyn.css **/
 @import url("/static/common/modal.css");
-@import url("params.dyn.css");
+
+.text1 {
+    color: $rootFolder.settings.textColour1 !important;
+}
+.text2 {
+    color:$page.parent.settings.textColour2 !important;
+}
+.hero1 {
+    color:$page.parent.settings.heroColour1 !important;
+}
+.hero2 {
+    color:$page.parent.settings.heroColour2 !important;
+}
+.bg-text1 {
+    background-color: $rootFolder.settings.textColour1 !important;
+}
+.bg-text2 {
+    background-color:$page.parent.settings.textColour2 !important;
+}
+.bg-hero1 {
+    background-color:$page.parent.settings.heroColour1 !important;
+}
+.bg-hero2 {
+    background-color:$page.parent.settings.heroColour2 !important;
+}
+
+
 html {
     font-size: 1em;
     height:100%;
@@ -2253,4 +2279,15 @@ div.bar.alt {
 
 a.courseBox.active, a.courseBox:hover {
     border-top:8px solid $page.parent.settings.heroColour1;
+}
+
+.downloadIcon {
+    display: inline-block;
+    background-image: url(/static/common/download.png);
+    background-position: center center;
+    background-repeat: no-repeat;    
+    text-indent: -10000px;
+    cursor: pointer;
+    height: 31px;
+    width: 34px;
 }

@@ -18,7 +18,8 @@
             callback: function() {
                 
             },
-            valiationMessageSelector: ".pageMessage"
+            valiationMessageSelector: ".pageMessage",
+            validationFailedMessage : "Some inputs are not valid"
         }, options);  
         
   
@@ -78,7 +79,8 @@
                     log("exception sending forum comment", e);
                 }            
             } else {
-                log("form is not valid");
+                $(config.valiationMessageSelector, container).text(config.validationFailedMessage);
+                $(config.valiationMessageSelector, container).show(100);
             }
             return false;
         });    
@@ -333,6 +335,19 @@ function showMessage(text, container) {
 
 function showErrorField(target) {
     target.addClass("errorField");
+    if( CKEDITOR ) {
+        log("check for editor1", target);
+        var name = target.attr("name");
+        if( !name ) {
+            name = target.attr("id");
+        }
+        editor = CKEDITOR.instances[name];
+        log("check for editor", name, editor);
+        if( editor ) {
+            log("add class", editor.container);
+            editor.container.addClass("errorField");
+        }
+    }
 }
 
 /*

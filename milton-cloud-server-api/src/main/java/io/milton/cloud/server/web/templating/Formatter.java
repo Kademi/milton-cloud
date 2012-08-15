@@ -20,6 +20,7 @@ import io.milton.common.FileUtils;
 import io.milton.common.Utils;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
+import io.milton.vfs.db.Profile;
 
 /**
  * Handy functions exposes to rendering logic for formatting.
@@ -839,4 +840,12 @@ public class Formatter {
             return ":" + p;
         }
     }
+    
+    public String profilePicHref(Profile p) {
+        if( p.getPhotoHash() == null ) {
+            return "/templates/apps/user/profile.png";
+        } else {
+            return "/_hashes/files/" + p.getPhotoHash();
+        }
+    }    
 }

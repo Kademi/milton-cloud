@@ -9,7 +9,7 @@
         <div id="content">            
             <div class="PostDetails">
                 <div class="Post Question ClearFix">
-                    <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
+                    <div class="Avatar"> <img src="$formatter.profilePicHref($page.poster)" width="50" height="50" alt="Patrick Hone" /> </div>
                     <div class="Details">
                         <h3>$page.title</h3>
 
@@ -29,7 +29,7 @@
                     <h3>Answers</h3>
                     #foreach($reply in $page.replies)
                     <div class="Post Answer ClearFix">
-                        <div class="Avatar"> <img src="/static/common/photo02.jpg" width="50" height="50" alt="$reply.poster.nickName" /> </div>
+                        <div class="Avatar"> <img src="$formatter.profilePicHref($reply.poster)" width="50" height="50" alt="$reply.poster.nickName" /> </div>
                         <div class="Details">
                             <div class="Description">
                                 <p>$reply.notes</p>

@@ -87,12 +87,6 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             tx.commit();
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("template")) {
-            // is the theme tab
-            for (AppControlBean a : getApps()) {
-                boolean enabled = parameters.containsKey(a.getAppId());
-                setStatus(a.getAppId(), enabled, session);
-            }
-
             Repository r = website.getRepository();
             r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
             r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
