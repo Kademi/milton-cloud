@@ -571,3 +571,16 @@ function initActiveNav(containerSelector) {
         }
     });
 }
+
+function profileImg(user) {
+    var profileHref;
+    if( user.photoHref ) {
+        profileHref = user.photoHref;
+    } else if( user.photoHash ) {
+        profileHref = "/_hashes/files/" + user.photoHash + "";
+    } else {
+        profileHref = "/templates/apps/user/profile.png";
+    }         
+    var profilePic = "<img src='" + profileHref + "' alt='' />";            
+    return profilePic;
+}

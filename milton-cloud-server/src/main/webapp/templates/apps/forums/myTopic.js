@@ -25,7 +25,13 @@ function addReply(text) {
     log("addReply", text);
     var answersDiv = $(".AnswerList");
     var replyDiv = $("<div class='Post Answer ClearFix'></div>");
-    var avatarDiv = $("<div class='Avatar'> <img src='/static/common/photo02.jpg' width='50' height='50' alt='' /> </div>");    
+    var currentUser = {
+        name: userName,
+        href: userUrl, 
+        photoHref: "/profile/pic"
+    }
+    var img = profileImg(currentUser);
+    var avatarDiv = $("<div class='Avatar'>" + img + "</div>");    
     var detailsDiv = $("<div class='Details'></div>");
     replyDiv.append(avatarDiv);
     replyDiv.append(detailsDiv);

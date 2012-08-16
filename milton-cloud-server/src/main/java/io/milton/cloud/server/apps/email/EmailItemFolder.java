@@ -19,6 +19,7 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -46,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 
 /**
  * Represents a single email, which might contain attachments
@@ -69,6 +72,22 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
         _(HtmlTemplater.class).writePage("email/myInbox", this, params, out);
     }
 
+    @Override
+    public boolean authorise(Request request, Method method, Auth auth) {
+        if( parent.getBaseEntity() == null ) {
+            return true; // null entity on parent means this is a resource for the current user, whoever that is
+        }
+        if( auth != null && auth.getTag() != null ) {
+            UserResource u = (UserResource) auth.getTag();
+            if( u.getThisUser() == parent.getBaseEntity()) {
+                return true;
+            }
+        }
+        return super.authorise(request, method, auth);
+    }
+
+    
+    
     public EmailFolder getInbox() {
         return parent;
     }

@@ -18,7 +18,7 @@
                 #foreach($post in $page.questions)
                 <li class="Post">
                     <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
-                    <div class="ReplyNumber"> <strong>15</strong> replies </div>
+                    <div class="ReplyNumber"> <strong>$post.numReplies</strong> replies </div>
                     <div class="Details">
                         <h4><a href="$post.name">$post.title</a></h4>
                         <p>

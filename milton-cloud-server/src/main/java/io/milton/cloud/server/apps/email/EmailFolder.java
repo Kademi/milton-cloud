@@ -71,6 +71,12 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         _(HtmlTemplater.class).writePage("email/myInbox", this, params, out);
     }
 
+    public BaseEntity getBaseEntity() {
+        return baseEntity;
+    }
+
+    
+    
     public EmailFolder getInbox() {
         return this;
     }

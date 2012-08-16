@@ -249,7 +249,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         @Override
         public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
             if (fanout() == null) {
-                return "/templates/apps/users/profile.png";
+                return "/templates/apps/user/profile.png";
             } else {
                 return null;
             }

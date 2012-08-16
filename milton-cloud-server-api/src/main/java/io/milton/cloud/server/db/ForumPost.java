@@ -111,4 +111,13 @@ public class ForumPost extends Post implements Serializable{
         session.save(r);
         return r;
     }
+    
+    @Transient
+    public long getNumReplies() {
+        if( getForumReplys() == null ) {
+            return 0;
+        } else {
+            return getForumReplys().size();
+        }
+    }
 }
