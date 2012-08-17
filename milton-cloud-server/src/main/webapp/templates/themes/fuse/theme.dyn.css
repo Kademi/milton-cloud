@@ -2018,12 +2018,6 @@ div.textOverImage div {
     text-align: center;    
 }
 
-/**
-Initially hidden message, is displayed after successful processing
-*/
-p.confirm {
-    display: none; 
-}
 
 p.lessSpace {
     padding-bottom: 0;

@@ -18,3 +18,9 @@ p.validationError {
     margin: 0 0 0.1em 0;
 }
 
+/**
+Initially hidden message, is displayed after successful processing
+*/
+p.confirm {
+    display: none; 
+}

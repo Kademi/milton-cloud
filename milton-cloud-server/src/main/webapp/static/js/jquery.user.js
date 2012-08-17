@@ -28,8 +28,8 @@
             afterLoginUrl: "index.html",
             logoutSelector: ".logout",
             valiationMessageSelector: "#validationMessage",
-            requiredFieldsMessage: "Please enter your credentials",
-            loginFailedMessage: "Sorry, those login details were not recognised"
+            requiredFieldsMessage: "Please enter your credentials.",
+            loginFailedMessage: "Sorry, those login details were not recognised."
         }, options);  
   
         $(config.logoutSelector).click(function() {

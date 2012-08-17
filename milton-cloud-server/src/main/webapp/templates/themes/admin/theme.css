@@ -1,4 +1,4 @@
-/** Begin Fuse/theme.css **/
+/** Begin admin/theme.css **/
 @import url("/static/common/modal.css");
 /* Reset */
 html, body, div, span, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, address, code, img, small, strong, dl, dt, dd, ol, ul, li, fieldset, form, label {
@@ -52,7 +52,9 @@ h2 {
     width: 100%;            
 }
 h3 { font-size:15px; }
-h4 { font-size:13px; }
+h4 { 
+    font-size:13px;     
+}
 /*-- END DEFAULT --*/
 ul, li, ol { list-style:none }
 hr {

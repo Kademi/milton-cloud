@@ -74,12 +74,15 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        if( childName.equals("new")) {
+            return new ManageUserPage(childName, null, parent);
+        }
         Long profileId = Long.parseLong(childName);
         Profile p = (Profile) SessionManager.session().get(Profile.class, profileId);
         if(  p == null ) {
             return null;
         }
-        return new ManageUserPage(p, parent);
+        return new ManageUserPage(p.getName(), p, parent);
     }
 
     

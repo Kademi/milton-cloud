@@ -12,14 +12,14 @@
         </properties>
     </action>
     <action>
-            <actionName>run</actionName>
-            <goals>
-                <goal>compile</goal>
-            </goals>
-            <!--
-            <properties>
-                <Env.MAVEN_OPTS>-javaagent:C:\Users\brad\.netbeans\7.1.2\jrebel\jrebel.jar</Env.MAVEN_OPTS>
-            </properties>
-            -->
-        </action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>compile</goal>
+        </goals>
+        <!--
+        <properties>
+            <Env.MAVEN_OPTS>-javaagent:C:\Users\brad\.netbeans\7.1.2\jrebel\jrebel.jar</Env.MAVEN_OPTS>
+        </properties>
+        -->
+    </action>
 </actions>

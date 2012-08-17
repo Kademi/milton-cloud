@@ -211,6 +211,7 @@ public class ApplicationManager {
                 try (FileOutputStream fout = new FileOutputStream(configFile)) {
                     props.store(fout, "auto-generated defaults");
                 }
+                log.info("Wrote initial properties to: " + configFile.getAbsolutePath());
             }
             return config;
         }

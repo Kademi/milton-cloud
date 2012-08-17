@@ -19,7 +19,7 @@
                 
             },
             valiationMessageSelector: ".pageMessage",
-            validationFailedMessage : "Some inputs are not valid"
+            validationFailedMessage : "Some inputs are not valid."
         }, options);  
         
   

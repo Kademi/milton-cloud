@@ -15,16 +15,20 @@
                                 <div class="Box02Bottom">
                                     <div class="Box02Middle">
                                         <div class="pageMessage"></div>
+                                        
                                         <label class="first" for="email">Email</label>
-                                        <input class="required" type="text" name="email" id="email" placeholder="Enter your email address" />
-                                        <label class="last" for="password">Password</label>
-                                        <input class="required" type="password" name="password" id="password" placeholder="Enter your preferred password" />
-                                        <br/>
-                                        <label class="first" for="nickName">Nickname</label>
+                                        <input class="required" type="text" name="email" id="email" placeholder="You email address" />
+                                        
+                                        <label class="last" for="nickName">Nickname</label>
                                         <input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" />
-
+                                        
+                                        <br/>
+                                        
+                                        <label class="first" for="password">Password</label>
+                                        <input class="required" type="password" name="password" id="password" placeholder="Your preferred password" />
+                                        
                                         <label class="last" for="confirmPassword">Confirm</label>
-                                        <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Please confirm your password" />
+                                        <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" />
 
                                         <button class="Register" ><span>Register</span></button>
                                     </div>
@@ -46,10 +50,10 @@
                     var title = label.text();
                     var input = jQuery("#" + label.attr("for"));
                     input.attr("title", title);
-                    input.attr("placeholder", title);
                     label.text(i+1);
                 });
                 jQuery("#registerForm").forms({
+                    validationFailedMessage: "Please enter your details below.",
                     callback: function() {
                         log("created account ok, logging in...");
                         var userName = $("#email").val();
