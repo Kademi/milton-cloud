@@ -29,6 +29,8 @@ import io.milton.vfs.db.utils.SessionManager;
 import javax.mail.internet.MimeMessage;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import io.milton.principal.CalDavPrincipal;
 import io.milton.principal.CardDavPrincipal;
 
@@ -48,6 +50,19 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         this.user = u;
     }
 
+    @Override
+    public boolean authorise(Request request, Method method, Auth auth) {
+        if( auth != null && auth.getTag() != null ) {
+            UserResource ur = (UserResource) auth.getTag();
+            if( ur.getThisUser() == user ) {
+                return true;
+            }
+        }
+        return super.authorise(request, method, auth);
+    }
+
+    
+    
     public String getTitle() {
         String s = user.getNickName();
         if( s == null ) {
@@ -124,7 +139,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        getTemplater().writePage("admin/mnageUser", this, params, out);
+        getTemplater().writePage("user/dashboard", this, params, out);
     }
 
     @Override

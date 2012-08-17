@@ -270,5 +270,5 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             }
         }        
         return null;
-    }
+    }   
 }

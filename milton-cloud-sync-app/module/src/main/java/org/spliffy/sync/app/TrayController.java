@@ -4,6 +4,11 @@ package org.spliffy.sync.app;
 import io.milton.common.LogUtils;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
+import io.milton.sync.SpliffySync;
+import io.milton.sync.event.DownloadSyncEvent;
+import io.milton.sync.event.FinishedSyncEvent;
+import io.milton.sync.event.ScanEvent;
+import io.milton.sync.event.UploadSyncEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
@@ -12,11 +17,7 @@ import javax.swing.SwingUtilities;
 import org.openide.LifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spliffy.sync.SpliffySync;
-import org.spliffy.sync.event.DownloadSyncEvent;
-import org.spliffy.sync.event.FinishedSyncEvent;
-import org.spliffy.sync.event.ScanEvent;
-import org.spliffy.sync.event.UploadSyncEvent;
+
 
 /**
  *

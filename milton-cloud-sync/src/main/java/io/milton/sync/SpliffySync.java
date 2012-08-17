@@ -107,6 +107,60 @@ public class SpliffySync {
         return paused;
     }
 
+    public Archiver getArchiver() {
+        return archiver;
+    }
+
+    public DbInitialiser getDbInit() {
+        return dbInit;
+    }
+
+    public String getBasePath() {
+        return basePath;
+    }
+
+    public SyncingDeltaListener getDeltaListener2() {
+        return deltaListener2;
+    }
+
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    public Host getHttpClient() {
+        return httpClient;
+    }
+
+    public JdbcLocalTripletStore getJdbcTripletStore() {
+        return jdbcTripletStore;
+    }
+
+    public File getLocalRoot() {
+        return localRoot;
+    }
+
+    public HttpTripletStore getRemoteTripletStore() {
+        return remoteTripletStore;
+    }
+
+    public ScheduledFuture<?> getScanJob() {
+        return scanJob;
+    }
+
+    public ScheduledExecutorService getScheduledExecService() {
+        return scheduledExecService;
+    }
+
+    public JdbcSyncStatusStore getStatusStore() {
+        return statusStore;
+    }
+
+    public Syncer getSyncer() {
+        return syncer;
+    }
+    
+    
+
     private class ScanRunner implements Runnable {
 
         @Override

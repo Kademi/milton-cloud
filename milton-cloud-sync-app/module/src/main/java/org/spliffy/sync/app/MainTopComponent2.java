@@ -5,13 +5,11 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.openide.windows.WindowManager;
 
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//com.ettrema.cloudsync//main//EN",
-autostore = false)
+@ConvertAsProperties(dtd = "-//com.ettrema.cloudsync//main//EN",autostore = false)
 @TopComponent.Description(preferredID = "mainTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
@@ -20,8 +18,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
  */)
-@TopComponent.OpenActionRegistration(displayName = "#CTL_mainAction",
-preferredID = "mainTopComponent")
+@TopComponent.OpenActionRegistration(displayName = "SpliffySync", preferredID = "mainTopComponent")
 @Messages({
     "CTL_mainAction=main",
     "CTL_mainTopComponent=main Window",
@@ -31,14 +28,15 @@ public final class MainTopComponent2 extends TopComponent {
 
     public MainTopComponent2() {
         System.out.println("--- STARTING SPLIFFY SYNC ---");
-        initComponents();
-        setName(Bundle.CTL_mainTopComponent());
-        setToolTipText(Bundle.HINT_mainTopComponent());
-        putClientProperty(TopComponent.PROP_CLOSING_DISABLED, Boolean.TRUE);
-        putClientProperty(TopComponent.PROP_UNDOCKING_DISABLED, Boolean.TRUE);
 
         try {
-            SyncFactory moduleFactory = SyncFactory.get(); 
+            initComponents();
+            setName("SpliffySync");
+            setToolTipText("SpliffySync");
+            putClientProperty(TopComponent.PROP_CLOSING_DISABLED, Boolean.TRUE);
+            putClientProperty(TopComponent.PROP_UNDOCKING_DISABLED, Boolean.TRUE);
+
+            SyncFactory moduleFactory = SyncFactory.get();
             System.out.println("initialied: " + moduleFactory);
             moduleFactory.startAll();
         } catch (Exception e) {
@@ -261,8 +259,6 @@ public final class MainTopComponent2 extends TopComponent {
     public boolean canClose() {
         return false;
     }
-    
-    
 
     void writeProperties(java.util.Properties p) {
         // better to version settings since initial version as advocated at
