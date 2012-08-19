@@ -48,9 +48,14 @@ function displayPost(user, date, comment, pageTitle, pagePath) {
         li.append("<a class='profilePic' href='#'><img src='/templates/apps/user/profile.png' alt='' /></a>");
     }
     li.append("<a class='user' href='#'>" + user.name + "</a> posted in <a class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
-    li.append("<p>" + comment + "</p>");
     var formattedDate = date.toISOString();
-    li.append("<em><abbr class='timeago' title='" + formattedDate + "'>" + formattedDate + "</abbr></em>");
+    var commentHtml = "<div class='post'>";    
+    commentHtml += "<p>" + comment + "</p>";
+    commentHtml += "<em><abbr class='timeago' title='" + formattedDate + "'>" + formattedDate + "</abbr></em>";
+    commentHtml += "</div>";
+    li.append(commentHtml);
+    
+    li.append();
     $(".barList").append(li);
             
 //                <li>

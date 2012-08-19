@@ -44,7 +44,7 @@ function initTheme() {
     initTabPanel();
     initRotation();
     initPlaceholder();
-    
+    initPseudoClasses();
          
     log("initTheme: run page init functions");
     for( i=0; i<pageInitFunctions.length; i++) {
@@ -323,5 +323,11 @@ function initPlaceholder() {
     $('input, textarea').placeholder();    
 }
 
+function initPseudoClasses() {
+    $("table tr td:first-child").addClass("first");
+    $("table tr td:last-child").addClass("last");
+    $("ul li:nth-child(even)").addClass("even");
+    $("ul li:nth-child(odd)").addClass("odd");    
+}
 
 /** End init-theme.js */

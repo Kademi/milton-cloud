@@ -131,7 +131,7 @@ body p, body p a {
 }
 
 p, ul, ol {
-    padding: 0px 0px 5px 0px;    
+    padding: 0px 0px 0.5em;
 }
 
 body p a {   
@@ -304,81 +304,6 @@ a.arrowR {
     padding-left:10px;
 }
 
-
-/*sideBar*/
-.sideBar{
-    width:29%;
-    float:right;
-}
-body ul.barList {
-    margin: 0;
-}
-ul.barList li{
-    list-style:none;
-    border-top:1px solid #dbdada;
-    padding:7px 0 7px 10px;
-    margin: 0;
-    font-size: 0.75em;    
-}
-ul.barList li:last-child {
-    border-bottom: 1px solid #dbdada;
-}
-.profilePic{
-    float:left;
-    margin-right:8px;
-}
-ul.barList li .textBox{
-    float:left;
-    width:70%;
-}
-ul.barList p {    
-    line-height: 12px;
-    margin: 0;
-}
-.textBox h3{
-    color:#262626;
-    font-size:12px;
-    font-weight:bold;
-    margin: 0 0 4px 0;
-}
-.textBox h3 a{
-    text-decoration:none;
-    color:#262626;
-}
-.textBox h3 a:hover{
-    text-decoration:underline;
-}
-.textBox h3 span{
-    color:$page.parent.settings.heroColour1;
-}
-.textBox p{
-    color:#262626;
-    font-size:10px;
-    margin-bottom:4px;
-}
-ul.barList em, ul.barList small, ul.barList p {
-    font-size: 0.8333em;
-}
-ul.barList em{
-    color:#262626;    
-    margin-right:7px;
-}
-ul.barList small{
-    color:$page.parent.settings.heroColour1;    
-    font-style:italic;
-    background:url(images/plus.gif) top left no-repeat;
-    padding-left:10px;
-    background-position:0 4px;
-}
-
-a.module {
-    color: $page.parent.settings.heroColour1;
-    font-weight: bold;
-}
-a.user {
-    color: #262626;    
-    font-weight: bold;
-}
 
 /*dashBoardfinal*/
 .welcomeBox{
@@ -792,36 +717,41 @@ a.Link {
 }
 /*dropdown*/
 .dropBox {
-    min-width: 145px;
     position:absolute;
-    top:35px;
-    right:0;
     background:#fff;
     border:1px solid #cbcbcb;
-    border-bottom-left-radius: 5px 5px;
-    border-bottom-right-radius: 5px 5px;
-    border-top-left-radius: 5px 5px;
-    border-top-right-radius: 5px 5px;
+    border-radius: 0.3em;
     z-index:999;
-    padding:3px 3px 3px 3px;
+    padding: 0.18em 0.18em 0 0.18em;
     display:none;
+    line-height: 1.4em;    
 }
 .dropBox ul {
     margin: 0;
-    padding: 0.5em;
 }
-.Login li a {
-    font-weight: 400;
-    color: #2F2F2F;
-    display: block;
-    line-height: 1.5em;
-    text-decoration: none;
-    font-size: 0.8em;
-    padding: 0.4em;
-    border-radius: 5px;
+.dropBox li {
+    list-style:none;
+    font-size: 0.68em;
+    margin: 0;
+    padding: 0;
 }
-.Login li a:hover {
+.dropBox li:hover a {
     background:#e6e6e6;
+    text-decoration: none;
+}
+.dropBox li a {
+    text-decoration:none;
+    color:$page.parent.settings.textColour2;
+    display:block;
+    padding: 0.3em 0 0 0.625em;
+    border-radius: 0.3em;
+    font-size: 1.3em;
+}
+
+.Login .dropBox {
+    min-width: 145px;
+    top:35px;
+    right:0;
 }
 .Login form label {
     display: inline-block;
@@ -905,7 +835,7 @@ body.myDashboard li.nav-myDashboard, body.myLearning li.nav-myLearning, body.com
     padding: 0;
 }
 
-.header ul li a {
+.nav ul li a {
     font-weight: 400;    
 }
 
@@ -1137,7 +1067,7 @@ table h1, table h2, table h3, table h4 {
 }
 
 #comments input, #comments textarea{
-    padding: 4px 10px;
+    padding: 4px 10px 2p;
     width:95%;
     height:19px;
     margin: 0;
@@ -1154,7 +1084,8 @@ table h1, table h2, table h3, table h4 {
     padding:10px 10px 9px;
     background:#fff;
     border-top:1px solid #d4d4d4;
-    margin-bottom:3px;
+    border-bottom: 1px solid #D4D4D4;
+    margin-bottom:5px;
     text-align: left;
     position: relative;
 }
@@ -1682,7 +1613,7 @@ div.dropdown.dropdown2 {
 
 
 .btnHideFollowing {
-    background-color: #88c140;
+    background-color: $rootFolder.settings.heroColour1;
     border-radius: 4px;
     /* border: 1px solid #98a686;*/
     color: white;
@@ -1722,7 +1653,7 @@ div.dropdown > div {
 }
 
 .modulePage .dropdown h6 {
-    /* background-color: #e9e9e9;*/
+    background-color: #e9e9e9;
 }
 
 div.dropdown h6 {
@@ -1775,7 +1706,7 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
 #editor div.dropdown > span, div.dropdown.open > span {
     background-position: -28px -94px;
 }
-.modulePage div.dropdown > div {
+.edifyIsViewMode.modulePage div.dropdown > div {
     display: none;
 }
 
@@ -1798,120 +1729,15 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
 }
 
 
-/** Start moduleLayout.css **/
 
-.modulePage .content {
-    min-height: 350px;
-    background-color: white;
-    background-image: url("images/h-shade.jpg");
-    background-position: center top;
-    background-repeat: repeat-y;
-    min-height: 350px;
-}
-.modulePage .nav, .modulePage .formBox {
-    display: none;
-}   
-.modulePage div.header {
-    min-height: 80px;
-    border-bottom: solid #F4F4F4 1px;
-}
-.modulePage div.header h1 {
-    padding-top: 0;
-}
-.modulePage div.header h1 a {
-    margin-top: 0;
-}
-.modulePage .header > a {
-    position: absolute;
-    right: 20px;
-    bottom: 10px;
-    background: url("images/arrow1.gif") no-repeat scroll 0 1px transparent;
-    color: $rootFolder.settings.textColour2;
-    font-size: 13px;
-    padding-left: 20px;
-}
-ul.pages {
-    display: inline-block;
-    margin: 0;
-    max-width: 780px;
-}
-.pages li {
-    display: block;
-    float: left;
-    list-style-type: none;
-    margin: 0 8px 8px;
-}
-.pages li a{
+a.hero {
     background-color: $rootFolder.settings.heroColour1;
-    border: solid 6px $rootFolder.settings.heroColour1;
-    border-radius: 15px;
-    display: inline-block;
-    font-size: 12px;
-    height: 4px;
-    margin: 0;
-    padding: 6px;
-    text-indent: -9999px;
-    width: 4px;
-}
-.content .pages li a:hover, .content .pages li a.active {   
-    background-color: white;
-    border: solid 6px $rootFolder.settings.heroColour1;
-    padding: 6px 6px;
-    margin: 0;     
-    font-size: 14px;   
+    border-style: solid;
+    border-width: 6px;
+    border-color: $rootFolder.settings.heroColour1;
 }
 
 
-.handsImg{
-    position:absolute;
-    bottom:-3px;
-    right:0;
-}
-div.pages {
-    background-color: white;
-    max-width: 950px;
-    padding: 0 15px;
-}
-.commetnArea{
-    max-width: 950px;    
-    background-color: #EEEEEE;
-    padding: 0 15px;
-}
-.commetnArea, div.pages, .panelBox{
-    border-left: solid 1px #d2d2d2;
-    border-right: solid 1px #d2d2d2;    
-}
-.commetnArea, div.pages{
-    text-align: center;
-    margin:16px 15px 0;
-    position:relative;
-    overflow:hidden;
-    margin: 0 auto;
-}
-
-.modulePage a.nextBtn, .modulePage a.prevBtn{
-    position:absolute;
-    width:84px;
-    height:21px;    
-    color:#fff;
-    font-size:13px;    
-    top:0;    
-    text-decoration:none;
-    cursor:pointer;
-    text-align:center;
-    display:block;
-    background:$rootFolder.settings.heroColour1;
-    border-radius: 5px 5px;
-    padding-top:5px;    
-    margin-top: 5px;
-}
-
-.modulePage a.prevBtn{    
-    left: 15px;
-}
-.modulePage a.nextBtn{
-    right: 15px;
-}
 ul.btnList{
     width:225px;
     margin:0 auto;
@@ -2167,7 +1993,7 @@ div.bar {
 div.bar h3 {
     color: #FFFFFF;
     float: left;
-    font-size: 0.9em;
+    font-size: 1em;
     font-weight: normal;
     margin: 0;
     padding: 0;
@@ -2178,6 +2004,7 @@ div.bar h3 {
 }
 body ul.barList {
     margin: 0;
+    font-size: 1em;
 }
 ul.barList li{
     list-style:none;
@@ -2193,18 +2020,35 @@ ul.barList li:last-child {
     float:left;
     margin-right:8px;
 }
+a.module {
+    color: $page.parent.settings.heroColour1;
+    font-weight: bold;
+}
+a.user {
+    color: #262626;    
+    font-weight: bold;
+}
+#comments a.user {
+    font-size: 0.8em;
+}
+#comments p {
+    font-size: 0.7em;
+}
+
 ul.barList li .textBox{
     float:left;
     width:70%;
 }
+ul.barList div.post {    
+   margin-left: 60px; /** width of the image to prevent text wrapping */    
+}
 ul.barList p {    
+    padding-top: 5px;
     line-height: 12px;
     margin: 0;
 }
-
-
-ul.barList em, ul.barList small, ul.barList p {
-    font-size: 1em;
+ul.barList p, ul.barList em{
+    font-size: 0.85em;    
 }
 ul.barList em{
     color:#262626;    
@@ -2258,9 +2102,35 @@ table.bar thead tr th:last-child {
 table.bar tr:nth-child(odd) td {
     background-color: white;
 }
+
+
 tr.seperator {
     display: block;
     height: 10px;
+}
+
+tr.bar td.first, div.bar {
+   padding: 0 8px;    
+}
+
+tr.bar td.title {
+    font-size: 0.9em;
+    font-style: normal;
+}
+tr.bar td.first {
+    border-radius: 5px 0 0 5px;
+
+}
+tr.bar td {
+    background: $page.parent.settings.heroColour1;
+    line-height: 2em;
+    padding: 0 8px;
+    color: white;
+    font-size: 0.7em;
+    font-style: italic;
+}
+tr.bar td.last {
+    border-radius: 0 5px 5px 0;
 }
 
 div.bar {

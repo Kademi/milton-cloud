@@ -1,15 +1,14 @@
 table.classifier tr td {
     vertical-align: top;
 }
-table.classifier tr td:last-child {
-    width: 700px;
+table.classifier tr td.last {
+    width: 716px;
     background-image: url(shade.png);
     background-repeat: no-repeat;
 }
 table.classifier div.rule {
     background-repeat: no-repeat;
-    height: 155px;
-    width: 656px;
+    height: 164px;
     background-position: top center;
     padding: 100px 20px 20px 20px;
 }

@@ -19,6 +19,7 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.utils.UserDao;

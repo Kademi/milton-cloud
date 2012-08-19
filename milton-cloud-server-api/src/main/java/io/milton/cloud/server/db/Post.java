@@ -114,7 +114,7 @@ public abstract class Post implements Serializable{
         this.postDate = postDate;
     }
 
-    @Column(nullable=true)
+    @Column(nullable=true, length=2048)
     public String getNotes() {
         return notes;
     }

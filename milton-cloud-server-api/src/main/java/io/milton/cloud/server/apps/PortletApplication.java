@@ -30,10 +30,28 @@ import org.apache.velocity.context.Context;
  * @author brad
  */
 public interface PortletApplication extends Application{
-    
+    /**
+     * Inside the HEAD tag, following all template declarations
+     */
     public static final String PORTLET_SECTION_HEADER = "header";
+    
+    /**
+     * Inside the navigation section
+     */
+    public static final String PORTLET_SECTION_NAV_HEADER = "navHeader";
+    /**
+     * Renders at the top of the user dashboard page
+     */
     public static final String PORTLET_SECTION_DASH_MESSAGES = "dashboardMessages";
+    
+    /**
+     * The main section of the user dashboard
+     */
     public static final String PORTLET_SECTION_DASH_PRIMARY = "dashboardPrimary";
+    
+    /**
+     * The secondary section of the user dashboard
+     */
     public static final String PORTLET_SECTION_DASH_SECONDARY = "dashboardSecondary";
     
     /**

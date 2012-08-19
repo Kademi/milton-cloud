@@ -28,6 +28,7 @@
                 <bean class="io.milton.cloud.server.apps.googleanalytics.GaApp"/>
                 <bean class="io.milton.cloud.server.apps.contactus.ContactUsApp"/>
                 <bean class="io.milton.cloud.server.apps.dns.NameServerApp"/>
+                <bean class="io.milton.cloud.server.apps.search.SearchApp"/>
             </list>
         </constructor-arg>
         <constructor-arg ref="current.root.folder.service"/>

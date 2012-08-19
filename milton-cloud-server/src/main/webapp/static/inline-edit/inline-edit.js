@@ -6,7 +6,7 @@ $(function() {
     var adminToolbar = $("<div class='adminToolbar'>");
     var btnEdit = $("<button class='edit'>Edit page</button>");
     btnEdit.click(function() {
-        edifyPage(formContainer);
+        edifyPage(".contentForm");
     });
     var btnNew = $("<button class='new'>New Page</button>");
     adminToolbar.append(btnEdit).append(btnNew);
@@ -22,51 +22,76 @@ $(function() {
     });
 });
 
-function edifyPage(container) {
+function edifyPage(selector) {
     log("edifyPage", container);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
             
+    var container = $(selector);
     container.animate({
         opacity: 0
-    }, 200, function() {
-        initHtmlEditors(container.find(".htmleditor"));
+    }, 500);
     
-        $(".inputTextEditor").each(function(i, n) {
-            var $n = $(n);
-            var s = $n.text();
-            $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
-        });        
-        container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
-        $("#edifyForm").append("<input type='hidden' name='body' value='' />");
-        var buttons = $("<div class='buttons'></div>");
-        $("#edifyForm").prepend(buttons);
-        var title = $("<input type='text' name='title' id='title' title='Enter the page title here' />");
-        title.val(document.title);
-        buttons.append(title);
-        buttons.append("<button title='Save edits to the page' class='save' type='submit'>Save</button>");
-        buttons.append("<button title='View page history' class='history' type='button'>History</button>");
-        var btnCancel = $("<button title='Return to view mode without saving. Any changes will be lost' class='cancel' type='button'>Cancel</button>");
-        btnCancel.click(function() {
-            window.location.reload()
-        });
-        buttons.append(btnCancel);
-        buttons.on("click", "button.history", function(){
-            showHistory();
-        });
-                        
-        $("#edifyForm").submit(function(e) {
-            e.preventDefault();
-            log("inlineedit: edifyPage: submit page");
-            submitEdifiedForm(function() {
-                window.location.reload();
+    $.ajax({
+        type: 'GET',
+        url: window.location.pathname,
+        success: function(resp) {
+            log("got page content");
+            ajaxLoadingOff();                
+            var page = $(resp);                
+            var newContentForm = page.find(".contentForm");
+            log("got data", newContentForm);
+            $(".contentForm").replaceWith(newContentForm);
+            
+            // now we've loaded the content we must re-select the container
+            container = $(selector);            
+            
+            initHtmlEditors(container.find(".htmleditor"));
+        
+            $(".inputTextEditor").each(function(i, n) {
+                var $n = $(n);
+                var s = $n.text();
+                $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
+            });        
+            container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
+            var form = $("#edifyForm");
+            log("hide", form);
+            form.css("opacity", 0);            
+            $("#edifyForm").append("<input type='hidden' name='body' value='' />");
+            var buttons = $("<div class='buttons'></div>");
+            $("#edifyForm").prepend(buttons);
+            var title = $("<input type='text' name='title' id='title' title='Enter the page title here' />");
+            title.val(document.title);
+            buttons.append(title);
+            buttons.append("<button title='Save edits to the page' class='save' type='submit'>Save</button>");
+            buttons.append("<button title='View page history' class='history' type='button'>History</button>");
+            var btnCancel = $("<button title='Return to view mode without saving. Any changes will be lost' class='cancel' type='button'>Cancel</button>");
+            btnCancel.click(function() {
+                window.location.reload()
             });
-        });
-        log("done hide, now show again");
-        container.animate({
-            opacity: 1
-        },500);
-    });
+            buttons.append(btnCancel);
+            buttons.on("click", "button.history", function(){
+                showHistory();
+            });
+                            
+            $("#edifyForm").submit(function(e) {
+                e.preventDefault();
+                log("inlineedit: edifyPage: submit page");
+                submitEdifiedForm(function() {
+                    window.location.reload();
+                });
+            });
+            log("done hide, now show again");
+            form.animate({
+                opacity: 1
+            },500);            
+        },
+        error: function(resp) {
+            ajaxLoadingOff();
+            alert("There was an error loading the page content into the editor. Please refresh the page and try again");
+        }
+            
+    });    
 
 }
 

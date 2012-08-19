@@ -45,7 +45,7 @@
                                         <a href="/profile">Profile</a>
                                     </li>                                    
                                     <li>
-                                        <a class="logout">Logout</a>
+                                        <a href="#" class="logout">Logout</a>
                                     </li>
                                 </ul>
                                 <ul class="list sansuser">
@@ -74,19 +74,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="divider"></div>
-                        <form action="http://www.google.com/search" method="get">
-                            <fieldset>
-                                <input type="hidden" name="domains" value="$targetPage.host.name"/>
-                                <input type="hidden" name="sitesearch" value="$targetPage.host.name" />
-                                <div class="inputBox">
-                                    <input class="input" type="text" name="q" placeholder="Search"/>
-                                    <button class="goBtn" name="btnG" type="submit">Go</button> 
-                                </div>    
-                            </fieldset>
-                            <div class="clr"></div>
-                        </form>
+                        </div>                     
+                        <!-- TODO: Maybe move the login menu etc into user app? -->
+                        #portlets("navHeader")
                         <div class="clr"></div>
                     </div>
                 </div>

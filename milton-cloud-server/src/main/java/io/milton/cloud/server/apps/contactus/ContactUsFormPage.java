@@ -173,7 +173,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     }
     
     public String getThankYouMessage() {
-        return "<p>Thank you for your enquiry. Our team will respond as soon as possible</p>";
+        return "<p>Thank you for your enquiry. Our team will respond as soon as possible.</p>";
     }
 
     @Override
