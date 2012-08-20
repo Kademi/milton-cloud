@@ -326,6 +326,8 @@ function initPlaceholder() {
 function initPseudoClasses() {
     $("table tr td:first-child").addClass("first");
     $("table tr td:last-child").addClass("last");
+    $("table tr:nth-child(odd)").addClass("odd");
+    $("table tr:nth-child(even)").addClass("even");
     $("ul li:nth-child(even)").addClass("even");
     $("ul li:nth-child(odd)").addClass("odd");    
 }

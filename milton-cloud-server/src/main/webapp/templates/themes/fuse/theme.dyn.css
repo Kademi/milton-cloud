@@ -2100,7 +2100,7 @@ table.bar th:last-child, table.bar td:last-child {
 table.bar thead tr th:last-child {
     border-radius: 0 5px 5px 0;
 }
-table.bar tr:nth-child(odd) td {
+table.bar tr.odd td {
     background-color: white;
 }
 
@@ -2155,8 +2155,10 @@ a.courseBox.active, a.courseBox:hover {
     background-image: url(/static/common/download.png);
     background-position: center center;
     background-repeat: no-repeat;    
-    text-indent: -10000px;
     cursor: pointer;
     height: 31px;
     width: 34px;
+}
+.downloadIcon span {
+    display: none;
 }
