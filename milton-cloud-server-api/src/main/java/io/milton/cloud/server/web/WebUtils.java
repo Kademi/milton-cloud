@@ -225,7 +225,6 @@ public class WebUtils {
      * @param rootFolder 
      */
     public static void setActiveMenu(String thisHref, RootFolder rootFolder) {
-        System.out.println("setActiveMenu: --------------------------- " + thisHref);
         if (rootFolder instanceof WebsiteRootFolder) {
             String menuId = null;
             String longestHref = null;
@@ -243,7 +242,6 @@ public class WebUtils {
                     Path p = Path.path(href);
                     String parentHref = p.getParent().toString();
                     if (thisHref.startsWith(parentHref)) {
-                        System.out.println("yes, it is");
                         if( longestHref == null || parentHref.length() > longestHref.length()  ) {
                             longestHref = parentHref;
                             menuId = id;

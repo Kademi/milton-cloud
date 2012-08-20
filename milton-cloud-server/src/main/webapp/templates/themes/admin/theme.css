@@ -609,6 +609,10 @@ textarea {
     line-height: 20px;
     padding: 5px 10px;
 }
+textarea.smaller {
+    height: 100px;
+    width: 97%; /** fit inside the table on manage module page */
+}
 /* Form details for editing purpose */
 .Details {
     padding: 20px;

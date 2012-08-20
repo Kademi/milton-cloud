@@ -133,7 +133,7 @@ body p, body p a {
 }
 
 p, ul, ol {
-    padding: 0px 0px 0.5em;
+    padding: 0px 0px 0.7em;
 }
 
 body p a {   
@@ -580,7 +580,7 @@ table.verticalFields tbody tr td, table.verticalFields tbody tr th {
 
 .content {
     background: white;
-    padding:15px 15px 70px 15px;
+    padding: 1em 1em 2em;
 }
 
 .content a:hover {
@@ -835,6 +835,7 @@ body.myDashboard li.nav-myDashboard, body.myLearning li.nav-myLearning, body.com
     text-transform:capitalize;
     display: inline-block;
     padding: 0;
+    zoom:1; *display: inline;
 }
 
 .nav ul li a {
@@ -1038,6 +1039,7 @@ table.tree-browser {
 
 table.bar {
     width: 100%;
+    border-collapse: collapse;
 }
 
 table.bar tbody {
@@ -1046,7 +1048,7 @@ table.bar tbody {
 
 table.bar td {
     border-width: 1px 0;
-    vertical-align: top;
+    vertical-align: middle;
 }
 table.bar td a {
     color: $page.parent.settings.textColour2;
@@ -1624,7 +1626,7 @@ div.dropdown.dropdown2 {
 }
 
 
-.lightbulb div.dropdown{
+.lightbulb div.dropdown, .lightbulb div.dropdown h6 {
     background-color: #fbf5e9;
 }
 
