@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -187,16 +185,14 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
 
             @Override
             public void visit(ForumPost p) {
-                b.setForumTitle(p.getTopic().getForum().getTitle());
-                b.setTopicTitle(p.getTopic().getTitle());
+                b.setForumTitle(p.getForum().getTitle());
                 b.setContentHref(ForumsApp.toHref(p));
                 b.setType("q"); // question
             }
 
             @Override
             public void visit(ForumReply r) {
-                b.setForumTitle(r.getPost().getTopic().getForum().getTitle());
-                b.setTopicTitle(r.getPost().getTopic().getTitle());
+                b.setForumTitle(r.getPost().getForum().getTitle());
                 b.setContentHref(ForumsApp.toHref(r.getPost()));
                 b.setType("r"); // reply
             }
@@ -212,7 +208,6 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
         private ProfileBean user;
         private String notes;
         private String forumTitle;
-        private String topicTitle;
         private String contentTitle;
         private String contentHref;
         private Date date;
@@ -232,14 +227,6 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
 
         public void setForumTitle(String forumTitle) {
             this.forumTitle = forumTitle;
-        }
-
-        public String getTopicTitle() {
-            return topicTitle;
-        }
-
-        public void setTopicTitle(String parentTitle) {
-            this.topicTitle = parentTitle;
         }
 
         public String getContentHref() {

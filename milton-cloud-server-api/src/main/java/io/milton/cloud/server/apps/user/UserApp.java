@@ -43,7 +43,7 @@ import io.milton.vfs.db.Website;
  *
  * @author brad
  */
-public class UserApp implements Application, MenuApplication, ChildPageApplication, BrowsableApplication {
+public class UserApp implements Application, ChildPageApplication, BrowsableApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
@@ -108,9 +108,6 @@ public class UserApp implements Application, MenuApplication, ChildPageApplicati
         } else if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             switch (requestedName) {
-                case "dashboard":
-                    MenuItem.setActiveIds("menuDashboard");
-                    return new DashboardPage(requestedName, wrf);                    
                 case "profile":
                     MenuItem.setActiveIds("menuDashboard");
                     return new ProfilePage(requestedName, wrf);
@@ -141,16 +138,4 @@ public class UserApp implements Application, MenuApplication, ChildPageApplicati
         }
     }
 
-    @Override
-    public void appendMenu(MenuItem parent) {
-        String parentId = parent.getId();
-        switch (parentId) {
-            case "menuRoot":
-                if (parent.getRootFolder() instanceof WebsiteRootFolder) {
-                    if (parent.getUser() != null) {
-                        parent.getOrCreate("menuDashboard", "Dashboard", "/dashboard").setOrdering(10);
-                    }
-                }
-        }
-    }
 }

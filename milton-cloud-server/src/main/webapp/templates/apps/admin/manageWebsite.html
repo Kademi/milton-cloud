@@ -59,40 +59,56 @@
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th class="Short">Choose a theme</th>
-                                        <td>
-                                            <select name="template" class="Medium">
-                                                <option value="fuse">Fuse</option>
-                                                <option value="custom">Custom</option>
-                                            </select>
+                                        <th class="Short">Choose a theme for public pages</th>
+                                        <td colspan="3">
+                                            <select name="publicTheme">                                            
+                                            #foreach($t in $page.themes)
+                                                $formatter.option($t, $t, $page.website.publicTheme)
+                                            #end
+                                            </select>                                            
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="Short">Choose a theme for logged in pages</th>
+                                        <td colspan="3">
+                                            <select name="internalTheme">                                            
+                                            #foreach($t in $page.themes)
+                                                $formatter.option($t, $t, $page.website.internalTheme)
+                                            #end
+                                            </select>                                            
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="Short">Logo</th>
-                                        <td>
+                                        <td colspan="3">
                                             <textarea class="htmleditor required toolbar-Logo" name="logo" id="logo" rows="4" cols="20">$!page.themeParams.logo</textarea>
                                         </td>
                                     </tr>                                    
                                     <tr>
                                         <th class="Short">Hero colour 1</th>
                                         <td><input type="text" name="heroColour1" value="$!page.themeParams.heroColour1" class="required color" /></td>
+                                        <th class="Short">Text colour 1</th>
+                                        <td><input type="text" name="textColour1" value="$!page.themeParams.textColour1" class="required color" /></td>                                        
                                     </tr>
                                     <tr>
                                         <th class="Short">Hero colour 2</th>
                                         <td><input type="text" name="heroColour2" value="$!page.themeParams.heroColour2" class="required color" /></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="Short">Text colour 1</th>
-                                        <td><input type="text" name="textColour1" value="$!page.themeParams.textColour1" class="required color" /></td>
-                                    </tr>
-                                    <tr>
                                         <th class="Short">Text colour 2</th>
-                                        <td><input type="text" name="textColour2" value="$!page.themeParams.textColour2" class="required color" /></td>
+                                        <td><input type="text" name="textColour2" value="$!page.themeParams.textColour2" class="required color" /></td>                                        
+                                    </tr>
+                                    <tr>
+                                        <th class="Short">Menu</th>
+                                        <td colspan="3">
+                                            <textarea name="menu">$!page.themeParams.menu</textarea>
+                                            <br/>
+                                            Menu is in the form of address,title. Eg /faq.html,FAQ
+                                        </td>
                                     </tr>                                    
+                                    
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="2">
+                                        <td colspan="4">
                                             <button class="Btn">Save Changes</button>
                                         </td>
                                     </tr>

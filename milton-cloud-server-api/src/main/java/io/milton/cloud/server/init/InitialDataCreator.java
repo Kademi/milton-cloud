@@ -16,11 +16,15 @@ import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.resource.CollectionResource;
-import io.milton.resource.Resource;
+import io.milton.event.EventManager;
+import io.milton.event.EventManagerImpl;
+import io.milton.sync.SyncCommand;
+import io.milton.sync.SyncJob;
+import io.milton.vfs.db.Branch;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,6 +56,7 @@ public class InitialDataCreator implements LifecycleApplication {
         this.initHelper = new InitHelper(passwordManager, applicationManager);
 
         initTestData();
+        initContentAutoLoad();
     }
 
     @Override
@@ -106,6 +111,10 @@ public class InitialDataCreator implements LifecycleApplication {
         Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin, "o");
         users.grantRole("Content author", true, session);
 
+        Group publicGroup = initHelper.checkCreateGroup(rootOrg, Group.PUBLIC, groupDao, 50, session, admin, "o");
+        publicGroup.grantRole("Forums viewer", true, session);
+        
+        
         Profile normalUser = initHelper.checkCreateUser("a1", adminPassword, session, rootOrg, null);
         normalUser.addToGroup(users, rootOrg);
         if( normalUser.repository("files") == null ) {
@@ -113,11 +122,17 @@ public class InitialDataCreator implements LifecycleApplication {
         }
         
         admin.addToGroup(administrators, rootOrg).addToGroup(users, rootOrg);
-        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "fuse", admin); // can be accessed on milton.localhost or milton.io
+        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io
         initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
         miltonSite.addGroup(users, session);
+        String menu = "/content/index.html,Home\n" +
+                        "/content/maven/index.html,Downloads\n" +
+                        "/content/guide/index.html,Documentation";
+                
+        miltonSite.getRepository().setAttribute("logo", "milton.io", session);
+        miltonSite.getRepository().setAttribute("menu", menu, session);
 
-        Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "fuse", admin); // can be accessed on mymilton.localhost or my.milton.io
+        Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "milton", admin); // can be accessed on mymilton.localhost or my.milton.io
         initHelper.enableApps(myMiltonSite, admin, session, "admin", "users", "organisations", "website", "myFiles", "calendar", "contacts", "email");
         myMiltonSite.addGroup(users, session);
 
@@ -150,5 +165,24 @@ public class InitialDataCreator implements LifecycleApplication {
     @Override
     public String getInstanceId() {
         return "initialDataCreator";
+    }
+
+    private void initContentAutoLoad() throws Exception {
+        String sRootDir = "../sites";
+        File rootDir = new File(sRootDir);
+        if( !rootDir.exists()) {
+            throw new RuntimeException("Fuse autoloader root directory does not exist: " + rootDir.getAbsolutePath());
+        }
+        System.out.println("FuseAutoloader: " + rootDir.getAbsolutePath());
+        
+        File miltonContent = new File(rootDir, "milton");
+        System.out.println("Beginning monitor of content dir: " + miltonContent.getAbsolutePath());
+        File dbFile = new File("target/sync-db");
+        boolean localReadonly = true;
+        List<SyncJob> jobs = Arrays.asList(
+                new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly)
+        );
+        EventManager eventManager = new EventManagerImpl();
+        SyncCommand.start(dbFile, jobs, eventManager);        
     }
 }

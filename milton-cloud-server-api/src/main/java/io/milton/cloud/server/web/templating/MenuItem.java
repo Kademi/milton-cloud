@@ -50,7 +50,7 @@ public class MenuItem implements Comparable<MenuItem> {
         return getActiveMenuIdSet().contains(id);
     }
     
-    private static Set<String> getActiveMenuIdSet() {
+    public static Set<String> getActiveMenuIdSet() {
         Set<String> set = (Set<String>) HttpManager.request().getAttributes().get("activeMenuIds");
         if( set == null ) {
             set = new HashSet<>();

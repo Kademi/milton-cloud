@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Compatibility</title>
+	</head>
+	<body>
+		<h2>Recipe for broad client compatibility</h2>
+		<p>So you want your webdav server to be accessible from windows XP to Win7, Linux, Mac OS and from the  	main office productivity suites Open Office and MS Office - right?	Here's how to do it:</p>
+		<p>
+			Note: All of these are
+			<b>required!</b>
+		</p>
+		<h3>Server implementation requirements</h3>
+		<ul>
+			<li>Your DAV webapp must have a root context path, ie "/". NOT "/webdav" etc</li>
+			<li>Must run on port 80.</li>
+			<li>Must have Digest authentication enabled</li>
+			<li>Must support locking, including the awkward lock-null support for collections</li>
+			<li>Must allow unauthenticated OPTIONS requests</li>
+		</ul>
+		<h3>Client mapping requirements</h3>
+		<ul>
+			<li>Do not specify a port number in the URL (this contradicts some widespread information)</li>
+			<li>Do not specify user name in URL (ditto)</li>
+		</ul>
+		<h3>Live Demo</h3>
+		<p>Connect to the following webdav address. Use the same credentials in the app context file in milton-filesystem-test, or ask the email group</p>
+		<p>http://miltondemo.ettrema.com/</p>
+		<p>
+			This is very close to milton-filesystem-test. Feel free to use it to try out milton's webdav capabilities but please don't abuse it!
+			<br />
+			Do not store anything important there, all of the content in that repository will be deleted from time to time without notice.
+		</p>
+		<h3>Client compatibility summary</h3>
+		<p>Note: where we refer to an operating system, we're actually referring to the native webdav client for that OS</p>
+		<table width="100%" cellspacing="5" cellpadding="5" border="1" style="border-collapse: collapse;">
+			<tbody>
+				<tr>
+					<td>
+						<b>Dav Client</b>
+					</td>
+					<td>
+						<b>Supported</b>
+					</td>
+					<td>
+						<b>Notes</b>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">Windows 2000</td>
+					<td>Yes</td>
+					<td>Uses Web Folders client</td>
+				</tr>
+				<tr>
+					<td valign="top">Windows XP Native</td>
+					<td>Yes</td>
+					<td>Uses Web Folders client</td>
+				</tr>
+				<tr>
+					<td valign="top">Windows XP (64 bit) Native</td>
+					<td>Unknown</td>
+					<td>Previous advice was that this doesnt work, but this hasnt been confirmed since Digest support was introduced into milton</td>
+				</tr>
+				<tr>
+					<td valign="top">Windows Vista</td>
+					<td>Yes</td>
+					<td>
+						These comments are a bit old and need to be updated for 1.5.4
+						<ul>
+							<li>
+								Might need this patch for some installations -
+								<a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=17C36612-632E-4C04-9382-987622ED1D64&amp;displaylang=en">KB907306</a>
+							</li>
+							<li>Can be a bit tricky to find what to click on to create a network location (its under My Computer, not Network Places)</li>
+							<li>One strange issue i've seen is that sometimes a user can't open a folder by double clicking it, although they can open it from the pull down menu's in Vista's address bar. Weird.</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td>Windows 7</td>
+					<td>Yes</td>
+					<td>
+						<ul>
+							<li>Recent testing (as of July 2010) shows that Win7 has good support without any webdav specific patches, provided     				the conditions outlined above are met</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">MS Office</td>
+					<td>Yes</td>
+					<td>
+						<ul>
+							<li>Recent testing (as of July 2010) has shown that MS Office 2003 works out of the box, both by opening a URL directly     					(which uses the web folder client) or when opening from a network place (which uses both the web folder client and the     					webdav redirector)</li>
+							<li>All versions of MS office use the web folder client so we believe there should be broad compatibility across versions.</li>
+							<li>
+								Note that there is this webdav related hotfix -
+								<a href="http://support.microsoft.com/KB/942392">http://support.microsoft.com/KB/942392</a>
+							</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td>Open Office</td>
+					<td>Yes</td>
+					<td>
+						<ul>
+							<li>Must use the "Use open office dialogs" option. When using the windows dialog it will browser network places but     				won't open files from them.</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">Linux Gnome (Nautilus)</td>
+					<td>Yes</td>
+					<td>
+						<ul>
+							<li>Enter urls with a protocol of dav:// not http://</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">Linux KDE</td>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<td valign="top">Mac OS</td>
+					<td>Yes</td>
+					<td>
+						<ul>
+							<li>Implements some elaborate locking and committing mechanism which results in a large number of file operations</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">Novel Netdrive/Webdrive</td>
+					<td>Yes</td>
+					<td>Works as of webdrive 8.22 (updated Sep 2009)</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.netdrive.net/">Netdrive</a>
+					</td>
+					<td>No</td>
+					<td>
+						<ul>
+							<li>Works well when the webapp runs from a context (eg /webdav) but displays the host name in the path when mounting the root (eg /)</li>
+							<li>Currently (July 2010) in contact with the vendor who is being helpful</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.bitkinex.com/">Bitkinex</a>
+					</td>
+					<td>Yes</td>
+					<td>Very reliable client application. Free.</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.oxygenxml.com/">OxygenXML</a>
+					</td>
+					<td>Yes</td>
+					<td>Very good dav enabled XML editor (I'm using it right now! Brad)</td>
+				</tr>
+				<tr>
+					<td>Dreamweaver</td>
+					<td>Yes</td>
+					<td>Synchronises with server using DAV. By default requires Digest authentication, but there is a patch to allow Basic auth</td>
+				</tr>
+				<tr>
+					<td valign="top">Cadaver (linux command line client)</td>
+					<td>Yes</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr>
+					<td valign="top">
+						<a href="http://www.webdav.org/neon/litmus/">Litmus Test</a>
+					</td>
+					<td>Yes</td>
+					<td>
+						<a href="/compat/litmus.zip">Results here (milton has changed a fair bit since it was last run)</a>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">Linux DavFS2</td>
+					<td>Yes</td>
+					<td>
+						<pre>
+							(From&nbsp; Russ)
+
+
+
+Make sure you mount is writable for the user accessing the mount.
+
+
+
+Example:
+
+
+
+sudo mount -t davfs
+							<a href="https://yoursite.com/" class="moz-txt-link-rfc2396E">"https://yoursite.com/"</a>
+							your_mount_point -o
+
+uid=your_username
+
+
+
+We did find an issue w/ Ubuntu 10.04 and SSL that was worked around by
+
+installing davfs2 from source. That appears to be an Ubuntu packaging
+
+issue that will hopefully be fixed in the next release of Ubuntu.
+							<a href="http://savannah.nongnu.org/support/?107471" class="moz-txt-link-freetext">http://savannah.nongnu.org/support/?107471</a>
+						</pre>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">
+						<pre wrap="">WebDAV Navigator for iOS
+
+(iPhone)</pre>
+					</td>
+					<td>Yes</td>
+					<td>
+						<pre wrap="">
+							"..the WebDAV Navigator for iOS works great with Milton-based servers and basic auth, and it's free:
+							<a class="moz-txt-link-freetext" href="http://seanashton.net/webdav">http://seanashton.net/webdav</a>
+							"
+						</pre>
+						<pre wrap="" />
+						<pre wrap="">- Christian Bauer</pre>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">
+						<p>PaderSyncDAV</p>
+					</td>
+					<td>Yes</td>
+					<td>
+						<p>For Android, Java ME and Blackberry - http://www.pader-sync.com/mobile-webdav-client.html</p>
+						<p>Free trial, $10 to purchase.</p>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">Dav-E</td>
+					<td>NO</td>
+					<td>
+						<pre wrap="">"DAV-E crashes immediately after the first authenticated PROPFIND request after the initial OPTIONS"
+
+
+
+- Christian
+
+
+
+http://greenbytes.de/dav-e.html
+
+
+
+Action: Have emailed the author at green-bytes, but havent had response (BM 30/11/2010)</pre>
+						<pre wrap="" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

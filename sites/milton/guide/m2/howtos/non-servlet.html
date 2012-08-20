@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Integrating with non servlet applications</title>
+	</head>
+	<body>
+		<p>Milton can easily be integrated with non servlet-api web and desktop applications. To do you just need to&nbsp; implement your own com.bradmcevoy.http.Request and Response</p>
+		<ol>
+			<li>At startup your application should create an instance of ResourceFactory</li>
+			<li>Then create an instance of HttpManager, giving it your resource factory</li>
+			<li>For each request that your application receives, create instances of Request and Response</li>
+			<li>Then pass the request and response to the process method of HttpManager</li>
+		</ol>
+		<p>
+			For an example, please see the
+			<a href="http://berry.ettrema.com">Berry project</a>
+			. This project integrates Milton with
+			<a href="http://xlightweb.sourceforge.net/">xLightWeb</a>
+			and
+			<a href="http://simpleweb.sourceforge.net/">Simple HTTP</a>
+			embedded http servers.
+		</p>
+	</body>
+</html>
+

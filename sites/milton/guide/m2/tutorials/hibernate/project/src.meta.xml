@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE c:meta SYSTEM "http://clyde.ettrema.com/dtd/core.dtd">
+
+<c:meta xmlns:c="http://clyde.ettrema.com/ns/core">
+	<c:folder secureRead="false" versioningEnabled="false">
+		<c:roleRules>
+			<c:const />
+		</c:roleRules>
+	</c:folder>
+</c:meta>
+

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>ZSync</title>
+	</head>
+	<body>
+		<p>
+			As of 1.6.2 Milton supports the
+			<a href="http://zsync.moria.org.uk/paper/index.html">ZSync protocol</a>
+			, for rsync like efficient file syncronisation.
+		</p>
+		<p>To implement zsync support in your server application:</p>
+		<ul>
+			<li>add the milton-zsync library to your project</li>
+			<li>configure your application to use the ZSyncResourceFactory</li>
+			<li>(Optional) implement the ZSyncResource interface for better performance by persisting checksum calculations</li>
+		</ul>
+		<p>Client application</p>
+		<p>
+			To download efficiently from a zsync enabled server (this uses the milton-client library):
+			<br />
+			&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;
+			<code>
+				Host host = new Host("localhost", "webdav", 8080, "me", "pwd", null, null);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; final File fRemoteMeta = File.createTempFile("milton-zsync-remotemeta", null);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; String url = host.getHref(Path.path("/source.txt/.zsync"));
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; host.doGet(url, new StreamReceiver() {
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; @Override
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; public void receive(InputStream in) throws IOException {
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; FileOutputStream fout = new FileOutputStream(fRemoteMeta);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; StreamUtils.readTo(in, fout, true, true);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; }
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; }, null);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("meta file: " + fRemoteMeta.getAbsolutePath());
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // Now build local file
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; com.ettrema.httpclient.File remoteFile = (com.ettrema.httpclient.File) host.find("/source.txt");
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; Assert.assertNotNull(remoteFile);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; HttpRangeLoader rangeLoader = new HttpRangeLoader(remoteFile);
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("local: " + fLocal.getAbsolutePath());
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; fileMaker.make(fLocal, fRemoteMeta, rangeLoader);
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("----------------------------------------------");
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("Bytes downloaded: " + rangeLoader.getBytesDownloaded());
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("----------------------------------------------");
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("----------------------------------------------");
+			</code>
+		</p>
+		<p>To upload from a client application:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; Host host = new Host("localhost", "webdav", 8080, "me", "pwd", null, null);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; File metaFile = metaFileMaker.make("/test", 32, fIn);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; Part[] parts = {new FilePart("meta", metaFile)};
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; String url = host.getHref(Path.path("/source.txt/.zsync"));
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; String ranges = host.doPost(url, null, parts);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("ranges: " + ranges);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; RangeListParser listParser = new RangeListParser();
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; List&lt;Range&gt; list = listParser.parse(new ByteArrayInputStream(ranges.getBytes()));
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; LocalFileRangeLoader fileRangeLoader = new LocalFileRangeLoader(fIn);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; byte[] data = fileRangeLoader.get(list);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("sending bytes: " + data.length);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; InputStream in = new ByteArrayInputStream(data);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; int result = host.doPut(url, in, (long)data.length, null);
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; Utils.processResultCode(result, url );
+				<br />
+				&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; System.out.println("done!!");
+			</code>
+		</p>
+	</body>
+</html>
+

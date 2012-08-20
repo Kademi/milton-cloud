@@ -47,6 +47,7 @@ public abstract class Post implements Serializable{
         List<Post> list = DbUtils.toList(crit, Post.class);
         return list;
     }    
+         
     
     public static List<Post> findByOrg(Organisation org, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);

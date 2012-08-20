@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.content;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
@@ -27,7 +28,11 @@ import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
+import io.milton.http.HttpManager;
+import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.AccessControlledResource;
@@ -36,6 +41,7 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.Writer;
@@ -46,35 +52,35 @@ import org.apache.velocity.context.Context;
  *
  * @author brad
  */
-public class ContentApp implements Application, PortletApplication, ResourceApplication {
-
+public class ContentApp implements Application, PortletApplication, ResourceApplication, MenuApplication {
+    
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
     public static final String PATH_SUFFIX_HISTORY = ".history";
     public static final String PATH_SUFFIX_PREVIEW = ".preview";
     private SpliffyResourceFactory resourceFactory;
-
+    
     @Override
     public String getInstanceId() {
         return "content";
     }
-
+    
     @Override
     public String getTitle(Organisation organisation, Website website) {
         return "Content viewing and authoring";
     }
-
+    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides content viewing functions, such as generating menus based on folders";
     }
-
+    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.resourceFactory = resourceFactory;
         resourceFactory.getSecurityManager().add(new ContentViewerRole());
         resourceFactory.getSecurityManager().add(new ContentAuthorRole());
     }
-
+    
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (rootFolder instanceof WebsiteRootFolder) {
@@ -92,7 +98,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             }
         }
     }
-
+    
     @Override
     public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
         System.out.println("getResource: " + path);
@@ -116,11 +122,11 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                     return new ViewFromHistoryResource(p.getName(), cr);
                 }
             }
-
+            
         }
         return null;
     }
-
+    
     private Resource findFromRoot(RootFolder rootFolder, Path p) throws NotAuthorizedException, BadRequestException {
         CollectionResource col = rootFolder;
         Resource r = null;
@@ -140,14 +146,21 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         }
         return r;
     }
-
+    
+    @Override
+    public void appendMenu(MenuItem parent) {
+        WebUtils.appendMenu(parent);
+    }
+   
+ 
+    
     public class ContentViewerRole implements Role {
-
+        
         @Override
         public String getName() {
             return ROLE_CONTENT_VIEWER;
         }
-
+        
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (isContentResource(resource)) {
@@ -156,24 +169,24 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             }
             return false;
         }
-
+        
         @Override
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Collections.singleton(AccessControlledResource.Priviledge.READ);
         }
-
+        
         private boolean isContentResource(CommonResource resource) {
             return resource instanceof ContentResource;
         }
     }
-
+    
     public class ContentAuthorRole implements Role {
-
+        
         @Override
         public String getName() {
             return "Content author";
         }
-
+        
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (resource instanceof AbstractContentResource) {
@@ -186,7 +199,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             }
             return false;
         }
-
+        
         @Override
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Role.READ_WRITE;

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>How to support PROPPATCH</title>
+	</head>
+	<body>
+		<p>The PROPPATCH method provides a means for clients to update (ie patch) resource properties.</p>
+		<p>Milton provides a number of interfaces to allow developers to implement PROPPATCH&nbsp;support, and an extensible mechanism which allows new interfaces to be added.</p>
+		<h2>Options for PROPPATCH Handling</h2>
+		<p>&nbsp;</p>
+		<p>
+			<strong>1. Implement PropPatchableResource (deprecated)</strong>
+		</p>
+		<p>This was the original method but is inflexible and awkward to implement. It should be avoided.</p>
+		<p>
+			<strong>2. Implement CustomPropertyResource (not preferred)</strong>
+		</p>
+		<p>This provides a read/write access to properties, so the same properties automatically are available for PROPFIND and PROPPATCH. However, the interface is still a bit awkward to implement as it uses accessor objects for properties. And it doesnt support multiple name spaces which are often required for custom properties.</p>
+		<p>
+			<strong>3. Implement MultiNamespaceCustomPropertyResource</strong>
+		</p>
+		<p>This is a good option if you have dynamic properties. Ie the properties available are determined at runtime, such as with a content repository. The interface is reasonably simple to work with and is integrated into PROPFIND as well as PROPPATCH:</p>
+		<p>
+			<code>
+				public interface MultiNamespaceCustomPropertyResource {
+				<br />
+				&nbsp;&nbsp;&nbsp; Object getProperty( QName name );
+				<br />
+				&nbsp;&nbsp;&nbsp; void setProperty( QName name, Object value );
+				<br />
+				&nbsp;&nbsp;&nbsp; PropertyMetaData getPropertyMetaData( QName name );
+				<br />
+				&nbsp;&nbsp;&nbsp; List
+				<qname>
+					getAllPropertyNames();
+					<br />
+					}
+				</qname>
+			</code>
+		</p>
+		<p>
+			<strong>4. Annotate with BeanPropertyResource</strong>
+		</p>
+		<p>This is the best option if the properties you wish to expose are hardcoded into your application, as it allows them to be accessed simply by setting annotations on the class and/or properties</p>
+		<p>Eg</p>
+		<p>
+			<code>
+				@BeanPropertyResource(value="http://milton.ettrema.com/demo/beanprop", writable=true, enableByDefault=false)
+				<br />
+				public class TTextResource implements Resource {
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp; String someData;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp; @BeanPropertyAccess(true)
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; public String getSomeData() {
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return someData;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; }
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; public void setSomeData(String s) {
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; someData = s;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; }
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>}</code>
+		</p>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

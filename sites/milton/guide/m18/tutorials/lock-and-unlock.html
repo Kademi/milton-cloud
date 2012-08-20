@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>LOCK and UNLOCK</title>
+	</head>
+	<body>
+		<h2>Locking and Unlocking</h2>
+		<p>WebDAV provides the LOCK and UNLOCK method to control the access for the Resource.  Milton provides the LockableResource interface to support both LOCK and UNLOCK methods. We just need to extend this Milton Interface in order to control the access of the resource.</p>
+		<p>
+			You can find more information about LOCK method
+			<a href="http://www.webdav.org/specs/rfc2518.html#METHOD_LOCK">here</a>
+			and UNLOCK method
+			<a href="http://www.webdav.org/specs/rfc2518.html#METHOD_UNLOCK">here</a>
+		</p>
+		<p>&nbsp;</p>
+		<h2>Important Methods</h2>
+		<p>
+			<b>lock</b>
+			(LockTimeout timeout, LockInfo lockInfo): This method locks the resource and returns the LockToken back to the WebDAV client.  refreshLock(String token): This method renews the current lock and returns the token.
+		</p>
+		<p>
+			<b>unlock</b>
+			(java.lang.String tokenId): unlocks the locked resource if tokenid matches and current resource is locked. Please refer the
+			<a href="/reference/milton-api/apidocs/com/bradmcevoy/http/LockableResource.html">javadoc</a>
+			for more information about LockableResource.
+		</p>
+		<p>&nbsp;</p>
+		<p>
+			<b>Sample code:</b>
+			<script src="https://gist.github.com/2484389.js?file=milton_lockableresource_1.java" />
+		</p>
+		<p>&nbsp;</p>
+		<p>
+			Please note that webDav is stateless and so as Milton. Since above code doesn't persist the locks across the session, each time the request will be considered as new request and Lock will not work as expected. You can take a look at the
+			<a href="http://milton.ettrema.com/reference/milton-filesystem/xref/com/ettrema/http/fs/FsMemoryLockManager.html">FsMemoryLockManager</a>
+			if you like to write your custom Lockmanager.
+		</p>
+		<p>Milton comes with the built-in simple lock manager. you can make use the SimpleLockManager to enable the basic locking.Please find the sample code below.</p>
+		<p>
+			<b>DocumentResource</b>
+			<br />
+			<script src="https://gist.github.com/2504012.js?file=milton_lockableresource_2.java" />
+			<b>ResourceFactory</b>
+			<br />
+			<script src="https://gist.github.com/2504025.js?file=milton_resourcefact_1.java" />
+		</p>
+		<h2>Output:</h2>
+		<p>
+			<b>Locking:</b>
+			<br />
+			<img alt="" style="padding:2px; border:1px solid #cccccc" src="/images/milton_locking.jpg" />
+			<b>Refresh Lock:</b>
+			<br />
+			<img alt="" style="padding:2px; border:1px solid #cccccc" src="/images/milton_refresh_lock.jpg" />
+			<b>Unlocking:</b>
+			<br />
+			<img alt="" style="padding:2px; border:1px solid #cccccc" src="/images/milton_unlock.jpg" />
+		</p>
+		<p>&nbsp;</p>
+		<p>
+			<b>LockingCollectionResource</b>
+		</p>
+		<p>A collection which allows locking "unmapped resources". This means that a LOCK method can effectively create an empty resource which is immediately locked. Implement this in conjunction with {@see LockableResource} on child resources to fully support locking.</p>
+		<p>the main method of this interface is "createAndLock". it takes the name of the resource to be created, timeout and lock details.</p>
+		<p>
+			method signature: LockToken
+			<a href="/reference/milton-api/apidocs/com/bradmcevoy/http/LockingCollectionResource.html#createAndLock">createAndLock</a>
+			(String name, LockTimeout timeout, LockInfo lockInfo)
+		</p>
+		<p>
+			Please refer the
+			<a href="/reference/milton-api/apidocs/com/bradmcevoy/http/LockingCollectionResource.html">javadoc</a>
+			for more information
+		</p>
+		<p>
+			Please refer
+			<a href="/reference/milton-filesystem/xref/com/ettrema/http/fs/FsDirectoryResource.html">this example</a>
+			for sample code.
+		</p>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

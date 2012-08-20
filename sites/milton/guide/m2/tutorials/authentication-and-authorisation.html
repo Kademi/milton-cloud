@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Authentication and authorisation</title>
+	</head>
+	<body>
+		<p>Milton has a built in framework for implementing robust security for HTTP&nbsp;protocols which includes support for conventional login pages on websites. Alternatively, milton can co-exist with external security frameworks.</p>
+		<h2>Security Lifecycle</h2>
+		<p>Milton treats authentication and authorisation as two distinct and seperate phases.</p>
+		<ol>
+			<li>Typically, a Webdav client will request a secure resource without any credentials</li>
+			<li>Milton will not attempt to authenticate the request, as there is nothing to authenticate</li>
+			<li>Milton will attempt to authorise the request on the resource with a null user object</li>
+			<li>Usually, secure Resource implementations will reject the authorisation because there is no user</li>
+			<li>Milton will issue a HTTP&nbsp;challenge to the client using all supported and enabled login methods (eg Basic + Digest)</li>
+			<li>The webdav client will prompt the user for login credentials, and repeat the original request with those credentials</li>
+			<li>Milton will attempt to authenticate the given credentials, returning a user object if successful</li>
+			<li>Milton will attempt to authorise the request on the Resource with the given user</li>
+			<li>The Resource should decide whether to accept or reject the request based on who the user is, what resource they are acting on, and what the operation is</li>
+			<li>If authorisation is accepted milton carries on with the request</li>
+		</ol>
+		<p>One thing to note about HTTP is that credentials are sent with every request, which is different to conventional web applications which only authenticate the user on a login page at the beginning of a session. So you should ensure that your authentication code is optimised, eg use credential caching if necessary.</p>
+		<h2>Interfaces</h2>
+		<p>The Resource interface requires at least Basic authentication and authorisation via these methods:</p>
+		<ol>
+			<li>Object authenticate(userName, password) - just check the username and password are acceptable. If so return some object to represent the user. This object will be available in authorisation</li>
+			<li>boolean authorise(Request request, Request.Method method, Auth auth) - check if the given user is permitted to execute the given method on the current resource. Note that auth will be null if no authentication has been attempted. The current user, as returned from authenticate, is available on auth.getTag(). Note that this can return null, if authentication has been attempted but did not succeed</li>
+		</ol>
+		<p>Milton allows Resources to be compatible with Digest authentication by implementing the DigestResource interface</p>
+		<p>Object authenticate(DigestResponse digestRequest) - this works much the same as Resource.authenticate, but the credentials given are hashed. Example:</p>
+		<p>&nbsp;</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TCalDavPrincipal p = TResourceFactory.findUser(digestRequest.getUser());
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (p != null) {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DigestGenerator gen = new DigestGenerator();
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String actual = gen.generateDigest(digestRequest, p.getPassword());
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (actual.equals(digestRequest.getResponseDigest())) {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return p;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; log.warn("that password is incorrect. Try 'password'");
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; log.warn("user not found: " + digestRequest.getUser() + " - try 'userA'");
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return null;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				<br />
+			</code>
+		</p>
+	</body>
+</html>
+

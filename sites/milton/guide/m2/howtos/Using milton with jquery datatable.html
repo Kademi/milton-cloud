@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Using milton with jquery datatable</title>
+	</head>
+	<body>
+		<p>
+			The
+			<a href="http://www.datatables.net/">JQuery Datatable plugin</a>
+			can load data via ajax or as a javscript array. It can easily be connected to a milton webdav repository via the ajax gateway.
+		</p>
+		<p>First, configure you application to use the com.ettrema.json.JsonResourceFactory.</p>
+		<p>
+			Then put your table into the html and integrate the datatable javascript as per the documentation for loading a javascript array. Build up that array using an
+			<a href="http://milton.ettrema.com/guide/demo.js">ajax call to PROPFIND like this</a>
+		</p>
+		<p>Below is a running demo just listing files in this folder</p>
+		<p>&nbsp;</p>
+		<table style="width: 551px; height: 67px;" id="files">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Title</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+			</tbody>
+		</table>
+		<script type="text/javascript" src="/templates/jquery.js">//</script>
+		<script src="/templates/jquery.dataTables.min.js" type="text/javascript" />
+		<script type="text/javascript" src="demo.js">//</script>
+		<script type="text/javascript">$(document).ready(function(){
+
+                            loadFiles();
+
+                        });</script>
+	</body>
+</html>
+

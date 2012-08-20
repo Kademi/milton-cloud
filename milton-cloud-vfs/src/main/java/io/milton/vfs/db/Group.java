@@ -47,6 +47,10 @@ public class Group implements Serializable, VfsAcceptor {
 
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
+    /**
+     * Intended to be used as the public group in SpliffySecurityManager
+     */
+    public static String PUBLIC = "public";
     public static String REGO_MODE_OPEN = "o";
     public static String REGO_MODE_ADMIN_REVIEW = "a";
     public static String REGO_MODE_CLOSED = "c";

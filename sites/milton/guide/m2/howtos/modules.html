@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Modules</title>
+	</head>
+	<body>
+		<p>Milton consists of a core API&nbsp;library and a bunch of other modules</p>
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<thead />
+			<tbody>
+				<tr>
+					<th>Module</th>
+					<th>Type</th>
+					<th>Notes</th>
+				</tr>
+				<tr>
+					<td>milton-api</td>
+					<td>jar</td>
+					<td>
+						<p>Core library containing Resource interfaces and protocol handler implementations. Is independent of the servlet API</p>
+						<p>You definitely want this.</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-servlet</td>
+					<td>jar</td>
+					<td>Contains adapters for normal servlet containers. You probably want this.</td>
+				</tr>
+				<tr>
+					<td>milton-test</td>
+					<td>war</td>
+					<td>
+						<p>A runnable web application which demonstrates implementing milton resource interfaces in the simplest manner.</p>
+						<p>Uses memory only data storage so is not not suitable for production.</p>
+						<p>Use it to learn how to implement milton resources.</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-filesystem</td>
+					<td>jar</td>
+					<td>
+						<p>Resource implementation for using a physical filesystem as a webdav repository.</p>
+						<p>Use this if you want an off-the-shelf file server, or if you want to use the code as an example</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-filesystem-test</td>
+					<td>war</td>
+					<td>
+						<p>A complete web application which demonstrates using milton-filesystem. Uses spring configuration.</p>
+						<p>Uses very simple user management which might not be suitable for production, but is otherwise a useful webdav server.</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-gae</td>
+					<td>jar</td>
+					<td>
+						<p>Just some helper class implementations to&nbsp; allow milton to be used in Google App Engine.</p>
+						<p>Use it if you're deploying into GAE</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-json</td>
+					<td>jar</td>
+					<td>
+						<p>Adapters to allow WEBDAV operations using GET and POST through javascript.</p>
+						<p>This allows a web developer to leverage the webdav capabilities of the server in rich web 2.0 web apps. For example you can call PROPFIND and get the result as a JSON&nbsp;array.</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-ajax-demo</td>
+					<td>war</td>
+					<td>Demonstrates using milton-json.</td>
+				</tr>
+				<tr>
+					<td>milton-ftp</td>
+					<td>jar</td>
+					<td>
+						<p>Adapter to Apache FTP, allows milton resources to be accessed by FTP.</p>
+						<p>Use it if you want to access your data by both FTP&nbsp;and webdav</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-console</td>
+					<td>jar</td>
+					<td>
+						<p>Fun little addition. It gives you a command line console in a web page which you can use to navigate your webdav repository.</p>
+						<p>Use it to look cool.</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-caldav</td>
+					<td>jar</td>
+					<td>
+						<p>Experimental implementation of caldav and ACL.Should be finished late 2010. Currently works with mozilla calendar clients, and is being extended to include iCal</p>
+						<p>Use it to turn your milton server into a CALDAV server.</p>
+					</td>
+				</tr>
+				<tr>
+					<td>milton-caldav-demo</td>
+					<td>war</td>
+					<td>Demonstrates using milton-caldav</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

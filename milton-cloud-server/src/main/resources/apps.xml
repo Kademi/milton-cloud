@@ -20,6 +20,7 @@
                 <bean class="io.milton.cloud.server.apps.forums.ForumsApp"/>
                 <bean class="io.milton.cloud.server.apps.email.EmailApp"/>
                 <bean class="io.milton.cloud.server.apps.user.UserApp"/>
+                <bean class="io.milton.cloud.server.apps.user.UserDashboardApp"/>
                 <bean class="io.milton.cloud.server.apps.dynamiccss.DynamicCssApp"/>
                 <bean class="io.milton.cloud.server.apps.groupresources.GroupResourcesApp"/>
                 <bean class="io.milton.cloud.server.apps.myfiles.MyFilesApp"/>                

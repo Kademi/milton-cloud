@@ -63,7 +63,10 @@ public class ManageForumsFolder extends AbstractCollectionResource implements Ge
         }
         return children;
     }
-        
+
+    public ManageForumsFolder getForumsRoot() {
+        return this;
+    }
 
     public List<Website> getWebsites() {
         List<Website> list = getOrganisation().getWebsites();

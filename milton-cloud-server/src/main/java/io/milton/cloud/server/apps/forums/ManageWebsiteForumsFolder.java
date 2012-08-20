@@ -100,6 +100,11 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
         }
         return null;
     }
+    
+    public ManageForumsFolder getForumsRoot() {
+        return parent;
+    }
+    
 
     public String getTitle() {
         return "Manage forums: " + website.getDomainName();

@@ -24,6 +24,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 
 /**
  *
@@ -33,26 +34,45 @@ import org.hibernate.criterion.Expression;
 @DiscriminatorValue("FP")
 public class ForumPost extends Post implements Serializable{
 
-    public static ForumPost findByName(String childName, ForumTopic forumTopic, Session session) {
+    public static ForumPost findByName(String childName, Forum forum, Session session) {
         Criteria c = session.createCriteria(ForumPost.class);
         c.add(Expression.eq("name", childName));
-        c.add(Expression.eq("topic", forumTopic));
+        c.add(Expression.eq("forum", forum));
         return DbUtils.unique(c);
     }
     
+    /**
+     * Find up to 'limit' results, when ordered by date, for the given forum
+     * 
+     * @param forum
+     * @param limit
+     * @param session
+     * @return 
+     */
+    public static List<ForumPost> findRecentByForum(Forum forum, Integer limit, Session session) {
+        Criteria crit = session.createCriteria(Post.class);
+        crit.add(Expression.eq("forum", forum));
+        crit.addOrder(Order.desc("postDate"));
+        if( limit != null ) {
+            crit.setMaxResults(limit);
+        }
+        List<ForumPost> list = DbUtils.toList(crit, ForumPost.class);
+        return list;
+    }       
+    
     private List<ForumReply> forumReplys;
-    private ForumTopic topic;
+    private Forum forum;
     private String name;
     private String title;
 
 
     @ManyToOne(optional=false)
-    public ForumTopic getTopic() {
-        return topic;
+    public Forum getForum() {
+        return forum;
     }
 
-    public void setTopic(ForumTopic topic) {
-        this.topic = topic;
+    public void setForum(Forum forum) {
+        this.forum = forum;
     }
 
     @Column(nullable=false)

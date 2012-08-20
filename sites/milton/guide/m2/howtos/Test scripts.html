@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Test scripts</title>
+	</head>
+	<body>
+		<p>Milton test procedures</p>
+		<pre>Test combinations:
+
+==================
+
+A subset of these combinations will be tested.
+
+
+
+- XP 3
+
+- Windows 7
+
+- Vista
+
+- Mac
+
+
+
+X
+
+
+
+- OpenOffice 3.3
+
+- Office 2000
+
+- Office 2003
+
+- Office 2007
+
+- Office 2010
+
+
+
+Testing subset:
+
+
+
+1. Latest Mac + latest Office
+
+2. Windows 7 + OpenOffice 3.3
+
+3. XP + OpenOffice 3.3
+
+4. Windows 7 + Office 2010
+
+5. Vista + Office 2007
+
+6. XP + Office 2000
+
+7. XP + Office 2010
+
+
+
+Bandwidth
+
+=========
+
+- Ping times should be at least 100ms for tests
+
+
+
+- Bandwidth should be at most 50kBytes/s
+
+
+
+Tests
+
+=====
+
+For all tests:
+
+
+
+- User interface should not appear locked or stuck. It should
+
+repaint and "not responding" should not be displayed by Windows
+
+in title bar.
+
+
+
+- Show signs of progress every 2 seconds.
+
+
+
+- Must work in root directory as well as a subfolder.
+
+
+
+1. Start Word/OO, open file requester at Webdav URL, 
+
+browse folder, open small Word document, authenticated folder.
+
+Document should be non-trivial in size. At least 2 seconds
+
+to load.
+
+
+
+Required result:
+
+
+
+a. It should ask for login + password w/possibility to change user.
+
+
+
+b. display document 
+
+
+
+2. Save same document on top of old
+
+
+
+3. Open document on one machine and verify that it shows up as locked
+
+on another machine.
+
+
+
+4. Disable network connection to machine that has document locked and
+
+verify that the lock clears in 60 seconds(?).
+
+
+
+5. Create folder from within file requester.
+
+ 
+
+6. Save a large word file (should take more than 20 seconds to 
+
+save).
+
+
+
+7. Save and load excel spread sheet.
+
+
+
+8. Abort saving of too large file. A file which is too large to save
+
+should fail with grace / be abortable.
+
+
+
+Operating system tests:
+
+=======================
+
+
+
+1. Open Explorer to webdav address and browse directory and
+
+subdirectories. 
+
+
+
+2. Copy large file on top of existing file. More than 10 seconds to
+
+save.
+
+
+
+3. Copy large file to new location. More than 10 seconds.
+
+
+
+4. Download large file. More than 10 seconds.
+
+
+
+5. Copy to locked file (by Word) should fail gracefully.
+
+
+
+6. Create folder</pre>
+	</body>
+</html>
+

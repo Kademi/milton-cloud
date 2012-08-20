@@ -73,6 +73,7 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        log.info("processForm");
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("isRecip")) {
@@ -86,13 +87,22 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             }
             tx.commit();
             jsonResult = new JsonResult(true);
-        } else if (parameters.containsKey("template")) {
+        } else if (parameters.containsKey("publicTheme")) {
+            log.info("Update theme info");
+            String publicTheme = parameters.get("publicTheme");
+            String internalTheme = parameters.get("internalTheme");
+            website.setPublicTheme(publicTheme);
+            website.setInternalTheme(internalTheme);
+            session.save(website);
+            
             Repository r = website.getRepository();
+            
             r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
             r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
             r.setAttribute("textColour1", parameters.get("textColour1"), session);
             r.setAttribute("textColour2", parameters.get("textColour2"), session);
             r.setAttribute("logo", parameters.get("logo"), session);
+            r.setAttribute("menu", parameters.get("menu"), session);
             tx.commit();
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("name")) {
@@ -135,6 +145,14 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
         website.addGroup(group, SessionManager.session());
     }
 
+    public List<String> getThemes() {
+        List<String> list = new ArrayList<>();
+        list.add("fuse");                
+        list.add("milton");                
+        list.add("custom");                
+        return list;
+    }
+    
     public Map<String, String> getThemeParams() {
         if (themeParams == null) {
             themeParams = new HashMap<>();
@@ -147,8 +165,9 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
         return themeParams;
     }
 
+    
+    @Override
     public List<AppControlBean> getApps() {
-        ApplicationManager appManager = _(ApplicationManager.class);
         List<Application> activeApps;
         activeApps = appManager.findActiveApps(website);
         List<AppControlBean> beans = new ArrayList<>();

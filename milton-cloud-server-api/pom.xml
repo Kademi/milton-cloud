@@ -10,6 +10,12 @@
     <packaging>jar</packaging>
   
     <dependencies>
+        <!-- Used to autoload content -->
+        <dependency>
+            <groupId>io.milton</groupId>
+            <artifactId>milton-cloud-sync</artifactId>
+            <version>${version}</version>
+        </dependency>        
         <dependency>
             <groupId>io.milton</groupId>
             <artifactId>milton-cloud-lib</artifactId>

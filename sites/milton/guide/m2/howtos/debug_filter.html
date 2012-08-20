@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Http logging and DebugFilter</title>
+	</head>
+	<body>
+		<p>When debugging a webdav application its very often helpful to see the exact request and responses.</p>
+		<p>The best way to do this is to use a network sniffing tool like wireshark, but that doesnt work in some important circumstances:</p>
+		<ul>
+			<li>when running on localhost (because request dont go to an actual network adapter)</li>
+			<li>when using SSL</li>
+		</ul>
+		<p>The solution is to use Milton's DebugFilter. This is a Milton filter (NOT a javax.servlet filter!) which writes text files containing each request and response to some directory.</p>
+		<h3 style="color: Red;">Caution: Using DebugFilter can create ten's of thousands of files in your home directory. This can bring your PC to its knees! Turn it on when you need it then turn it off</h3>
+		<p>&nbsp;</p>
+		<h2>How to use it</h2>
+		<p>Using servlet configuration:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;init-param&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;param-name&gt;filter_0&lt;/param-name&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;param-value&gt;com.bradmcevoy.http.DebugFilter&lt;/param-value&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/init-param&gt;
+			</code>
+			<br />
+			&nbsp;
+		</p>
+		<p>Using Spring configuration:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; &lt;bean id="milton.debug.filter" class="com.bradmcevoy.http.DebugFilter" &gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg value="/somedir"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; &lt;bean id="milton.http.manager" class="com.bradmcevoy.http.HttpManager"&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="milton.resource.factory" /&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name="filters"&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;list&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;ref bean="milton.debug.filter" /&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/list&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/property&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+			</code>
+		</p>
+		<p>&nbsp;</p>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

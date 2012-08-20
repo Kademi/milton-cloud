@@ -43,7 +43,7 @@ public class PostBean {
 
             @Override
             public void visit(ForumPost p) {
-                b.setContentTitle(p.getTopic().getTitle());
+                b.setContentTitle(p.getForum().getTitle());
                 b.setContentHref(ForumsApp.toHref(p));
             }
 

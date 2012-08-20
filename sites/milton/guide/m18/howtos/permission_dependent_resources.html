@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Permission Dependent Resources</title>
+	</head>
+	<body>
+		<p>Normally, a URL identifies a resource in all circumstances. This is largely the intent of the HTTP&nbsp;specification, and Milton is designed to support this approach.</p>
+		<p>But an often encountered use case is where resources depend on the currently logged in user. Milton can be made to work this way although its a bit tricky.</p>
+		<p>Start by integrating PreAuthenticationFilter (in com.bradmcevoy.http.http11.auth). This will ensure that the current user is known prior to resource location. PreAuthenticationFilter will use the standard AuthenticationHandler mechanism to authenticate, but since no resource has yet been resolved a null will be passed in its place. So you must use AuthenticationHandler's which don't reference the resource.</p>
+		<p>Then you can get a reference to the current user in your resource factory using</p>
+		<p>User user = (User)HttpManager.request().getAuth().getTag(); // Assumes you have some class called User</p>
+		<p>You can then implement the logic in your resource manager as you see fit. Note that you should ensure that the same logic is used in your CollectionResource.getChildren() method</p>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

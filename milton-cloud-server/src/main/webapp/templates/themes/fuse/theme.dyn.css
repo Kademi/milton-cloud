@@ -81,9 +81,11 @@ a:hover {
 body h2, body h2 a {
     color: $rootFolder.settings.heroColour1;
     font-weight: 500;
-    font-size: 1.6em;    
     padding: 0px 0px 15px 0px;
     margin:0px;
+}
+body h2 {
+    font-size: 1.6em;        
 }
 
 body h3, body h3 a {
@@ -996,9 +998,6 @@ div.section {
     margin-top: 15px;
     border-top: 1px solid lightgray;
 }
-div.section:nth-child(even) {
-    clear: both;
-}
 .tree-browser {
     border: 1px solid #CACACA;
     border-radius: 3px 3px 3px 3px;
@@ -1056,11 +1055,11 @@ table.bar td a:hover {
     text-decoration: none;
 }
 
-table h2 {
+table.striped h2 {
     font-size: 14px;    
 }
 
-table h1, table h2, table h3, table h4 {
+table.striped h1, table.striped h2, table.striped h3, table.striped h4 {
     padding: 0;
     margin: 0;
     font-style: normal;    

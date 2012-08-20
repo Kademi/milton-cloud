@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Getting started with Milton</title>
+	</head>
+	<body>
+		<p>Here, we will start with a simple dirty program before we go into the details of Milton. Milton provides all of the WebDAV functionalities and very customizable according to your need.  Following program just lets you get started on a simple program. The main objective of the following code is to get your hand dirty with Milton API. Hence it is simplified as much as possible. If you are already familiar with Milton, you can skip this section.</p>
+		<p>Implement the Resource (like GetableResource, FileResource etc): If you like to download the say some document, then need to implement the GetableResource and write a logic to send the content in the SendContent method.</p>
+		<p>&nbsp;</p>
+		<p>
+			<i>Note: All the Types of Resource are coved in details below. Please do not worry if you didn't get it.</i>
+		</p>
+		<script src="https://gist.github.com/1857568.js?file=miltontutorial_quickstart1.java" />
+		<p>Implement the ResourceFactoty to find the Resource. RecourceFactory class has method GetResource which identifies the resources by the given path in the given host.</p>
+		<script src="https://gist.github.com/1857574.js?file=miltontutorial_quickstart2.java" />
+		<p>Update the web.xml with Milton Servlet and corresponding init parameters as follows.</p>
+		<script src="https://gist.github.com/1857581.js?file=miltontutorial_quickstart3.xml" />
+		<p>That's all. You can test this program in browser. Here is the result.</p>
+		<p>
+			<img src="/images/gettingstarted-output.jpg" alt="" />
+		</p>
+	</body>
+</html>
+

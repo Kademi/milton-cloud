@@ -24,7 +24,6 @@ import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.Forum;
-import io.milton.cloud.server.db.ForumTopic;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.Formatter;
@@ -52,14 +51,14 @@ import java.util.Set;
  */
 public class ForumsApp implements MenuApplication, ResourceApplication, PortletApplication, ChildPageApplication, BrowsableApplication {
 
+    public static final String ROLE_FORUM_VIEWER = "Forums viewer";
     public static final String ROLE_FORUM_USER = "Forums user";
     
     public static String toHref(ForumPost r) {
-        ForumTopic topic = r.getTopic();
-        Forum forum = topic.getForum();
+        Forum forum = r.getForum();
         Website website = forum.getWebsite();
         String sPort = _(Formatter.class).getPortString();
-        String path = "/community/" + forum.getName() + "/" + topic.getName() + "/" + r.getName();
+        String path = "/community/" + forum.getName() + "/" + r.getName();
         String url = "http://" + website.getDomainName() + sPort + path;
         return url;
     }
@@ -85,7 +84,9 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        resourceFactory.getSecurityManager().add(new ForumViewerRole() );
         resourceFactory.getSecurityManager().add(new ForumUserRole());
+        
     }
 
     @Override
@@ -180,4 +181,26 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE_CONTENT);
         }
     }    
+    
+    public class ForumViewerRole implements Role {
+
+        @Override
+        public String getName() {
+            return ROLE_FORUM_VIEWER;
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
+            if( resource instanceof IForumResource ) {
+                IForumResource acr = (IForumResource) resource;
+                return acr.getOrganisation().isWithin(withinOrg);
+            }            
+            return false;
+        }
+
+        @Override
+        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {            
+            return AclUtils.asSet(AccessControlledResource.Priviledge.READ);
+        }
+    }       
 }

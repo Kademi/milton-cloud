@@ -17,10 +17,17 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
+import io.milton.http.HttpManager;
+import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.Website;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -177,5 +184,78 @@ public class WebUtils {
         } else {
             return i + "";
         }
+    }    
+    
+    
+    public static void appendMenu(MenuItem parent) {
+        String thisHref = null;
+        Request req = HttpManager.request();
+        if( req != null ) {
+            thisHref = req.getAbsolutePath();
+        }
+        if (parent.getId().equals("menuRoot")) {
+            RootFolder rootFolder = parent.getRootFolder();
+            if (rootFolder instanceof WebsiteRootFolder) {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+                Website website = wrf.getWebsite();
+                Repository r = website.getRepository();
+                String sMenu = r.getAttribute("menu");
+                if (sMenu != null && sMenu.length() > 0) {
+                    String[] arr = sMenu.split("\n");
+                    int cnt = 0;
+                    for (String s : arr) {
+                        String[] pair = s.split(",");
+                        String id = "menuContent" + cnt++;
+                        String menuHref = pair[0];
+                        MenuItem i = parent.getOrCreate(id, pair[1], menuHref);
+                        i.setOrdering(cnt * 10);
+                        if( thisHref != null && thisHref.startsWith(menuHref)) {
+                            MenuItem.setActiveId(id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+   
+    /**
+     * Find the longest matching menu href which contains thisHref
+     * 
+     * @param thisHref
+     * @param rootFolder 
+     */
+    public static void setActiveMenu(String thisHref, RootFolder rootFolder) {
+        System.out.println("setActiveMenu: --------------------------- " + thisHref);
+        if (rootFolder instanceof WebsiteRootFolder) {
+            String menuId = null;
+            String longestHref = null;
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+            Website website = wrf.getWebsite();
+            Repository r = website.getRepository();
+            String sMenu = r.getAttribute("menu");
+            if (sMenu != null && sMenu.length() > 0) {
+                String[] arr = sMenu.split("\n");
+                int cnt = 0;
+                for (String s : arr) {
+                    String[] pair = s.split(",");
+                    String id = "menuContent" + cnt++;
+                    String href = pair[0];
+                    Path p = Path.path(href);
+                    String parentHref = p.getParent().toString();
+                    if (thisHref.startsWith(parentHref)) {
+                        System.out.println("yes, it is");
+                        if( longestHref == null || parentHref.length() > longestHref.length()  ) {
+                            longestHref = parentHref;
+                            menuId = id;
+                        }                        
+                    }
+                }
+                if( menuId != null ) {
+                    MenuItem.setActiveId(menuId);
+                }
+            }
+            
+        }
+    
     }    
 }

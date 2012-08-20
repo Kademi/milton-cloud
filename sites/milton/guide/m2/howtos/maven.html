@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Maven</title>
+	</head>
+	<body>
+		<p>You can include the milton jars in your maven pom.xml file like this:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;dependency&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;groupId&gt;io.milton&lt;/groupId&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;artifactId&gt;milton-server&lt;/artifactId&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;version&gt;${milton.version}&lt;/version&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/dependency&gt;&nbsp;&nbsp;&nbsp;&nbsp;
+			</code>
+		</p>
+		<p>However, milton is not published to the central repositories, so you'll need to add the ettrema repository:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; &lt;repositories&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;repository&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;id&gt;ettrema-repo&lt;/id&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;url&gt;http://www.ettrema.com/maven2&lt;/url&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/repository&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/repositories&gt;&nbsp;&nbsp;&nbsp;
+			</code>
+		</p>
+	</body>
+</html>
+

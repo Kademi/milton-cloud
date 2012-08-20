@@ -1,0 +1,23 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Documentation home</title>
+    </head>
+    <body>
+        
+        <h1>Documentation</h1>
+        
+        #foreach($f in $folder.children.ofType.folder)
+		<div class="section">
+			<h2>
+				<a href="${f.href}index.html">$f.title</a>
+			</h2>
+			<p>$f.index.getParam("brief")</p>
+			<p class="auxText">
+                #foreach($page in $f.children.ofType.page)
+                $page.link                  
+                #end
+            </p>
+		</div>        
+        #end
+    </body>
+</html>

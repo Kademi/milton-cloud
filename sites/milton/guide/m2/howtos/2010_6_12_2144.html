@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Using the displayname field</title>
+	</head>
+	<body>
+		<p>The DAV spec defines a "displayname" field which can contain any arbitrary text representing the name of a resource to the end user. This field doesnt form part of the url.</p>
+		<p>But most people usually want the displayname field to be the same as the resource name, ie Resource.getName(). This is what Milton does by default.</p>
+		<p>However, Milton allows you to change this behaviour by dependency injection.</p>
+		<p>
+			The displayname property is determined by the injected instanceof DisplayNameFormatter, which gets injected into the WebDavProtocol class (see
+			<a href="/guide/2010_7_4_2235">configuration</a>
+			, or below). Two default implementations are provided:
+		</p>
+		<ul>
+			<li>DefaultDisplayNameFormatter: which just returns Resource.getName()</li>
+			<li>CdataDisplayNameFormatter: which wraps another DisplayNameFormatter and puts the content inside a CDATA element</li>
+		</ul>
+		<p>As of the time of writing (13/7/2010) its not certain that the displayname field ever needs to be put inside a CDATA section, but Apache Slide appears to do so.</p>
+		<h3>How to set your implementation into milton</h3>
+		<p>
+			It gets set on a property of the WebDavProtocol class:
+			<br />
+			<br />
+			WebDavProtocol p = ...;
+			<br />
+			p.setDisplayNameFormatter(.. your implementation...)
+			<br />
+			<br />
+			How you get a reference to WebDavProtocol depends on how you do your  configuration. If you're using the simplified HttpManager constructor,  as is used in MiltonServlet, you might want to write a little bit of  code to find it...
+			<br />
+			<br />
+			(pseudo code)
+			<br />
+			for(ph : httpManager.gethanders() {
+			<br />
+			&nbsp;&nbsp; if( ph instanceof WebDavProtocol ) {
+			<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... set the display name formatter property
+			<br />
+			&nbsp; }
+			<br />
+			}
+			<br />
+			<br />
+			But if you configure everything through spring you can do it from the config file.
+		</p>
+	</body>
+</html>
+

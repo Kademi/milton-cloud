@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Efficient deleting</title>
+	</head>
+	<body>
+		<p>When a user deletes a collection (ie a folder)&nbsp;Milton will, by default, check each resource individually to see if its locked, and then delete each item individually.</p>
+		<p>This can sometimes be inefficient and slow. So as of 1.5.4 milton supports a pluggable service ( com.bradmcevoy.http.DeleteHelper) which you can implement to make this more efficient. This class will be used whenever a resource is deleted, which can be a result of a MOVE or COPY operation.</p>
+		<p>
+			<code>
+				public interface DeleteHelper {
+				<br />
+				&nbsp;&nbsp;&nbsp; /**
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * Check if the resource or any child resources are locked or otherwise not
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * deletable
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; *
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * @param req
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * @param r
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * @return
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; */
+				<br />
+				&nbsp;&nbsp;&nbsp; boolean isLockedOut(Request req, Resource r);
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp; /**
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * Delete the resource and any child resources
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; *
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; * @param r
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp; */
+				<br />
+				&nbsp;&nbsp;&nbsp; void delete(DeletableResource r) throws NotAuthorizedException, ConflictException, BadRequestException;
+				<br />
+				}
+				<br />
+			</code>
+		</p>
+		<p>By implementing this interface you can check locks in batch and delete in batch (eg using a single SQL&nbsp;statement).</p>
+		<p>However, be aware that many client applications will delete each resource individually anway.</p>
+	</body>
+</html>
+

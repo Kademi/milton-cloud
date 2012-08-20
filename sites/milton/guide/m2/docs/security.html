@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Security in webdav: Authenticate and Authorise</title>
+	</head>
+	<body>
+		<h1>Implementing Security in Milton</h1>
+		<p>You have 2 general choices</p>
+		<ol>
+			<li>Don't implement security in milton, and use an external security framework such as Spring Security</li>
+			<li>Use milton's security framework for authentication and authorisation prior to request processing</li>
+		</ol>
+		<h2>Using an External Security Framework</h2>
+		<p>You should disable Digest authentication through configuration, or else there will be header clashes with milton and the other framework.</p>
+		<p>Then implement authenticate and authorise to always indicate success. This is done as:</p>
+		<ul>
+			<li>authenticate: return any not null value</li>
+			<li>authorise: return true</li>
+		</ul>
+		<h2>Use Milton's Security Framework</h2>
+		<p>Using milton's securty framework consists of the following:</p>
+		<ul>
+			<li>implement authenticate: Check the user credentials, if it fails return null, otherwise return any not null value. This value can be anything, but you might want it to be a User object, or something else which is useful, because that object is available later for authorisation and request processing.</li>
+			<li>implement authorise: the purpose of this method is to proactively determine if the current user&nbsp;(or no user, if no credentials are present) is allowed to perform the given method (eg GET, DELETE) on the resource identified by the request URL.</li>
+		</ul>
+		<h3>When you can't authorise in advance</h3>
+		<p>It isnt always possible to make this determination in advance of rendering or processing, in which case just return true from authorise and throw a NotAuthorizedException from your processing code if you find that the current user should not be allowed access.</p>
+		<h3>Digest Authentication</h3>
+		<p>By default milton supports Basic and Digest authentication, where Digest is much more secure then Basic if you're not using SSL. But digest authentication will only be performed if your resource implements DigestResource. With Digest, its impossible to extract the password from the request, so you can't compare it directly with what you have stored.</p>
+		<p>Instead, generate a digest on the same factors as the client and check that you get the same result. You can use the DigestGenerator to perform the digest calculation.</p>
+		<h3>Passthrough Authentication</h3>
+		<p>If you are using milton as a gateway to another system or API you might not be able to authenticate in advance, and you might need to pass the credentials through to the other system.</p>
+		<p>In this case you cannot use Digest Authentication, because you cant get the credentials, so you must disable Digest in configuration.</p>
+		<p>In the authenticate method, store the password in context (eg a request attribute) and return a not null value to indicate success. Then in your request processing code (eg sendContent, processForm, etc) use the stored password to call the other system. If the other system reports an authentication failure just throw a NotAuthorizedException as above</p>
+		<h2>Security Implementation Guide</h2>
+		<p>
+			Here's a bit more detail on implementing security in milton. First is  authentication, then there's some in depth discussion on authorisation:
+			<br />
+			<br />
+			1. implement authenticate(user,password) in Resource. That will get your Basic authentication.
+			<br />
+			<br />
+			2. decide if you need Digest authentication. This will greatly improve client compatibility, so you will probably want it
+			<br />
+			<br />
+			3. if you decide you want Digest then implement DigestResource and its  authenticate(digestRequest) method. There is a helper class you can  (optionally) use. This is easiest if you can read the persisted plain  text password. If you want to persist a hashed form of the password it  MUST be hashed according to the Digest spec!
+			<br />
+			<br />
+			4. implement authorise(..). You will probably want to do some sort of  Role or Group membership check to determine whether to allow the  request. Ettrema uses a mapping which maps http/webdav methods to a  Role, and then uses Group membership to determine if a user has the  required role.
+			<br />
+			<br />
+			Suggestion for authorisation
+			<br />
+			HTTP Method&nbsp;&nbsp;&nbsp; Role
+			<br />
+			PROPFIND&nbsp;&nbsp; ---&gt; Viewer
+			<br />
+			GET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ---&gt;&nbsp; Viewer
+			<br />
+			PROPPATCH&nbsp; ---&gt; Author
+			<br />
+			PUT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ---&gt; Author
+			<br />
+			<br />
+			POST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ---&gt; Viewer (POST is a tricky one because it has undefined semantics, best to decide in app logic)
+			<br />
+			(note that the role mechanism is completely external to milton, and is only a suggestion)
+			<br />
+			<br />
+			Note that HTTP/webdav and Milton support contextual permissions. Ie a  sales person might have Author access to /sales and Viewer access to  /hr. While a HR person might have Viewer access to /sales and Author  access to /hr. So, for a truly flexible security scheme, its not enough  to determine if they have a role - you have to check if they have that  role for a given resource.
+			<br />
+			<br />
+			See the authorise method in ettrema for an example:
+			<br />
+			https://github.com/ettrema/clyde/blob/master/clyde-core/src/main/java/com/ettrema/web/security/PermissionsAuthoriser.java
+			<br />
+			<br />
+			5. Now for the fun stuff - ACL. If you want to support ACL (only really  needed for caldav) then implement AccessControlledResource. This  involves making the authorisation factors above accessible to milton. A  Role assigned to a user becomes an ACL Priviledge, where Viewer maps to  Priviledge.READ and Author maps to Priviledge.WRITE.
+			<br />
+			<br />
+			6. And finally we come to property permissions. Milton allows per  property permissions for PROPFIND and PROPPATCH. You might need to  implement your own PropertyAuthoriser to determine which properties  should be readble/writable for different users, see the checkPermissions  method here for an example:
+			<br />
+			https://github.com/ettrema/clyde/blob/master/clyde-core/src/main/java/com/ettrema/web/security/PermissionsAuthoriser.java
+		</p>
+		<p>&nbsp;</p>
+	</body>
+</html>
+

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Configuration</title>
+	</head>
+	<body>
+		<p>Being a library, Milton tries not to impose constraints on   application developers. It won't force you to use a particular logging   library or configuration tool. Although Milton doesnt implement or   mandate any particular configuration tool or approach, it is designed to   work seemlessly with dependency injection, and this same approach   allows Milton to be wired up with explicit java code.</p>
+		<p>Milton's main classes have several constructors allowing the   application developer to either have less configuration and less   control, or more configuration and more control.</p>
+		<p>To begin with you might just create a HttpManager like this:</p>
+		<p>
+			<code>HttpManager httpManager = new HttpManager(myResourceFactory);</code>
+		</p>
+		<p>or in spring:</p>
+		<p>
+			<code>
+				&lt;bean id="my.resource.factory" class="..." /&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&lt;bean id="http.manager" class="com.bradmcevoy.http.HttpManager"&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp; &lt;constructor-arg ref="my.resource.factory"/&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>&lt;/bean&gt;</code>
+		</p>
+		<p>This will have the default configuration for everything, such as   authentication (Basic and Digest), response handling (non gzipped) and   property support (eg bean properties on resource objects are exposed via   PROPFIND)</p>
+		<p>If you want to modify the authentication handling, for example to   disable digest authentication, you could use an alternative constructor   like this:</p>
+		<p>
+			<code>
+				AuthenticationService authenticationService = AuthenticationService();
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>authenticationService.setDisableDigest(true);</code>
+		</p>
+		<p>
+			<code>HttpManager httpManager = new HttpManager(myResourceFactory, authenticationService );</code>
+		</p>
+		<p>Or as spring config:</p>
+		<p>
+			<code>
+				&lt;bean id="my.resource.factory" class="..." /&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&lt;bean id="authentication.service" class="com.bradmcevoy.http.AuthenticationService"&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp; &lt;property name="disableDigest" value="true"/&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&lt;/bean&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&lt;bean id="http.manager" class="com.bradmcevoy.http.HttpManager"&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>
+				&nbsp;&nbsp; &lt;constructor-arg ref="my.resource.factory"/&gt;
+				<br />
+			</code>
+		</p>
+		<p>
+			<code>&nbsp;&nbsp; &lt;constructor-arg ref="authentication.service"/&gt;</code>
+		</p>
+		<p>
+			<code>&lt;/bean&gt;</code>
+		</p>
+		<h1>MiltonServlet</h1>
+		<p>While the core of milton is a pojo library and independent of  servlets, there is also a milton-servlet project which contains a  pre-packaged servlet.</p>
+		<p>This is useful for getting started quickly but only provides very configuration options so won't be right for everyone.</p>
+		<p>You can easily create your own servlet and this is in fact how milton  is intended to be used. By creating your own servlet you have complete  control of how it gets initialised and configured.</p>
+		<p>Here's what your service method should look like:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; public void service( javax.servlet.ServletRequest  servletRequest, javax.servlet.ServletResponse servletResponse ) throws  ServletException, IOException {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; HttpServletRequest req = (HttpServletRequest) servletRequest;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; HttpServletResponse resp = (HttpServletResponse) servletResponse;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Request request = new ServletRequest( req );
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Response response = new ServletResponse( resp );
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; httpManager.process( request, response );
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } finally {
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; servletResponse.getOutputStream().flush();
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; servletResponse.flushBuffer();
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+				<br />
+				&nbsp;&nbsp;&nbsp; }
+			</code>
+			<br />
+			&nbsp;
+		</p>
+	</body>
+</html>
+

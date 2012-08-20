@@ -26,6 +26,7 @@ import java.util.Map;
 import io.milton.cloud.server.web.templating.HtmlPage;
 import io.milton.cloud.server.web.templating.HtmlTemplateParser;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.WebResource;
 import io.milton.common.Path;
 import io.milton.http.Auth;
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -151,6 +153,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
             jsonResult.write(out);
         } else {
             checkParse();
+            WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
             _(HtmlTemplater.class).writePage(template, this, params, out);
         }
     }
@@ -494,7 +497,9 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         fileResource.setHash(s);
     }
     
-    
+    public String getLink() {
+        return "<a href='" + getHref() + "'>" + getTitle() + "</a>";
+    }
     
     
 }

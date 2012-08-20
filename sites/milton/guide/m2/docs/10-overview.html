@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Overview and Architecture of Milton</title>
+	</head>
+	<body>
+		<h2>Milton-core-API</h2>
+		<p>Following diagram shows the main components of Milton API.</p>
+		<img src="arch.png" />
+		<p>
+			<b>HTTPManager:</b>
+			this class is core of Milton API. It handles the initialization of Resource factory, Resource Handler and Authentication Handler during the startup. It initializes the default resource handler if none was specified. Upon receiving the request, it invokes the processing method of the Resource handler. It is the Engine of the Milton API.
+		</p>
+		<p>
+			<b>Security, Filter:</b>
+			<i>yet to be completed</i>
+		</p>
+		<p>
+			<b>Request &amp; Repsonse :</b>
+			represents the WebDAV Request object and Response objects and defines the abstract methods.
+		</p>
+		<p>
+			<b>Resource Factory:</b>
+			It identifies an instance of a resource at the given url and on the given host
+		</p>
+		<p>
+			<b>Resources:</b>
+			This is an interface and notable sub-classes are Getable, Postable, putable  etc. These Resource Classes serve the corresponding requests. For Example, Getable Resource serves the GET requests. Explanation and usage is covered in details below.
+		</p>
+		<p>
+			<b>Handlers:</b>
+			it takes the request, response and resource as an input and process the resources appropriately. For example, PutHandler creates or overwrites the resource. GetHandler returns the content by invoking HTTPResponse Handler.
+		</p>
+		<h2>Milton-Servlet-API</h2>
+		<img src="milton-servlet-api-arch.png" />
+		<p>
+			<b>MiltonServlet:</b>
+			Main Servlet and act as a Gateway to the Milton API. Once Milton Servlet receives the request, it hands it over to the ServletHTTPManager.
+		</p>
+		<p>
+			<b>ServletHTTPManager:</b>
+			Just extends the normal HttpManager to support initializing filters from servlet init params.
+		</p>
+		<p>
+			<b>SpringAwareMiltonServlet:</b>
+			This spring aware servlet will load the spring context from a classpath resource named /applicationContext.xml.  Please refer the Javadoc for more details about the implementation.
+		</p>
+		<p>
+			<b>ResourceFactoryFactory:</b>
+			This can be used to configure the Resource Factory. Please refer the Javadoc for more details about the implementation.
+		</p>
+		<h2>Milton API – class diagram &amp; sequence diagram</h2>
+		<p>
+			<i>yet to be completed</i>
+		</p>
+	</body>
+</html>
+

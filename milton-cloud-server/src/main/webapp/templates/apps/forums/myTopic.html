@@ -11,13 +11,15 @@
                 <div class="col1">
                     <h3>Recent community questions</h3>
                 </div>
+                #if( $user )
                 <a href="#postQuestion" class="Button ShowModal border-text1"><i class="Icon-add"><!----></i> Post a question</a> 
+                #end
                 <div class="clr"></div>
             </div>            
             <ul class="PostList ClearFix">
                 #foreach($post in $page.questions)
                 <li class="Post">
-                    <div class="Avatar"> <img src="/static/common/photo01.jpg" width="50" height="50" alt="Patrick Hone" /> </div>
+                    <div class="Avatar"> <img src="$formatter.profilePicHref($post.poster)" alt="$!post.poster.nickName" /> </div>
                     <div class="ReplyNumber"> <strong>$post.numReplies</strong> replies </div>
                     <div class="Details">
                         <h4><a href="$post.name">$post.title</a></h4>

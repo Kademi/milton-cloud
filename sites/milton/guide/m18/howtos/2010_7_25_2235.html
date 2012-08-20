@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Caching and Modified Dates</title>
+	</head>
+	<body>
+		<p>One goal of milton is to allow optimum use of caching in HTTP&nbsp;without requiring the programmer to have a good knowledge of the various HTTP caching mechanisms.</p>
+		<p>So we have some simple API methods on the Resource interfaces to implement which provide Milton with the information it needs:</p>
+		<ul>
+			<li>GetableResource.getMaxAgeSeconds(Auth auth);</li>
+			<li>Resource.getUniqueId();</li>
+			<li>Resource.getModifiedDate();</li>
+		</ul>
+		<p>All of these may return null, and Milton will simply do the best it can with what its got. For example, if you are dynamically generating content you might not be able to return a meaningful Modified-Date. In that case Milton won't return a modified-date header and HTTP&nbsp;caching based on the modifed date won't be available.</p>
+		<p>A stronger level of content change detection is a combination of unique ID and modified date. So if you provide both then milton will generate "entity tags".</p>
+		<p>If you return a non-null value from getMaxAgeSeconds then milton will calculate the appropriate header values (eg cache-control) and will check the max age hasnt expired when processing conditional GET's.</p>
+		<p>However, a slightly odd situation arises when using max-age. If we determine that the browser is performing a conditional GET with an expired modified date value, and therefore respond with content, the browser will continue to use the expired modified date, so forever more we will have to respond with content - eliminating the benefit of caching!</p>
+		<p>The answer is that whenever we respond with content, and we have a non-null max-age value, we must set the modified date header to the current date/time.</p>
+	</body>
+</html>
+

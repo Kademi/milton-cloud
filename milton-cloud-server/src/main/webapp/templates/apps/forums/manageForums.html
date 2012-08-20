@@ -19,8 +19,8 @@
                         <div class="Content ClearFix">
                             <section>
                                 <ul class="Websites">
-                                #foreach($website in $page.websites)
-                                <li><a href="$website.name">$website.name</a></li>
+                                #foreach($websiteFolder in $page.forumsRoot.children)
+                                <li><a href="$websiteFolder.name">$websiteFolder.name</a></li>
                                 #end
                                 </ul>
                             </section>
@@ -40,19 +40,14 @@
                     <div class="ShowDialog"><a href="$forum.name">$forum.title</a></div>
                 </header>
                 <div class="ContentForum ClearFix">
-                    <h4>Available Topics</h4>
+                    <h4>Recent posts</h4>
                     <ul class="TopicList">
-                        #foreach($topic in $forum.children)
+                        #foreach($post in $forum.recentPosts)
                         <li>
-                            <span>$topic.title</span>
-                            <aside>
-                                <a title="Rename this topic" class="Edit RenameTopic" href="$topic.href"><span class="Hidden">Rename this topic</span></a> 
-                                <a title="Delete this topic" class="Delete DeleteTopic" href="$topic.href"><span class="Hidden">Delete this topic</span></a>
-                            </aside>
+                            <span>$post.title</span>
                         </li>
                         #end
                     </ul>			
-                    <button class="SmallBtn Add AddTopic"><span>Add New Topic</span></button>
                 </div>
             </div>
             #end

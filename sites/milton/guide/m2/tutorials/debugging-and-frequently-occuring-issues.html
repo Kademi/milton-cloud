@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Frequently occuring Issues and Debugging</title>
+	</head>
+	<body>
+		<p>This chapter captures the errors that we encounter usually and debugging methods to address them. Please feel free to include your scenarios as well.</p>
+		<p>
+			Before starting to develop, it is very important to know your WebDAV Client. Each WebDAV clients has it is own properties, pros and cons. Please refer the corresponding the Client&rsquo;s documentation to understand it fully. Please do not forget to check our
+			<a href="/guide/compat/index.html">compatibility Guide</a>
+		</p>
+		<h2>Debugging</h2>
+		<p>&nbsp;</p>
+		<p>Let us walk through the available Debugging options.</p>
+		<p>&nbsp;</p>
+		<ul>
+			<li>
+				<b>Milton API Log</b>
+				<br />
+				<p>Milton API comes with logging features. Logging level can be specified in the log file. Milton will automatically pick the configurations and API log statements will be published as per the log properties.</p>
+				<p>Milton API uses slf4j as a logging facade. The below example uses the log4j along with slf4j for logging.  As usual, we specify the log properties in "log4j.properties" file. Milton API uses the log properties and redirects the log statements to output.</p>
+				<p>
+					Log file:
+					<br />
+					<img src="/images/debug_log4j.jpg" alt="Log4j configuration" />
+				</p>
+				<br />
+				<p>
+					Output:
+					<br />
+					<img src="/images/debug_log4j_output.jpg" alt="Output" />
+				</p>
+				<br />
+				&nbsp;
+			</li>
+			<li>
+				<b>Request &amp; Response Logging - Milton</b>
+				<br />
+				<p>Milton API has ability to log the WebDAV request and response. It can be turned on by enabling the debug filter in the deployment descriptor (web.xml file).  Following screen shots shows you that.</p>
+				<p>
+					Configuration:
+					<br />
+					<img src="/images/debug_reqresp_config.jpg" alt="Configuration" />
+				</p>
+				<br />
+				<p>
+					Output:
+					<br />
+					<img src="/images/debug_reqresp_output.jpg" alt="Output" />
+				</p>
+				<br />
+				&nbsp;
+			</li>
+			<li>
+				<b>BitKinex</b>
+				<br />
+				<p>BitKinex integrates the fuctionality of an innovative FTP, SFTP and WebDAV client for Windows. Simply it is  a All-in-one FTP/SFTP/HTTP/WebDAV Client.</p>
+				<p>We will see how to debug the WebDAV requests if you are using the BitKinex. BitKinex provides the logging by default. You access the log settings and log statements as shown below.</p>
+				<p>
+					<img src="/images/debug_bitkinex_1.jpg" alt="" />
+				</p>
+				<br />
+				<p>
+					<img src="/images/debug_bitkinex_2.jpg" alt="Output" />
+				</p>
+				<br />
+				&nbsp;
+			</li>
+			<li>
+				<b>Fiddler</b>
+				<br />
+				<p>Fiddler is a Web Debugging Proxy which logs all HTTP(S) traffic between your computer and the Internet. Fiddler allows you to inspect traffic, set breakpoints, and "fiddle" with incoming or outgoing data.</p>
+				<p>But logging the WebDAV traffic really depends on the WebDAV client.</p>
+				<p>However we can use Fiddler to manully invoke the WebDAV methods (like PROPFIND, PROPPATCH etc). Use the "Composer" page to do compose the WebDAV message (As you aware, WebDAV is nothing but an extension of http).</p>
+				<p>
+					<img src="/images/debug_fiddler_1.jpg" alt="" />
+				</p>
+				<br />
+				<p>
+					<img src="/images/debug_fiddler_2.jpg" alt="" />
+				</p>
+				<br />
+				<p>You can use the "Inspector" tab to inspect the response.</p>
+				<p>
+					<img src="/images/debug_fiddler_3.jpg" alt="" />
+					<br />
+					In this way, you can make test the each WebDAV methods.
+				</p>
+			</li>
+		</ul>
+		<h2>Common Issues</h2>
+		<ul>
+			<li>
+				<b>Resource not compatible:</b>
+				This is the very basic error that most of the developers encounter while starting on the WebDAV.
+				<br />
+				<p>Following is the example such error logged in the console.</p>
+				<br />
+				<img alt="" src="/images/debug_src_not_compatible.jpg" />
+				<p>
+					The log clearly shows that WebDav client invokes the "GET" method. Hence Milton API invokes the getHandler to handle the Resource "CompanyResource". Let us take a look at the "CompanyResource" class.
+					<br />
+					<img alt="" src="/images/debug_src_not_compatible_1.jpg" />
+				</p>
+				<p>We now know the cause of the error. Generally, when WebDAV invokes the method which is not implemented by the corresponding resource, "Resource not compatible" will be displayed.</p>
+				<p>To fix the issues, corresponding resource class needs to implements the required method.</p>
+			</li>
+		</ul>
+	</body>
+</html>
+

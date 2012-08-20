@@ -46,7 +46,7 @@ public class Forum implements Serializable{
         return f;
     }
     
-    private List<ForumTopic> forumTopics;
+    private List<ForumPost> forumPosts;
     private long id;
     private Website website;
     private String name;
@@ -114,30 +114,17 @@ public class Forum implements Serializable{
     }
 
     @OneToMany(mappedBy = "forum")
-    public List<ForumTopic> getForumTopics() {
-        return forumTopics;
+    public List<ForumPost> getForumPosts() {
+        return forumPosts;
     }
 
-    public void setForumTopics(List<ForumTopic> forumTopics) {
-        this.forumTopics = forumTopics;
+    public void setForumPosts(List<ForumPost> forumTopics) {
+        this.forumPosts = forumTopics;
     }
     
-    public ForumTopic addTopic(String name, String title, Session session) {
-        ForumTopic ft = new ForumTopic();
-        ft.setForum(this);
-        ft.setName(name);
-        ft.setTitle(title);
-        if( this.getForumTopics() == null ) {
-            setForumTopics(new ArrayList<ForumTopic>());
-        }
-        getForumTopics().add(ft);
-        session.save(ft);
-        return ft;
-    }
-
     public void delete(Session session) {
-        if( getForumTopics() != null ) {
-            for( ForumTopic t : getForumTopics()) {
+        if( getForumPosts() != null ) {
+            for( ForumPost t : getForumPosts()) {
                 t.delete(session);
             }
         }

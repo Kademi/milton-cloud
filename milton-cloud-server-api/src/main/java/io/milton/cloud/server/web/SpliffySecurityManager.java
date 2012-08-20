@@ -36,6 +36,8 @@ public class SpliffySecurityManager {
     private final UserDao userDao;
     private final PasswordManager passwordManager;
     private final Map<String, Role> mapOfRoles = new ConcurrentHashMap<>();
+    
+    private String publicGroup = "public";
 
     public SpliffySecurityManager(UserDao userDao, PasswordManager passwordManager) {
         this.userDao = userDao;
@@ -151,11 +153,16 @@ public class SpliffySecurityManager {
         if (curUser != null) {
             if (curUser.getMemberships() != null) {
                 for (GroupMembership m : curUser.getMemberships()) {
-                    System.out.println("authorise: found membership: " + m.getGroupEntity().getName());
                     appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
                 }
             }
             System.out.println("privs size: " + privs.size());
+        } else {
+            Organisation org = resource.getOrganisation();
+            Group pg = org.group(publicGroup, SessionManager.session());
+            if( pg != null ) {
+                appendPriviledges(pg, org, resource, privs);
+            }
         }
         return privs;
     }

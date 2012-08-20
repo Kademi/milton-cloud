@@ -15,7 +15,7 @@
 package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.server.db.Forum;
-import io.milton.cloud.server.db.ForumTopic;
+import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.web.*;
 import io.milton.http.*;
 import io.milton.http.exceptions.BadRequestException;
@@ -29,11 +29,9 @@ import io.milton.principal.Principal;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.DeletableCollectionResource;
-import io.milton.resource.PostableResource;
+import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,7 +47,7 @@ import org.hibernate.Transaction;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class ManageForumFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource, PostableResource, DeletableCollectionResource {
+public class ManageForumFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource, DeletableCollectionResource, GetableResource {
 
     private final Forum forum;
     private final CommonCollectionResource parent;
@@ -62,16 +60,6 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
         this.parent = parent;
     }
 
-    @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        String newName = parameters.get("newName");
-        if(newName != null ) {
-            createTopic(newName, tx, session);
-        }
-        return null;
-    }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -103,6 +91,11 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
         tx.commit();
     }
 
+    public List<ForumPost> getRecentPosts() {
+        return ForumPost.findRecentByForum(forum, 10, SessionManager.session());  
+        
+    }
+    
     public String getTitle() {
         return forum.getTitle();
     }
@@ -123,13 +116,6 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            List<ForumTopic> topics = forum.getForumTopics();
-            if( topics != null ) {
-                for( ForumTopic t : topics ) {
-                    ManageTopicFolder ftaf = new ManageTopicFolder(t, this);
-                    children.add(ftaf);
-                }
-            }
         }
         return children;
     }
@@ -170,17 +156,6 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
         return null;
     }    
     
-    private void createTopic(String newTitle, Transaction tx, Session session) {
-        String newName = NewPageResource.findAutoName(newTitle, this, null);
-        newName = newName.replace(".html", ""); // HACK: remove .html suffix added about
-        ForumTopic t = new ForumTopic();
-        t.setForum(forum);
-        t.setTitle(newTitle);
-        t.setName(newName);
-        session.save(t);
-        tx.commit();
-        jsonResult = new JsonResult(true, "Created", newName);
-    }
 
     @Override
     public boolean isLockedOutRecursive(Request request) {

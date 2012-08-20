@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Custom Webdav Properties with Annotation</title>
+	</head>
+	<body>
+		<h1>Custom Webdav Properties with Annotation</h1>
+		<p>The default configuration includes the BeanPropertySource as a source of properties when performing PROPFIND&nbsp;and PROPATCH requests.</p>
+		<p>
+			This property source will look for a
+			<a href="/reference/milton-api/apidocs/com/bradmcevoy/property/PropertySource.html">BeanPropertySource</a>
+			annotation on the found Resource's class, and if present, will resolve requested properties using the namespace declared on the annotation and the bean syntax names of properties on the Resource class.
+		</p>
+		<p>
+			The properties may return any data type, as long as their are type converters registered with
+			<a href="/reference/milton-api/apidocs/com/bradmcevoy/http/values/ValueWriters.html">ValueWriters</a>
+		</p>
+	</body>
+</html>
+

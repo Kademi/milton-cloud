@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+	<head>
+		<title>Integrate with FCKEditor</title>
+	</head>
+	<body>
+		<p>FCKEditor is a WYSISIG html editor for embedding in web applications. It has built in file browsing and uploading features which are embedded in the editor. For example you can click a button to insert a picture, browse the server to choose one or upload one.</p>
+		<p>For a long time non-java frameworks have enjoyed out of the box integration with FCKEditor, but there's been no easy way to integrate with java apps. But now milton has a ready-to-roll adapter you get almost instant content management capabilities!</p>
+		<p>To use it:</p>
+		<ul>
+			<li>1. Add FckResourceFactory to your MultipleResourceFactory</li>
+			<li>2. Install FCKEditor in your application</li>
+			<li>3. Configure FCKEditor to use the milton FCK connector</li>
+		</ul>
+		<p>1. Add the FCK&nbsp;Resource Factory</p>
+		<p>A typical spring config for an app which also used static files and the AJAX/DAV gateway might look like this:</p>
+		<p>
+			<code>
+				&nbsp;&nbsp;&nbsp; &lt;bean id="my.resource.factory" class="com.me.web.MyResourceFactory"&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="dao.business"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+				<br />
+				<br />
+				<span style="color: rgb(51, 153, 102);">
+					&nbsp;&nbsp;&nbsp; &lt;bean id="fckeditor.resource.factory" class="com.ettrema.http.fck.FckResourceFactory"&gt;
+					<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="yocal.resource.factory" /&gt;
+					<br />
+					&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+				</span>
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;bean id="filesystem.resource.factory" class="com.ettrema.http.fs.FileSystemResourceFactory"&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name="securityManager" &gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;bean class="com.bradmcevoy.http.ReadOnlySecurityManager"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/property&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name="maxAgeSeconds" value="315360000" /&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name="root" value="${static.file.root}" /&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name="allowDirectoryBrowsing" value="false"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;bean id="json.resource.factory" class="com.ettrema.json.JsonResourceFactory"&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="yocal.resource.factory" index="0"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="milton.property.sources" index="1"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="milton.prop.patcher" index="2"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg ref="permissions.authoriser" index="3"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+				<br />
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;bean id="multi.resource.factory" class="com.bradmcevoy.http.MultipleResourceFactory"&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;constructor-arg&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;list&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;ref local="yocal.resource.factory"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;ref local="filesystem.resource.factory"/&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;ref locallocal="json.resource.factory" /&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;ref locallocal="fckeditor.resource.factory" /&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/list&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/constructor-arg&gt;
+				<br />
+				&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+			</code>
+		</p>
+		<p>&nbsp;2. Install FCKEditor in your application</p>
+		<p>
+			<a href="http://sourceforge.net/projects/fckeditor/">Download FCKEditor from here.</a>
+			If using the filesystem resource factory above to serve the static content files (Eg js and css) then unpack directly into your ${static.file.root}
+		</p>
+		<p>&nbsp;</p>
+		<p>3. Configure FCKEditor to use milton's connector</p>
+		<p>You need to update the URL's pointing to the connector in fckconfig.js, which should be in the same directory as fckeditor.js. It might look like this:</p>
+		<p>
+			<code>
+				FCKConfig.LinkBrowser = true ;
+				<br />
+				FCKConfig.LinkBrowserURL = FCKConfig.BasePath + 'filemanager/browser/default/browser.html?Connecto
+				<span style="color: rgb(51, 153, 102);">r=/fck_connector.html';</span>
+				<br />
+				FCKConfig.LinkBrowserWindowWidth&nbsp;&nbsp;&nbsp; = FCKConfig.ScreenWidth * 0.7 ;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // 70%
+				<br />
+				FCKConfig.LinkBrowserWindowHeight&nbsp;&nbsp;&nbsp; = FCKConfig.ScreenHeight * 0.7 ;&nbsp;&nbsp;&nbsp; // 70%
+				<br />
+				<br />
+				FCKConfig.ImageBrowser = true ;
+				<br />
+				FCKConfig.ImageBrowserURL = FCKConfig.BasePath + 'filemanager/browser/default/browser.html?Type=Image&amp;Connector
+				<span style="color: rgb(51, 153, 102);">=/fck_connector.html';</span>
+				<br />
+				FCKConfig.ImageBrowserWindowWidth&nbsp; = FCKConfig.ScreenWidth * 0.7 ;&nbsp;&nbsp;&nbsp; // 70% ;
+				<br />
+				FCKConfig.ImageBrowserWindowHeight = FCKConfig.ScreenHeight * 0.7 ;&nbsp;&nbsp;&nbsp; // 70% ;
+				<br />
+				<br />
+				FCKConfig.FlashBrowser = true ;
+				<br />
+				FCKConfig.FlashBrowserURL = FCKConfig.BasePath + 'filemanager/browser/default/browser.html?Type=Flash&amp;Connector=
+				<span style="color: rgb(51, 153, 102);">/fck_connector.html' ;</span>
+				<br />
+				FCKConfig.FlashBrowserWindowWidth&nbsp; = FCKConfig.ScreenWidth * 0.7 ;&nbsp;&nbsp;&nbsp; //70% ;
+				<br />
+				FCKConfig.FlashBrowserWindowHeight = FCKConfig.ScreenHeight * 0.7 ;&nbsp;&nbsp;&nbsp; //70% ;
+				<br />
+				<br />
+				FCKConfig.LinkUpload = true ;
+				<br />
+				FCKConfig.LinkUploadURL =
+				<span style="color: rgb(51, 153, 102);">'/fck_upload';</span>
+				<br />
+				FCKConfig.LinkUploadAllowedExtensions&nbsp;&nbsp;&nbsp; = "" ;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // empty for all
+				<br />
+				FCKConfig.LinkUploadDeniedExtensions&nbsp;&nbsp;&nbsp; = ".(html|htm|php|php2|php3|php4|php5|phtml|pwml|inc|asp|aspx|ascx|jsp|cfm|cfc|pl|bat|exe|com|dll|vbs|js|reg|cgi|htaccess|asis)$" ;&nbsp;&nbsp;&nbsp; // empty for no one
+				<br />
+				<br />
+				FCKConfig.ImageUpload = true ;
+				<br />
+				FCKConfig.ImageUploadURL =
+				<span style="color: rgb(51, 153, 102);">'/fck_upload'</span>
+				+ '?Type=Image' ;
+				<br />
+				FCKConfig.ImageUploadAllowedExtensions&nbsp;&nbsp;&nbsp; = ".(jpg|gif|jpeg|png|bmp)$" ;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // empty for all
+				<br />
+				FCKConfig.ImageUploadDeniedExtensions&nbsp;&nbsp;&nbsp; = "" ;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // empty for no one
+				<br />
+				<br />
+				FCKConfig.FlashUpload = true ;
+				<br />
+				FCKConfig.FlashUploadURL =
+				<span style="color: rgb(51, 153, 102);">'/fck_upload'</span>
+				+ '?Type=Flash' ;
+				<br />
+				FCKConfig.FlashUploadAllowedExtensions&nbsp;&nbsp;&nbsp; = ".(swf|fla)$" ;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // empty for all
+				<br />
+				FCKConfig.FlashUploadDeniedExtensions&nbsp;&nbsp;&nbsp; = "" ;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; // empty for no one
+				<br />
+				<br />
+				FCKConfig.SmileyPath&nbsp;&nbsp;&nbsp; = FCKConfig.BasePath + 'images/smiley/msn/' ;
+				<br />
+				FCKConfig.SmileyImages&nbsp;&nbsp;&nbsp; = ['regular_smile.gif','sad_smile.gif','wink_smile.gif','teeth_smile.gif','confused_smile.gif','tounge_smile.gif','embaressed_smile.gif','omg_smile.gif','whatchutalkingabout_smile.gif','angry_smile.gif','angel_smile.gif','shades_smile.gif','devil_smile.gif','cry_smile.gif','lightbulb.gif','thumbs_down.gif','thumbs_up.gif','heart.gif','broken_heart.gif','kiss.gif','envelope.gif'] ;
+				<br />
+				FCKConfig.SmileyColumns = 8 ;
+				<br />
+				FCKConfig.SmileyWindowWidth&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; = 320 ;
+				<br />
+				FCKConfig.SmileyWindowHeight&nbsp;&nbsp;&nbsp; = 210 ;
+				<br />
+				<br />
+				FCKConfig.BackgroundBlockerColor = '#ffffff' ;
+				<br />
+				FCKConfig.BackgroundBlockerOpacity = 0.50 ;
+				<br />
+				<br />
+				FCKConfig.MsWebBrowserControlCompat = false ;
+				<br />
+				<br />
+				FCKConfig.PreventSubmitHandler = false ;
+				<br />
+			</code>
+		</p>
+		<p>&nbsp;</p>
+	</body>
+</html>
+
