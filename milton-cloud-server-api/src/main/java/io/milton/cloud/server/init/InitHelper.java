@@ -84,20 +84,11 @@ public class InitHelper {
 
     public void createGroupEmailJobs(Organisation o, Session session, Group... groups) {
         // create a few group emails
-        String status = "c";
         for (int i = 1; i < 5; i++) {
             GroupEmailJob j = new GroupEmailJob();
             j.setOrganisation(o);
             j.setFromAddress("joe@somewhere.com");
             j.setName("test-job-" + i);
-            if (status == null) {
-                status = "c";
-            } else if (status.equals("c")) {
-                status = "p";
-            } else if (status.equals("p")) {
-                status = null;
-            }
-            j.setStatus(status);
             j.setStatusDate(new Date());
             j.setSubject("Test email " + i);
             j.setTitle("A test email " + i);

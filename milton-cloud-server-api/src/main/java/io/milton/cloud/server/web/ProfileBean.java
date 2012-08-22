@@ -24,14 +24,19 @@ public class ProfileBean {
     
     public static ProfileBean toBean(Profile p) {
         ProfileBean b = new ProfileBean();
+        populateBean(p, b);
+        return b;
+    }
+
+    public static void populateBean(Profile p, ProfileBean b) {
         b.setHref("/users/" + p.getId());
         b.setName(p.getNickName());
         if( b.getName() == null ) {
             b.setName(p.getName());
         }
         b.setPhotoHash(p.getPhotoHash());
-        return b;
     }
+    
     
     private String href;
     private String name;

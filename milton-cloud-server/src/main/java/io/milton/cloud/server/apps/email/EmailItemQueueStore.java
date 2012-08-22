@@ -47,7 +47,7 @@ public class EmailItemQueueStore implements QueueStore {
     private final CurrentDateService currentDateService;
     private List<QueueInfo> currentQueue;
     private long retryIntervalMs = 5 * 1000l; // 5secs
-    private int maxAttempts = 5;
+    private int maxAttempts = 3;
 
     public EmailItemQueueStore(SessionManager sessionManager, Configuration aspirinConfiguration, ListenerManager listenerManager, CurrentDateService currentDateService) {
         this.sessionManager = sessionManager;
@@ -83,8 +83,28 @@ public class EmailItemQueueStore implements QueueStore {
     }
 
     @Override
-    public void init() {
-        log.info("init");
+    public void init() {        
+        Session session = sessionManager.open();
+        Transaction tx = session.beginTransaction();
+        try {
+            log.info("init: reset any in progress statuses");
+            List<EmailItem> items = EmailItem.findInProgress(session);
+            log.info("EmailItems to reset inprogress state to retry: " + items.size());
+            for( EmailItem i : items ) {
+                i.setSendStatus("r");
+                session.save(i);
+            }
+            
+            log.info("init: check for any completed group email jobs");
+            for( GroupEmailJob j : GroupEmailJob.findInProgress(session) ) {
+                Date now = currentDateService.getNow();
+                log.info("Check: " + j.getTitle());
+                j.checkStatus(now, session);
+            }
+            tx.commit();
+        } finally {
+            sessionManager.close();
+        }        
     }
 
     @Override
@@ -118,6 +138,7 @@ public class EmailItemQueueStore implements QueueStore {
                     log.info("Nothing to sendxxx");
                     return null;
                 }
+                log.info("Loaded queue size: " + items.size());
                 currentQueue = new ArrayList<>();
                 for (EmailItem i : items) {
                     QueueInfo info = new QueueInfo(aspirinConfiguration, listenerManager);
@@ -131,6 +152,7 @@ public class EmailItemQueueStore implements QueueStore {
         }
 
         QueueInfo next = currentQueue.remove(0);
+        log.info("Current queue size: " + currentQueue.size());
 
         // Mark it as pending
         Session session = sessionManager.open();
@@ -143,9 +165,12 @@ public class EmailItemQueueStore implements QueueStore {
             i.setSendStatusDate(now);
             session.save(i);
             tx.commit();
+            
+            log.info("next item: " + i.getRecipientAddress() + " attempts: " + i.getNumAttempts() + " id: " + i.getId() );
         } finally {
             sessionManager.close();
         }
+
         return next;
     }
 
@@ -160,15 +185,17 @@ public class EmailItemQueueStore implements QueueStore {
     }
 
     @Override
-    public void setSendingResult(QueueInfo qi) {
-        log.info("setSendingResult: " + qi.getMailid() + " - " + qi.getResultInfo() + " - " + qi.getAttempt());
+    public void setSendingResult(QueueInfo qi) {        
         final Session session = sessionManager.open();
+        Transaction tx = session.beginTransaction();
         try {
             Long id = Long.parseLong(qi.getMailid());
             EmailItem i = (EmailItem) session.get(EmailItem.class, id);
             if (i == null) {
                 return;
             }
+            log.info("setSendingResult: " + i.getRecipientAddress() + " - attempt=" + i.getNumAttempts() + " emailId=" + i.getId());
+            log.info("   resultinfo: " + qi.getResultInfo() + " state=" + qi.getState());
 
             EmailSendAttempt a = new EmailSendAttempt();
             a.setEmailItem(i);
@@ -182,7 +209,7 @@ public class EmailItemQueueStore implements QueueStore {
             } else if (qi.getState() == DeliveryState.SENT) {
                 i.setSendStatus("c");
             } else if (qi.getState() == DeliveryState.IN_PROGRESS) {
-                i.setSendStatus("p");                
+                i.setSendStatus("p");
             } else if (qi.getState() == DeliveryState.QUEUED) {
                 long tm = currentDateService.getNow().getTime();
                 tm = tm + retryIntervalMs;
@@ -191,27 +218,37 @@ public class EmailItemQueueStore implements QueueStore {
                 if (i.getNumAttempts() != null) {
                     attempts = i.getNumAttempts();
                 }
-                attempts++;
-                i.setNextAttempt(retryDate); // when next to attempt delivery
-                i.setNumAttempts(attempts);
-                i.setSendStatus("r"); // is now a retry
-
+                if (attempts >= maxAttempts) {
+                    i.setSendStatus("f");
+                    log.warn("Set retry. Reached max attempts=" + attempts + " for id: " + i.getId());
+                } else {
+                    attempts++;
+                    i.setNextAttempt(retryDate); // when next to attempt delivery
+                    i.setNumAttempts(attempts);
+                    i.setSendStatus("r"); // is now a retry
+                    log.warn("Set retry. Attempts=" + attempts + " for id: " + i.getId());
+                }
+            } else {
+                log.warn("------------------ unhandled state: " + qi.getState() + " ------------------");
             }
             session.save(i);
             // Check if this is the last email in a batch job, in which case we mark it as completed
+            log.info("check if completed");
             BaseEmailJob job = i.getJob();
-            if( job != null  ) {
+            if (job != null) {
+                log.info("we have a job");
                 job.accept(new AbstractEmailJobVisitor() {
                     @Override
                     public void visit(GroupEmailJob r) {
-                        r.setStatus(GroupEmailJob.STATUS_COMPLETED);
                         Date now = currentDateService.getNow();
-                        r.setStatusDate(now);
-                        session.save(r);
+                        r.checkStatus(now, session);
                     }
                 });
+            } else {
+                log.info("email item not attached to a job");
             }
-            
+                    
+            tx.commit();
         } finally {
             sessionManager.close();
         }

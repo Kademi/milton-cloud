@@ -22,6 +22,8 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,26 +33,33 @@ import org.hibernate.criterion.Expression;
 @DiscriminatorValue("G")
 public class GroupEmailJob extends BaseEmailJob {
 
+    private static final Logger log = LoggerFactory.getLogger(GroupEmailJob.class);
+    
     /**
-     * When set to READY_TO_SEND the job will be queued for sending by the dispatcher
+     * When set to READY_TO_SEND the job will be queued for sending by the
+     * dispatcher
      */
     public static final String STATUS_READY_TO_SEND = "r";
-    
     /**
      * This status indicates that the email dispatcher is processing the job
      */
     public static final String STATUS_IN_PROGRESS = "p";
-    
     /**
      * Completed: the dispatcher has completed sending the job
      */
     public static final String STATUS_COMPLETED = "c";
-    
+
     public static List<GroupEmailJob> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
         crit.add(Expression.eq("organisation", org));
-        return DbUtils.toList(crit, GroupEmailJob.class);        
+        return DbUtils.toList(crit, GroupEmailJob.class);
     }
+    
+    public static List<GroupEmailJob> findInProgress(Session session) {
+        Criteria crit = session.createCriteria(GroupEmailJob.class);
+        crit.add(Expression.eq("status", STATUS_IN_PROGRESS));
+        return DbUtils.toList(crit, GroupEmailJob.class);
+    }    
     
     private String status;
     private Date statusDate;
@@ -58,14 +67,11 @@ public class GroupEmailJob extends BaseEmailJob {
     public GroupEmailJob() {
     }
 
-    
     /**
-     * c=completed
-     * r=ready to send (ie as commanded by UI)
-     * p=in progress (set by background process)
-     * otherwise not started
-     * 
-     * @return 
+     * c=completed r=ready to send (ie as commanded by UI) p=in progress (set by
+     * background process) otherwise not started
+     *
+     * @return
      */
     @Column
     public String getStatus() {
@@ -76,8 +82,8 @@ public class GroupEmailJob extends BaseEmailJob {
         this.status = status;
     }
 
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)       
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getStatusDate() {
         return statusDate;
     }
@@ -86,13 +92,43 @@ public class GroupEmailJob extends BaseEmailJob {
         this.statusDate = statusDate;
     }
 
-
     public boolean readyToSend() {
         return STATUS_READY_TO_SEND.equals(getStatus());
     }
 
+    public boolean completed() {
+        return STATUS_COMPLETED.equals(getStatus());
+    }
+    
+    public boolean inProgress() {
+        return STATUS_IN_PROGRESS.equals(getStatus());
+    }    
+    
+    
     @Override
     public void accept(EmailJobVisitor visitor) {
         visitor.visit(this);
+    }
+
+    public void checkStatus(Date now, Session session) {        
+        if( !inProgress() ) {
+            log.info("checkStatus: not in progress");
+            return ;
+        }
+        // If all email items are completed or failed then the job is complete
+        if( getEmailItems() != null ) {
+            for( EmailItem i : getEmailItems() ) {
+                boolean finished = i.complete() || i.failed();
+                if( !finished ) {
+                    log.info("checkStatus: found an unfinished item");
+                    return ; // not finished
+                }
+            }
+        }
+        log.info("checkStatus: All items are finished, so mark job as complete");
+        setStatus(GroupEmailJob.STATUS_COMPLETED);
+        setStatusDate(now);
+        session.save(this);
+
     }
 }

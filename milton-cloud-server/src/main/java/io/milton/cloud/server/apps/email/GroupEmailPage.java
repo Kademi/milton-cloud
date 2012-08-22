@@ -18,6 +18,7 @@ package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.db.EmailSendAttempt;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.queue.AsynchProcessor;
@@ -132,32 +133,31 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         status.setStatusCode(getStatusCode());
         status.setStatusDescription(getStatus());
         if (job.getEmailItems() != null) {
-            int completedOk = 0;
-            int retrying = 0;
+            status.setTotalToSend(job.getEmailItems().size());
             for (EmailItem e : job.getEmailItems()) {
                 if (e.getRecipient() instanceof Profile) {
-                    Profile recip = (Profile) e.getRecipient();
-                    switch (e.getSendStatus()) {
-                        case "c":
-                            completedOk++;
-                            break;
-                        case "f":
-                            ProfileBean p = ProfileBean.toBean(recip);
-                            status.getFailed().add(p);                                    
-                            break;
-                        case "r":
-                            retrying++;
-                            break;
-                        case "p":
-                            p = ProfileBean.toBean(recip);
-                            status.getSending().add(p);
-                            break;
+                    if (e.getSendStatus() != null) {
+                        switch (e.getSendStatus()) {
+                            case "c":
+                                status.getSuccessful().add(e.getId());
+                                break;
+                            case "f":
+                                EmailBean p = toBean(e);
+                                status.getFailed().add(p);
+                                break;
+                            case "r":
+                                p = toBean(e);
+                                status.getRetrying().add(p);
+                                break;
+                            case "p":
+                                p = toBean(e);
+                                status.getSending().add(p);
+                                break;
 
+                        }
                     }
                 }
             }
-        } else {
-            status.setNumSent(0);
         }
 
 
@@ -175,7 +175,11 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     }
 
     public String getTitle() {
-        return job.getTitle();
+        String s = job.getTitle();
+        if (s == null || s.trim().length() == 0) {
+            s = "Untitled email";
+        }
+        return s;
     }
 
     public void setTitle(String s) {
@@ -216,18 +220,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
      * @return
      */
     public String getStatusCode() {
-        if (job.getStatus() == null || job.getStatus().length() == 0) {
-            return "Draft";
-        } else {
-            switch (job.getStatus()) {
-                case "c":
-                    return "Completed";
-                case "p":
-                    return "Progress";
-                default:
-                    return "Status" + job.getStatus();
-            }
-        }
+        return job.getStatus();
     }
 
     public String getStatus() {
@@ -377,14 +370,59 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         session.save(job);
     }
 
+    private EmailSendAttempt findLastAttempt(EmailItem e) {
+        EmailSendAttempt latest = null;
+        if (e.getEmailSendAttempts() != null) {
+            List<EmailSendAttempt> list = e.getEmailSendAttempts();
+            if (!list.isEmpty()) {
+                latest = list.get(0);
+                for (EmailSendAttempt a : list) {
+                    if (a.getStatusDate().after(latest.getStatusDate())) {
+                        latest = a;
+                    }
+                }
+            }
+        }
+        return latest;
+    }
+
+    private EmailBean toBean(EmailItem email) {
+        Profile p = (Profile) email.getRecipient();
+        EmailBean b = new EmailBean();
+        b.setEmailId(email.getId());
+        b.setProfile(ProfileBean.toBean(p));
+        b.setEmail(p.getEmail());
+        String fullName = p.getFirstName();
+        if (fullName != null) {
+            fullName += " ";
+        }
+        if (p.getSurName() != null) {
+            fullName += p.getSurName();
+        }
+        if (fullName == null) {
+            fullName = p.getNickName();
+        }
+        if (fullName == null) {
+            fullName = p.getName();
+        }
+        b.setRetries(email.getNumAttempts());
+        EmailSendAttempt lastAttempt = findLastAttempt(email);
+        if (lastAttempt != null) {
+            b.setLastError(lastAttempt.getStatus());
+        }
+        return b;
+    }
+    
+    
     public class SendStatus {
 
         private String statusCode;
         private String statusDescription;
-        private int numSent;
-        private List<ProfileBean> sending = new ArrayList<>();
-        private List<ProfileBean> failed = new ArrayList<>();
-        private List<ProfileBean> retrying = new ArrayList<>();
+        private List<Long> successful = new ArrayList<>();
+        private List<EmailBean> sending = new ArrayList<>();
+        private List<EmailBean> failed = new ArrayList<>();
+        private List<EmailBean> retrying = new ArrayList<>();
+        private int totalToSend;
 
         public String getStatusCode() {
             return statusCode;
@@ -402,38 +440,91 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
             this.statusDescription = statusDescription;
         }
 
-        public int getNumSent() {
-            return numSent;
+        /**
+         * A list of email IDs of successfully completed email items
+         * 
+         * @return 
+         */
+        public List<Long> getSuccessful() {
+            return successful;
         }
 
-        public void setNumSent(int numSent) {
-            this.numSent = numSent;
-        }
-
-        public List<ProfileBean> getRetrying() {
+        public List<EmailBean> getRetrying() {
             return retrying;
         }
 
-        public void setRetrying(List<ProfileBean> retrying) {
-            this.retrying = retrying;
-        }
-
-        
-
-        public List<ProfileBean> getSending() {
+        public List<EmailBean> getSending() {
             return sending;
         }
 
-        public void setSending(List<ProfileBean> sending) {
-            this.sending = sending;
-        }
-
-        public List<ProfileBean> getFailed() {
+        public List<EmailBean> getFailed() {
             return failed;
         }
 
-        public void setFailed(List<ProfileBean> failed) {
-            this.failed = failed;
+        public int getTotalToSend() {
+            return totalToSend;
+        }
+
+        public void setTotalToSend(int totalToSend) {
+            this.totalToSend = totalToSend;
+        }
+    }
+
+    public class EmailBean {
+
+        private long emailId;
+        private ProfileBean profile;
+        private String fullName;
+        private String email;
+        private Integer retries;
+        private String lastError;
+
+        public long getEmailId() {
+            return emailId;
+        }
+
+        public void setEmailId(long emailId) {
+            this.emailId = emailId;
+        }
+
+        public ProfileBean getProfile() {
+            return profile;
+        }
+
+        public void setProfile(ProfileBean profile) {
+            this.profile = profile;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public void setFullName(String fullName) {
+            this.fullName = fullName;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Integer getRetries() {
+            return retries;
+        }
+
+        public void setRetries(Integer retries) {
+            this.retries = retries;
+        }
+
+        public String getLastError() {
+            return lastError;
+        }
+
+        public void setLastError(String lastError) {
+            this.lastError = lastError;
         }
     }
 }

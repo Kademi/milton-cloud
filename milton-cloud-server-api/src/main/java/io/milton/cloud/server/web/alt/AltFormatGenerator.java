@@ -77,8 +77,8 @@ public class AltFormatGenerator implements EventListener {
         this.sessionManager = sessionManager;
         this.formats = new ArrayList<>();
         this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
-        formats.add(new FormatSpec("image", "png", 150, 150, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
-        profileSpec = new FormatSpec("image", "png", 52, 52, "-ss", "1", "-vframes", "1", "-f", "mjpeg");
+        formats.add(new FormatSpec("image", "png", 150, 150, "-f", "mjpeg"));
+        profileSpec = new FormatSpec("image", "png", 52, 52, "-f", "mjpeg");
         formats.add(profileSpec);
 
         formats.add(new FormatSpec("video", "flv", 800, 455, "-r", "15", "-b:v", "512k")); // for non-html video

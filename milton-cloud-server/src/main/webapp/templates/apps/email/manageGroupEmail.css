@@ -1,198 +1,221 @@
 #manageEmail > header {
-	border-bottom: 1px solid #DADADA;
-	margin-bottom: 5px;
+    border-bottom: 1px solid #DADADA;
+    margin-bottom: 5px;
 }
 #manageEmail > .Content {
-	border: 1px solid #DEDEDE;
-	border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DEDEDE;
+    border-radius: 5px 5px 5px 5px;
 }
 #manageEmail > .Content header {
-	border-bottom: 1px solid #dedede;
-	border-radius: 5px 5px 0 0;
-	background: #f0f0f0;
-	padding: 0 8px 0 13px;
+    border-bottom: 1px solid #dedede;
+    border-radius: 5px 5px 0 0;
+    background: #f0f0f0;
+    padding: 0 8px 0 13px;
 }
 #manageEmail > .Content header div {
-	position: relative;
-	height: 30px;
-	line-height: 30px;
+    position: relative;
+    height: 30px;
+    line-height: 30px;
 }
 #manageEmail > .Content header a {
-	position: absolute;
-	font-weight: bold;
-	padding-right: 13px;
-	top: 0px;
+    position: absolute;
+    font-weight: bold;
+    padding-right: 13px;
+    top: 0px;
 }
 #manageEmail > .Content header a.Date { left: 0; }
 #manageEmail > .Content header a.Name { left: 15%; }
 #manageEmail > .Content header a.Status { left: 70%; }
 #manageEmail > .Content ul { padding: 0 4px 4px; }
 #manageEmail > .Content ul li {
-	border-radius: 3px;
-	border: 1px solid #ededed;
-	margin-top: 4px;
-	padding: 4px 3px 4px 8px;
-	background: #ededed;
-	height: 25px;
+    border-radius: 3px;
+    border: 1px solid #ededed;
+    margin-top: 4px;
+    padding: 4px 3px 4px 8px;
+    background: #ededed;
+    height: 25px;
 }
 #manageEmail > .Content ul li.Odd { background-color: #FFF; }
 #manageEmail > .Content ul li div {
-	height: 25px;
-	line-height: 25px;
+    height: 25px;
+    line-height: 25px;
 }
 #manageEmail > .Content ul li div span { float: left; }
 #manageEmail > .Content ul li div span.Date { width: 15%; }
 #manageEmail > .Content ul li div span.Name { width: 55%; }
 #manageEmail > .Content ul li div span.Status {
-	padding-left: 30px;
+    padding-left: 30px;
 }
 #manageEmail > .Content ul li div.emailStatusProgress span.Status { background-position: 0 0; }
 #manageEmail > .Content ul li div.emailStatusCompleted span.Status { background-position: 0 100%; }
 #manageEmail > .Content ul li aside { float: right; }
 #manageEmail > .Content ul li aside a {
-	float: left;
-	display: block;
-	height: 23px;
-	width: 23px;
-	background-position: 50% 50%;
-	background-repeat: no-repeat;
-	margin-right: 4px;
-	border-radius: 2px;
-	padding: 1px;
+    float: left;
+    display: block;
+    height: 23px;
+    width: 23px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    margin-right: 4px;
+    border-radius: 2px;
+    padding: 1px;
 }
 #manageEmail > .Content ul li aside a:hover { background-color: #FFF; }
 #manageEmail > .Content ul li.Odd aside a:hover {
-	padding: 0px;
-	border: 1px solid #dedede;
+    padding: 0px;
+    border: 1px solid #dedede;
 }
 #manageEmail .TabContent .Content header {
-	margin-bottom: 7px;
-	border-bottom: 1px solid #dadada;
+    margin-bottom: 7px;
+    border-bottom: 1px solid #dadada;
 }
 #manageEmail .TabContent .Content button.Btn { float: right; margin-left: 10px; }
 
 #manageEmail .TabContent .Content ul.GroupList li span { float: left; }
 #manageEmail .TabContent .Content ul.GroupList li aside {
-	float: right;
-	padding-left: 5px;
+    float: right;
+    padding-left: 5px;
 }
 #manageEmail .TabContent .Content ul.GroupList li aside a {
-	float: left;
-	display: block;
-	height: 25px;
-	width: 25px;
-	background-color: #ededed;
-	background-position: 50% 50%;
-	background-repeat: no-repeat;
-	margin-right: 4px;
-	border-radius: 2px;
+    float: left;
+    display: block;
+    height: 25px;
+    width: 25px;
+    background-color: #ededed;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    margin-right: 4px;
+    border-radius: 2px;
 }
 #manageEmail .TabContent .Content ul.GroupList li aside a:hover { background-color: #FFF; }
 #manageEmail .TabContent .Content.Send {
-	text-align: center;
-	padding: 20px;
+    text-align: center;
+    padding: 20px;
 }
 #manageEmail .TabContent .Content.Send h4 {
-	font-size: 15px;
-	font-weight: bold;
+    font-size: 15px;
+    font-weight: bold;
 }
 #manageEmail .TabContent .Content.Send p {
-	padding: 8px 0;
-	margin: 10px 0;
+    padding: 8px 0;
+    margin: 10px 0;
 }
 #manageEmail .TabContent .Content.Send button.Btn {
-	float: none;
+    float: none;
 }
 #manageEmail .TabContent .Content.Send button.Btn.Big {
-	font-size: 15px;
-	line-height: 35px;
-	height: 35px;
+    font-size: 15px;
+    line-height: 35px;
+    height: 35px;
 }
 #manageEmail .TabContent .Content.SendProgress {
-	padding: 80px 0 120px;
-	text-align: center;
+    padding: 30px 0 120px;
+    text-align: center;
 }
 #manageEmail .TabContent .Content.SendProgress p {
-	line-height: 160%;
-	margin-bottom: 10px;
+    line-height: 160%;
+    margin-bottom: 10px;
 }
 #manageEmail .TabContent .Content.SendProgress strong {
-	font-size: 15px;
+    font-size: 15px;
 }
 #manageEmail .TabContent .Content.SendProgress small {
-	display: block;
-	font-style: italic;
-	font-size: 11px;
+    display: block;
+    font-style: italic;
+    font-size: 11px;
 }
 #manageEmail .TabContent .Content.SendProgress div.Progress {
-	margin: 0 auto;
-	width: 336px;
-	height: 38px;
-	border: 1px solid #e0e0e0;
-	padding: 1px;
-	background: #FFF;
+    margin: 0 auto;
+    width: 336px;
+    height: 38px;
+    border: 1px solid #e0e0e0;
+    padding: 1px;
+    background: #FFF;
+    position: relative;
 }
 #manageEmail .TabContent .Content.SendProgress div.Progress div.Percent {
-	height: 100%;
-	background: #44bbe0;
-	width: 0%;
+    height: 100%;
+    background: #44bbe0;
+    width: 0%;
 }
 #manageEmail .TabContent .Content.Success {
-	margin-bottom: 10px;
-	padding: 0;
+    margin-bottom: 10px;
+    padding: 0;
 }
 #manageEmail .TabContent .Content.Success h3 {
-	text-align: center;
-	font-size: 20px;
-	font-weight: bold;
-	margin-top: 50px;
-	padding-top: 60px;
-	background: url(images/icon_success.png) no-repeat 50% 0;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 50px;
+    padding-top: 60px;
+    background: url(images/icon_success.png) no-repeat 50% 0;
 }
 #manageEmail .TabContent .Content.Success p {
-	padding: 10px 0 45px;
-	font-size: 13px;
-	text-align: center;
+    padding: 10px 0 45px;
+    font-size: 13px;
+    text-align: center;
 }
-#manageEmail .TabContent .Content.Success table {
-	width: 100%;
-	border-radius: 5px;
-	font-size: 12px;
+#manageEmail .TabContent.status table {
+    width: 100%;
+    border-radius: 5px;
+    font-size: 12px;
 }
-#manageEmail .TabContent .Content.Success table th, #manageEmail .TabContent .Content.Success table td {
-	padding-left: 10px;
+#manageEmail .TabContent.status table th, #manageEmail .TabContent.status table td {
+    padding-left: 10px;
 }
-#manageEmail .TabContent .Content.Success table thead tr th {
-	line-height: 38px;
-	background: #f0f0f0;
-	text-align: left;
+#manageEmail .TabContent.status tr td:first-child {
+    text-align: left;
 }
-#manageEmail .TabContent .Content.Success table thead tr th div {
-	position: relative;
-	padding-right: 40px;
+#manageEmail .TabContent.status table thead tr th {
+    line-height: 38px;
+    background: #f0f0f0;
+    text-align: left;
 }
-#manageEmail .TabContent .Content.Success table thead tr th div .Btn {
-	position: absolute;
-	top: 5px;
-	right: 5px;
-	background-repeat: no-repeat;
-	background-position: 50% 50%;
-	width: 35px;
+#manageEmail .TabContent.status table thead tr th div {
+    position: relative;
+    padding-right: 40px;
 }
-#manageEmail .TabContent .Content.Success table thead tr th:first-child {
-	border-radius: 5px 0 0 0;
+#manageEmail .TabContent.status table thead tr th div .Btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    width: 35px;
 }
-#manageEmail .TabContent .Content.Success table thead tr th:last-child {
-	border-radius: 0 5px 0 0;
+#manageEmail .TabContent.status table thead tr th:first-child {
+    border-radius: 5px 0 0 0;
 }
-#manageEmail .TabContent .Content.Success table tbody tr td {
-	border-top: 1px solid #dedede;
-	background: #FFF;
-	line-height: 31px;
+#manageEmail .TabContent.status table thead tr th:last-child {
+    border-radius: 0 5px 0 0;
 }
-#manageEmail .TabContent .Content.Success table tbody tr:last-child td:first-child {
-	border-radius: 0 0 0 5px;
+#manageEmail .TabContent.status table tbody tr td {
+    border-top: 1px solid #dedede;
+    background: #FFF;
+    line-height: 31px;
 }
-#manageEmail .TabContent .Content.Success table tbody tr:last-child td:last-child {
-	border-radius: 0 0 5px 0;
+#manageEmail .TabContent.status table tbody tr:last-child td:first-child {
+    border-radius: 0 0 0 5px;
+}
+#manageEmail .TabContent.status table tbody tr:last-child td:last-child {
+    border-radius: 0 0 5px 0;
+}
+#manageEmail .TabContent.status div.stats {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    color: #333333;
+    line-height: 38px;
+}
+#manageEmail .TabContent.status strong.status {
+    display: none;
+}
+#manageEmail .TabContent.status.status_p strong.status.status_p {
+    display: inline;
+}
+#manageEmail .TabContent.status.status_c strong.status.status_c {
+    display: inline;
 }

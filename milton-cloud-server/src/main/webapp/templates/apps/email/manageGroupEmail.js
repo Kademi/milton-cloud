@@ -10,6 +10,7 @@ function initEditEmailPage() {
     addGroupBtn();
     eventForModal();
     initGroupCheckbox();
+    initStatusPolling();    
 }
 
 function initGroupCheckbox() {
@@ -295,8 +296,8 @@ function eventForModal() {
 function sendMail() {
     log("sendMail click");
 		
-    $('div.Send').addClass('Hidden');
-    $('div.SendProgress').removeClass('Hidden');
+    //    $('div.Send').addClass('Hidden');
+    //    $('div.SendProgress').removeClass('Hidden');
         
     try {
         $.ajax({
@@ -307,7 +308,8 @@ function sendMail() {
             },
             success: function(data) {
                 log("send has been initiated", data);
-                progress();
+                $(".TabContent").hide();
+                $(".TabContent.status").show();
             },
             error: function(resp) {
                 log("error", resp);
@@ -317,18 +319,96 @@ function sendMail() {
     } catch(e) {
         log("exception in createJob", e);
     }           
-		
-    progress();    
 }
 
-var percent = 0;
 
-function progress() {
-    var timer = setInterval(function() {
-        checkProgress();
-    }, 5000);
+function initStatusPolling() {
+    log("initStatusPolling");
+    pollStatus();
 }
 
-function checkProgress() {
-    log("checkProgress");
+function pollStatus() {
+    log("pollStatus");
+    if( $("div.status:visible").length == 0 ) {
+        window.setTimeout(pollStatus, 2000);
+        return;
+    }
+    try {
+        $.ajax({
+            type: 'GET',
+            url: window.location.href,
+            dataType: "json",
+            data: {
+                status: "true"
+            },
+            success: function(resp) {
+                displayStatus(resp.data);
+                window.setTimeout(pollStatus, 2000);
+            },
+            error: function(resp) {
+                log("error", resp);
+            }
+        });          
+    } catch(e) {
+        log("exception in createJob", e);
+    }          
+}
+
+function displayStatus(data) {
+    log("displayStatus", data);
+    var tbody = $("#emails tbody");
+    if( data.statusCode ) {
+        $("div.status > div").hide();
+        $("div.status").removeClass("status_c");
+        $("div.status").removeClass("status_p");
+        $("div.status").addClass("status_" + data.statusCode);
+        $("div.status div.SendProgress").show();
+        $("div.status div.Percent").css("width", data.percent +"%");
+        var txtProgress = data.successful.length + " sent ok, ";
+        
+        if( data.failed ) {
+            txtProgress += data.failed.length + " failed, ";
+        }
+        if( data.retrying) {
+            txtProgress += data.retrying.length + " retrying, ";
+        }
+        if( data.totalToSend ) {
+            txtProgress += data.totalToSend + " in total to send";
+        }
+        $("div.status div.stats").text(txtProgress);
+        
+        $.each(data.successful, function(i, e) {
+            tbody.find("#" + e.emailId).remove();
+        });
+        addRows(data.sending, "Sending..", tbody);
+        addRows(data.retrying, "Retrying..", tbody);
+        addRows(data.failed, "Failed", tbody);
+    } else {
+        $("div.status > div").hide();
+        $("div.status div.NotSent").show();
+        tbody.html("");
+        
+        
+    }
+}
+
+function addRows(list, status, tbody) {
+    $.each(list, function(i, e) {
+        tr = getOrCreateEmailRow(e, tbody);
+        if( e.lastError ) {
+            tr.find("td.status").html("<acronym title='" + e.lastError + "'>" + status + "</acronym>");
+        } else {
+            tr.find("td.status").text(status);
+        }
+        tr.find("td.attempt").text(e.retries);
+    });          
+}
+
+function getOrCreateEmailRow(e, tbody) {
+    var tr = tbody.find("#" + e.emailId);
+    if( tr.length == 0 ) {
+        tr = $("<tr id='" + e.emailId + "'><td>" + e.email + "</td><td>" + e.fullName + "</td><td class='status'></td><td class='attempt'></td></td>");
+        tbody.prepend(tr);
+    }
+    return tr;
 }

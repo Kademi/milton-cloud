@@ -84,6 +84,15 @@ public class EmailItem implements Serializable {
         Integer num = (Integer) results.get(0);
         return num;
     }
+
+    public static List<EmailItem> findInProgress(Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be "p" = in progress
+        crit.add(Expression.eq("sendStatus", "p"));
+        return DbUtils.toList(crit, EmailItem.class);
+    }
+    
+    
     private List<EmailSendAttempt> emailSendAttempts;
     private long id;
     private BaseEmailJob job; // optional, might be linked to a job
@@ -227,7 +236,9 @@ public class EmailItem implements Serializable {
     public void setSendStatus(String sendStatus) {
         this.sendStatus = sendStatus;
     }
+    
 
+  
     /**
      * Required field
      * 
@@ -330,6 +341,11 @@ public class EmailItem implements Serializable {
         return "c".equals(sendStatus);
     }
 
+    public boolean failed() {
+        return "f".equals(sendStatus);
+    }
+    
+    
     @Column(nullable = true)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)    
     public Date getNextAttempt() {

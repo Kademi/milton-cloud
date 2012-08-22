@@ -70,7 +70,6 @@ body.profile .changePassword .input.last {
 }
 
 body.profile #fileupload {
-    height: 2em;
     margin: 0;
     padding: 0;
 }
