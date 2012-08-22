@@ -321,6 +321,11 @@ public class EmailItem implements Serializable {
         this.toList = toList;
     }
 
+    /**
+     * True if it was completed successfully. See getSendStatus for other states
+     * 
+     * @return 
+     */
     public boolean complete() {
         return "c".equals(sendStatus);
     }

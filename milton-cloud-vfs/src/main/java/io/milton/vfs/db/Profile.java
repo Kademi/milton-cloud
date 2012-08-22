@@ -19,10 +19,6 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 @DiscriminatorValue("U")
-@Table(
-uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"email"})}// item names must be unique within a directory
-)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Profile extends BaseEntity implements VfsAcceptor {
 

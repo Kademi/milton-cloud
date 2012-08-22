@@ -35,12 +35,15 @@
                 <!--headRight-->
                 <div class="headRight">
                     <div class="formBox">
-                        <div class="userBtn Login"> 
-                            <a class="Link sansuser" href="/login.html">Login</a>
-
-                            <a class="Link requiresuser" href="/profile">Hi $user.title</a>
+                        <div class="userBtn Login">                             
+                            #if($user)
+                            <a class="Link" href="/profile">Hi $user.title</a>
+                            #else
+                            <a class="Link" href="/login.html">Login</a>
+                            #end
                             <div class="dropBox">
-                                <ul class="list requiresuser">
+                                #if($user)
+                                <ul class="list">
                                     <li>
                                         <a href="/profile">Profile</a>
                                     </li>                                    
@@ -48,7 +51,8 @@
                                         <a href="#" class="logout">Logout</a>
                                     </li>
                                 </ul>
-                                <ul class="list sansuser">
+                                #else
+                                <ul class="list">
                                     <li>
                                         <a href="/register.html">Register</a>
                                     </li>
@@ -64,7 +68,9 @@
                                         <button class="Login Button" ><span>Login</span></button>                                     
                                         <a href="/password-reset" title="Forgotten password" class="Forgot">Forgotten password</a>                                        
                                     </fieldset>
-                                </form>                                
+                                </form>                                            
+                                #end
+                    
                                 <div class="accessBox">
                                     <div class="greyBox FontSize"> 
                                         <a class="linkText ZoomIn" href="#">A</a> 
