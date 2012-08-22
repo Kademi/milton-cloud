@@ -1655,6 +1655,7 @@ div.dropdown > div {
 
 .modulePage .dropdown h6 {
     background-color: #e9e9e9;
+    border-radius: 6px;
 }
 
 div.dropdown h6 {
@@ -1985,7 +1986,7 @@ table.dashboard td.gap, table.myLearning td.gap {
 div.bar {
     background: none repeat scroll 0 0 #4899BF;
     border-radius: 5px 5px 5px 5px;
-    font-size: 0.9em;
+    font-size: 1.0em;
     height: 2em;
     line-height: 2em;
     margin-bottom: 2px;
