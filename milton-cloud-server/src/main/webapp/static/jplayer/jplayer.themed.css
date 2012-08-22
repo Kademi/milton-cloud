@@ -25,21 +25,22 @@ body .jp-video .jp-video-fuse {
 body .jp-jplayer {
     margin: 0 auto; 
 }
-body .jp-video .jp-video-full {
+body .jp-video.jp-video-full {
     width:800px;
     height:455px;
     position:static !important; 
     position:relative;
 }
-body .jp-video .jp-video-full .jp-jplayer {
+body .jp-video.jp-video-full .jp-jplayer {
     top: 0;
     left: 0;
     position: fixed !important; position: relative; /* Rules for IE6 (full-screen) */
     overflow: hidden;
     z-index:1000;    
+    background-color: black;
 }
 
-body .jp-video .jp-video-full .jp-gui {
+body .jp-video.jp-video-full .jp-gui {
     position: fixed !important; position: static; /* Rules for IE6 (full-screen) */
     top: 0;
     left: 0;
@@ -48,7 +49,7 @@ body .jp-video .jp-video-full .jp-gui {
     z-index:1000;
 }
 
-body .jp-video .jp-video-full .jp-interface {
+body .jp-video.jp-video-full .jp-interface {
     position: absolute !important; position: relative; /* Rules for IE6 (full-screen) */
     bottom: 0;
     left: 0;
@@ -117,6 +118,7 @@ body .jp-video #separator {
 
 body .jp-video .jp-progress {
     background: #706d6d;
+    margin-right: 20px;
 
     -webkit-border-radius:5px;
     -moz-border-radius:5px;
@@ -188,6 +190,7 @@ body .jp-video .jp-duration {
     float: left;
     display:inline;
     text-align: right;
+    margin-right: 15px;
 }
 body .jp-video .jp-video .jp-current-time {
     margin-left:10px;

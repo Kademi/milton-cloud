@@ -136,7 +136,7 @@ CKEDITOR.plugins.add( 'embed_video',
                             pagePath: "",
                             excludedEndPaths: [".mil/"],
                             includeContentTypes: ["video"],
-                            onselect: function(n) {
+                            onselectFolder: function(n) {
                                 var selectedVideoUrl = $("#myTree").mtree("getSelectedFolderUrl");
                                 log("onselect: folder=", url);
                                 $("#myUploaded").mupload("setUrl", selectedVideoUrl);

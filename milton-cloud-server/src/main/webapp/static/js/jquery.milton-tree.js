@@ -102,20 +102,40 @@
                 }
             };
             var parentNode = $(options.selectedItem);
+            log("addFile, parentNode", parentNode);
+            var icon = parentNode.find("> a > ins.jstree-icon");
+            if( icon.hasClass("file")) { 
+                parentNode = parentNode.parent().closest("li");
+                log("addFile, parentNode2", parentNode);
+            } else {
+                log("not a file", parentNode, icon);
+            }
+            var parent = null;
+            if( parentNode && parentNode.length > 0 ) {
+                parent = parentNode[0];
+            } else {
+                parent = null;
+            }
             
             var r;
-            if( options.selectedItem ) {
-                log("add inside", options.selectedItem);
-                r = $.jstree._reference(tree[0]).create_node(options.selectedItem, "inside", js);
+            if( parent ) {
+                log("add inside", parent);
+                r = $.jstree._reference(tree[0]).create_node(parent, "inside", js);
             } else {
-                log("add root", options.selectedItem);
+                log("add root", parent);
                 r = $.jstree._reference(tree[0]).create_node(-1, "first", js);
             }
             log("addFile: r=", r);
-            r.find("a ins").addClass("file");  
+            if( r ) {
+                r.find("a ins").addClass("file");  
+                var ul = r.closest("ul");
+                ul.find("li").sort(asc_sort).appendTo(ul);
+                tree.mtree("select", r);
+                //this.select(r);
+                log("done select", r);
+            }
             parentNode.removeClass("jstree-closed");
-            parentNode.addClass("jstree-open");
-        //tree.mtree("select", r);
+            parentNode.addClass("jstree-open");        
         },
         // Make the given node selected
         select: function(node, callback) {
@@ -326,6 +346,9 @@ function toPropFindUrl(path, config) {
         url = config.basePath + "/";
     } else {
         url = config.basePath + path;
+    }
+    if( !url.endsWith("/")) {
+        url += "/";
     }
     url = url + "_DAV/PROPFIND?fields=name,getcontenttype>contentType,href,iscollection&depth=1";
     //log("toPropFindUrl","base:", config.basePath, "path:", path,"final url:", url);

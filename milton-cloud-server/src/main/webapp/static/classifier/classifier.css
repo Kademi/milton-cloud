@@ -28,6 +28,9 @@ table.classifier tr td:first-child div {
     padding: 5px 10px;
     position: relative;
 }
+table.classifier h4 {
+    padding: 0;
+}
 table.classifier td span {
     background-image: url(arrows.png);
     height: 45px;

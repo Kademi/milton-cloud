@@ -584,3 +584,13 @@ function profileImg(user) {
     var profilePic = "<img src='" + profileHref + "' alt='' />";            
     return profilePic;
 }
+
+// http://stackoverflow.com/questions/1134976/how-may-i-sort-a-list-alphabetically-using-jquery
+function asc_sort(a, b){
+    return ($(b).text()) < ($(a).text());    
+}
+
+// decending sort
+function dec_sort(a, b){
+    return ($(b).text()) > ($(a).text());    
+}
