@@ -1653,7 +1653,7 @@ div.dropdown > div {
     display: inline-block; 
 }
 
-.modulePage .dropdown h6 {
+div.dropdown h6 {
     background-color: #e9e9e9;
     border-radius: 6px;
 }
@@ -1717,6 +1717,10 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
     border: 1px solid #c5cfb8;
     border-radius: 6px;
     padding: 15px 20px 15px 20px;           
+}
+
+div.dropdown.accentuated h6 {
+    background-color: #dce2d5;
 }
 
 .accentuated p {
