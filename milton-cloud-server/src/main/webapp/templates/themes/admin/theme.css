@@ -644,10 +644,6 @@ textarea.smaller {
     vertical-align: top;
 }
 .Details table tbody th { padding-right: 25px; }
-.Details table tbody td #email {
-    float: left;
-    margin: 0 5px 0 0;
-}
 .Details table tbody td > label { float: left; }
 .Details table tbody td select { float: left; }
 .Details table tfoot td {

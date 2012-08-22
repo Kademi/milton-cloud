@@ -26,7 +26,6 @@
     background-color:$page.parent.settings.heroColour2 !important;
 }
 
-
 html {
     font-size: 1em;
     height:100%;
@@ -490,7 +489,8 @@ hr {
     border-color: lightgray;
 }
 
-button, .content a.button {
+
+button, .content a.button, .muploadBtn {
     margin: 10px;
     padding: 6px 20px;
     text-align:center;

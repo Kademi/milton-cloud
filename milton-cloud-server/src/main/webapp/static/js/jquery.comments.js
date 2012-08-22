@@ -56,6 +56,11 @@
 function sendNewForumComment( pageUrl, commentInput, renderComment, currentUser) {
     log("sendNewForumComment", pageUrl, commentInput);
     var comment = commentInput.val();
+    commentInput.removeClass("errorField");
+    if( comment.trim().length < 1 ) {
+        commentInput.addClass("errorField");
+        return;
+    }
     var url = pageUrl + "_DAV/PROPPATCH";
     ajaxLoadingOn();
     $.ajax({

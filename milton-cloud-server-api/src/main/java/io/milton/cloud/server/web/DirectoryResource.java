@@ -293,7 +293,11 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             RenderFileResource html = getIndex();
             if (html != null) {
                 html.doSaveHtml();
+            } else {
+                System.out.println("No html page to save");
             }
+        } else {
+            System.out.println("not updatedIndex ---");
         }
     }
 

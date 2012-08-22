@@ -210,7 +210,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
         if (htmlPage != null) {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             _(HtmlTemplateParser.class).update(htmlPage, bout);
-            //System.out.println("doSaveHtml: " + bout.toString());
             byte[] arr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             setContent(bin);

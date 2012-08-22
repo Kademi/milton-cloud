@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.queue.AsynchProcessor;
@@ -55,6 +56,7 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.Profile;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -84,7 +86,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         if (parameters.containsKey("sendMail")) {
             startSendJob(session);
             tx.commit();
-            
+
             SendMailProcessable processable = new SendMailProcessable(job.getId());
             _(AsynchProcessor.class).enqueue(processable);
 
@@ -107,19 +109,61 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
             }
             session.save(job);
             tx.commit();
-        }        
+        }
         jsonResult = new JsonResult(true);
         return null;
     }
-    
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (params.containsKey("status")) {
+            jsonResult = buildStatus();
+        }
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
             MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
             _(HtmlTemplater.class).writePage("admin", "email/groupEmailJob", this, params, out);
         }
+    }
+
+    private JsonResult buildStatus() {
+        SendStatus status = new SendStatus();
+        status.setStatusCode(getStatusCode());
+        status.setStatusDescription(getStatus());
+        if (job.getEmailItems() != null) {
+            int completedOk = 0;
+            int retrying = 0;
+            for (EmailItem e : job.getEmailItems()) {
+                if (e.getRecipient() instanceof Profile) {
+                    Profile recip = (Profile) e.getRecipient();
+                    switch (e.getSendStatus()) {
+                        case "c":
+                            completedOk++;
+                            break;
+                        case "f":
+                            ProfileBean p = ProfileBean.toBean(recip);
+                            status.getFailed().add(p);                                    
+                            break;
+                        case "r":
+                            retrying++;
+                            break;
+                        case "p":
+                            p = ProfileBean.toBean(recip);
+                            status.getSending().add(p);
+                            break;
+
+                    }
+                }
+            }
+        } else {
+            status.setNumSent(0);
+        }
+
+
+        JsonResult r = new JsonResult(true);
+        r.setData(status);
+        return r;
     }
 
     public GroupEmailJob getJob() {
@@ -331,5 +375,65 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         Date now = _(CurrentDateService.class).getNow();
         job.setStatusDate(now);
         session.save(job);
+    }
+
+    public class SendStatus {
+
+        private String statusCode;
+        private String statusDescription;
+        private int numSent;
+        private List<ProfileBean> sending = new ArrayList<>();
+        private List<ProfileBean> failed = new ArrayList<>();
+        private List<ProfileBean> retrying = new ArrayList<>();
+
+        public String getStatusCode() {
+            return statusCode;
+        }
+
+        public void setStatusCode(String statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public String getStatusDescription() {
+            return statusDescription;
+        }
+
+        public void setStatusDescription(String statusDescription) {
+            this.statusDescription = statusDescription;
+        }
+
+        public int getNumSent() {
+            return numSent;
+        }
+
+        public void setNumSent(int numSent) {
+            this.numSent = numSent;
+        }
+
+        public List<ProfileBean> getRetrying() {
+            return retrying;
+        }
+
+        public void setRetrying(List<ProfileBean> retrying) {
+            this.retrying = retrying;
+        }
+
+        
+
+        public List<ProfileBean> getSending() {
+            return sending;
+        }
+
+        public void setSending(List<ProfileBean> sending) {
+            this.sending = sending;
+        }
+
+        public List<ProfileBean> getFailed() {
+            return failed;
+        }
+
+        public void setFailed(List<ProfileBean> failed) {
+            this.failed = failed;
+        }
     }
 }

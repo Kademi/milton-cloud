@@ -153,7 +153,7 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
         
     @Override
     public boolean is(String type) {
-        if( type.equals("manageRewards")) {
+        if( type.equals("manageEmail")) {
             return true;
         }
         return super.is(type);

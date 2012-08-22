@@ -87,8 +87,23 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("nickName")) {
-            try {
+            try {                
+                String oldEmail = p.getEmail();
+                String newEmail = parameters.get("email");
+                if( newEmail != null ) {
+                    newEmail = newEmail.trim();
+                }
+                System.out.println("checjk email:" + oldEmail + " == " + newEmail);
+                if( oldEmail == null || (newEmail != null && !newEmail.equals(oldEmail))) {
+                    Profile someOtherUser = Profile.findByEmail(newEmail, getOrganisation(), session);
+                    if( someOtherUser != null ) {
+                        log.warn("Found another user with that email: " + newEmail);
+                        jsonResult = JsonResult.fieldError("email", "There is another user account registered with that email");
+                        return null;
+                    }
+                }
                 _(DataBinder.class).populate(p, parameters);
+                
                 session.save(p);
                 tx.commit();
                 jsonResult = new JsonResult(true);
