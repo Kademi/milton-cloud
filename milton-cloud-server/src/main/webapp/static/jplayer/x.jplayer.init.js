@@ -18,25 +18,29 @@ function initJPlayer(height, width, cssClass) {
     });
 }
 
+var jplayerId = 0;
+
 function insertJPlayer(container, src, title, height, width, cssClass) {
     log("insertJPlayer", container, src, title, height, width, cssClass);
     container.load("/static/jplayer/player-fragment.html", function(i, n) {
         log("loaded player fragment", container);
-        var container = $("div.jp-video", container);
+        var vidContainer = $("div.jp-video", container);
             
         // set the title
         $(".jp-title li").text(title);
             
         // setup id's as required by jp
-        var uniqueId = "vid_" + Math.ceil(Math.random() * 1000000);
+        var uniqueId = "vid_" + jplayerId++;
+        log("jplayer id", uniqueId);
         var containerId = uniqueId + "_cont";
         var playerId = uniqueId + "_player";
-        container.attr("id", containerId);
-        $(".jp-jplayer", container).attr("id", playerId);
+        log("set id on vidContainer", vidContainer, containerId);
+        vidContainer.attr("id", containerId);
+        $(".jp-jplayer", vidContainer).attr("id", playerId);
             
         // now setup the player
         log("setup jplayer", $("#" + containerId));
-        $(".jp-jplayer", container).jPlayer({
+        $(".jp-jplayer", vidContainer).jPlayer({
             swfPath: "/static/jplayer",
             supplied: "mp4, webmv, flv",
             size: {

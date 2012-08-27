@@ -20,6 +20,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import java.util.Map;
 
 /**
@@ -33,7 +34,7 @@ public interface RootFolder extends CommonCollectionResource {
      * @param name
      * @return 
      */
-    PrincipalResource findEntity(BaseEntity user) throws NotAuthorizedException, BadRequestException;
+    PrincipalResource findEntity(Profile user) throws NotAuthorizedException, BadRequestException;
     
     @Override
     Organisation getOrganisation();

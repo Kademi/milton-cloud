@@ -15,81 +15,107 @@
 package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.server.apps.reporting.TimeDataPointBean;
-import io.milton.cloud.server.db.AccessLog;
+import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
-public class WebsiteAccessReport implements JsonReport{
+public class GroupSignupsReport implements JsonReport{
 
+    private static final Logger log = LoggerFactory.getLogger(GroupSignupsReport.class);
+    
     @Override
     public String getReportId() {
-        return "websiteAccess";
+        return "groupSignups";
     }
 
     @Override
     public String getTitle(Organisation organisation, Website website) {
-        return "Web access report: " + website.getName();
+        return "Group signups report: " + website.getName();
     }
     
-    
-    
-
+        
     @Override
     public GraphData runReport(Organisation org, Website website, Date start, Date finish, JsonResult jsonResult) {
+        log.info("runReport: " + start + " - " + finish);
         Session session = SessionManager.session();
-        Criteria crit = session.createCriteria(AccessLog.class)
+        Criteria crit = session.createCriteria(SignupLog.class)
                 .setProjection(Projections.projectionList()
                 .add(Projections.min("reqDate"))
                 .add(Projections.rowCount())
+                .add(Projections.groupProperty("groupEntity"))
                 .add(Projections.groupProperty("reqYear"))
                 .add(Projections.groupProperty("reqMonth"))
                 .add(Projections.groupProperty("reqDay"))
                 .add(Projections.groupProperty("reqHour")));
-        if (start != null) {
-            crit.add(Restrictions.ge("reqDate", start));
-        }
-        if (finish != null) {
-            crit.add(Restrictions.le("reqDate", finish));
-        }
-        if( website != null ) {
-            crit.add(Restrictions.le("website", website));
-        }
-        if( org != null ) {
-            crit.add(Restrictions.le("organisation", org));
-        }
+//        if (start != null) {
+//            crit.add(Restrictions.ge("reqDate", start));
+//        }
+//        if (finish != null) {
+//            crit.add(Restrictions.le("reqDate", finish));
+//        }
+//        if( website != null ) {
+//            crit.add(Restrictions.le("website", website));
+//        }
+//        if( org != null ) {
+//            crit.add(Restrictions.le("organisation", org));
+//        }
         List list = crit.list();
-        List<TimeDataPointBean> dataPoints = new ArrayList<>();
+        Set<String> groupsInSeries = new HashSet<>();
+        List<Map<String,Object>> dataPoints = new ArrayList<>();
+        Map<Long,Map<String,Object>> mapOfDataPointsByTime = new HashMap<>();
+        log.info("results: " + list.size());
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
+            log.info("got row: " + arr);
             Date date = (Date) arr[0];
+            Long time = date.getTime();
             Integer count = (Integer) arr[1];
-            TimeDataPointBean b = new TimeDataPointBean();
-            b.setDate(date.getTime());
-            b.setValue(count);
-            dataPoints.add(b);
+            Group group = (Group) arr[2];
+            
+            groupsInSeries.add(group.getName()); // keep a set of group names for labels
+            
+            Map<String,Object> dataPoint = mapOfDataPointsByTime.get(time);
+            if( dataPoint == null  ) {
+                dataPoint = new HashMap<>();
+                dataPoint.put("date", time);
+                mapOfDataPointsByTime.put(time, dataPoint);
+                dataPoints.add(dataPoint);
+            }
+            dataPoint.put(group.getName(), count);
+
         }
         GraphData graphData = new GraphData();
         graphData.setData(dataPoints);
-        String[] labels = {"Hits"};
+        String[] labels = {"Signups"};
         graphData.setLabels(labels);
         graphData.setXkey("date");
-        String[] ykeys = {"value"};
+        String[] ykeys = new String[groupsInSeries.size()];
+        groupsInSeries.toArray(ykeys);
         graphData.setYkeys(ykeys);
+        log.info("data points: " + dataPoints.size());
         return graphData;
     }
     

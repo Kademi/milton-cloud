@@ -17,6 +17,9 @@
 package io.milton.cloud.server.apps.signup;
 
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.GroupMembershipApplication;
+import io.milton.cloud.server.db.SignupLog;
+import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
@@ -32,7 +35,6 @@ import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
@@ -47,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Group;
 
 /**
  * Manages registration of a user when signing up to a group
@@ -56,7 +59,6 @@ import static io.milton.context.RequestContext._;
 public class GroupRegistrationPage extends AbstractResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(GroupRegistrationPage.class);
-    
     private final String name;
     private final GroupInWebsiteFolder parent;
     private JsonResult jsonResult;
@@ -67,7 +69,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     }
 
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult != null) {
             log.info("sendContent: json");
             jsonResult.write(out);
@@ -85,54 +87,79 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         Transaction tx = session.beginTransaction();
         try {
             Organisation org = parent.getOrganisation();
-            
-            String nickName = WebUtils.getParam(parameters,"nickName");
-            if( nickName != null ) {
-                nickName = nickName.trim();
-                if( nickName.length() == 0 ) {
-                    nickName = null;
-                }
-            }
-            
-            String newName = WebUtils.getParam(parameters,"name");
-            if( newName == null || newName.trim().length() == 0 ) {
-                if( nickName == null  ) {
-                    jsonResult = JsonResult.fieldError("nickName", "Please enter a name or nick name");
-                    return null;
-                }
-                newName = org.findUniqueName(nickName, session);
-            }
-            
-            // Check email is unique within the org
-            String email = WebUtils.getParam(parameters,"email");
-            Profile p = Profile.findByEmail(email, org, session);
-            if( p != null ) {
-                jsonResult = JsonResult.fieldError("email", "There is already a user registered with that email");
-                return null;
-            }
-            
-            Profile u = new Profile();
-            u.setOrganisation(org);
-            u.setName(newName);
-            u.setNickName(nickName);
-            u.setEmail(email);
-            u.setCreatedDate(new Date());
-            u.setModifiedDate(new Date());
-            session.save(u);
 
             String password = parameters.get("password");
-            if( password == null || password.trim().length() == 0 ) {
-                throw new Exception("No password given");
+            if (password == null || password.trim().length() == 0) {
+                jsonResult = JsonResult.fieldError("password", "No password was given");
+                return null;
             }
-            _(SpliffySecurityManager.class).getPasswordManager().setPassword(u, password);
 
-            u.addToGroup(parent.getGroup(), parent.getOrganisation());
-            RootFolder rf = WebUtils.findRootFolder(this);
-            _(SignupApp.class).onNewProfile(u, rf);
-                                   
+            // Check if the email is already taken. If so, and if the given password matches,
+            // then we assume this is an existing Fuse user who is signing up for another
+            // group or site
+            String email = WebUtils.getParam(parameters, "email");
+            Profile p = Profile.find(email, session);
+            if (p != null) {
+                // Check password matches
+                if (_(PasswordManager.class).verifyPassword(p, password)) {
+                    // Passwords match, all good
+                } else {
+                    jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address. If this is your account please enter the existing password");
+                    return null;
+                }
+            } else {
+                // Not existing, create a new profile
+                p = new Profile();                
+                String nickName = WebUtils.getParam(parameters, "nickName");
+                if (nickName != null) {
+                    nickName = nickName.trim();
+                    if (nickName.length() == 0) {
+                        nickName = null;
+                    }
+                }
+
+                String newName = WebUtils.getParam(parameters, "name");
+                if (newName == null || newName.trim().length() == 0) {
+                    if (nickName == null) {
+                        jsonResult = JsonResult.fieldError("nickName", "Please enter a name or nick name");
+                        return null;
+                    }
+                    newName = Profile.findUniqueName(nickName, session);
+                }
+
+                p.setName(newName);
+                p.setNickName(nickName);
+                p.setEmail(email);
+                p.setCreatedDate(new Date());
+                p.setModifiedDate(new Date());
+                session.save(p);
+                _(SpliffySecurityManager.class).getPasswordManager().setPassword(p, password);
+            }
+
+
+            Group group = parent.getGroup();
+            if (!Group.REGO_MODE_OPEN.equals(group.getRegistrationMode())) {
+                // Not open
+                GroupMembershipApplication gma = new GroupMembershipApplication();
+                gma.setCreatedDate(new Date());
+                gma.setModifiedDate(new Date());
+                gma.setGroupEntity(group);
+                gma.setMember(p);
+                gma.setWithinOrg(org);  // TODO: this should be the selected organisation where users belong to subordinate orgs
+                session.save(gma);
+            } else {
+                // add directly to group
+                p.addToGroup(group, org, session);
+                WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
+                SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
+            }
+
+
+            //_(SignupApp.class).onNewProfile(u, parent.getGroup(),  rf);
+
             tx.commit();
 
-            String userPath = "/" + u.getName(); // todo: encoding
+            String userPath = "/users/" + p.getName(); // todo: encoding
             log.info("Created user: " + userPath);
             jsonResult = new JsonResult(true, "Created account", userPath);
         } catch (Exception e) {
@@ -204,6 +231,4 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public boolean isPublic() {
         return true;
     }
-    
-    
 }

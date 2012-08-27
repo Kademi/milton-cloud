@@ -51,6 +51,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     public AdminApp() {
         reports = new ArrayList<>();
         reports.add(new WebsiteAccessReport());
+        reports.add(new GroupSignupsReport());
     }
     
     

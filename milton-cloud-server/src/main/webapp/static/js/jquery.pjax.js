@@ -319,7 +319,7 @@
                     direction : "right"
                 };
                 //this.hide("slide", effectOptions, 500);
-                this.fadeOut(200);
+                this.animate({opacity: 0}, 200);
                 log("pjax: done hide");
             }
         },

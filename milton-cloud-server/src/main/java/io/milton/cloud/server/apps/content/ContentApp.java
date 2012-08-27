@@ -92,7 +92,6 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                 }
                 // Resources for classifier - TODO: make this configurable somehow
                 writer.append("<script type='text/javascript' src='/static/classifier/jquery.mc-classifier.js'>//</script>\n");
-                writer.append("<script type='text/javascript' src='/static/classifier/init-classifier.js'>//</script>\n");
                 writer.append("<script type='text/javascript' src='/static/common/jquery.debounce-1.0.5.js'>//</script>\n");
                 writer.append("<link href='/static/classifier/classifier.css' rel='stylesheet' type='text/css' />\n");
             }

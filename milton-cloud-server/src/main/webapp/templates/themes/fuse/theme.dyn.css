@@ -694,7 +694,7 @@ h1.logo a {
 }
 .userBtn {
     background:#ececec;
-    width:152px;
+    min-width: 9em;
     height:30px;
     float:right;
     position:relative;
@@ -711,9 +711,9 @@ a.Link {
     text-decoration:none;
     display:block;
     color:$page.parent.settings.textColour2;
-    font-size:13px;
+    font-size: 0.85em;
     font-weight:normal;
-    padding:8px 0 0 10px;
+    padding:0.5em 2em 0 0.7em;
     background:url(images/arrow.gif) top right no-repeat;
     background-position:95% 12px;
 }
@@ -1647,6 +1647,11 @@ div.dropdown > div {
 .modulePage div.dropdown.open {
     display: block;    
 }
+/** turn off bottom rounded corners on header when open **/
+.modulePage div.dropdown.open h6 {
+    border-radius: 6px 6px 0 0;
+}
+
 
 /** make the dropdown div inline so its width is sized to the heading, instead of full width */
 .modulePage div.dropdown {
@@ -1713,14 +1718,14 @@ div.dropdown span.sprite, .btnHideFollowing > span.sprite {
 }
 
 .accentuated {
-    background-color: #eaf0e2;
+    background-color: #e7f0e4;
     border: 1px solid #c5cfb8;
     border-radius: 6px;
     padding: 15px 20px 15px 20px;           
 }
 
 div.dropdown.accentuated h6 {
-    background-color: #dce2d5;
+    background-color: #e1eece;
 }
 
 .accentuated p {
@@ -1987,23 +1992,7 @@ table.dashboard td.gap, table.myLearning td.gap {
 
 
 
-div.bar {
-    background: none repeat scroll 0 0 #4899BF;
-    border-radius: 5px 5px 5px 5px;
-    font-size: 1.0em;
-    height: 2em;
-    line-height: 2em;
-    margin-bottom: 2px;
-    padding: 0 8px;
-}
-div.bar h3 {
-    color: #FFFFFF;
-    float: left;
-    font-size: 1em;
-    font-weight: normal;
-    margin: 0;
-    padding: 0;
-}
+
 .sideBar{
     width:29%;
     float:right;
@@ -2140,12 +2129,20 @@ tr.bar td.last {
 }
 
 div.bar {
-    height: 2.0em;
     background:$page.parent.settings.heroColour1;
-    line-height: 2em;
     margin-bottom:2px;
     border-radius: 5px;
     padding: 0 8px;
+    font-size: 1.0em;    
+    position: relative;        
+}
+div.bar h3 {
+    color: #FFFFFF;
+    font-size: 0.9em;
+    font-weight: normal;
+    line-height: 2em;
+    margin: 0;
+    padding: 0;    
 }
 div.bar.alt {
     background:$page.parent.settings.heroColour2;

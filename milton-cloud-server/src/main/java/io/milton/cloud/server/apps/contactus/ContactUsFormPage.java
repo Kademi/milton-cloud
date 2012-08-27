@@ -15,6 +15,8 @@
 package io.milton.cloud.server.apps.contactus;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.apps.AppConfig;
+import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.apps.email.GroupEmailPage;
 import io.milton.cloud.server.apps.email.SendMailProcessable;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
@@ -27,6 +29,7 @@ import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
@@ -53,11 +56,14 @@ import io.milton.http.Request.Method;
 import io.milton.http.XmlWriter;
 import io.milton.http.XmlWriter.Element;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
+import org.apache.velocity.context.Context;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -65,7 +71,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ContactUsFormPage extends AbstractResource implements GetableResource, PostableResource {
+public class ContactUsFormPage extends AbstractResource implements GetableResource, PostableResource, SettingsApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ContactUsFormPage.class);
     private CommonCollectionResource parent;
@@ -287,5 +293,35 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     private String getTitle(AppControl appControl, Website website, ContactRequest r) {
         String name = r.getFirstName() + " " + r.getSurName();
         return "Contact from: " + name + " for " + website.getName();
+    }
+
+    @Override
+    public void renderSettings(Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getInstanceId() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getTitle(Organisation organisation, Website website) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getSummary(Organisation organisation, Website website) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

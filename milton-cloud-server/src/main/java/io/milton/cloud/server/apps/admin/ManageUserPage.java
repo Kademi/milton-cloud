@@ -92,7 +92,6 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                 profile.setName(nameToCreate);
                 Date now = _(CurrentDateService.class).getNow();
                 profile = new Profile();
-                profile.setOrganisation(parent.getOrganisation());
                 profile.setCreatedDate(now);
                 profile.setModifiedDate(now);
             }

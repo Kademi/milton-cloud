@@ -48,17 +48,23 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         Profile u = _(SpliffySecurityManager.class).authenticate(getOrganisation(), user, password);
         if (u != null) {
             try {
-                return SpliffyResourceFactory.getRootFolder().findEntity(u);
+                PrincipalResource p = SpliffyResourceFactory.getRootFolder().findEntity(u);
+                if( p == null ) {
+                    log.warn("Could not locate a PrincipalResource for user: " + u.getName());
+                }
+                return p;
             } catch (NotAuthorizedException | BadRequestException ex) {
                 throw new RuntimeException(ex);
             }
         } else {
+            log.warn("authentication did not return a profile");
             return null;
         }
     }
 
     @Override
     public Object authenticate(DigestResponse digestRequest) {
+        log.info("authenticate");
         Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(getOrganisation(), digestRequest);
         if (u != null) {
             try {

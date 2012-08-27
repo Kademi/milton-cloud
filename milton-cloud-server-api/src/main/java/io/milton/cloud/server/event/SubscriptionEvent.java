@@ -48,12 +48,14 @@ public class SubscriptionEvent implements TriggerEvent {
     private final Profile profile;
     private final Group group;
     private final Website website;
+    private final Organisation memberOfOrg;
     private final SignupAction action;
 
-    public SubscriptionEvent(Profile profile, Group group, Website website, SignupAction action) {
+    public SubscriptionEvent(Profile profile, Group group, Website website, Organisation memberOfOrg, SignupAction action) {
         this.profile = profile;
         this.group = group;
         this.website = website;
+        this.memberOfOrg = memberOfOrg;
         this.action = action;
     }
 
@@ -68,8 +70,11 @@ public class SubscriptionEvent implements TriggerEvent {
     public Group getGroup() {
         return group;
     }
-    
-    
+
+    public Organisation getMemberOfOrg() {
+        return memberOfOrg;
+    }
+        
 
     @Override
     public List<BaseEntity> getSourceEntities() {
@@ -85,7 +90,7 @@ public class SubscriptionEvent implements TriggerEvent {
 
     @Override
     public Organisation getOrganisation() {
-        return profile.getOrganisation();
+        return website.getOrganisation();
     }
 
     @Override

@@ -19,14 +19,11 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
@@ -85,8 +82,7 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
         return new ManageUserPage(p.getName(), p, parent);
     }
 
-    
-    
+       
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -165,20 +161,6 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
         return organisation;
     }
     
-    public List<Organisation> getChildOrganisations() {
-        List<Organisation> list = new ArrayList<>();        
-        List<BaseEntity> members = getOrganisation().getMembers();
-        if( members == null || members.isEmpty() ) {
-            return Collections.EMPTY_LIST;
-        }
-        for( BaseEntity be : members ) {
-            if( be instanceof Organisation) {
-                list.add((Organisation)be);
-            }
-        }
-        return list;
-    }
-
     @Override
     public boolean is(String type) {
         if( type.equals("userAdmin")) {

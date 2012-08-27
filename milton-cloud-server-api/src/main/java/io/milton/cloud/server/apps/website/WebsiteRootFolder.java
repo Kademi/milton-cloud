@@ -100,7 +100,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     }
 
     @Override
-    public PrincipalResource findEntity(BaseEntity u) throws NotAuthorizedException, BadRequestException{
+    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
         return UserApp.findEntity(u, this);
     }
 

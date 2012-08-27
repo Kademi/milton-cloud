@@ -13,6 +13,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,24 +31,11 @@ public class UserDao {
         return (PasswordCredential) crit.uniqueResult();
     }
 
-    public List<Profile> listProfilesByAdminOrg(Organisation org, Session sess) {
-        Criteria crit = sess.createCriteria(Profile.class);
-        crit.add(Expression.eq("adminOrg", org));
-        crit.addOrder(Order.asc("surName"));
-        crit.addOrder(Order.asc("firstName"));
-        crit.addOrder(Order.asc("email"));
-        List list = crit.list();
-        if (list == null || list.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        } else {
-            List<Profile> users = new ArrayList<>(list);
-            return users;
-        }
-    }
-
     public List<Profile> listProfiles(Organisation org, Session sess) {
         Criteria crit = sess.createCriteria(Profile.class);
-        crit.add(Expression.eq("organisation", org));
+        Criteria critMembership = crit.createCriteria("memberships");
+        Criteria critSubordinate = critMembership.createCriteria("subordinates");
+        critSubordinate.add(Restrictions.eq("withinOrg", org));
         crit.addOrder(Order.asc("surName"));
         crit.addOrder(Order.asc("firstName"));
         crit.addOrder(Order.asc("email"));
@@ -60,53 +48,16 @@ public class UserDao {
         }
     }
 
-    /**
-     * Look for the given user profile in the given organisation
-     *
-     * @param nameOrEmail
-     * @param organisation
-     * @param session
-     * @return
-     */
-    public Profile getProfile(String nameOrEmail, Organisation organisation, Session session) {
-        Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.and(Expression.eq("organisation", organisation), 
-                Expression.or(Expression.eq("name", nameOrEmail), Expression.eq("email", nameOrEmail))                
-        ));
-        List<Profile> list = DbUtils.toList(crit, Profile.class);
-        if( list.isEmpty() ) {
-            return null;
-        } else {
-            return list.get(0);
-        }
-    }
-
-    /**
-     * Look for the given profile in the given organisation or any of its
-     * ancestors
-     *
-     * @param name
-     * @param organisation
-     * @param session
-     * @return
-     */
-    public Profile findProfile(String name, Organisation organisation, Session session) {
-        while (organisation != null) {
-            Profile p = getProfile(name, organisation, session);
-            if (p != null) {
-                return p;
-            }
-            organisation = organisation.getOrganisation();
-        }
-        return null;
-    }
 
     public List<Profile> search(String q, Organisation org, Session session) {
         log.info("search: q=" + q + " org=" + org.getName() );
         Criteria crit = session.createCriteria(Profile.class);
+        Criteria critMembership = crit.createCriteria("memberships");
+        Criteria critSubordinate = critMembership.createCriteria("subordinates");
+        critSubordinate.add(Restrictions.eq("withinOrg", org));
+        
         String[] arr = q.split(" ");
         Conjunction con = Expression.conjunction();
-        con.add(Expression.eq("adminOrg", org));
         for( String queryPart : arr ) {
             Disjunction dis = Expression.disjunction();
             String s = queryPart + "%";

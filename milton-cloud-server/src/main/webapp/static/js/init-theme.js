@@ -45,6 +45,7 @@ function initTheme() {
     initRotation();
     initPlaceholder();
     initPseudoClasses();
+    initPrintLink();
          
     log("initTheme: run page init functions");
     for( i=0; i<pageInitFunctions.length; i++) {
@@ -330,6 +331,13 @@ function initPseudoClasses() {
     $("table tr:nth-child(even)").addClass("even");
     $("ul li:nth-child(even)").addClass("even");
     $("ul li:nth-child(odd)").addClass("odd");    
+}
+
+function initPrintLink() {
+    $("a.print").click(function(e) {
+        e.preventDefault();
+        window.print();
+    });
 }
 
 /** End init-theme.js */

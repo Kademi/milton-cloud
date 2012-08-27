@@ -18,11 +18,7 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
-import io.milton.cloud.server.apps.MenuApplication;
-import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.config.HttpManagerBuilder;
@@ -33,9 +29,7 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 
-import static io.milton.context.RequestContext._;
 import io.milton.http.http11.auth.CookieAuthenticationHandler;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 
@@ -48,16 +42,21 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
 
-    public static PrincipalResource findEntity(BaseEntity u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
+    public static PrincipalResource findEntity(Profile u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
+        log.info("findEntity");
         Resource r = rootFolder.child(USERS_FOLDER_NAME);
         if (r instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) r;
-            Resource p = uf.child(u.getName());
+            Resource p = uf.findUserResource(u);
             if (p instanceof PrincipalResource) {
                 PrincipalResource pr = (PrincipalResource) p;
                 return pr;
             } else if (p != null) {
                 log.warn("Found a resource which is not a principalResource: " + p.getClass());
+                return null;
+            } else {
+                log.warn("Could not get a child resource from users folder");
+                return null;
             }
         } else {
             if (r == null) {
@@ -65,8 +64,8 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
             } else {
                 log.warn("users folder not found correct type: " + r.getClass());
             }
-        }
-        return null;
+            return null;
+        }        
     }
     private SpliffySecurityManager securityManager;
     private CookieAuthenticationHandler cookieAuthenticationHandler; // Needed for logging users in on password reset
@@ -100,17 +99,16 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     public Resource getPage(Resource parent, String requestedName) {
         if (parent instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) parent;
-            UserDao userDao = _(UserDao.class);
-            Profile p = userDao.findProfile(requestedName, uf.getOrganisation(), SessionManager.session());
+            Profile p = Profile.find(requestedName, SessionManager.session());
             if (p != null) {
                 return new UserResource(uf, p);
             }
-        } else if (parent instanceof WebsiteRootFolder) {
-            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+        } else if (parent instanceof RootFolder) {
+            RootFolder rf = (RootFolder) parent;
             switch (requestedName) {
                 case "profile":
                     MenuItem.setActiveIds("menuDashboard");
-                    return new ProfilePage(requestedName, wrf);
+                    return new ProfilePage(requestedName, rf);
             }
         }
         if (parent instanceof RootFolder) {            

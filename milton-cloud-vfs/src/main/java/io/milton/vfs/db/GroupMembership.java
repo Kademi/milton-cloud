@@ -18,7 +18,9 @@ package io.milton.vfs.db;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -52,6 +54,12 @@ public class GroupMembership implements Serializable{
     private Group groupEntity;
     private Date createdDate;
     private Date modifiedDate;
+    private List<Subordinate> subordinates;
+
+    public GroupMembership() {
+    }
+    
+    
     
     @Id
     @GeneratedValue
@@ -112,6 +120,24 @@ public class GroupMembership implements Serializable{
 
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
+    }
+
+    @OneToMany(mappedBy = "groupMembership")
+    public List<Subordinate> getSubordinates() {
+        return subordinates;
+    }
+
+    public void setSubordinates(List<Subordinate> subordinates) {
+        this.subordinates = subordinates;
+    }
+
+    public void delete(Session session) {
+        if( getSubordinates() != null ) {
+            for( Subordinate s : getSubordinates() ) {
+                s.delete(session);
+            }
+        }
+        session.delete(this);
     }
     
 }

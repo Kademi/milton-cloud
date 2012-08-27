@@ -1,3 +1,6 @@
+body.admin div.bar {
+    display: none;
+}
 body.profile .details form, body.profile .changePassword form, body.profile div.profilePic {
     border: solid lightgray 1px;
     border-radius: 5px;

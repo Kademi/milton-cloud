@@ -25,10 +25,13 @@ import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.event.SubscriptionEvent.SignupAction;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.event.Event;
+import io.milton.event.EventListener;
 import io.milton.event.EventManager;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -36,13 +39,17 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
-public class SignupApp implements ChildPageApplication, BrowsableApplication {
+public class SignupApp implements ChildPageApplication, BrowsableApplication, EventListener {
 
+    private static final Logger log = LoggerFactory.getLogger(SignupApp.class);
+    
     private String signupPageName = "signup";
     private StateProcess userManagementProcess;
     private TimerService timerService;
@@ -62,15 +69,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
         return "User registration and signup";
     }
 
-    
-    
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides signup pages, which allows people to join your websites and groups";
     }
 
-    
-    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         userManagementProcess = buildProcess();
@@ -146,7 +149,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
         return new SubscriptionEventActionHandler(a);
     }
 
-    public void onNewProfile(Profile u, RootFolder rf) {
+    public void onNewProfile(Profile u, Group groupToJoin, RootFolder rf) {
         ProfileProcess pp = new ProfileProcess();
         pp.setProfile(u);
         pp.setProcessName(userManagementProcess.getName());
@@ -158,7 +161,19 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
             context.addAttribute("website", wrf);
         }
         context.scan();
+        log.info("Final state: " + pp.getStateName());
+    }
 
+    @Override
+    public void onEvent(Event e) {
+        log.info("onEvent" + e);
+        if (e instanceof SubscriptionEvent) {
+            // although these events are raised from within this app, they can be
+            // raised from anywhere, eg other apps might also do signups
+            SubscriptionEvent se = (SubscriptionEvent) e;
+            log.info("process subscription event: group=" + se.getGroup().getName());
+            SignupLog.logSignup(se.getWebsite(), se.getProfile(), se.getMemberOfOrg(), se.getGroup(), SessionManager.session());
+        }
     }
 
     public class SubscriptionEventActionHandler implements ActionHandler {
@@ -180,11 +195,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
             }
             try {
                 if (p.getMemberships() == null || p.getMemberships().isEmpty()) {
-                    SubscriptionEvent e = new SubscriptionEvent(p, null, website, action);
+                    SubscriptionEvent e = new SubscriptionEvent(p, null, website, null, action);
                     eventManager.fireEvent(e);
                 } else {
                     for (GroupMembership m : p.getMemberships()) {
-                        SubscriptionEvent e = new SubscriptionEvent(p, m.getGroupEntity(), website, action);
+                        SubscriptionEvent e = new SubscriptionEvent(p, m.getGroupEntity(), website, m.getWithinOrg(), action);
                         eventManager.fireEvent(e);
                     }
                 }
@@ -194,7 +209,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
 
         }
     }
-    
+
     public class RejectedRule implements Rule {
 
         @Override
@@ -203,18 +218,19 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
             Profile p = pi.getProfile();
             return p.isRejected();
         }
-        
     }
 
     public class AutoApproved implements Rule {
 
         @Override
         public boolean eval(ProcessContext context) {
+            log.info("AutoApproved: eval");
             ProfileProcess pi = (ProfileProcess) context.getProcessInstance();
             // Check that all groups are open
             Profile p = pi.getProfile();
             if (p.getMemberships() == null) {
                 // can't be open if there are no groups
+                log.info("AutoApproved: not auto approved because has no memberships");
                 return false;
             }
             for (GroupMembership gm : p.getMemberships()) {
@@ -223,6 +239,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication {
                     return false;
                 }
             }
+            log.info("AutoApproved: eval: no closed groups so return true");
             return true;
         }
     }

@@ -16,12 +16,9 @@
  */
 package io.milton.cloud.server.apps.user;
 
-
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -39,74 +36,98 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
-import io.milton.vfs.db.*;
+import java.util.HashMap;
 
 /**
- * Represents the collection of users defined on this organisation as their admin
- * org
+ * Represents the collection of users defined on this organisation as their
+ * admin org
  *
  * @author brad
  */
 public class UsersFolder extends AbstractCollectionResource implements GetableResource {
-    
+
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UsersFolder.class);
-    
     private final CommonCollectionResource parent;
     private final String name;
-    
     private ResourceList children;
-    private InstantiationVisitor instantiationVisitor;
+    private Map<String, UserResource> tempChildren; // used to hold references to children when the whole collection has not been loaded
 
-    public UsersFolder(CommonCollectionResource parent, String name) {        
+    public UsersFolder(CommonCollectionResource parent, String name) {
         this.parent = parent;
         this.name = name;
     }
-    
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("admin","user/home", this, params, out);
+        _(HtmlTemplater.class).writePage("admin", "user/home", this, params, out);
+    }
+
+    public Resource findUserResource(Profile p) {
+        if( p == null) {
+            return  null;
+        }
+        if (children != null) {
+            log.info("find from children");
+            return NodeChildUtils.childOf(children, p.getName());
+        } else {
+            log.info("cherry pick");
+            if (tempChildren == null) {
+                tempChildren = new HashMap<>();
+            }
+            UserResource r = tempChildren.get(p.getName());
+            if (r == null) {
+                r = new UserResource(this, p);
+                tempChildren.put(p.getName(), r);
+            }
+            return r;
+        }
     }
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return super.child(childName); // TODO: need to pick out resources without loading whole collection
+        log.info("child: " + childName);
+        if (children == null) {
+            // Attempt to locate a user without loading entire collection
+            Profile p = Profile.find(childName, SessionManager.session());
+            return findUserResource(p);
+        } else {
+            return super.child(childName); // will scan the list of loaded children
+        }
     }
-    
+
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if( children == null ) {
+        if (children == null) {
             children = new ResourceList();
             _(ApplicationManager.class).addBrowseablePages(this, children);
-            List<BaseEntity> entities = BaseEntity.find(getOrganisation(), SessionManager.session());
-            for( BaseEntity e : entities ) {
-                CommonResource r = instantiateEntity(e);
-                if( r != null ) {
-                    children.add(r);
+            List<Profile> list = Profile.findByBusinessUnit(getOrganisation(), SessionManager.session());
+            for (Profile e : list) {
+                UserResource r;
+                if( tempChildren != null && tempChildren.containsKey(e.getName())) {
+                    r = tempChildren.get(e.getName());
+                } else {
+                    r = new UserResource(this, e);
                 }
+                children.add(r);
             }
         }
         return children;
-    }    
+    }
 
-    
-    
-    
     @Override
     public CommonCollectionResource getParent() {
         return parent;
     }
 
-
     @Override
     public String getName() {
         return name;
     }
-    
+
     @Override
     public Map<Principal, List<Priviledge>> getAccessControlList() {
         return null;
     }
-
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
@@ -126,44 +147,5 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
-    }
-
-    /**
-     * Uses the visitor pattern to create an instance of an appropriate resource
-     * 
-     * @param e
-     * @return 
-     */
-    private CommonResource instantiateEntity(BaseEntity e) {
-        instantiated = null;
-        if( instantiationVisitor == null ) {
-            instantiationVisitor = new InstantiationVisitor();
-        }
-        e.accept(instantiationVisitor);
-        if( instantiated == null ) {
-            log.warn("Couldnt create resource for entity: " + e.getClass() + " - " + e.getName());
-        }
-        return instantiated;
-    }
-    
-    private CommonResource instantiated;
-    
-    private class InstantiationVisitor extends AbstractVfsVisitor {
-
-        @Override
-        public void visit(Group r) {
-            instantiated = new GroupResource(UsersFolder.this, r);
-        }
-
-        @Override
-        public void visit(Organisation p) {
-            instantiated = new OrganisationFolder(UsersFolder.this, p);
-        }
-
-        @Override
-        public void visit(Profile r) {
-            instantiated = new UserResource(UsersFolder.this, r);
-        }
-        
     }
 }

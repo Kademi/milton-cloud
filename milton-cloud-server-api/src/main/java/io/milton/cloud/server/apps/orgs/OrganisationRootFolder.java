@@ -70,7 +70,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     }
 
     @Override
-    public PrincipalResource findEntity(BaseEntity u) throws NotAuthorizedException, BadRequestException{
+    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
         return UserApp.findEntity(u, this);
     }
 

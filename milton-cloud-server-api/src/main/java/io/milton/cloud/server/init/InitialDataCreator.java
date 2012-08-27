@@ -116,12 +116,12 @@ public class InitialDataCreator implements LifecycleApplication {
         
         
         Profile normalUser = initHelper.checkCreateUser("a1", adminPassword, session, rootOrg, null);
-        normalUser.addToGroup(users, rootOrg);
+        normalUser.addToGroup(users, rootOrg, session);
         if( normalUser.repository("files") == null ) {
             normalUser.createRepository("files", normalUser, session);
         }
         
-        admin.addToGroup(administrators, rootOrg).addToGroup(users, rootOrg);
+        admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io
         initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
         miltonSite.addGroup(users, session);

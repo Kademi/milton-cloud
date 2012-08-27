@@ -1,8 +1,5 @@
 package io.milton.vfs.db;
 
-import io.milton.resource.AccessControlledResource;
-import io.milton.vfs.db.utils.DbUtils;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -30,14 +27,13 @@ import org.hibernate.annotations.Index;
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name = "BASE_ENTITY",
-uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "organisation"})}// item names must be unique within a directory
-)
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name"})}// website DNS names must be unique across whole system
+)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {
@@ -51,22 +47,14 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         }
     }
 
-    public static List<BaseEntity> find(Organisation organisation, Session session) {
-        Criteria crit = session.createCriteria(BaseEntity.class);
-        crit.add(Expression.eq("organisation", organisation));
-        return DbUtils.toList(crit, BaseEntity.class);
-    }
-    
     
     private long id;
     private String name;
     private String type;
     private String notes;
-    private Organisation organisation;
     private Date createdDate;
     private Date modifiedDate;
     private List<Repository> repositories;    // has repositories
-    private List<GroupMembership> memberships; // can belong to groups
     private List<AddressBook> addressBooks; // has addressbooks
     private List<Calendar> calendars; // has calendars
 
@@ -78,15 +66,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    @ManyToOne
-    public Organisation getOrganisation() {
-        return organisation;
-    }
-
-    public void setOrganisation(Organisation organisation) {
-        this.organisation = organisation;
     }
 
     @Column(nullable = false)
@@ -167,20 +146,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.type = type;
     }
 
-    /**
-     * Returns the groups that this entity is a member of. Not to be confused with
-     * members on a group, which lists the entities which are in the group
-     * 
-     * @return 
-     */
-    @OneToMany(mappedBy = "member")
-    public List<GroupMembership> getMemberships() {
-        return memberships;
-    }
-
-    public void setMemberships(List<GroupMembership> memberships) {
-        this.memberships = memberships;
-    }
 
     @Column
     public String getNotes() {
@@ -218,12 +183,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             setRepositories(null);
         }
         
-        if( getMemberships() != null ) {
-            for( GroupMembership m : getMemberships() ) {
-                session.delete(m);
-            }
-            setMemberships(null);
-        }
         if( getAddressBooks() != null ) {
             for( AddressBook a : getAddressBooks() ) {
                 a.delete(session);
@@ -247,7 +206,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
      * @param g
      * @return 
      */
-    public BaseEntity addToGroup(Group g, Organisation withinOrg) {
+    public BaseEntity addToGroup(Group g, Organisation withinOrg, Session session) {
         if( g.isMember(this, withinOrg)) {
             return this;
         }
@@ -257,7 +216,15 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         gm.setMember(this);
         gm.setWithinOrg(withinOrg);
         gm.setModifiedDate(new Date());
-        SessionManager.session().save(gm);
+        session.save(gm);
+        
+        // Need to create a subordinate record for each parent organisation
+        Organisation subordinateTo = withinOrg;
+        while(subordinateTo != null ) {
+            createSubordinate(subordinateTo, gm, session);
+            subordinateTo = subordinateTo.getOrganisation();
+        }
+        
         return this;
     }    
     
@@ -271,4 +238,17 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         }        
         return null;
     }   
+
+    /**
+     * Creates a Subordinate record
+     * 
+     * @param subordinateTo
+     * @param gm 
+     */
+    private void createSubordinate(Organisation subordinateTo, GroupMembership gm, Session session) {
+        Subordinate s = new Subordinate();
+        s.setWithinOrg(subordinateTo);
+        s.setGroupMembership(gm);
+        session.save(s);
+    }
 }

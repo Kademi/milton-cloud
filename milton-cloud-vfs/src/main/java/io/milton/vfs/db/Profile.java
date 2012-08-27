@@ -3,12 +3,16 @@ package io.milton.vfs.db;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A user profile is defined within an organisation. Might change this in the
@@ -22,28 +26,84 @@ import org.hibernate.criterion.Expression;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Profile extends BaseEntity implements VfsAcceptor {
 
+    private static final Logger log = LoggerFactory.getLogger(Profile.class);
+
+    public static Profile find(String name, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.add(
+                Restrictions.disjunction()
+                .add(Restrictions.eq("name", name))
+                .add(Restrictions.eq("email", name)));
+        return DbUtils.unique(crit);
+    }
+
+    public static Profile find(Organisation org, String name, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.setCacheMode(CacheMode.NORMAL);
+        // join to group membership, then subordinate, then restrict on org        
+        Criteria critMembership = crit.createCriteria("memberships");
+        Criteria critSubordinate = critMembership.createCriteria("subordinates");
+        crit.add(Restrictions.eq("name", name));
+        critSubordinate.add(Restrictions.eq("withinOrg", org));
+        List list = crit.list();
+        if (list == null || list.isEmpty()) {
+            log.warn("Profile not found: " + name + " in org: " + org.getName());
+            return null;
+        } else {
+            return (Profile) list.get(0);
+        }
+    }
+
     public static List<Profile> findByBusinessUnit(Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.add(Expression.eq("organisation", organisation));
         return DbUtils.toList(crit, Profile.class);
     }
 
-    public static Profile findByEmail(String email, Organisation organisation, Session session) {
+    public static Profile findByEmail(String email, Organisation org, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.eq("organisation", organisation));
-        crit.add(Expression.eq("email", email));
-        List<Profile> list = DbUtils.toList(crit, Profile.class);
-        if( list.isEmpty() ) {
+        // join to group membership, then subordinate, then restrict on org        
+        Criteria critMembership = crit.createCriteria("memberships");
+        Criteria critSubordinate = critMembership.createCriteria("subordinates");
+        crit.add(Restrictions.eq("email", email));
+        critSubordinate.add(Restrictions.eq("withinOrg", org));
+        List list = crit.list();
+        if (list == null || list.isEmpty()) {
             return null;
         } else {
-            return list.get(0);
+            return (Profile) list.get(0);
         }
+
     }
 
     public static Profile get(long profileId, Session session) {
         return (Profile) session.get(Profile.class, profileId);
     }
+
+    /**
+     * Find a unique name based on the given base name
+     *
+     * @param nickName
+     * @return
+     */
+    public static  String findUniqueName(String nickName, Session session) {
+        String candidateName = nickName;
+        int counter = 1;
+        while (!isUniqueName(candidateName, session)) {
+            candidateName = nickName + counter++;
+        }
+        return candidateName;
+    }
+
+    public static boolean isUniqueName(String name, Session session) {
+        Criteria crit = session.createCriteria(BaseEntity.class);
+        crit.add(Expression.eq("name", name));
+        return crit.uniqueResult() == null;
+    }
+
+    
     private List<Credential> credentials;
+    private List<GroupMembership> memberships; // can belong to groups    
     private String firstName;
     private String surName;
     private String phone;
@@ -53,6 +113,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private boolean enabled;
     private boolean rejected;
 
+    @Override
+    public void delete(Session session) {
+        if (getMemberships() != null) {
+            for (GroupMembership m : getMemberships()) {
+                session.delete(m);
+            }
+            setMemberships(null);
+        }
+        super.delete(session);
+    }
+
     @OneToMany(mappedBy = "profile")
     public List<Credential> getCredentials() {
         return credentials;
@@ -60,6 +131,21 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public void setCredentials(List<Credential> credentials) {
         this.credentials = credentials;
+    }
+
+    /**
+     * Returns the groups that this entity is a member of. Not to be confused
+     * with members on a group, which lists the entities which are in the group
+     *
+     * @return
+     */
+    @OneToMany(mappedBy = "member")
+    public List<GroupMembership> getMemberships() {
+        return memberships;
+    }
+
+    public void setMemberships(List<GroupMembership> memberships) {
+        this.memberships = memberships;
     }
 
     public void setEmail(String email) {
@@ -140,8 +226,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     @Override
-    public Profile addToGroup(Group g, Organisation hasGroupInOrg) {
-        return (Profile) super.addToGroup(g, hasGroupInOrg);
+    public Profile addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
+        return (Profile) super.addToGroup(g, hasGroupInOrg, session);
     }
 
     public boolean isInGroup(String groupName, Organisation org) {
@@ -161,8 +247,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         if (getMemberships() != null) {
             for (GroupMembership m : getMemberships()) {
                 if (org.isWithin(m.getWithinOrg())) {
-                    for (GroupRole r  : m.getGroupEntity().getGroupRoles()) {
-                        if( r.getRoleName().equals(roleName)) {
+                    for (GroupRole r : m.getGroupEntity().getGroupRoles()) {
+                        if (r.getRoleName().equals(roleName)) {
                             return true;
                         }
                     }

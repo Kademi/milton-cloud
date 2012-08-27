@@ -99,12 +99,13 @@ public class PasswordManager {
 
     public boolean verifyPassword(Profile user, String requestPassword) {
         if (requestPassword != null) {
-            System.out.println("veruify password: " + user.getName());
+            log.info("verify password: " + user.getName());
             if (user.getCredentials() != null && !user.getCredentials().isEmpty()) {
                 for (Credential c : user.getCredentials()) {
                     if (c instanceof PasswordCredential) {
                         PasswordCredential pc = (PasswordCredential) c;
                         if (matches(user.getName(), pc, requestPassword)) {
+                            log.info("Password check ok");
                             return true;
                         } else {
                             log.warn("Non-matching password");

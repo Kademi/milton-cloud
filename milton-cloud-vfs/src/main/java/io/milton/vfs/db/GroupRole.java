@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -77,6 +78,10 @@ public class GroupRole implements Serializable{
 
     public void setGrantee(Group grantee) {
         this.grantee = grantee;
+    }
+
+    public void delete(Session session) {
+        session.delete(this);
     }
 
     

@@ -66,6 +66,7 @@ public class RootContext extends Context implements Closeable {
             reg = context.put(exec,context); // the context is its own onRemove handler
             exec.execute(context);
         } catch (Throwable e) {
+            log.error("error executing: " + exec, e);
             throw new RuntimeException(e);
         } finally {
             reg.remove();

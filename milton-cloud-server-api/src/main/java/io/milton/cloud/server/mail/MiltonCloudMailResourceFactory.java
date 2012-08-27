@@ -26,9 +26,9 @@ import io.milton.vfs.db.utils.SessionManager;
 
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.vfs.db.BaseEntity;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Profile;
 
 /**
  *
@@ -58,7 +58,7 @@ public class MiltonCloudMailResourceFactory implements MailResourceFactory{
         Website w = wrf.getWebsite();
 
         // Now look for a profile which has a admin org that owns the website
-        BaseEntity p = BaseEntity.find(w.getOrganisation(), add.user, SessionManager.session());
+        Profile p = Profile.find(w.getOrganisation(), add.user, SessionManager.session());
         if( p == null ) {
             log.info("baseentity not found: " + add.user + " in website: " + w.getDomainName());
             return null;

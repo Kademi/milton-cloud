@@ -182,17 +182,7 @@ public abstract class AbstactAppsPage extends AbstractResource implements Getabl
     }
 
     public List<Organisation> getChildOrganisations() {
-        List<Organisation> list = new ArrayList<>();
-        List<BaseEntity> members = getOrganisation().getMembers();
-        if (members == null || members.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-        for (BaseEntity be : members) {
-            if (be instanceof Organisation) {
-                list.add((Organisation) be);
-            }
-        }
-        return list;
+        return getOrganisation().childOrgs();
     }
 
     protected void updateApplicationSettings(Map<String, String> parameters, Map<String, FileItem> files, Transaction tx) throws NotAuthorizedException, HibernateException, BadRequestException, ConflictException {

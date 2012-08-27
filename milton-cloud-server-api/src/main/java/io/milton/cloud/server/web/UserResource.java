@@ -319,4 +319,8 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         }
         return s;
     }
+    
+    public Long getUserId() {
+        return user.getId();
+    }
 }

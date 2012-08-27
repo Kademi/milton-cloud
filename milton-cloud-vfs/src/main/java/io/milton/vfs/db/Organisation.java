@@ -16,12 +16,12 @@
  */
 package io.milton.vfs.db;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -50,32 +50,30 @@ import org.hibernate.criterion.Expression;
  */
 @javax.persistence.Entity
 @Table(name = "ORG_ENTITY", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"orgId"}),
-}// website DNS names must be unique across whole system
+    @UniqueConstraint(columnNames = {"orgId"})}// website DNS names must be unique across whole system
 )
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
-    
 
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.add(Expression.isNull("organisation"));
         return (Organisation) crit.uniqueResult();
     }
-    
+
     public static Organisation findByOrgId(String orgId, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.add(Expression.eq("orgId", orgId));
         return (Organisation) crit.uniqueResult();
-    }    
-    
+    }
     private String orgId; // globally unique; used for web addresses for this organisation
-    private List<BaseEntity> members;
+    private Organisation organisation;
+    private List<Organisation> childOrgs;
     private List<Website> websites;
     private List<Group> groups;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     @Index(name = "idx_orgId")
     public String getOrgId() {
         return orgId;
@@ -85,15 +83,22 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgId = orgId;
     }
 
-    
-    
-    @OneToMany(mappedBy = "organisation")
-    public List<BaseEntity> getMembers() {
-        return members;
+    @ManyToOne
+    public Organisation getOrganisation() {
+        return organisation;
     }
 
-    public void setMembers(List<BaseEntity> users) {
-        this.members = users;
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
+    }
+
+    @OneToMany(mappedBy = "organisation")
+    public List<Organisation> getChildOrgs() {
+        return childOrgs;
+    }
+
+    public void setChildOrgs(List<Organisation> childOrgs) {
+        this.childOrgs = childOrgs;
     }
 
     @OneToMany(mappedBy = "organisation")
@@ -113,45 +118,18 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
-    /**
-     * Find a unique name based on the given base name
-     *
-     * @param nickName
-     * @return
-     */
-    public String findUniqueName(String nickName, Session session) {
-        String candidateName = nickName;
-        int counter = 1;
-        while (!isUniqueName(candidateName, session)) {
-            candidateName = nickName + counter++;
-        }
-        return candidateName;
-    }
-
-    public boolean isUniqueName(String name, Session session) {
-        Criteria crit = session.createCriteria(BaseEntity.class);
-        crit.add(Expression.and(Expression.eq("organisation", this), Expression.eq("name", name)));
-        return crit.uniqueResult() == null;
-    }
-
     public List<Organisation> childOrgs() {
-        List<Organisation> list = new ArrayList<>();
-        if (this.getMembers() != null) {
-            for (BaseEntity be : getMembers()) {
-                if (be instanceof Organisation) {
-                    list.add((Organisation) be);
-                }
-            }
+        if (getChildOrgs() == null) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return getChildOrgs();
         }
-        return list;
     }
 
-    public BaseEntity childOrg(String dn) {
-        if (this.getMembers() != null) {
-            for (BaseEntity be : this.getMembers()) {
-                if (be.getName().equals(dn)) {
-                    return be;
-                }
+    public Organisation childOrg(String dn) {
+        for (Organisation org : childOrgs()) {
+            if (org.getName().equals(dn)) {
+                return org;
             }
         }
         return null;
@@ -182,10 +160,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     /**
      * Creates an organisation with an orgId the same as its name. Note that
      * orgId must be unique globally, so this might not always work
-     * 
+     *
      * @param orgName
      * @param session
-     * @return 
+     * @return
      */
     public Organisation createChildOrg(String orgName, Session session) {
         Organisation o = new Organisation();
@@ -196,8 +174,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         o.setModifiedDate(new Date());
         session.save(o);
         return o;
-    }        
-    
+    }
+
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
@@ -205,16 +183,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     /**
      * Recursive method, goes up through parent orgs to find the group
-     * 
+     *
      * @param groupName
      * @param session
-     * @return 
+     * @return
      */
     public Group group(String groupName, Session session) {
         Group g = Group.findByOrgAndName(this, groupName, session);
-        if( g == null ) {
+        if (g == null) {
             Organisation parent = getOrganisation();
-            if( parent != null ) {
+            if (parent != null) {
                 g = parent.group(groupName, session);
             }
         }
@@ -227,19 +205,23 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     @Override
     public void delete(Session session) {
-        if( getWebsites() != null ) {
-            for( Website w : getWebsites()) {
-                w.delete(session); 
+        if (getWebsites() != null) {
+            for (Website w : getWebsites()) {
+                w.delete(session);
             }
         }
         setWebsites(null);
-        if( getMembers() != null ) {
-            for( BaseEntity m : getMembers()) {
-                m.delete(session);
+        if( getGroups() != null ) {
+            for( Group g : getGroups() ) {
+                g.delete(session);
             }
         }
-        session.delete(this);
         
+        for( Organisation childOrg : childOrgs() ) {
+            childOrg.delete(session);
+        }
+        session.delete(this);
+
     }
 
     @OneToMany(mappedBy = "organisation")
@@ -253,23 +235,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     /**
      * Check if this organisation is within, or is, the given org
-     * 
+     *
      * @param withinOrg
-     * @return 
+     * @return
      */
     public boolean isWithin(Organisation withinOrg) {
-        if( withinOrg == null ) {
+        if (withinOrg == null) {
             return false;
         }
-        if( withinOrg == this ) {
+        if (withinOrg == this) {
             return true;
         }
         Organisation parent = getOrganisation();
-        if( parent != null ) {
+        if (parent != null) {
             return parent.isWithin(withinOrg);
         }
         return false;
     }
-    
-    
 }

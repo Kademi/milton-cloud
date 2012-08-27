@@ -22,7 +22,7 @@
         <script type="text/javascript" src="/static/js/jQueryRotate.2.2.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.placeholder.js" >//</script>
     </head>
-    <body class="theme">
+    <body class="theme admin">
         <!-- page layout goes here -->
         <div id="wrapper">
             <header id="header">
@@ -37,7 +37,7 @@
                 </nav>
                 <aside class="userBtn">
                     #if( $user )
-                    <h3><a href="$user.path">Welcome $user.nickName</a></h3>
+                    <h3><a href="/manageUsers/$user.userId">Welcome $user.nickName</a></h3>
                     <div class="dropBox">
                         <ul class="list requiresuser">
                             <li>
@@ -81,7 +81,7 @@
                         <h1>$page.title</h1>
                         <a href="#" class="helpIcon">Help</a>
                     </header>
-                    <div id="module-Course">
+                    <div id="module-Course" class="content"> <!-- The id module-Course is incorrect, should be replaced with content -->
                         <article>
                             #content
                         </article>

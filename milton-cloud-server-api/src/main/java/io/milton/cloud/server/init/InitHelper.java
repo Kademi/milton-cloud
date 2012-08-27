@@ -76,7 +76,7 @@ public class InitHelper {
             for (int i = 0; i < numUsers; i++) {
                 String pname = name + i;
                 Profile p = checkCreateUser(pname, "password8", session, org, emailSender);
-                p.addToGroup(g, org);
+                p.addToGroup(g, org, session);
             }
         }
         return g;
@@ -118,10 +118,9 @@ public class InitHelper {
      * @throws HibernateException
      */
     public Profile checkCreateUser(String name, String password, Session session, Organisation org, Profile emailSender) throws HibernateException {
-        BaseEntity be = BaseEntity.find(org, name, session);
+        Profile be = Profile.find( name, session);
         if (be == null) {
             Profile t = new Profile();
-            t.setOrganisation(org);
             t.setName(name);
             t.setNickName(name);
             t.setCreatedDate(new Date());

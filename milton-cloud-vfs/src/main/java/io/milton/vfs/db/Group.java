@@ -247,5 +247,19 @@ public class Group implements Serializable, VfsAcceptor {
         boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
         return b;        
     }
+
+    public void delete(Session session) {
+        if( getGroupRoles() != null ) {
+            for( GroupRole gr : getGroupRoles() ) {
+                gr.delete(session);
+            }
+        }
+        if( getGroupMemberships() != null ) {
+            for( GroupMembership gm : getGroupMemberships() ) {
+                gm.delete(session);
+            }
+        }
+        session.delete(this);
+    }
     
 }
