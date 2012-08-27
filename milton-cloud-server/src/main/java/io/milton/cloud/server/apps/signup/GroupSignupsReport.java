@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.admin;
+package io.milton.cloud.server.apps.signup;
 
 import io.milton.cloud.server.apps.reporting.TimeDataPointBean;
 import io.milton.cloud.server.db.SignupLog;

@@ -1,6 +1,7 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.CacheMode;
@@ -225,11 +226,50 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.rejected = rejected;
     }
 
-    @Override
-    public Profile addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
-        return (Profile) super.addToGroup(g, hasGroupInOrg, session);
-    }
+    /**
+     * Create a GroupMembership linking this profile to the given group, within the given
+     * organisation. Is immediately saved
+     * 
+     * @param g
+     * @return 
+     */
 
+    public Profile addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
+        if( g.isMember(this, hasGroupInOrg)) {
+            return this;
+        }
+        GroupMembership gm = new GroupMembership();
+        gm.setCreatedDate(new Date());
+        gm.setGroupEntity(g);
+        gm.setMember(this);
+        gm.setWithinOrg(hasGroupInOrg);
+        gm.setModifiedDate(new Date());
+        session.save(gm);
+        
+        // Need to create a subordinate record for each parent organisation
+        Organisation subordinateTo = hasGroupInOrg;
+        while(subordinateTo != null ) {
+            createSubordinate(subordinateTo, gm, session);
+            subordinateTo = subordinateTo.getOrganisation();
+        }
+        
+        return this;
+    }  
+    
+    /**
+     * Creates a Subordinate record
+     * 
+     * @param subordinateTo
+     * @param gm 
+     */
+    private void createSubordinate(Organisation subordinateTo, GroupMembership gm, Session session) {
+        Subordinate s = new Subordinate();
+        s.setWithinOrg(subordinateTo);
+        s.setGroupMembership(gm);
+        session.save(s);
+    }    
+    
+    
     public boolean isInGroup(String groupName, Organisation org) {
         if (getMemberships() != null) {
             for (GroupMembership m : getMemberships()) {
@@ -257,4 +297,5 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
+    
 }

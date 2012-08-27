@@ -198,35 +198,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         session.delete(this);
     }
      
-    
-    /**
-     * Create a GroupMembership linking this profile to the given group, within the given
-     * organisation. Is immediately saved
-     * 
-     * @param g
-     * @return 
-     */
-    public BaseEntity addToGroup(Group g, Organisation withinOrg, Session session) {
-        if( g.isMember(this, withinOrg)) {
-            return this;
-        }
-        GroupMembership gm = new GroupMembership();
-        gm.setCreatedDate(new Date());
-        gm.setGroupEntity(g);
-        gm.setMember(this);
-        gm.setWithinOrg(withinOrg);
-        gm.setModifiedDate(new Date());
-        session.save(gm);
-        
-        // Need to create a subordinate record for each parent organisation
-        Organisation subordinateTo = withinOrg;
-        while(subordinateTo != null ) {
-            createSubordinate(subordinateTo, gm, session);
-            subordinateTo = subordinateTo.getOrganisation();
-        }
-        
-        return this;
-    }    
+      
     
     public Repository repository(String name) {
         if( getRepositories() != null ) {
@@ -239,16 +211,5 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         return null;
     }   
 
-    /**
-     * Creates a Subordinate record
-     * 
-     * @param subordinateTo
-     * @param gm 
-     */
-    private void createSubordinate(Organisation subordinateTo, GroupMembership gm, Session session) {
-        Subordinate s = new Subordinate();
-        s.setWithinOrg(subordinateTo);
-        s.setGroupMembership(gm);
-        session.save(s);
-    }
+
 }

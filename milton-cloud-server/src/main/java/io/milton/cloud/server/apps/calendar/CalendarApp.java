@@ -17,16 +17,16 @@
 package io.milton.cloud.server.apps.calendar;
 
 import io.milton.resource.CollectionResource;
-import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
-import io.milton.cloud.server.event.JoinGroupEvent;
+import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.vfs.db.Calendar;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
@@ -68,7 +68,7 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         calendarManager = new CalendarManager();
         applicationManager = resourceFactory.getApplicationManager();
-        resourceFactory.getEventManager().registerEventListener(this, JoinGroupEvent.class);
+        resourceFactory.getEventManager().registerEventListener(this, SubscriptionEvent.class);
     }
 
     @Override
@@ -83,12 +83,13 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
 
     @Override
     public void onEvent(Event e) {
-        if (e instanceof JoinGroupEvent) {
-            JoinGroupEvent joinEvent = (JoinGroupEvent) e;
-            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(joinEvent.getGroup(), SessionManager.session());
+        if (e instanceof SubscriptionEvent) {
+            SubscriptionEvent joinEvent = (SubscriptionEvent) e;
+            Group group = joinEvent.getMembership().getGroupEntity();
+            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
             for (GroupInWebsite giw  : giws) {
                 if (applicationManager.isActive(this, giw.getWebsite())) {
-                    addCalendar("cal", joinEvent.getProfile(), SessionManager.session());
+                    addCalendar("cal", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }
         }

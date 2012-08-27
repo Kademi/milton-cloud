@@ -14,31 +14,40 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import javax.persistence.DiscriminatorValue;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Expression;
 
 /**
+ * This process tracks a user's progress through a program;
  *
  * @author brad
  */
-
 @javax.persistence.Entity
 @DiscriminatorValue("P")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class ProfileProcess extends BaseProcess{
-    private Profile profile;
+public class MembershipProcess extends BaseProcess {
 
-    @ManyToOne(optional=false)
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
+    public static MembershipProcess find(GroupMembership membership, String name, Session session) {
+        Criteria crit = session.createCriteria(MembershipProcess.class);
+        crit.add(Expression.eq("moduleStatus", membership));
+        crit.add(Expression.eq("processName", name));
+        return DbUtils.unique(crit);
     }
     
+    private GroupMembership membership;
+    
+    public GroupMembership getMembership() {
+        return membership;
+    }
+
+    public void setMembership(GroupMembership membership) {
+        this.membership = membership;
+    }
+
     
 }

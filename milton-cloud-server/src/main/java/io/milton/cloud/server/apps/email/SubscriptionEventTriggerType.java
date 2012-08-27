@@ -1,7 +1,7 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.event.SubscriptionEvent;
-import io.milton.cloud.server.event.SubscriptionEvent.SignupAction;
+import io.milton.cloud.server.event.SubscriptionEvent.SubscriptionAction;
 import io.milton.cloud.server.mail.EmailTriggerType;
 import io.milton.cloud.server.mail.Option;
 import io.milton.vfs.db.Group;
@@ -60,7 +60,7 @@ public class SubscriptionEventTriggerType implements EmailTriggerType {
     @Override
     public List<Option> options3(Organisation o) {
         List<Option> list = new ArrayList<>();
-        for( SignupAction a : SubscriptionEvent.SignupAction.values()) {
+        for( SubscriptionAction a : SubscriptionEvent.SubscriptionAction.values()) {
             Option.add(list, a.name());
         }
         return list;

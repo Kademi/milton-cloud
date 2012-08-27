@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.apps.signup.GroupSignupsReport;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ApplicationManager;
@@ -51,7 +52,6 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     public AdminApp() {
         reports = new ArrayList<>();
         reports.add(new WebsiteAccessReport());
-        reports.add(new GroupSignupsReport());
     }
     
     

@@ -20,7 +20,6 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.PortletApplication;
-import io.milton.cloud.server.event.JoinGroupEvent;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -39,6 +38,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import java.io.IOException;
@@ -76,12 +76,13 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
 
     @Override
     public void onEvent(Event e) {
-        if (e instanceof JoinGroupEvent) {
-            JoinGroupEvent joinEvent = (JoinGroupEvent) e;
-            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(joinEvent.getGroup(), SessionManager.session());
+        if (e instanceof SubscriptionEvent) {
+            SubscriptionEvent joinEvent = (SubscriptionEvent) e;
+            Group group = joinEvent.getMembership().getGroupEntity();
+            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
             for (GroupInWebsite giw : giws) {
                 if (applicationManager.isActive(this, giw.getWebsite())) {
-                    Profile u = joinEvent.getProfile();
+                    Profile u = joinEvent.getMembership().getMember();
                     Session session = SessionManager.session();
                     addRepo("Documents", u, session);
                     addRepo("Music", u, session);

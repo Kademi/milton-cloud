@@ -16,13 +16,12 @@
  */
 package io.milton.cloud.server.event;
 
-import io.milton.event.Event;
 import io.milton.vfs.db.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fired when a user signs up
+ * Fired when a user joins a group
  *
  * @author brad
  */
@@ -34,7 +33,7 @@ public class SubscriptionEvent implements TriggerEvent {
     /**
      * The sorts of things that can happen in a signupevent
      */
-    public enum SignupAction {
+    public enum SubscriptionAction {
 
         AUTOAPPROVED,
         PENDING,
@@ -45,41 +44,32 @@ public class SubscriptionEvent implements TriggerEvent {
         PAYMENT_OVERDUE,
         RE_ACTIVATED
     }
-    private final Profile profile;
-    private final Group group;
     private final Website website;
-    private final Organisation memberOfOrg;
-    private final SignupAction action;
+    private final GroupMembership membership;
+    private final SubscriptionAction action;
 
-    public SubscriptionEvent(Profile profile, Group group, Website website, Organisation memberOfOrg, SignupAction action) {
-        this.profile = profile;
-        this.group = group;
+    public SubscriptionEvent(GroupMembership membership, Website website, SubscriptionAction action) {
         this.website = website;
-        this.memberOfOrg = memberOfOrg;
+        this.membership = membership;
         this.action = action;
     }
 
-    public Profile getProfile() {
-        return profile;
+    public SubscriptionAction getAction() {
+        return action;
     }
 
+    public GroupMembership getMembership() {
+        return membership;
+    }
+        
     public Website getWebsite() {
         return website;
     }
 
-    public Group getGroup() {
-        return group;
-    }
-
-    public Organisation getMemberOfOrg() {
-        return memberOfOrg;
-    }
-        
-
     @Override
     public List<BaseEntity> getSourceEntities() {
         List<BaseEntity> list = new ArrayList<>();
-        list.add(profile);
+        list.add(membership.getMember());
         return list;
     }    
     
@@ -95,7 +85,7 @@ public class SubscriptionEvent implements TriggerEvent {
 
     @Override
     public String getTriggerItem1() {
-        return group.getId() + "";
+        return membership.getGroupEntity().getId() + "";
     }
 
     @Override

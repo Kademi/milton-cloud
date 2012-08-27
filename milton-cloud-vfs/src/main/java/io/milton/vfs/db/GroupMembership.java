@@ -50,7 +50,7 @@ uniqueConstraints = {
 public class GroupMembership implements Serializable{
     private Long id;
     private Organisation withinOrg;
-    private BaseEntity member;
+    private Profile member;
     private Group groupEntity;
     private Date createdDate;
     private Date modifiedDate;
@@ -83,11 +83,11 @@ public class GroupMembership implements Serializable{
     
     
     @ManyToOne(optional=false)
-    public BaseEntity getMember() {
+    public Profile getMember() {
         return member;
     }
 
-    public void setMember(BaseEntity member) {
+    public void setMember(Profile member) {
         this.member = member;
     }
 
