@@ -1843,22 +1843,26 @@
             this._trigger($.jPlayer.event.resize);
         },
         _setSize: function() {
-            // Determine the current size from the options
+            // Determine the current size from the options            
+            var containerHeight;
             if(this.options.fullScreen) {
                 this.status.width = this.options.sizeFull.width;
                 this.status.height = this.options.sizeFull.height;
+                containerHeight = this.status.height;
                 this.status.cssClass = this.options.sizeFull.cssClass;
             } else {
+                log("_setSize", this.options.size.height);
                 this.status.width = this.options.size.width;
-                this.status.height = this.options.size.height;
+                containerHeight = this.options.size.height;
+                this.status.height = ""; //this.options.size.height;
                 this.status.cssClass = this.options.size.cssClass;
             }
 
             // Set the size of the jPlayer area.
-            log("set size", this.element, this.status);
+            log("set size", this, this.element, this.status);
             this.element.css({
                 'width': this.status.width, 
-                'height': this.status.height
+                'height': containerHeight //this.status.height
                 });
         },
         _addUiClass: function() {

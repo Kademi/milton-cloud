@@ -203,7 +203,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     private String getEmailMenuItemText() {
         Profile currentUser = securityManager.getCurrentUser();
-        int numUnread = EmailItem.findByNumUnreadByRecipient(currentUser, SessionManager.session());
+        long numUnread = EmailItem.findByNumUnreadByRecipient(currentUser, SessionManager.session());
         StringBuilder sb = new StringBuilder();
         if (numUnread > 0) {
             sb.append("<span>").append(numUnread).append("</span>");

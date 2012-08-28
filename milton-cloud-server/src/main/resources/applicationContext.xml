@@ -29,23 +29,6 @@
 
     <bean id="lock.manager" class="io.milton.http.fs.SimpleLockManager" />
             
-    <bean id="blob.store" class="io.milton.cloud.common.store.FileSystemBlobStore">
-        <constructor-arg value="${blob.storage.location}" />
-    </bean>
-    
-    <!-- This is a much more robust blob store, but experimental -->
-    <!--
-    <bean id="blob.store" class="io.milton.cloud.server.db.store.HAVolumeBlobStore">
-        <constructor-arg ref="volume.allocator"/>
-        <constructor-arg>
-            <list>
-                <ref local="local.volume.type" />
-            </list>
-        </constructor-arg>
-        <constructor-arg ref="session.manager" />
-    </bean>
-    -->
-
     <bean id="hash.store" class="io.milton.vfs.content.DbHashStore"/>
     
     
@@ -75,7 +58,7 @@
     
     <bean id="alt.format.generator" class="io.milton.cloud.server.web.alt.AltFormatGenerator">
         <constructor-arg ref="hash.store" />
-        <constructor-arg ref="blob.store"  />        
+        <constructor-arg ref="${id.blob.store}" />
         <constructor-arg ref="event.manager" /> 
         <constructor-arg ref="content.type.service" />
         <constructor-arg ref="root.context"/>
@@ -97,13 +80,13 @@
        
     <bean id="sync.spliffy.resource.factory" class="io.milton.cloud.server.web.sync.SpliffySyncResourceFactory">
         <constructor-arg ref="hash.store" />
-        <constructor-arg ref="blob.store" />
+        <constructor-arg ref="${id.blob.store}" />
         <constructor-arg ref="security.manager" />
     </bean>
     
     <bean id="altformat.resource.factory" class="io.milton.cloud.server.web.alt.AltFormatResourceFactory">
         <constructor-arg ref="hash.store" />
-        <constructor-arg ref="blob.store" />
+        <constructor-arg ref="${id.blob.store}" />
         <constructor-arg ref="main.spliffy.resource.factory" />
         <constructor-arg ref="alt.format.generator" />
     </bean>    
@@ -112,7 +95,7 @@
         <constructor-arg ref="servletContext" />        
         <constructor-arg ref="main.spliffy.resource.factory" />        
         <constructor-arg ref="hash.store"/>
-        <constructor-arg ref="blob.store"/>
+        <constructor-arg ref="${id.blob.store}" />
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>
         <constructor-arg ref="event.manager"/>

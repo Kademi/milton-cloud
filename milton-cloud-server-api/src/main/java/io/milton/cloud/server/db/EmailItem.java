@@ -73,7 +73,7 @@ public class EmailItem implements Serializable {
         return DbUtils.toList(crit, EmailItem.class);
     }
 
-    public static int findByNumUnreadByRecipient(Profile p, Session session) {
+    public static long findByNumUnreadByRecipient(Profile p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         crit.add(Restrictions.eq("recipient", p));
         crit.add(Restrictions.eq("readStatus", false));
@@ -82,7 +82,7 @@ public class EmailItem implements Serializable {
         if (results == null) {
             return 0;
         }
-        Integer num = (Integer) results.get(0);
+        Long num = (Long) results.get(0);
         return num;
     }
 

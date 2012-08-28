@@ -71,7 +71,7 @@
                                     </fieldset>
                                 </form>                                            
                                 #end
-                    
+
                                 <div class="accessBox">
                                     <div class="greyBox FontSize"> 
                                         <a class="linkText ZoomIn" href="#">A</a> 
@@ -114,9 +114,10 @@
             <div class="footerOuter">
                 <div class="footer">
                     <ul class="fList">
-                        <li>
-                            <a href="${targetPage.name}.edit" shape="rect">Administration</a>
-                        </li>                    
+                        <li><a href="/" shape="rect">Home</a></li>                    
+                        #if($user)
+                        <li><a href="/profile">Profile</a></li>
+                        #end                        
                     </ul>
 
                 </div>

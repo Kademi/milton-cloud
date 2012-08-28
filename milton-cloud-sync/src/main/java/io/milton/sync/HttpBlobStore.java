@@ -26,6 +26,13 @@ public class HttpBlobStore implements BlobStore {
     private long gets;
     private long sets;
 
+    public HttpBlobStore(String server, int port, String rootPath, String username, String password) {
+        this.host = new Host(server, rootPath, port, username, password, null, null);
+        this.hashCache = new MemoryHashCache();
+    }
+
+    
+    
     public HttpBlobStore(Host host, HashCache hashCache) {
         this.host = host;
         this.hashCache = hashCache;

@@ -78,14 +78,17 @@ public class AltFormatResourceFactory implements ResourceFactory {
                 String formatName = p.getName().replace("alt-", "");
                 AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());
                 FormatSpec format = altFormatGenerator.findFormat(formatName);
-                if (f != null) {
-                    return new AltFormatResource((FileResource) r, p.getName(), f, format);
+                if (f != null) {                    
+                    AltFormatResource alt = new AltFormatResource((FileResource) r, p.getName(), f, format);
+                    log.info("getResource: created resource for format: " + format + " - " + alt);
+                    return alt;
                 } else {
                     log.warn("getResource: pre-generated alt format not found: " + sourceHash + " - " + p.getName());
                     // if the format is valid then create a resource which will generate on demand                                        
-                    if (format != null) {
-                        System.out.println("created resource for format: " + format);
-                        return new AltFormatResource((FileResource) r, p.getName(), format);
+                    if (format != null) {                        
+                        AltFormatResource alt = new AltFormatResource((FileResource) r, p.getName(), format);
+                        log.info("getResource: created resource for format: " + format + " - " + alt);
+                        return alt;
                     } else {
                         log.warn("getResource: unrecognised format: " + formatName);
                     }
@@ -128,6 +131,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {            
+            log.info("sendContent");
             MediaMetaData mmd = MediaMetaData.find(rPrimary.getHash(), SessionManager.session());
             if( mmd != null ) {
                 Integer durationSecs = mmd.getDurationSecs();
@@ -145,6 +149,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                 boolean force = params.containsKey("force");
                 if (altFormat == null || force) {
                     // hack start
+                    log.info("sendContent: will generate");
                     if( params.containsKey("args")) {
                         List<String> args = new ArrayList<>();
                         for( String s : params.get("args").split(",")) {
@@ -195,7 +200,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     }
                     System.out.println("finished sending file: " + bytes);
                 } else {
-                    System.out.println("using pre-existing al-format");
+                    log.info("sendContent: using existing");
                     Combiner combiner = new Combiner();
                     List<String> fanoutCrcs = getFanout().getHashes();
                     combiner.combine(fanoutCrcs, hashStore, blobStore, out);
@@ -249,14 +254,13 @@ public class AltFormatResourceFactory implements ResourceFactory {
         }
 
         @Override
-        public Long getContentLength() {
-            System.out.println("getContentLength");
+        public Long getContentLength() {            
             if (getFanout() != null) {
                 Long l = getFanout().getActualContentLength();
-                System.out.println("content length=" + l);
+                log.info("getContentLength: " + l);
                 return l;
             }
-            System.out.println("no content length");
+            log.info("getContentLength: no content length");
             return null;
         }
 

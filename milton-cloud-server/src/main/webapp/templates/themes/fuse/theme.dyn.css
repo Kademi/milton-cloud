@@ -895,6 +895,7 @@ ul.fList li {
     font-size:11px;
     border-left:1px solid #999;
     padding-left:10px;
+    padding-bottom: 0;
     margin-left:10px;
     height:12px;
     display:inline;

@@ -118,10 +118,19 @@
         options.context = $container
 
         options.success = function(data){
+            var $data = $(data);
+
+            // If there's a <title> tag in the response, use it as
+            // the page's title.
+            var oldTitle = document.title;
+            var title = $.trim( $data.find('title').text() )
+            
+            if ( title ) document.title = title
+            
             if ( options.fragment ) {
                 // If they specified a fragment, look for it in the response
                 // and pull it out.
-                var $fragment = $(data).find(options.fragment)
+                var $fragment = $data.find(options.fragment)
                 if ( $fragment.length ){
                     data = $fragment.children()
                 }else {
@@ -130,8 +139,9 @@
             } else {
                 // If we got no data or an entire web page, go directly
                 // to the page and let normal error handling happen.
-                if ( !$.trim(data) || /<html/i.test(data) )
-                    return window.location = options.url
+                if ( !$.trim(data) || /<html/i.test(data) ) {
+                    return window.location = options.url;
+                }
             }
 
             // Make it happen.
@@ -146,18 +156,6 @@
                 log("pjax: opacity animation done, now show to ensure shown");
                 contentContainer.show();
             });
-
-            // If there's a <title> tag in the response, use it as
-            // the page's title.
-            var oldTitle = document.title,
-            title = $.trim( this.find('title').remove().text() )
-
-            // No <title>? Fragment? Look for data-title and title attributes.
-            if ( !title && options.fragment ) {
-                title = $fragment.attr('title') || $fragment.data('title')
-            }
-
-            if ( title ) document.title = title
 
             var state = {
                 pjax: $container.selector,
