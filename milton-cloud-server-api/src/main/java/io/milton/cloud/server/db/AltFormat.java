@@ -19,7 +19,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Makes a connection between the hash for a primary file and an alternative format
@@ -36,14 +36,15 @@ public class AltFormat implements Serializable {
     
     public static AltFormat find(String sourceHash, String name, Session session) {
         Criteria crit = session.createCriteria(AltFormat.class);
-        crit.add(Expression.and(Expression.eq("sourceHash", sourceHash), Expression.eq("name", name)));        
+        crit.setCacheable(true);
+        crit.add(Restrictions.and(Restrictions.eq("sourceHash", sourceHash), Restrictions.eq("name", name)));        
         return DbUtils.unique(crit);
     }    
     
     public static AltFormat insertIfOrUpdate(String name, String sourceHash, String altHash, Session session) {
         AltFormat f = find(sourceHash, name, session);
         if( f != null ) {
-            if( f.getAltHash() == altHash) {
+            if( f.getAltHash() == null ? altHash == null : f.getAltHash().equals(altHash)) {
                 return f;
             }
         } else {

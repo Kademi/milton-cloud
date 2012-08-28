@@ -22,6 +22,7 @@ import javax.persistence.Id;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * A named counter provides a means of generating monotonic-ally increasing
@@ -36,7 +37,7 @@ public class NamedCounter implements Serializable {
 
     public static NamedCounter findByName(String name, Session session) {
         Criteria crit = session.createCriteria(NamedCounter.class);
-        crit.add(Expression.eq("name", name));
+        crit.add(Restrictions.eq("name", name));
         NamedCounter c = DbUtils.unique(crit);
         return c;
     }        

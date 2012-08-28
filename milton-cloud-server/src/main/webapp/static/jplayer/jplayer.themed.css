@@ -1,3 +1,8 @@
+.jp-video-fuse {
+    width: 640px;
+    margin: 0 auto;
+}
+
 div.video {
     margin: 15px 0;
 }
@@ -13,8 +18,9 @@ body .jp-video .jp-video {
     margin: 0 auto;
     width: 570px;
 }
-body .jp-video .jp-video-360p, .jp-video-270p {
-    /** width: 640px; */
+body .jp-video,body .jp-video-360p, .jp-video-270p {
+    width: 640px;
+    margin: 0 auto;
 }
 body .jp-video {
     background: black;

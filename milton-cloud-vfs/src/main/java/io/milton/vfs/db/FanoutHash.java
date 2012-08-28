@@ -18,6 +18,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Represents either a list of other fanout hashes, or a list of blob hashes
@@ -64,8 +65,9 @@ public class FanoutHash implements Serializable, Fanout {
      */
     public static FanoutHash findByHashAndType(String hash, String type, Session session) {
         Criteria crit = session.createCriteria(FanoutHash.class);
-        crit.add(Expression.eq("fanoutHash", hash));
-        crit.add(Expression.eq("type", type));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("fanoutHash", hash));
+        crit.add(Restrictions.eq("type", type));
         return DbUtils.unique(crit);
     }
     

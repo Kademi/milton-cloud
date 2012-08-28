@@ -24,6 +24,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Controls whether applications are enabled or not for an application container
@@ -42,13 +43,15 @@ public class AppControl implements Serializable {
 
     public static List<AppControl> find(Website c, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
-        crit.add(Expression.eq("website", c));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("website", c));
         return DbUtils.toList(crit, AppControl.class);
     }
 
     public static List<AppControl> find(Organisation c, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
-        crit.add(Expression.eq("organisation", c));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("organisation", c));
         return DbUtils.toList(crit, AppControl.class);
     }
 

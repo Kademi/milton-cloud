@@ -30,6 +30,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * A user group, is a list of users and other groups. Is typically used to
@@ -57,15 +58,17 @@ public class Group implements Serializable, VfsAcceptor {
 
     public static List<Group> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(Group.class);
-        crit.add(Expression.eq("organisation", org));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("organisation", org));
         crit.addOrder(Order.asc("name"));
         return DbUtils.toList(crit, Group.class);
     }
 
     public static Group findByOrgAndName(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Group.class);
-        crit.add(Expression.eq("organisation", org));
-        crit.add(Expression.eq("name", name));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("organisation", org));
+        crit.add(Restrictions.eq("name", name));
         return (Group) crit.uniqueResult();
     }
     

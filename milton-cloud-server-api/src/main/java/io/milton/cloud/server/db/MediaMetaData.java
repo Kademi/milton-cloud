@@ -21,6 +21,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Given the hash for a primary media file (ie not for alternative formats) this
@@ -38,7 +39,8 @@ public class MediaMetaData implements Serializable {
     
     public static MediaMetaData find(String sourceHash, Session session) {
         Criteria crit = session.createCriteria(MediaMetaData.class);
-        crit.add(Expression.eq("sourceHash", sourceHash));        
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("sourceHash", sourceHash));        
         return DbUtils.unique(crit);
     }    
     

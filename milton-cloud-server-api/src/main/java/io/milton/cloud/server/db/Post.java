@@ -24,8 +24,8 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
@@ -39,7 +39,7 @@ public abstract class Post implements Serializable{
     
     public static List<Post> findByWebsite(Website website, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
-        crit.add(Expression.eq("website", website));
+        crit.add(Restrictions.eq("website", website));
         crit.addOrder(Order.desc("postDate"));
         if( limit != null ) {
             crit.setMaxResults(limit);
@@ -52,7 +52,7 @@ public abstract class Post implements Serializable{
     public static List<Post> findByOrg(Organisation org, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
         Criteria critWebsite = crit.createAlias("website", "w");
-        critWebsite.add(Expression.eq("w.organisation", org));
+        critWebsite.add(Restrictions.eq("w.organisation", org));
         crit.addOrder(Order.desc("postDate"));
         if( limit != null ) {
             crit.setMaxResults(limit);

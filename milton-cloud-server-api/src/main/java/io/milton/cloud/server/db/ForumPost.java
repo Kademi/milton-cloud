@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
@@ -36,8 +37,9 @@ public class ForumPost extends Post implements Serializable{
 
     public static ForumPost findByName(String childName, Forum forum, Session session) {
         Criteria c = session.createCriteria(ForumPost.class);
-        c.add(Expression.eq("name", childName));
-        c.add(Expression.eq("forum", forum));
+        c.setCacheable(true);
+        c.add(Restrictions.eq("name", childName));
+        c.add(Restrictions.eq("forum", forum));
         return DbUtils.unique(c);
     }
     
@@ -51,7 +53,8 @@ public class ForumPost extends Post implements Serializable{
      */
     public static List<ForumPost> findRecentByForum(Forum forum, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
-        crit.add(Expression.eq("forum", forum));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("forum", forum));
         crit.addOrder(Order.desc("postDate"));
         if( limit != null ) {
             crit.setMaxResults(limit);

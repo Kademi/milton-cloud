@@ -21,6 +21,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * This process tracks a user's progress through a program;
@@ -34,8 +35,9 @@ public class MembershipProcess extends BaseProcess {
 
     public static MembershipProcess find(GroupMembership membership, String name, Session session) {
         Criteria crit = session.createCriteria(MembershipProcess.class);
-        crit.add(Expression.eq("moduleStatus", membership));
-        crit.add(Expression.eq("processName", name));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("moduleStatus", membership));
+        crit.add(Restrictions.eq("processName", name));
         return DbUtils.unique(crit);
     }
     

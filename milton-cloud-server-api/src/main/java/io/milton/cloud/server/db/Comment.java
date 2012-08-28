@@ -24,6 +24,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * This is a comment on a content item. It is keyed on the meta UUID of the content
@@ -37,7 +38,8 @@ public class Comment extends Post {
     
     public static List<Comment> findByContentId(UUID contentId, Session session) {
         Criteria crit = session.createCriteria(Comment.class);
-        crit.add(Expression.eq("contentId", contentId));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("contentId", contentId));
         crit.addOrder(Order.asc("postDate")); // hmm, might need a join or something
         return DbUtils.toList(crit, Comment.class);        
     }

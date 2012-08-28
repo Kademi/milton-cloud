@@ -31,6 +31,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static Profile find(String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
+        crit.setCacheable(true);
         crit.add(
                 Restrictions.disjunction()
                 .add(Restrictions.eq("name", name))
@@ -40,7 +41,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static Profile find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.setCacheMode(CacheMode.NORMAL);
+        crit.setCacheable(true);
         // join to group membership, then subordinate, then restrict on org        
         Criteria critMembership = crit.createCriteria("memberships");
         Criteria critSubordinate = critMembership.createCriteria("subordinates");
@@ -57,12 +58,13 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static List<Profile> findByBusinessUnit(Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Expression.eq("organisation", organisation));
+        crit.add(Restrictions.eq("organisation", organisation));
         return DbUtils.toList(crit, Profile.class);
     }
 
     public static Profile findByEmail(String email, Organisation org, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
+        crit.setCacheable(true);
         // join to group membership, then subordinate, then restrict on org        
         Criteria critMembership = crit.createCriteria("memberships");
         Criteria critSubordinate = critMembership.createCriteria("subordinates");

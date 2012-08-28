@@ -27,6 +27,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * A Website is an alias for a repository. The name of the website is the DNS
@@ -45,7 +46,8 @@ public class Website implements Serializable, VfsAcceptor {
 
     public static List<Website> findByRepository(Repository repository, Session session) {
         Criteria crit = session.createCriteria(Website.class);
-        crit.add(Expression.eq("repository", repository));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("repository", repository));
         return DbUtils.toList(crit, Website.class);
     }
 
@@ -67,7 +69,8 @@ public class Website implements Serializable, VfsAcceptor {
     
     public static Website findByDomainNameDirect(String domainName, Session session) {
         Criteria crit = session.createCriteria(Website.class);
-        crit.add(Expression.eq("domainName", domainName));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("domainName", domainName));
         return DbUtils.unique(crit);
     }    
 
@@ -81,7 +84,8 @@ public class Website implements Serializable, VfsAcceptor {
     
     public static Website findByNameDirect(String name, Session session) {
         Criteria crit = session.createCriteria(Website.class);
-        crit.add(Expression.eq("name", name));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("name", name));
         return DbUtils.unique(crit);
     }
     

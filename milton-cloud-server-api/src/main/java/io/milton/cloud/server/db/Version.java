@@ -72,6 +72,7 @@ public class Version implements Serializable {
     
     public static Version find(String modHash, Session session) {
         Criteria crit = session.createCriteria(Version.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("modHash", modHash));
         return DbUtils.unique(crit);
     }    

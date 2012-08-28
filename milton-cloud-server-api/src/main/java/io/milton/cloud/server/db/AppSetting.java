@@ -14,15 +14,8 @@
  */
 package io.milton.cloud.server.db;
 
-import io.milton.vfs.db.*;
-import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 
 /**
  * Applications which can be configured per organisation/website can store

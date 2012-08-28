@@ -81,12 +81,19 @@ public class AltFormatGenerator implements EventListener {
         profileSpec = new FormatSpec("image", "png", 52, 52, "-f", "mjpeg");
         formats.add(profileSpec);
 
-        formats.add(new FormatSpec("video", "flv", 800, 455, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "mp4", 800, 455, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 800, 455, "-r", "15", "-b:v", "512k"));
-        formats.add(new FormatSpec("video", "webm", 800, 455, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "flv", 1280, 720, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "mp4", 1280, 720, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 1280, 720, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 1280, 720, "-r", "15", "-b:v", "512k"));
+        
+        formats.add(new FormatSpec("video", "flv", 640, 360, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "mp4", 640, 360, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 640, 360, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 640, 360, "-r", "15", "-b:v", "512k"));
+        
 
-        formats.add(new FormatSpec("video", "png", 800, 455, "-ss", "1", "-vframes", "1", "-f", "mjpeg"));
+        formats.add(new FormatSpec("video", "png", 640, 360, "-ss", "0", "-vframes", "1", "-f", "mjpeg"));
+        formats.add(new FormatSpec("video", "png", 1280, 720, "-ss", "0", "-vframes", "1", "-f", "mjpeg"));
 
         System.out.println("register put event on: " + eventManager);
         eventManager.registerEventListener(this, PutEvent.class);

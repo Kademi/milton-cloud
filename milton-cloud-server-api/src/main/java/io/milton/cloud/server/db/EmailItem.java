@@ -26,6 +26,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Represents a task to send an email, which may have been sent or might be
@@ -52,9 +53,9 @@ public class EmailItem implements Serializable {
     public static List<EmailItem> findToSend(Date now, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         // sendStatus must be null or "r" = try
-        crit.add(Expression.or(
-                Expression.isNull("sendStatus"),
-                Expression.eq("sendStatus", "r")
+        crit.add(Restrictions.or(
+                Restrictions.isNull("sendStatus"),
+                Restrictions.eq("sendStatus", "r")
         ));
         // and nextAttempt date must be null or past
 //        crit.add(Expression.or(
@@ -67,15 +68,15 @@ public class EmailItem implements Serializable {
 
     public static List<EmailItem> findByRecipient(BaseEntity p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
-        crit.add(Expression.eq("recipient", p));
+        crit.add(Restrictions.eq("recipient", p));
         crit.addOrder(Order.desc("sendStatusDate"));
         return DbUtils.toList(crit, EmailItem.class);
     }
 
     public static int findByNumUnreadByRecipient(Profile p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
-        crit.add(Expression.eq("recipient", p));
-        crit.add(Expression.eq("readStatus", false));
+        crit.add(Restrictions.eq("recipient", p));
+        crit.add(Restrictions.eq("readStatus", false));
         crit.setProjection(Projections.rowCount());
         List results = crit.list();
         if (results == null) {
@@ -88,7 +89,7 @@ public class EmailItem implements Serializable {
     public static List<EmailItem> findInProgress(Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         // sendStatus must be "p" = in progress
-        crit.add(Expression.eq("sendStatus", "p"));
+        crit.add(Restrictions.eq("sendStatus", "p"));
         return DbUtils.toList(crit, EmailItem.class);
     }
     

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Represents a real world entity such as a user or an organisation
@@ -38,7 +39,8 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
-        crit.add(Expression.and(Expression.eq("organisation", org), Expression.eq("name", name)));
+        crit.setCacheable(true);
+        crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
         List list = crit.list();
         if (list == null || list.isEmpty()) {
             return null;

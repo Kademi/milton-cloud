@@ -1,6 +1,5 @@
 package io.milton.vfs.db;
 
-import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.List;
@@ -9,7 +8,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Creates a link between a program and a website, which makes that program
@@ -28,13 +27,15 @@ public class GroupInWebsite implements Serializable {
 
     public static List<GroupInWebsite> findByWebsite(Website w, Session session) {
         Criteria crit = session.createCriteria(GroupInWebsite.class);
-        crit.add(Expression.eq("website", w));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("website", w));
         return DbUtils.toList(crit, GroupInWebsite.class);
     }
 
     public static List<GroupInWebsite> findByGroup(Group g, Session session) {
         Criteria crit = session.createCriteria(GroupInWebsite.class);
-        crit.add(Expression.eq("userGroup", g));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("userGroup", g));
         return DbUtils.toList(crit, GroupInWebsite.class);
     }
     

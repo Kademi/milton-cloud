@@ -44,8 +44,8 @@ function insertJPlayer(container, src, title, height, width, cssClass) {
             swfPath: "/static/jplayer",
             supplied: "mp4, webmv, flv",
             size: {
-                width: width,
-                height: height,
+                width: width + "px",
+                height: height + "px",
                 cssClass: cssClass
             },        
             cssSelectorAncestor: "#" + containerId
@@ -53,25 +53,22 @@ function insertJPlayer(container, src, title, height, width, cssClass) {
     
         if( src ) {
             log("play", src);
-            playVideo("#" + playerId, src);             
+            playVideo("#" + playerId, src,height, width);             
         }        
     });            
 }
  
-function playVideo(playerSel, primaryUrl) {
+function playVideo(playerSel, primaryUrl, height, width) {
     log("playVideo", playerSel, $(playerSel), primaryUrl);
     // given the posterUrl, calculate path to other media..
     
     log("filename", primaryUrl);
-    var posterUrl = primaryUrl + "/alt-800-455.png";
+    var basePath = primaryUrl + "/alt-" + width + "-" + height + ".";
+    var posterUrl = basePath + "png";
     $(playerSel).jPlayer("setMedia", {
-        webmv: primaryUrl + "/alt-800-455.webm",  
-        //ogv: primaryUrl + "/alt-800-455.ogv",        
-        flv: primaryUrl + "/alt-800-455.flv",
-        m4v: primaryUrl + "/alt-800-455.mp4",   
-        //                m4v: "http://www.jplayer.org/video/m4v/Big_Buck_Bunny_Trailer_480x270_h264aac.m4v",
-        //                ogv: "http://www.jplayer.org/video/ogv/Big_Buck_Bunny_Trailer_480x270.ogv",
-        poster: posterUrl //"http://www.jplayer.org/video/poster/Big_Buck_Bunny_Trailer_480x270.png"
+        webmv: basePath + "webm",  
+        flv: basePath + "flv",
+        m4v: basePath + "mp4",   
+        poster: posterUrl
     });
-    //$(playerSel).jPlayer("play");
 }

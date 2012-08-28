@@ -31,6 +31,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * An organisation contains users and websites. An organisation can have a
@@ -58,13 +59,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
-        crit.add(Expression.isNull("organisation"));
+        crit.setCacheable(true);
+        crit.add(Restrictions.isNull("organisation"));
         return (Organisation) crit.uniqueResult();
     }
 
     public static Organisation findByOrgId(String orgId, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
-        crit.add(Expression.eq("orgId", orgId));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("orgId", orgId));
         return (Organisation) crit.uniqueResult();
     }
     private String orgId; // globally unique; used for web addresses for this organisation

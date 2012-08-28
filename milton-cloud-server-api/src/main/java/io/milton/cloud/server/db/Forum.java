@@ -23,6 +23,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
@@ -33,7 +34,8 @@ public class Forum implements Serializable{
     
     public static List<Forum>  findByWebsite(Website website, Session session) {
         Criteria crit = session.createCriteria(Forum.class);
-        crit.add(Expression.eq("website", website));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("website", website));
         return DbUtils.toList(crit, Forum.class);
     }    
     
