@@ -108,11 +108,18 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         Website website = null;
         String subject; // subject for the email
+        String fromAddress = "noreply@";
         if( rootFolder instanceof WebsiteRootFolder) {
             website = ((WebsiteRootFolder)rootFolder).getWebsite();
             subject = "Password reset for " + website.getDomainName();
+            String d = website.getDomainName();
+            if( d.startsWith("www")) {
+                d = d.replace("www.", "");
+            }
+            fromAddress += d;
         } else {
             subject = "Password reset for " + org.getName();
+            fromAddress += org.getName();
         }
         String returnUrl = this.getHref();
         Date now = _(CurrentDateService.class).getNow();
@@ -121,10 +128,12 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         
         String emailHtml = createEmailHtml();
         
+        
+        
         EmailItem emailItem = new EmailItem();
         emailItem.setCreatedDate(now);
-        emailItem.setFromAddress("me@me.com"); // TODO: perhaps delegate to RootFolder?
-        emailItem.setReplyToAddress("me@me.com"); // TODO: perhaps delegate to RootFolder?
+        emailItem.setFromAddress(fromAddress); // TODO: perhaps delegate to RootFolder?
+        emailItem.setReplyToAddress(fromAddress); // TODO: perhaps delegate to RootFolder?
         emailItem.setHtml(emailHtml);
         emailItem.setRecipient(user);
         emailItem.setRecipientAddress(email);

@@ -329,6 +329,9 @@ public class Formatter {
         if (l == null) {
             return "";
         } else {
+            if( l == 0 ) {
+                return "";
+            }
             long hours = l / 60;
             long mins = l % 60;
             if (numeric) {

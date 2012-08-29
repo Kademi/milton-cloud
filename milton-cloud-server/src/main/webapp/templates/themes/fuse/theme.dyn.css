@@ -13,17 +13,17 @@
 .hero2 {
     color:$page.parent.settings.heroColour2 !important;
 }
-.bg-text1 {
-    background-color: $rootFolder.settings.textColour1 !important;
+html body .bg-text1 {
+    background-color: $rootFolder.settings.textColour1;
 }
-.bg-text2 {
-    background-color:$page.parent.settings.textColour2 !important;
+html body .bg-text2 {
+    background-color:$page.parent.settings.textColour2;
 }
-.bg-hero1 {
-    background-color:$page.parent.settings.heroColour1 !important;
+html body .bg-hero1 {
+    background-color:$page.parent.settings.heroColour1;
 }
-.bg-hero2 {
-    background-color:$page.parent.settings.heroColour2 !important;
+html body .bg-hero2 {
+    background-color:$page.parent.settings.heroColour2;
 }
 
 html {
@@ -1747,8 +1747,18 @@ a.hero {
     border-style: solid;
     border-width: 6px;
     border-color: $rootFolder.settings.heroColour1;
+    color: white;
 }
 
+a.hero.disabled, a.bg-hero1.disabled {
+    background-color: #d7d7d7;
+    border-color: #d7d7d7;
+    color: white;
+    cursor: not-allowed;
+}
+a.hero.active {
+    color: #1C1D1F;
+}
 
 ul.btnList{
     width:225px;

@@ -114,6 +114,8 @@ public class AltFormatResourceFactory implements ResourceFactory {
         private AltFormat altFormat;
         private Fanout fanout;
         private boolean doneFanoutLookup;
+        
+        private Long sentContentLength;
 
         public AltFormatResource(FileResource rPrimary, String name, AltFormat altFormat, FormatSpec formatSpec) {
             this.rPrimary = rPrimary;
@@ -145,9 +147,12 @@ public class AltFormatResourceFactory implements ResourceFactory {
             } else {
                 System.out.println("no metadata for: " + rPrimary.getHash());
             }
+            long bytes = 0;
+            String operation = "";
             try {
                 boolean force = params.containsKey("force");
                 if (altFormat == null || force) {
+                    operation = "send generated content";
                     // hack start
                     log.info("sendContent: will generate");
                     if( params.containsKey("args")) {
@@ -164,7 +169,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     // hack end
                     System.out.println("generate: " + getName());
                     GenerateJob j = altFormatGenerator.getOrEnqueueJob(rPrimary.getHash(), rPrimary.getName(), formatSpec);
-                    System.out.println("got job: " + j);
+                    System.out.println("got job: " + j + " status=" + j.getStatus());
 
                     // Wait until the file exists
                     int cnt = 0;
@@ -185,8 +190,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     System.out.println("send file...");
                     // Read the file until the job is done, or we run out of bytes
                     int s = fin.read(buf);
-                    System.out.println("send file... " + s);
-                    long bytes = 0;
+                    System.out.println("send file... " + s);                    
                     while (!j.done() || s > 0) {
                         if (s < 0) { // no bytes available, but job is not done, so wait
                             System.out.println("sleep...");
@@ -201,13 +205,14 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     System.out.println("finished sending file: " + bytes);
                 } else {
                     log.info("sendContent: using existing");
+                    operation = "send pre-generated content";
                     Combiner combiner = new Combiner();
                     List<String> fanoutCrcs = getFanout().getHashes();
                     combiner.combine(fanoutCrcs, hashStore, blobStore, out);
                     out.flush();
                 }
             } catch (Throwable e) {
-                log.error("Exception sending content", e);
+                log.error("Exception sending content. sentContentLength=" + sentContentLength + " - bytes sent=" + bytes + " operation=" + operation, e);
                 throw new IOException("Exception sending content");
             }
         }
@@ -256,12 +261,12 @@ public class AltFormatResourceFactory implements ResourceFactory {
         @Override
         public Long getContentLength() {            
             if (getFanout() != null) {
-                Long l = getFanout().getActualContentLength();
-                log.info("getContentLength: " + l);
-                return l;
+                sentContentLength = getFanout().getActualContentLength();
+                log.info("getContentLength: " + sentContentLength);                
+            } else {
+                log.info("getContentLength: no content length");
             }
-            log.info("getContentLength: no content length");
-            return null;
+            return sentContentLength;
         }
 
         @Override

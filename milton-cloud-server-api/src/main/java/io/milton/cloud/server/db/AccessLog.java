@@ -16,12 +16,14 @@ package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import java.util.Calendar;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import org.hibernate.Session;
 
 /**
  * Records an HTTP access to the system
@@ -30,8 +32,32 @@ import javax.persistence.Temporal;
  */
 @javax.persistence.Entity
 public class AccessLog {
-    
-    
+
+    public static void insert(Organisation org, Website website, String host, String url, String referrerUrl, int result, long duration, Long size, String method, String contentType, String fromAddress, String user, Session session) {
+        AccessLog al = new AccessLog();
+        al.setOrganisation(org);
+        al.setWebsite(website);
+        al.setReqHost(host);
+        al.setUrl(url);
+        al.setReferrer(referrerUrl);
+        Date dt = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        al.setReqDate(new java.sql.Date(dt.getTime()));
+        al.setReqYear(cal.get(Calendar.YEAR));
+        al.setReqMonth(cal.get(Calendar.MONTH));
+        al.setReqDay(cal.get(Calendar.DAY_OF_MONTH));
+        al.setReqHour(cal.get(Calendar.HOUR_OF_DAY));
+        al.setResultCode(result);
+        al.setDurationMs(duration);
+        al.setNumBytes(size);
+        al.setReqMethod(method);
+        al.setContentType(contentType);
+        al.setReqFrom(fromAddress);
+        al.setReqUser(user);
+        session.save(al);
+
+    }
     private long id;
     private Organisation organisation;
     private Website website;
@@ -50,16 +76,19 @@ public class AccessLog {
     private String contentType;
     private String reqFrom;
     private String reqUser;
-    
+
+    public AccessLog() {
+    }
+
     @Id
-    @GeneratedValue    
+    @GeneratedValue
     public long getId() {
         return id;
     }
 
     public void setId(long id) {
         this.id = id;
-    }    
+    }
 
     @ManyToOne
     public Organisation getOrganisation() {
@@ -79,8 +108,6 @@ public class AccessLog {
         this.website = website;
     }
 
-    
-    
     public String getReqHost() {
         return reqHost;
     }
@@ -88,7 +115,6 @@ public class AccessLog {
     public void setReqHost(String reqHost) {
         this.reqHost = reqHost;
     }
-    
 
     public String getUrl() {
         return url;
@@ -106,8 +132,8 @@ public class AccessLog {
         this.referrer = referrer;
     }
 
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)      
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getReqDate() {
         return reqDate;
     }
@@ -157,10 +183,10 @@ public class AccessLog {
     }
 
     /**
-     * The duration of the processing time. Note that this is the time to process
-     * the request, but does not include time to transmit to the client
-     * 
-     * @return 
+     * The duration of the processing time. Note that this is the time to
+     * process the request, but does not include time to transmit to the client
+     *
+     * @return
      */
     @Column
     public long getDurationMs() {
@@ -174,8 +200,8 @@ public class AccessLog {
     /**
      * The size of the response entity, if known. Will often not be known for
      * generated data such as HTML pages, so will be null
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public Long getNumBytes() {
@@ -188,10 +214,10 @@ public class AccessLog {
 
     /**
      * The request method, eg GET, POST
-     * 
-     * @return 
+     *
+     * @return
      */
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getReqMethod() {
         return reqMethod;
     }
@@ -202,8 +228,8 @@ public class AccessLog {
 
     /**
      * The content type of the response
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public String getContentType() {
@@ -216,8 +242,8 @@ public class AccessLog {
 
     /**
      * The IP address the request is from
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public String getReqFrom() {
@@ -236,7 +262,4 @@ public class AccessLog {
     public void setReqUser(String reqUser) {
         this.reqUser = reqUser;
     }
-
-    
-    
 }

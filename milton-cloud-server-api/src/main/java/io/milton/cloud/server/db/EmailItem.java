@@ -27,6 +27,8 @@ import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a task to send an email, which may have been sent or might be
@@ -42,6 +44,8 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 public class EmailItem implements Serializable {
+    
+    private static final Logger log = LoggerFactory.getLogger(EmailItem.class);
 
     /**
      * Get emauils to send. TODO: currently only gets those never tried, should
@@ -55,8 +59,7 @@ public class EmailItem implements Serializable {
         // sendStatus must be null or "r" = try
         crit.add(Restrictions.or(
                 Restrictions.isNull("sendStatus"),
-                Restrictions.eq("sendStatus", "r")
-        ));
+                Restrictions.eq("sendStatus", "r")));
         // and nextAttempt date must be null or past
 //        crit.add(Expression.or(
 //                Expression.isNull("nextAttempt"),
@@ -82,8 +85,19 @@ public class EmailItem implements Serializable {
         if (results == null) {
             return 0;
         }
-        Long num = (Long) results.get(0);
-        return num;
+        Object o = results.get(0);
+        if (o instanceof Long) {
+            Long num = (Long) o;
+            return num;
+        } else if (o instanceof Integer) {
+            Integer ii = (Integer) o;
+            return ii.intValue();
+        } else {
+            if (o != null) {
+                log.error("Unsupported value type: " + o.getClass());
+            }
+            return 0;
+        }
     }
 
     public static List<EmailItem> findInProgress(Session session) {
@@ -92,8 +106,6 @@ public class EmailItem implements Serializable {
         crit.add(Restrictions.eq("sendStatus", "p"));
         return DbUtils.toList(crit, EmailItem.class);
     }
-    
-    
     private List<EmailSendAttempt> emailSendAttempts;
     private long id;
     private BaseEmailJob job; // optional, might be linked to a job
@@ -193,7 +205,7 @@ public class EmailItem implements Serializable {
         this.subject = subject;
     }
 
-    @Column(nullable = true, length=20000)
+    @Column(nullable = true, length = 20000)
     public String getHtml() {
         return html;
     }
@@ -202,7 +214,7 @@ public class EmailItem implements Serializable {
         this.html = html;
     }
 
-    @Column(nullable = true, length=20000)
+    @Column(nullable = true, length = 20000)
     public String getText() {
         return text;
     }
@@ -222,13 +234,10 @@ public class EmailItem implements Serializable {
     }
 
     /**
-     * The send status. Initially null, then set to:
-     * - f = failed
-     * - c = completed
-     * - p = pending/in progress
-     * - r = retry
-     * 
-     * @return 
+     * The send status. Initially null, then set to: - f = failed - c =
+     * completed - p = pending/in progress - r = retry
+     *
+     * @return
      */
     public String getSendStatus() {
         return sendStatus;
@@ -237,13 +246,11 @@ public class EmailItem implements Serializable {
     public void setSendStatus(String sendStatus) {
         this.sendStatus = sendStatus;
     }
-    
 
-  
     /**
      * Required field
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -335,8 +342,8 @@ public class EmailItem implements Serializable {
 
     /**
      * True if it was completed successfully. See getSendStatus for other states
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean complete() {
         return "c".equals(sendStatus);
@@ -345,10 +352,9 @@ public class EmailItem implements Serializable {
     public boolean failed() {
         return "f".equals(sendStatus);
     }
-    
-    
+
     @Column(nullable = true)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)    
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getNextAttempt() {
         return nextAttempt;
     }
@@ -359,8 +365,8 @@ public class EmailItem implements Serializable {
 
     /**
      * Number of attempts at SMTP delivery
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public Integer getNumAttempts() {
@@ -378,5 +384,5 @@ public class EmailItem implements Serializable {
 
     public void setEmailTrigger(EmailTrigger emailTrigger) {
         this.emailTrigger = emailTrigger;
-    }    
+    }
 }

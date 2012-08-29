@@ -64,7 +64,7 @@ public class AltFormatGenerator implements EventListener {
     private final MediaInfoService mediaInfoService;
     private String ffmpeg = "avconv";
     private List<FormatSpec> formats;
-    private ExecutorService consumer = new ThreadPoolExecutor(1, 4, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100));
+    private ExecutorService consumer = new ThreadPoolExecutor(10, 20, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100));
     private final List<GenerateJob> currentJobs = new CopyOnWriteArrayList<>();
     private final FormatSpec profileSpec;
     private boolean enableMetaData;
@@ -162,15 +162,16 @@ public class AltFormatGenerator implements EventListener {
      */
     public GenerateJob getOrEnqueueJob(String primaryHash, String fileName, FormatSpec format) {
         for (GenerateJob j : currentJobs) {
-            if (j.primaryFileHash == primaryHash) {
+            if (j.primaryFileHash == null ? primaryHash == null : j.primaryFileHash.equals(primaryHash)) {
                 if (format.equals(j.formatSpec)) {
+                    log.info("Found existing job: " + j.formatSpec);
                     return j;
                 }
             }
         }
         GenerateJob j = new GenerateJob(primaryHash, fileName, format);
         currentJobs.add(j);
-        System.out.println("submitted new job");
+        log.info("submitted new job");
         consumer.submit(j);
         return j;
     }
@@ -238,6 +239,7 @@ public class AltFormatGenerator implements EventListener {
         private final String primaryFileName;
         private final AvconvConverter converter;
         private boolean jobDone;
+        private String status = "not started";
 
         public GenerateJob(String primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
             this.primaryFileHash = primaryFileHash;
@@ -254,9 +256,16 @@ public class AltFormatGenerator implements EventListener {
             return converter.getDest();
         }
 
+        public String getStatus() {
+            return status;
+        }
+        
+        
+
         @Override
         public void run() {
             System.out.println("GenerateJob: run");
+            status = "starting...";
             try {
                 rootContext.execute(new Executable2() {
                     @Override
@@ -264,6 +273,7 @@ public class AltFormatGenerator implements EventListener {
                         sessionManager.open();
                         try {
                             doProcess(context);
+                            status = "finished";
                         } finally {
                             sessionManager.close();
                         }
@@ -293,14 +303,17 @@ public class AltFormatGenerator implements EventListener {
             final Parser parser = new Parser();
             String altHash;
             try {
+                status = "generating";
                 altHash = converter.generate(new With<InputStream, String>() {
                     @Override
                     public String use(InputStream t) throws Exception {
+                        status = "generator parsing";
                         String newFileHash = parser.parse(t, hashStore, blobStore);
                         return newFileHash;
                     }
                 });
             } catch (Exception e) {
+                status = "conversion failed";
                 throw new IOException("Couldnt convert: " + primaryFileName, e);
             }
             if (altHash != null) {

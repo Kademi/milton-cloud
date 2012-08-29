@@ -204,30 +204,31 @@ public class EmailItemQueueStore implements QueueStore {
             session.save(a);
 
             i.setSendStatusDate(currentDateService.getNow());
+            //boolean sentOk = qi.getResultInfo() != null && qi.getResultInfo().startsWith("250");
             if (qi.getState() == DeliveryState.FAILED) {
                 i.setSendStatus("f");
-            } else if (qi.getState() == DeliveryState.SENT) {
+            } else if (qi.getState() == DeliveryState.SENT || qi.getState() == DeliveryState.QUEUED) {
                 i.setSendStatus("c");
             } else if (qi.getState() == DeliveryState.IN_PROGRESS) {
                 i.setSendStatus("p");
-            } else if (qi.getState() == DeliveryState.QUEUED) {
-                long tm = currentDateService.getNow().getTime();
-                tm = tm + retryIntervalMs;
-                Date retryDate = new Date(tm);
-                int attempts = 0;
-                if (i.getNumAttempts() != null) {
-                    attempts = i.getNumAttempts();
-                }
-                if (attempts >= maxAttempts) {
-                    i.setSendStatus("f");
-                    log.warn("Set retry. Reached max attempts=" + attempts + " for id: " + i.getId());
-                } else {
-                    attempts++;
-                    i.setNextAttempt(retryDate); // when next to attempt delivery
-                    i.setNumAttempts(attempts);
-                    i.setSendStatus("r"); // is now a retry
-                    log.warn("Set retry. Attempts=" + attempts + " for id: " + i.getId());
-                }
+//            } else if (qi.getState() == DeliveryState.QUEUED) {
+//                long tm = currentDateService.getNow().getTime();
+//                tm = tm + retryIntervalMs;
+//                Date retryDate = new Date(tm);
+//                int attempts = 0;
+//                if (i.getNumAttempts() != null) {
+//                    attempts = i.getNumAttempts();
+//                }
+//                if (attempts >= maxAttempts) {
+//                    i.setSendStatus("f");
+//                    log.warn("Set retry. Reached max attempts=" + attempts + " for id: " + i.getId());
+//                } else {
+//                    attempts++;
+//                    i.setNextAttempt(retryDate); // when next to attempt delivery
+//                    i.setNumAttempts(attempts);
+//                    i.setSendStatus("r"); // is now a retry
+//                    log.warn("Set retry. Attempts=" + attempts + " for id: " + i.getId());
+//                }
             } else {
                 log.warn("------------------ unhandled state: " + qi.getState() + " ------------------");
             }

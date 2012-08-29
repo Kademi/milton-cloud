@@ -270,28 +270,7 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
                             website = (Website) session.get(Website.class, access.websiteId);
                         }
 
-                        AccessLog al = new AccessLog();
-                        al.setOrganisation(org);
-                        al.setWebsite(website);
-                        al.setReqHost(access.host);
-                        al.setUrl(access.url);
-                        al.setReferrer(access.referrerUrl);
-                        Date dt = new Date();
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(dt);
-                        al.setReqDate(new java.sql.Date(dt.getTime()));
-                        al.setReqYear(cal.get(Calendar.YEAR));
-                        al.setReqMonth(cal.get(Calendar.MONTH));
-                        al.setReqDay(cal.get(Calendar.DAY_OF_MONTH));
-                        al.setReqHour(cal.get(Calendar.HOUR_OF_DAY));
-                        al.setResultCode(access.result);
-                        al.setDurationMs(access.duration);
-                        al.setNumBytes(access.size);
-                        al.setReqMethod(access.method);
-                        al.setContentType(access.contentType);
-                        al.setReqFrom(access.fromAddress);
-                        al.setReqUser(access.user);
-                        session.save(al);
+                        AccessLog.insert(org, website, access.host, access.url, access.referrerUrl, access.result, access.duration, access.size, access.method, access.contentType, access.fromAddress, access.user, session);
                         tx.commit();
                     } catch (Exception ex) {
                         log.error("Exception logging access", ex);
