@@ -790,6 +790,24 @@ public class Formatter {
         return sb.toString();
     }
     
+    public String radio(String id, String name, Object oChecked, String value) {
+        Boolean checked = toBool(oChecked);
+        if (checked == null) {
+            checked = Boolean.FALSE;
+        }
+        StringBuilder sb = new StringBuilder("<input type='radio' ");
+        sb.append("name='").append(name).append("' ");
+        if (checked) {
+            sb.append("checked='true'");
+        }
+        sb.append("value='").append(value).append("'");
+        if( id != null ) {
+            sb.append("id='").append(id).append("'");
+        }
+        sb.append(" />");
+        return sb.toString();
+    }    
+    
     /**
      * Generate an option element
      * @return 
