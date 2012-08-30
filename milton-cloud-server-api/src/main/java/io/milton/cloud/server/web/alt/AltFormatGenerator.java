@@ -82,12 +82,12 @@ public class AltFormatGenerator implements EventListener {
         formats.add(profileSpec);
 
         formats.add(new FormatSpec("video", "flv", 1280, 720, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "mp4", 1280, 720, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "m4v", 1280, 720, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
         formats.add(new FormatSpec("video", "ogv", 1280, 720, "-r", "15", "-b:v", "512k"));
         formats.add(new FormatSpec("video", "webm", 1280, 720, "-r", "15", "-b:v", "512k"));
         
         formats.add(new FormatSpec("video", "flv", 640, 360, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "mp4", 640, 360, "-c:v", "mpeg4", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "m4v", 640, 360, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
         formats.add(new FormatSpec("video", "ogv", 640, 360, "-r", "15", "-b:v", "512k"));
         formats.add(new FormatSpec("video", "webm", 640, 360, "-r", "15", "-b:v", "512k"));
         
