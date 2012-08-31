@@ -46,6 +46,7 @@ function initTheme() {
     initPlaceholder();
     initPseudoClasses();
     initPrintLink();
+    initLoginDropDown();
          
     log("initTheme: run page init functions");
     for( i=0; i<pageInitFunctions.length; i++) {
@@ -54,6 +55,31 @@ function initTheme() {
          
     log("finished init-theme");
 } 
+
+var isMouseOver = false;
+function initLoginDropDown() {
+    $(".Login, .Login .dropBox").hover(function() {
+        isMouseOver = true;
+        checkCloseLogin();
+    }, function() {
+        isMouseOver = false;
+        checkCloseLogin();
+    });    
+}
+
+
+function checkCloseLogin() {
+    if( isMouseOver ) {
+        $(".Login .dropBox").show(300);        
+    }
+    window.setTimeout(function() {                
+        log("check close", isMouseOver);
+        if( !isMouseOver ) {
+            $(".Login .dropBox").hide(300);
+        }
+
+    }, 1000);    
+}
 
 function initModal() {
     $("body").on("click", ".Modal a.Close", function(e) {

@@ -73,11 +73,6 @@
             <artifactId>persistence-api</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>ejb3-persistence</artifactId>
-            <version>1.0.2.GA</version>
-        </dependency>
                 
         <dependency>
             <groupId>javax.sql</groupId>

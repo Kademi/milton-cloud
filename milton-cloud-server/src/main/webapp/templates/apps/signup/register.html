@@ -14,23 +14,32 @@
                             <div class="Box02">
                                 <div class="Box02Bottom">
                                     <div class="Box02Middle">
-                                        <div class="pageMessage"></div>
-                                        
-                                        <label class="first" for="email">Email</label>
-                                        <input class="required" type="text" name="email" id="email" placeholder="Your email address" />
-                                        
-                                        <label class="last" for="nickName">Nickname</label>
-                                        <input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" />
-                                        
-                                        <br/>
-                                        
-                                        <label class="first" for="password">Password</label>
-                                        <input class="required" type="password" name="password" id="password" placeholder="Your preferred password" />
-                                        
-                                        <label class="last" for="confirmPassword">Confirm</label>
-                                        <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" />
-
-                                        <button class="Register" ><span>Register</span></button>
+                                        <div class="pageMessage">&nbsp;</div>
+                                        <!-- IE7 made me!!! -->
+                                        <table class="plain signup">
+                                            <colgroup>
+                                                <col class="col1" />
+                                                <col class="col2" />
+                                                <col class="col3" />
+                                                <col class="col4" />
+                                                <col class="col5" />
+                                            </colgroup>
+                                            <tbody>
+                                                <tr>
+                                                    <td><label class="first" for="email">Email</label></td>
+                                                    <td><input class="required" type="text" name="email" id="email" placeholder="Your email address" /></td>
+                                                    <td><label class="last" for="nickName">Nickname</label></td>
+                                                    <td><input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" /></td>
+                                                    <td rowspan="2"><button class="Register" type="submit" ><span>Register</span></button></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><label class="first" for="password">Password</label></td>
+                                                    <td><input class="required" type="password" name="password" id="password" placeholder="Your preferred password" /></td>
+                                                    <td><label class="last" for="confirmPassword">Confirm</label></td>
+                                                    <td><input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" /></td>                                                
+                                                </tr>  
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -39,7 +48,7 @@
                     $folder.find("/content/signup/professionals.html").body
                 </div>		
                 <br class="Clear" />
-                
+
             </div> 
         </div> 
         <script type="text/javascript">

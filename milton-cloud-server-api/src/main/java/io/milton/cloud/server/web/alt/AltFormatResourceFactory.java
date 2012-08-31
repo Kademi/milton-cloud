@@ -78,14 +78,14 @@ public class AltFormatResourceFactory implements ResourceFactory {
                 String formatName = p.getName().replace("alt-", "");
                 AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());
                 FormatSpec format = altFormatGenerator.findFormat(formatName);
-                if (f != null) {                    
+                if (f != null) {
                     AltFormatResource alt = new AltFormatResource((FileResource) r, p.getName(), f, format);
                     log.info("getResource: created resource for format: " + format + " - " + alt);
                     return alt;
                 } else {
                     log.warn("getResource: pre-generated alt format not found: " + sourceHash + " - " + p.getName());
                     // if the format is valid then create a resource which will generate on demand                                        
-                    if (format != null) {                        
+                    if (format != null) {
                         AltFormatResource alt = new AltFormatResource((FileResource) r, p.getName(), format);
                         log.info("getResource: created resource for format: " + format + " - " + alt);
                         return alt;
@@ -114,7 +114,6 @@ public class AltFormatResourceFactory implements ResourceFactory {
         private AltFormat altFormat;
         private Fanout fanout;
         private boolean doneFanoutLookup;
-        
         private Long sentContentLength;
 
         public AltFormatResource(FileResource rPrimary, String name, AltFormat altFormat, FormatSpec formatSpec) {
@@ -132,14 +131,14 @@ public class AltFormatResourceFactory implements ResourceFactory {
         }
 
         @Override
-        public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {            
+        public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
             log.info("sendContent");
             MediaMetaData mmd = MediaMetaData.find(rPrimary.getHash(), SessionManager.session());
-            if( mmd != null ) {
+            if (mmd != null) {
                 Integer durationSecs = mmd.getDurationSecs();
-                if( durationSecs != null ) {
+                if (durationSecs != null) {
                     Response resp = HttpManager.response();
-                    if( resp != null ) {
+                    if (resp != null) {
                         System.out.println("set duration header: " + durationSecs);
                         resp.setNonStandardHeader("X-Content-Duration", durationSecs.toString());
                     }
@@ -155,17 +154,17 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     operation = "send generated content";
                     // hack start
                     log.info("sendContent: will generate");
-                    if( params.containsKey("args")) {
+                    if (params.containsKey("args")) {
                         List<String> args = new ArrayList<>();
-                        for( String s : params.get("args").split(",")) {
+                        for (String s : params.get("args").split(",")) {
                             args.add(s);
                         }
                         String[] arr = new String[args.size()];
                         args.toArray(arr);
                         formatSpec.setConverterArgs(arr);
-                        System.out.println("set args: " + arr);                        
+                        System.out.println("set args: " + arr);
                     }
-                    
+
                     // hack end
                     System.out.println("generate: " + getName());
                     GenerateJob j = altFormatGenerator.getOrEnqueueJob(rPrimary.getHash(), rPrimary.getName(), formatSpec);
@@ -173,29 +172,36 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
                     // Wait until the file exists
                     int cnt = 0;
-                    System.out.println("check if exists..." );
+                    System.out.println("check if exists...");
                     while (!j.getDestFile().exists() && !j.done()) {
                         cnt++;
                         System.out.println("sleep..." + cnt + " .. " + j.getDestFile().exists() + " - " + j.done());
-                        doSleep(cnt++, 200, 70);
+                        doSleep(cnt++, 200, 50); // 200ms sleep time, so 5 checks per second, give it 10 secs to start
                     }
                     System.out.println("finished sleepy check");
                     if (!j.getDestFile().exists()) {
                         throw new RuntimeException("Job did not create a destination file: " + j.getDestFile().getAbsolutePath());
                     }
                     System.out.println("use dest file: " + j.getDestFile().getAbsolutePath() + " size: " + j.getDestFile().length());
-                    
+
                     FileInputStream fin = new FileInputStream(j.getDestFile());
                     byte[] buf = new byte[1024];
                     System.out.println("send file...");
                     // Read the file until the job is done, or we run out of bytes
                     int s = fin.read(buf);
-                    System.out.println("send file... " + s);                    
+                    System.out.println("send file... " + s);
+                    cnt = 0;
                     while (!j.done() || s > 0) {
                         if (s < 0) { // no bytes available, but job is not done, so wait
-                            System.out.println("sleep...");
+                            cnt++;
+                            System.out.println("sleep... " + cnt);
+                            // if no bytes for 10 seconds then abort
+                            if (cnt > 100) {
+                                throw new RuntimeException("Timed out waiting for bytes from job: " + j.getStatus());
+                            }
                             doSleep(100);
                         } else {
+                            cnt = 0;
                             System.out.println("write bytes: " + s);
                             bytes += s;
                             out.write(buf, 0, s);
@@ -203,13 +209,24 @@ public class AltFormatResourceFactory implements ResourceFactory {
                         s = fin.read(buf);
                     }
                     System.out.println("finished sending file: " + bytes);
-                } else {
-                    log.info("sendContent: using existing");
+                } else {                    
                     operation = "send pre-generated content";
                     Combiner combiner = new Combiner();
                     List<String> fanoutCrcs = getFanout().getHashes();
-                    combiner.combine(fanoutCrcs, hashStore, blobStore, out);
-                    out.flush();
+                    try {
+                        if( range != null ) {
+                            log.info("sendContent: using existing - PARTIAL - " + range);
+                            combiner.combine(fanoutCrcs, hashStore, blobStore, out, range.getStart(), range.getFinish());
+                            log.info("Sent bytes: " + combiner.getBytesWritten());
+                        } else {
+                            log.info("sendContent: using existing - FULL");
+                            combiner.combine(fanoutCrcs, hashStore, blobStore, out);
+                        }
+                        out.flush();
+                    } catch (IOException iOException) {
+                        log.error("io exception", iOException);
+                        showDebugInfo(combiner.getBytesWritten());
+                    }
                 }
             } catch (Throwable e) {
                 log.error("Exception sending content. sentContentLength=" + sentContentLength + " - bytes sent=" + bytes + " operation=" + operation, e);
@@ -254,15 +271,14 @@ public class AltFormatResourceFactory implements ResourceFactory {
         public String getContentType(String accepts) {
             String canProvide = ContentTypeUtils.findContentTypes(name);
             String type = ContentTypeUtils.findAcceptableContentType(canProvide, accepts);
-            System.out.println("content type: " + type);
             return type;
         }
 
         @Override
-        public Long getContentLength() {            
+        public Long getContentLength() {
             if (getFanout() != null) {
                 sentContentLength = getFanout().getActualContentLength();
-                log.info("getContentLength: " + sentContentLength);                
+                log.info("getContentLength: " + sentContentLength);
             } else {
                 log.info("getContentLength: no content length");
             }
@@ -328,12 +344,29 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
         private void doSleep(int cnt, long sleepMillis, int maxCnt) {
             if (cnt > maxCnt) {
-                throw new RuntimeException("Timeout");
+                throw new RuntimeException("Timeout while waiting for generation to being");
             }
             try {
                 Thread.sleep(sleepMillis);
             } catch (InterruptedException ex) {
                 throw new RuntimeException(ex);
+            }
+        }
+
+        private void showDebugInfo(long bytesWritten) {
+            if (sentContentLength.longValue() != bytesWritten) {
+                log.error("-----------------------------------");
+                log.error("-----------------------------------");
+                log.error("ERROR: byte count mismatch. Sent content length=" + sentContentLength + " actually sent=" + bytesWritten);
+                log.error("rPrimary=" + rPrimary.getHref());
+                log.error("alt format id=" + altFormat.getId());
+                log.error("alt format name=" + altFormat.getName());
+                log.error("fanout content length=" + fanout.getActualContentLength());
+                for (String s : fanout.getHashes()) {
+                    log.error("  hash=" + s);
+                }
+                log.error("-----------------------------------");
+                log.error("-----------------------------------");
             }
         }
     }

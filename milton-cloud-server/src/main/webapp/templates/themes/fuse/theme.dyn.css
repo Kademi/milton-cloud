@@ -706,16 +706,17 @@ h1.logo a {
     z-index:999;
     margin-top:2px;
 }
-a.Link {
-    height:30px;
+a.Link {    
+    height: 30px;
     text-decoration:none;
     display:block;
     color:$page.parent.settings.textColour2;
     font-size: 0.85em;
     font-weight:normal;
-    padding:0.5em 2em 0 0.7em;
+    padding:0.5em 2em 1.5em 0.7em;
     background:url(images/arrow.gif) top right no-repeat;
     background-position:95% 12px;
+    min-width: 110px;
 }
 /*dropdown*/
 .dropBox {
@@ -804,9 +805,7 @@ a.circle {
     display:block;
     margin-top:5px !important;
 }
-.userBtn:hover>.dropBox {
-    display:block;
-}
+
 /*nav*/
 body.myDashboard li.nav-myDashboard, body.myLearning li.nav-myLearning, body.community li.nav-community, .nav li.active{
     border-top:1px solid #cbcbcb;
@@ -1624,6 +1623,8 @@ div.dropdown.dropdown2 {
     display: inline-block;
     position: relative;
     font-weight: 500;    
+    zoom: 1; /** for IE7 */
+    *display: inline;
 }
 
 
@@ -2002,8 +2003,6 @@ table.dashboard td.gap, table.myLearning td.gap {
 
 
 
-
-
 .sideBar{
     width:29%;
     float:right;
@@ -2145,7 +2144,9 @@ div.bar {
     border-radius: 5px;
     padding: 0 8px;
     font-size: 1.0em;    
-    position: relative;        
+    position: relative;   
+    top: 0;
+    left: 0;
 }
 div.bar h3 {
     color: #FFFFFF;
@@ -2157,6 +2158,7 @@ div.bar h3 {
 }
 div.bar.alt {
     background:$page.parent.settings.heroColour2;
+    position: static; /** fix IE7 bug on community updates **/
 }
 
 a.courseBox.active, a.courseBox:hover {
