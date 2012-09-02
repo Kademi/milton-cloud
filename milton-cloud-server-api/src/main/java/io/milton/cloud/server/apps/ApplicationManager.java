@@ -99,7 +99,7 @@ public class ApplicationManager {
             List<Application> active = (List<Application>) rootFolder.getAttributes().get(attName);
             if (active == null) {
                 active = findActiveApps(rootFolder);
-                log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
+                //log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
                 rootFolder.getAttributes().put(attName, active);
             }
             return active;

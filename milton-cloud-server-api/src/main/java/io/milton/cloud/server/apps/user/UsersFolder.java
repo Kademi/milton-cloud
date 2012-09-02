@@ -67,10 +67,8 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
             return  null;
         }
         if (children != null) {
-            log.info("find from children");
             return NodeChildUtils.childOf(children, p.getName());
         } else {
-            log.info("cherry pick");
             if (tempChildren == null) {
                 tempChildren = new HashMap<>();
             }
@@ -85,7 +83,6 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        log.info("child: " + childName);
         if (children == null) {
             // Attempt to locate a user without loading entire collection
             Profile p = Profile.find(childName, SessionManager.session());

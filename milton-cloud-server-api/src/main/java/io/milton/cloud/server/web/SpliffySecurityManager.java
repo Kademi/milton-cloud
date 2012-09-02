@@ -63,7 +63,7 @@ public class SpliffySecurityManager {
         }
         Auth auth = HttpManager.request().getAuthorization();
         if (auth == null || auth.getTag() == null) {
-            log.warn("no auth object");
+            //log.warn("no auth object");
             return null;
         }
         UserResource ur = (UserResource) auth.getTag();
@@ -80,7 +80,6 @@ public class SpliffySecurityManager {
             log.warn("user not found: " + userName);
             return null;
         } else {
-            log.info("verify password for: " + user.getName());
             // only the password hash is stored on the user, so need to generate an expected hash
             if (passwordManager.verifyPassword(user, requestPassword)) {
                 //HttpManager.request().getAttributes().put("_current_user", user);
@@ -92,7 +91,6 @@ public class SpliffySecurityManager {
     }
 
     public Profile authenticate(Organisation org, DigestResponse digest) {
-        log.trace("authenticate: " + digest.getUser());
         Session session = SessionManager.session();
         Profile user = Profile.find(digest.getUser(), session);
         while (user == null && org != null) {
@@ -137,7 +135,7 @@ public class SpliffySecurityManager {
             }
             log.info("Required priviledge: " + required + " was not found in assigned priviledge list of size: " + privs.size());
         }
-        log.info("allows = " + allows + " rsource: " + resource.getClass());
+//        log.info("allows = " + allows + " rsource: " + resource.getClass());
         return allows;
     }
 
@@ -157,7 +155,6 @@ public class SpliffySecurityManager {
                     appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
                 }
             }
-            System.out.println("privs size: " + privs.size());
         } else {
             Organisation org = resource.getOrganisation();
             Group pg = org.group(publicGroup, SessionManager.session());
@@ -170,18 +167,14 @@ public class SpliffySecurityManager {
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {        
         if (g.getGroupRoles() != null) {
-            System.out.println("appendPriviledges: group roles size: " + g.getGroupRoles().size() + " for group: " + g.getName());
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();
-                System.out.println("roleName: " + roleName);
                 Role role = mapOfRoles.get(roleName);
                 if (role != null) {
-                    System.out.println("role: " + role);
                     if (role.appliesTo(resource, withinOrg, g)) {
-                        System.out.println("does apply");
                         privs.addAll(role.getPriviledges(resource, withinOrg, g));
                     } else {
-                        System.out.println("does not apply");
+
                     }
                            
                 } else {
@@ -189,7 +182,7 @@ public class SpliffySecurityManager {
                 }
             }
         } else {
-            System.out.println("appendPriviledges: no grs for: " + g.getName());
+            //System.out.println("appendPriviledges: no grs for: " + g.getName());
         }
     }
 

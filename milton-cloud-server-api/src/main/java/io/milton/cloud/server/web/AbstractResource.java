@@ -63,8 +63,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     }
 
     @Override
-    public Object authenticate(DigestResponse digestRequest) {
-        log.info("authenticate");
+    public Object authenticate(DigestResponse digestRequest) {        
         Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(getOrganisation(), digestRequest);
         if (u != null) {
             try {
@@ -89,7 +88,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         if (!b) {
 //            LogUtils.info(log, "authorisation failed", auth, "resource:", getName(), "method:", method);
         }
-        log.info("authorise: " + getName() + " auth: " + auth + " = " + b);
+        //log.info("authorise: " + getName() + " auth: " + auth + " = " + b);
         return b;
     }
 
@@ -166,7 +165,6 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
         Set<AccessControlledResource.Priviledge> privs = _(SpliffySecurityManager.class).getPriviledges(curUser, this);
         list.addAll(privs);
-        System.out.println("AbstractRes: getPrivs: " + privs);
         return list;
     }
 

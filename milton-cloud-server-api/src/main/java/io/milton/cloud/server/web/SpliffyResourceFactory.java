@@ -92,9 +92,9 @@ public class SpliffyResourceFactory implements ResourceFactory {
                 }
             }
         }
-        if (r != null) {
-            log.info("Found a resource: " + r.getClass());
-        }
+//        if (r != null) {
+//            log.info("Found a resource: " + r.getClass());
+//        }
         return r;
     }
 

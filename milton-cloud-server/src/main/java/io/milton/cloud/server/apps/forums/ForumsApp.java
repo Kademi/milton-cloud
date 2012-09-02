@@ -43,6 +43,7 @@ import io.milton.resource.AccessControlledResource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -63,6 +64,8 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         return url;
     }
 
+    private Date modDate = new Date();
+    
     @Override
     public String getInstanceId() {
         return "forums";
@@ -148,7 +151,9 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         }
         if (path.endsWith(".css")) {
             Path p = Path.path(path);
-            return new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
+            TemplatedTextPage t = new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
+            t.setModifiedDate(modDate);
+            return t;
         }
         return null;
     }

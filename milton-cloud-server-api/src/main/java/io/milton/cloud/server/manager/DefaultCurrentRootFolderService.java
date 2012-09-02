@@ -129,26 +129,21 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
-        System.out.println("resolve: " + host);
         Session session = SessionManager.session();
         String primaryDomainSuffix = "." + primaryDomain;
         if (host.endsWith(primaryDomainSuffix)) {
             String subdomain = Utils.stripSuffix(host, primaryDomainSuffix);
-            System.out.println("subdoman: " + subdomain);
             // If starts with admin. then look for an organisation, will go to admin console
             if (subdomain.startsWith("admin.")) {
                 String orgName = Utils.stripPrefix(subdomain, "admin.");
-                System.out.println("look for org: " + orgName);
                 Organisation org = Organisation.findByOrgId(orgName, session);
                 if (org != null) {
-                    System.out.println("found: " + org.getName());
                     return new OrganisationRootFolder(applicationManager, org);
                 }
             }
             // otherwise, look for a website with a name that matches the subdomain
             Website website = Website.findByName(subdomain, session);
             if (website != null) {
-                System.out.println("found website: " + website.getName());
                 return new WebsiteRootFolder(applicationManager, website);
             }
         }
@@ -164,7 +159,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         if (org == null) {
             throw new RuntimeException("No root organisation");
         }
-        System.out.println("fall through to rootorg: " + org.getOrgId());
         return new OrganisationRootFolder(applicationManager, org);
     }
 

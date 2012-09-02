@@ -224,8 +224,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                         }
                         out.flush();
                     } catch (IOException iOException) {
-                        log.error("io exception", iOException);
-                        showDebugInfo(combiner.getBytesWritten());
+                        log.error("io exception, client has probably disconnected");
                     }
                 }
             } catch (Throwable e) {
