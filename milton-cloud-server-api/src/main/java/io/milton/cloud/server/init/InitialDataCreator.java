@@ -56,7 +56,7 @@ public class InitialDataCreator implements LifecycleApplication {
         this.initHelper = new InitHelper(passwordManager, applicationManager);
 
         initTestData();
-        initContentAutoLoad();
+//        initContentAutoLoad();
     }
 
     @Override

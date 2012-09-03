@@ -19,10 +19,20 @@ package io.milton.cloud.server.apps.myfiles;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.cloud.server.web.UserResource;
+import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
@@ -38,6 +48,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.CollectionResource;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
@@ -47,7 +58,7 @@ import java.io.IOException;
  *
  * @author brad
  */
-public class MyFilesApp implements Application, EventListener, PortletApplication {
+public class MyFilesApp implements Application, EventListener, PortletApplication, MenuApplication, BrowsableApplication {
 
     private ApplicationManager applicationManager;
 
@@ -84,20 +95,21 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
                 if (applicationManager.isActive(this, giw.getWebsite())) {
                     Profile u = joinEvent.getMembership().getMember();
                     Session session = SessionManager.session();
-                    addRepo("Documents", u, session);
-                    addRepo("Music", u, session);
-                    addRepo("Pictures", u, session);
-                    addRepo("Videos", u, session);
+                    addRepo("Documents", "docs", u, session);
+                    addRepo("Music", "music", u, session);
+                    addRepo("Pictures", "pics", u, session);
+                    addRepo("Videos","vids", u, session);
                 }
             }
         }
     }
 
-    private void addRepo(String name, Profile u, Session session) throws HibernateException {
+    private void addRepo(String title, String name, Profile u, Session session) throws HibernateException {
         Repository r1 = new Repository();
         r1.setBaseEntity(u);
         r1.setCreatedDate(new Date());
         r1.setName(name);
+        r1.setTitle(title);
         session.save(r1);
     }
 
@@ -105,6 +117,33 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (portletSection.equals("dashboardPrimary")) {
             _(TextTemplater.class).writePage("myfiles/filesPortlet.html", currentUser, rootFolder, context, writer);
+        }
+    }
+
+    @Override
+    public void appendMenu(MenuItem parent) {
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if( curUser == null ) {
+            return;
+        }
+        switch (parent.getId()) {
+            case "menuRoot":
+                String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
+                for( Repository r : curUser.getRepositories()) {
+                    String repoHref = userHref + r.getName() + "/";
+                    String title = r.getTitle() == null ? r.getName() : r.getTitle();
+                    parent.getOrCreate("menu-myfiles-" + r.getName(), title, repoHref).setOrdering(50);
+                }
+                break;
+        }
+        
+    }
+
+    @Override
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
+        if( parent instanceof UserResource ) {
+            UserResource ur = (UserResource) parent;
+            
         }
     }
 }

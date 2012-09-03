@@ -335,6 +335,26 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
     
     
-    
+    @Override
+    public List<ContentDirectoryResource> getSubFolders() throws NotAuthorizedException, BadRequestException {
+        List<ContentDirectoryResource> list = new ArrayList<>();
+        for (Resource r : getChildren()) {
+            if (r instanceof ContentDirectoryResource) {
+                list.add((ContentDirectoryResource) r);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public List<ContentResource> getFiles() throws NotAuthorizedException, BadRequestException {
+        List<ContentResource> list = new ArrayList<>();
+        for (Resource r : getChildren()) {
+            if ((r instanceof ContentResource) && !(r instanceof ContentDirectoryResource)) {
+                list.add((ContentResource) r);
+            }
+        }
+        return list;
+    }    
     
 }

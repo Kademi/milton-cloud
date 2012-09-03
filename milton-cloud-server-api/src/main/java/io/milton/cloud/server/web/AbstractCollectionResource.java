@@ -78,5 +78,6 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.READ_CONTENT;
     }      
+
     
 }

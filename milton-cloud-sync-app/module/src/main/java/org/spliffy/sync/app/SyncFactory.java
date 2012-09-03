@@ -43,6 +43,7 @@ public class SyncFactory {
         }
         log.info("config dir: " + fConfigDir.getCanonicalPath());
         File fConfigFile = new File(fConfigDir, "config.properties");
+        System.out.println("Load config file: " + fConfigFile.getCanonicalPath());
         Properties props = new Properties();
         if (fConfigFile.exists()) {
             FileInputStream fin = new FileInputStream(fConfigFile);
@@ -57,6 +58,7 @@ public class SyncFactory {
                 SyncJob job = mapOfJobs.get(jobId);
                 if (job == null) {
                     job = new SyncJob();
+                    job.setMonitor(true);
                     mapOfJobs.put(jobId, job);
                 }
                 String prop = parts[1];

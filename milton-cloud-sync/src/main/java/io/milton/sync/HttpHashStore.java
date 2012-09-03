@@ -141,6 +141,11 @@ public class HttpHashStore implements HashStore {
         try {
             byte[] arr = host.doGet(destPath);
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+            
+            
+            System.out.println("got file fanout");
+            String s = new String(arr);
+            System.out.println(s);
             Fanout fanout = FanoutSerializationUtils.readFanout(bin);
 
             if (filesHashCache != null) {

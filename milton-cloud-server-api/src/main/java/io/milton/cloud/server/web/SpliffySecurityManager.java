@@ -97,10 +97,12 @@ public class SpliffySecurityManager {
 
     public Profile authenticate(Organisation org, DigestResponse digest) {
         Session session = SessionManager.session();
-        Profile user = Profile.find(digest.getUser(), session);
+        Profile user = null;
         while (user == null && org != null) {
-            org = org.getOrganisation();
             user = Profile.find(org, digest.getUser(), session);
+            if( user == null ) {
+                org = org.getOrganisation();            
+            }
         }
         if (user == null) {
             log.warn("user not found: " + digest.getUser());

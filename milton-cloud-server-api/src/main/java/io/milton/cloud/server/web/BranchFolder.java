@@ -38,8 +38,6 @@ import org.hashsplit4j.api.HashStore;
 public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource, NodeChildUtils.ResourceCreator {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-        
-    
     protected final boolean renderMode;
     protected final CommonCollectionResource parent;
     protected final String name;
@@ -56,7 +54,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         this.name = name;
         this.parent = parent;
         this.branch = branch;
-        if( branch != null ) {
+        if (branch != null) {
             this.commit = branch.getHead();
         }
         this.dataSession = new DataSession(branch, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
@@ -68,20 +66,20 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public void save() throws IOException{        
+    public void save() throws IOException {
         String lastHash = null;
         Long lastId = null;
-        if( branch != null && branch.getHead() != null ) {
-            lastId = branch.getHead().getId();                    
+        if (branch != null && branch.getHead() != null) {
+            lastId = branch.getHead().getId();
             lastHash = branch.getHead().getItemHash();
         }
-                
+
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        if( currentUser == null ) {
+        if (currentUser == null) {
             throw new RuntimeException("No current user!");
         }
         dataSession.save(currentUser);
-        
+
         System.out.println("----------------------------------");
         System.out.println("branch head ID: " + branch.getHead().getId());
         System.out.println("branch head hash: " + branch.getHead().getItemHash());
@@ -94,8 +92,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Resource child(String childName) {
         return NodeChildUtils.childOf(getChildren(), childName);
     }
-            
-    
+
     @Override
     public ResourceList getChildren() {
         if (children == null) {
@@ -205,7 +202,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             }
         }
         log.trace("sendContent: render template");
-        getTemplater().writePage(false, "repoHome", this, params, out);
+        getTemplater().writePage(false, "directoryIndex", this, params, out);
     }
 
     @Override
@@ -347,7 +344,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public String getHash() {
         Commit c = branch.getHead();
-        if( c == null ) {
+        if (c == null) {
             return null;
         } else {
             return c.getItemHash();
@@ -356,23 +353,46 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public void setHash(String s) {
-        this.dataSession.getRootDataNode().setHash(s);        
+        this.dataSession.getRootDataNode().setHash(s);
     }
-    
-    
 
     @Override
     public Profile getModifiedBy() {
         Commit h = branch.getHead();
-        if( h == null ) {
+        if (h == null) {
             return null;
         } else {
             return h.getEditor();
         }
-    }                
+    }
 
     public DataSession getDataSession() {
         return dataSession;
     }
-   
+
+    @Override
+    public List<ContentDirectoryResource> getSubFolders() {
+        List<ContentDirectoryResource> list = new ArrayList<>();
+        for (Resource r : getChildren()) {
+            if (r instanceof ContentDirectoryResource) {
+                if (!r.getName().equals(".mil")) {
+                    list.add((ContentDirectoryResource) r);
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public List<ContentResource> getFiles() {
+        List<ContentResource> list = new ArrayList<>();
+        for (Resource r : getChildren()) {
+            if ((r instanceof ContentResource) && !(r instanceof ContentDirectoryResource)) {
+                if (!r.getName().equals(".mil")) {
+                    list.add((ContentResource) r);
+                }
+            }
+        }
+        return list;
+    }
 }

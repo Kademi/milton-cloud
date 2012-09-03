@@ -54,6 +54,8 @@ public class FanoutResource extends BaseResource implements GetableResource {
 
     @Override
     public Long getContentLength() {
-        return 8 + fanout.getHashes().size() * 8l; // 8 bytes for each hash, plus 8 for the actualContentLength
+        return null;
+//        String s = fanout.getActualContentLength() + "";
+//        return s.length() + fanout.getHashes().size() * 40l;
     }
 }

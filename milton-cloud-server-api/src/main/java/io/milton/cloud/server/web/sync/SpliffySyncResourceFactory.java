@@ -11,6 +11,8 @@ import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.cloud.server.db.utils.OrganisationDao;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.ResourceFactory;
 import io.milton.vfs.db.utils.SessionManager;
@@ -44,13 +46,15 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
     public static final Date LONG_LONG_AGO = new Date(0);
     private String basePath = "/_hashes";
     private final SpliffySecurityManager securityManager;
+    private final CurrentRootFolderService currentRootFolderService;
     private final HashStore hashStore;
     private final BlobStore blobStore;
     
-    public SpliffySyncResourceFactory(HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager) {
+    public SpliffySyncResourceFactory(HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager,CurrentRootFolderService currentRootFolderService) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.securityManager = securityManager;
+        this.currentRootFolderService = currentRootFolderService;
     }
 
     @Override
@@ -58,19 +62,10 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
-        Organisation org;
-        Website website = Website.findByDomainName(host, SessionManager.session());
-        if (website == null) {
-            org = OrganisationDao.getRootOrg(SessionManager.session());
-            if (org == null) {
-                throw new RuntimeException("Not in a website and no root organisation. Host=" + host);
-            }            
-        } else {
-            org = (Organisation) website.getOrganisation();
-        }
 
         if (path.startsWith(basePath)) {
-            return getSyncResource(path, org);
+            RootFolder rootFolder = currentRootFolderService.getRootFolder(host);
+            return getSyncResource(path, rootFolder.getOrganisation());
         } else {
             return null;
         }

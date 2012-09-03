@@ -24,6 +24,7 @@ import io.milton.resource.ReportableResource;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Organisation;
 import java.util.Set;
 
 /**
@@ -64,7 +65,11 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public Object authenticate(DigestResponse digestRequest) {        
-        Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(getOrganisation(), digestRequest);
+        Organisation org = getOrganisation();
+        if( org == null ) {
+            throw new RuntimeException("Got null org for: " + this.getClass());
+        }
+        Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(org, digestRequest);
         if (u != null) {
             try {
                 PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);

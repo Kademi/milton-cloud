@@ -15,10 +15,11 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.vfs.data.DataSession.DirectoryNode;
-import io.milton.vfs.db.Branch;
-import java.io.IOException;
+import java.util.List;
 
 /**
  * Implemented by content resources, which dont save themselves, but delegate
@@ -39,11 +40,7 @@ public interface ContentDirectoryResource extends CommonCollectionResource, Cont
 
     void onRemovedChild(AbstractContentResource aThis);
     
-    /**
-     * Get the branch that contains this content (or is this content, if the resource
-     * is itself the BranchFolder
-     * 
-     * @return 
-     */
-    Branch getBranch();
+    List<ContentDirectoryResource> getSubFolders() throws NotAuthorizedException, BadRequestException;
+    
+    List<ContentResource> getFiles() throws NotAuthorizedException, BadRequestException;
 }

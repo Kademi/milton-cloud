@@ -82,6 +82,7 @@
         <constructor-arg ref="hash.store" />
         <constructor-arg ref="${id.blob.store}" />
         <constructor-arg ref="security.manager" />
+        <constructor-arg ref="current.root.folder.service" />
     </bean>
     
     <bean id="altformat.resource.factory" class="io.milton.cloud.server.web.alt.AltFormatResourceFactory">
