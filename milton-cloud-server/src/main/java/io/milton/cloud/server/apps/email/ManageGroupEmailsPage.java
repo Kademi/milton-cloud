@@ -43,6 +43,7 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -85,7 +86,13 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
         
         return null;
     }    
-        
+
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }
+    
+    
     
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               

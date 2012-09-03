@@ -187,36 +187,6 @@ public class WebUtils {
     }    
     
     
-    public static void appendMenu(MenuItem parent) {
-        String thisHref = null;
-        Request req = HttpManager.request();
-        if( req != null ) {
-            thisHref = req.getAbsolutePath();
-        }
-        if (parent.getId().equals("menuRoot")) {
-            RootFolder rootFolder = parent.getRootFolder();
-            if (rootFolder instanceof WebsiteRootFolder) {
-                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-                Website website = wrf.getWebsite();
-                Repository r = website.getRepository();
-                String sMenu = r.getAttribute("menu");
-                if (sMenu != null && sMenu.length() > 0) {
-                    String[] arr = sMenu.split("\n");
-                    int cnt = 0;
-                    for (String s : arr) {
-                        String[] pair = s.split(",");
-                        String id = "menuContent" + cnt++;
-                        String menuHref = pair[0];
-                        MenuItem i = parent.getOrCreate(id, pair[1], menuHref);
-                        i.setOrdering(cnt * 10);
-                        if( thisHref != null && thisHref.startsWith(menuHref)) {
-                            MenuItem.setActiveId(id);
-                        }
-                    }
-                }
-            }
-        }
-    }
    
     /**
      * Find the longest matching menu href which contains thisHref
@@ -256,4 +226,13 @@ public class WebUtils {
         }
     
     }    
+    
+    public static Website getWebsite(Resource r ) {
+        RootFolder rf = findRootFolder(r);
+        if( rf instanceof WebsiteRootFolder ) {
+            return ((WebsiteRootFolder)rf).getWebsite();
+        } else {
+            return null;
+        }
+    }
 }

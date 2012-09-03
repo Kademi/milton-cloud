@@ -266,5 +266,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
     }
     
     
-    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }    
 }

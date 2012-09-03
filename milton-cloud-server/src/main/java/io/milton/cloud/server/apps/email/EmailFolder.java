@@ -195,4 +195,10 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         log.info("not owning user, check sec manager");
         return super.authorise(request, method, auth);
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }        
+    
 }

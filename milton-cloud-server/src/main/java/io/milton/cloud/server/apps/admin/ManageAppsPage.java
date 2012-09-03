@@ -16,6 +16,7 @@ package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -38,7 +39,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 /**
- * Controls application and their settings for an organisation
+ * Controls application and their settings for an organisation. See
+ * ManageWebsitePage for managing apps within a Website
  *
  * @author brad
  */
@@ -53,8 +55,7 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
     public String getTitle() {
         return "Manage applications: " + organisation.getName();
     }
-   
-    
+
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
@@ -72,10 +73,13 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            // push web and org into request variables for templating
+            RenderAppSettingsDirective.setOrganisation(organisation);
+            RenderAppSettingsDirective.setWebsite(website);
+
             _(HtmlTemplater.class).writePage("admin", "admin/manageApps", this, params, out);
         }
     }
-
 
     @Override
     public boolean is(String type) {

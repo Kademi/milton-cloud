@@ -16,12 +16,14 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.*;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Represents a Profile which is a subordinate to an organisation. This is 
@@ -39,6 +41,24 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Subordinate implements Serializable{
+    
+    
+    /**
+     * Find a Subordinate (if one exists) between then given org and user profile
+     * 
+     * @param org
+     * @param p
+     * @return 
+     */
+    public static Subordinate find(Organisation org, Profile p, Session session) {
+        Criteria c = session.createCriteria(Subordinate.class);
+        c.add(Restrictions.eq("withinOrg", org));
+        Criteria cMemmbership = c.createCriteria("groupMembership");
+        cMemmbership.add(Restrictions.eq("member", p));
+        c.setCacheable(true);
+        return DbUtils.unique(c);
+    }
+    
     private Long id;
     private Organisation withinOrg;
     private GroupMembership groupMembership;

@@ -111,16 +111,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.modifiedDate = modifiedDate;
     }
 
-    /**
-     * Return true if this entity contains or is the given user
-     *
-     * @param user
-     * @return
-     */
-    public boolean containsUser(BaseEntity user, Organisation withinOrg) {
-        return this == user;
-    }
-
     @OneToMany(mappedBy = "owner")
     public List<Calendar> getCalendars() {
         return calendars;

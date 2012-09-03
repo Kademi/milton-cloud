@@ -79,11 +79,11 @@ function doLogin(userName, password, config) {
                 if( config.afterLoginUrl == null) {
                     window.location.reload();
                 } else if( config.afterLoginUrl.startsWith("/")) {
-                    //alert("would redirect to: " + config.afterLoginUrl);
+                    log("redirect to1: " + config.afterLoginUrl);
                     //return;
                     window.location = config.afterLoginUrl;
                 } else {
-                    //alert("would redirect to: " + userUrl + config.afterLoginUrl);
+                    log("redirect to2: " + userUrl + config.afterLoginUrl);
                     //return;
                     window.location = userUrl + config.afterLoginUrl;
                 }

@@ -17,6 +17,7 @@ import io.milton.http.http11.auth.DigestResponse;
 import io.milton.vfs.db.Profile;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.AccessControlledResource;
 import org.apache.log4j.Logger;
 
 /**
@@ -125,7 +126,10 @@ public abstract class BaseResource implements CommonResource{
         return true;
     }
 
-    
+    @Override
+    public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
     
     
     

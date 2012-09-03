@@ -24,25 +24,30 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
-import io.milton.cloud.server.apps.admin.WebsiteAccessReport;
+import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.event.SubscriptionEvent.SubscriptionAction;
+import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
+import io.milton.http.FileItem;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +55,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class SignupApp implements ChildPageApplication, BrowsableApplication, EventListener, ReportingApplication {
+public class SignupApp implements ChildPageApplication, BrowsableApplication, EventListener, ReportingApplication, SettingsApplication {
 
     private static final Logger log = LoggerFactory.getLogger(SignupApp.class);
+    public static final String NEXT_HREF = "signup.next.href";
     
     private String signupPageName = "signup";
     private StateProcess userManagementProcess;
@@ -60,6 +66,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     private CurrentDateService currentDateService;
     private EventManager eventManager;
     private List<JsonReport> reports;
+    private AppConfig config;
 
     public SignupApp() {
         reports = new ArrayList<>();
@@ -88,6 +95,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         eventManager = resourceFactory.getEventManager();
         currentDateService = config.getContext().get(CurrentDateService.class);
         timerService = config.getContext().get(TimerService.class);
+        this.config = config;
     }
 
     @Override
@@ -95,7 +103,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         if (parent instanceof GroupInWebsiteFolder) {
             GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
             if (requestedName.equals(signupPageName)) {
-                return new GroupRegistrationPage(requestedName, wrf);
+                return new GroupRegistrationPage(requestedName, wrf, this);
             }
         }
         return null;
@@ -107,7 +115,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             Website website = wrf.getWebsite();
             List<GroupInWebsite> groupsInWebsite = website.groups(SessionManager.session());
-            System.out.println("addBrowseablePages: " + groupsInWebsite.size());
             for (GroupInWebsite giw : groupsInWebsite) {
                 GroupInWebsiteFolder f = new GroupInWebsiteFolder(giw, wrf);
                 children.add(f);
@@ -149,8 +156,60 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         log.info("Final state: " + pp.getStateName());
     }
 
+    /**
+     * Get the URL to redirect the new user to
+     * 
+     * @param newUser
+     * @return 
+     */
+    public String getNextHref(Profile newUser, Website website) {
+        String s = config.get(NEXT_HREF, website);
+        return s;
+    }
+    
     @Override
     public void onEvent(Event e) {
+    }
+
+    @Override
+    public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {
+        String href; // = findSetting("gaAccountNumber", rootFolder);
+        if( website != null ) {
+            System.out.println("get from website - " + website.getName());
+            href = config.get(NEXT_HREF, website);
+        } else {
+            System.out.println("get from org");
+            href = config.get(NEXT_HREF, org);
+        }        
+        System.out.println("current href: " + href);
+        if( href == null ) {
+            href = "";
+        }
+        writer.write("<label for='signupNextHref'>First page after signup</label>");
+        writer.write("<input type='text' id='signupNextHref' name='signupNextHref' value='" + href + "' />");
+        writer.flush();
+    }
+
+    private String findSetting(String setting, RootFolder rootFolder) {
+        if( rootFolder instanceof WebsiteRootFolder ) {
+            System.out.println("get from web");
+            return config.get(setting, ((WebsiteRootFolder)rootFolder).getWebsite());
+        } else {
+            System.out.println("get from org");
+            return config.get(setting, rootFolder.getOrganisation());
+        }
+    }    
+    
+    @Override
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {
+        System.out.println("save settings");
+        String signupNextHref = parameters.get("signupNextHref");
+        if( website != null ) {
+            config.set(NEXT_HREF, website, signupNextHref);
+        } else {
+            config.set(NEXT_HREF, org, signupNextHref);
+        }
+        return new JsonResult(true);        
     }
 
     public class SubscriptionEventActionHandler implements ActionHandler {

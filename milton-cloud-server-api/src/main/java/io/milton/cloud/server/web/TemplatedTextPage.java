@@ -123,7 +123,15 @@ public class TemplatedTextPage extends AbstractResource implements GetableResour
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
-        return null;
+        if(modDate != null ) {
+            return 60*60l;
+        } else {
+            return null;
+        }
     }
     
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

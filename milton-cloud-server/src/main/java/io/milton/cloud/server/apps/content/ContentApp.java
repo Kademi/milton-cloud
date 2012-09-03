@@ -148,10 +148,46 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
     
     @Override
     public void appendMenu(MenuItem parent) {
-        WebUtils.appendMenu(parent);
+        appendWebsiteMenu(parent);
     }
    
- 
+    /**
+     * Get the current website and look for a "menu" attribute on its repository. If
+     * it exists then parse it and generate menu items
+     * 
+     * @param parent 
+     */
+    public void appendWebsiteMenu(MenuItem parent) {
+        String thisHref = null;
+        Request req = HttpManager.request();
+        if( req != null ) {
+            thisHref = req.getAbsolutePath();
+        }
+        if (parent.getId().equals("menuRoot")) {
+            RootFolder rootFolder = parent.getRootFolder();
+            if (rootFolder instanceof WebsiteRootFolder) {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+                Website website = wrf.getWebsite();
+                Repository r = website.getRepository();
+                String sMenu = r.getAttribute("menu");
+                if (sMenu != null && sMenu.length() > 0) {
+                    String[] arr = sMenu.split("\n");
+                    int cnt = 0;
+                    for (String s : arr) {
+                        String[] pair = s.split(",");
+                        String id = "menuContent" + cnt++;
+                        String menuHref = pair[0];
+                        MenuItem i = parent.getOrCreate(id, pair[1], menuHref);
+                        i.setOrdering(cnt * 10);
+                        if( thisHref != null && thisHref.startsWith(menuHref)) {
+                            MenuItem.setActiveId(id);
+                        }
+                    }
+                }
+            }
+        }
+    }    
+    
     
     public class ContentViewerRole implements Role {
         

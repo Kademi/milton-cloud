@@ -25,13 +25,13 @@ function initApps() {
             overlayClose: false,
             opacity: 0
         });
-    }); 
+    });     
     $(".settings form").forms({
         callback: function(resp) {
             log("done save", resp);
             $.tinybox.close();
             window.location.reload();
-        }
+}
     });
     
 }

@@ -13,6 +13,8 @@ import java.io.OutputStream;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
+import io.milton.resource.AccessControlledResource;
 import org.apache.log4j.Logger;
 import org.hashsplit4j.api.BlobStore;
 
@@ -76,4 +78,9 @@ public class DirectoryHashResource extends BaseResource implements GetableResour
     public Long getContentLength() {
         return null;
     }
+    
+    @Override
+    public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

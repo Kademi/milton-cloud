@@ -25,6 +25,7 @@ import java.util.Map;
 
  import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
+import io.milton.http.Request;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
@@ -63,6 +64,10 @@ public class MyQuestionFolder extends AbstractCollectionResource implements Geta
         return null;
     }
 
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }      
     
     
     @Override

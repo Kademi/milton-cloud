@@ -14,7 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
-import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
 import java.io.IOException;
 
@@ -45,6 +45,13 @@ public interface ContentResource extends CommonResource{
      * Save changes to the database. This will usually invoke save on a parent, 
      * except for the branch which will set the commit record
      */
-    void save() throws IOException;    
+    void save() throws IOException;  
+    
+    /**
+     * Get the branch that contains this content
+     * 
+     * @return 
+     */
+    Branch getBranch();
         
 }

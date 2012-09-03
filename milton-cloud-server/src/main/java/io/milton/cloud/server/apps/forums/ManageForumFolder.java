@@ -162,5 +162,8 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
         return false;
     }
 
-
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }    
 }

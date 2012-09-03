@@ -159,6 +159,9 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         return false;
     }
     
-    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }
 

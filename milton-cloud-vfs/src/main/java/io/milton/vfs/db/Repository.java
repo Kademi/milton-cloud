@@ -180,7 +180,8 @@ public class Repository implements Serializable {
         return null;
     }
 
-    public Branch trunk(Session session) {
+    @Transient
+    public Branch getTrunk() {
         if (getBranches() != null) {
             for (Branch b : getBranches()) {
                 if (Branch.TRUNK.equals(b.getName())) {
@@ -206,8 +207,8 @@ public class Repository implements Serializable {
         head.setItemHash(null);
         session.save(head);
 
-        Branch b = new Branch();
-        b.setName(Branch.TRUNK);
+        Branch b = new Branch();        
+        b.setName(name);
         b.setRepository(this);
         b.setHead(head);
         session.save(b);

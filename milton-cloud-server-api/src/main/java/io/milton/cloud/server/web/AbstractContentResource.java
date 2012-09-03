@@ -27,6 +27,7 @@ import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.property.BeanProperty;
+import io.milton.vfs.db.Branch;
 
 /**
  *
@@ -320,5 +321,16 @@ public abstract class AbstractContentResource extends AbstractResource implement
         this.contentNode.setHash(s);
         updateModDate();
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }    
+
+    @Override
+    public Branch getBranch() {
+        return parent.getBranch();
+    }
+    
     
 }

@@ -17,8 +17,10 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -33,7 +35,8 @@ import javax.persistence.Temporal;
  *
  * @author brad
  */
-public class GroupMembershipApplication {
+@Entity
+public class GroupMembershipApplication implements Serializable {
     private Long id;
     private Organisation withinOrg;
     private Profile member;

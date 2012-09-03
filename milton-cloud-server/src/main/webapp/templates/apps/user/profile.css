@@ -9,7 +9,7 @@ body.profile .details form, body.profile .changePassword form, body.profile div.
     margin-top: 0.6em;
 }
 div.details, div.profilePic {
-    width: 48%;
+    width: 47%;
 }
 div.details {
     float: left;

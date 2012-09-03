@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -81,6 +82,11 @@ public class ManageOrgsPage extends AbstractResource implements GetableResource,
         }
         return null;
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }    
     
     public String getTitle() {
         return "Manage business units";

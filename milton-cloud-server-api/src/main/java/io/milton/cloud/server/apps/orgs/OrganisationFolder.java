@@ -195,4 +195,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         }
         return fakeSettings;
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

@@ -134,7 +134,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         Transaction tx = session.beginTransaction();
         Profile p = getProfile();
         Repository r = findProfilePics(p);
-        Branch b = r.trunk(SessionManager.session());
+        Branch b = r.getTrunk();
         Commit head = b.getHead();
         if (head == null) {
         }

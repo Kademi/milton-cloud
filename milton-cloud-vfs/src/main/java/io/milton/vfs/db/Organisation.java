@@ -255,4 +255,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
+    
+    /**
+     * Return true if this entity contains or is the given user
+     *
+     * @param user
+     * @return
+     */
+    public boolean containsUser(Profile p, Session session) {
+        Subordinate s = Subordinate.find(this, p, session);
+        return  s != null;
+    }
+    
 }

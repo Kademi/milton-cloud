@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.util.Map;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.http.Request;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 
 /**
@@ -60,5 +62,8 @@ public class BlobResource extends BaseResource implements GetableResource{
         return "application/octet-stream";
     }
 
-
+    @Override
+    public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    } 
 }

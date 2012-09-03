@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import java.util.HashMap;
 
 /**
@@ -145,4 +146,10 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }      
+    
 }

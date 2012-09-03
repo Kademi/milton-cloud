@@ -91,7 +91,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
             children = new ResourceList();
             if (user.getRepositories() != null) {
                 for (Repository r : user.getRepositories()) {
-                    Branch b = r.trunk(SessionManager.session());
+                    Branch b = r.getTrunk();
                     if( b != null ) {
                         BranchFolder rr = new BranchFolder(r.getName(), this, b, false);
                         children.add(rr);
@@ -111,17 +111,8 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         Transaction tx = SessionManager.session().beginTransaction();
-        Repository r = new Repository();
-        r.setBaseEntity(user);
-        r.setName(newName);
-        r.setCreatedDate(new Date());
-        List<Repository> list = user.getRepositories();
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        list.add(r);
-        Branch b = r.trunk(SessionManager.session());
-
+        Repository r = user.createRepository(newName, user, SessionManager.session());
+        Branch b = r.getTrunk();
         SessionManager.session().save(r);
         tx.commit();
         return new BranchFolder(r.getName(), this, b, false);

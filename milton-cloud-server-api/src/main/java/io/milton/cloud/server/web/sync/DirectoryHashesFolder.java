@@ -16,7 +16,9 @@ import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
+import io.milton.http.Request;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.PostableResource;
 import io.milton.resource.PutableResource;
@@ -61,4 +63,8 @@ public class DirectoryHashesFolder extends BaseResource implements CollectionRes
         return Collections.EMPTY_LIST;
     }
 
+    @Override
+    public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

@@ -77,6 +77,12 @@ public class MyForumsFolder extends AbstractCollectionResource implements Getabl
         }
         return children;
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }      
+    
 
     @Override
     public CommonCollectionResource getParent() {

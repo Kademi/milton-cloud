@@ -26,10 +26,11 @@ public class MiltonOpenSessionInViewFilter implements Filter {
 
     @Override
     public void process(final FilterChain chain, final Request request, final Response response) {
+        long tm = System.currentTimeMillis();
         rootContext.execute(new Executable2() {
 
             @Override
-            public void execute(Context context) {
+            public void execute(Context context) {                
                 try {
                     Session s = sessionManager.open();
                     context.put(s);
@@ -39,5 +40,7 @@ public class MiltonOpenSessionInViewFilter implements Filter {
                 }
             }
         });
+        tm = System.currentTimeMillis() - tm;
+        System.out.println("Finished request: " + tm + "ms  for " + request.getAbsolutePath());
     }
 }

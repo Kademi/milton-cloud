@@ -140,7 +140,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Transaction tx = session.beginTransaction();
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         Repository r = findProfilePics(p);
-        Branch b = r.trunk(SessionManager.session());
+        Branch b = r.getTrunk();
         Commit head = b.getHead();
         if (head == null) {
         }

@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.vfs.db.Website;
 
 /**
@@ -125,4 +126,9 @@ public class WebsiteReportsFolder extends AbstractCollectionResource implements 
         return null;
     }
 
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }      
+    
 }

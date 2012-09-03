@@ -26,6 +26,7 @@ import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -46,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
@@ -94,9 +96,9 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             website.setPublicTheme(publicTheme);
             website.setInternalTheme(internalTheme);
             session.save(website);
-            
+
             Repository r = website.getRepository();
-            
+
             r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
             r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
             r.setAttribute("textColour1", parameters.get("textColour1"), session);
@@ -147,12 +149,12 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
 
     public List<String> getThemes() {
         List<String> list = new ArrayList<>();
-        list.add("fuse");                
-        list.add("milton");                
-        list.add("custom");                
+        list.add("fuse");
+        list.add("milton");
+        list.add("custom");
         return list;
     }
-    
+
     public Map<String, String> getThemeParams() {
         if (themeParams == null) {
             themeParams = new HashMap<>();
@@ -165,7 +167,6 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
         return themeParams;
     }
 
-    
     @Override
     public List<AppControlBean> getApps() {
         List<Application> activeApps;
@@ -195,6 +196,10 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            // push web and org into request variables for templating
+            RenderAppSettingsDirective.setOrganisation(organisation);
+            RenderAppSettingsDirective.setWebsite(website);
+
             _(HtmlTemplater.class).writePage("admin", "admin/manageWebsite", this, params, out);
         }
     }

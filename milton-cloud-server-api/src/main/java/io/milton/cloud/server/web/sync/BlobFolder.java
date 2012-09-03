@@ -12,6 +12,8 @@ import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.BlobStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.http.Request;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.PutableResource;
 
 /**
@@ -75,4 +77,9 @@ class BlobFolder extends  BaseResource implements PutableResource {
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         return Collections.EMPTY_LIST;
-    }}
+    }
+    @Override
+    public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    } 
+}

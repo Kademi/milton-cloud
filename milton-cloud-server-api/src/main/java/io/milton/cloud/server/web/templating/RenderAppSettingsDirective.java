@@ -32,7 +32,10 @@ import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
 
 /**
  * Called from the app settings page to render the settings for an app
@@ -41,6 +44,24 @@ import io.milton.vfs.db.Profile;
  */
 public class RenderAppSettingsDirective extends Directive {
 
+    
+    public static void setOrganisation(Organisation org) {
+        HttpManager.request().getAttributes().put("render-app-org", org);
+    }
+
+    public static Organisation getOrganisation() {
+        return (Organisation) HttpManager.request().getAttributes().get("render-app-org");
+    }
+    
+    
+    public static void setWebsite(Website w) {
+        HttpManager.request().getAttributes().put("render-app-website", w);
+    }
+    
+    public static Website getWebsite() {
+        return (Website) HttpManager.request().getAttributes().get("render-app-website");
+    }
+    
     @Override
     public String getName() {
         return "appSettings";
@@ -66,9 +87,11 @@ public class RenderAppSettingsDirective extends Directive {
             return true;
         }
         
+        Organisation org = getOrganisation();
+        Website w = getWebsite();
+        
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        RootFolder rootFolder = SpliffyResourceFactory.getRootFolder();
-        settingsApplication.renderSettings(currentUser, rootFolder, context, writer);
+        settingsApplication.renderSettings(currentUser, org, w, context, writer);
         return true;
     }
 }

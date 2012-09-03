@@ -32,7 +32,6 @@ import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import java.util.*;
@@ -40,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.vfs.db.Website;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -65,7 +65,7 @@ public abstract class AbstactAppsPage extends AbstractResource implements Getabl
         this.parent = parent;
         this.name = name;
         this.website = website;
-        appManager = _(ApplicationManager.class);
+        appManager = _(ApplicationManager.class);        
     }
 
       
@@ -187,19 +187,24 @@ public abstract class AbstactAppsPage extends AbstractResource implements Getabl
 
     protected void updateApplicationSettings(Map<String, String> parameters, Map<String, FileItem> files, Transaction tx) throws NotAuthorizedException, HibernateException, BadRequestException, ConflictException {
         // Updating the settings for an application
-        String appId = parameters.get("settingsAppId");
-        Application app = appManager.get(appId);
-        if (app instanceof SettingsApplication) {
-            SettingsApplication settingsApp = (SettingsApplication) app;
-            jsonResult = settingsApp.processForm(parameters, files, organisation, website);
-            if (jsonResult.isStatus()) {
-                tx.commit();
+        try {
+            String appId = parameters.get("settingsAppId");
+            Application app = appManager.get(appId);
+            if (app instanceof SettingsApplication) {
+                SettingsApplication settingsApp = (SettingsApplication) app;
+                jsonResult = settingsApp.processForm(parameters, files, organisation, website);
+                if (jsonResult.isStatus()) {
+                    tx.commit();
+                } else {
+                    tx.rollback();
+                }
             } else {
                 tx.rollback();
+                jsonResult = new JsonResult(false, "Application does not support settings");
             }
-        } else {
-            tx.rollback();
-            jsonResult = new JsonResult(false, "Application does not support settings");
+        } catch (Throwable e) {
+            log.error("exception saving app setting", e);
+            jsonResult = new JsonResult(false, "Exception occured: " + e.getMessage());
         }
     }
 
@@ -212,4 +217,9 @@ public abstract class AbstactAppsPage extends AbstractResource implements Getabl
         tx.commit();
         jsonResult = new JsonResult(true);
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }    
 }

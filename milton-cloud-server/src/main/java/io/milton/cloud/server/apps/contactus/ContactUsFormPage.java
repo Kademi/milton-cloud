@@ -115,6 +115,11 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         return null;
     }
 
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }        
+    
     private Long generateEmailItems(ContactRequest r, Session session) {
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         Website website;
@@ -296,7 +301,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     }
 
     @Override
-    public void renderSettings(Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+    public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

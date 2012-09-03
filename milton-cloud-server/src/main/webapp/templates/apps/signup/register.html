@@ -1,13 +1,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>
         <title>$view.title</title>        
+        <link href="register.css" rel="stylesheet" type="text/css" />
     </head>
     <body class="regoPage">        
         <div id="content">
             <div class="SubContent">
                 <h1>Registration</h1>
                 <div class="MainContent">
-                    $folder.find("/content/signup/professionals.html").getParam("intro")
+                    #set($path = "/content/signup/" + $folder.name + ".html")
+                    $!folder.find($path).getParam("intro")
                     <form method="post" id="registerForm" action="$page.name">
                         <fieldset>
                             <legend>Your login details</legend>
@@ -45,7 +47,7 @@
                             </div>
                         </fieldset>
                     </form>
-                    $folder.find("/content/signup/professionals.html").body
+                    $!folder.find($path).body
                 </div>		
                 <br class="Clear" />
 
@@ -54,7 +56,7 @@
         <script type="text/javascript">
             jQuery(function() {
                 log("init labels")
-                jQuery("label").each(function(i, n) {
+                jQuery("#registerForm label").each(function(i, n) {
                     var label = jQuery(n);
                     var title = label.text();
                     var input = jQuery("#" + label.attr("for"));
@@ -63,12 +65,12 @@
                 });
                 jQuery("#registerForm").forms({
                     validationFailedMessage: "Please enter your details below.",
-                    callback: function() {
-                        log("created account ok, logging in...");
-                        var userName = $("#email").val();
-                        var password = $("#password").val();
+                    callback: function(resp, form) {
+                        log("created account ok, logging in...", resp, form);
+                        var userName = form.find("input[name=email]").val();
+                        var password = form.find("input[name=password]").val();
                         doLogin(userName, password, {
-                            afterLoginUrl: "/dashboard"
+                            afterLoginUrl: resp.nextHref
                         });
                     }
                 });

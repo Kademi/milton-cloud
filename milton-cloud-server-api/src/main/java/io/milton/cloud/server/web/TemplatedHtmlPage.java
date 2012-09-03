@@ -152,5 +152,9 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
         return title;
     }
         
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }      
     
 }

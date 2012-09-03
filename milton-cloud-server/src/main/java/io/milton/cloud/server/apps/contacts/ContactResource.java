@@ -35,6 +35,7 @@ import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
+import io.milton.http.Request;
 import io.milton.http.Response;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -259,4 +260,9 @@ public class ContactResource extends AbstractResource implements GetableResource
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }    
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

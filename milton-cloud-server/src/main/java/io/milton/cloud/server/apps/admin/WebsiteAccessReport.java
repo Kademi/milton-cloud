@@ -19,6 +19,7 @@ import io.milton.cloud.server.db.AccessLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -29,6 +30,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -74,10 +77,11 @@ public class WebsiteAccessReport implements JsonReport{
         }
         List list = crit.list();
         List<TimeDataPointBean> dataPoints = new ArrayList<>();
+        Formatter f = _(Formatter.class);
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
-            Date date = (Date) arr[0];
-            Integer count = (Integer) arr[1];
+            Date date = (Date) arr[0];            
+            Long count = f.toLong(arr[1]);
             TimeDataPointBean b = new TimeDataPointBean();
             b.setDate(date.getTime());
             b.setValue(count);

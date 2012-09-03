@@ -52,7 +52,7 @@ public interface SettingsApplication extends Application{
      * @param context - the current velocity context
      * @param writer - to write content to
      */
-    void renderSettings(Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException;
+    void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException;
     
     /**
      * Process a form POST 

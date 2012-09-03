@@ -197,5 +197,8 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         return attributes;
     }
     
-    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

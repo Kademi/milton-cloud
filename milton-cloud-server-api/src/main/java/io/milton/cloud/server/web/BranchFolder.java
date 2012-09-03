@@ -56,7 +56,9 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         this.name = name;
         this.parent = parent;
         this.branch = branch;
-        this.commit = branch.getHead();
+        if( branch != null ) {
+            this.commit = branch.getHead();
+        }
         this.dataSession = new DataSession(branch, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
     }
 
@@ -372,6 +374,5 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public DataSession getDataSession() {
         return dataSession;
     }
-    
-    
+   
 }

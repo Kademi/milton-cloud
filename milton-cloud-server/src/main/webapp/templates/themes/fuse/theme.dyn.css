@@ -629,7 +629,7 @@ body .header li {
 body .header h1.logo, body .header h1.logo a {
     background-color: transparent;    
     left: 0;
-    color: $page.parent.settings.textColour2;   
+    color: $page.parent.settings.heroColour1;   
 }
 h1.logo a {
     width:121px;

@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -179,4 +180,9 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
     public String websiteAddress(Website w) {
         return w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }    
 }

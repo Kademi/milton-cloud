@@ -123,7 +123,7 @@ public class InitialDataCreator implements LifecycleApplication {
         
         admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io
-        initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email");
+        initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email", "content","search", "signup");
         miltonSite.addGroup(users, session);
         String menu = "/content/index.html,Home\n" +
                         "/content/maven/index.html,Downloads\n" +
@@ -131,8 +131,12 @@ public class InitialDataCreator implements LifecycleApplication {
                 
         miltonSite.getRepository().setAttribute("logo", "milton.io", session);
         miltonSite.getRepository().setAttribute("menu", menu, session);
+        
+        AppControl ac = AppControl.find(miltonSite, "signup", session);
+        ac.setSetting("signup.next.href", "/content/gettingStarted.html", session);
 
         Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "milton", admin); // can be accessed on mymilton.localhost or my.milton.io
+        miltonSite.getRepository().setAttribute("logo", "my.milton.io", session);
         initHelper.enableApps(myMiltonSite, admin, session, "admin", "users", "organisations", "website", "myFiles", "calendar", "contacts", "email");
         myMiltonSite.addGroup(users, session);
 
@@ -176,11 +180,14 @@ public class InitialDataCreator implements LifecycleApplication {
         System.out.println("FuseAutoloader: " + rootDir.getAbsolutePath());
         
         File miltonContent = new File(rootDir, "milton");
+        File mymiltonContent = new File(rootDir, "mymilton");
+        
         System.out.println("Beginning monitor of content dir: " + miltonContent.getAbsolutePath());
         File dbFile = new File("target/sync-db");
         boolean localReadonly = true;
         List<SyncJob> jobs = Arrays.asList(
-                new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly)
+                new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
+                new SyncJob(mymiltonContent, "http://127.0.0.1:8080/mymilton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly)
         );
         EventManager eventManager = new EventManagerImpl();
         SyncCommand.start(dbFile, jobs, eventManager);        

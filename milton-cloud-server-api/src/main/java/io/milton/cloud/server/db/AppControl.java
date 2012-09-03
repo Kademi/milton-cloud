@@ -23,6 +23,7 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
@@ -38,6 +39,7 @@ import org.hibernate.criterion.Restrictions;
  * @author brad
  */
 @javax.persistence.Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppControl implements Serializable {
     private List<AppSetting> appSettings;
 

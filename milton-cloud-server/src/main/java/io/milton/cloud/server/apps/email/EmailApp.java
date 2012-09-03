@@ -89,6 +89,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private EventManager eventManager;
     private AsynchProcessor asynchProcessor;
         
+    private int smtpPort = 2525;
 
     @Override
     public String getInstanceId() {
@@ -111,6 +112,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
+        smtpPort = config.getInt("smtp.port");
+        
         batchEmailService = new BatchEmailService();
         groupEmailService = new GroupEmailService(batchEmailService);
         config.getContext().put(groupEmailService);
@@ -130,7 +133,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         mailServerBuilder.setMailResourceFactory(mailResourceFactory);
         mailServerBuilder.setEnablePop(false);
         mailServerBuilder.setEnableMsa(false);
-        mailServerBuilder.setSmtpPort(2525); // high port for linux. TODO: make configurable        
+        mailServerBuilder.setSmtpPort(smtpPort); // high port for linux. TODO: make configurable        
         mailServerBuilder.setMailStore(mailStore);
         mailServerBuilder.setQueueStore(queueStore);
         List<Filter> filters = new ArrayList<>();
@@ -180,6 +183,9 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void appendMenu(MenuItem parent) {
+        if( _(SpliffySecurityManager.class).getCurrentUser() == null ) {
+            return ;
+        }
         switch (parent.getId()) {
             case "menuRoot":
                 if (parent.getRootFolder() instanceof WebsiteRootFolder) {
@@ -221,6 +227,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public void initDefaultProperties(AppConfig config) {
+        Integer i = config.getInt("smtp.port");
+        if( i == null ) {
+            i = 2525;
+            config.setInt("smtp.port", i);
+        }
+        int ii = config.getInt("smtp.port");
     }
 
     @Override

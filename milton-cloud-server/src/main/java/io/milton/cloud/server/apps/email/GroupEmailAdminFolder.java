@@ -5,6 +5,7 @@ import io.milton.cloud.server.apps.forums.*;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.principal.Principal;
@@ -71,4 +72,9 @@ public class GroupEmailAdminFolder extends AbstractCollectionResource {
     public Map<Principal, List<AccessControlledResource.Priviledge>> getAccessControlList() {
         return null;
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }            
 }

@@ -11,7 +11,7 @@
  */
 
 (function( $ ) {
-    $.fn.forms = function(options) {
+    $.fn.forms = function(options) {        
         log("init forms plugin", this);
         
         var config = $.extend( {
@@ -27,6 +27,7 @@
         log("msgs", config.valiationMessageSelector, container, $(config.valiationMessageSelector, container));
         $(this).submit(function(e) {            
             e.preventDefault();
+            e.stopPropagation();
             var form = $(this);     
             log("form submit", form, "to" , form.attr("action"));
             resetValidation(container);
@@ -69,7 +70,8 @@
                         },
                         error: function(resp) {
                             ajaxLoadingOff();
-                            alert("err");
+                            log("error posting form", form, resp);
+                            alert("err " + resp);
                             $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
                             log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
                             $(config.valiationMessageSelector, container).show(100);

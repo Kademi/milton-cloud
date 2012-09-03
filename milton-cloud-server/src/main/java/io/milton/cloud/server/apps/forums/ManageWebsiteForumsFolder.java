@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -43,10 +41,10 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
-import java.util.Collections;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -194,4 +192,9 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
         tx.commit();
         jsonResult = new JsonResult(true, "Created", newName);
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }        
 }

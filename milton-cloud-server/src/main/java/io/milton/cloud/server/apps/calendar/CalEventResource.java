@@ -22,6 +22,7 @@ import org.hibernate.Transaction;
 import io.milton.vfs.db.Organisation;
 import io.milton.http.Auth;
 import io.milton.http.Range;
+import io.milton.http.Request;
 import io.milton.http.Response.Status;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -267,4 +268,9 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }    
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

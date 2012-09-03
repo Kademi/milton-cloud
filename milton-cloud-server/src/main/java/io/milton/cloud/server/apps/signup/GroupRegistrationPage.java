@@ -61,11 +61,13 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     private static final Logger log = LoggerFactory.getLogger(GroupRegistrationPage.class);
     private final String name;
     private final GroupInWebsiteFolder parent;
-    private JsonResult jsonResult;
+    private final SignupApp app;
+    private JsonResult jsonResult;    
 
-    public GroupRegistrationPage(String name, GroupInWebsiteFolder parent) {
+    public GroupRegistrationPage(String name, GroupInWebsiteFolder parent, SignupApp app) {
         this.parent = parent;
         this.name = name;
+        this.app = app;
     }
 
     @Override
@@ -140,6 +142,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             Group group = parent.getGroup();
             if (!Group.REGO_MODE_OPEN.equals(group.getRegistrationMode())) {
                 // Not open
+                log.info("Group is not open, so create a membership application");
                 GroupMembershipApplication gma = new GroupMembershipApplication();
                 gma.setCreatedDate(new Date());
                 gma.setModifiedDate(new Date());
@@ -149,6 +152,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 session.save(gma);
             } else {
                 // add directly to group
+                System.out.println("group is open, so signup directly");
                 p.addToGroup(group, org, session);
                 WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
@@ -158,10 +162,11 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             //_(SignupApp.class).onNewProfile(u, parent.getGroup(),  rf);
 
             tx.commit();
-
+            
+            String nextHref = app.getNextHref(p, WebUtils.getWebsite(this));
             String userPath = "/users/" + p.getName(); // todo: encoding
             log.info("Created user: " + userPath);
-            jsonResult = new JsonResult(true, "Created account", userPath);
+            jsonResult = new JsonResult(true, "Created account", nextHref);
         } catch (Exception e) {
             log.error("Exception creating user", e);
             jsonResult = new JsonResult(false, e.getMessage());
@@ -231,4 +236,9 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public boolean isPublic() {
         return true;
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }     
 }

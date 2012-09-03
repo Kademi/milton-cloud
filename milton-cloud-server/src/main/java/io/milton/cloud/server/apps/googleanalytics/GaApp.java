@@ -101,17 +101,25 @@ public class GaApp implements PortletApplication, SettingsApplication{
         writer.write("</script>\n");
     }
 
+
     private String findSetting(String setting, RootFolder rootFolder) {
         if( rootFolder instanceof WebsiteRootFolder ) {
             return config.get(setting, ((WebsiteRootFolder)rootFolder).getWebsite());
         } else {
             return config.get(setting, rootFolder.getOrganisation());
         }
-    }
-
+    }    
+        
+    
     @Override
-    public void renderSettings(Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        String acc = findSetting("gaAccountNumber", rootFolder);
+    public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {        
+        String acc; // = findSetting("gaAccountNumber", rootFolder);
+        if( website != null ) {
+            acc = config.get("gaAccountNumber", website);
+        } else {
+            acc = config.get("gaAccountNumber", org);
+        }
+        
         if( acc == null ) {
             acc = "";
         }

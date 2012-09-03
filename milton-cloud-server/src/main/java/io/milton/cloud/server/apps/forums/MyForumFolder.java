@@ -32,6 +32,7 @@ import java.util.Map;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
+import io.milton.http.Request;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.Website;
@@ -72,6 +73,11 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
         return null;
     }
 
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }      
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         // will show a list of posts for this topic, and allow new posts
@@ -172,4 +178,5 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     public Long getContentLength() {
         return null;
     }
+          
 }

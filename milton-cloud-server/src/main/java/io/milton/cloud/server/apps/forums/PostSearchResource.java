@@ -72,6 +72,11 @@ public class PostSearchResource extends AbstractResource implements GetableResou
         }
         jsonWriter.write(beans, out);
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }    
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {

@@ -12,6 +12,8 @@ import java.util.List;
 import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.http.Request;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.PutableResource;
 import io.milton.vfs.db.utils.SessionManager;
 import org.apache.log4j.Logger;
@@ -82,4 +84,9 @@ public class FanoutFolder extends BaseResource implements PutableResource {
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         return Collections.EMPTY_LIST;
     }
+    
+    @Override
+    public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }     
 }

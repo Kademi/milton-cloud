@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.Request;
 import java.util.Collections;
 
 /**
@@ -114,5 +115,9 @@ public class ManageForumsFolder extends AbstractCollectionResource implements Ge
     public Long getContentLength() {
         return null;
     }
-    
+  
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }        
 }

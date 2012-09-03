@@ -354,4 +354,9 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
     public StandardMessage instantiateAttachedMessage() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }            
 }

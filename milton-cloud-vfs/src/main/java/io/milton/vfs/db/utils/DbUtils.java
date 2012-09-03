@@ -42,7 +42,11 @@ public class DbUtils {
     }
 
     public static <T> T unique(Criteria crit) {
-        T item = (T) crit.uniqueResult();
+        List list = crit.list();
+        if( list == null || list.isEmpty() ) {
+            return null;
+        }
+        T item = (T) list.get(0);
         return item;
     }
 }

@@ -8,6 +8,7 @@ import io.milton.resource.Resource;
 import java.util.Date;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
 
 /**
  *
@@ -72,5 +73,10 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     public boolean isPublic() {
         return false;
     }
-        
+
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.READ_CONTENT;
+    }      
+    
 }

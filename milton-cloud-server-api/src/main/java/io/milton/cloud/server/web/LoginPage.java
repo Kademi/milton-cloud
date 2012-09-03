@@ -140,4 +140,10 @@ public class LoginPage implements GetableResource, CommonResource {
         boolean b = parent.isPublic();
         return b;
     }
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }      
+    
 }

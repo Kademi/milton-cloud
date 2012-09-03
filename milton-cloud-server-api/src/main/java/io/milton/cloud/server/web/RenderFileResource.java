@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.vfs.db.Branch;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
@@ -146,6 +147,13 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
         return null;
     }
+
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }
+    
+    
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -500,6 +508,11 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     
     public String getLink() {
         return "<a href='" + getHref() + "'>" + getTitle() + "</a>";
+    }
+
+    @Override
+    public Branch getBranch() {
+        return fileResource.getBranch();
     }
     
     

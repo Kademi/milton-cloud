@@ -2,6 +2,8 @@ package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Organisation;
 import io.milton.common.Path;
+import io.milton.http.Request;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.DigestResource;
 
 /**
@@ -53,4 +55,16 @@ public interface CommonResource extends DigestResource{
      * @return 
      */
     boolean isPublic();    
+
+    /**
+     * Determine what priviledge is required for doing a POST to this resource
+     * with the given request.
+     * 
+     * Note that this can vary a lot. For example, posting a comment might only
+     * require READ_CONTENT, but a POST which updates a page will require WRITE_CONTENT
+     * 
+     * @param request
+     * @return 
+     */
+    Priviledge getRequiredPostPriviledge(Request request);
 }
