@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <title>Directory</title>
+        <link href="directoryIndex.css" rel="stylesheet" type="text/css" />
+        <link href="/static/css/jquery.lightbox-0.5.css" rel="stylesheet" type="text/css" media="screen" />
+    </head>    
+    <body class="directory">
+        <div class="input" id='myUploaded'></div>
+        <table id="fileList" class="bar">
+            <thead>
+                <tr>
+                    <th colspan="2">Files: $page.name</th>
+                    <th>Modified</th>
+                    <th>Download</th>
+                </tr>
+                <tr class="seperator">
+
+                </tr>
+            </thead>
+            <tbody>                
+                #foreach($f in $page.subFolders)
+                <tr>
+                    <td style="width: 70px">
+                        <a href="$f.href"><img alt="" src="/static/icons/folder.png"/></a>
+                    </td>
+                    <td class="left">
+                        <a href="$f.href">$f.name</a>
+                    </td>
+                    <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$f.modifiedDate</abbr></td>
+                    <td>
+                        <a href="$f.href" class="downloadIcon">
+                            <span>Download</span>                            
+                        </a>
+                    </td>
+                </tr>
+                #end
+                #foreach($f in $page.files)                
+                <tr class="file">
+                    #set($imgClass = $formatter.ifTrue($f.is("image"), "image", "" ) )
+                    <td style="width: 70px">
+                        <a href="$f.href" class="$imgClass"><img alt="" src="/templates/images/img8.gif"/></a>
+                    </td>
+                    <td class="left">
+                        <a href="$f.href" class="$imgClass">$f.name</a>
+                    </td>
+                    <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$f.modifiedDate</abbr></td>
+                    <td>
+                        <a href="$f.href" class="downloadIcon">
+                            <span>Download</span>                            
+                        </a>
+                    </td>
+                </tr>
+                #end                 
+            </tbody>
+        </table>
+        <script type="text/javascript" src="/static/js/types.js">// </script>
+        <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.lightbox-0.5.js"></script>
+        <script type="text/javascript">       
+            jQuery(document).ready(function(){
+                initFiles();
+                $("#myUploaded").mupload({
+                    url: window.location.pathname,
+                    buttonText: "Upload a file",
+                    oncomplete: function(data, name, href) {
+                        // reload the file list
+                        log("uploaded ok, now reload file list")
+                        $.get(window.location.pathname, "", function(resp) {
+                            log("got file list", resp);
+                            var html = $(resp);
+                            $("#fileList").replaceWith(html.find("#fileList"));
+                            initPseudoClasses();
+                            initFiles();
+                        });
+                    }
+                });
+            });            
+            function initFiles() {
+                $('a.image').each(function(i, n) {
+                    var href = $(n).attr("href");
+                    $(n).attr("href", href + "/alt-640-360.png");
+                });
+                $('a.image').lightBox(
+                {
+                    imageLoading: '/static/images/lightbox-ico-loading.gif',
+                    imageBtnClose: '/static/images/lightbox-btn-close.gif',
+                    imageBtnPrev: '/static/images/lightbox-btn-prev.gif',
+                    imageBtnNext: '/static/images/lightbox-btn-next.gif',
+                    imageBlank: '/static/images/lightbox-blank.gif',
+                    containerResizeSpeed: 350                    
+                }                
+            );
+                jQuery("abbr.timeago").timeago();
+                jQuery("table.bar .file a").each(function(index, node) {                    
+                    tag = $(node);
+                    var href = tag.attr("href");
+                    var icon = findIconByExt(href);
+                    $("img", tag).attr("src", icon);
+                });
+            
+            }
+        </script>   
+    </body>
+</html>

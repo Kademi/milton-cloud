@@ -18,6 +18,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.common.DefaultCurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.sync.push.PushManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.*;
@@ -75,8 +76,7 @@ public class MCRootContext extends RootContext {
         }
         for( Object bean : beans ) {
             put(bean);
-        }
-        
+        }        
     }
     
     

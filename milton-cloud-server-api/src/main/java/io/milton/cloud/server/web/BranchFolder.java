@@ -202,7 +202,8 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             }
         }
         log.trace("sendContent: render template");
-        getTemplater().writePage(false, "directoryIndex", this, params, out);
+        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
+        getTemplater().writePage(false, "myfiles/directoryIndex", this, params, out);
     }
 
     @Override

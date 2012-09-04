@@ -94,11 +94,11 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         // Defensive check
         Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-        if( curUser == null ) {
+        if (curUser == null) {
             log.warn("req: " + HttpManager.request());
             throw new RuntimeException("No current user!!");
         }
-        
+
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         DirectoryNode newNode = directoryNode.addDirectory(newName);
@@ -120,7 +120,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public void save() throws IOException {
         // Defensive check
         Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-        if( curUser == null ) {
+        if (curUser == null) {
             throw new RuntimeException("No current user!!");
         }
         parent.save();
@@ -133,7 +133,8 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        getTemplater().writePage("directoryIndex", this, params, out);
+        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
+        getTemplater().writePage("myfiles/directoryIndex", this, params, out);
     }
 
     @Override
@@ -194,7 +195,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         RenderFileResource rfr;
         Resource r = child(name);
         if (r == null) {
-            if( !autocreate ) {
+            if (!autocreate) {
                 return null;
             }
             DataSession.FileNode newNode = getDirectoryNode().addFile(name);
@@ -333,14 +334,15 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public void setHash(String s) {
         directoryNode.setHash(s);
     }
-    
-    
+
     @Override
     public List<ContentDirectoryResource> getSubFolders() throws NotAuthorizedException, BadRequestException {
         List<ContentDirectoryResource> list = new ArrayList<>();
         for (Resource r : getChildren()) {
-            if (r instanceof ContentDirectoryResource) {
-                list.add((ContentDirectoryResource) r);
+            if (!r.getName().equals(".mil")) {
+                if (r instanceof ContentDirectoryResource) {
+                    list.add((ContentDirectoryResource) r);
+                }
             }
         }
         return list;
@@ -355,6 +357,5 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             }
         }
         return list;
-    }    
-    
+    }
 }

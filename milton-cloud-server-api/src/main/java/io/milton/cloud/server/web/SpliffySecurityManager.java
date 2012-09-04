@@ -82,12 +82,16 @@ public class SpliffySecurityManager {
         } else {
             // only the password hash is stored on the user, so need to generate an expected hash
             if (passwordManager.verifyPassword(user, requestPassword)) {
-                // Now make sure that the user has an account within this org
-                if (org.containsUser(user, session)) {
-                    return user;
-                } else {
+                // Now make sure that the user has an account within this org or a parent org
+                Organisation checkOrg = org;
+                while (checkOrg != null && !checkOrg.containsUser(user, session)) {
+                    checkOrg = checkOrg.getOrganisation();
+                }
+                if (checkOrg == null) {
                     log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getName());
                     return null;
+                } else {
+                    return user;
                 }
             } else {
                 return null;
@@ -100,8 +104,8 @@ public class SpliffySecurityManager {
         Profile user = null;
         while (user == null && org != null) {
             user = Profile.find(org, digest.getUser(), session);
-            if( user == null ) {
-                org = org.getOrganisation();            
+            if (user == null) {
+                org = org.getOrganisation();
             }
         }
         if (user == null) {
@@ -163,14 +167,14 @@ public class SpliffySecurityManager {
         Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
         if (curUser != null) {
             // If the resource is a content resource and the current user is the direct owner of the repository, then grant R/W
-            if( resource instanceof ContentResource) {
+            if (resource instanceof ContentResource) {
                 ContentResource cr = (ContentResource) resource;
                 Branch b = cr.getBranch();
-                if( b.getRepository().getBaseEntity() == curUser ) {
+                if (b.getRepository().getBaseEntity() == curUser) {
                     privs.addAll(Role.READ_WRITE);
                 }
             }
-            
+
             if (curUser.getMemberships() != null && !curUser.getMemberships().isEmpty()) {
                 for (GroupMembership m : curUser.getMemberships()) {
                     System.out.println("group: " + m.getGroupEntity().getName());

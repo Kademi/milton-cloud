@@ -15,15 +15,20 @@
 package io.milton.cloud.server;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
+import io.milton.cloud.server.sync.push.PushManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.common.Service;
 import io.milton.config.HttpManagerBuilder;
 import io.milton.config.InitListener;
 import io.milton.context.Context;
 import io.milton.context.Executable2;
+import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * wired into app config, this is started and stopped from spring and takes care
@@ -72,6 +77,12 @@ public class ApplicationStarter implements InitListener, Service{
             public void execute(Context context) {
                 applicationManager.init(resourceFactory);
             }
-        });   
+        });  
+        EventManager eventManager = rootContext.get(EventManager.class);
+        SpliffySecurityManager securityManager = rootContext.get(SpliffySecurityManager.class);
+        CurrentRootFolderService currentRootFolderService = rootContext.get(CurrentRootFolderService.class);
+        SessionManager sessionManager = resourceFactory.getSessionManager();
+        PushManager pushManager = new PushManager(eventManager, securityManager, currentRootFolderService, sessionManager);
+        rootContext.put(pushManager);
     }
 }

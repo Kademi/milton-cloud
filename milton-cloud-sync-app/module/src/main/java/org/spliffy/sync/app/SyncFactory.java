@@ -1,5 +1,6 @@
 package org.spliffy.sync.app;
 
+import io.milton.cloud.server.sync.push.TcpChannelClient;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.event.EventManagerImpl;
@@ -84,6 +85,7 @@ public class SyncFactory {
                 }
             }
         }
+                
         File dbFile = new File(fConfigDir, "db");
         EventManager eventManager = new EventManagerImpl();
         List<SpliffySync> syncers = SyncCommand.start(dbFile, mapOfJobs.values(), eventManager);

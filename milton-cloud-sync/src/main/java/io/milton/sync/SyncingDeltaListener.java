@@ -12,7 +12,7 @@ import io.milton.cloud.common.Triplet;
  *
  * @author brad
  */
-class SyncingDeltaListener implements DeltaListener {
+public class SyncingDeltaListener implements DeltaListener {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SyncingDeltaListener.class);
     private final Syncer syncer;

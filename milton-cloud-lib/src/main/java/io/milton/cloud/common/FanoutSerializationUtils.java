@@ -34,14 +34,11 @@ public class FanoutSerializationUtils {
 
     public static void writeFanout(List<String> childCrcs, long actualContentLength, OutputStream bout) throws IOException {
         bout.write((actualContentLength + "").getBytes());
-        System.out.println("write fanout");
         for (String l : childCrcs) {
             bout.write("\n".getBytes());
-            System.out.println("write: " + l);
             bout.write(l.getBytes());
         }
         bout.flush();
-        System.out.println("flushed heaps to : " + bout.getClass());
     }
 
     public static Fanout readFanout(InputStream bin) throws IOException {

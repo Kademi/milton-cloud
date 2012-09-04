@@ -69,6 +69,7 @@ public class DirWalker {
         
         if (remoteTriplets != null) {            
             for (ITriplet remoteTriplet : remoteTriplets) {
+                System.out.println("remoteTriplet: " + remoteTriplet.getName());
                 Path childPath = path.child(remoteTriplet.getName());                
                 ITriplet localTriplet = localMap.get(remoteTriplet.getName());
                 if (localTriplet == null) {

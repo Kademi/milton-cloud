@@ -101,17 +101,19 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
     @Override
     public RootFolder getRootFolder(String host) {
         Request req = HttpManager.request();
-        if (req == null) {
-            return null;
-        }
         return getRootFolder(host, req, true);
     }
 
     private RootFolder getRootFolder(String host, Request req, boolean resolve) {
-        RootFolder rootFolder = (RootFolder) req.getAttributes().get(ROOT_FOLDER_NAME);
+        RootFolder rootFolder = null;
+        if( req != null ) {
+            rootFolder = (RootFolder) req.getAttributes().get(ROOT_FOLDER_NAME);
+        }
         if (rootFolder == null && resolve) {
             rootFolder = resolve(host);
-            req.getAttributes().put(ROOT_FOLDER_NAME, rootFolder);
+            if( req != null ) {
+                req.getAttributes().put(ROOT_FOLDER_NAME, rootFolder);
+            }
         }
         return rootFolder;
     }
@@ -126,6 +128,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
     }
 
     private RootFolder resolve(String host) {
+        System.out.println("resolve: " + host);
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
@@ -133,6 +136,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         String primaryDomainSuffix = "." + primaryDomain;
         if (host.endsWith(primaryDomainSuffix)) {
             String subdomain = Utils.stripSuffix(host, primaryDomainSuffix);
+            System.out.println("dubdomain: " + subdomain);
             // If starts with admin. then look for an organisation, will go to admin console
             if (subdomain.startsWith("admin.")) {
                 String orgName = Utils.stripPrefix(subdomain, "admin.");
@@ -142,6 +146,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
                 }
             }
             // otherwise, look for a website with a name that matches the subdomain
+            System.out.println("look for we: " + subdomain);
             Website website = Website.findByName(subdomain, session);
             if (website != null) {
                 return new WebsiteRootFolder(applicationManager, website);

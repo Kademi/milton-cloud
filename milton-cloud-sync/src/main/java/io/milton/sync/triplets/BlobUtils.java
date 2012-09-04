@@ -26,13 +26,14 @@ public class BlobUtils {
             if (!child.exists()) {
                 // cached information is out of date
                 // TODO: should regenerate triplets, but should rarely happen
-                throw new RuntimeException("Stale triplet information");
+                System.out.println("Stale triplet information. Child does not exist: " + child.getAbsolutePath());
+            } else {
+                Triplet t = new Triplet();
+                t.setHash(r.crc);
+                t.setName(r.name);
+                t.setType(Utils.toType(child));
+                list.add(t);
             }
-            Triplet t = new Triplet();
-            t.setHash(r.crc);
-            t.setName(r.name);
-            t.setType(Utils.toType(child));
-            list.add(t);
         }
         return list;
     }
@@ -46,5 +47,4 @@ public class BlobUtils {
             IOUtils.closeQuietly(raf);
         }
     }
-
 }
