@@ -71,14 +71,12 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     public String getTitle(Organisation organisation, Website website) {
         return "My files";
     }
-        
+
     @Override
     public String getSummary(Organisation organisation, Website website) {
         return "Provides end users with file storage, which they can syncronise with their own computers";
     }
 
-    
-    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.applicationManager = resourceFactory.getApplicationManager();
@@ -98,7 +96,7 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
                     addRepo("Documents", "docs", u, session);
                     addRepo("Music", "music", u, session);
                     addRepo("Pictures", "pics", u, session);
-                    addRepo("Videos","vids", u, session);
+                    addRepo("Videos", "vids", u, session);
                 }
             }
         }
@@ -123,27 +121,29 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     @Override
     public void appendMenu(MenuItem parent) {
         Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-        if( curUser == null ) {
+        if (curUser == null) {
             return;
         }
         switch (parent.getId()) {
             case "menuRoot":
                 String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
-                for( Repository r : curUser.getRepositories()) {
-                    String repoHref = userHref + r.getName() + "/";
-                    String title = r.getTitle() == null ? r.getName() : r.getTitle();
-                    parent.getOrCreate("menu-myfiles-" + r.getName(), title, repoHref).setOrdering(50);
+                for (Repository r : curUser.getRepositories()) {
+                    if (r.type().equals("R")) { // dont handle specialised repo's like contacts
+                        String repoHref = userHref + r.getName() + "/";
+                        String title = r.getTitle() == null ? r.getName() : r.getTitle();
+                        parent.getOrCreate("menu-myfiles-" + r.getName(), title, repoHref).setOrdering(50);
+                    }
                 }
                 break;
         }
-        
+
     }
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-        if( parent instanceof UserResource ) {
+        if (parent instanceof UserResource) {
             UserResource ur = (UserResource) parent;
-            
+
         }
     }
 }

@@ -79,5 +79,6 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
         return Priviledge.READ_CONTENT;
     }      
 
+
     
 }

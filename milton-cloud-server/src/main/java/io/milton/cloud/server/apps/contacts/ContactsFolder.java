@@ -16,136 +16,85 @@
  */
 package io.milton.cloud.server.apps.contacts;
 
-
-import io.milton.vfs.db.Organisation;
+import io.milton.cloud.server.web.BranchFolder;
 import io.milton.vfs.db.Contact;
 import io.milton.vfs.db.AddressBook;
-import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.NodeChildUtils;
+import io.milton.cloud.server.web.ContentDirectoryResource;
+import io.milton.cloud.server.web.PersonalResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.common.InternationalizedString;
-import io.milton.resource.AccessControlledResource.Priviledge;
-import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.Pair;
 import io.milton.resource.*;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.data.DataSession.FileNode;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Commit;
 
 /**
  * Represents an Address Book
  *
  * @author brad
  */
-public class ContactsFolder extends AbstractCollectionResource implements AddressBookResource, ReportableResource, GetableResource, DeletableResource, PutableResource {
-    private final ContactsHomeFolder parent;
+public class ContactsFolder extends BranchFolder implements AddressBookResource, ReportableResource, GetableResource, DeletableResource, PutableResource, PersonalResource {
+
     private final AddressBook addressBook;
     private final ContactManager contactManager;
-    
-    private List<ContactResource> children;
 
-    public ContactsFolder(ContactsHomeFolder parent,  AddressBook addressBook, ContactManager contactManager) {
-        
-        this.parent = parent;
+    public ContactsFolder(String name, CommonCollectionResource parent, AddressBook addressBook, Branch branch, ContactManager contactManager) {
+        super(name, parent, branch, false);
         this.addressBook = addressBook;
         this.contactManager = contactManager;
     }
-    
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("contacts", this, params, out);
+        _(HtmlTemplater.class).writePage("contacts/contactsHome", this, params, out);
     }
-    
+
+    @Override
+    public io.milton.cloud.server.web.FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
+        //return super.newFileResource(dm, parent, renderMode);
+        Contact c = addressBook.contact(dm.getName());
+        return new ContactResource(dm, this, c, contactManager);
+    }
     
     @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         contactManager.delete(addressBook);
-    }    
+    }
     
-    @Override
-    public CommonCollectionResource getParent() {
-        return parent;
-    }
-
-    @Override
-    public String getName() {
-        return addressBook.getName();
-    }
-
-    @Override
-    public Date getModifiedDate() {
-        return addressBook.getModifiedDate();
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return addressBook.getCreatedDate();
-    }
-
-    @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        return NodeChildUtils.childOf(getChildren(), childName);
-    }
-
-    @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if( children == null ) {
-            children = new ArrayList<>();
-            if( addressBook.getContacts() != null ) {
-                for( Contact c : addressBook.getContacts() ) {
-                    ContactResource r = new ContactResource(this, c, contactManager);
-                    children.add(r);
-                }
-            }
-        }
-        return children;
-    }
-
-
     @Override
     public String getCTag() {
-        return addressBook.getModifiedDate().getTime() + "t";
-    }
-    
-    @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
-        return null;
+        Commit head = branch.getHead();
+        if( head == null ) {
+            return "na";
+        }
+        return head.getItemHash();
     }
 
+ 
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        IOUtils.copy(inputStream, bout);
-        String data = bout.toString();
-        Contact contact= contactManager.createContact(addressBook, newName, data, contentType);
-        return new ContactResource(this, contact, contactManager);
+        ContactResource r = (ContactResource) super.createNew(newName, inputStream, length, contentType);
+        String data = r.getAddressData();
+        contactManager.createContact(addressBook, newName, data);
+        return r;
     }
 
     public AddressBook getAddressBook() {
         return addressBook;
-    }
-
-
-    @Override
-    public Long getMaxAgeSeconds(Auth auth) {
-        return null;
     }
 
     @Override
@@ -177,10 +126,5 @@ public class ContactsFolder extends AbstractCollectionResource implements Addres
     public Long getMaxResourceSize() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
-    @Override
-    public Organisation getOrganisation() {
-        return parent.getOrganisation();
-    }
- 
+
 }

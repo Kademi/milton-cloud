@@ -1,10 +1,10 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
-import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
@@ -298,6 +298,20 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             }
         }
         return false;
+    }
+
+    @Transient
+    public List<AddressBook> getAddressBooks() {
+        List<AddressBook> list = new ArrayList();
+        if( getRepositories() != null ) {
+            for( Repository r : getRepositories() ) {
+                if( r instanceof AddressBook ) {
+                    AddressBook ab = (AddressBook) r;
+                    list.add(ab);
+                }
+            }
+        }
+        return list;
     }
     
 }

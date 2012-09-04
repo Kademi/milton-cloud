@@ -16,87 +16,84 @@
  */
 package io.milton.cloud.server.apps.contacts;
 
+import info.ineighborhood.cardme.engine.VCardEngine;
+import info.ineighborhood.cardme.vcard.VCard;
 import java.io.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.xml.namespace.QName;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.apps.calendar.CalEventResource;
-import io.milton.cloud.server.apps.calendar.CalendarFolder;
-import io.milton.vfs.db.BaseEntity;
+import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.UploadUtils;
+import io.milton.http.FileItem;
 import io.milton.vfs.db.Contact;
-import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.http.Auth;
-import io.milton.http.Range;
-import io.milton.http.Request;
-import io.milton.http.Response;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.values.ValueAndType;
-import io.milton.http.webdav.PropFindResponse;
-import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
+import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import org.hibernate.Session;
 
 /**
  *
  * @author brad
  */
-@BeanPropertyResource(value="ldap")
-public class ContactResource extends AbstractResource implements GetableResource, ReplaceableResource, AddressResource, LdapContact, DeletableResource, MoveableResource, CopyableResource, PropertySourcePatchSetter.CommitableResource {
+@BeanPropertyResource(value = "ldap")
+public class ContactResource extends io.milton.cloud.server.web.FileResource implements AddressResource, LdapContact, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(CalEventResource.class);
-    private final Contact contact;
+    private Contact contact;
     private final ContactsFolder parent;
     private final ContactManager contactManager;
     private Transaction tx; // for proppatch setting
+    private VCard vcard;
 
-    public ContactResource(ContactsFolder parent, Contact contact, ContactManager contactManager) {
-        
+    public ContactResource(FileNode fileNode, ContactsFolder parent, Contact contact, ContactManager contactManager) {
+        super(fileNode, parent);
         this.contact = contact;
         this.parent = parent;
         this.contactManager = contactManager;
     }
 
     @Override
-    public String getUniqueId() {
-        return contact.getId().toString();
-    }
-        
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException {
-        writeData(out);
-        out.flush();
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        try {
+            vcard();
+            if (contact == null) {
+                contact = parent.getAddressBook().add(getName());
+            }
+            contactManager.setPhone(vcard, parameters.get("telephonenumber"), contact);
+            contactManager.setMail(vcard, parameters.get("mail"), contact);
+            contactManager.setSurName(vcard, parameters.get("surName"), contact);
+            contactManager.setGivenName(vcard, parameters.get("givenName"), contact);
+            String data = contactManager.format(vcard);
+            ByteArrayInputStream bin = null;
+            bin = new ByteArrayInputStream(data.getBytes("UTF-8"));
+            UploadUtils.setContent(this, bin);
+            getParent().save();
+            session.save(contact);
+            System.out.println("surname: " + contact.getSurName());
+            jsonResult = new JsonResult(true);
+            tx.commit();
+        } catch (IOException ex) {
+            jsonResult = new JsonResult(false, ex.getMessage());            
+        }
+        return null;
     }
 
+    
     @Override
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
-        try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            IOUtils.copy(in, bout);
-            String data = bout.toString();
-            contactManager.update(contact, data);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    public void writeData(OutputStream out) {
-        String s= contactManager.getContactAsCarddav(contact);
-        PrintWriter pw = new PrintWriter(out);
-        pw.print(s);
-        pw.flush();
-
+        super.replaceContent(in, length);
+        contactManager.update(contact, getAddressData());
     }
 
     @Override
@@ -105,164 +102,75 @@ public class ContactResource extends AbstractResource implements GetableResource
     }
 
     @Override
-    public String getName() {
-        return contact.getName();
-    }
-
-    @Override
-    public Date getModifiedDate() {
-        return contact.getModifiedDate();
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return contact.getCreatedDate();
-    }
-
-    @Override
-    public boolean isDir() {
-        return false;
-    }
-
-    @Override
-    public CommonCollectionResource getParent() {
-        return parent;
-    }
-
-    @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
-        return null;
-    }
-
-    @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+        super.delete();
         contactManager.delete(contact);
     }
 
     @Override
-    public void moveTo(CollectionResource rDest, String name) throws ConflictException, NotAuthorizedException, BadRequestException {
-        if (rDest instanceof ContactsFolder) {
-            ContactsFolder calFolder = (ContactsFolder) rDest;
-            contactManager.move(contact, calFolder.getAddressBook(), name);
-        } else {
-            throw new BadRequestException(rDest, "The destination resource is not a calendar");
-        }
-    }
-
-    @Override
-    public void copyTo(CollectionResource rDest, String name) throws NotAuthorizedException, BadRequestException, ConflictException {
-        if (rDest instanceof CalendarFolder) {
-            ContactsFolder calFolder = (ContactsFolder) rDest;
-            contactManager.copy(contact, calFolder.getAddressBook(), name);
-        } else {
-            throw new BadRequestException(rDest, "The destination resource is not a calendar");
-        }
-    }
-
-    @Override
-    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Response.Status, List<PropFindResponse.NameAndError>> errorProps) {
-        if (tx == null) {
-            log.warn("doCommit: Transaction not started");
-        } else {
-            log.trace("doCommit: commiting");
-            SessionManager.session().save(this.contact);
-            tx.commit();
-        }
-    }
-
-    /**
-     * Called from setters used by proppatch
-     */
-    private void checkTx() {
-        if (tx == null) {
-            tx = SessionManager.session().beginTransaction();
-        }
-    }
-
-    @Override
-    public Long getMaxAgeSeconds(Auth auth) {
-        return null;
-    }
-
-    @Override
-    public Long getContentLength() {
-        return null;
-    }
-
-    @Override
     public String getAddressData() {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeData(out);
-        return out.toString();
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            sendContent(out, null, null, null);
+            return out.toString("UTF-8");
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
-    
+
     public String getFormattedName() {
         return contact.getGivenName() + " " + contact.getSurName();
     }
-    
+
     public String getCommonName() {
         return getFormattedName();
     }
-    
+
     public String getTelephone() {
         return contact.getTelephonenumber();
     }
-    
+
     public String getEmail() {
         return contact.getMail();
     }
-    
-    public void setEmail(String s) {
-        contact.setMail(s);
-    }
-    
-    public String getOrganizationName() {
-        return contact.getOrganizationName();
-    }
-    
-    public void setOrganizationName(String s) {
-        contact.setOrganizationName(s);
-    }
-    
+
     public String getTelephonenumber() {
         return contact.getTelephonenumber();
     }
-    
-    public void setTelephonenumber(String s) {
-        contact.setTelephonenumber(s);
+
+    public List<String> getPhoneNumbers() {
+        return contactManager.getPhoneNumbers(vcard());
     }
-    
+
     public String getMail() {
         return contact.getMail();
     }
-    
-    public void setMail(String mail) {
-        contact.setMail(mail);
+
+    public List<String> getEmailAddresses() {
+        return contactManager.getEmailAddresses(vcard());
     }
-    
+
     public String getGivenName() {
         return contact.getGivenName();
     }
-    
+
     public void setGivenName(String s) {
         contact.setGivenName(s);
     }
-    
+
     public String getSurName() {
         return contact.getSurName();
     }
-    
-    public void setSurName(String s) {
-        contact.setSurName(s);
+
+    private VCard vcard() {
+        if (vcard == null) {
+            VCardEngine cardEngine = new VCardEngine();
+            try {
+                vcard = cardEngine.parse(getAddressData());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        return vcard;
     }
-    
-    @Override
-    public Organisation getOrganisation() {
-        return parent.getOrganisation();
-    }    
-    
-    @Override
-    public Priviledge getRequiredPostPriviledge(Request request) {
-        return null;
-    }     
 }

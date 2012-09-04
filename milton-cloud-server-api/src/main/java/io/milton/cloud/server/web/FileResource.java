@@ -57,9 +57,11 @@ import io.milton.http.Request;
 public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
-    private final FileNode fileNode;
+    protected final FileNode fileNode;
     private RenderFileResource htmlPage; // for parsing html pages
 
+    protected JsonResult jsonResult;
+    
     public FileResource(FileNode fileNode, ContentDirectoryResource parent) {
         super(fileNode, parent);
         this.fileNode = fileNode;
@@ -83,6 +85,10 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public final void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
+        if(jsonResult != null ) {
+            jsonResult.write(out);
+            return;
+        }
         if (params != null && params.containsKey("type") && "hash".equals(params.get("type"))) {
             String s = fileNode.getHash() + "";
             out.write(s.getBytes());

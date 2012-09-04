@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.BaseEntity;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
@@ -89,12 +90,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public Resource child(String childName) {
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException{
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
-    public ResourceList getChildren() {
+    public ResourceList getChildren() throws NotAuthorizedException, BadRequestException{
         if (children == null) {
             children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
         }
@@ -289,12 +290,20 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public void onAddedChild(AbstractContentResource aThis) {
-        getChildren().add(aThis);
+        try {
+            getChildren().add(aThis);
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
     public void onRemovedChild(AbstractContentResource aThis) {
-        getChildren().remove(aThis);
+        try {
+            getChildren().remove(aThis);
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -372,7 +381,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public List<ContentDirectoryResource> getSubFolders() {
+    public List<ContentDirectoryResource> getSubFolders() throws NotAuthorizedException, BadRequestException {
         List<ContentDirectoryResource> list = new ArrayList<>();
         for (Resource r : getChildren()) {
             if (r instanceof ContentDirectoryResource) {
@@ -385,7 +394,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public List<ContentResource> getFiles() {
+    public List<ContentResource> getFiles() throws NotAuthorizedException, BadRequestException {
         List<ContentResource> list = new ArrayList<>();
         for (Resource r : getChildren()) {
             if ((r instanceof ContentResource) && !(r instanceof ContentDirectoryResource)) {
@@ -395,5 +404,15 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             }
         }
         return list;
+    }
+
+    @Override
+    public Profile getOwnerProfile() {
+        Branch b = getBranch();
+        BaseEntity be = b.getRepository().getBaseEntity();
+        if( be instanceof Profile) {
+            return (Profile) be;
+        }
+        return null;
     }
 }

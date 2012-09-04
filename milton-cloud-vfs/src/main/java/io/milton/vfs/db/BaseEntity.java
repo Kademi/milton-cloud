@@ -57,7 +57,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     private Date createdDate;
     private Date modifiedDate;
     private List<Repository> repositories;    // has repositories
-    private List<AddressBook> addressBooks; // has addressbooks
     private List<Calendar> calendars; // has calendars
 
     @Id
@@ -120,15 +119,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.calendars = calendars;
     }
 
-    @OneToMany(mappedBy = "owner")
-    public List<AddressBook> getAddressBooks() {
-        return addressBooks;
-    }
-
-    public void setAddressBooks(List<AddressBook> addressBooks) {
-        this.addressBooks = addressBooks;
-    }
-
     @Column
     public String getType() {
         return type;
@@ -175,12 +165,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             setRepositories(null);
         }
         
-        if( getAddressBooks() != null ) {
-            for( AddressBook a : getAddressBooks() ) {
-                a.delete(session);
-            }
-            setAddressBooks(null);
-        }
         if( getCalendars() != null ) {
             for( Calendar cal : getCalendars() ) {
                 cal.delete(session); 

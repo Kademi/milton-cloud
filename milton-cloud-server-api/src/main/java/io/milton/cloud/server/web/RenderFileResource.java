@@ -26,7 +26,6 @@ import java.util.Map;
 import io.milton.cloud.server.web.templating.HtmlPage;
 import io.milton.cloud.server.web.templating.HtmlTemplateParser;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
-import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.WebResource;
 import io.milton.common.Path;
 import io.milton.http.Auth;
@@ -52,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.vfs.db.Branch;
-import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -515,5 +513,8 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         return fileResource.getBranch();
     }
     
-    
+    @Override
+    public Profile getOwnerProfile() {
+        return fileResource.getOwnerProfile();
+    }    
 }

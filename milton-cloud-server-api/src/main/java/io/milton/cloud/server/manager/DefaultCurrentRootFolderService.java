@@ -128,7 +128,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
     }
 
     private RootFolder resolve(String host) {
-        System.out.println("resolve: " + host);
         if (host.contains(":")) {
             host = host.substring(0, host.indexOf(":"));
         }
@@ -136,7 +135,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         String primaryDomainSuffix = "." + primaryDomain;
         if (host.endsWith(primaryDomainSuffix)) {
             String subdomain = Utils.stripSuffix(host, primaryDomainSuffix);
-            System.out.println("dubdomain: " + subdomain);
             // If starts with admin. then look for an organisation, will go to admin console
             if (subdomain.startsWith("admin.")) {
                 String orgName = Utils.stripPrefix(subdomain, "admin.");
@@ -146,7 +144,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
                 }
             }
             // otherwise, look for a website with a name that matches the subdomain
-            System.out.println("look for we: " + subdomain);
             Website website = Website.findByName(subdomain, session);
             if (website != null) {
                 return new WebsiteRootFolder(applicationManager, website);

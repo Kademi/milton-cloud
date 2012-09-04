@@ -1,8 +1,127 @@
-<#import "defaultLayout.ftl" as layout>
-<@layout.dirLayout "Contacts home" "contacts">
+<html>
+    <head>
+        <title>Directory</title>
+        <link href="contacts.css" rel="stylesheet" type="text/css" />
+    </head>    
+    <body class="directory">
+        <div class="input" id='myUploaded'></div>
+        <table id="contacts" class="bar">
+            <thead>
+                <tr>
+                    <th>Contacts: $page.name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+                <tr class="seperator">
 
-<#list page.children as x>
-  
-</#list>    
+                </tr>
+            </thead>
+            <tbody>                
+                #foreach($contact in $page.children)
+                #if($contact.is("vcard"))
+                <tr>
+                    <td class="left">
+                        <a href="$contact.href">$contact.commonName</a>
+                    </td>
+                    <td>$formatter.toCsv($contact.emailAddresses)</td>
+                    <td>$formatter.toCsv($contact.phoneNumbers)</td>
+                </tr>
+                #end
+                #end
+            </tbody>
+        </table>
 
-</@layout.dirLayout>
+        <div id="editContact" class="Modal"> 
+            <h3 class="Title">Edit contact</h3>
+            <form method="POST" action=".">
+                <ul>
+                    <li>
+                        <label for="givenName">Given name</label>
+                        <input id="givenName" name="givenName" />
+                    </li>
+                    <li>
+                        <label for="surName">Surname</label>
+                        <input id="surName" name="surName" />
+                    </li>
+                    <li>
+                        <label for="telephonenumber">Telephone</label>
+                        <input id="telephonenumber" name="telephonenumber" />
+                    </li>
+                    <li>
+                        <label for="mail">Email</label>
+                        <input id="mail" name="mail" />
+                    </li>
+
+                </ul>
+                <div class="ControllerContainer"> 
+                    <a href="" class="button">Cancel</a> 
+                    <button type="submit" class="Button">Save</button> 
+                    <button class="Button delete">Delete</button> 
+                </div>
+            </form>
+        </div>        
+
+        <script type="text/javascript">       
+            jQuery(document).ready(function(){
+                $("#contacts a").click(function(e) {
+                    e.preventDefault();
+                    showEditContact($(e.target));
+                });
+                $("#editContact form").forms({
+                    callback: function(resp) {
+                        log("saved", resp);
+                        $.tinybox.close();
+                        reloadContacts();
+                    }
+                });
+                $("#editContact form a.button").click(function(e) {
+                    e.preventDefault();
+                    $.tinybox.close();
+                });
+                $("#editContact form button.delete").click(function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    confirmDelete($("#editContact form").attr("action"), $("#givenName").val(), function() {
+                        $.tinybox.close();
+                        reloadContacts();
+                    });
+                });
+            });   
+            function reloadContacts() {
+                $.get(window.location.pathname, "", function(resp) {
+                    log("got contact list", resp);
+                    var html = $(resp);
+                    $("#contacts").replaceWith(html.find("#contacts"));
+                    initPseudoClasses();
+                });
+            
+            }
+            function showEditContact(link) {
+                var modal = $("#editContact");
+                $.ajax({
+                    type: 'GET',
+                    url: link.attr("href") + "/_DAV/PROPFIND?fields=ldap:telephonenumber,ldap:mail,ldap:surName,ldap:givenName",
+                    dataType: "json",
+                    success: function(data) {
+                        log("response", data);
+                        $("#givenName").val(data[0].givenName);
+                        $("#surName").val(data[0].surName);
+                        $("#telephonenumber").val(data[0].telephonenumber);
+                        $("#mail").val(data[0].mail);
+                        modal.find("form").attr("action", link.attr("href") );
+                        $.tinybox.show("#editContact", {
+                            overlayClose: false,
+                            opacity: 0
+                        });                        
+                    },
+                    error: function(resp) {
+                        log("error", resp);
+                        alert("err");
+                    }
+                });                 
+
+                
+            }
+        </script>  
+    </body>
+</html>

@@ -25,112 +25,19 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
+ * An AddressBook is a Repository which can have linked contact records.
+ *
+ * The contact records provide a search optimised view of the CARDDAV data held
+ * in the repository
  *
  * @author brad
  */
 @Entity
+@DiscriminatorValue("AB")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class AddressBook implements Serializable {
+public class AddressBook extends Repository {
+
     private List<Contact> contacts;
-    private Long id;
-    private BaseEntity owner;
-    private String name;
-    private String description;
-    private Date createdDate;
-    private Date modifiedDate;
-
-    /**
-     * @return the id
-     */
-    @Id
-    @GeneratedValue
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * @return the baseEntity
-     */
-    @ManyToOne
-    public BaseEntity getOwner() {
-        return owner;
-    }
-
-    /**
-     * @param baseEntity the baseEntity to set
-     */
-    public void setOwner(BaseEntity baseEntity) {
-        this.owner = baseEntity;
-    }
-
-    /**
-     * @return the name
-     */
-    @Column(nullable=false)
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return the description
-     */
-    @Column
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * @return the createdDate
-     */
-    @Column(nullable=false)    
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    /**
-     * @param createdDate the createdDate to set
-     */
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    /**
-     * @return the modifiedDate
-     */
-    @Column(nullable=false)    
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    /**
-     * @param modifiedDate the modifiedDate to set
-     */
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
 
     @OneToMany(mappedBy = "addressBook")
     public List<Contact> getContacts() {
@@ -141,12 +48,39 @@ public class AddressBook implements Serializable {
         this.contacts = contacts;
     }
 
+    @Override
     public void delete(Session session) {
-        if( getContacts() != null ) {
-            for( Contact c : getContacts() ) {
+        if (getContacts() != null) {
+            for (Contact c : getContacts()) {
                 session.delete(c);
             }
             setContacts(null);
         }
+        super.delete(session);
     }
+
+    public Contact contact(String name) {
+        if (getContacts() != null) {
+            for (Contact c : getContacts()) {
+                if (c.getName().equals(name)) {
+                    return c;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String type() {
+        return "AB";
+    }
+
+    public Contact add(String name) {
+        Contact c = new Contact();
+        c.setAddressBook(this);
+        c.setName(name);
+        return c;
+    }
+    
+    
 }

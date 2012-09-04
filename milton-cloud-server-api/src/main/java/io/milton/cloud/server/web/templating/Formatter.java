@@ -21,6 +21,7 @@ import io.milton.common.Utils;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.vfs.db.Profile;
+import java.util.List;
 
 /**
  * Handy functions exposes to rendering logic for formatting.
@@ -869,4 +870,17 @@ public class Formatter {
             return "/_hashes/files/" + p.getPhotoHash();
         }
     }    
+    
+    public String toCsv(List list) {
+        StringBuilder sb = new StringBuilder();
+        if( list != null ) {
+            for( Object o : list ) {
+                if( sb.length() > 0 ) {
+                    sb.append(",");
+                }
+                sb.append(o.toString());
+            }
+        }
+        return sb.toString();
+    }
 }

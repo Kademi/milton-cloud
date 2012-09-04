@@ -139,7 +139,6 @@ public class SpliffySecurityManager {
                 curUser = ur.getThisUser();
             }
         }
-        System.out.println("get privs");
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource, req);
         boolean allows = AclUtils.containsPriviledge(required, privs);
@@ -167,10 +166,10 @@ public class SpliffySecurityManager {
         Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
         if (curUser != null) {
             // If the resource is a content resource and the current user is the direct owner of the repository, then grant R/W
-            if (resource instanceof ContentResource) {
-                ContentResource cr = (ContentResource) resource;
-                Branch b = cr.getBranch();
-                if (b.getRepository().getBaseEntity() == curUser) {
+            if (resource instanceof PersonalResource) {
+                PersonalResource cr = (PersonalResource) resource;
+                Profile owner = cr.getOwnerProfile();
+                if( owner != null && owner == curUser ) {
                     privs.addAll(Role.READ_WRITE);
                 }
             }

@@ -17,15 +17,13 @@
 package io.milton.vfs.db;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
- * TODO: store photo from PHOTO field
+ * This stores a limited subset of information from the contact to allow fast
+ * searching. Full data is stored in ical text in the repository
  *
  * @author brad
  */
@@ -34,18 +32,14 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class Contact implements Serializable {
 
     private Long id;
-    private String uid;
+    private String uid; // unique id of the contact
     private AddressBook addressBook;
-    private String name;
+    private String name; // name of the resource
     private String givenName;
     private String surName;
     private String mail;
-    private String organizationName;
     private String telephonenumber;
-    private String skypeId;
-    private Date createdDate;   
-    private Date modifiedDate;    
-    private List<ContactExtendedProperty> extendedProperties;
+    private String orgName;
 
     /**
      * @return the id
@@ -130,19 +124,6 @@ public class Contact implements Serializable {
         this.mail = mail;
     }
 
-    /**
-     * @return the organizationName
-     */
-    public String getOrganizationName() {
-        return organizationName;
-    }
-
-    /**
-     * @param organizationName the organizationName to set
-     */
-    public void setOrganizationName(String organizationName) {
-        this.organizationName = organizationName;
-    }
 
     /**
      * @return the telephonenumber
@@ -157,26 +138,6 @@ public class Contact implements Serializable {
     public void setTelephonenumber(String telephonenumber) {
         this.telephonenumber = telephonenumber;
     }
-    
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
 
     @Column(nullable=false)
     public String getUid() {
@@ -186,32 +147,15 @@ public class Contact implements Serializable {
     public void setUid(String uid) {
         this.uid = uid;
     }
-
-    public void setExtendedProperty(String extensionName, String extensionData) {
-        if( extendedProperties == null ) {
-            extendedProperties = new ArrayList<>();
-        }
-        for( ContactExtendedProperty ext : extendedProperties ) {
-            if( ext.getName().equals(extensionName)) {
-                ext.setPropValue(extensionData);
-                return ;
-            }
-        }
-        ContactExtendedProperty ext = new ContactExtendedProperty();
-        ext.setContact(this);
-        ext.setName(name);
-        ext.setPropValue(extensionData);
-        extendedProperties.add(ext);
-    }
-
-    @OneToMany
-    public List<ContactExtendedProperty> getExtendedProperties() {
-        return extendedProperties;
-    }
-
-    public void setExtendedProperties(List<ContactExtendedProperty> extendedProperties) {
-        this.extendedProperties = extendedProperties;
-    }
     
+    public void setOrganizationName(String s) {
+        this.orgName = s;
+    }
+
+    @Column
+    public String getOrganizationName() {
+        return orgName;
+    }
+
     
 }

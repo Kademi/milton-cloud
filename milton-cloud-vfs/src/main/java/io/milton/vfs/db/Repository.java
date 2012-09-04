@@ -26,6 +26,7 @@ uniqueConstraints = {
 public class Repository implements Serializable {
 
     private long id;
+    private String type;
     private String name; // identifies the resource to webdav
     private String title; // user friendly title
     private String notes;
@@ -34,6 +35,7 @@ public class Repository implements Serializable {
     private BaseEntity baseEntity; // the direct owner of this repository
     private List<Branch> branches;
     private List<NvPair> nvPairs; // holds data capture information
+    
 
     @Id
     @GeneratedValue
@@ -116,6 +118,17 @@ public class Repository implements Serializable {
     public void setNvPairs(List<NvPair> nvPairs) {
         this.nvPairs = nvPairs;
     }
+
+    @Column
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+    
+    
 
     @Column(nullable = false)
     public boolean isPublicContent() {
@@ -235,5 +248,15 @@ public class Repository implements Serializable {
             setNvPairs(null);
         }
         session.delete(this);
+    }
+    
+    /**
+     * Get the discriminator type for this instance. Should just use getType,
+     * but for some reason is returning null
+     * 
+     * @return 
+     */
+    public String type() {
+        return "R";
     }
 }

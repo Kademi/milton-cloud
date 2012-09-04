@@ -21,8 +21,11 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.resource.CollectionResource;
@@ -31,6 +34,7 @@ import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
@@ -38,11 +42,13 @@ import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
  */
-public class ContactsApp implements Application, EventListener, BrowsableApplication {
+public class ContactsApp implements Application, EventListener, BrowsableApplication, MenuApplication {
 
     public static final String ADDRESS_BOOK_HOME_NAME = "abs";
     private ContactManager contactManager;
@@ -145,10 +151,29 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
     private void addAddressBook(String name, Profile u, Session session) throws HibernateException {
         AddressBook addressBook = new AddressBook();
         addressBook.setName(name);
-        addressBook.setOwner(u);
+        addressBook.setTitle(name);
+        addressBook.setBaseEntity(u);
         addressBook.setCreatedDate(new Date());
-        addressBook.setModifiedDate(new Date());
-        addressBook.setDescription("My contacts");
         session.save(addressBook);
+    }
+
+    @Override
+    public void appendMenu(MenuItem parent) {
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if (curUser == null) {
+            return;
+        }
+        switch (parent.getId()) {
+            case "menuRoot":
+                String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
+                for (Repository r : curUser.getRepositories()) {
+                    if (r instanceof AddressBook) { 
+                        String repoHref = userHref + ADDRESS_BOOK_HOME_NAME + "/" + r.getName() + "/";
+                        String title = r.getTitle() == null ? r.getName() : r.getTitle();
+                        parent.getOrCreate("menu-mycontacts-" + r.getName(), title, repoHref).setOrdering(50);
+                    }
+                }
+                break;
+        }
     }
 }

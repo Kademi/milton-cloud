@@ -23,12 +23,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import io.milton.vfs.db.AddressBook;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.NodeChildUtils;
+import io.milton.cloud.server.web.PersonalResource;
+import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.AccessControlledResource;
@@ -45,29 +46,46 @@ import io.milton.resource.MakeCollectionableResource;
 import io.milton.resource.Resource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.Collections;
+import java.util.Comparator;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
  * @author brad
  */
-public class ContactsHomeFolder  extends AbstractCollectionResource implements MakeCollectionableResource, GetableResource {
+public class ContactsHomeFolder extends AbstractCollectionResource implements MakeCollectionableResource, GetableResource, PersonalResource {
 
     private final String name;
     private final UserResource parent;
     private final ContactManager contactManager;
     private List<ContactsFolder> children;
 
-    public ContactsHomeFolder(UserResource parent,  String name, ContactManager contactManager) {
-        
+    public ContactsHomeFolder(UserResource parent, String name, ContactManager contactManager) {
         this.parent = parent;
         this.name = name;
         this.contactManager = contactManager;
     }
 
     @Override
+    public boolean authorise(Request request, Method method, Auth auth) {
+        return super.authorise(request, method, auth);
+    }
+
+    @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         AddressBook addressBook = contactManager.createAddressBook(parent.getThisUser(), newName);
-        return new ContactsFolder(this, addressBook, contactManager);
+        Branch branch = addressBook.getTrunk();
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if( branch == null ) {
+            branch = addressBook.createBranch(Branch.TRUNK, curUser, SessionManager.session());
+        }
+        return new ContactsFolder(newName, this, addressBook, branch, contactManager);
     }
 
     @Override
@@ -102,12 +120,38 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
             children = new ArrayList<>();
             if (addressBooks != null) {
                 for (AddressBook cal : addressBooks) {
-                    ContactsFolder f = new ContactsFolder(this, cal, contactManager);
+                    Branch branch = cal.getTrunk();
+                    ContactsFolder f = new ContactsFolder(cal.getName(), this, cal, branch, contactManager);
                     children.add(f);
                 }
             }
         }
         return children;
+    }
+    
+    public List<ContactResource> getContacts() throws NotAuthorizedException, BadRequestException {
+        List<ContactResource> list = new ArrayList();
+        for( Resource r : getChildren() ) {
+            if( r instanceof ContactsFolder ) {
+                ContactsFolder book = (ContactsFolder) r;
+                for( Resource rContact : book.getChildren()) {
+                    if( rContact instanceof ContactResource ) {
+                        ContactResource c = (ContactResource) rContact;
+                        list.add(c);
+                    }
+                }
+            }
+        }
+        Collections.sort(list, new Comparator<ContactResource>() {
+
+            @Override
+            public int compare(ContactResource o1, ContactResource o2) {
+                String n1 = o1.getCommonName();
+                String n2 = o2.getCommonName();
+                return n1.compareTo(n2);
+            }
+        });
+        return list;
     }
 
     @Override
@@ -117,7 +161,7 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("contactsHome", this, params, out);
+        _(HtmlTemplater.class).writePage("contacts/contactsHome", this, params, out);
     }
 
     @Override
@@ -139,8 +183,11 @@ public class ContactsHomeFolder  extends AbstractCollectionResource implements M
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
+
+    @Override
+    public Profile getOwnerProfile() {
+        return parent.getThisUser();
+    }
     
     
 }
-
-   

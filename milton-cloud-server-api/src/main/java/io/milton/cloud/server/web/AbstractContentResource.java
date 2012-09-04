@@ -332,5 +332,13 @@ public abstract class AbstractContentResource extends AbstractResource implement
         return parent.getBranch();
     }
     
-    
+    @Override
+    public Profile getOwnerProfile() {
+        Branch b = getBranch();
+        BaseEntity be = b.getRepository().getBaseEntity();
+        if( be instanceof Profile) {
+            return (Profile) be;
+        }
+        return null;
+    }    
 }

@@ -1,0 +1,12 @@
+#editContact {
+    background-color: white;
+    padding: 10px;
+}
+
+#editContact ul li {
+    list-style-type: none;
+}
+#editContact ul li label {
+    display: inline-block;
+    width: 100px;
+}

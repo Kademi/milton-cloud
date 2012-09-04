@@ -19,22 +19,20 @@ package io.milton.cloud.server.apps.contacts;
 import info.ineighborhood.cardme.engine.VCardEngine;
 import info.ineighborhood.cardme.io.VCardWriter;
 import info.ineighborhood.cardme.vcard.VCard;
-import info.ineighborhood.cardme.vcard.VCardImpl;
 import info.ineighborhood.cardme.vcard.features.EmailFeature;
-import info.ineighborhood.cardme.vcard.features.ExtendedFeature;
-import info.ineighborhood.cardme.vcard.features.NameFeature;
 import info.ineighborhood.cardme.vcard.features.TelephoneFeature;
-import info.ineighborhood.cardme.vcard.types.*;
+import info.ineighborhood.cardme.vcard.types.EmailType;
+import info.ineighborhood.cardme.vcard.types.TelephoneType;
 import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Contact;
-import io.milton.vfs.db.ContactExtendedProperty;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -55,11 +53,9 @@ public class ContactManager {
 
         AddressBook c = new AddressBook();
         c.setCreatedDate(new Date());
-        c.setModifiedDate(new Date());
         c.setName(newName);
-        c.setDescription("Auto generated");
-        c.setOwner(owner);
-
+        c.setTitle(newName);
+        c.setBaseEntity(owner);
         session.save(c);
 
         tx.commit();
@@ -110,8 +106,6 @@ public class ContactManager {
         newContact.setAddressBook(dest);
         dest.getContacts().add(newContact);
 
-        newContact.setCreatedDate(new Date());
-        newContact.setModifiedDate(new Date());
         newContact.setName(name);
         newContact.setGivenName(contact.getGivenName());
         newContact.setMail(contact.getMail());
@@ -128,25 +122,20 @@ public class ContactManager {
         Transaction tx = session.beginTransaction();
 
         session.delete(contact);
-        
-        // update addressbook to force ctag change
-        contact.getAddressBook().setModifiedDate(new Date());
-        session.save(contact.getAddressBook());        
+
+        session.save(contact.getAddressBook());
         tx.commit();
     }
 
-    public Contact createContact(AddressBook addressBook, String newName, String icalData, String contentType) throws UnsupportedEncodingException {
+    public Contact createContact(AddressBook addressBook, String newName, String icalData) throws UnsupportedEncodingException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         Contact e = new Contact();
         e.setName(newName);
         e.setAddressBook(addressBook);
-        e.setCreatedDate(new Date());
         _update(e, icalData);
         session.save(e);
-        // update addressbook to force ctag change
-        e.getAddressBook().setModifiedDate(new Date());
-        session.save(e.getAddressBook());        
+        session.save(e.getAddressBook());
         tx.commit();
         return e;
     }
@@ -156,54 +145,28 @@ public class ContactManager {
         Transaction tx = session.beginTransaction();
         _update(contact, data);
         session.save(contact);
-        
-        // update addressbook to force ctag change
-        contact.getAddressBook().setModifiedDate(new Date());
         session.save(contact.getAddressBook());
         tx.commit();
     }
 
-    public String getContactAsCarddav(Contact contact) {
-        VCardImpl vc = new VCardImpl();
-        vc.setBegin(new BeginType());
-        vc.setUID(new UIDType(contact.getUid()));
-        String formattedName = buildFormattedName(contact);
-        vc.setFormattedName(new FormattedNameType(formattedName));
-        NameFeature nf = new NameType(contact.getSurName(), contact.getGivenName());
-        vc.setName(nf);
-        if (contact.getMail() != null && contact.getMail().length() > 0) {
-            vc.addEmail(new EmailType(contact.getMail()));
-        }
-        String o = contact.getOrganizationName();
-        if (o != null && o.length() > 0) {
-            OrganizationType orgType = new OrganizationType();
-            orgType.addOrganization(o);
-            vc.setOrganizations(orgType);
-        }
-        if (contact.getTelephonenumber() != null && contact.getTelephonenumber().length() > 0) {
-            vc.addTelephoneNumber(new TelephoneType(contact.getTelephonenumber()));
-        }
-        if( contact.getExtendedProperties() != null ) {            
-            for( ContactExtendedProperty ext : contact.getExtendedProperties() ) {
-                vc.addExtendedType(new ExtendedType(ext.getName(), ext.getPropValue()));
-            }
-        }
-        vc.setEnd(new EndType());
+    public String format(VCard vcard) {
         VCardWriter writer = new VCardWriter();
-        writer.setVCard(vc);
+        writer.setVCard(vcard);
         return writer.buildVCardString();
     }
-
-    private void _update(Contact contact, String data) {
-        contact.setModifiedDate(new Date());
+    
+    public VCard parse(String data) {
         VCardEngine cardEngine = new VCardEngine();
-        VCard vcard;
         try {
-            vcard = cardEngine.parse(data);
+            return cardEngine.parse(data);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        if( vcard.getUID() != null && vcard.getUID().hasUID() ) {
+    }
+
+    private void _update(Contact contact, String data) {
+        VCard vcard = parse(data);
+        if (vcard.getUID() != null && vcard.getUID().hasUID()) {
             contact.setUid(vcard.getUID().getUID());
         } else {
             contact.setUid(UUID.randomUUID().toString());
@@ -224,28 +187,79 @@ public class ContactManager {
                 contact.setOrganizationName(itOrg.next());
             }
         }
+        String ph = getPhone(vcard);
+        contact.setTelephonenumber(ph);
+    }
+
+    public List<String> getEmailAddresses(VCard vcard) {
+        List<String> list = new ArrayList<>();
+        Iterator<EmailFeature> it = vcard.getEmails();
+        while (it.hasNext()) {
+            list.add(it.next().getEmail());
+        }
+        return list;
+    }
+
+    private String getPhone(VCard vcard) {
         Iterator<TelephoneFeature> itPhone = vcard.getTelephoneNumbers();
         while (itPhone.hasNext()) {
-            contact.setTelephonenumber(itPhone.next().getTelephone());
+            return itPhone.next().getTelephone();
         }
-        Iterator<ExtendedFeature> itEx = vcard.getExtendedTypes();
-        if( itEx != null ) {
-            while( itEx.hasNext() ) {
-                ExtendedFeature ext = itEx.next();
-                contact.setExtendedProperty(ext.getExtensionName(), ext.getExtensionData());
-            }
+        return null;
+    }
+
+    public List<String> getPhoneNumbers(VCard vcard) {
+        List<String> list = new ArrayList<>();
+        Iterator<TelephoneFeature> itPhone = vcard.getTelephoneNumbers();
+        while (itPhone.hasNext()) {
+            String s = itPhone.next().getTelephone();
+            list.add(s);
         }
+        return list;
     }
 
     private String buildFormattedName(Contact contact) {
         String s = "";
-        if( contact.getGivenName() != null && contact.getGivenName().length() > 0 ) {
+        if (contact.getGivenName() != null && contact.getGivenName().length() > 0) {
             s += contact.getGivenName();
         }
-        if( contact.getSurName() != null && contact.getSurName().length() > 0 ) {
+        if (contact.getSurName() != null && contact.getSurName().length() > 0) {
             s += " ";
             s += contact.getSurName();
         }
         return s;
+    }
+
+    public void setPhone(VCard vcard, String phone, Contact contact) {
+        contact.setTelephonenumber(phone);
+        Iterator<TelephoneFeature> it = vcard.getTelephoneNumbers();
+        while( it.hasNext() ) {
+            it.next().setTelephone(phone);
+            return ;
+        }
+        TelephoneFeature t = new TelephoneType(phone);
+        vcard.addTelephoneNumber(t);        
+    }
+
+    public void setMail(VCard vcard, String email, Contact contact) {
+        contact.setMail(email);
+        Iterator<EmailFeature> it = vcard.getEmails();
+        while( it.hasNext() ) {
+            it.next().setEmail(email);
+            return ;
+        }
+        EmailFeature e = new EmailType(email);
+        vcard.addEmail(e);
+    }
+
+    public void setSurName(VCard vcard, String surName, Contact contact) {
+        vcard.getName().setFamilyName(surName);        
+        contact.setSurName(surName);
+        System.out.println("set name on contact and vcard: " + contact.getSurName() + " - " + vcard.getName().getFamilyName());
+    }
+
+    public void setGivenName(VCard vcard, String givenName, Contact contact) {
+        vcard.getName().setGivenName(givenName);
+        contact.setGivenName(givenName);
     }
 }
