@@ -104,7 +104,9 @@ public class ContactResource extends io.milton.cloud.server.web.FileResource imp
     @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         super.delete();
-        contactManager.delete(contact);
+        if( contact != null ) {
+            contactManager.delete(contact);
+        }
     }
 
     @Override

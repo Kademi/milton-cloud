@@ -8,13 +8,18 @@
             var container = this;
             var config = $.extend( {
                 url: "./",
+                useJsonPut: true,
                 buttonText: "Add files...",
                 oncomplete: function(data) {
                     log("finished upload", data);
                 }
                 }, options);  
             log("init milton uploads", container);
-            var form = $("<form action='" + config.url + "_DAV/PUT?overwrite=true' method='POST' enctype='multipart/form-data'><input type='hidden' name='overwrite' value='true'></form>");
+            var actionUrl = config.url;
+            if( config.useJsonPut ) {
+                actionUrl += "_DAV/PUT?overwrite=true";
+            }
+            var form = $("<form action='" + actionUrl + "' method='POST' enctype='multipart/form-data'><input type='hidden' name='overwrite' value='true'></form>");
             var buttonBar = $("<div class='row fileupload-buttonbar'></div>");
             form.append(buttonBar);
             var fileInputContainer = $("<div class='muploadBtn'></div>");
@@ -30,9 +35,17 @@
                 dataType: 'json',
                 progressInterval: 10,
                 done: function (e, data) {
-                    log("done", data.result[0], data.result[0].href);
-                    var name = getFileName(data.result[0].href);
-                    config.oncomplete(data, name, data.result[0].href);
+                    log("done", data);
+                    //log("done", data.result[0], data.result[0].href);
+                    var href = null;
+                    var name = null;
+                    if( data.result && data.result[0]) {
+                        href = data.result[0].href;
+                        if( href ) {
+                            name = getFileName(href);
+                        }
+                    }                    
+                    config.oncomplete(data, name, href);
                     $('.progress').hide(4000, function() {
                         $('.progress .bar', buttonBar).css('width','0%');
                     });

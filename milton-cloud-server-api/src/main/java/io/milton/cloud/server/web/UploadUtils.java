@@ -41,9 +41,48 @@ public class UploadUtils {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UploadUtils.class);
 
+    /**
+     * Inserts the new node, instantiates a FileResource, does an updateModDate and
+     * calls save on the parent folder, and wraps the lot in a transaction
+     * 
+     * @param col
+     * @param newName
+     * @param inputStream
+     * @param length
+     * @param contentType
+     * @return
+     * @throws IOException
+     * @throws ConflictException
+     * @throws NotAuthorizedException
+     * @throws BadRequestException 
+     */
     public static Resource createNew(ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
+        try {
+            return createNew(session, col, newName, inputStream, length, contentType);
+        } finally {
+            col.save();
+            tx.commit();
+        }
+    }
+
+    /**
+     * Inserts the new node, instantiates a FileResource, does an updateModDate.  DOES NOT save parent or start or commit a transaction
+     * 
+     * @param session
+     * @param col
+     * @param newName
+     * @param inputStream
+     * @param length
+     * @param contentType
+     * @return
+     * @throws IOException
+     * @throws ConflictException
+     * @throws NotAuthorizedException
+     * @throws BadRequestException 
+     */
+    public static Resource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         DataSession.DirectoryNode thisNode = col.getDirectoryNode();
         DataSession.FileNode newFileNode = thisNode.addFile(newName);
         FileResource fileResource = col.newFileResource(newFileNode, col, false);
@@ -70,8 +109,6 @@ public class UploadUtils {
         }
         col.onAddedChild(fileResource);
         fileResource.updateModDate();
-        col.save();
-        tx.commit();
 
         return fileResource;
     }

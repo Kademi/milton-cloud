@@ -20,9 +20,12 @@ import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
 import io.milton.httpclient.HttpResult;
 import io.milton.httpclient.MethodNotAllowedException;
+import io.milton.httpclient.NotifyingFileInputStream;
+import io.milton.httpclient.ProgressListener;
 import io.milton.sync.event.DownloadSyncEvent;
 import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FinishedSyncEvent;
+import io.milton.sync.event.TransferProgressEvent;
 import io.milton.sync.event.UploadSyncEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +51,9 @@ public class Syncer {
     private final HashCalc hashCalc = HashCalc.getInstance();
     private boolean paused;
     private boolean readonlyLocal;
+    private Combiner combiner;
+    private Parser parser;
+    private ProgressListener progressListener = new EventProgressListener();
 
     public Syncer(EventManager eventManager, File root, HttpHashStore httpHashStore, HttpBlobStore httpBlobStore, Host host, Archiver archiver, String baseUrl) {
         this.eventManager = eventManager;
@@ -60,9 +66,13 @@ public class Syncer {
     }
 
     public void createRemoteDir(Path path) throws ConflictException {
+        if (paused) {
+            return;
+        }
         Path p = baseUrl.add(path);
         try {
-            EventUtils.fireQuietly(eventManager, new UploadSyncEvent());
+            File localFile = toFile(path);
+            EventUtils.fireQuietly(eventManager, new UploadSyncEvent(localFile));
             host.doMkCol(p);
         } catch (MethodNotAllowedException e) {
             throw new ConflictException(p.toString());
@@ -82,9 +92,14 @@ public class Syncer {
     }
 
     public void deleteRemote(Path path) {
+        if (paused) {
+            return;
+        }
+
         Path p = baseUrl.add(path);
         try {
-            EventUtils.fireQuietly(eventManager, new UploadSyncEvent());
+            File localFile = toFile(path);
+            EventUtils.fireQuietly(eventManager, new UploadSyncEvent(localFile));
             host.doDelete(p);
         } catch (NotFoundException e) {
             // ok
@@ -96,21 +111,25 @@ public class Syncer {
     }
 
     public void downloadSync(String hash, Path path) throws IOException {
+        if (paused) {
+            return;
+        }
+
         if (readonlyLocal) {
             log.warn("Not downsyncing because local is readonly");
             return;
         }
         try {
-            EventUtils.fireQuietly(eventManager, new DownloadSyncEvent());
-            _downloadSync(hash, path);;
+            File localFile = toFile(path);
+            EventUtils.fireQuietly(eventManager, new DownloadSyncEvent(localFile));
+            _downloadSync(hash, path, localFile);
         } finally {
             EventUtils.fireQuietly(eventManager, new FinishedSyncEvent());
         }
     }
 
-    private void _downloadSync(String fileHash, Path path) throws IOException {
+    private void _downloadSync(String fileHash, Path path, File localFile) throws IOException {
         System.out.println("downloadSync: " + path);
-        File localFile = toFile(path);
         List<HashStore> hashStores = new ArrayList<>();
         List<BlobStore> blobStores = new ArrayList<>();
 
@@ -162,10 +181,11 @@ public class Syncer {
             try {
                 fout = new FileOutputStream(fTemp);
                 try (BufferedOutputStream bufOut = new BufferedOutputStream(fout)) {
-                    Combiner combiner = new Combiner();
+                    combiner = new Combiner();
                     // TODO: Use MultipleBlobStore with the httpHashStore and LocalFileTriplet.blobStore to minimise network traffic                
                     combiner.combine(rootHashes, multiHashStore, multiBlobStore, bufOut);
                     bufOut.flush();
+                    combiner = null;
                 }
             } finally {
                 IOUtils.closeQuietly(fout);
@@ -203,13 +223,17 @@ public class Syncer {
 //        }
 //    }
     public void upSync(Path path) throws FileNotFoundException, IOException {
+        if (paused) {
+            return;
+        }
         File file = toFile(path);
 
-        Parser parser = new Parser();
-        FileInputStream fin = null;
+        parser = new Parser();
+        InputStream fin = null;
         try {
-            EventUtils.fireQuietly(eventManager, new UploadSyncEvent());
-            fin = new FileInputStream(file);
+            File localFile = toFile(path);
+            EventUtils.fireQuietly(eventManager, new UploadSyncEvent(localFile));
+            fin = new NotifyingFileInputStream(file, progressListener);
             BufferedInputStream bufIn = new BufferedInputStream(fin);
 
             String newHash;
@@ -223,12 +247,15 @@ public class Syncer {
                     if (cnt++ > 3) {
                         throw new RuntimeException("Uploaded file is not valid: " + destPath);
                     }
+                    if (paused) {
+                        return;
+                    }
                     try {
                         ByteArrayBlobStore byteArrayBlobStore = new ByteArrayBlobStore();
                         newHash = parser.parse(bufIn, new NullHashStore(), byteArrayBlobStore);
                         byte[] data = byteArrayBlobStore.getBytes();
                         HttpResult result = host.doPut(destPath, data, null);
-                        if( result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
+                        if (result.getStatusCode() < 200 || result.getStatusCode() > 299) {
                             throw new IOException("HTTP result code indicates failure: " + result.getStatusCode() + " uploading: " + destPath);
                         }
                     } catch (Exception ex) {
@@ -253,13 +280,14 @@ public class Syncer {
 //                    if (cnt++ > 3) {
 //                        throw new RuntimeException("Uploaded file is not valid: " + destPath);
 //                    }
-                    updateHashOnRemoteResource(newHash, path);
+                updateHashOnRemoteResource(newHash, path);
 //                    done = checkRemoteHash(newHash, path);
 //                }
             }
         } finally {
             EventUtils.fireQuietly(eventManager, new FinishedSyncEvent());
             IOUtils.closeQuietly(fin);
+            parser = null;
         }
 
     }
@@ -322,7 +350,14 @@ public class Syncer {
 
     public void setPaused(boolean state) {
         this.paused = state;
-        // TODO: should act on uploading and downloading
+        if (paused) {
+            if (combiner != null) {
+                combiner.setCanceled(true);
+            }
+            if (parser != null) {
+                parser.setCancelled(true);
+            }
+        }
     }
 
     public boolean isReadonlyLocal() {
@@ -331,5 +366,28 @@ public class Syncer {
 
     public void setReadonlyLocal(boolean readonlyLocal) {
         this.readonlyLocal = readonlyLocal;
+    }
+
+    private class EventProgressListener implements ProgressListener {
+
+        @Override
+        public void onRead(int bytes) {
+        }
+
+        @Override
+        public void onProgress(long bytesRead, Long totalBytes, String fileName) {
+            if (totalBytes != null) {
+                EventUtils.fireQuietly(eventManager, new TransferProgressEvent(bytesRead, totalBytes, fileName));
+            }
+        }
+
+        @Override
+        public void onComplete(String fileName) {
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
     }
 }

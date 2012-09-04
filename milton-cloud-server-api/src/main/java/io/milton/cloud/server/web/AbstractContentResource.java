@@ -139,7 +139,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
         return loadNodeMeta().getModDate();
     }
 
-    protected void updateModDate() {        
+    public void updateModDate() {        
         long previousProfileId = loadNodeMeta().getProfileId();
         Date previousModDate = loadNodeMeta().getModDate();
         String previousResourceHash = contentNode.getLoadedHash();

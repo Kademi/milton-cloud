@@ -101,29 +101,29 @@ public class SpliffySecurityManager {
 
     public Profile authenticate(Organisation org, DigestResponse digest) {
         Session session = SessionManager.session();
-        Profile user = null;
-        while (user == null && org != null) {
-            user = Profile.find(org, digest.getUser(), session);
-            if (user == null) {
-                org = org.getOrganisation();
-            }
-        }
+        Profile user = Profile.find(digest.getUser(), session);
         if (user == null) {
             log.warn("user not found: " + digest.getUser());
             return null;
-        }
-        if (passwordManager.verifyDigest(digest, user)) {
-//            log.info("digest auth ok: " + user.getName());
-            if (org.containsUser(user, session)) {
-                return user;
+        } else {
+            // only the password hash is stored on the user, so need to generate an expected hash
+            if (passwordManager.verifyDigest(digest, user)) {
+                // Now make sure that the user has an account within this org or a parent org
+                Organisation checkOrg = org;
+                while (checkOrg != null && !checkOrg.containsUser(user, session)) {
+                    checkOrg = checkOrg.getOrganisation();
+                }
+                if (checkOrg == null) {
+                    log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getName());
+                    return null;
+                } else {
+                    return user;
+                }
             } else {
-                log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getName());
+                log.warn("digest password verification failed");
                 return null;
             }
-        } else {
-            log.warn("password verifuication failed");
-            return null;
-        }
+        }        
     }
 
     public String getRealm() {

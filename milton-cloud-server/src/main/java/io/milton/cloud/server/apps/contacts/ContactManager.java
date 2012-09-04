@@ -27,13 +27,16 @@ import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Contact;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -127,16 +130,13 @@ public class ContactManager {
         tx.commit();
     }
 
-    public Contact createContact(AddressBook addressBook, String newName, String icalData) throws UnsupportedEncodingException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
+    public Contact createContact(AddressBook addressBook, String newName, String icalData, Session session) throws UnsupportedEncodingException {
         Contact e = new Contact();
         e.setName(newName);
         e.setAddressBook(addressBook);
         _update(e, icalData);
         session.save(e);
         session.save(e.getAddressBook());
-        tx.commit();
         return e;
     }
 
@@ -261,5 +261,14 @@ public class ContactManager {
     public void setGivenName(VCard vcard, String givenName, Contact contact) {
         vcard.getName().setGivenName(givenName);
         contact.setGivenName(givenName);
+    }
+
+    public List<VCard> parseMultiple(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        IOUtils.copy(inputStream, bout);
+        String vcardText = bout.toString("UTF-8");
+        VCardEngine cardEngine = new VCardEngine();
+        List<VCard> vcards = cardEngine.parseManyInOneVCard(vcardText);
+        return vcards;
     }
 }

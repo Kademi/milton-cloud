@@ -10,3 +10,42 @@
     display: inline-block;
     width: 100px;
 }
+
+body.contacts #fileupload {
+    margin: 0;
+    padding: 0;
+}
+
+body.contacts .muploadBtn {        
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;                
+    position: relative;    
+    cursor: pointer;
+    width: 200px;   
+    margin-left: 0;
+    padding: 0;
+}
+body.contacts .muploadBtn span {
+    position: absolute;
+    top: 0.5em;
+    left: 40px;
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+}
+body.contacts .fileupload-buttonbar .progress {
+    border: 1px solid #51A351;
+    border-radius: 5px 5px 5px 5px;
+    display: none;
+    width: 65%;
+    float: right;
+}
+body.contacts .fileupload-buttonbar .progress div {
+    background-color: #51A351;
+    height: 2em;
+    width: 0;
+    padding: 0;
+    margin: 0;
+}

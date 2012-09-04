@@ -3,14 +3,15 @@
         <title>Directory</title>
         <link href="contacts.css" rel="stylesheet" type="text/css" />
     </head>    
-    <body class="directory">
+    <body class="contacts">
         <div class="input" id='myUploaded'></div>
         <table id="contacts" class="bar">
             <thead>
                 <tr>
-                    <th>Contacts: $page.name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
+                    <th class="type-string">Contacts: $page.name</th>
+                    <th class="type-string">Email</th>
+                    <th class="type-string">Phone</th>
+                    <th></th>
                 </tr>
                 <tr class="seperator">
 
@@ -23,8 +24,9 @@
                     <td class="left">
                         <a href="$contact.href">$contact.commonName</a>
                     </td>
-                    <td>$formatter.toCsv($contact.emailAddresses)</td>
-                    <td>$formatter.toCsv($contact.phoneNumbers)</td>
+                    <td><a href="$contact.href">$formatter.toCsv($contact.emailAddresses)</a></td>
+                    <td><a href="$contact.href">$formatter.toCsv($contact.phoneNumbers)</a></td>
+                    <td><a href="$contact.href">edit</a></td>
                 </tr>
                 #end
                 #end
@@ -61,8 +63,23 @@
             </form>
         </div>        
 
+        <script type="text/javascript" src="/static/js/stupidtable.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>        
         <script type="text/javascript">       
             jQuery(document).ready(function(){
+                $("#contacts").stupidtable();
+                $("#contacts thead th:first-child").click();
+                $("#myUploaded").mupload({
+                    url: window.location.pathname,
+                    buttonText: "Upload vcard(s)",
+                    useJsonPut: false,
+                    oncomplete: function(data, name, href) {
+                        // reload the file list
+                        log("uploaded ok, now reload file list")
+                        reloadContacts()
+                    }
+                });
                 $("#contacts a").click(function(e) {
                     e.preventDefault();
                     showEditContact($(e.target));
@@ -91,7 +108,9 @@
                 $.get(window.location.pathname, "", function(resp) {
                     log("got contact list", resp);
                     var html = $(resp);
-                    $("#contacts").replaceWith(html.find("#contacts"));
+                    $("#contacts").replaceWith(html.find("#contacts"));                    
+                    $("#contacts").stupidtable();
+                    $("#contacts thead th:first-child").click();
                     initPseudoClasses();
                 });
             

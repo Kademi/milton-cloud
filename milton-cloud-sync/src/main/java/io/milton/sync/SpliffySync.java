@@ -48,6 +48,7 @@ public class SpliffySync implements ChannelListener{
     private TcpChannelClient pushClient;
     
     private boolean jobScheduled;
+    private DirWalker dirWalker;
 
     public SpliffySync(File local, Host httpClient, String basePath, Syncer syncer, Archiver archiver, DbInitialiser dbInit, EventManager eventManager, boolean localReadonly) throws IOException {
         this.localRoot = local;
@@ -83,7 +84,7 @@ public class SpliffySync implements ChannelListener{
      * @throws IOException 
      */
     public void scan() throws HttpException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException, IOException {
-        DirWalker dirWalker = new DirWalker(remoteTripletStore, jdbcTripletStore, statusStore, deltaListener2);
+        dirWalker = new DirWalker(remoteTripletStore, jdbcTripletStore, statusStore, deltaListener2);
 
         // Now do the 
         dirWalker.walk();
@@ -124,6 +125,9 @@ public class SpliffySync implements ChannelListener{
     }
     
     public void setPaused(boolean state) {
+        if( dirWalker != null ) {
+            dirWalker.setCanceled(paused);
+        }
         paused = state;
         syncer.setPaused(state);
     }
