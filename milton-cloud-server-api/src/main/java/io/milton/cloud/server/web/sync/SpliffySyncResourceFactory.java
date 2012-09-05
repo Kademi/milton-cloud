@@ -9,13 +9,10 @@ import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Fanout;
 import org.hashsplit4j.api.HashStore;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Website;
-import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.ResourceFactory;
-import io.milton.vfs.db.utils.SessionManager;
 import org.apache.log4j.Logger;
 
 /**

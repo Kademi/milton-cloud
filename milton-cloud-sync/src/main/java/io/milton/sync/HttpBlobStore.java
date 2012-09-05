@@ -27,8 +27,10 @@ public class HttpBlobStore implements BlobStore {
     private long sets;
 
     public HttpBlobStore(String server, int port, String rootPath, String username, String password) {
-        this.host = new Host(server, rootPath, port, username, password, null, null);
+        this.host = new Host(server, port, username, password, null, null);
+        this.host.setUseDigestForPreemptiveAuth(false); // we don't want DIGEST because it precludes preemptive auth
         this.hashCache = new MemoryHashCache();
+        this.basePath = Path.path(rootPath);
     }
 
     
@@ -74,7 +76,9 @@ public class HttpBlobStore implements BlobStore {
         Path destPath = basePath.child(hash + "");
         try {
             return host.doGet(destPath);
-        } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
+        } catch(NotFoundException e) {
+            return null;
+        } catch (IOException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -90,7 +94,7 @@ public class HttpBlobStore implements BlobStore {
     /**
      * Base url to PUT to, hash will be appended. Must end with a slash
      *
-     * Eg http://myserver/blobs
+     * Eg http://myserver/blobs/
      *
      * @return
      */

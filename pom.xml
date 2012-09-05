@@ -57,6 +57,7 @@
         <module>milton-cloud-server-api</module>
         <module>milton-cloud-sync</module>
         <module>milton-cloud-vfs</module>
+        <module>milton-cloud-blobby</module>
     </modules>
     <build>
         <plugins>

@@ -58,7 +58,7 @@
     
     <bean id="alt.format.generator" class="io.milton.cloud.server.web.alt.AltFormatGenerator">
         <constructor-arg ref="hash.store" />
-        <constructor-arg ref="${id.blob.store}" />
+        <constructor-arg ref="blob.store" />
         <constructor-arg ref="event.manager" /> 
         <constructor-arg ref="content.type.service" />
         <constructor-arg ref="root.context"/>
@@ -80,14 +80,14 @@
        
     <bean id="sync.spliffy.resource.factory" class="io.milton.cloud.server.web.sync.SpliffySyncResourceFactory">
         <constructor-arg ref="hash.store" />
-        <constructor-arg ref="${id.blob.store}" />
+        <constructor-arg ref="blob.store" />
         <constructor-arg ref="security.manager" />
         <constructor-arg ref="current.root.folder.service" />
     </bean>
     
     <bean id="altformat.resource.factory" class="io.milton.cloud.server.web.alt.AltFormatResourceFactory">
         <constructor-arg ref="hash.store" />
-        <constructor-arg ref="${id.blob.store}" />
+        <constructor-arg ref="blob.store" />
         <constructor-arg ref="main.spliffy.resource.factory" />
         <constructor-arg ref="alt.format.generator" />
     </bean>    
@@ -96,7 +96,7 @@
         <constructor-arg ref="servletContext" />        
         <constructor-arg ref="main.spliffy.resource.factory" />        
         <constructor-arg ref="hash.store"/>
-        <constructor-arg ref="${id.blob.store}" />
+        <constructor-arg ref="blob.store" />
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>
         <constructor-arg ref="event.manager"/>

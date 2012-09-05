@@ -44,10 +44,6 @@
                     <artifactId>endrick-context</artifactId>
                     <groupId>com.ettrema</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
             </exclusions>
         </dependency>             
         <dependency>
@@ -82,12 +78,13 @@
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
             </exclusions>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>milton-cloud-lib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     
     <profiles>        		
@@ -110,7 +107,6 @@
                         <configuration>
                             <webAppConfig>
                                 <contextPath>/</contextPath>
-                                <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
                             </webAppConfig>     
 
                             <connectors>
