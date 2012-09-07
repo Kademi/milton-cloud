@@ -192,7 +192,15 @@ public class InitHelper {
         return mainWebsite;
     }
 
+    public void enableAllApps(Organisation org, Profile user, Session session) {
+        for (Application app : applicationManager.getApps()) {
+            AppControl.setStatus(app.getInstanceId(), org, true, user, new Date(), session);
+        }
+    }
+    
+    
     public void enableAllApps(Website w, Profile user, Session session) {
+        enableAllApps(w.getOrganisation(), user, session);
         for (Application app : applicationManager.getApps()) {
             AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
         }

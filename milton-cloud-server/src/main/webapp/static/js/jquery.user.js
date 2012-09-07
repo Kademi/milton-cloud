@@ -90,14 +90,14 @@ function doLogin(userName, password, config) {
             } else {
                 // null userurl, so login was not successful
                 $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
-                log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
+                log("null userUrl, so failed. Set validation message message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
                 $(config.valiationMessageSelector, container).show(200);
             }
         //window.location = "/index.html";
         },
         error: function(resp) {
             $(config.valiationMessageSelector).text(config.loginFailedMessage);
-            log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
+            log("error response from server, set message. msg output:", $(config.valiationMessageSelector, this), "config msg:", config.loginFailedMessage, "resp:", resp);
             $(config.valiationMessageSelector).show(300);
         }
     });      

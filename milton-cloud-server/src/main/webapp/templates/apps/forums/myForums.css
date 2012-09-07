@@ -137,52 +137,7 @@ ul.PostList li.Post div.Reply { float: right; }
     width: 21px;
     height: 21px;
 }
-/* Modal */
-.Modal {
-    width: 555px;
-    padding: 20px;
-    border: 1px solid #b2b2b2;
-    border-radius: 5px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
-    position: relative;
-    display: none;
-    background: #FFF;
-}
-.Modal a.Close {
-    display: block;
-    width: 14px;
-    height: 14px;
-    position: absolute;
-    right: 14px;
-    top: 12px;
-    background: url(icon_close.png) no-repeat 50% 50%;
-    z-index: 9;
-    text-indent: -9999px;
-}
-.Modal .Button {
-    text-align: center;
-    width: 65px;
-}
-.Modal .Title {
-    font-size: 20px;
-    color: #33a9c8;
-    margin-bottom: 15px;
-}
-.Modal input, .Modal textarea {
-    border: 1px solid #c6c6c6;
-    background: #F0F0F0;
-    padding: 10px 13px;
-    width: 435px;
-}
-.Modal input { 
-    font-size: 16px; 
-    margin-bottom: 10px;
-}
-.Modal textarea {
-    resize: none;
-    height: 200px;
-    overflow: auto;
-}
+
 /* Style for placeholder */
 .placeholder {
     color: #2f2f2f;

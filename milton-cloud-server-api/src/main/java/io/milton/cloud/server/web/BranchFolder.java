@@ -99,6 +99,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         if (children == null) {
             children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
         }
+        System.out.println("children: " + children.size() + " - " + getHref());
         return children;
     }
 

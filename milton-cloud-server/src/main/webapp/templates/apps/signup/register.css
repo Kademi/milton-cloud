@@ -40,11 +40,20 @@ table.signup td {
 table.signup td.last {
     text-align: right;
 }
+table.signup tr td.findOrg {
+    text-align: left;
+}
 table.signup .col1, table.signup .col3 {
     width: 75px;
 }
 table.signup .col2, table.signup .col4 {
     width: 250px;
+}
+#orgSearchResults {
+    display: none;
+}
+#orgSearchResults th {
+    text-align: left;
 }
 
 

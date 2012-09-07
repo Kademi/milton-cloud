@@ -32,9 +32,6 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})}// website DNS names must be unique across whole system
-)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {

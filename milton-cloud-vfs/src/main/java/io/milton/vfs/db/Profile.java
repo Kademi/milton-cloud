@@ -313,5 +313,16 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return list;
     }
-    
+
+    @Transient
+    public String getFormattedName() {
+        String name = "";
+        if( getFirstName() != null && getFirstName().length() > 0 ) {
+            name += getFirstName();
+        }
+        if( getSurName() != null && getSurName().length() > 0 ) {
+            name = name + " " + getSurName();
+        }
+        return name;
+    }
 }

@@ -19,6 +19,7 @@ package io.milton.cloud.server.apps.orgs;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.SettingsMap;
 import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.db.GroupMembershipApplication;
 import io.milton.http.*;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -57,7 +58,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     private final Organisation organisation;
     private ResourceList children;
     private Map<String, String> fakeSettings;
-
+    
     public OrganisationFolder(CommonCollectionResource parent, Organisation organisation) {
         this.parent = parent;
         this.organisation = organisation;
@@ -199,5 +200,5 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }     
+    }        
 }

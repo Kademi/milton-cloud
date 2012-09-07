@@ -16,6 +16,7 @@ toolbarSets["Full"] = [
 	{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote',
 	'-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
 ] ;
+
  
 
 toolbarSets["Balanced"] = [

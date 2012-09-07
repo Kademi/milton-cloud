@@ -27,7 +27,7 @@ public class UserDao {
 
     public PasswordCredential getEmailCredential(String email, Session sess) {
         Criteria crit = sess.createCriteria(PasswordCredential.class);
-        crit.add(Expression.eq("email", email));
+        crit.add(Restrictions.eq("email", email));
         return (PasswordCredential) crit.uniqueResult();
     }
 
@@ -61,10 +61,10 @@ public class UserDao {
         for( String queryPart : arr ) {
             Disjunction dis = Expression.disjunction();
             String s = queryPart + "%";
-            dis.add(Expression.ilike("firstName", s));
-            dis.add(Expression.ilike("surName", s));
-            dis.add(Expression.ilike("name", s));
-            dis.add(Expression.ilike("email", s));
+            dis.add(Restrictions.ilike("firstName", s));
+            dis.add(Restrictions.ilike("surName", s));
+            dis.add(Restrictions.ilike("name", s));
+            dis.add(Restrictions.ilike("email", s));
             con.add(dis);
         }
         crit.add(con);        

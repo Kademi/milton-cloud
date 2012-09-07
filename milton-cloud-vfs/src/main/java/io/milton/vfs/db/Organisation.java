@@ -16,6 +16,7 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +31,6 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -57,6 +57,7 @@ import org.hibernate.criterion.Restrictions;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
 
+
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
@@ -70,6 +71,17 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.add(Restrictions.eq("orgId", orgId));
         return (Organisation) crit.uniqueResult();
     }
+
+    public static List<Organisation> search(String q, Organisation organisation, Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.setCacheable(true);
+        String s = q + "%";
+        crit.add(Restrictions.ilike("name", s));
+        // TODO: add other properties like address
+        // TODO: impose parent org restriction
+        return DbUtils.toList(crit, Organisation.class);
+    }
+    
     private String orgId; // globally unique; used for web addresses for this organisation
     private Organisation organisation;
     private List<Organisation> childOrgs;
@@ -265,6 +277,5 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public boolean containsUser(Profile p, Session session) {
         Subordinate s = Subordinate.find(this, p, session);
         return  s != null;
-    }
-    
+    }    
 }

@@ -32,7 +32,7 @@
                                                     <td><input class="required" type="text" name="email" id="email" placeholder="Your email address" /></td>
                                                     <td><label class="last" for="nickName">Nickname</label></td>
                                                     <td><input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" /></td>
-                                                    <td rowspan="2"><button class="Register" type="submit" ><span>Register</span></button></td>
+                                                    <td rowspan="3"><button class="Register" type="submit" ><span>Register</span></button></td>
                                                 </tr>
                                                 <tr>
                                                     <td><label class="first" for="password">Password</label></td>
@@ -40,6 +40,13 @@
                                                     <td><label class="last" for="confirmPassword">Confirm</label></td>
                                                     <td><input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" /></td>                                                
                                                 </tr>  
+                                                <tr>
+                                                    <td><label class="first" for="orgName">Pharmacy</label></td>
+                                                    <td colspan="3" class="findOrg">
+                                                        <input type="hidden" name="orgId" id="orgId" />
+                                                        <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your pharmacy" />
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -53,29 +60,31 @@
 
             </div> 
         </div> 
-        <script type="text/javascript">
-            jQuery(function() {
-                log("init labels")
-                jQuery("#registerForm label").each(function(i, n) {
-                    var label = jQuery(n);
-                    var title = label.text();
-                    var input = jQuery("#" + label.attr("for"));
-                    input.attr("title", title);
-                    label.text(i+1);
-                });
-                jQuery("#registerForm").forms({
-                    validationFailedMessage: "Please enter your details below.",
-                    callback: function(resp, form) {
-                        log("created account ok, logging in...", resp, form);
-                        var userName = form.find("input[name=email]").val();
-                        var password = form.find("input[name=password]").val();
-                        doLogin(userName, password, {
-                            afterLoginUrl: resp.nextHref
-                        });
-                    }
-                });
-            });
-        </script>        
+        <div id="findOrg" class="Modal"> 
+            <a href="" class="Close" title="Close">Close</a>
+            <h3 class="Title">Find your pharmacy</h3>
+            <form method="POST" action=".">
+                <input id="orgQuery" type="text" value="" placeholder="Search for your organisation here" />
+                <table id="orgSearchResults">
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                    #foreach($org in $page.searchResults)
+                    <tr>
+                        <td><a href="$org.orgId">$org.name</a></td>
+                    </tr>
+                    #end
+                </table>                
+            </form>
+        </div>   
+        <div id="pending" class="Modal"> 
+            <a href="" class="Close" title="Close">Close</a>
+            <h3 class="Title">Account pending</h3>
+            <p>Thank you for your application.</p>
+            <p>An administrator will review your details shortly.</p>
+            <p><a href="/">Click here</a> to return to the home page</p>
+        </div>           
+        <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>        
     </body>    
 </html> 
 

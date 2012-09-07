@@ -62,7 +62,8 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     private final String name;
     private final GroupInWebsiteFolder parent;
     private final SignupApp app;
-    private JsonResult jsonResult;    
+    private JsonResult jsonResult;
+    private List<Organisation> searchResults;
 
     public GroupRegistrationPage(String name, GroupInWebsiteFolder parent, SignupApp app) {
         this.parent = parent;
@@ -77,6 +78,12 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             jsonResult.write(out);
         } else {
             log.info("sendContent: render page");
+
+            String q = params.get("q");
+            if (q != null && q.length() > 0) {
+                searchResults = Organisation.search(q, getOrganisation(), SessionManager.session()); // find the given user in this organisation 
+            }
+
             _(HtmlTemplater.class).writePage("signup/register", this, params, out);
         }
     }
@@ -89,6 +96,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         Transaction tx = session.beginTransaction();
         try {
             Organisation org = parent.getOrganisation();
+            if( parameters.containsKey("orgId")) {
+                String orgId = parameters.get("orgId");
+                org = Organisation.findByOrgId(orgId, session);
+            }
 
             String password = parameters.get("password");
             if (password == null || password.trim().length() == 0) {
@@ -111,7 +122,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 }
             } else {
                 // Not existing, create a new profile
-                p = new Profile();                
+                p = new Profile();
                 String nickName = WebUtils.getParam(parameters, "nickName");
                 if (nickName != null) {
                     nickName = nickName.trim();
@@ -140,33 +151,38 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
 
 
             Group group = parent.getGroup();
+            String result;
+            WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
             if (!Group.REGO_MODE_OPEN.equals(group.getRegistrationMode())) {
-                // Not open
+                // Not open, just create application
                 log.info("Group is not open, so create a membership application");
                 GroupMembershipApplication gma = new GroupMembershipApplication();
                 gma.setCreatedDate(new Date());
                 gma.setModifiedDate(new Date());
                 gma.setGroupEntity(group);
+                gma.setWebsite(wrf.getWebsite());
                 gma.setMember(p);
+                gma.setAdminOrg(getOrganisation());
                 gma.setWithinOrg(org);  // TODO: this should be the selected organisation where users belong to subordinate orgs
                 session.save(gma);
+                result = "pending";
             } else {
                 // add directly to group
                 System.out.println("group is open, so signup directly");
-                p.addToGroup(group, org, session);
-                WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
+                p.addToGroup(group, org, session);                
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
+                result = "created";                        
             }
 
 
             //_(SignupApp.class).onNewProfile(u, parent.getGroup(),  rf);
 
             tx.commit();
-            
+
             String nextHref = app.getNextHref(p, WebUtils.getWebsite(this));
             String userPath = "/users/" + p.getName(); // todo: encoding
             log.info("Created user: " + userPath);
-            jsonResult = new JsonResult(true, "Created account", nextHref);
+            jsonResult = new JsonResult(true, result, nextHref);
         } catch (Exception e) {
             log.error("Exception creating user", e);
             jsonResult = new JsonResult(false, e.getMessage());
@@ -236,9 +252,15 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public boolean isPublic() {
         return true;
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.READ_CONTENT;
-    }     
+    }
+
+    public List<Organisation> getSearchResults() {
+        return searchResults;
+    }
+    
+    
 }

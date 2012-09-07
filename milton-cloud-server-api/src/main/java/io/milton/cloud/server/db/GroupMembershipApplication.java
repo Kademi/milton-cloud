@@ -17,14 +17,20 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * For closed groups, when a user applies for membership (ie by creating a new
@@ -37,8 +43,17 @@ import javax.persistence.Temporal;
  */
 @Entity
 public class GroupMembershipApplication implements Serializable {
+    
+    public static List<GroupMembershipApplication> findByAdminOrg(Organisation adminOrg, Session session) {
+        Criteria crit = session.createCriteria(GroupMembershipApplication.class);
+        crit.add(Restrictions.eq("adminOrg", adminOrg));
+        return DbUtils.toList(crit, GroupMembershipApplication.class);
+    }
+    
     private Long id;
+    private Organisation adminOrg; // the org which will approve the membership
     private Organisation withinOrg;
+    private Website website; // just to track what website the application came in on
     private Profile member;
     private Group groupEntity;
     private Date createdDate;
@@ -63,6 +78,25 @@ public class GroupMembershipApplication implements Serializable {
         this.withinOrg = withinOrg;
     }
 
+    @ManyToOne(optional=false)
+    public Organisation getAdminOrg() {
+        return adminOrg;
+    }
+
+    public void setAdminOrg(Organisation adminOrg) {
+        this.adminOrg = adminOrg;
+    }
+
+    @ManyToOne
+    public Website getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(Website website) {
+        this.website = website;
+    }
+
+    
     
     
     @ManyToOne(optional=false)

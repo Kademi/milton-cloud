@@ -23,16 +23,22 @@ import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
+import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.SettingsApplication;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.db.GroupMembershipApplication;
+import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.event.SubscriptionEvent.SubscriptionAction;
+import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
@@ -51,11 +57,14 @@ import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.milton.context.RequestContext._;
+import org.hibernate.Session;
+
 /**
  *
  * @author brad
  */
-public class SignupApp implements ChildPageApplication, BrowsableApplication, EventListener, ReportingApplication, SettingsApplication {
+public class SignupApp implements ChildPageApplication, BrowsableApplication, EventListener, ReportingApplication, SettingsApplication, PortletApplication {
 
     private static final Logger log = LoggerFactory.getLogger(SignupApp.class);
     public static final String NEXT_HREF = "signup.next.href";
@@ -104,6 +113,12 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
             if (requestedName.equals(signupPageName)) {
                 return new GroupRegistrationPage(requestedName, wrf, this);
+            }
+        }
+        if( parent instanceof OrganisationFolder) {
+            OrganisationFolder orgFolder = (OrganisationFolder) parent;
+            if( requestedName.equals("pendingApps")) {
+                return new ProcessPendingPage("pendingApps", orgFolder, this);
             }
         }
         return null;
@@ -190,15 +205,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         writer.flush();
     }
 
-    private String findSetting(String setting, RootFolder rootFolder) {
-        if( rootFolder instanceof WebsiteRootFolder ) {
-            System.out.println("get from web");
-            return config.get(setting, ((WebsiteRootFolder)rootFolder).getWebsite());
-        } else {
-            System.out.println("get from org");
-            return config.get(setting, rootFolder.getOrganisation());
-        }
-    }    
     
     @Override
     public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {
@@ -211,6 +217,37 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         }
         return new JsonResult(true);        
     }
+
+    @Override
+    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        if (portletSection.equals("adminDashboardPrimary")) {
+            CommonResource r = (CommonResource) context.get("page");
+            List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
+            System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getName() + " - " + r.getClass());
+            context.put("applications", applications);
+            _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
+        }
+    }
+
+    /**
+     * accept or reject the given app
+     * 
+     * @param gma
+     * @param b 
+     */
+    public void processPending(GroupMembershipApplication gma, Boolean b, Session session) {        
+        if( b ) {
+            Profile p = gma.getMember();            
+            Organisation org = gma.getWithinOrg();
+            Group group = gma.getGroupEntity();
+            p.addToGroup(group, org, session);
+            SignupLog.logSignup(gma.getWebsite(), p, org, group, SessionManager.session());
+        } else {
+            // TODO: send rejected email
+        }
+        session.delete(gma);
+    }
+      
 
     public class SubscriptionEventActionHandler implements ActionHandler {
 
