@@ -14,7 +14,6 @@ import io.milton.http.Request.Method;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.AccessControlledResource.Priviledge;
-import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.GroupRole;

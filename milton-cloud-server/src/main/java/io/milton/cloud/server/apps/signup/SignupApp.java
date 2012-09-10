@@ -23,6 +23,7 @@ import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
+import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.SettingsApplication;
@@ -37,8 +38,11 @@ import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TextTemplater;
+import io.milton.common.Path;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
@@ -136,7 +140,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             }
         }
     }
-
 
     @Override
     public List<JsonReport> getReports(Organisation org, Website website) {

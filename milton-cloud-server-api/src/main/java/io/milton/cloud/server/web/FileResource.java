@@ -259,10 +259,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 _(HtmlTemplateParser.class).update(htmlPage, bout);
                 byte[] arr = bout.toByteArray();
-                System.out.println("messy html: " + bout.toString());
                 ByteArrayInputStream bin = new ByteArrayInputStream(arr);
                 String tidyHtml = WebUtils.tidyHtml(bin);
-                System.out.println("clean html: " + tidyHtml);
                 bin = new ByteArrayInputStream(tidyHtml.getBytes("UTF-8"));
                 setContent(bin);
             } catch (UnsupportedEncodingException ex) {

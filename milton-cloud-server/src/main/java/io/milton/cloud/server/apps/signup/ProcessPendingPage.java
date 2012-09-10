@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * For handling AJAX requests to enable or disable membership applications
+ * 
+ * Invoked from admin dashboard
  *
  * @author brad
  */
