@@ -202,11 +202,6 @@ public class ManageAutoEmailPage extends AbstractResource implements GetableReso
     }
 
     @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
-    @Override
     public Long getContentLength() {
         return null;
     }

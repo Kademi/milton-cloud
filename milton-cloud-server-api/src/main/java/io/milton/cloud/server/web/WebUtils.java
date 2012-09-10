@@ -20,17 +20,20 @@ import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
-import io.milton.http.HttpManager;
-import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
+import org.w3c.tidy.Tidy;
 
 
 /**
@@ -235,4 +238,24 @@ public class WebUtils {
             return null;
         }
     }
+    
+    public static String tidyHtml(InputStream in ) {
+        try {
+            Tidy tidy = new Tidy(); // obtain a new Tidy instance
+            tidy.setXHTML(true);
+            tidy.setDropEmptyParas(true);
+            tidy.setDropProprietaryAttributes(true);
+            tidy.setDocType(null);
+            tidy.setIndentContent(true);
+            tidy.setSmartIndent(true);
+            //tidy.setDocType(false);
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            tidy.parse(in, bout); // run tidy, providing an input and output stream
+            return bout.toString("UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        
+    }
+
 }

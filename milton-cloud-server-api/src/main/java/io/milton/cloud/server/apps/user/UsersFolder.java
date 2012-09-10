@@ -133,11 +133,6 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
     }
 
     @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
-    @Override
     public Long getContentLength() {
         return null;
     }

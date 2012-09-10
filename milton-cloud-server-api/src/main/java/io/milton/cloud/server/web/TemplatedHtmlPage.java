@@ -88,11 +88,6 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     public Long getContentLength() {
         return null;
     }
-
-    @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
                        
     @Override
     public boolean isDir() {

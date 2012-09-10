@@ -23,6 +23,7 @@ import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReportableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import java.util.Set;
@@ -34,7 +35,6 @@ import java.util.Set;
 public abstract class AbstractResource implements CommonResource, PropFindableResource, AccessControlledResource, ReportableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractResource.class);
-
 
     public AbstractResource() {
     }
@@ -50,7 +50,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         if (u != null) {
             try {
                 PrincipalResource p = SpliffyResourceFactory.getRootFolder().findEntity(u);
-                if( p == null ) {
+                if (p == null) {
                     log.warn("Could not locate a PrincipalResource for user: " + u.getName());
                 }
                 return p;
@@ -64,9 +64,9 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     }
 
     @Override
-    public Object authenticate(DigestResponse digestRequest) {        
+    public Object authenticate(DigestResponse digestRequest) {
         Organisation org = getOrganisation();
-        if( org == null ) {
+        if (org == null) {
             throw new RuntimeException("Got null org for: " + this.getClass());
         }
         Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(org, digestRequest);
@@ -138,7 +138,6 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         return _(HtmlTemplater.class);
     }
 
-
     @Override
     public boolean isDigestAllowed() {
         return true;
@@ -147,12 +146,12 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     @Override
     public String getPrincipalURL() {
         CommonResource r = this;
-        while( !(r instanceof PrincipalResource)) {
+        while (!(r instanceof PrincipalResource)) {
             r = r.getParent();
         }
-        if( r != null ) {
+        if (r != null) {
             PrincipalResource pr = (PrincipalResource) r;
-            return pr.getHref() ;
+            return pr.getHref();
         }
         return null;
     }
@@ -199,7 +198,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
 
     @Override
     public boolean is(String type) {
-        if( type.equals("resource") ) {
+        if (type.equals("resource")) {
             return true;
         }
         return false;
@@ -228,43 +227,67 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public boolean isPublic() {
         return false;
     }
-    
+
     public Resource find(String path) throws NotAuthorizedException, BadRequestException {
         Path p = Path.path(path);
         return find(p);
     }
-    
+
     public Resource find(Path p) throws NotAuthorizedException, BadRequestException {
         Resource current = this;
-        if( p.isRelative() ) {
+        if (p.isRelative()) {
             current = this;
         } else {
             current = WebUtils.findRootFolder(this);
         }
-        for(String part : p.getParts()) {
-            if( part.equals(".")) {
+        for (String part : p.getParts()) {
+            if (part.equals(".")) {
                 // do nothing
-            } else if( part.equals("..")) {
-                if( current instanceof AbstractResource) {
+            } else if (part.equals("..")) {
+                if (current instanceof AbstractResource) {
                     AbstractResource ar = (AbstractResource) current;
                     current = ar.getParent();
                 } else {
                     return null;
                 }
             } else {
-                if( current instanceof CollectionResource) {
+                if (current instanceof CollectionResource) {
                     CollectionResource col = (CollectionResource) current;
                     current = col.child(part);
                 } else {
                     return null;
-                }                
+                }
             }
         }
         return current;
     }
-    
+
     public boolean isDir() {
         return this instanceof CollectionResource;
     }
-    
+
+    /**
+     * Since a RFR will always output XML we want to use the xhtml content type
+     * where possible. However, many browsers do not support it, so in that case
+     * we want to use text/html
+     *
+     * see http://www.w3.org/TR/xhtml-media-types/#media-types
+     *
+     * @param accepts
+     * @return
+     */
+    public String getContentType(String accepts) {
+        if (this instanceof GetableResource) {
+            if (accepts.contains("application/xhtml+xml")) {
+                // can't use it because of CKEditor - http://dev.ckeditor.com/ticket/4576
+                //return "application/xhtml+xml";
+                
+                return "text/html";
+            } else {
+                return "text/html";
+            }
+        } else {
+            return "";
+        }
+    }
 }

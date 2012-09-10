@@ -139,11 +139,6 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     }
 
     @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
-    @Override
     public Long getContentLength() {
         return null;
     }

@@ -778,14 +778,14 @@ public class Formatter {
         if (checked == null) {
             checked = Boolean.FALSE;
         }
-        StringBuilder sb = new StringBuilder("<input type='checkbox' ");
-        sb.append("name='").append(name).append("' ");
+        StringBuilder sb = new StringBuilder("<input type='checkbox'");
+        sb.append(" name='").append(name).append("' ");
         if (checked) {
             sb.append("checked='true'");
         }
-        sb.append("value='").append(value).append("'");
+        sb.append(" value='").append(value).append("'");
         if( id != null ) {
-            sb.append("id='").append(id).append("'");
+            sb.append(" id='").append(id).append("'");
         }
         sb.append(" />");
         return sb.toString();
@@ -796,14 +796,14 @@ public class Formatter {
         if (checked == null) {
             checked = Boolean.FALSE;
         }
-        StringBuilder sb = new StringBuilder("<input type='radio' ");
-        sb.append("name='").append(name).append("' ");
+        StringBuilder sb = new StringBuilder("<input type='radio'");
+        sb.append(" name='").append(name).append("'");
         if (checked) {
-            sb.append("checked='true'");
+            sb.append(" checked='true'");
         }
-        sb.append("value='").append(value).append("'");
+        sb.append(" value='").append(value).append("'");
         if( id != null ) {
-            sb.append("id='").append(id).append("'");
+            sb.append(" id='").append(id).append("'");
         }
         sb.append(" />");
         return sb.toString();

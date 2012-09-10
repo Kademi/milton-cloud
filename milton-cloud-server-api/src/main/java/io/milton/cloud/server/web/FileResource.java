@@ -47,6 +47,8 @@ import javax.xml.namespace.QName;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Request;
+import java.util.HashMap;
+import java.util.logging.Level;
 
 /**
  *
@@ -59,9 +61,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     protected final FileNode fileNode;
     private RenderFileResource htmlPage; // for parsing html pages
-
     protected JsonResult jsonResult;
-    
+
     public FileResource(FileNode fileNode, ContentDirectoryResource parent) {
         super(fileNode, parent);
         this.fileNode = fileNode;
@@ -85,7 +86,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public final void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
-        if(jsonResult != null ) {
+        System.out.println("sendContent: FR");
+        if (jsonResult != null) {
             jsonResult.write(out);
             return;
         }
@@ -93,11 +95,30 @@ public class FileResource extends AbstractContentResource implements Replaceable
             String s = fileNode.getHash() + "";
             out.write(s.getBytes());
         } else {
-            if (range == null) {
-                fileNode.writeContent(out);
+            boolean asJson = (contentType != null && contentType.contains("application/json")) || (params != null && "json".equals(params.get("type")));
+            if (asJson) {
+                sendContentAsJson(out);
             } else {
+
+                if (range == null) {
+                    fileNode.writeContent(out);
+                } else {
+                }
             }
         }
+    }
+
+    private void sendContentAsJson(OutputStream out) throws IOException {
+        RenderFileResource page = getHtml();
+        Map<String, String> map = new HashMap<>();
+        map.put("title", page.getTitle());
+        map.put("body", page.getBody());
+        for (String s : page.getParamNames()) {
+            map.put(s, page.getParam(s));
+        }
+        jsonResult = new JsonResult(true);
+        jsonResult.setData(map);
+        jsonResult.write(out);
     }
 
     /**
@@ -108,12 +129,32 @@ public class FileResource extends AbstractContentResource implements Replaceable
      */
     @Override
     public String getContentType(String accepts) {
+        Request req = HttpManager.request();
+        if (req.getParams() != null && "json".equals(req.getParams().get("type"))) {
+            return JsonResult.CONTENT_TYPE;
+        }
         if (getName() == null) {
             throw new RuntimeException("no name");
         }
+        return getUnderlyingContentType();
+    }
+
+    /**
+     * getContentType will return the content type of the data which will be
+     * generated for this request, which might be a transformation of the underlying
+     * data (eg transformed to JSON)
+     * 
+     * getUnderlyingContentType returns the content type of the underlying data,
+     * which is invariant with respect to request information
+     * 
+     * @param accepts
+     * @return 
+     */
+    public String getUnderlyingContentType() {
         String acceptable = ContentTypeUtils.findContentTypes(getName().toLowerCase());
-        String ct = ContentTypeUtils.findAcceptableContentType(acceptable, accepts);
+        String ct = ContentTypeUtils.findAcceptableContentType(acceptable, null);
         return ct;
+
     }
 
     @Override
@@ -155,7 +196,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             return getName();
         }
     }
-    
+
     public String getBody() {
         RenderFileResource r = getHtml();
         if (r != null) {
@@ -163,7 +204,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         } else {
             return "";
         }
-        
+
     }
 
     @Override
@@ -214,11 +255,19 @@ public class FileResource extends AbstractContentResource implements Replaceable
         // htmlPage will only have been set if html content fields have been set, in which
         // case we need to generate and persist html content
         if (htmlPage != null) {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            _(HtmlTemplateParser.class).update(htmlPage, bout);
-            byte[] arr = bout.toByteArray();
-            ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-            setContent(bin);
+            try {
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                _(HtmlTemplateParser.class).update(htmlPage, bout);
+                byte[] arr = bout.toByteArray();
+                System.out.println("messy html: " + bout.toString());
+                ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+                String tidyHtml = WebUtils.tidyHtml(bin);
+                System.out.println("clean html: " + tidyHtml);
+                bin = new ByteArrayInputStream(tidyHtml.getBytes("UTF-8"));
+                setContent(bin);
+            } catch (UnsupportedEncodingException ex) {
+                throw new RuntimeException(ex);
+            }
         } else {
             log.warn("No htmlPage, so nothing to save");
         }
@@ -234,12 +283,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     }
 
-
     public FileNode getFileNode() {
         return fileNode;
     }
-    
-    
 
     @Override
     public boolean is(String type) {
@@ -261,19 +307,18 @@ public class FileResource extends AbstractContentResource implements Replaceable
             }
         }
         return false;
-    }    
+    }
 
     @Override
     public void setHash(String s) {
-        if( htmlPage != null ) {
+        if (htmlPage != null) {
             log.warn("Set hash, but htmlpage representation exists and will not be updated"); // TODO: should we flush the htmlpage?
-        }        
+        }
         super.setHash(s);
     }
-    
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }    
+    }
 }

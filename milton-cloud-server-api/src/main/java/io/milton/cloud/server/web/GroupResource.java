@@ -73,10 +73,6 @@ public class GroupResource extends AbstractCollectionResource implements Collect
         return null;
     }
 
-    @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
 
     @Override
     public Long getContentLength() {

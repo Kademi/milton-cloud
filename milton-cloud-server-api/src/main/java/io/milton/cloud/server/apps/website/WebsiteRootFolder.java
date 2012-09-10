@@ -140,12 +140,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
-
-    @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
+    
     @Override
     public Long getContentLength() {
         return null;

@@ -51,6 +51,8 @@ import org.slf4j.LoggerFactory;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.vfs.db.Branch;
+import java.util.HashMap;
+import java.util.Iterator;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -91,9 +93,7 @@ import javax.xml.stream.XMLStreamException;
 public class RenderFileResource extends AbstractResource implements GetableResource, MoveableResource, CopyableResource, DeletableResource, HtmlPage, PostableResource, ParameterisedResource, ReplaceableResource, ContentResource {
 
     private static final Logger log = LoggerFactory.getLogger(RenderFileResource.class);
-    
     public static final String DEFAULT_TEMPLATE = "theme/page";
-    
     private final FileResource fileResource;
     private final List<String> bodyClasses = new ArrayList<>();
     private final List<WebResource> webResources = new ArrayList<>();
@@ -150,8 +150,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
     }
-    
-    
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -273,11 +271,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     @Override
-    public String getContentType(String accepts) {
-        return fileResource.getContentType(accepts);
-    }
-
-    @Override
     public void moveTo(CollectionResource rDest, String name) throws ConflictException, NotAuthorizedException, BadRequestException {
         fileResource.moveTo(rDest, name);
     }
@@ -371,6 +364,22 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         return names;
     }
 
+    public void removeParam(String paramToRemove) {
+        Iterator<WebResource> it = this.webResources.iterator();
+        while (it.hasNext()) {
+            WebResource wr = it.next();
+            if (wr.getTag().equals("script")) {
+                String type = wr.getAtts().get("type");
+                if ("data/parameter".equals(type)) {
+                    String paramTitle = wr.getAtts().get("title");
+                    if (paramTitle.equals(paramToRemove)) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+    }
+
     public List<CommentBean> getComments() {
         return fileResource.getComments();
     }
@@ -462,27 +471,27 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
         this.fileResource.replaceContent(in, length);
     }
-    
+
     /**
      * For public repositories we allow all READ operations
-     * 
-     * TODO: should limit this to not include PROPFIND
-     * TODO: a POST is often available to anonymous users but will be rejected
-     * 
+     *
+     * TODO: should limit this to not include PROPFIND TODO: a POST is often
+     * available to anonymous users but will be rejected
+     *
      * @param request
      * @param method
      * @param auth
-     * @return 
+     * @return
      */
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
-        if( !method.isWrite ) {
-            if( isPublic() ) {
+        if (!method.isWrite) {
+            if (isPublic()) {
                 return true;
             }
         }
         return super.authorise(request, method, auth);
-    }    
+    }
 
     @Override
     public String getHash() {
@@ -503,7 +512,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public void setHash(String s) {
         fileResource.setHash(s);
     }
-    
+
     public String getLink() {
         return "<a href='" + getHref() + "'>" + getTitle() + "</a>";
     }
@@ -512,9 +521,9 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public Branch getBranch() {
         return fileResource.getBranch();
     }
-    
+
     @Override
     public Profile getOwnerProfile() {
         return fileResource.getOwnerProfile();
-    }    
+    }
 }

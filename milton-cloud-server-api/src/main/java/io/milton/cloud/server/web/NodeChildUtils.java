@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.common.ContentTypeUtils;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -24,10 +25,9 @@ import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.data.DataSession.FileNode;
 import java.util.List;
 
-
 /**
- * Just shove stuff in here that doesnt fit anywhere else. Hopefuly mostly
- * to do with nodes and children
+ * Just shove stuff in here that doesnt fit anywhere else. Hopefuly mostly to do
+ * with nodes and children
  *
  * @author brad
  */
@@ -65,13 +65,13 @@ public class NodeChildUtils {
     }
 
     public static boolean isHtml(FileResource rfr) {
-        String ct = rfr.getContentType("text/html"); // find if it can produce html
-        return "text/html".equals(ct);
+        String ct = rfr.getUnderlyingContentType();
+        return ct != null && ct.contains("html");
     }
 
     public static ResourceList toResources(ContentDirectoryResource parent, DirectoryNode dir, boolean renderMode, ResourceCreator resourceCreator) {
         ResourceList list = new ResourceList();
-        for (DataNode n : dir ) {
+        for (DataNode n : dir) {
             CommonResource r = toResource(parent, n, renderMode, resourceCreator);
             list.add(r);
         }
@@ -92,46 +92,44 @@ public class NodeChildUtils {
 
     public static Resource find(Path p, CollectionResource col) throws NotAuthorizedException, BadRequestException {
         Resource r = col;
-        for( String s : p.getParts()) {
-            if( r instanceof CollectionResource) {
-                r = ((CollectionResource)r).child(s);
+        for (String s : p.getParts()) {
+            if (r instanceof CollectionResource) {
+                r = ((CollectionResource) r).child(s);
             } else {
                 return null;
             }
         }
         return r;
     }
-    
+
     public static String getHash(Resource r) {
-        if( r instanceof FileResource) {
+        if (r instanceof FileResource) {
             FileResource fr = (FileResource) r;
             return fr.getHash();
-        } else if( r instanceof RenderFileResource) {
+        } else if (r instanceof RenderFileResource) {
             RenderFileResource rfr = (RenderFileResource) r;
-            return getHash(rfr.getFileResource());                    
+            return getHash(rfr.getFileResource());
         } else {
             return null;
         }
     }
-    
+
     public static FileResource toFileResource(Resource r) {
-        if( r instanceof FileResource) {
+        if (r instanceof FileResource) {
             FileResource fr = (FileResource) r;
             return fr;
-        } else if( r instanceof RenderFileResource) {
+        } else if (r instanceof RenderFileResource) {
             RenderFileResource rfr = (RenderFileResource) r;
             return rfr.getFileResource();
         } else {
             return null;
         }
-    }    
-    
+    }
+
     public interface ResourceCreator {
 
         FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode);
 
         DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode);
     }
-    
-    
 }

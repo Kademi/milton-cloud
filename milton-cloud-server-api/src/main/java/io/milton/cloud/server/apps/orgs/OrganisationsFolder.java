@@ -120,11 +120,6 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     }
 
     @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
-    @Override
     public Long getContentLength() {
         return null;
     }
