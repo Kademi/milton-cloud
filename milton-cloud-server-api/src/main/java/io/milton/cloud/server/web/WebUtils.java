@@ -35,45 +35,44 @@ import java.util.Date;
 import java.util.Map;
 import org.w3c.tidy.Tidy;
 
-
 /**
  *
  * @author brad
  */
 public class WebUtils {
-    
+
     /**
-     * Returns a trimmed, nulled, string value. If present the value is trimmed, and
-     * if empty returns null
-     * 
+     * Returns a trimmed, nulled, string value. If present the value is trimmed,
+     * and if empty returns null
+     *
      * @param params
      * @param name
-     * @return 
+     * @return
      */
-    public static String getParam(Map<String,String> params, String name) {
+    public static String getParam(Map<String, String> params, String name) {
         String s = params.get(name);
-        if( s == null ) {
+        if (s == null) {
             return null;
         }
         s = s.trim();
-        if( s.length() == 0 ) {
+        if (s.length() == 0) {
             return null;
         }
         return s;
     }
-    
+
     public static OrganisationFolder findParentOrg(Resource page) {
-        if( page instanceof OrganisationFolder ) {
+        if (page instanceof OrganisationFolder) {
             return (OrganisationFolder) page;
-        } else if( page instanceof CommonResource ) {
+        } else if (page instanceof CommonResource) {
             CommonResource cr = (CommonResource) page;
             return findParentOrg(cr.getParent());
         } else {
             return null;
         }
-    }    
-    
-    public static  RootFolder findRootFolder(Resource aThis) {
+    }
+
+    public static RootFolder findRootFolder(Resource aThis) {
         if (aThis instanceof CommonResource) {
             CommonResource ar = (CommonResource) aThis;
             return WebUtils.findRootFolder(ar);
@@ -87,13 +86,12 @@ public class WebUtils {
             return (RootFolder) ar;
         } else {
             CommonCollectionResource parent = ar.getParent();
-            if( parent == null ) {
+            if (parent == null) {
                 throw new RuntimeException("Got null parent from: " + ar.getClass() + " - " + ar.getName());
             }
             return WebUtils.findRootFolder(parent);
         }
-    }    
-    
+    }
 
     public static String findAutoName(CollectionResource folder, Map<String, String> parameters) {
         String nameToUse = getImpliedName(parameters, folder);
@@ -138,8 +136,7 @@ public class WebUtils {
         } else {
             return null;
         }
-    }    
-    
+    }
 
     public static String getDateAsName() {
         return getDateAsName(false);
@@ -165,7 +162,7 @@ public class WebUtils {
         try {
             String name = baseName;
             Resource r = col.child(name);
-            int cnt = 0;            
+            int cnt = 0;
             while (r != null) {
                 cnt++;
                 name = baseName + cnt;
@@ -187,15 +184,13 @@ public class WebUtils {
         } else {
             return i + "";
         }
-    }    
-    
-    
-   
+    }
+
     /**
      * Find the longest matching menu href which contains thisHref
-     * 
+     *
      * @param thisHref
-     * @param rootFolder 
+     * @param rootFolder
      */
     public static void setActiveMenu(String thisHref, RootFolder rootFolder) {
         if (rootFolder instanceof WebsiteRootFolder) {
@@ -215,31 +210,31 @@ public class WebUtils {
                     Path p = Path.path(href);
                     String parentHref = p.getParent().toString();
                     if (thisHref.startsWith(parentHref)) {
-                        if( longestHref == null || parentHref.length() > longestHref.length()  ) {
+                        if (longestHref == null || parentHref.length() > longestHref.length()) {
                             longestHref = parentHref;
                             menuId = id;
-                        }                        
+                        }
                     }
                 }
-                if( menuId != null ) {
+                if (menuId != null) {
                     MenuItem.setActiveId(menuId);
                 }
             }
-            
+
         }
-    
-    }    
-    
-    public static Website getWebsite(Resource r ) {
+
+    }
+
+    public static Website getWebsite(Resource r) {
         RootFolder rf = findRootFolder(r);
-        if( rf instanceof WebsiteRootFolder ) {
-            return ((WebsiteRootFolder)rf).getWebsite();
+        if (rf instanceof WebsiteRootFolder) {
+            return ((WebsiteRootFolder) rf).getWebsite();
         } else {
             return null;
         }
     }
-    
-    public static String tidyHtml(InputStream in ) {
+
+    public static String tidyHtml(InputStream in) {
         try {
             Tidy tidy = new Tidy(); // obtain a new Tidy instance
             tidy.setXHTML(true);
@@ -255,12 +250,12 @@ public class WebUtils {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-        
+
     }
 
     public static Long getParamAsLong(Map<String, String> parameters, String key) {
         String s = getParam(parameters, key);
-        if( s == null || s.length() == 0 ) {
+        if (s == null || s.length() == 0) {
             return null;
         }
         try {
@@ -272,15 +267,22 @@ public class WebUtils {
 
     public static Integer getParamAsInteger(Map<String, String> parameters, String key) {
         String s = getParam(parameters, key);
-        if( s == null || s.length() == 0 ) {
+        if (s == null || s.length() == 0) {
             return null;
         }
         try {
-            return  Integer.parseInt(s);
+            return Integer.parseInt(s);
         } catch (NumberFormatException numberFormatException) {
             throw new RuntimeException("Invalid number: " + s);
         }
-        
+
     }
 
+    public static Boolean getParamAsBool(Map<String, String> parameters, String key) {
+        String s = getParam(parameters, key);
+        if (s == null || s.length() == 0) {
+            return null;
+        }
+        return s.equalsIgnoreCase("true");
+    }
 }

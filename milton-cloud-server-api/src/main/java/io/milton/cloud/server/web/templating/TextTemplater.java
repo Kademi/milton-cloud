@@ -31,8 +31,6 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.WebUtils;
 import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 
 /**
@@ -122,6 +120,12 @@ public class TextTemplater implements Templater {
     public void setTemplateFileRoots(List<File> roots) {
         this.roots = roots;
     }
+
+    public VelocityEngine getEngine() {
+        return engine;
+    }
+    
+    
 
     class SimpleTemplateLoader extends org.apache.velocity.runtime.resource.loader.ResourceLoader {
 

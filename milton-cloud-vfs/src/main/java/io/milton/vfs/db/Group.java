@@ -186,10 +186,14 @@ public class Group implements Serializable, VfsAcceptor {
      * also saves the change in the session
      *
      * @param roleName
-     * @param isGrant
+     * @param isGrant - true means to grant permission, false to remove
      * @param session
      */
     public void grantRole(String roleName, boolean isGrant, Session session) {
+        grantRole(null, roleName, isGrant, session);
+    }
+    
+    public void grantRole(Organisation withinOrg, String roleName, boolean isGrant, Session session) {
         if (getGroupRoles() == null) {
             setGroupRoles(new ArrayList<GroupRole>());
         }
@@ -197,7 +201,11 @@ public class Group implements Serializable, VfsAcceptor {
         for (GroupRole gr : getGroupRoles()) {
             if (gr.getRoleName().equals(roleName)) {
                 if (isGrant) {
-                    // nothing to do
+                    if( gr.getWithinOrg() != null && gr.getWithinOrg() == withinOrg ) {
+                        // nothing to do
+                    } else {
+                        
+                    }
                 } else {
                     session.delete(gr);
                     getGroupRoles().remove(gr);

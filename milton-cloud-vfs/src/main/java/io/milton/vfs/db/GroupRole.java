@@ -17,8 +17,6 @@
 package io.milton.vfs.db;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
@@ -50,6 +48,7 @@ public class GroupRole implements Serializable{
     private long id;
     private String roleName;
     private Group grantee;
+    private Organisation withinOrg; // optional. If null the withinorg is the org of the group membership which has this role
 
 
     @Id
@@ -79,6 +78,24 @@ public class GroupRole implements Serializable{
     public void setGrantee(Group grantee) {
         this.grantee = grantee;
     }
+
+    /**
+     * Optional. Where this is present it means that the the role only applies
+     * within this given organisation. If not present it means that the role
+     * applies within the organisation associated with the group membership
+     * 
+     * @return 
+     */
+    @ManyToOne
+    public Organisation getWithinOrg() {
+        return withinOrg;
+    }
+
+    public void setWithinOrg(Organisation withinOrg) {
+        this.withinOrg = withinOrg;
+    }
+    
+    
 
     public void delete(Session session) {
         session.delete(this);

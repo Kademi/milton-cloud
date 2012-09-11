@@ -70,10 +70,10 @@ public class ManageGroupsPage extends AbstractResource implements GetableResourc
             String groupName = parameters.get("group");
             Group g = findGroup(groupName);
             if (g != null) {
-                String role = parameters.get("role");
-                String sIsRecip = parameters.get("isRecip");
-                boolean isRecip = "true".equals(sIsRecip);
-                log.info("grant or revoke role: " + role + " - " + isRecip);
+                String role = parameters.get("role");                
+                boolean isRecip = WebUtils.getParamAsBool(parameters, "isRecip");
+                //boolean isWithinThisOrg = WebUtils.getParamAsBool(parameters, "isWithinThisOrg");
+                //log.info("grant or revoke role: " + role + " - " + isRecip + " - " + isWithinThisOrg);
                 g.grantRole(role, isRecip, session);
                 tx.commit();
                 jsonResult = new JsonResult(true);

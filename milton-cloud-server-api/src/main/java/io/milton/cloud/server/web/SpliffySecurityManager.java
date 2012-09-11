@@ -175,14 +175,14 @@ public class SpliffySecurityManager {
 
             if (curUser.getMemberships() != null && !curUser.getMemberships().isEmpty()) {
                 for (GroupMembership m : curUser.getMemberships()) {
-                    System.out.println("group: " + m.getGroupEntity().getName());
+                    log.info("append privs for group membership: " + m.getGroupEntity().getName());
                     appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
                 }
             } else {
-                System.out.println("user has no group memberships");
+                log.trace("user has no group memberships");
             }
         } else {
-            System.out.println("no user");
+            log.trace("no user");
             Organisation org = resource.getOrganisation();
             Group pg = org.group(publicGroup, SessionManager.session());
             if (pg != null) {
@@ -193,16 +193,18 @@ public class SpliffySecurityManager {
     }
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {
+        log.info("appendPriviledges: resource=" + resource.getClass());
         if (g.getGroupRoles() != null) {
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();
-                System.out.println("roleame:  " + roleName);
                 Role role = mapOfRoles.get(roleName);
                 if (role != null) {
                     if (role.appliesTo(resource, withinOrg, g)) {
-                        privs.addAll(role.getPriviledges(resource, withinOrg, g));
+                        Set<Priviledge> privsToAdd = role.getPriviledges(resource, withinOrg, g);
+                        log.info("role:" + roleName + " does apply to: " + withinOrg.getName() + ", add privs " + privsToAdd);
+                        privs.addAll(privsToAdd);
                     } else {
-                        System.out.println("does not apply to: " + withinOrg.getName());
+                        log.info("role:" + roleName + " does not apply to: " + withinOrg.getName());
                     }
 
                 } else {
