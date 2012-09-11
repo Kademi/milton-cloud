@@ -70,6 +70,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
+        log.info("getResource: " + sPath);
         Path path = Path.path(sPath);
         Resource r;
         if (path.getName() != null && path.getName().equals("_triplets")) { // special path suffix to get sync triplets for a directory. See HttpTripletStore
@@ -92,9 +93,11 @@ public class SpliffyResourceFactory implements ResourceFactory {
                 }
             }
         }
-//        if (r != null) {
-//            log.info("Found a resource: " + r.getClass());
-//        }
+        if (r != null) {
+            log.info("Found a resource: " + r.getClass());
+        } else {
+            log.info("Not found: " + sPath);
+        }
         return r;
     }
 

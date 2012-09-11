@@ -15,14 +15,13 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.VfsVisitor;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * This table defines the conditions which will trigger automatic emails. Where
@@ -38,36 +37,36 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
 
     public static List<EmailTrigger> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(EmailTrigger.class);
-        crit.add(Expression.eq("organisation", org));
+        crit.add(Restrictions.eq("organisation", org));
         return DbUtils.toList(crit, EmailTrigger.class);
     }
 
     public static List<EmailTrigger> find(Session session, String eventId, Organisation org, String trigger1, String trigger2, String trigger3, String trigger4, String trigger5) {
         Criteria crit = session.createCriteria(EmailTrigger.class);
         if (trigger1 != null) {
-            crit.add(Expression.or(Expression.eq("triggerCondition1", trigger1), Expression.isNull("triggerCondition1")));
+            crit.add(Restrictions.or(Restrictions.eq("triggerCondition1", trigger1), Restrictions.isNull("triggerCondition1")));
         } else {
-            crit.add(Expression.isNull("triggerCondition1"));
+            crit.add(Restrictions.isNull("triggerCondition1"));
         }
         if (trigger2 != null) {
-            crit.add(Expression.or(Expression.eq("triggerCondition2", trigger2), Expression.isNull("triggerCondition2")));
+            crit.add(Restrictions.or(Restrictions.eq("triggerCondition2", trigger2), Restrictions.isNull("triggerCondition2")));
         } else {
-            crit.add(Expression.isNull("triggerCondition2"));
+            crit.add(Restrictions.isNull("triggerCondition2"));
         }
         if (trigger3 != null) {
-            crit.add(Expression.or(Expression.eq("triggerCondition3", trigger3), Expression.isNull("triggerCondition3")));
+            crit.add(Restrictions.or(Restrictions.eq("triggerCondition3", trigger3), Restrictions.isNull("triggerCondition3")));
         } else {
-            crit.add(Expression.isNull("triggerCondition3"));
+            crit.add(Restrictions.isNull("triggerCondition3"));
         }
         if (trigger4 != null) {
-            crit.add(Expression.or(Expression.eq("triggerCondition4", trigger4), Expression.isNull("triggerCondition4")));
+            crit.add(Restrictions.or(Restrictions.eq("triggerCondition4", trigger4), Restrictions.isNull("triggerCondition4")));
         } else {
-            crit.add(Expression.isNull("triggerCondition4"));
+            crit.add(Restrictions.isNull("triggerCondition4"));
         }
         if (trigger5 != null) {
-            crit.add(Expression.or(Expression.eq("triggerCondition5", trigger5), Expression.isNull("triggerCondition5")));
+            crit.add(Restrictions.or(Restrictions.eq("triggerCondition5", trigger5), Restrictions.isNull("triggerCondition5")));
         } else {
-            crit.add(Expression.isNull("triggerCondition5"));
+            crit.add(Restrictions.isNull("triggerCondition5"));
         }
         return DbUtils.toList(crit, EmailTrigger.class);
     }

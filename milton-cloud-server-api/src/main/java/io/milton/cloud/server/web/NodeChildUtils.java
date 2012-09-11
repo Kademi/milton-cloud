@@ -20,6 +20,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.data.DataSession;
 import io.milton.vfs.data.DataSession.DataNode;
 import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.data.DataSession.FileNode;
@@ -126,6 +127,31 @@ public class NodeChildUtils {
         }
     }
 
+    public static String findName(String baseName, String defaultName, DataSession.DirectoryNode dir) {
+        if (baseName == null || baseName.length() == 0) {
+            baseName = defaultName;
+        } else {
+            if (baseName.contains("\\")) {
+                baseName = baseName.substring(baseName.lastIndexOf("\\"));
+            }
+        }
+        String candidateName = baseName;
+        int cnt = 1;
+        while (contains(dir, candidateName)) {
+            candidateName = baseName + cnt++;
+        }
+        return candidateName;
+    }    
+    
+    public static boolean contains(DataSession.DirectoryNode dir, String name) {
+        for (DataNode n : dir) {
+            if (n.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }    
+    
     public interface ResourceCreator {
 
         FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode);

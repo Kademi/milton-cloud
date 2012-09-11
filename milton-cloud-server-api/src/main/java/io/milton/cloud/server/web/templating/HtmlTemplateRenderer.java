@@ -74,6 +74,9 @@ public class HtmlTemplateRenderer {
             datamodel.put("parentOrg", orgFolder);
         }
         
+        System.out.println("themeTemplateTemplateMeta: " + themeTemplateTemplateMeta.getId());
+        System.out.println("bodyTemplateMeta: " + bodyTemplateMeta.getId());
+        
         PrintWriter pw = new PrintWriter(out);
         pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
         pw.write("<html xmlns='http://www.w3.org/1999/xhtml'>\n");
@@ -100,7 +103,9 @@ public class HtmlTemplateRenderer {
             String html = wr.toHtml(themeName);
             pw.write(html + "\n");
         }
-        applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel , pw); 
+        if( !themeTemplateTemplateMeta.getId().endsWith("/plain.html")) { // don't render the header for plain pages, these might be used as PDF input
+            applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel , pw); 
+        }
         pw.write("</head>\n");
         pw.write("<body class=\"");
         List<String> bodyClasses = deDupeBodyClasses(themeTemplateTemplateMeta.getBodyClasses(), bodyTemplateMeta.getBodyClasses(), pageBodyClasses);

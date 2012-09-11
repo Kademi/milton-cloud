@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupRecipient;
 import org.hibernate.Session;

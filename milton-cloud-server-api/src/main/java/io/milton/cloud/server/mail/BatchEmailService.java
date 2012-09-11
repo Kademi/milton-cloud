@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.email;
+package io.milton.cloud.server.mail;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.BaseEmailJob;
@@ -45,7 +45,7 @@ public class BatchEmailService {
      * @param session
      */
     public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, Session session) {
-        if (j.getGroupRecipients() == null) {
+        if (j.getGroupRecipients() == null && directRecipients.isEmpty()) {
             log.warn("No recipients!! For job: " + j.getId());
             return;
         }

@@ -329,6 +329,9 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public Branch getBranch() {
+        if( parent == null ) {
+            return null;
+        }
         return parent.getBranch();
     }
     

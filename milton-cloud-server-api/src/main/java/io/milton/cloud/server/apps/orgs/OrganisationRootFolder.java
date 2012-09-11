@@ -85,9 +85,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
                 }
             }
             children.add(new OrganisationsFolder("organisations", this, organisation));
-            System.out.println("OrganisationRootFolder add children: " + children.size());
             _(ApplicationManager.class).addBrowseablePages(this, children);
-            System.out.println("OrganisationRootFolder add children2: " + children.size());
         }
         return children;
     }
@@ -99,5 +97,10 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
         }
         return attributes;
     }    
-    
+
+    @Override
+    public String getEmailAddress() {
+        String fromAddress = "noreply@" + organisation.getName();
+        return fromAddress;
+    }    
 }

@@ -132,6 +132,10 @@ public class EmailItem implements Serializable {
     private String ccList;
     private String bccList;
 
+    public EmailItem() {
+    }
+    
+    
     @Id
     @GeneratedValue
     public long getId() {

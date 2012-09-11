@@ -324,6 +324,12 @@ public class HtmlTemplater {
         this.defaultPublicTheme = defaultPublicTheme;
     }
 
+    public VelocityEngine getEngine() {
+        return engine;
+    }
+    
+    
+
     public class HtmlTemplateLoader {
 
         /**

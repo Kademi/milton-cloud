@@ -20,6 +20,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.cloud.server.web.alt.AltFormatGenerator;
@@ -156,7 +157,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Parser parser = new Parser();
         String fileHash = parser.parse(inputStream, hashStore, blobStore);
         log.info("saved inputstream with hash: " + fileHash);
-        newName = findName(newName, dir);
+        newName = NodeChildUtils.findName(newName, "profile", dir);
         log.info("newName: " + newName);
         try {
             fileHash = _(AltFormatGenerator.class).generateProfileImage(fileHash, newName);
@@ -202,30 +203,6 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         return r;
     }
 
-    private String findName(String baseName, DataSession.DirectoryNode dir) {
-        if (baseName == null || baseName.length() == 0) {
-            baseName = "profile";
-        } else {
-            if (baseName.contains("\\")) {
-                baseName = baseName.substring(baseName.lastIndexOf("\\"));
-            }
-        }
-        String candidateName = baseName;
-        int cnt = 1;
-        while (contains(dir, candidateName)) {
-            candidateName = baseName + cnt++;
-        }
-        return candidateName;
-    }
-
-    private boolean contains(DataSession.DirectoryNode dir, String name) {
-        for (DataNode n : dir) {
-            if (n.getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {

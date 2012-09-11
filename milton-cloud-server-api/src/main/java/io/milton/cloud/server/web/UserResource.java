@@ -111,10 +111,15 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         Transaction tx = SessionManager.session().beginTransaction();
+        CollectionResource col = createCollectionNoTx(newName);
+        tx.commit();        
+        return col;
+    }
+    
+    public CollectionResource createCollectionNoTx(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         Repository r = user.createRepository(newName, user, SessionManager.session());
         Branch b = r.getTrunk();
         SessionManager.session().save(r);
-        tx.commit();
         return new BranchFolder(r.getName(), this, b, false);
     }
 

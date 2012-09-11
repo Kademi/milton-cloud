@@ -48,7 +48,7 @@ public class PushManager implements EventListener {
     private final SessionManager sessionManager;
 
     public PushManager(EventManager eventManager, SpliffySecurityManager securityManager, CurrentRootFolderService currentRootFolderService, SessionManager sessionManager) {
-        if( sessionManager == null ) {
+        if (sessionManager == null) {
             throw new RuntimeException("sessionManager cannot be null");
         }
         hub = new TcpChannelHub(7020, new ClientConnectionClientListener());
@@ -68,8 +68,10 @@ public class PushManager implements EventListener {
             ResourceEvent re = (ResourceEvent) e;
             if (re.getResource() instanceof ContentResource) {
                 ContentResource cr = (ContentResource) re.getResource();
-                BaseEntity owner = cr.getBranch().getRepository().getBaseEntity();
-                notifyClients(owner);
+                if (cr.getBranch() != null) {
+                    BaseEntity owner = cr.getBranch().getRepository().getBaseEntity();
+                    notifyClients(owner);
+                }
             }
         }
     }

@@ -18,6 +18,8 @@ import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.MakeCollectionableResource;
+import io.milton.resource.Resource;
+import io.milton.vfs.data.DataSession;
 import io.milton.vfs.data.DataSession.DirectoryNode;
 import java.util.List;
 
@@ -43,4 +45,8 @@ public interface ContentDirectoryResource extends CommonCollectionResource, Cont
     List<ContentDirectoryResource> getSubFolders() throws NotAuthorizedException, BadRequestException;
     
     List<ContentResource> getFiles() throws NotAuthorizedException, BadRequestException;
+    
+    FileResource getOrCreateFile(String name) throws NotAuthorizedException, BadRequestException;
+            
+    DirectoryResource getOrCreateDirectory(String name) throws NotAuthorizedException, NotAuthorizedException, BadRequestException; 
 }

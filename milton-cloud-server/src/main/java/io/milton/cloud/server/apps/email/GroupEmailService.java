@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;

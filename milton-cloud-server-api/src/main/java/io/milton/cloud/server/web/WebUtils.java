@@ -258,4 +258,29 @@ public class WebUtils {
         
     }
 
+    public static Long getParamAsLong(Map<String, String> parameters, String key) {
+        String s = getParam(parameters, key);
+        if( s == null || s.length() == 0 ) {
+            return null;
+        }
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException numberFormatException) {
+            throw new RuntimeException("Invalid number: " + s);
+        }
+    }
+
+    public static Integer getParamAsInteger(Map<String, String> parameters, String key) {
+        String s = getParam(parameters, key);
+        if( s == null || s.length() == 0 ) {
+            return null;
+        }
+        try {
+            return  Integer.parseInt(s);
+        } catch (NumberFormatException numberFormatException) {
+            throw new RuntimeException("Invalid number: " + s);
+        }
+        
+    }
+
 }

@@ -4,11 +4,8 @@ import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -98,8 +95,12 @@ public class LoginPage implements GetableResource, CommonResource {
     public String checkRedirect(Request request) {
         if (request.getAuthorization() != null && request.getAuthorization().getTag() != null) {
             // logged in, so go to user's home page
-            Profile user = (Profile) request.getAuthorization().getTag();
-            return "/" + user.getName() + "/";
+            Object oUser = request.getAuthorization().getTag();
+            if( oUser instanceof UserResource ) {
+                UserResource user = (UserResource) oUser;
+                return "/" + user.getName() + "/";
+            }
+            throw new RuntimeException("Unexpected tag type: " + oUser.getClass() + " - expected UserResource");
         } else {
             return null;
         }

@@ -333,7 +333,7 @@ function resetForm($form) {
     });
 }
 
-function edify(container, cssFiles, callback) {
+function edify(container, callback) {
     log("edify", container, callback);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
@@ -362,8 +362,11 @@ function edify(container, cssFiles, callback) {
         container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
         $("#edifyForm").append("<input type='hidden' name='body' value='' />");
             
-        $("#edifyForm").submit(function() {
-            submitEdifiedForm();
+        $("#edifyForm").submit(function(e) {
+            log("edifyForm submit");
+            e.preventDefault();
+            e.stopPropagation();
+            submitEdifiedForm(callback);
         });
         log("done hide, now show again");
         container.animate({
@@ -443,6 +446,7 @@ function submitEdifiedForm(callback) {
     }
         
     var data = form.serialize();
+    log("serialied", data);
 
     try {
         //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );

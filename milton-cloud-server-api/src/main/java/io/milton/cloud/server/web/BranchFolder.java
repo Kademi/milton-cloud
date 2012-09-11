@@ -416,4 +416,37 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
         return null;
     }
+
+    public FileResource getOrCreateFile(String name) throws NotAuthorizedException, BadRequestException {
+        Resource r = child(name);
+        FileResource fr;
+        if( r == null ) {
+            DataSession.FileNode newNode = getDirectoryNode().addFile(name);
+            fr = new FileResource(newNode, this);
+        } else {
+            if( r instanceof FileResource) {
+                fr = (FileResource) r;          
+            } else {
+                throw new RuntimeException("Resource exists, but is not a FileResource: " + name + " is a " + r.getClass());
+            }
+        }
+        return fr;
+    }    
+    
+    public DirectoryResource getOrCreateDirectory(String name) throws NotAuthorizedException, NotAuthorizedException, BadRequestException {
+        Resource r = child(name);
+        DirectoryResource fr;
+        if( r == null ) {
+            DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
+            fr = new DirectoryResource(newNode, this, false);
+        } else {
+            if( r instanceof DirectoryResource) {
+                fr = (DirectoryResource) r;          
+            } else {
+                throw new RuntimeException("Resource exists, but is not a DirectoryResource: " + name + " is a " + r.getClass());
+            }
+        }
+        return fr;
+    }
+    
 }

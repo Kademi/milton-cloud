@@ -1,16 +1,20 @@
 package io.milton.cloud.server.web.alt;
 
+import io.milton.cloud.server.web.ContentDirectoryResource;
+import io.milton.cloud.server.web.DirectoryResource;
 import io.milton.cloud.server.web.FileResource;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.exceptions.NotFoundException;
+import io.milton.resource.GetableResource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
-import org.apache.commons.io.output.CountingOutputStream;
 import org.xhtmlrenderer.util.XRRuntimeException;
 import org.xml.sax.SAXException;
 
@@ -19,19 +23,20 @@ public class PdfGenerator {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PdfGenerator.class);
     private static final long serialVersionUID = 1L;
 
-    public void generate(FileResource fr, OutputStream out) {
+
+    public FileResource convertHtmlToPdf(String href, GetableResource source, ContentDirectoryResource destDir, String destName) throws NotAuthorizedException, BadRequestException, NotFoundException {
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         Map<String, String> params = new HashMap<>();
         try {
-            fr.sendContent(outContent, null, params, null);
+            source.sendContent(outContent, null, params, null);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+        
         final InputStream in = new ByteArrayInputStream(outContent.toByteArray());
-        final MyTextRenderer renderer = new MyTextRenderer();
-        final CountingOutputStream cout = new CountingOutputStream(out);
+        final MyTextRenderer renderer = new MyTextRenderer();        
         try {
-            renderer.setDocument(in, fr.getHref());
+            renderer.setDocument(in, href);
         } catch (SAXException e) {
             log.error("exception processing page: " + e.getClass(), e);
             throw new RuntimeException(e);
@@ -53,21 +58,22 @@ public class PdfGenerator {
             throw new RuntimeException(e);
         }
         renderer.layout();
+        outContent = new ByteArrayOutputStream();
         try {
-            renderer.createPDF(cout);
+            renderer.createPDF(outContent);
         } catch (Exception ex) {
-            throw new RuntimeException("Exception processing: " + fr.getHref(), ex);
+            throw new RuntimeException("Exception processing: " + href, ex);
         }
         try {
-            cout.flush();
-            out.flush();
-            cout.close();
+            outContent.flush();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        int i = cout.getCount();
-        log.debug("generated pdf of size: " + i);
-
+        
+        FileResource fr = destDir.getOrCreateFile(destName);
+        ByteArrayInputStream bin = new ByteArrayInputStream(outContent.toByteArray());
+        fr.setContent(bin);
+        return fr;
     }
 //
 //

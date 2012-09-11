@@ -16,23 +16,15 @@
  */
 package io.milton.cloud.server.web.templating;
 
-import com.bradmcevoy.xml.XmlHelper;
 import io.milton.cloud.server.web.RenderFileResource;
+import io.milton.cloud.util.JDomUtils;
 import io.milton.common.Path;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 /**
  *
@@ -56,7 +48,7 @@ public class HtmlTemplateParser {
         try (InputStream fin = meta.getInputStream()) {
             if (fin != null) {
                 BufferedInputStream bufIn = new BufferedInputStream(fin);
-                doc = getJDomDocument(bufIn);
+                doc = JDomUtils.getJDomDocument(bufIn);
             } else {
                 doc = null;
             }
@@ -66,10 +58,10 @@ public class HtmlTemplateParser {
             if (!elRoot.getName().equals("html")) {
                 throw new RuntimeException("Document is not an html doc");
             }
-            Element elHead = getChild(elRoot, "head");
+            Element elHead = JDomUtils.getChild(elRoot, "head");
             parseWebResourcesFromHtml(elHead, meta, webPath);
 
-            Element elBody = getChild(elRoot, "body");
+            Element elBody = JDomUtils.getChild(elRoot, "body");
             if (elBody != null) {
                 String sBodyClasses = elBody.getAttributeValue("class");
                 if (sBodyClasses != null) {
@@ -78,7 +70,7 @@ public class HtmlTemplateParser {
             }
 
             // TODO: move ftl directive into top level trmplate only
-            String body = getValueOf(elRoot, "body");
+            String body = JDomUtils.getValueOf(elRoot, "body");
             meta.setBody(body);
         }
     }
@@ -93,68 +85,13 @@ public class HtmlTemplateParser {
         htmlFormatter.update(r, bout);
     }
 
-    public org.jdom.Document getJDomDocument(InputStream fin) throws XMLStreamException {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        if (!inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
-            throw new RuntimeException(":EEEk");
-        }
-        inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
-        inputFactory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE);
-        inputFactory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
-        inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-        inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
-        XMLResolver xMLResolver = new XMLResolver() {
 
-            @Override
-            public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException {
-                return new ByteArrayInputStream(new byte[0]);
-            }
-        };
-        inputFactory.setProperty(XMLInputFactory.RESOLVER, xMLResolver);
-        StaxBuilder staxBuilder = new StaxBuilder();
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(fin);
-        return staxBuilder.build(streamReader);
-    }
 
-    private Element getChild(Element el, String name) {
-        for (Object o : el.getChildren()) {
-            if (o instanceof Element) {
-                Element elChild = (Element) o;
-                if (elChild.getName().equals(name)) {
-                    return elChild;
-                }
-            }
-        }
-        return null;
-    }
-
-    private String getValueOf(Element el, String name) {
-        Element elChild = getChild(el, name);
-        if (elChild == null) {
-            return null;
-        } else {
-            return getValue(elChild);
-        }
-    }
-
-    private String getValue(Element el) {
-        Attribute att = el.getAttribute("value");
-        String v;
-        if (att != null) {
-            v = att.getValue();
-        } else {
-            v = XmlHelper.getAllText(el);
-        }
-        if (v == null) {
-            return null;
-        }
-        return v.trim();
-    }
 
     private void parseWebResourcesFromHtml(Element elHead, HtmlPage meta, Path webPath) {
-        for (Element wrTag : children(elHead)) {
+        for (Element wrTag : JDomUtils.children(elHead)) {
             if (wrTag.getName().equals("title")) {
-                meta.setTitle(getValueOf(elHead, "title"));
+                meta.setTitle(JDomUtils.getValueOf(elHead, "title"));
             } else {
                 WebResource wr = new WebResource(webPath);
                 meta.getWebResources().add(wr);
@@ -169,33 +106,10 @@ public class HtmlTemplateParser {
         }
     }
 
-    private List<org.jdom.Element> children(org.jdom.Element e2) {
-        if( e2 == null ) {
-            return Collections.EMPTY_LIST;
-        }
-        List list = e2.getChildren();
-        List<org.jdom.Element> els = new ArrayList<>();
-        for (Object o : list) {
-            els.add((org.jdom.Element) o);
-        }
-        return els;
-    }
     
     public String getContent(org.jdom.Element el) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        transformDocument(out, el);
+        JDomUtils.transformDocument(out, el);
         return out.toString().trim();
-    }
-    
-    private void transformDocument(OutputStream out, org.jdom.Element el) {
-        Format f = Format.getPrettyFormat();
-        f.setTextMode(Format.TextMode.PRESERVE);
-        f.setOmitDeclaration(true);
-        XMLOutputter outputter = new XMLOutputter(f);
-        try {
-            outputter.output(el.getContent(), out);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
     }    
 }

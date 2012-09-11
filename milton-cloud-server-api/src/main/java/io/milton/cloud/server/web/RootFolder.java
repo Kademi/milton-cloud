@@ -54,5 +54,11 @@ public interface RootFolder extends CommonCollectionResource {
      */
     String getId();
     
+    /**
+     * An email address to use when sending emails from this logical entity
+     * 
+     * @return 
+     */
+    String getEmailAddress();
 
 }

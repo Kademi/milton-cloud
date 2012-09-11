@@ -39,13 +39,14 @@ import io.milton.vfs.db.*;
 import static io.milton.context.RequestContext._;
 
 /**
- * Represents the root of a website. A "website" in this context is a product, its
- * a customer facing side of some activity, such as Learning Management System
- * or business website.
- * 
+ * Represents the root of a website. A "website" in this context is a product,
+ * its a customer facing side of some activity, such as Learning Management
+ * System or business website.
+ *
  * Resources within a WebsiteRootFolder will often behave differently then if
- * they were located under a OrganisationRootFolder, because the assumption is that
- * websites are for customers, while aadministrators will accessing the organisation directly
+ * they were located under a OrganisationRootFolder, because the assumption is
+ * that websites are for customers, while aadministrators will accessing the
+ * organisation directly
  *
  * @author brad
  */
@@ -54,9 +55,9 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     private final ApplicationManager applicationManager;
     private final Website website;
     private ResourceList children;
-    private Map<String,Object> attributes;
+    private Map<String, Object> attributes;
 
-    public WebsiteRootFolder( ApplicationManager applicationManager, Website website) {        
+    public WebsiteRootFolder(ApplicationManager applicationManager, Website website) {
         this.website = website;
         this.applicationManager = applicationManager;
     }
@@ -70,8 +71,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     public String getId() {
         return website.getName();
     }
-    
-    
 
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
@@ -100,7 +99,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     }
 
     @Override
-    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
+    public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException {
         return UserApp.findEntity(u, this);
     }
 
@@ -140,7 +139,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
-    
+
     @Override
     public Long getContentLength() {
         return null;
@@ -186,14 +185,25 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
     @Override
     public Map<String, Object> getAttributes() {
-        if( attributes == null ) {
+        if (attributes == null) {
             attributes = new HashMap<>();
         }
         return attributes;
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }     
+    }
+
+    @Override
+    public String getEmailAddress() {
+        String fromAddress = "noreply@";
+        String d = website.getDomainName();
+        if (d.startsWith("www")) {
+            d = d.replace("www.", "");
+        }
+        fromAddress += d;
+        return fromAddress;
+    }
 }

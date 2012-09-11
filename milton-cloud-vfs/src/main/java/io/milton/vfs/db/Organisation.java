@@ -76,12 +76,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
         String s = q + "%";
-        crit.add(Restrictions.ilike("name", s));
+        crit.add(Restrictions.ilike("title", s));
         // TODO: add other properties like address
         // TODO: impose parent org restriction
         return DbUtils.toList(crit, Organisation.class);
     }
     
+    private String title;
     private String orgId; // globally unique; used for web addresses for this organisation
     private Organisation organisation;
     private List<Organisation> childOrgs;
@@ -98,6 +99,17 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgId = orgId;
     }
 
+    @Column
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    
+    
     @ManyToOne
     public Organisation getOrganisation() {
         return organisation;
@@ -278,4 +290,5 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Subordinate s = Subordinate.find(this, p, session);
         return  s != null;
     }    
+        
 }
