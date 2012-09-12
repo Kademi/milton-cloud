@@ -278,7 +278,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
      */
     public String getContentType(String accepts) {
         if (this instanceof GetableResource) {
-            if (accepts.contains("application/xhtml+xml")) {
+            if (accepts != null && accepts.contains("application/xhtml+xml")) {
                 // can't use it because of CKEditor - http://dev.ckeditor.com/ticket/4576
                 //return "application/xhtml+xml";
                 

@@ -11,6 +11,8 @@ import java.util.Map;
 import org.hashsplit4j.api.Fanout;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import io.milton.resource.GetableResource;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Combiner;
@@ -36,6 +38,13 @@ public class GetResource extends BaseResource implements GetableResource {
         this.hashStore = hashStore;
     }
 
+    @Override
+    public boolean authorise(Request rqst, Method method, Auth auth) {
+        return true;
+    }
+
+    
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> map, String string) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         Combiner combiner = new Combiner();

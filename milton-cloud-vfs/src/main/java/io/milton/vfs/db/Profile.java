@@ -58,7 +58,11 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static List<Profile> findByBusinessUnit(Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
-        crit.add(Restrictions.eq("organisation", organisation));
+        crit.setCacheable(true);
+        // join to group membership, then subordinate, then restrict on org        
+        Criteria critMembership = crit.createCriteria("memberships");
+        Criteria critSubordinate = critMembership.createCriteria("subordinates");
+        critSubordinate.add(Restrictions.eq("withinOrg", organisation));
         return DbUtils.toList(crit, Profile.class);
     }
 
