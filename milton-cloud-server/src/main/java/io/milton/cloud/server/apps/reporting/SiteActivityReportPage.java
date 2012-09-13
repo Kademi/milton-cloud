@@ -18,6 +18,7 @@ import io.milton.cloud.server.db.AccessLog;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -35,6 +36,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -91,11 +94,12 @@ public class SiteActivityReportPage extends TemplatedHtmlPage {
             crit.add(Restrictions.le("reqDate", finish));
         }
         List list = crit.list();
+        Formatter formatter = _(Formatter.class);
         List<TimeDataPointBean> dataPoints = new ArrayList<>();
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
             Date date = (Date) arr[0];
-            Integer count = (Integer) arr[1];
+            Long count = formatter.toLong(arr[1]);
             TimeDataPointBean b = new TimeDataPointBean();
             b.setDate(date.getTime());
             b.setValue(count);

@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import java.util.HashMap;
 
 /**
@@ -122,6 +123,16 @@ public class UsersFolder extends AbstractCollectionResource implements GetableRe
         return name;
     }
 
+    @Override
+    public boolean authorise(Request request, Method method, Auth auth) {
+        if( method.equals(Method.PROPFIND)) {
+            return auth != null && auth.getTag() != null; // allow browsing of users folder
+        }
+        return super.authorise(request, method, auth);
+    }
+
+    
+    
     @Override
     public Map<Principal, List<Priviledge>> getAccessControlList() {
         return null;
