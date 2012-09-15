@@ -19,7 +19,6 @@ package io.milton.cloud.server.manager;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Utils;
 import io.milton.http.HttpManager;
@@ -29,7 +28,6 @@ import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
 
-import static io.milton.context.RequestContext._;
 
 /**
  * Stores the root folder in a request attribute. Is null safe, ie does nothing
@@ -157,7 +155,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         }
 
         // Still nothing found, so drop to root org admin console
-        Organisation org = OrganisationDao.getRootOrg(SessionManager.session());
+        Organisation org = Organisation.getRootOrg(SessionManager.session());
         if (org == null) {
             throw new RuntimeException("No root organisation");
         }

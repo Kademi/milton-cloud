@@ -6,7 +6,6 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.db.utils.GroupDao;
-import io.milton.cloud.server.db.utils.OrganisationDao;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
@@ -82,7 +81,7 @@ public class InitialDataCreator implements LifecycleApplication {
         Transaction tx = session.beginTransaction();
 
         GroupDao groupDao = new GroupDao();
-        Organisation rootOrg = OrganisationDao.getRootOrg(session);
+        Organisation rootOrg = Organisation.getRootOrg(session);
         boolean newOrg = false;
         if (rootOrg == null) {
             System.out.println("Create new organisation");

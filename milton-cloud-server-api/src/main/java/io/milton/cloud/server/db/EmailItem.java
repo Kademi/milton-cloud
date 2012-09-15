@@ -23,6 +23,7 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author brad
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class EmailItem implements Serializable {
     
     private static final Logger log = LoggerFactory.getLogger(EmailItem.class);
@@ -280,6 +282,7 @@ public class EmailItem implements Serializable {
     }
 
     @OneToMany(mappedBy = "emailItem")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<EmailSendAttempt> getEmailSendAttempts() {
         return emailSendAttempts;
     }

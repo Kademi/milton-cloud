@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Base class for entities which represent email jobs, such as a group email
@@ -34,6 +35,7 @@ import javax.persistence.*;
 @Entity
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 2)
 @Inheritance(strategy = InheritanceType.JOINED)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEmailJob  implements Serializable{
 
     public abstract void accept(EmailJobVisitor visitor);
@@ -116,6 +118,7 @@ public abstract class BaseEmailJob  implements Serializable{
     }
 
     @OneToMany(mappedBy = "job")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<GroupRecipient> getGroupRecipients() {
         return groupRecipients;
     }
@@ -125,6 +128,7 @@ public abstract class BaseEmailJob  implements Serializable{
     }
 
     @OneToMany(mappedBy = "job")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<EmailItem> getEmailItems() {
         return emailItems;
     }

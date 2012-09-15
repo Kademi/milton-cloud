@@ -10,16 +10,17 @@
             <header class="ClearFix">
                 <button class="SmallBtn Add AddGroup"><span>Add New Group</span></button>
             </header>
-            #foreach($group in $page.groups)
+            #foreach($group in $page.children)
             <div class="Group">
                 <header class="ClearFix">
                     <div class="ShowDialog"><span>$group.name</span></div>
+                    <a href="#" class="regoMode">Registration: $group.regoModeText</a>
                 </header>
                 <div class="ContentGroup ClearFix">
                     #portlets("groupDetails")
                     <h4>Roles</h4>
                     <ul class="PermissionList ClearFix">
-                        #foreach($role in $group.groupRoles)
+                        #foreach($role in $group.group.groupRoles)
                         <li><span>$role.roleName</span></li>
                         #end
                     </ul>	
@@ -40,7 +41,7 @@
                                                 $role
                                                 <aside rel="$group.name">
                                                     <div class="CheckBoxWrapper">
-                                                        $formatter.checkbox($role, $page.isSelected($group, $role) )
+                                                        $formatter.checkbox($role, $page.isSelected($group.group, $role) )
                                                         <label><!----></label>
                                                     </div>
                                                 </aside>
@@ -88,6 +89,30 @@
                 </table>
             </div>
         </div>
+        <div id="modalRegoMode" class="Modal">
+            <header>
+                <h3>Registration Mode</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <td><a class="Btn" href="#" rel="o">Open</a></td>
+                        <td>Allows any member of the public to register and their membership is immediately active</td>
+                    </tr>
+                    <tr>
+                        <td><a class="Btn" href="#" rel="a">Admin-review</a></td>
+                        <td>Allows any member of the public to register but the membership is initially inactive until reviewed by an administrator</td>
+                    </tr>
+                    <tr>
+                        <td><a class="Btn" href="#" rel="c">Closed</a></td>
+                        <td>Registration is not available. Instead administrators create accounts as required</td>
+                    </tr>
+                    
+                </table>
+            </div>
+        </div>
+        
         <script type="text/javascript" >
             jQuery(function() {
                 initManageGroup();

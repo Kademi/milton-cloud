@@ -24,6 +24,7 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -35,10 +36,12 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 2)
 @DiscriminatorValue("P")
 @Inheritance(strategy = InheritanceType.JOINED)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class Post implements Serializable{
     
     public static List<Post> findByWebsite(Website website, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("website", website));
         crit.addOrder(Order.desc("postDate"));
         if( limit != null ) {
@@ -51,6 +54,7 @@ public abstract class Post implements Serializable{
     
     public static List<Post> findByOrg(Organisation org, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
+        crit.setCacheable(true);
         Criteria critWebsite = crit.createAlias("website", "w");
         critWebsite.add(Restrictions.eq("w.organisation", org));
         crit.addOrder(Order.desc("postDate"));

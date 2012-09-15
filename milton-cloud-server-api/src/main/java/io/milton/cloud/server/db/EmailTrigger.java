@@ -21,6 +21,7 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -33,6 +34,7 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 @DiscriminatorValue("T")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class EmailTrigger extends BaseEmailJob implements Serializable {
 
     public static List<EmailTrigger> findByOrg(Organisation org, Session session) {

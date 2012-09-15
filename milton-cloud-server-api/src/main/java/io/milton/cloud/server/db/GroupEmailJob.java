@@ -21,7 +21,8 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 @Entity
 @DiscriminatorValue("G")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupEmailJob extends BaseEmailJob {
 
     private static final Logger log = LoggerFactory.getLogger(GroupEmailJob.class);
@@ -51,13 +53,15 @@ public class GroupEmailJob extends BaseEmailJob {
 
     public static List<GroupEmailJob> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
-        crit.add(Expression.eq("organisation", org));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("organisation", org));
         return DbUtils.toList(crit, GroupEmailJob.class);
     }
     
     public static List<GroupEmailJob> findInProgress(Session session) {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
-        crit.add(Expression.eq("status", STATUS_IN_PROGRESS));
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("status", STATUS_IN_PROGRESS));
         return DbUtils.toList(crit, GroupEmailJob.class);
     }    
     

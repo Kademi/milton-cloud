@@ -47,11 +47,13 @@ function initTheme() {
     initPseudoClasses();
     initPrintLink();
     initLoginDropDown();
+    initDropDownHiding();        
          
     log("initTheme: run page init functions");
     for( i=0; i<pageInitFunctions.length; i++) {
         pageInitFunctions[i]();
     }
+
          
     log("finished init-theme");
 } 
@@ -364,6 +366,26 @@ function initPrintLink() {
         e.preventDefault();
         window.print();
     });
+}
+
+function initDropDownHiding() {
+    // Hide DropDownContent which clicking elsewhere
+    $('body').click(function(event) {
+        var target = $(event.target);
+        log("initDropDownHiding-click", target, target.closest(".Dialog"));
+        if( target.closest("div.DropdownControl, .ShowDialog, .Dialogue").length > 0 ) {
+            log("..ignoring");
+            return; // don't handle events inside the dropdown'
+        }
+        var dropdown = $("div.DropdownContent, .Dialog").filter(":visible");
+        if( dropdown.length > 0 ) {
+            if (!target.closest('div.DropdownContent, Dialog').length) {
+                log("initDropDownHiding-click: hide", target);
+                dropdown.hide(300);
+            };
+        }
+    });
+    
 }
 
 /** End init-theme.js */

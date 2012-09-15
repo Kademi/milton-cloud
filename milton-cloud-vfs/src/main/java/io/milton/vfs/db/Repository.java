@@ -102,6 +102,7 @@ public class Repository implements Serializable {
     }
 
     @OneToMany(mappedBy = "repository")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Branch> getBranches() {
         return branches;
     }
@@ -111,6 +112,7 @@ public class Repository implements Serializable {
     }
 
     @OneToMany(mappedBy = "repository")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<NvPair> getNvPairs() {
         return nvPairs;
     }

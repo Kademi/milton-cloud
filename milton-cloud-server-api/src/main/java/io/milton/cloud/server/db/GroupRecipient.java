@@ -17,12 +17,14 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Group;
 import java.io.Serializable;
 import javax.persistence.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  *
  * @author brad
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupRecipient implements Serializable{
     private long id;
     private Group recipient;

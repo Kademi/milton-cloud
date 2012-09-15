@@ -43,6 +43,7 @@ public class ForumReply extends Post implements Serializable {
         visitor.visit(this);
     }
 
+    @Override
     public void delete(Session session) {
         session.delete(this);
     }

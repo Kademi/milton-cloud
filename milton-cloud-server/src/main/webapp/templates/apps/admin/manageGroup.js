@@ -6,6 +6,7 @@ function initManageGroup() {
     addGroupButton();
     eventForModal();
     initPermissionCheckboxes();
+    initRegoMode();
 }
 
 function initPermissionCheckboxes() {
@@ -60,21 +61,20 @@ function initGroupDialog() {
         e.preventDefault();
 		
         var _dialog = $(this).find("div.Dialog");
-		
-        $("div.Dialog").not(_dialog).addClass("Hidden");
-		
-        if(_dialog.hasClass("Hidden")) {
-            _dialog.removeClass("Hidden");
-        } else {
-            _dialog.addClass("Hidden");
-        }
+        _dialog.toggle();
     });
 	
     // Bind event for Delete forum
     $("body").on("click", "a.DeleteGroup", function(e) {
         e.preventDefault();
-		
-        $(this).parents("div.Group").remove();
+        var target = $(e.target);
+        var name = target.closest(".ShowDialog").find("> span").text();
+        var href = $.URLEncode(name);
+        log("delete", href);
+        confirmDelete(href, name, function() {
+            log("remove ", this);
+            target.parents("div.Group").remove();
+        });	        
     });
 	
     // Bind event for Edit forum
@@ -149,13 +149,8 @@ function showModal(name, title, type, data) {
 	
     var _modal = $("#modalGroup");
 	
-    _modal
-    .find("header h3")
-    .html(title)
-    .end()
-    .find("button")
-    .html(type==="Save"?"Save changes":type)
-    .attr("rel", name);
+    _modal.find("header h3").html(title);
+    _modal.find("button").html(type==="Save"?"Save changes":type).attr("rel", name);
 			
     _modal
     .find("tr[rel=Group], tr[rel=Program], tr[rel=Permission]").addClass("Hidden")
@@ -245,6 +240,7 @@ function eventForModal() {
 	
     // Event for Add/Edit button
     _modal.find("button").click(function(e) {
+        log("Click add/edit group");
         var _this = $(this);
         var _rel = _this.attr("rel");
         var _type = _this.html();		
@@ -258,24 +254,9 @@ function eventForModal() {
 				
                     // If is adding Group		
                     if(_type === "Add") {
-                        var tempDialog = $("#dialogGroup").html();
-                        $("#manageGroup").append('\
-						<div class="Group" data-group="' + maxOrderGroup() + '">\
-							<header class="ClearFix">\
-								<div class="ShowDialog"><span>' + _name + '</span>\
-									' + tempDialog + '\
-								</div>\
-							</header>\
-							<div class="ContentGroup ClearFix">\
-								<h4>Available Programs</h4>\
-								<ul class="ProgramList"></ul>\
-								<div class="ClearFix"><button class="SmallBtn Add AddProgram"><span>Add New Program</span></button></div>\
-								<h4>Permissions</h4>\
-								<ul class="PermissionList ClearFix"></ul>\
-								<div class="ClearFix"><button class="SmallBtn Add AddPermission"><span>Add New Permission</span></button></div>\
-							</div>\
-						</div>\
-					');
+                        createFolder(_name, null, function(name, resp) {
+                            window.location.reload();                        
+                        });
 					
                     // If is editing Group
                     } else {
@@ -391,5 +372,36 @@ function eventForModal() {
             default:
                 break;
         }
+    });
+}
+
+function initRegoMode() {
+    $("a.regoMode").click(function(e) {
+        log("click", e.target);
+        e.preventDefault();
+        e.stopPropagation();        
+        var target = $(e.target);
+        var modal = $("#modalRegoMode");
+        modal.find("a.Btn").unbind();
+        modal.find("a.Btn").click(function(e) {
+            var regoModeLink = $(e.target);
+            setRegoMode(target, regoModeLink);
+        });
+        $.tinybox.show(modal, {
+            overlayClose: false,
+            opacity: 0
+        });
+    });
+}
+
+function setRegoMode(currentRegoModeLink, selectedRegoModeLink) {
+    var val = selectedRegoModeLink.attr("rel");
+    var text = selectedRegoModeLink.text();
+    var data = "milton:regoMode=" + val;
+    var href = currentRegoModeLink.closest("div.Group").find("header div > span").text();
+    href = $.URLEncode(href);
+    log("setRegoMode: val=", val, "text=", text, "data=", data, "href=", href);
+    proppatch(href, data, function() {
+        currentRegoModeLink.text(text);
     });
 }

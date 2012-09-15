@@ -23,7 +23,7 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -33,6 +33,7 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 @DiscriminatorValue("FP")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ForumPost extends Post implements Serializable{
 
     public static ForumPost findByName(String childName, Forum forum, Session session) {
@@ -97,6 +98,7 @@ public class ForumPost extends Post implements Serializable{
     }
 
     @OneToMany(mappedBy = "post")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<ForumReply> getForumReplys() {
         return forumReplys;
     }

@@ -125,6 +125,7 @@ public class FanoutHash implements Serializable, Fanout {
     }
 
     @OneToMany(mappedBy = "fanout", cascade = CascadeType.ALL)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<FanoutEntry> getFanoutEntrys() {
         return fanoutEntrys;
     }

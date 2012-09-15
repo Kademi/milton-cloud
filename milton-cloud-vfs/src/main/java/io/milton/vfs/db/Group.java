@@ -137,6 +137,7 @@ public class Group implements Serializable, VfsAcceptor {
     }
 
     @OneToMany(mappedBy = "groupEntity")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<GroupMembership> getGroupMemberships() {
         return groupMemberships;
     }
@@ -146,6 +147,7 @@ public class Group implements Serializable, VfsAcceptor {
     }
 
     @OneToMany(mappedBy = "grantee")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<GroupRole> getGroupRoles() {
         return groupRoles;
     }

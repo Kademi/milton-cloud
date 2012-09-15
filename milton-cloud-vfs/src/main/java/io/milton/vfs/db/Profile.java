@@ -132,6 +132,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     @OneToMany(mappedBy = "profile")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Credential> getCredentials() {
         return credentials;
     }
@@ -147,6 +148,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @return
      */
     @OneToMany(mappedBy = "member")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<GroupMembership> getMemberships() {
         return memberships;
     }

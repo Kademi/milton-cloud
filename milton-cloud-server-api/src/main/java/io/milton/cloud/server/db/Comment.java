@@ -22,7 +22,6 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 

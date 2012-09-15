@@ -30,6 +30,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -42,10 +44,12 @@ import org.hibernate.criterion.Restrictions;
  * @author brad
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupMembershipApplication implements Serializable {
     
     public static List<GroupMembershipApplication> findByAdminOrg(Organisation adminOrg, Session session) {
         Criteria crit = session.createCriteria(GroupMembershipApplication.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("adminOrg", adminOrg));
         return DbUtils.toList(crit, GroupMembershipApplication.class);
     }

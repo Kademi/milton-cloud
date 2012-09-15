@@ -29,7 +29,7 @@ function ensureObject(target) {
 $.extend({
     URLEncode:function(c){
         var o='';
-        var x=0;
+        var x = 0;
         c=c.toString();
         var r=/(^[a-zA-Z0-9_.]*)/;
         while(x<c.length){
@@ -500,6 +500,35 @@ function deleteFile(href, callback) {
             alert("Sorry, an error occured deleting " + href + ". Please check your internet connection");
         }
     });
+}
+
+function proppatch(href, data, callback) {
+    ajaxLoadingOn();
+    href = suffixSlash(href);
+    $.ajax({
+        type: 'POST',
+        url: href + "_DAV/PROPPATCH",
+        data: data,
+        dataType: "json",
+        success: function(resp) {
+            ajaxLoadingOff();
+            if( callback ) {
+                callback();
+            }
+        },
+        error: function(resp) {
+            log("failed", resp);
+            ajaxLoadingOff();
+            alert("Sorry, an error occured deleting " + href + ". Please check your internet connection");
+        }
+    });
+}
+
+function suffixSlash(href) {
+    if( href.endsWith("/")) {
+        return href;
+    }
+    return href + "/";
 }
 
 function showCreateFolder() {

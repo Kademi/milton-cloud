@@ -20,6 +20,7 @@ import java.util.Date;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Restrictions;
 
@@ -39,6 +40,7 @@ import org.hibernate.criterion.Restrictions;
  * @author brad
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Version implements Serializable {
 
     public static String calcModHash(String versionHash, long modDate, long modProfileId) {
@@ -66,6 +68,7 @@ public class Version implements Serializable {
     public static Version find(String currentHash, Date currentModDate, long modUserId, Session session) {
         String modHash = calcModHash(currentHash, currentModDate.getTime(), modUserId);
         Criteria crit = session.createCriteria(Version.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("modHash", modHash));
         return DbUtils.unique(crit);
     }

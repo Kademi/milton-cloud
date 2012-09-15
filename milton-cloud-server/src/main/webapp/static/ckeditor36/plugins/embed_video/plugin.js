@@ -94,7 +94,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     [
                     {
                         type : 'html',
-                        html: "<div id='myTree'></div><div id='myUploaded'></div><div id='vidContainer'></div>",
+                        html: "<div id='myTree'></div><div id='myUploaded'></div><div class='vidEditor' style='position: absolute; top: 85px; left: 250px'><div id='vidContainer' class='jp-video'></div></div>",
                         commit: function(data) {
                             log("commit, data=", data);
                         }
@@ -144,8 +144,9 @@ CKEDITOR.plugins.add( 'embed_video',
                             onselectFile: function(n, selectedVideoUrl) {
                                 url = selectedVideoUrl;
                                 log("selected file", n, url);                                
-                                playVideo( "#vidContainer .jp-jplayer", url);
-                        
+                                //playVideo( "#vidContainer .jp-jplayer", url);
+                                //loadJPlayer("360", "640", "jp-video-360p", $(".vidEditor div.jp-video"), 100, url);
+                                buildJPlayer("360", "640", "jp-video-360p", $(".vidEditor div.jp-video"), 100, url);
                             }
                         });                
                         $("#myUploaded").mupload({
@@ -153,12 +154,15 @@ CKEDITOR.plugins.add( 'embed_video',
                                 log("oncomplete", data);
                                 $("#myTree").mtree("addFile", name, href);
                                 url = href;
-                                playVideo( "#vidContainer .jp-jplayer", href);
+                                //playVideo( "#vidContainer .jp-jplayer", href);
+                                //loadJPlayer("360", "640", "jp-video-360p", $(".vidEditor div.jp-video"), 100, href);
+                                buildJPlayer("360", "640", "jp-video-360p", $(".vidEditor div.jp-video"), 100, href);
                             }
                         });
                 
                         // Setup the jplayer
-                        insertJPlayer($("#vidContainer"), null, null, "360px","640px", "");
+                        //insertJPlayer($("#vidContainer"), null, null, "360px","640px", "");
+                        //buildJPlayer("360", "640", "jp-video-360p", $("#vidContainer"), 100, null);
                     }
                 },
                 onOk : function() {
@@ -168,7 +172,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     var returnUrl = url;
                     returnUrl = returnUrl.substring(pagePath.length+1);
                     log("onOk", url, pagePath,"=", returnUrl);
-                    img.setAttribute( "src", returnUrl + "/alt-800-455.png" );
+                    img.setAttribute( "src", returnUrl + "/alt-640-360.png" );
                     img.setAttribute("class", "video");
                     if ( this.insertMode ) {
                         log("inserted")

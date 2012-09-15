@@ -20,7 +20,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  */
 @javax.persistence.Entity
 @Table(name = "BRANCH")
-@Cache(usage = CacheConcurrencyStrategy.NONE) // no cache until we get the file sync problem sorted out
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Branch implements Serializable, VfsAcceptor {
 
     /**

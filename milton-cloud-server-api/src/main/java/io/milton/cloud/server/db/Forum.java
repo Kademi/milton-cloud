@@ -17,12 +17,11 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -30,6 +29,7 @@ import org.hibernate.criterion.Restrictions;
  * @author brad
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Forum implements Serializable{
     
     public static List<Forum>  findByWebsite(Website website, Session session) {
@@ -116,6 +116,7 @@ public class Forum implements Serializable{
     }
 
     @OneToMany(mappedBy = "forum")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<ForumPost> getForumPosts() {
         return forumPosts;
     }

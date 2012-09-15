@@ -69,7 +69,7 @@ public class ManageOrgsPage extends AbstractResource implements GetableResource,
             log.info("processForm: newTitle: " + newTitle);
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
-            String newName = NewPageResource.findAutoName(newTitle, this.getParent(), parameters);
+            String newName = NewPageResource.findAutoCollectionName(newTitle, this.getParent(), parameters);
             Organisation c = getOrganisation().createChildOrg(newName, session);
             session.save(c);
             

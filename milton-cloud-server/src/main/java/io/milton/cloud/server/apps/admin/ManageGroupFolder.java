@@ -14,20 +14,16 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
-import io.milton.http.FileItem;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
-import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
-import io.milton.resource.PostableResource;
 import io.milton.vfs.db.Organisation;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,8 +33,19 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.http.Response.Status;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.http.values.ValueAndType;
+import io.milton.http.webdav.PropFindResponse.NameAndError;
+import io.milton.http.webdav.PropertySourcePatchSetter;
+import io.milton.property.BeanPropertyAccess;
+import io.milton.property.BeanPropertyResource;
+import io.milton.resource.CollectionResource;
+import io.milton.resource.DeletableResource;
+import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
+import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -46,88 +53,53 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageGroupsPage extends AbstractResource implements GetableResource, PostableResource {
+@BeanPropertyResource(value = "milton", enableByDefault = false)
+public class ManageGroupFolder extends AbstractResource implements GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ManageGroupsPage.class);
-    private final String name;
+    private static final Logger log = LoggerFactory.getLogger(ManageGroupFolder.class);
+    private final Group group;
     private final CommonCollectionResource parent;
-    private final Organisation organisation;
-    private JsonResult jsonResult;
+    private ResourceList children;
 
-    public ManageGroupsPage(String name, Organisation organisation, CommonCollectionResource parent) {
-        this.organisation = organisation;
+    public ManageGroupFolder(CommonCollectionResource parent, Group group) {
         this.parent = parent;
-        this.name = name;
+        this.group = group;
     }
 
     @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        log.info("processForm");
+    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+        if (children == null) {
+            children = new ResourceList();
+        }
+        return children;
+    }
+
+    @Override
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
-        if (parameters.containsKey("role")) {
-            String groupName = parameters.get("group");
-            Group g = findGroup(groupName);
-            if (g != null) {
-                String role = parameters.get("role");                
-                boolean isRecip = WebUtils.getParamAsBool(parameters, "isRecip");
-                //boolean isWithinThisOrg = WebUtils.getParamAsBool(parameters, "isWithinThisOrg");
-                //log.info("grant or revoke role: " + role + " - " + isRecip + " - " + isWithinThisOrg);
-                g.grantRole(role, isRecip, session);
-                tx.commit();
-                jsonResult = new JsonResult(true);
-            } else {
-                jsonResult = new JsonResult(false, "Group not found: " + groupName);
-            }
-        }        
-        
-        return null;
+        group.delete(session);
+        tx.commit();
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
-    }    
+    }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if( jsonResult != null ) {
-            jsonResult.write(out);
-        } else {
-            _(HtmlTemplater.class).writePage("admin", "admin/manageGroups", this, params, out);
-        }
+        _(HtmlTemplater.class).writePage("admin", "admin/manageGroup", this, params, out);
     }
 
     public List<Group> getGroups() {
         return Group.findByOrg(getOrganisation(), SessionManager.session());
     }
 
-    public boolean isSelected(Group g, String role) {
-        if( g.getGroupRoles() == null ) {
-            return false;
-        }
-        for( GroupRole gr : g.getGroupRoles()) {
-            if( gr.getRoleName().contains(role)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public List<String> getAllRoles() {
-        List<String> names = new ArrayList<>();
-        for( Role r : _(SpliffySecurityManager.class).getGroupRoles() ) {
-            names.add(r.getName());
-        }
-        
-        return names;
+    public String getTitle() {
+        return "Manage group: " + group.getName();
     }
 
-    public String getTitle() {
-        return "Manage groups";
-    }
-    
     @Override
     public boolean isDir() {
         return false;
@@ -138,19 +110,45 @@ public class ManageGroupsPage extends AbstractResource implements GetableResourc
         return parent;
     }
 
+    @BeanPropertyAccess(value = true)
     @Override
     public String getName() {
-        return name;
+        return group.getName();
+    }
+
+    public void setName(String s) {
+        group.setName(s);
+    }
+
+    @BeanPropertyAccess(value = true)
+    public String getRegoMode() {
+        return group.getRegistrationMode();
+    }
+
+    public void setRegoMode(String s) {
+        group.setRegistrationMode(s);
+    }
+
+    public String getRegoModeText() {
+        if (getRegoMode().equals(Group.REGO_MODE_ADMIN_REVIEW)) {
+            return "Administrator review";
+        } else if (getRegoMode().equals(Group.REGO_MODE_CLOSED)) {
+            return "Closed";
+        } else if (getRegoMode().equals(Group.REGO_MODE_OPEN)) {
+            return "Open";
+        } else {
+            return getRegoMode();
+        }
     }
 
     @Override
     public Date getModifiedDate() {
-        return null;
+        return group.getModifiedDate();
     }
 
     @Override
     public Date getCreateDate() {
-        return null;
+        return group.getModifiedDate();
     }
 
     @Override
@@ -175,19 +173,33 @@ public class ManageGroupsPage extends AbstractResource implements GetableResourc
 
     @Override
     public Organisation getOrganisation() {
-        return organisation;
+        return parent.getOrganisation();
     }
 
     @Override
     public boolean is(String type) {
-        if (type.equals("groupsAdmin")) {
+        if (type.equals("group")) {
             return true;
         }
         return super.is(type);
     }
 
-    private Group findGroup(String groupName) {
-        Group g = Group.findByOrgAndName(organisation, groupName, SessionManager.session());
-        return g;
+    @Override
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
+
+    @Override
+    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        session.save(group);
+        tx.commit();
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+    
+    
 }

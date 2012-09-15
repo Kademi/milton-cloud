@@ -20,7 +20,7 @@ import java.util.Date;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -35,6 +35,7 @@ import org.hibernate.criterion.Restrictions;
 uniqueConstraints = {
     @UniqueConstraint(columnNames = {"sourceHash"})}
 )
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class MediaMetaData implements Serializable {
     
     public static MediaMetaData find(String sourceHash, Session session) {

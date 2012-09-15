@@ -92,7 +92,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                     return new ManageUsersFolder(requestedName, p.getOrganisation(), p);
                 case "groups":
                     MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
-                    return new ManageGroupsPage(requestedName, p.getOrganisation(), p);
+                    return new ManageGroupsFolder(requestedName, p.getOrganisation(), p);
                 case "manageWebsites":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
                     return new ManageWebsitesFolder(requestedName, p.getOrganisation(), p);

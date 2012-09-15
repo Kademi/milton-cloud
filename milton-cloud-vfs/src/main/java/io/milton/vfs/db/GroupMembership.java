@@ -123,6 +123,7 @@ public class GroupMembership implements Serializable{
     }
 
     @OneToMany(mappedBy = "groupMembership")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Subordinate> getSubordinates() {
         return subordinates;
     }

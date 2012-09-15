@@ -21,7 +21,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -33,10 +34,12 @@ import org.hibernate.criterion.Restrictions;
  * @author brad
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NamedCounter implements Serializable {
 
     public static NamedCounter findByName(String name, Session session) {
         Criteria crit = session.createCriteria(NamedCounter.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("name", name));
         NamedCounter c = DbUtils.unique(crit);
         return c;

@@ -79,6 +79,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseEntity")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Repository> getRepositories() {
         return repositories;
     }
@@ -108,6 +109,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
 
     @OneToMany(mappedBy = "owner")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Calendar> getCalendars() {
         return calendars;
     }

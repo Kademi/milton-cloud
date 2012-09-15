@@ -17,6 +17,7 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -82,6 +83,31 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return DbUtils.toList(crit, Organisation.class);
     }
     
+    public static Organisation getOrganisation(String name, Session session) {
+        return (Organisation) session.get(Organisation.class, name);
+    }
+
+    public static Organisation getRootOrg(Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.isNull("organisation"));
+        Organisation org = (Organisation) crit.uniqueResult();
+        return org;
+    }
+
+    public static Organisation getOrganisation(Organisation organisation, String name, Session session) {        
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.setCacheable(true);
+        crit.add(
+                Restrictions.and(
+                    Restrictions.eq("organisation", organisation), 
+                    Restrictions.eq("name", name)
+                )
+        );        
+        Organisation org = (Organisation) crit.uniqueResult();
+        return org;
+    }    
+    
     private String title;
     private String orgId; // globally unique; used for web addresses for this organisation
     private Organisation organisation;
@@ -99,6 +125,17 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgId = orgId;
     }
 
+    @OneToMany(mappedBy = "organisation")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
+    }
+    
+    
     @Column
     public String getTitle() {
         return title;
@@ -120,6 +157,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     }
 
     @OneToMany(mappedBy = "organisation")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Organisation> getChildOrgs() {
         return childOrgs;
     }
@@ -129,6 +167,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     }
 
     @OneToMany(mappedBy = "organisation")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Website> getWebsites() {
         return websites;
     }
@@ -251,15 +290,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     }
 
-    @OneToMany(mappedBy = "organisation")
-    public List<Group> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<Group> groups) {
-        this.groups = groups;
-    }
-
     /**
      * Check if this organisation is within, or is, the given org
      *
@@ -290,5 +320,24 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Subordinate s = Subordinate.find(this, p, session);
         return  s != null;
     }    
+
+    /**
+     * Creates and adds to this Org's groups, but does not save
+     * 
+     * @param newName
+     * @return 
+     */
+    public Group createGroup(String newName) {
+        Group g = new Group();
+        g.setName(newName);
+        g.setOrganisation(this);
+        g.setCreatedDate(new Date());
+        g.setModifiedDate(new Date());
+        if( this.getGroups() == null ) {
+            this.setGroups(new ArrayList<Group>());
+        }
+        getGroups().add(g);
+        return g;
+    }
         
 }

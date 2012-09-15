@@ -53,3 +53,16 @@
     top: 15px;
     right: -185px;
 }
+#manageGroup a.regoMode {
+    float: right;
+}
+#modalRegoMode td {
+    vertical-align: top;
+}
+#modalRegoMode td.first {
+    width: 130px;
+}
+#modalRegoMode td a {
+    font-size: 12px;
+    margin-right: 10px;
+}
