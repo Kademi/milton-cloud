@@ -81,7 +81,8 @@
                     log("exception sending forum comment", e);
                 }            
             } else {
-                $(config.valiationMessageSelector, container).text(config.validationFailedMessage);
+                showValidation(null, config.validationFailedMessage, container);
+                //$(config.valiationMessageSelector, container).text(config.validationFailedMessage);
                 $(config.valiationMessageSelector, container).show(100);
             }
             return false;
@@ -321,7 +322,7 @@ function checkTrue(target, message, container) {
 */
 function showValidation(target, text, container) {
     if( text ) {
-        log("showValidation", target, text);
+        log("showValidation", target, text, container);
         showMessage(text, container);
         if( target ) {
             var t = ensureObject(target);
@@ -331,8 +332,9 @@ function showValidation(target, text, container) {
 }
 
 function showMessage(text, container) {
-    $(".pageMessage",container).append("<p class='validationError'>" + text + "</p>");
-    $(".pageMessage",container).show(500);
+    var messages = $(".pageMessage",container)
+    messages.append("<p class='validationError'>" + text + "</p>");
+    messages.show(500);
 }
 
 function showErrorField(target) {

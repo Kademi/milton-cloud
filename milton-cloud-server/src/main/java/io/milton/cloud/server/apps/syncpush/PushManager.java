@@ -12,11 +12,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.sync.push;
+package io.milton.cloud.server.apps.syncpush;
 
 import io.milton.cloud.server.manager.CurrentRootFolderService;
-import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.cloud.server.sync.push.TcpChannelHub.Client;
+import io.milton.cloud.server.sync.push.AuthenticateMessage;
+import io.milton.cloud.server.sync.push.FilesChangedMessage;
+import io.milton.cloud.server.apps.syncpush.TcpChannelHub.Client;
 import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffySecurityManager;
@@ -41,26 +42,35 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PushManager implements EventListener {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PushManager.class);
+    private final EventManager eventManager;
     private final TcpChannelHub hub;
     private final SpliffySecurityManager securityManager;
     private final CurrentRootFolderService currentRootFolderService;
     private final Map<Long, Client> authenticatedClients = new ConcurrentHashMap<>(); // key is the profile id
     private final SessionManager sessionManager;
 
-    public PushManager(EventManager eventManager, SpliffySecurityManager securityManager, CurrentRootFolderService currentRootFolderService, SessionManager sessionManager) {
+    public PushManager(int port, EventManager eventManager, SpliffySecurityManager securityManager, CurrentRootFolderService currentRootFolderService, SessionManager sessionManager) {
         if (sessionManager == null) {
             throw new RuntimeException("sessionManager cannot be null");
         }
-        hub = new TcpChannelHub(7020, new ClientConnectionClientListener());
+        this.eventManager = eventManager;
+        hub = new TcpChannelHub(port, new ClientConnectionClientListener());
         this.securityManager = securityManager;
         this.currentRootFolderService = currentRootFolderService;
         this.sessionManager = sessionManager;
+    }
+    
+    public void start() {
+        hub.start();
         eventManager.registerEventListener(this, PutEvent.class);
         eventManager.registerEventListener(this, DeleteEvent.class);
-        eventManager.registerEventListener(this, MoveEvent.class);
-        hub.start();
+        eventManager.registerEventListener(this, MoveEvent.class);        
     }
 
+    public void stop() {
+        hub.stop();
+    }
+    
     @Override
     public void onEvent(Event e) {
         log.info("onEvent: " + e);

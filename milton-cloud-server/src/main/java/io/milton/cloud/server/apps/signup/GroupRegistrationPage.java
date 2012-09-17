@@ -99,6 +99,13 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             if( parameters.containsKey("orgId")) {
                 String orgId = parameters.get("orgId");
                 org = Organisation.findByOrgId(orgId, session);
+                if( org == null ) {
+                    jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
+                    return null;
+                }
+                if( !org.isWithin(getOrganisation())) {
+                    throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
+                }
             }
 
             String password = parameters.get("password");
@@ -163,7 +170,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 gma.setWebsite(wrf.getWebsite());
                 gma.setMember(p);
                 gma.setAdminOrg(getOrganisation());
-                gma.setWithinOrg(org);  // TODO: this should be the selected organisation where users belong to subordinate orgs
+                gma.setWithinOrg(org);
                 session.save(gma);
                 result = "pending";
             } else {

@@ -122,7 +122,7 @@ public class SpliffySecurityManager {
                 log.warn("digest password verification failed");
                 return null;
             }
-        }        
+        }
     }
 
     public String getRealm() {
@@ -168,21 +168,22 @@ public class SpliffySecurityManager {
             if (resource instanceof PersonalResource) {
                 PersonalResource cr = (PersonalResource) resource;
                 Profile owner = cr.getOwnerProfile();
-                if( owner != null && owner == curUser ) {
+                if (owner != null && owner == curUser) {
                     privs.addAll(Role.READ_WRITE);
                 }
             }
 
             if (curUser.getMemberships() != null && !curUser.getMemberships().isEmpty()) {
                 for (GroupMembership m : curUser.getMemberships()) {
-                    log.info("append privs for group membership: " + m.getGroupEntity().getName());
+                    if (log.isTraceEnabled()) {
+                        log.trace("append privs for group membership: " + m.getGroupEntity().getName());
+                    }
                     appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
                 }
             } else {
                 log.trace("user has no group memberships");
             }
         } else {
-            log.trace("no user");
             Organisation org = resource.getOrganisation();
             Group pg = org.group(publicGroup, SessionManager.session());
             if (pg != null) {
@@ -193,7 +194,6 @@ public class SpliffySecurityManager {
     }
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {
-        log.info("appendPriviledges: resource=" + resource.getClass());
         if (g.getGroupRoles() != null) {
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();
@@ -201,10 +201,14 @@ public class SpliffySecurityManager {
                 if (role != null) {
                     if (role.appliesTo(resource, withinOrg, g)) {
                         Set<Priviledge> privsToAdd = role.getPriviledges(resource, withinOrg, g);
-                        log.info("role:" + roleName + " does apply to: " + withinOrg.getName() + ", add privs " + privsToAdd);
+                        if (log.isTraceEnabled()) {
+                            log.trace("role:" + roleName + " does apply to: " + withinOrg.getName() + ", add privs " + privsToAdd);
+                        }
                         privs.addAll(privsToAdd);
                     } else {
-                        log.info("role:" + roleName + " does not apply to: " + withinOrg.getName());
+                        if (log.isTraceEnabled()) {
+                            log.trace("role:" + roleName + " does not apply to: " + withinOrg.getName());
+                        }
                     }
 
                 } else {

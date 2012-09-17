@@ -41,7 +41,7 @@ import org.hibernate.criterion.Restrictions;
 @javax.persistence.Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppControl implements Serializable {
-    private List<AppSetting> appSettings;
+
 
     public static List<AppControl> find(Website c, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
@@ -161,6 +161,7 @@ public class AppControl implements Serializable {
     private boolean enabled; // if the app is enabled for the specified container
     private Profile modifiedBy;
     private Date modifiedDate;
+    private List<AppSetting> appSettings;    
 
     @Id
     @GeneratedValue
@@ -228,6 +229,7 @@ public class AppControl implements Serializable {
     }
 
     @OneToMany(mappedBy = "appControl")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<AppSetting> getAppSettings() {
         return appSettings;
     }

@@ -160,6 +160,18 @@ public class TcpObjectCodec {
             this.id = id;
             this.data = data;
         }
+
+        public Serializable getData() {
+            return data;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+        
+        
+        
+        
     }
 
     public class IdAndArray {
@@ -171,5 +183,15 @@ public class TcpObjectCodec {
             this.id = id;
             this.data = data;
         }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+        
+        
     }
 }

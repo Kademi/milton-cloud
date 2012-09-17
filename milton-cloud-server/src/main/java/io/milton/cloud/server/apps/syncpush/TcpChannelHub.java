@@ -1,6 +1,9 @@
-package io.milton.cloud.server.sync.push;
+package io.milton.cloud.server.apps.syncpush;
 
-import io.milton.cloud.server.sync.push.TcpObjectCodec.IdAndArray;
+import io.milton.cloud.server.sync.push.AreYouThere;
+import io.milton.cloud.server.sync.push.MemberRemoved;
+import io.milton.cloud.server.sync.push.ReceivedMessage;
+import io.milton.cloud.server.sync.push.TcpObjectCodec;
 import io.milton.common.Service; 
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,7 +12,6 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.ClosedChannelException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xsocket.MaxReadSizeExceededException;
@@ -151,7 +152,7 @@ public class TcpChannelHub implements Service  {
         MemberRemoved mr = new MemberRemoved();
         byte[] arr = codec.encodeToBytes( mr );
 
-        ReceivedMessage m = new ReceivedMessage( null, id, arr );
+        ReceivedMessage m = new ReceivedMessage( null, id, arr ); 
         sendQueue.add( m );
     }
 
@@ -197,7 +198,7 @@ public class TcpChannelHub implements Service  {
             }
             try {
                 TcpObjectCodec.IdAndObject idAndObject = codec.decode( con );
-                channelListener.handleNotification(this, idAndObject.data);
+                channelListener.handleNotification(this, idAndObject.getData());
                 return true;
             } catch (ClassNotFoundException ex) {
                 throw new RuntimeException(ex);

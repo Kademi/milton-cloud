@@ -29,6 +29,7 @@ div.profilePic img {
     margin-right: 1em;
     height: 52px;
     width: 52px;
+    padding-bottom: 20px;
 }
 body.profile legend {
     font-size: 0.8em;

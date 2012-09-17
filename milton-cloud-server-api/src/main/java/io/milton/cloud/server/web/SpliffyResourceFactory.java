@@ -33,9 +33,9 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.utils.SessionManager;
 
 /**
- * 
+ *
  * See DefaultCurrentRootFolderService for notes on domain name resolution
- * 
+ *
  *
  * @author brad
  */
@@ -56,8 +56,6 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private final EventManager eventManager;
     private final SessionManager sessionManager;
     private final CurrentRootFolderService currentRootFolderService;
-    
-    
 
     public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.userDao = userDao;
@@ -70,15 +68,17 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
-        log.info("getResource: " + sPath);
+        if (log.isTraceEnabled()) {
+            log.trace("getResource: " + sPath);
+        }
         Path path = Path.path(sPath);
         Resource r;
         if (path.getName() != null && path.getName().equals("_triplets")) { // special path suffix to get sync triplets for a directory. See HttpTripletStore
             r = find(host, path.getParent());
-            if( r != null ) {
-                if( r instanceof ContentDirectoryResource) {
+            if (r != null) {
+                if (r instanceof ContentDirectoryResource) {
                     ContentDirectoryResource dr = (ContentDirectoryResource) r;
-                    r = new DirectoryHashResource(dr.getDirectoryNode().getHash(), securityManager, dr.getOrganisation()); 
+                    r = new DirectoryHashResource(dr.getDirectoryNode().getHash(), securityManager, dr.getOrganisation());
                 }
             }
         } else {
@@ -94,7 +94,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
             }
         }
         if (r != null) {
-            log.info("Found a resource: " + r.getClass());
+            log.trace("Found a resource: " + r.getClass());
         } else {
             log.info("Not found: " + sPath);
         }
@@ -123,19 +123,19 @@ public class SpliffyResourceFactory implements ResourceFactory {
             }
         }
     }
-    
+
     public Resource findFromRoot(RootFolder rootFolder, Path p) throws NotAuthorizedException, BadRequestException {
         CollectionResource col = rootFolder;
         Resource r = null;
-        for( String s : p.getParts() ) {
-            if( col == null ) {
+        for (String s : p.getParts()) {
+            if (col == null) {
                 return null;
             }
             r = col.child(s);
-            if( r == null ) {
+            if (r == null) {
                 return null;
             }
-            if( r instanceof CollectionResource ) {
+            if (r instanceof CollectionResource) {
                 col = (CollectionResource) r;
             } else {
                 col = null;
@@ -163,5 +163,4 @@ public class SpliffyResourceFactory implements ResourceFactory {
     public SessionManager getSessionManager() {
         return sessionManager;
     }
-    
 }

@@ -12,7 +12,7 @@ public class ReceivedMessage {
     final UUID source;
     final byte[] data;
 
-    ReceivedMessage(UUID dest, UUID source, byte[] data) {
+    public ReceivedMessage(UUID dest, UUID source, byte[] data) {
         this.dest = dest;
         this.source = source;
         this.data = data;

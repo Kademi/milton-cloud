@@ -151,3 +151,21 @@
 	background-color: #e3e3e3;
 	border-radius: 3px;
 }
+div.newUser div.groups p {
+    margin: 10px 0;
+}
+div.newUser div.groups ul {
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#orgSearchResults {
+    display: none;    
+    border: solid #CCCCCC 1px;
+}
+#orgSearchResults td {
+    line-height: 15px;
+    padding: 2px 13px;
+    border-top: 1px solid #CCCCCC;
+    background: white;
+}

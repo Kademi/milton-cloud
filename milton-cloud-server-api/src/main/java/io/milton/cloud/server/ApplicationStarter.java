@@ -18,7 +18,6 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
-import io.milton.cloud.server.sync.push.PushManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.alt.PdfGenerator;
@@ -82,9 +81,7 @@ public class ApplicationStarter implements InitListener, Service{
         EventManager eventManager = rootContext.get(EventManager.class);
         SpliffySecurityManager securityManager = rootContext.get(SpliffySecurityManager.class);
         CurrentRootFolderService currentRootFolderService = rootContext.get(CurrentRootFolderService.class);
-        SessionManager sessionManager = resourceFactory.getSessionManager();
-        PushManager pushManager = new PushManager(eventManager, securityManager, currentRootFolderService, sessionManager);
-        rootContext.put(pushManager);
+        SessionManager sessionManager = resourceFactory.getSessionManager();        
         PdfGenerator pdfGenerator = new PdfGenerator();
         rootContext.put(pdfGenerator);
     }

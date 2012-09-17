@@ -7,41 +7,8 @@
     <body class="manageUserPages">
         <section id="manageUser" class="MainContent">
             <header class="ClearFix">
-                <a href="new" class="SmallBtn Add AddGroup"><span>Add New User</span></a>
+                <a href="new" class="SmallBtn Add newUser"><span>Add New User</span></a>
             </header>            
-                <!--            
-            <header class="ClearFix">
-                <div class="Right">
-                    <button class="Btn Download" tooltip="Download Users"><span class="Hidden">Download User</span></button>
-                    <button class="Btn Upload Cancel" tooltip="Upload User"><span class="Hidden">Upload User</span></button>
-                </div>
-                <div class="Left ClearFix">
-                    <a class="Search" href="#search"><span class="Hidden">Search</span></a>					
-                    <nav><a href="#">Default Folder</a> | <a href="#">Folder 1</a> | <a href="#">Folder 2</a> | <a href="#">Folder 3</a></nav>
-                    <div class="Info Hidden" rel="#search" id="pullDown">
-                        <header class="ClearFix">
-                            <div class="SearchBox">
-                                <input type="text" value="" placeholder="Search for business here" />
-                                <a href="#" class="ClearText"><span class="Hidden">X</span></a>
-                            </div>
-                        </header>
-                        <table class="Summary">
-                            <thead>
-                                <tr>
-                                    <th>Business</th>
-                                    <th>Title</th>
-                                    <th>Suburb</th>
-                                    <th>Post code</th>
-                                    <th>Address</th>
-                                    <th>State</th>
-                                </tr>
-                            </thead>	
-                            <tbody></tbody>					
-                        </table>
-                    </div>
-                </div>
-            </header>
-                    -->                    
             <div class="Info">
                 <header class="ClearFix">
                     <div class="SearchBox">
@@ -103,7 +70,63 @@
                 </table>
             </div>
         </section>
-        
+
+        <div class="Modal newUser">
+            <header>
+                <h3>New user</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>                           
+            <div class="ModalContent">
+                #set($groups = $page.groups)
+                #if($groups.isEmpty())
+                <p class="validationError">You must create at least one group in this or a parent organisation before you can add users</p>
+                #else
+                <form method="POST" action="new">
+                    <div class="pageMessage"></div>
+                    <div class="inputs">
+                        <label for="newUserNickName">Nick name</label>
+                        <input type="text" name="nickName" id="newUserNickName" class="required" />
+                        <label for="newUserEmail">Email</label>
+                        <input type="text" name="email" id="newUserEmail" class="email required" />
+                    </div>
+                    <div class="groups">
+                        <h3>Group membership</h3>
+                        <p>Please select a group and an organisation to make this user a member of</p>
+                        <input type="text" class="required" autocomplete="off" name="orgId" id="orgId" value="$page.organisation.orgId" />
+                        <table id="orgSearchResults">
+                            #if( $page.orgSearchResults.isEmpty() ) 
+                            <tr>
+                                <td>No matching organisations found</td>
+                            </tr>
+                            #else
+                            #foreach($org in $page.orgSearchResults)
+                            <tr>
+                                <td><a href="$org.orgId">$org.orgId</a></td>
+                                <td><a href="$org.orgId">$!org.title</a></td>
+                            </tr>
+                            #end
+                            #end
+                        </table>                
+
+                        <ul>
+                            #foreach($group in $groups)
+                            #set($id = "radGroup_" + $group.name)
+                            <li>
+                                $formatter.radio($id, "group", false, $group.name)
+                                <label for="$id">$group.name</label>
+                            </li>
+                            #end
+                        </ul>
+                    </div>
+
+
+                    <button type="submit" class="Btn" style="float: right">Save</button>
+                </form>
+
+                #end
+            </div>
+        </div>
+
         <script type="text/javascript" >
             jQuery(function() {
                 initManageUsers();                

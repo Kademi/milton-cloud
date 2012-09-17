@@ -371,10 +371,8 @@ function initPrintLink() {
 function initDropDownHiding() {
     // Hide DropDownContent which clicking elsewhere
     $('body').click(function(event) {
-        var target = $(event.target);
-        log("initDropDownHiding-click", target, target.closest(".Dialog"));
+        var target = $(event.target);        
         if( target.closest("div.DropdownControl, .ShowDialog, .Dialogue").length > 0 ) {
-            log("..ignoring");
             return; // don't handle events inside the dropdown'
         }
         var dropdown = $("div.DropdownContent, .Dialog").filter(":visible");
@@ -382,7 +380,7 @@ function initDropDownHiding() {
             if (!target.closest('div.DropdownContent, Dialog').length) {
                 log("initDropDownHiding-click: hide", target);
                 dropdown.hide(300);
-            };
+            }
         }
     });
     

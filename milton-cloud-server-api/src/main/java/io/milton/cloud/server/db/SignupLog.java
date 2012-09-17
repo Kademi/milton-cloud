@@ -37,11 +37,14 @@ import org.hibernate.Session;
 public class SignupLog {
 
     public static void logSignup(Website website, Profile p, Organisation withinOrg, Group group, Session session) {
+        logSignup(website, website.getOrganisation(), p, withinOrg, group, session);
+    }
+    public static void logSignup(Website website, Organisation org, Profile p, Organisation withinOrg, Group group, Session session) {
         SignupLog l = new SignupLog();
         l.setWebsite(website);
         l.setGroupEntity(group);
         l.setMembershipOrg(withinOrg);
-        l.setOrganisation(website.getOrganisation());
+        l.setOrganisation(org);
         l.setProfile(p);
         Date dt = new Date();
         Calendar cal = Calendar.getInstance();

@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,6 +50,7 @@ import io.milton.resource.Resource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.InputStream;
@@ -86,21 +88,58 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("nickName")) {
+            // is create or update
+            String sGroup = parameters.get("group");
+            String orgId = parameters.get("orgId"); // to create the membership in
+            boolean isNew = false;
             if (profile == null) {
                 String nickName = parameters.get("nickName");
+                if (sGroup == null) {
+                    jsonResult = JsonResult.fieldError("group", "Please select a group for the new user");
+                    return null;
+                }
+                String email = WebUtils.getParam(parameters, "email");
+                Profile pExisting = Profile.find(email, session);
+                if( pExisting != null ) {
+                    jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address.");
+                    return null;
+                }
                 String nameToCreate = NewPageResource.findAutoCollectionName(nickName, this, parameters);
-                profile.setName(nameToCreate);
                 Date now = _(CurrentDateService.class).getNow();
                 profile = new Profile();
+                profile.setName(nameToCreate);
                 profile.setCreatedDate(now);
                 profile.setModifiedDate(now);
+                isNew = true;
             }
 
             try {
                 _(DataBinder.class).populate(profile, parameters);
                 session.save(profile);
+                if (sGroup != null) {
+                    // We need a group and an org to create a membership
+                    Group group = getOrganisation().group(sGroup, session);
+                    if (orgId == null) {
+                        jsonResult = JsonResult.fieldError("orgId", "Please select an organisation");
+                        return null;
+                    }
+                    Organisation subOrg = Organisation.findByOrgId(orgId, session);
+                    if (subOrg == null) {
+                        throw new RuntimeException("Organisation not found: " + orgId);
+                    }
+                    if (!subOrg.isWithin(getOrganisation())) {
+                        throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
+                    }
+                    profile.addToGroup(group, subOrg, session);
+                    SignupLog.logSignup(null, getOrganisation(), profile, subOrg, group, SessionManager.session());
+                }
                 tx.commit();
                 jsonResult = new JsonResult(true);
+                if (isNew) {
+                    System.out.println("parent path: " + parent.getPath() + " for " + parent.getClass());
+                    String newHref = parent.getPath().child(profile.getId() + "").toString();
+                    jsonResult.setNextHref(newHref);
+                }
             } catch (Exception ex) {
                 log.error("exception: " + profile.getId(), ex);
                 jsonResult = new JsonResult(false, ex.getMessage());
@@ -185,7 +224,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
 
     public String getPhotoHref() {
         Profile p = getProfile();
-        if ( p != null && p.getPhotoHash() != null && p.getPhotoHash().length() > 0) {
+        if (p != null && p.getPhotoHash() != null && p.getPhotoHash().length() > 0) {
             return "/_hashes/files/" + p.getPhotoHash();
         } else {
             return "/templates/apps/user/profile.png";

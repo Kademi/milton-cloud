@@ -42,7 +42,7 @@ import org.hibernate.criterion.Restrictions;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Subordinate implements Serializable{
     
-    
+    /**
     /**
      * Find a Subordinate (if one exists) between then given org and user profile
      * 

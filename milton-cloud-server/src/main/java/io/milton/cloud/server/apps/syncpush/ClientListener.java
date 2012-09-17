@@ -12,9 +12,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.sync.push;
+package io.milton.cloud.server.apps.syncpush;
 
-import io.milton.cloud.server.sync.push.TcpChannelHub.Client;
+import io.milton.cloud.server.apps.syncpush.TcpChannelHub.Client;
 import java.io.Serializable;
 
 /**

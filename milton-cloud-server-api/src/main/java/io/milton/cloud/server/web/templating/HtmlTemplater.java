@@ -162,7 +162,6 @@ public class HtmlTemplater {
         if (!templatePath.startsWith("/")) {
             if( templatePath.startsWith("theme/")) {
                 templatePath = templatePath.replace("theme/", themePath); // Eg change theme/page to /content/theme/page
-                System.out.println("writePage: replaced theme => " + templatePath);
             } else {
                 templatePath = "/templates/apps/" + templatePath; // Eg change admin/manageUsers to /templates/apps/admin/manageUsers
             }
@@ -338,7 +337,7 @@ public class HtmlTemplater {
          * filesystem, then finally in the classpath
          */
         public TemplateHtmlPage findTemplateSource(String path) throws IOException {
-            log.info("findTemplateSource: " + path);
+            log.trace("findTemplateSource: " + path);
 
             TemplateHtmlPage meta = cachedTemplateMetaData.get(path);
             if (meta != null) {
@@ -346,7 +345,7 @@ public class HtmlTemplater {
                     cachedTemplateMetaData.remove(path);
                     meta = null;
                 } else {
-                    log.info("cache hit: " + meta.getSource() + " - " + meta.getClass());
+                    log.trace("cache hit: " + meta.getSource() + " - " + meta.getClass());
                     return meta;
                 }
             }
@@ -384,7 +383,7 @@ public class HtmlTemplater {
                     if (!templateFile.exists()) {
                         log.warn("Template does not exist: " + templateFile.getAbsolutePath());
                     } else {
-                        log.info("found file: " + templateFile.getAbsolutePath());
+                        log.trace("found file: " + templateFile.getAbsolutePath());
                         meta = loadFileMeta(templateFile, webPath);
                         break;
                     }

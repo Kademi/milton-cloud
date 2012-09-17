@@ -159,7 +159,6 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             Organisation resourceOrg = resource.getOrganisation();
             boolean  b = resourceOrg.isWithin(withinOrg); 
-            System.out.println("appliesTo: " + resourceOrg.getName() + " - " + withinOrg.getName() + " = " + b);
             return b;
         }
 

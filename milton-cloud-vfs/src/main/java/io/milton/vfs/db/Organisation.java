@@ -17,6 +17,7 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -26,12 +27,14 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -57,7 +60,8 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
-
+        
+    
 
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
@@ -77,9 +81,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
         String s = q + "%";
-        crit.add(Restrictions.ilike("title", s));
+        Disjunction or = Restrictions.disjunction();
+        or.add(Restrictions.ilike("title", s));
+        or.add(Restrictions.ilike("orgId", s));
+        or.add(Restrictions.ilike("name", s));
+        crit.add(or);
         // TODO: add other properties like address
-        // TODO: impose parent org restriction
+        Criteria critParentLink = crit.createCriteria("parentOrgLinks");
+        critParentLink.add(Restrictions.eq("owner", organisation));
         return DbUtils.toList(crit, Organisation.class);
     }
     
@@ -114,7 +123,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private List<Organisation> childOrgs;
     private List<Website> websites;
     private List<Group> groups;
+    private List<SubOrg> parentOrgLinks;
 
+    @Transient
+    public String getFormattedName() {
+        if( getTitle() != null && getTitle().length() > 0 ) {
+            return getTitle();
+        }
+        return getName();
+    }
+    
     @Column(nullable = false)
     @Index(name = "idx_orgId")
     public String getOrgId() {
@@ -156,6 +174,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.organisation = organisation;
     }
 
+    /**
+     * Updates the organisation reference and also any SubOrg links
+     * 
+     * @param organisation
+     * @param session 
+     */
+    public void setOrganisation(Organisation organisation, Session session) {
+        Organisation previous = this.getOrganisation();
+        this.organisation = organisation;
+        if( previous != null && previous != organisation) {
+            SubOrg.updateSubOrgs(this, SessionManager.session());
+        }
+    }
+    
+    
     @OneToMany(mappedBy = "organisation")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Organisation> getChildOrgs() {
@@ -176,6 +209,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.websites = websites;
     }
 
+    @OneToMany(mappedBy = "suborg")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    public List<SubOrg> getParentOrgLinks() {
+        return parentOrgLinks;
+    }
+
+    public void setParentOrgLinks(List<SubOrg> parentOrgLinks) {
+        this.parentOrgLinks = parentOrgLinks;
+    }    
+    
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
@@ -218,6 +261,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         w.setInternalTheme(null);
         w.setCurrentBranch(Branch.TRUNK);
         w.setRepository(r);
+        if( this.getWebsites() == null ) {
+            this.setWebsites(new ArrayList<Website>());
+        }
+        this.getWebsites().add(w);
         session.save(w);
 
         return w;
@@ -232,13 +279,20 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Organisation createChildOrg(String orgName, Session session) {
+        System.out.println("createChildOrg");
         Organisation o = new Organisation();
         o.setOrganisation(this);
         o.setName(orgName);
         o.setOrgId(orgName);
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
+        if( this.getChildOrgs() == null ) {
+            this.setChildOrgs(new ArrayList<Organisation>());
+        }
+        this.getChildOrgs().add(o);
         session.save(o);
+        SubOrg.updateSubOrgs(o, session);
+        System.out.println("done");
         return o;
     }
 
@@ -339,5 +393,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         getGroups().add(g);
         return g;
     }
+
         
 }

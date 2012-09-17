@@ -1,4 +1,5 @@
 function initManageUsers() {	
+    initNewUserForm();
     initShowBusinessBtn();
     initShowSettingBtn();
     initClearTextBtn();	
@@ -7,6 +8,7 @@ function initManageUsers() {
     initTooltip();
     initSearchBusiness();
     initSearchUser();
+    initOrgSearch();
 }
 
 function initSearchUser() {
@@ -73,9 +75,9 @@ function initShowBusinessBtn() {
 function initSettingPanel() {	
     // Check cookie for user settings
     var _SettingContent = $("div.SettingContent"),
-        _userSetting = $.cookie("user-setting"),
-        _checkboxes = _SettingContent.find("input[type=checkbox]"),
-        _remember = $("#remember");
+    _userSetting = $.cookie("user-setting"),
+    _checkboxes = _SettingContent.find("input[type=checkbox]"),
+    _remember = $("#remember");
        
     if(_userSetting) {
         _remember.attr("checked", true);
@@ -188,3 +190,63 @@ function initSearchBusiness() {
         }
     });
 }
+
+function initNewUserForm() {
+    var modal = $("div.Modal.newUser");
+    $("a.newUser").click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $.tinybox.show(modal, {
+            overlayClose: false,
+            opacity: 0
+        });            
+    });
+    modal.find("form").forms({
+        callback: function(resp) {
+            log("done new user", resp);
+            if( resp.nextHref ) {
+                window.location.href = resp.nextHref;
+            }
+            $.tinybox.close();
+        }
+    });   
+}
+
+function initOrgSearch() {
+    $("#orgId").on("focus click", function() {
+        $("#orgSearchResults").show();
+        log("show", $("#orgSearchResults")  );
+    });
+    $("#orgId").keyup(function () {
+        typewatch(function () {
+            log("do search");
+            doOrgSearch();
+        }, 500);
+    });         
+    $("div.groups").on("click", "a", function(e) {
+        log("clicked", e.target);
+        e.preventDefault();
+        e.stopPropagation();        
+        var orgLink = $(e.target);
+        $("#orgId").val(orgLink.attr("href"));
+        $("#orgSearchResults").hide();
+    });
+}
+
+function doOrgSearch() {
+    $.ajax({
+        type: 'GET',
+        url: window.location.pathname + "?orgSearch=" + $("#orgId").val(),
+        success: function(data) {
+            log("success", data)
+                
+            var $fragment = $(data).find("#orgSearchResults");
+            $("#orgSearchResults").replaceWith($fragment);
+            $fragment.show();
+            log("frag", $fragment);
+        },
+        error: function(resp) {
+            alert("err");
+        }
+    });      
+}    

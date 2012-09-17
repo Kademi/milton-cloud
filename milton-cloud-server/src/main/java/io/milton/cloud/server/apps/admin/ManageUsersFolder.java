@@ -44,6 +44,8 @@ import io.milton.vfs.db.utils.SessionManager;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Group;
+import java.util.Collections;
 
 /**
  *
@@ -52,12 +54,12 @@ import io.milton.resource.Resource;
 public class ManageUsersFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageUsersFolder.class);
-    
     private final String name;
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private JsonResult jsonResult;
     private List<Profile> searchResults;
+    private List<Organisation> orgSearchResults;
 
     public ManageUsersFolder(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
@@ -68,44 +70,57 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     public String getTitle() {
         return "Manage users";
     }
-    
+
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        if( childName.equals("new")) {
-            return new ManageUserPage(childName, null, parent);
+        if (childName.equals("new")) {
+            return new ManageUserPage(childName, null, this);
         }
         Long profileId = Long.parseLong(childName);
         Profile p = (Profile) SessionManager.session().get(Profile.class, profileId);
-        if(  p == null ) {
+        if (p == null) {
             return null;
         }
-        return new ManageUserPage(p.getName(), p, parent);
+        return new ManageUserPage(p.getName(), p, this);
     }
 
-       
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         throw new UnsupportedOperationException("Not supported yet.");
-    }    
-    
-    
+    }
+
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {        
-        
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+
         UserDao userDao = _(UserDao.class);
-        
+
         OrganisationFolder orgFolder = WebUtils.findParentOrg(this);
         Organisation org = orgFolder.getOrganisation();
         String q = params.get("q");
-        if( q != null && q.length() > 0 ) {            
+        if (q != null && q.length() > 0) {
             searchResults = userDao.search(q, org, SessionManager.session()); // find the given user in this organisation
         } else {
             searchResults = userDao.listProfiles(org, SessionManager.session()); // find the given user in this organisation
         }
-        _(HtmlTemplater.class).writePage("admin","admin/manageUsers", this, params, out);
+
+        String orgSearch = params.get("orgSearch");
+        log.info("orgSearch: " + orgSearch);
+        if (orgSearch != null && orgSearch.length() > 0) {            
+            orgSearchResults = Organisation.search(orgSearch, getOrganisation(), SessionManager.session()); // find the given user in this organisation 
+            log.info("results: " + orgSearchResults.size());
+        }
+
+        _(HtmlTemplater.class).writePage("admin", "admin/manageUsers", this, params, out);
     }
 
-    
+    public List<Group> getGroups() {
+        List<Group> groups = getOrganisation().getGroups();
+        if (groups == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return groups;
+    }
+
     @Override
     public boolean isDir() {
         return false;
@@ -136,7 +151,6 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -155,15 +169,15 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     public List<Profile> getSearchResults() {
         return searchResults;
     }
-    
+
     @Override
     public Organisation getOrganisation() {
         return organisation;
     }
-    
+
     @Override
     public boolean is(String type) {
-        if( type.equals("userAdmin")) {
+        if (type.equals("userAdmin")) {
             return true;
         }
         return super.is(type);
@@ -172,5 +186,11 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         throw new UnsupportedOperationException("Not supported yet.");
-    }        
+    }
+
+    public List<Organisation> getOrgSearchResults() {
+        return orgSearchResults;
+    }
+    
+    
 }
