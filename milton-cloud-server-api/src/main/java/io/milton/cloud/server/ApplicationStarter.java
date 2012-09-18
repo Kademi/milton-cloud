@@ -54,14 +54,14 @@ public class ApplicationStarter implements InitListener, Service{
         rootContext.shutdown();
     }        
 
-    @Override
+    @Override 
     public void beforeInit(HttpManagerBuilder b) {
-        
+        SpliffyContentGenerator contentGenerator = new SpliffyContentGenerator();
+        b.setContentGenerator(contentGenerator);        
     }
 
     @Override
     public void afterInit(HttpManagerBuilder b) {
-        
     }
 
     @Override

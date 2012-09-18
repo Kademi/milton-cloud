@@ -128,7 +128,13 @@ function checkRequiredFields(container) {
         if( !checkValidPasswords(container) ) {
             isOk = false;
         }
-        log('will check length');
+        if( !checkSimpleChars(container) ) {
+            isOk = false;
+        }
+        if( !checkHrefs(container) ) {
+            isOk = false;
+        }
+        
         if( !checkValueLength($("#firstName", container), 1, 15, "First name" ) ) {
             isOk = false;
         }
@@ -231,6 +237,42 @@ function checkValidEmailAddress(container) {
         }
     }
     return true;
+}
+
+function checkSimpleChars(container) {
+    var target = $(".simpleChars", container); // either with id of email, or with class email
+    var isOk = true;
+    var pattern = new RegExp("^[a-zA-Z0-9_]+$");
+    target.each(function(i, n) {
+        var node = $(n);
+        var val = node.val();
+        log("test: ", val, node);
+        if(val.length > 0 ) {
+            if( !pattern.test(val) ) {
+                showValidation(node, "Please use only letters, numbers and underscores", container);
+                isOk = false;
+            }
+        }
+    });
+    return isOk;
+}
+
+function checkHrefs(container) {
+    var target = $(".href", container); // either with id of email, or with class email
+    var isOk = true;
+    var pattern = new RegExp("^[a-zA-Z0-9_/%:/.]+$");
+    target.each(function(i, n) {
+        var node = $(n);
+        var val = node.val();
+        if(val.length > 0 ) {
+            if( !pattern.test(val) ) {
+                showValidation(node, "Not a valid web address", container);
+                isOk = false;
+            }
+        }
+    });
+    return isOk;
+
 }
 
 function checkValueLength(target, minLength, maxLength, lbl) {

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import com.sun.org.apache.xerces.internal.dom.ChildNode;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
@@ -44,6 +45,7 @@ import io.milton.resource.PostableResource;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.http.http11.auth.DigestResponse;
+import io.milton.resource.DeletableResource;
 import io.milton.resource.DigestResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
@@ -51,9 +53,11 @@ import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Combiner;
@@ -67,30 +71,31 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageUserPage extends TemplatedHtmlPage implements GetableResource, PostableResource, PutableResource {
+public class ManageUserPage extends TemplatedHtmlPage implements GetableResource, PostableResource, PutableResource, CommonCollectionResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageUserPage.class);
     public static final String PROFILE_PIC_CHILD = "pic";
     public static final String PICS_REPO_NAME = "ProfilePics";
     public static final long MAX_SIZE = 10000000l;
-    private final CommonCollectionResource parent;
     private Profile profile;
     private JsonResult jsonResult;
+    private ResourceList children;
+    private List<Organisation> orgSearchResults;
 
     public ManageUserPage(String name, Profile profile, CommonCollectionResource parent) {
         super(name, parent, "admin/profile", "Manage User");
         this.profile = profile;
-        this.parent = parent;
     }
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
+        String sGroup = parameters.get("group");
+        String orgId = parameters.get("orgId"); // to create the membership in
+
         if (parameters.containsKey("nickName")) {
             // is create or update
-            String sGroup = parameters.get("group");
-            String orgId = parameters.get("orgId"); // to create the membership in
             boolean isNew = false;
             if (profile == null) {
                 String nickName = parameters.get("nickName");
@@ -100,7 +105,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                 }
                 String email = WebUtils.getParam(parameters, "email");
                 Profile pExisting = Profile.find(email, session);
-                if( pExisting != null ) {
+                if (pExisting != null) {
                     jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address.");
                     return null;
                 }
@@ -117,21 +122,10 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                 _(DataBinder.class).populate(profile, parameters);
                 session.save(profile);
                 if (sGroup != null) {
-                    // We need a group and an org to create a membership
-                    Group group = getOrganisation().group(sGroup, session);
-                    if (orgId == null) {
-                        jsonResult = JsonResult.fieldError("orgId", "Please select an organisation");
+                    // We need a group and an org to create a membership                    
+                    if (!addMembership(sGroup, orgId, session)) {
                         return null;
                     }
-                    Organisation subOrg = Organisation.findByOrgId(orgId, session);
-                    if (subOrg == null) {
-                        throw new RuntimeException("Organisation not found: " + orgId);
-                    }
-                    if (!subOrg.isWithin(getOrganisation())) {
-                        throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
-                    }
-                    profile.addToGroup(group, subOrg, session);
-                    SignupLog.logSignup(null, getOrganisation(), profile, subOrg, group, SessionManager.session());
                 }
                 tx.commit();
                 jsonResult = new JsonResult(true);
@@ -149,6 +143,13 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             _(PasswordManager.class).setPassword(profile, newPassword);
             jsonResult = new JsonResult(true);
             tx.commit();
+        } else if (parameters.containsKey("group")) { // create a new group membersip
+            log.info("processForm: add membership: " + sGroup + " " + orgId);
+            if (!addMembership(sGroup, orgId, session)) {
+                return null;
+            }
+            tx.commit();
+            jsonResult = new JsonResult(true);
         }
         return null;
     }
@@ -209,12 +210,42 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            String orgSearch = params.get("orgSearch");
+            if (orgSearch != null && orgSearch.length() > 0) {
+                orgSearchResults = Organisation.search(orgSearch, getOrganisation(), SessionManager.session()); // find the given user in this organisation 
+                log.info("results: " + orgSearchResults.size());
+            } else {
+                orgSearchResults = Collections.EMPTY_LIST;
+            }
+
             super.sendContent(out, range, params, contentType);
         }
     }
 
+    public List<Organisation> getOrgSearchResults() {
+        return orgSearchResults;
+    }
+
     public Profile getProfile() {
         return profile;
+    }
+
+    /**
+     * Return only those memberships which are visible to this organisation
+     *
+     * @return
+     */
+    public List<GroupMembership> getMemberships() {
+        List<GroupMembership> list = new ArrayList<>();
+        if (profile.getMemberships() != null) {
+            Organisation parentOrg = getOrganisation();
+            for (GroupMembership m : profile.getMemberships()) {
+                if (m.getWithinOrg().isWithin(parentOrg)) {
+                    list.add(m);
+                }
+            }
+        }
+        return list;
     }
 
     @Override
@@ -269,12 +300,56 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         if (childName.equals(PROFILE_PIC_CHILD)) {
             return new ProfilePicResource(name);
         }
-        return null;
+        return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        return Collections.EMPTY_LIST;
+        if (children == null) {
+            children = new ResourceList();
+            for (GroupMembership gm : getMemberships()) {
+                MembershipResource m = new MembershipResource(gm);
+                children.add(m);
+            }
+        }
+        return children;
+    }
+
+    public List<Group> getGroups() {
+        List<Group> groups = getOrganisation().getGroups();
+        if (groups == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return groups;
+    }
+
+    /**
+     * Returns true if successful, otherwise a validation error has occured
+     *
+     * @param sGroup
+     * @return
+     */
+    private boolean addMembership(String sGroup, String orgId, Session session) {
+        Group group = getOrganisation().group(sGroup, session);
+        if (group == null) {
+            jsonResult = JsonResult.fieldError("group", "Sorry, I couldnt find group: " + sGroup);
+            return false;
+        }
+        if (orgId == null) {
+            jsonResult = JsonResult.fieldError("orgId", "Please select an organisation");
+            return false;
+        }
+        Organisation subOrg = Organisation.findByOrgId(orgId, session);
+        if (subOrg == null) {
+            jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
+            return false;
+        }
+        if (!subOrg.isWithin(getOrganisation())) {
+            throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
+        }
+        profile.addToGroup(group, subOrg, session);
+        SignupLog.logSignup(null, getOrganisation(), profile, subOrg, group, SessionManager.session());
+        return true;
     }
 
     public class ProfilePicResource implements GetableResource, DigestResource {
@@ -369,6 +444,63 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         @Override
         public boolean isDigestAllowed() {
             return ManageUserPage.this.isDigestAllowed();
+        }
+    }
+
+    /**
+     * Represents a membership of a user with a group
+     *
+     */
+    public class MembershipResource extends AbstractResource implements DeletableResource {
+
+        private GroupMembership membership;
+
+        public MembershipResource(GroupMembership membership) {
+            this.membership = membership;
+        }
+
+        public String getGroupName() {
+            return membership.getGroupEntity().getName();
+        }
+
+        public String getOrgName() {
+            return membership.getWithinOrg().getFormattedName();
+        }
+
+        @Override
+        public CommonCollectionResource getParent() {
+            return ManageUserPage.this;
+        }
+
+        @Override
+        public Organisation getOrganisation() {
+            return ManageUserPage.this.getOrganisation();
+        }
+
+        @Override
+        public Priviledge getRequiredPostPriviledge(Request request) {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return membership.getGroupEntity().getName() + "-" + membership.getWithinOrg().getOrgId();
+        }
+
+        @Override
+        public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            membership.delete(session);
+            tx.commit();
+        }
+
+        @Override
+        public boolean is(String type) {
+            if (type.equals("membership")) {
+                return true;
+            }
+            return super.is(type);
         }
     }
 }

@@ -74,7 +74,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             boolean isFirst = true;
             while (r != null) {
                 cnt++;
-                name = FileUtils.incrementFileName(name, isFirst);
+                name = incrementFileName(name, isFirst);
                 isFirst = false;
                 r = col.child(name);
             }
@@ -83,6 +83,32 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             throw new RuntimeException(ex);
         }
     }
+    
+    public static String incrementFileName(String name, boolean isFirst) {
+        System.out.println("incrementFileName: " + name);
+        String mainName = FileUtils.stripExtension(name);
+        String ext = FileUtils.getExtension(name);
+        int count;
+        if( isFirst ) {
+            count = 1;
+        } else {
+            int pos = mainName.lastIndexOf("-");
+            System.out.println("mainName: " + mainName);
+            System.out.println("pos: " + pos);
+            if( pos > 0 ) {
+                String sNum = mainName.substring(pos+1, mainName.length());
+                System.out.println("sNum: " + sNum);
+                count = Integer.parseInt(sNum)+1;
+                mainName = mainName.substring(0,pos);
+            } else {
+                count = 1;
+            }
+        }
+        String s = mainName + "-" + count;
+        if( ext != null) s = s + "." + ext;
+        return s;
+
+    }    
 
     /**
      * Just like findAutoName, but does not add .html
@@ -128,7 +154,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
      */
     public static String getImpliedName(String baseName, Map<String, String> parameters, CollectionResource folder, boolean isHtml) {
         String nameToCreate = baseName;
-        if (nameToCreate.equals("_autoname.html")) {
+        if (nameToCreate.contains("autoname")) {
             if (parameters.containsKey("name")) {
                 nameToCreate = parameters.get("name");
             } else if (parameters.containsKey("nickName")) {
@@ -193,6 +219,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             } else {
                 FileResource tempFr = new FileResource(null, parent);
                 created = tempFr.getHtml();
+                created.setNameOverride(getName());
             }
             created.setParsed(true);
             created.setNewPage(true);

@@ -778,14 +778,14 @@ public class Formatter {
         if (checked == null) {
             checked = Boolean.FALSE;
         }
-        StringBuilder sb = new StringBuilder("<input type='checkbox'");
-        sb.append(" name='").append(name).append("' ");
+        StringBuilder sb = new StringBuilder("<input type=\"checkbox\"");
+        sb.append(" name=\"").append(name).append("\" ");
         if (checked) {
-            sb.append("checked='true'");
+            sb.append("checked=\"true\"");
         }
-        sb.append(" value='").append(value).append("'");
+        appendValue(sb, value);
         if( id != null ) {
-            sb.append(" id='").append(id).append("'");
+            sb.append(" id=\"").append(id).append("\"");
         }
         sb.append(" />");
         return sb.toString();
@@ -796,14 +796,14 @@ public class Formatter {
         if (checked == null) {
             checked = Boolean.FALSE;
         }
-        StringBuilder sb = new StringBuilder("<input type='radio'");
-        sb.append(" name='").append(name).append("'");
+        StringBuilder sb = new StringBuilder("<input type=\"radio\"");
+        sb.append(" name=\"").append(name).append("\"");
         if (checked) {
-            sb.append(" checked='true'");
+            sb.append(" checked=\"true\"");
         }
-        sb.append(" value='").append(value).append("'");
+        appendValue(sb, value);
         if( id != null ) {
-            sb.append(" id='").append(id).append("'");
+            sb.append(" id=\"").append(id).append("\"");
         }
         sb.append(" />");
         return sb.toString();
@@ -814,15 +814,28 @@ public class Formatter {
      * @return 
      */
     public String option(String value, String text, String currentValue) {
-        StringBuilder sb = new StringBuilder("<option value='");
-        sb.append(value).append("' ");
+        StringBuilder sb = new StringBuilder("<option");
+        appendValue(sb, value);
         if( currentValue != null && currentValue.equals(value)) {
-            sb.append("selected='true'");
+            sb.append("selected=\"true\"");
         }        
         sb.append(">");
         sb.append(text).append("</option>");
         return sb.toString();
         
+    }
+    
+    /**
+     * Appends the html encoded value surrounded by quotes
+     * 
+     * @param sb
+     * @param value 
+     */
+    private void appendValue(StringBuilder sb, String value) {
+        sb.append(" value=");
+        sb.append("\"");
+        sb.append(htmlEncode(value));
+        sb.append("\"");
     }
     
     /**

@@ -261,6 +261,15 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             subordinateTo = subordinateTo.getOrganisation();
         }
         
+        if( getMemberships() == null ) {
+            setMemberships(new ArrayList<GroupMembership>());
+        }
+        getMemberships().add(gm);
+        if( g.getGroupMemberships() == null ) {
+            g.setGroupMemberships(new ArrayList<GroupMembership>());
+        }
+        g.getGroupMemberships().add(gm);
+        
         return this;
     }  
     

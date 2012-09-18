@@ -185,6 +185,12 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         this.repo.getBaseEntity().getRepositories().remove(this.repo);
+        List<Website> websites = Website.findByRepository(repo, session);
+        if( websites != null ) {
+            for( Website w : websites ) {
+                w.delete(session);
+            }
+        }
         this.repo.delete(session);
         tx.commit();
     }    

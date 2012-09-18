@@ -33,6 +33,8 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.WebUtils;
+import io.milton.http.HttpManager;
+import io.milton.http.Request;
 
 /**
  *
@@ -68,6 +70,10 @@ public class HtmlTemplateRenderer {
         MenuItem menu = applicationManager.getRootMenuItem(page, profile, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
+        Request request = HttpManager.request();
+        if( request != null ) {
+            datamodel.put("request", request);
+        }
 
         OrganisationFolder orgFolder = WebUtils.findParentOrg(page);
         if( orgFolder != null ) {

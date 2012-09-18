@@ -122,6 +122,9 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void appendMenu(MenuItem parent) {
+        if( _(SpliffySecurityManager.class).getCurrentUser() == null  ) {
+            return ;
+        }
         switch (parent.getId()) {
             case "menuRoot":
                 if (parent.getRootFolder() instanceof WebsiteRootFolder) {

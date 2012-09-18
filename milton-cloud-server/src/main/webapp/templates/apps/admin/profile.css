@@ -7,7 +7,7 @@ body.profile p {
     padding: 5px 0;
 }
 
-body.profile .details form, body.profile .changePassword form, body.profile div.profilePic {
+body.profile .details form, body.profile .changePassword form, body.profile div.profilePic, div.groups {
     border: solid lightgray 1px;
     border-radius: 5px;
     padding: 9px 12px 48px;
@@ -56,17 +56,23 @@ body.profile div.email {
 }
 body.profile fieldset.image input {
     margin: 1em;
-    
+
 }
 body.profile label {
     width: 20%;
 }
-body.profile #module-Course button {
+body.profile #module-Course button[type=submit] {
     position: absolute;
     bottom: 0;
     right: 0.6em;
     width: 9em;
 }
+
+body.profile #module-Course .Modal button[type=submit] {
+    bottom: 1em;
+    right: 1em;    
+}
+
 body.profile .changePassword form {    
 }
 body.profile .changePassword .input {
@@ -131,4 +137,35 @@ body.profile #module-Course button, body.profile #module-Course .content a.butto
     cursor: pointer;
     margin: 10px;
     padding: 1px 20px;
+}
+
+div.groups li {
+    float: left;
+    margin-right: 10px;    
+    background: none repeat scroll 0 0 #EDEDED;
+    border-radius: 3px 3px 3px 3px;
+    height: 25px;
+    line-height: 27px;
+    margin-top: 3px;
+    padding: 4px 10px 4px 10px;    
+}
+div.groups li a {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-indent: -9999px;
+    margin-left: 10px;
+}
+div.groups li:hover a {
+     background-image: url(/templates/themes/admin/images/btn_delete_small.png);
+     background-position: right center;
+     background-repeat: no-repeat;
+     cursor: pointer;
+}
+div.groups form {
+    position: relative;
+}
+body.profile #module-Course div.groups .SmallBtn {
+    float: right;
+    margin: 0;
 }

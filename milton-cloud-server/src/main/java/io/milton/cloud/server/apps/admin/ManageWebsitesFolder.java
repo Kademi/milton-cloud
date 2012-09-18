@@ -24,6 +24,7 @@ import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -46,7 +47,14 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.data.DataSession.FileNode;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.ByteArrayInputStream;
+import org.hashsplit4j.api.BlobStore;
+import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -83,19 +91,30 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             Transaction tx = session.beginTransaction();
             String newDnsName = parameters.get("newDnsName");
 
-            Website existing = Website.findByName(newName, session);
-            if (existing != null) {
-                jsonResult = new JsonResult(false, "Domain name is already registered in this system");
-                jsonResult.addFieldMessage("newName", "Please choose a unique name");
-                return null;
+            {
+                Website existing = Website.findByName(newName, session);
+                if (existing != null) {
+                    jsonResult = new JsonResult(false, "Domain name is already registered in this system");
+                    jsonResult.addFieldMessage("newName", "Please choose a unique name");
+                    return null;
+                }
             }
             Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-            Website c = getOrganisation().createWebsite( newName, newDnsName, null, curUser, session);
-            session.save(c);
-            
-            Date now = _(CurrentDateService.class).getNow();
-            AppControl.initDefaultApps(existing, curUser, now, session);
+            Website c = getOrganisation().createWebsite(newName, newDnsName, null, curUser, session);
+            Repository r = c.getRepository();
+            r.setPublicContent(true); // allow public access
+            r.setAttribute("heroColour1", "#88c03f", session);
+            r.setAttribute("heroColour2", "#88c03f", session);
+            r.setAttribute("textColour1", "#1C1D1F", session);
+            r.setAttribute("textColour2", "#2F2F2F", session);
+            r.setAttribute("logo", "<img src='/content/theme/images/IDH_logo.png' >", session);
+            session.save(r);
 
+            session.save(c);
+
+            Date now = _(CurrentDateService.class).getNow();
+            AppControl.initDefaultApps(c, curUser, now, session);
+            createDefaultWebsiteContent(c, curUser, session);
             tx.commit();
             jsonResult = new JsonResult(true, "Created", c.getDomainName());
         }
@@ -176,13 +195,39 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
     public List<Website> getWebsites() {
         return organisation.websites();
     }
-    
+
     public String websiteAddress(Website w) {
         return w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
-    }    
+    }
+
+    private void createDefaultWebsiteContent(Website c, Profile user, Session session) {
+        try {
+            String html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">";
+            html += "<html xmlns=\"http://www.w3.org/1999/xhtml\">";
+            html += "<head>\n";
+            html += "<title>new page1</title>\n";
+            html += "<link rel=\"template\" href=\"theme/page\" />\n";
+            html += "</head>\n";
+            html += "<body>\n";
+            html += "<h1>Welcome to your new site!</h1>\n";
+            html += "<p>Login with the menu in the navigation above, then you will be able to start editing</p>\n";
+            html += "</body>\n";
+            html += "</html>\n";
+            Repository r = c.getRepository();
+            Branch b = r.getTrunk();
+            DataSession dataSession = new DataSession(b, session, _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
+            DataSession.DirectoryNode rootDir = (DataSession.DirectoryNode) dataSession.find(Path.root);
+            FileNode file = rootDir.addFile("index.html");
+            ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes("UTF-8"));
+            file.setContent(bin);
+            dataSession.save(user);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 }

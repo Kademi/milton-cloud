@@ -13,17 +13,18 @@
                 <div class="TabContent">
                     <div class="Content">
                         <form name="frmDetails" action="$page.name" method="post" class="Details">
+                            <div class="pageMessage">.</div>
                             <table>
                                 <tbody>
                                     <tr>
                                         <th>Website name</th>
                                         <td>
-                                            <input type="text" name="name" value="$!page.name" class="required" />
+                                            <input type="text" name="name" value="$!page.name" class="required simpleChars" />
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Domain name</th>
-                                        <td><input type="text" name="domainName" value="$!page.website.domainName"/></td>
+                                        <td><input type="text" name="domainName" value="$!page.website.domainName" class="simpleChars" /></td>
                                     </tr>
                                     <tr>
                                         <th>Alias for</th>
@@ -38,7 +39,7 @@
                                     </tr>
                                     <tr>
                                         <th>Redirect to</th>
-                                        <td><input type="text" name="redirectTo" value="$!page.website.redirectTo"/></td>
+                                        <td><input type="text" name="redirectTo" value="$!page.website.redirectTo" class="href"/></td>
                                     </tr>                                    
                                 </tbody>
                                 <tfoot>
@@ -124,7 +125,7 @@
                         </header>
                         <ul class="GroupList ClearFix">
                             #foreach($g in $page.selectedGroups)
-                            <li class="$g.name">$g.name</li>
+                            <li>$g.name</li>
                             #end
                         </ul>
                     </div>

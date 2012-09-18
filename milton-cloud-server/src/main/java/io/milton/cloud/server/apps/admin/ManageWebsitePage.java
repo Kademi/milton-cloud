@@ -83,7 +83,12 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             String groupName = parameters.get("group");
             String sIsRecip = parameters.get("isRecip");
             if ("true".equals(sIsRecip)) {
-                addGroup(groupName);
+                Group group = website.getOrganisation().group(groupName, SessionManager.session());
+                if( group == null ) {
+                    jsonResult = JsonResult.fieldError("group", "The group could not be found: " + groupName);                            
+                    return null;
+                }
+                website.addGroup(group, SessionManager.session());
             } else {
                 removeGroup(groupName);
             }
@@ -113,15 +118,18 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
                 website.setName(parameters.get("name"));
                 website.setDomainName(parameters.get("domainName"));
                 website.setRedirectTo(parameters.get("redirectTo"));
-                System.out.println("redirect: " + website.getRedirectTo());
                 Website aliasTo = null;
                 String sAlias = parameters.get("aliasTo");
                 if (sAlias != null && sAlias.trim().length() != 0) {
                     aliasTo = Website.findByName(sAlias.trim(), session);
                 }
                 website.setAliasTo(aliasTo);
-
                 session.save(website);
+
+                Repository r = website.getRepository();
+                r.setName(website.getName());
+                session.save(r);
+
                 tx.commit();
                 jsonResult = new JsonResult(true);
             } catch (Exception ex) {
@@ -140,11 +148,6 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
     private void removeGroup(String groupName) {
         Group group = website.getOrganisation().group(groupName, SessionManager.session());
         website.removeGroup(group, SessionManager.session());
-    }
-
-    private void addGroup(String groupName) {
-        Group group = website.getOrganisation().group(groupName, SessionManager.session());
-        website.addGroup(group, SessionManager.session());
     }
 
     public List<String> getThemes() {
@@ -184,12 +187,6 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
         return activeApps.contains(app);
     }
 
-    private void setStatus(String appId, boolean enabled, Session session) {
-        log.info("setStatus: " + appId + " = " + enabled);
-        Date currentDate = _(CurrentDateService.class).getNow();
-        Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        AppControl.setStatus(appId, website, enabled, currentUser, currentDate, session);
-    }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {

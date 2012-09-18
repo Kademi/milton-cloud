@@ -138,10 +138,11 @@ public class AppControl implements Serializable {
     }
     
     public static void initDefaultApps(Website website, Profile currentUser, Date now, Session session) {
-
-        for( AppControl ac : find(website, session)) {
+        System.out.println("initDefaultApps");
+        for( AppControl ac : find(website.getOrganisation(), session)) {
             AppControl newac = new AppControl();
             if( ac.isEnabled()) {
+                System.out.println("enabled: " + ac.getName());
                 newac.setEnabled(true);
                 newac.setName(ac.getName());
                 newac.setWebsite(website);

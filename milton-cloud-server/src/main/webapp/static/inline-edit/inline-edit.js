@@ -9,6 +9,12 @@ $(function() {
         edifyPage(".contentForm");
     });
     var btnNew = $("<button class='new'>New Page</button>");
+    btnNew.click(function() {
+        var href = window.location.href;
+        href = getFolderPath(href);
+        href = href + "/autoname.new";
+        window.location.href = href;
+    });
     adminToolbar.append(btnEdit).append(btnNew);
     $("body").append(adminToolbar);
         
@@ -20,6 +26,9 @@ $(function() {
             themeCssFiles.push(href);
         }
     });
+    if( window.location.href.endsWith(".new")) {
+        edifyPage(".contentForm");
+    }
 });
 
 function edifyPage(selector) {
@@ -77,8 +86,12 @@ function edifyPage(selector) {
             $("#edifyForm").submit(function(e) {
                 e.preventDefault();
                 log("inlineedit: edifyPage: submit page");
-                submitEdifiedForm(function() {
-                    window.location.reload();
+                submitEdifiedForm(function(resp) {
+                    if( resp.nextHref ) {
+                        window.location.href = resp.nextHref;
+                    } else {
+                        window.location.reload();
+                    }
                 });
             });
             log("done hide, now show again");

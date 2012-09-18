@@ -92,7 +92,7 @@ public class Subordinate implements Serializable{
     }
 
     public void delete(Session session) {
-        session.delete(session);
+        session.delete(this);
     }
     
     

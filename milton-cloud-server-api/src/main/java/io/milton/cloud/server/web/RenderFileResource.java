@@ -103,6 +103,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     private String body;
     private JsonResult jsonResult;
     private boolean isNewPage; // set to true by NewPageResource
+    private String nameOverride;
 
     public RenderFileResource(FileResource fileResource) {
         this.fileResource = fileResource;
@@ -247,7 +248,11 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public String getName() {
-        return fileResource.getName();
+        if( nameOverride != null ) {
+            return nameOverride;
+        }
+        String name = fileResource.getName();
+        return name;
     }
 
     @Override
@@ -313,7 +318,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         if (this.template != null && template.endsWith(type)) {
             return true;
         }
-        boolean b = fileResource.is(type);
+        boolean b = fileResource.is(type, getName());
         return b;
     }
 
@@ -526,4 +531,14 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public Profile getOwnerProfile() {
         return fileResource.getOwnerProfile();
     }
+
+    public void setNameOverride(String name) {
+        this.nameOverride = name;
+    }
+
+    public String getNameOverride() {
+        return nameOverride;
+    }
+    
+    
 }

@@ -26,6 +26,7 @@ import static io.milton.context.RequestContext._;
 import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -208,7 +209,11 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public Path getPath() {
         CommonCollectionResource p = getParent();
         if (p != null) {
-            return p.getPath().child(this.getName());
+            String name = this.getName();
+            if (name == null) {
+                throw new RuntimeException("name is null in resource: " + getClass());
+            }
+            return p.getPath().child(name);
         } else {
             return Path.root;
         }
@@ -281,7 +286,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
             if (accepts != null && accepts.contains("application/xhtml+xml")) {
                 // can't use it because of CKEditor - http://dev.ckeditor.com/ticket/4576
                 //return "application/xhtml+xml";
-                
+
                 return "text/html";
             } else {
                 return "text/html";
@@ -289,5 +294,20 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         } else {
             return "";
         }
+    }
+
+    @Override
+    public Date getModifiedDate() {
+        return null;
+    }
+
+    @Override
+    public Date getCreateDate() {
+        return null;
+    }
+
+    @Override
+    public Map<Principal, List<Priviledge>> getAccessControlList() {
+        return null;
     }
 }

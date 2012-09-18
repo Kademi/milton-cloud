@@ -138,6 +138,8 @@ public class GroupMembership implements Serializable{
                 s.delete(session);
             }
         }
+        this.getMember().getMemberships().remove(this);
+        this.getGroupEntity().getGroupMemberships().remove(this);
         session.delete(this);
     }
     

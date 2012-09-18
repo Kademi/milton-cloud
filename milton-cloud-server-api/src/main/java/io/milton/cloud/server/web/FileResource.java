@@ -286,6 +286,10 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public boolean is(String type) {
+        return is(type,getName());
+    }
+    
+    public boolean is(String type, String name) {
         if (type.equals("file")) {
             return true;
         }
@@ -295,7 +299,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         }
 
         // will return a non-null value if type is contained in any content type
-        List<String> list = _(ContentTypeService.class).findContentTypes(getName());
+        List<String> list = _(ContentTypeService.class).findContentTypes(name);
         if (list != null) {
             for (String ct : list) {
                 if (ct.contains(type)) {
@@ -304,7 +308,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             }
         }
         return false;
-    }
+    }    
 
     @Override
     public void setHash(String s) {

@@ -78,7 +78,7 @@ public class EncodeUtils {
         "&reg;"};
 
     protected static synchronized void buildEntityTables() {
-        entityTableEncode = new HashMap<String, String>(ENTITIES.length);
+        entityTableEncode = new HashMap<>(ENTITIES.length);
 
         for (int i = 0; i < ENTITIES.length; i += 2) {
             if (!entityTableEncode.containsKey(ENTITIES[i])) {

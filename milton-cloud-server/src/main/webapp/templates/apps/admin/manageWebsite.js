@@ -30,19 +30,27 @@ function setGroupRecipient(name, isRecip) {
                 group: name,
                 isRecip: isRecip
             },
+            dataType: "json",
             success: function(data) {
-                log("saved ok", data);
-                if( isRecip ) {
-                    $(".GroupList").append("<li class=" + name + ">" + name + "</li>");
-                    log("appended to", $(".GroupList"));
+                if( data.status ) {
+                    log("saved ok", data);
+                    if( isRecip ) {
+                        $(".GroupList").append("<li>" + name + "</li>");
+                        log("appended to", $(".GroupList"));
+                    } else {
+                        var toRemove = $(".GroupList li").filter(function() {
+                            return $(this).text() == name;
+                        });
+                        toRemove.remove();
+                    }
                 } else {
-                    $(".GroupList li." + name).remove();
-                    log("removed from", $(".GroupList"));
+                    log("error", data);
+                    alert("Sorry, couldnt save " + data);
                 }
             },
             error: function(resp) {
                 log("error", resp);
-                alert("err");
+                alert("Sorry, couldnt save - " + resp);
             }
         });          
     } catch(e) {
