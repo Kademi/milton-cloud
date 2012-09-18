@@ -63,17 +63,9 @@ function initForumDialog() {
 	
     // Bind event for header of forum - show dialog
     $("body").on("click", "div.Forum header > div.ShowDialog", function(e) {
-        e.preventDefault();
-		
-        var _dialog = $(this).find("div.Dialog");
-		
-        $("div.Dialog").not(_dialog).addClass("Hidden");
-		
-        if(_dialog.hasClass("Hidden")) {
-            _dialog.removeClass("Hidden");
-        } else {
-            _dialog.addClass("Hidden");
-        }
+        e.preventDefault();	
+        var dialog = $(this).find("div.Dialog");		
+        dialog.toggle();
     });
 	
     // Bind event for Delete forum
@@ -198,8 +190,9 @@ function addForum() {
     var modal = $("#modalForum");
     var name = $("input[name=name]", modal).val();
     log("addForum", name);
-    if( name == null || name.length == 0 ) {
-        alert("Please enter a name for the new forum");
+    var cont = modal.find(".ModalContent");
+    resetValidation(cont);
+    if( !checkRequiredFields(cont)) {
         return;
     }
     $.ajax({
@@ -218,7 +211,7 @@ function addForum() {
             $.tinybox.close();
             
             var tempDialog = $("#dialogForum").html();
-            $("#manageForum").append('\
+            var newDiv = $('\
                         <div class="Forum" data-forum="' + maxOrderForum() + '">\
                                 <header class="ClearFix">\
                                         <div class="ShowDialog"><a href="' + data.nextHref + '">' + name + '</a>\
@@ -231,8 +224,12 @@ function addForum() {
                                         <button class="SmallBtn Add AddTopic"><span>Add New Topic</span></button>\
                                 </div>\
                         </div>\
-                ');    
-                
+                ');
+            $("#manageForum").append(newDiv);    
+            var offset = newDiv.offset();
+            $(document).scrollTop(offset.top);
+            newDiv.css("opacity", 0);
+            newDiv.animate({opacity: 1}, 2000);
         },
         error: function(resp) {
             log("error", resp);

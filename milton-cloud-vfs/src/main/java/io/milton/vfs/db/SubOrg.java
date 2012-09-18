@@ -56,7 +56,6 @@ public class SubOrg implements Serializable{
             s.setSuborg(childOrg);
             childOrg.getParentOrgLinks().add(s);
             session.save(s);
-            System.out.println("Save SubOrg link: parent=" + parent.getId() + "-" + parent.getName() + " child=" + childOrg.getId() + "-" + childOrg.getName());
             parent = parent.getOrganisation();
         }
     }

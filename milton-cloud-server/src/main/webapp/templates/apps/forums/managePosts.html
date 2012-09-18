@@ -7,7 +7,11 @@
     </head>
     <body>
         <section id="managePost" class="MainContent">
-            #foreach($post in $page.latestPosts)
+            #set($posts = $page.latestPosts)
+            #if( $posts.isEmpty() )
+            <p>There are currently no posts</p>
+            #else
+                #foreach($post in $posts)
             <div class="Post Comment ClearFix">
                 <header>
                     #if( $post.forumTitle )
@@ -31,8 +35,8 @@
                     </div>
                 </footer>
             </div>
+                #end
             #end
-
         </section>
         <div class="Hidden">
             <div id="controller">		
@@ -40,7 +44,7 @@
                 <a class="Delete DeletePost" title="Edit this post" href=""><span class="Hidden">Delete this post</span></a>
             </div>
         </div>
-     
+
         <div id="editPost" class="Modal">
             <header>
                 <h3>Edit Post</h3>
