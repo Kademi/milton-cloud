@@ -182,11 +182,6 @@
             <classifier>jdk15</classifier>
         </dependency>
         <dependency>
-            <groupId>io.milton</groupId>
-            <artifactId>cardme</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-cloud-server-api</artifactId>
             <version>${project.version}</version>
