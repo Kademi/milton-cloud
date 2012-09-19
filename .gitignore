@@ -17,3 +17,5 @@
 /external/jstree/target/
 /external/colorpicker/target/
 /milton-cloud-blobby/target/
+/.idea
+*.iml
