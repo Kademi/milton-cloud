@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 import java.util.ArrayList;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -32,6 +31,9 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name"})})
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(Organisation org, String name, Session session) {
@@ -45,8 +47,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             return (BaseEntity) list.get(0);
         }
     }
-
-    
     private long id;
     private String name;
     private String type;
@@ -67,7 +67,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
 
     @Column(nullable = false)
-    @Index(name="ids_entity_name")
+    @Index(name = "ids_entity_name")
     public String getName() {
         return name;
     }
@@ -75,8 +75,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     public void setName(String name) {
         this.name = name;
     }
-
-    
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseEntity")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -127,7 +125,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.type = type;
     }
 
-
     @Column
     public String getNotes() {
         return notes;
@@ -136,10 +133,9 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     public void setNotes(String notes) {
         this.notes = notes;
     }
-    
-    
+
     public Repository createRepository(String name, Profile user, Session session) {
-        if( getRepositories() == null ) {
+        if (getRepositories() == null) {
             setRepositories(new ArrayList<Repository>());
         }
         Repository r = new Repository();
@@ -149,42 +145,38 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         r.setName(name);
         r.setTitle(name);
         session.save(r);
-        
+
         r.createBranch(Branch.TRUNK, user, session);
-        
+
         return r;
     }
 
-    public void delete(Session session) {      
-        
-        if( getRepositories() != null ) {
-            for( Repository r : getRepositories()) {
+    public void delete(Session session) {
+
+        if (getRepositories() != null) {
+            for (Repository r : getRepositories()) {
                 r.delete(session);
             }
             setRepositories(null);
         }
-        
-        if( getCalendars() != null ) {
-            for( Calendar cal : getCalendars() ) {
-                cal.delete(session); 
+
+        if (getCalendars() != null) {
+            for (Calendar cal : getCalendars()) {
+                cal.delete(session);
             }
             setCalendars(null);
         }
         session.delete(this);
     }
-     
-      
-    
+
     public Repository repository(String name) {
-        if( getRepositories() != null ) {
-            for( Repository r : getRepositories() ) {
-                if( r.getName().equals(name)) {
+        if (getRepositories() != null) {
+            for (Repository r : getRepositories()) {
+                if (r.getName().equals(name)) {
                     return r;
                 }
             }
-        }        
+        }
         return null;
-    }   
-
-
+    }
 }

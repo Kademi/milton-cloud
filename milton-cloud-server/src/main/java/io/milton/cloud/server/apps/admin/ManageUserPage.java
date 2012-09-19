@@ -16,7 +16,6 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import com.sun.org.apache.xerces.internal.dom.ChildNode;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
@@ -109,7 +108,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                     jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address.");
                     return null;
                 }
-                String nameToCreate = NewPageResource.findAutoCollectionName(nickName, this, parameters);
+                String nameToCreate = Profile.findAutoName(nickName, session);
                 Date now = _(CurrentDateService.class).getNow();
                 profile = new Profile();
                 profile.setName(nameToCreate);
@@ -237,11 +236,13 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
      */
     public List<GroupMembership> getMemberships() {
         List<GroupMembership> list = new ArrayList<>();
-        if (profile.getMemberships() != null) {
-            Organisation parentOrg = getOrganisation();
-            for (GroupMembership m : profile.getMemberships()) {
-                if (m.getWithinOrg().isWithin(parentOrg)) {
-                    list.add(m);
+        if (profile != null) {
+            if (profile.getMemberships() != null) {
+                Organisation parentOrg = getOrganisation();
+                for (GroupMembership m : profile.getMemberships()) {
+                    if (m.getWithinOrg().isWithin(parentOrg)) {
+                        list.add(m);
+                    }
                 }
             }
         }
