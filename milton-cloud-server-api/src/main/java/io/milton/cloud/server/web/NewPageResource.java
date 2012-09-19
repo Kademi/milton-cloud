@@ -30,6 +30,7 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.*;
 import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -74,7 +75,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             boolean isFirst = true;
             while (r != null) {
                 cnt++;
-                name = incrementFileName(name, isFirst);
+                name = DbUtils.incrementFileName(name, isFirst);
                 isFirst = false;
                 r = col.child(name);
             }
@@ -83,32 +84,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
             throw new RuntimeException(ex);
         }
     }
-    
-    public static String incrementFileName(String name, boolean isFirst) {
-        System.out.println("incrementFileName: " + name);
-        String mainName = FileUtils.stripExtension(name);
-        String ext = FileUtils.getExtension(name);
-        int count;
-        if( isFirst ) {
-            count = 1;
-        } else {
-            int pos = mainName.lastIndexOf("-");
-            System.out.println("mainName: " + mainName);
-            System.out.println("pos: " + pos);
-            if( pos > 0 ) {
-                String sNum = mainName.substring(pos+1, mainName.length());
-                System.out.println("sNum: " + sNum);
-                count = Integer.parseInt(sNum)+1;
-                mainName = mainName.substring(0,pos);
-            } else {
-                count = 1;
-            }
-        }
-        String s = mainName + "-" + count;
-        if( ext != null) s = s + "." + ext;
-        return s;
-
-    }    
+     
 
     /**
      * Just like findAutoName, but does not add .html
@@ -127,17 +103,9 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
     }
 
     public static String findAutoName(String baseName, CollectionResource folder, Map<String, String> parameters, boolean isHtml) {
-        String nameToUse = getImpliedName(baseName, parameters, folder, isHtml);
+        String nameToUse = getImpliedName(baseName, parameters, folder, isHtml);        
         if (nameToUse != null) {
-            nameToUse = nameToUse.toLowerCase().replace("/", "");
-            nameToUse = nameToUse.replace("'", "");
-            nameToUse = nameToUse.replace("\"", "");
-            nameToUse = nameToUse.replace("@", "-");
-            nameToUse = nameToUse.replace(" ", "-");
-            nameToUse = nameToUse.replace("?", "-");
-            nameToUse = nameToUse.replace(":", "-");
-            nameToUse = nameToUse.replace("--", "-");
-            nameToUse = nameToUse.replace("--", "-");
+            nameToUse = DbUtils.replaceYuckyChars(nameToUse);
             nameToUse = NewPageResource.getUniqueName(folder, nameToUse);
         } else {
             nameToUse = NewPageResource.getDateAsNameUnique(folder);

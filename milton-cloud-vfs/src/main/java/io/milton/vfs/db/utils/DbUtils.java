@@ -16,6 +16,7 @@
  */
 package io.milton.vfs.db.utils;
 
+import io.milton.common.FileUtils;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.Criteria; 
@@ -48,5 +49,58 @@ public class DbUtils {
         }
         T item = (T) list.get(0);
         return item;
+    }
+    
+    public static String incrementFileName(String name, boolean isFirst) {
+        String mainName = FileUtils.stripExtension(name);
+        String ext = FileUtils.getExtension(name);
+        int count;
+        if( isFirst ) {
+            count = 1;
+        } else {
+            int pos = mainName.lastIndexOf("-");
+            if( pos > 0 ) {
+                String sNum = mainName.substring(pos+1, mainName.length());
+                count = Integer.parseInt(sNum)+1;
+                mainName = mainName.substring(0,pos);
+            } else {
+                count = 1;
+            }
+        }
+        String s = mainName + "-" + count;
+        if( ext != null) {
+            s = s + "." + ext;
+        }
+        return s;
+
+    }   
+    
+    /**
+     * Change any characters that might be ugly in a url with hyphens.
+     * 
+     * @param baseName
+     * @return 
+     */
+    public static String replaceYuckyChars(String baseName) {
+        String nameToUse = baseName;
+        // TODO: use regex
+        nameToUse = nameToUse.toLowerCase().replace("/", "");
+        nameToUse = nameToUse.replace("'", "");
+        nameToUse = nameToUse.replace("\"", "");
+        nameToUse = nameToUse.replace("@", "-");
+        nameToUse = nameToUse.replace(" ", "-");
+        nameToUse = nameToUse.replace("?", "-");
+        nameToUse = nameToUse.replace(":", "-");
+        nameToUse = nameToUse.replace("<", "-");
+        nameToUse = nameToUse.replace(">", "-");
+        nameToUse = nameToUse.replace("&", "-");
+        nameToUse = nameToUse.replace("[", "-");
+        nameToUse = nameToUse.replace("]", "-");
+        nameToUse = nameToUse.replace("\\", "-");
+        nameToUse = nameToUse.replace("/", "-");
+        nameToUse = nameToUse.replace("!", "-");
+        nameToUse = nameToUse.replace("--", "-");
+        nameToUse = nameToUse.replace("--", "-");        
+        return nameToUse;
     }
 }

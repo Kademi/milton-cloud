@@ -1,16 +1,18 @@
 package io.milton.vfs.db;
 
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,57 @@ import org.slf4j.LoggerFactory;
 public class Profile extends BaseEntity implements VfsAcceptor {
 
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
+
+    public static String findAutoName(String nickName, Session session) {
+        String nameToUse = DbUtils.replaceYuckyChars(nickName);
+        nameToUse = getUniqueName(nameToUse, session);
+        return nameToUse;
+    }
+
+    public static String getUniqueName(final String baseName, Session session) {
+        String name = baseName;
+        Profile r = find(name, session);
+        int cnt = 0;
+        boolean isFirst = true;
+        while (r != null) {
+            cnt++;
+            name = DbUtils.incrementFileName(name, isFirst);
+            isFirst = false;
+            r = find(name, session);
+        }
+        return name;
+    }
+
+    /**
+     *
+     * @param baseName
+     * @param parameters
+     * @param folder
+     * @return
+     */
+    public static String getImpliedName(Map<String, String> parameters) {
+        String nameToCreate;
+
+        if (parameters.containsKey("name")) {
+            nameToCreate = parameters.get("name");
+        } else if (parameters.containsKey("nickName")) {
+            nameToCreate = parameters.get("nickName");
+        } else if (parameters.containsKey("fullName")) {
+            nameToCreate = parameters.get("fullName");
+        } else if (parameters.containsKey("firstName")) {
+            String fullName = parameters.get("firstName");
+            if (parameters.containsKey("surName")) {
+                fullName = fullName + "." + parameters.get("surName");
+            }
+            nameToCreate = fullName;
+        } else if (parameters.containsKey("title")) {
+            nameToCreate = parameters.get("title");
+        } else {
+            nameToCreate = "$[counter]";
+        }
+
+        return nameToCreate;
+    }
 
     public static Profile find(String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
@@ -93,7 +146,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @param nickName
      * @return
      */
-    public static  String findUniqueName(String nickName, Session session) {
+    public static String findUniqueName(String nickName, Session session) {
         String candidateName = nickName;
         int counter = 1;
         while (!isUniqueName(candidateName, session)) {
@@ -104,11 +157,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static boolean isUniqueName(String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
-        crit.add(Expression.eq("name", name));
+        crit.add(Restrictions.eq("name", name));
         return crit.uniqueResult() == null;
     }
-
-    
     private List<Credential> credentials;
     private List<GroupMembership> memberships; // can belong to groups    
     private String firstName;
@@ -235,15 +286,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Create a GroupMembership linking this profile to the given group, within the given
-     * organisation. Is immediately saved
-     * 
+     * Create a GroupMembership linking this profile to the given group, within
+     * the given organisation. Is immediately saved
+     *
      * @param g
-     * @return 
+     * @return
      */
-
     public Profile addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
-        if( g.isMember(this, hasGroupInOrg)) {
+        if (g.isMember(this, hasGroupInOrg)) {
             return this;
         }
         GroupMembership gm = new GroupMembership();
@@ -253,40 +303,39 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         gm.setWithinOrg(hasGroupInOrg);
         gm.setModifiedDate(new Date());
         session.save(gm);
-        
+
         // Need to create a subordinate record for each parent organisation
         Organisation subordinateTo = hasGroupInOrg;
-        while(subordinateTo != null ) {
+        while (subordinateTo != null) {
             createSubordinate(subordinateTo, gm, session);
             subordinateTo = subordinateTo.getOrganisation();
         }
-        
-        if( getMemberships() == null ) {
+
+        if (getMemberships() == null) {
             setMemberships(new ArrayList<GroupMembership>());
         }
         getMemberships().add(gm);
-        if( g.getGroupMemberships() == null ) {
+        if (g.getGroupMemberships() == null) {
             g.setGroupMemberships(new ArrayList<GroupMembership>());
         }
         g.getGroupMemberships().add(gm);
-        
+
         return this;
-    }  
-    
+    }
+
     /**
      * Creates a Subordinate record
-     * 
+     *
      * @param subordinateTo
-     * @param gm 
+     * @param gm
      */
     private void createSubordinate(Organisation subordinateTo, GroupMembership gm, Session session) {
         Subordinate s = new Subordinate();
         s.setWithinOrg(subordinateTo);
         s.setGroupMembership(gm);
         session.save(s);
-    }    
-    
-    
+    }
+
     public boolean isInGroup(String groupName, Organisation org) {
         if (getMemberships() != null) {
             for (GroupMembership m : getMemberships()) {
@@ -318,9 +367,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     @Transient
     public List<AddressBook> getAddressBooks() {
         List<AddressBook> list = new ArrayList();
-        if( getRepositories() != null ) {
-            for( Repository r : getRepositories() ) {
-                if( r instanceof AddressBook ) {
+        if (getRepositories() != null) {
+            for (Repository r : getRepositories()) {
+                if (r instanceof AddressBook) {
                     AddressBook ab = (AddressBook) r;
                     list.add(ab);
                 }
@@ -332,10 +381,10 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     @Transient
     public String getFormattedName() {
         String name = "";
-        if( getFirstName() != null && getFirstName().length() > 0 ) {
+        if (getFirstName() != null && getFirstName().length() > 0) {
             name += getFirstName();
         }
-        if( getSurName() != null && getSurName().length() > 0 ) {
+        if (getSurName() != null && getSurName().length() > 0) {
             name = name + " " + getSurName();
         }
         return name;

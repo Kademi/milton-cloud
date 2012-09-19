@@ -55,16 +55,19 @@ public class MediaInfoRunner {
     }
 
     public MediaInfo parseOutput(String output) throws IOException {
+        if( output == null ) {
+            return null;
+        }
         StringReader sr = new StringReader(output);
         BufferedReader br = new BufferedReader(sr);
         String line = br.readLine();
         MediaInfo info = new MediaInfo();
         while (line != null) {
-            System.out.println("line: " + line);
+            //System.out.println("line: " + line);
             process(info, line);
             line = br.readLine();
         }
-        System.out.println("done parseoutput");
+        //System.out.println("done parseoutput");
         return info;
     }
 
