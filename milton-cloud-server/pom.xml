@@ -201,7 +201,15 @@
             <groupId>com.jolbox</groupId>
             <artifactId>bonecp-provider</artifactId>
             <version>0.7.1.RELEASE</version>
-        </dependency>        
+        </dependency>    
+        <!-- Used by Dynamic CSS App -->    
+        
+        <dependency>  
+            <groupId>com.asual.lesscss</groupId>  
+            <artifactId>lesscss-engine</artifactId>  
+            <version>1.3.0</version>  
+        </dependency>  
+        
     </dependencies>
     
     <profiles>        		
@@ -336,7 +344,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
-                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.Autoloader</value>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>
