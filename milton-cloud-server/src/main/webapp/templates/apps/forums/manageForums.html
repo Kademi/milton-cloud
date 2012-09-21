@@ -18,9 +18,14 @@
                     <div class="DropdownContent Hidden">
                         <div class="Content ClearFix">
                             <section>
+                                #set($websites = $page.forumsRoot.children)
                                 <ul class="Websites">
-                                #foreach($websiteFolder in $page.forumsRoot.children)
+                                #if( $websites.isEmpty() )
+                                <li>You need at least one website to add a forum</li>
+                                #else
+                                #foreach($websiteFolder in $websites)
                                 <li><a href="$websiteFolder.name">$websiteFolder.name</a></li>
+                                #end
                                 #end
                                 </ul>
                             </section>

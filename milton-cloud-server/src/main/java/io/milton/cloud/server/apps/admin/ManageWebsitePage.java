@@ -16,15 +16,11 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
-import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.event.GroupInWebsiteEvent;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -47,7 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
-import io.milton.http.Request;
+import io.milton.event.EventManager;
+import io.milton.sync.event.EventUtils;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
@@ -84,11 +81,13 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             String sIsRecip = parameters.get("isRecip");
             if ("true".equals(sIsRecip)) {
                 Group group = website.getOrganisation().group(groupName, SessionManager.session());
-                if( group == null ) {
-                    jsonResult = JsonResult.fieldError("group", "The group could not be found: " + groupName);                            
+                if (group == null) {
+                    jsonResult = JsonResult.fieldError("group", "The group could not be found: " + groupName);
                     return null;
                 }
                 website.addGroup(group, SessionManager.session());
+                GroupInWebsiteEvent e = new GroupInWebsiteEvent(group, website, true);
+                _(EventManager.class).fireEvent(e);
             } else {
                 removeGroup(groupName);
             }
@@ -148,6 +147,8 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
     private void removeGroup(String groupName) {
         Group group = website.getOrganisation().group(groupName, SessionManager.session());
         website.removeGroup(group, SessionManager.session());
+        GroupInWebsiteEvent e = new GroupInWebsiteEvent(group, website, false);
+        EventUtils.fireQuietly(_(EventManager.class), e);
     }
 
     public List<String> getThemes() {
@@ -186,7 +187,6 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
     private boolean isEnabled(Application app, List<Application> activeApps) {
         return activeApps.contains(app);
     }
-
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {

@@ -1995,6 +1995,9 @@ td.primary {
 table.dashboard {
     width: 100%;
 }
+table.myLearning {
+    width: 100%;
+}
 table.dashboard td.gap, table.myLearning td.gap {
     width: 1em;
 }

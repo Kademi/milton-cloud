@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import io.milton.vfs.db.PasswordCredential;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import org.hibernate.criterion.Conjunction;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author brad
  */
 public class UserDao {
-    
+
     private static final Logger log = LoggerFactory.getLogger(UserDao.class);
 
     public PasswordCredential getEmailCredential(String email, Session sess) {
@@ -39,27 +39,32 @@ public class UserDao {
         crit.addOrder(Order.asc("surName"));
         crit.addOrder(Order.asc("firstName"));
         crit.addOrder(Order.asc("email"));
-        List list = crit.list();
+        List<Profile> list = crit.list();
         if (list == null || list.isEmpty()) {
             return Collections.EMPTY_LIST;
         } else {
-            List<Profile> users = new ArrayList<>(list);
-            return users;
+            List<Profile> deduped = new ArrayList<>();
+            for (Profile p : list) {
+                if (!deduped.contains(p)) {
+                    deduped.add(p);
+                }
+            }
+            return deduped;
         }
     }
 
-
     public List<Profile> search(String q, Organisation org, Session session) {
-        log.info("search: q=" + q + " org=" + org.getName() );
+        log.info("search: q=" + q + " org=" + org.getName());
         Criteria crit = session.createCriteria(Profile.class);
+
         Criteria critMembership = crit.createCriteria("memberships");
         Criteria critSubordinate = critMembership.createCriteria("subordinates");
         critSubordinate.add(Restrictions.eq("withinOrg", org));
-        
+
         String[] arr = q.split(" ");
-        Conjunction con = Expression.conjunction();
-        for( String queryPart : arr ) {
-            Disjunction dis = Expression.disjunction();
+        Conjunction con = Restrictions.conjunction();
+        for (String queryPart : arr) {
+            Disjunction dis = Restrictions.disjunction();
             String s = queryPart + "%";
             dis.add(Restrictions.ilike("firstName", s));
             dis.add(Restrictions.ilike("surName", s));
@@ -67,7 +72,8 @@ public class UserDao {
             dis.add(Restrictions.ilike("email", s));
             con.add(dis);
         }
-        crit.add(con);        
+        crit.add(con);
+
 
 //        crit.add(Expression.ilike("name", q + "%"));
 
@@ -76,7 +82,13 @@ public class UserDao {
         crit.addOrder(Order.asc("email"));
 
         List<Profile> list = DbUtils.toList(crit, Profile.class);
-        log.info("user search: " + q + " -> " + list.size());
-        return list;
+        List<Profile> deduped = new ArrayList<>();
+        for (Profile p : list) {
+            if (!deduped.contains(p)) {
+                deduped.add(p);
+            }
+        }
+        log.info("user search: " + q + " -> " + deduped.size());
+        return deduped;
     }
 }
