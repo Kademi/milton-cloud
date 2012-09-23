@@ -258,7 +258,7 @@ function checkSimpleChars(container) {
 }
 
 function checkHrefs(container) {
-    var target = $(".href", container); // either with id of email, or with class email
+    var target = $(".href", container); 
     var isOk = true;
     var pattern = new RegExp("^[a-zA-Z0-9_/%:/.]+$");
     target.each(function(i, n) {

@@ -13,7 +13,7 @@
             #foreach($group in $page.children)
             <div class="Group">
                 <header class="ClearFix">
-                    <div class="ShowDialog"><span>$group.name</span></div>
+                    <div class="ShowDialog"><span>$formatter.htmlEncode($group.name)</span></div>
                     <a href="#" class="regoMode">Registration: $group.regoModeText</a>
                 </header>
                 <div class="ContentGroup ClearFix">

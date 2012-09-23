@@ -138,7 +138,7 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
 
     @Override
     public String getName() {
-        return website.getDomainName();
+        return website.getName();
     }
 
     @Override

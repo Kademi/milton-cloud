@@ -77,6 +77,7 @@ public class InitialDataCreator implements LifecycleApplication {
      *
      */
     public void initTestData() {
+        System.out.println("Create initial data...");
         Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
 
@@ -122,7 +123,7 @@ public class InitialDataCreator implements LifecycleApplication {
         
         admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io
-        initHelper.enableApps(miltonSite, admin, session, "admin", "users", "organisations", "website", "forums", "email", "content","search", "signup");
+        initHelper.enableApps(miltonSite, admin, session, "admin", "userApp", "forums", "email", "content","search", "signup","userDashboardApp");
         miltonSite.addGroup(users, session);
         String menu = "/content/index.html,Home\n" +
                         "/content/maven/index.html,Downloads\n" +
@@ -136,7 +137,7 @@ public class InitialDataCreator implements LifecycleApplication {
 
         Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "milton", admin); // can be accessed on mymilton.localhost or my.milton.io
         miltonSite.getRepository().setAttribute("logo", "my.milton.io", session);
-        initHelper.enableApps(myMiltonSite, admin, session, "admin", "users", "organisations", "website", "myFiles", "calendar", "contacts", "email");
+        initHelper.enableApps(myMiltonSite, admin, session, "admin", "userApp", "myFiles", "calendar", "contacts", "signup","userDashboardApp");
         myMiltonSite.addGroup(users, session);
 
         tx.commit();

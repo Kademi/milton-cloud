@@ -67,6 +67,7 @@ public class HtmlTemplateRenderer {
             datamodel.put("user", user);
             profile = user.getThisUser();
         }
+        datamodel.put("userResource", user);
         MenuItem menu = applicationManager.getRootMenuItem(page, profile, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
@@ -127,6 +128,7 @@ public class HtmlTemplateRenderer {
         }
         
         VelocityContentDirective.setContentTemplate(contentTemplate, datamodel);
+        System.out.println("user: " + datamodel.get("user"));
         themeTemplate.merge(datamodel, pw);
         VelocityContentDirective.setContentTemplate(null, datamodel);
 

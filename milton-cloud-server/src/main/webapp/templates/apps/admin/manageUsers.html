@@ -38,26 +38,26 @@
                 </header>
                 <table class="Summary" id="userSearchResults">
                     <tr>
+                        <th>Nickname</th>
                         <th>First Name</th>
                         <th>Last Name</th>
                         <th>Email Address</th>
                         <th>Contact</th>
-                        <th>State</th>
                         <th>&nbsp;</th>
                     </tr>
                     #foreach($p in $page.searchResults)
                     <tr>
                         <td>
-                            #if($p.firstName)
-                            $p.firstName
+                            #if($p.nickName)
+                            $formatter.htmlEncode($p.nickName)
                             #else
                             $p.name
                             #end
                         </td>
-                        <td>$!p.surName</td>
+                        <td>$formatter.htmlEncode($p.firstName)</td>
+                        <td>$formatter.htmlEncode($p.surName)</td>
                         <td>$p.email</td>
                         <td>$!p.phone</td>
-                        <td>NSW</td>
                         <td>
                             <div class="Controller">
                                 <a title="Show Dialogue" class="ShowDialog" href="#"><span class="Hidden">Show Dialogue</span></a>
