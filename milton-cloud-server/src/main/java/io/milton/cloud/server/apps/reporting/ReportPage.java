@@ -60,10 +60,8 @@ public class ReportPage extends TemplatedHtmlPage {
             try {
                 String sStart = params.get("startDate");
                 start = parseDate(sStart);
-                System.out.println("start: " + start);
                 String sFinish = params.get("finishDate");
                 finish = parseDate(sFinish);
-                System.out.println("finish: " + finish);
                 JsonResult jsonResult = new JsonResult(true);
                 GraphData graphData = jsonReport.runReport(getOrganisation(), website, start, finish, jsonResult);
                 if( jsonResult.isStatus() ) {
@@ -76,13 +74,17 @@ public class ReportPage extends TemplatedHtmlPage {
                 return;
             }            
         } else {
-            MenuItem.setActiveIds("menuReporting", "menuReportingHome", "menuReportsWebsite" + website.getName());
+            String nm = website == null ? getOrganisation().getTitle() : website.getName();
+            MenuItem.setActiveIds("menuReporting", "menuReportingHome", "menuReportsWebsite" + nm);
             super.sendContent(out, range, params, contentType);
         }
     }
 
 
     private Date parseDate(String s) throws ParseException {
+        if( s == null || s.trim().length() == 0 ) {
+            return null;
+        }
         return sdf.parse(s);
     }
 }

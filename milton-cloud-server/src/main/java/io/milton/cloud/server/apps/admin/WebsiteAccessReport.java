@@ -46,7 +46,11 @@ public class WebsiteAccessReport implements JsonReport{
 
     @Override
     public String getTitle(Organisation organisation, Website website) {
-        return "Web access report: " + website.getName();
+        if( website != null ) {
+            return "Web activity report: " + website.getName();
+        } else {
+            return "Web activity report: " + (organisation.getTitle() == null ? organisation.getName() : organisation.getTitle());
+        }
     }
     
     
@@ -61,8 +65,7 @@ public class WebsiteAccessReport implements JsonReport{
                 .add(Projections.rowCount())
                 .add(Projections.groupProperty("reqYear"))
                 .add(Projections.groupProperty("reqMonth"))
-                .add(Projections.groupProperty("reqDay"))
-                .add(Projections.groupProperty("reqHour")));
+                .add(Projections.groupProperty("reqDay")));
         if (start != null) {
             crit.add(Restrictions.ge("reqDate", start));
         }
@@ -75,6 +78,7 @@ public class WebsiteAccessReport implements JsonReport{
         if( org != null ) {
             crit.add(Restrictions.le("organisation", org));
         }
+        crit.add(Restrictions.eq("contentType", "text/html")); // might need to include application/html at some point...
         List list = crit.list();
         List<TimeDataPointBean> dataPoints = new ArrayList<>();
         Formatter f = _(Formatter.class);

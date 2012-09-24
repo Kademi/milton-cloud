@@ -11,13 +11,18 @@
     </li>                                                                     
 </ul>
 
+#set($basePath = "/")
+#if( $parentOrg )
+    #set($basePath = $parentOrg.href)
+#end
+
 <script type="text/javascript">
 $(function() {
-    initPosts();
+    initPosts("$basePath");
 });
 
-function initPosts() {    
-    $.getJSON("/_postSearch?a", function(response) {
+function initPosts(basePath) {    
+    $.getJSON(basePath + "_postSearch?a", function(response) {
         log("got posts response", response);
         processPosts(response);
     });

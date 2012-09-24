@@ -20,9 +20,12 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
+import io.milton.cloud.server.apps.reporting.ReportingApp;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.reporting.JsonReport;
@@ -36,26 +39,27 @@ import io.milton.vfs.db.Website;
 import java.util.Set;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Profile;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.velocity.context.Context;
 
 /**
  *
  * @author brad
  */
-public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication {
+public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication, PortletApplication {
 
     private ApplicationManager applicationManager;
-    
     private List<JsonReport> reports;
 
     public AdminApp() {
         reports = new ArrayList<>();
         reports.add(new WebsiteAccessReport());
     }
-    
-    
-    
+
     @Override
     public String getInstanceId() {
         return "admin";
@@ -65,8 +69,6 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     public String getTitle(Organisation organisation, Website website) {
         return "Administration";
     }
-    
-    
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
@@ -79,8 +81,6 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     public String getSummary(Organisation organisation, Website website) {
         return "Provides most admin console functionality, such as managing users, groups, websites, etc";
     }
-    
-    
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
@@ -99,7 +99,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
-                    
+
             }
         } else if (parent instanceof OrganisationsFolder) {
             OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
@@ -111,13 +111,12 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         return null;
     }
 
-
     @Override
     public void appendMenu(MenuItem parent) {
         String parentId = parent.getId();
         OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
-        if(parentOrg == null ) {
-            return ;
+        if (parentOrg == null) {
+            return;
         }
         Path parentPath = parentOrg.getPath();
         switch (parentId) {
@@ -146,7 +145,42 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     public List<JsonReport> getReports(Organisation org, Website website) {
         return reports;
     }
-    
+
+    /**
+     * This is used to display the web access report on the admin dashboard
+     *
+     * @param portletSection
+     * @param currentUser
+     * @param rootFolder
+     * @param context
+     * @param writer
+     * @throws IOException
+     */
+    @Override
+    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
+        if (rootFolder instanceof OrganisationRootFolder && currentUser != null ) {
+            if (portletSection.equals("adminDashboardPrimary")) {
+                writer.append("<div class='report'>\n");
+                writer.append("<h3>Website activity</h3>\n");
+                writer.append("<div class='websiteAccess'></div>\n");
+                writer.append("<script type='text/javascript' >\n");
+                writer.append("jQuery(function() {\n");
+                //17/09/2012 - 24/09/2012
+                String range = ReportingApp.getDashboardDateRange();
+                CommonResource r = (CommonResource) context.get("page");
+                OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
+                if (orgFolder != null) {
+                    //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
+                    String href = orgFolder.getHref() + "reporting/org-websiteAccess";
+                    writer.append(" runReport(\"" + range + "\", jQuery('.report .websiteAccess'), \"" + href + "\");\n");
+                    writer.append("});\n");
+                    writer.append("</script>\n");
+                }
+                writer.append("</div>\n");
+            }
+        }
+    }
+
     public class AdminRole implements Role {
 
         @Override
@@ -154,11 +188,10 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
             return "Administrator";
         }
 
-  
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             Organisation resourceOrg = resource.getOrganisation();
-            boolean  b = resourceOrg.isWithin(withinOrg); 
+            boolean b = resourceOrg.isWithin(withinOrg);
             return b;
         }
 
@@ -166,10 +199,8 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Collections.singleton(Priviledge.ALL);
         }
-        
     }
-    
-    
+
     public class UserAdminRole implements Role {
 
         @Override
@@ -179,7 +210,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
 
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
-            if( resource instanceof UserResource) {
+            if (resource instanceof UserResource) {
                 UserResource ur = (UserResource) resource;
                 return ur.getOrganisation().isWithin(withinOrg);
             }
@@ -190,6 +221,5 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Role.READ_WRITE;
         }
-
-    }      
+    }
 }

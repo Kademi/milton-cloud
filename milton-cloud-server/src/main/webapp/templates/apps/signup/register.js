@@ -1,4 +1,4 @@
-jQuery(function() {
+function initRegister(afterRegisterHref) {
     log("init labels")
     var form = $("#registerForm");
     var lastTabIndex = 0;
@@ -23,7 +23,7 @@ jQuery(function() {
                 var userName = form.find("input[name=email]").val();
                 var password = form.find("input[name=password]").val();
                 doLogin(userName, password, {
-                    afterLoginUrl: resp.nextHref
+                    afterLoginUrl: afterRegisterHref
                 });
             }
         }
@@ -72,4 +72,4 @@ jQuery(function() {
             opacity: 0
         });
     }
-});
+}

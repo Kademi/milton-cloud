@@ -32,28 +32,24 @@ public class Formatter {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Formatter.class);
     public static ThreadLocal<DateFormat> tlSdfUkShort = new ThreadLocal<DateFormat>() {
-
         @Override
         protected DateFormat initialValue() {
             return new SimpleDateFormat("dd/MM/yyyy");
         }
     };
     public static ThreadLocal<DateFormat> tlSdfUkLong = new ThreadLocal<DateFormat>() {
-
         @Override
         protected DateFormat initialValue() {
             return new SimpleDateFormat("dd MMMM yyyy");
         }
     };
     public static final ThreadLocal<DateFormat> sdfDateOnly = new ThreadLocal<DateFormat>() {
-
         @Override
         protected DateFormat initialValue() {
             return new SimpleDateFormat("dd/MM/yyyy");
         }
     };
     public static final ThreadLocal<DateFormat> sdfDateAndTime = new ThreadLocal<DateFormat>() {
-
         @Override
         protected DateFormat initialValue() {
             return new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -318,19 +314,20 @@ public class Formatter {
     }
 
     /**
-     * Given a value which can be parsed to a Long, return it formatted as a human
-     * readable duration such as 12:30 (12 mins, 30 seconds) or 12 mins, 3 hrs 20
-     * 
+     * Given a value which can be parsed to a Long, return it formatted as a
+     * human readable duration such as 12:30 (12 mins, 30 seconds) or 12 mins, 3
+     * hrs 20
+     *
      * @param o
      * @param numeric
-     * @return 
+     * @return
      */
     public String formatMinsAsDuration(Object o, boolean numeric) {
         Long l = toLong(o);
         if (l == null) {
             return "";
         } else {
-            if( l == 0 ) {
+            if (l == 0) {
                 return "";
             }
             long hours = l / 60;
@@ -630,7 +627,7 @@ public class Formatter {
         Duration d = new Duration(jodaSt, jodaFn);
         return d.getStandardSeconds();
     }
-    
+
     /**
      * Get the duration from the start to the finish date in seconds.
      *
@@ -642,8 +639,8 @@ public class Formatter {
         DateTime jodaSt = toJodaDate(start);
         DateTime jodaFn = toJodaDate(finish);
         Duration d = new Duration(jodaSt, jodaFn);
-        return d.getStandardSeconds()/(60 * 60);
-    }    
+        return d.getStandardSeconds() / (60 * 60);
+    }
 
     public String getMonthName(int i) {
         switch (i) {
@@ -772,7 +769,7 @@ public class Formatter {
     public String checkbox(String name, Object oChecked) {
         return checkbox(null, name, oChecked, "true");
     }
-    
+
     public String checkbox(String id, String name, Object oChecked, String value) {
         Boolean checked = toBool(oChecked);
         if (checked == null) {
@@ -784,13 +781,13 @@ public class Formatter {
             sb.append("checked=\"true\"");
         }
         appendValue(sb, value);
-        if( id != null ) {
+        if (id != null) {
             sb.append(" id=\"").append(id).append("\"");
         }
         sb.append(" />");
         return sb.toString();
     }
-    
+
     public String radio(String id, String name, Object oChecked, String value) {
         Boolean checked = toBool(oChecked);
         if (checked == null) {
@@ -802,34 +799,35 @@ public class Formatter {
             sb.append(" checked=\"true\"");
         }
         appendValue(sb, value);
-        if( id != null ) {
+        if (id != null) {
             sb.append(" id=\"").append(id).append("\"");
         }
         sb.append(" />");
         return sb.toString();
-    }    
-    
+    }
+
     /**
      * Generate an option element
-     * @return 
+     *
+     * @return
      */
     public String option(String value, String text, String currentValue) {
         StringBuilder sb = new StringBuilder("<option");
         appendValue(sb, value);
-        if( currentValue != null && currentValue.equals(value)) {
+        if (currentValue != null && currentValue.equals(value)) {
             sb.append("selected=\"true\"");
-        }        
+        }
         sb.append(">");
         sb.append(text).append("</option>");
         return sb.toString();
-        
+
     }
-    
+
     /**
      * Appends the html encoded value surrounded by quotes
-     * 
+     *
      * @param sb
-     * @param value 
+     * @param value
      */
     private void appendValue(StringBuilder sb, String value) {
         sb.append(" value=");
@@ -837,22 +835,22 @@ public class Formatter {
         sb.append(htmlEncode(value));
         sb.append("\"");
     }
-    
+
     /**
      * Attempts to find the port of the current request, defaults to 80
-     * 
-     * @return 
+     *
+     * @return
      */
     public int getPort() {
         int port = 80;
         Request req = HttpManager.request();
-        if( req != null ) {
+        if (req != null) {
             String sHost = req.getHostHeader();
-            if( sHost != null ) {
+            if (sHost != null) {
                 String[] arr = sHost.split(":");
-                if( arr.length > 1) {
+                if (arr.length > 1) {
                     String sPort = arr[1].trim();
-                    if( sPort.length() > 0 ) {
+                    if (sPort.length() > 0) {
                         port = Integer.parseInt(sPort);
                     }
                 }
@@ -860,40 +858,55 @@ public class Formatter {
         }
         return port;
     }
-    
+
     /**
-     * Returns empty string if the current request is on port 80, otherwise returns
-     * the port number prefixed with a colon, eg :8080
-     * 
-     * @return 
+     * Returns empty string if the current request is on port 80, otherwise
+     * returns the port number prefixed with a colon, eg :8080
+     *
+     * @return
      */
     public String getPortString() {
         int p = getPort();
-        if( p == 80) {
+        if (p == 80) {
             return "";
         } else {
             return ":" + p;
         }
     }
-    
+
     public String profilePicHref(Profile p) {
-        if( p.getPhotoHash() == null ) {
+        if (p.getPhotoHash() == null) {
             return "/templates/apps/user/profile.png";
         } else {
             return "/_hashes/files/" + p.getPhotoHash();
         }
-    }    
-    
+    }
+
     public String toCsv(List list) {
         StringBuilder sb = new StringBuilder();
-        if( list != null ) {
-            for( Object o : list ) {
-                if( sb.length() > 0 ) {
+        if (list != null) {
+            for (Object o : list) {
+                if (sb.length() > 0) {
                     sb.append(",");
                 }
                 sb.append(o.toString());
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Return a date which has the given number of days added (or subtracted if
+     * negative) to the given date
+     * 
+     * @param now
+     * @param i
+     * @return 
+     */
+    public Date addDays(Date now, int days) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+        cal.add(Calendar.DAY_OF_YEAR, days);
+        return cal.getTime();
     }
 }

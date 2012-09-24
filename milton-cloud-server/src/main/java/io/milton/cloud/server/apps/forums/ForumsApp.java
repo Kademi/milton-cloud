@@ -22,6 +22,7 @@ import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.Forum;
 import io.milton.cloud.server.role.Role;
@@ -100,9 +101,11 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
                 return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
             }
         } else if( parent instanceof OrganisationFolder) {
-            OrganisationFolder repoFolder = (OrganisationFolder) parent;
+            OrganisationFolder orgFolder = (OrganisationFolder) parent;
             if( requestedName.equals("managePosts")) {
-                return new ManagePostsPage(requestedName, repoFolder.getOrganisation(), repoFolder);
+                return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
+            } else if( requestedName.equals("_postSearch")) {
+                return new PostSearchResource(requestedName, orgFolder.getOrganisation(), orgFolder);
             }
         }
         return null;
@@ -165,6 +168,10 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (portletSection.equals("dashboardSecondary")) {
             _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
+        } else if( portletSection.equals("adminDashboardSecondary")) {
+            if( rootFolder instanceof OrganisationRootFolder && currentUser != null ) {
+                _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
+            }
         }
     }
     

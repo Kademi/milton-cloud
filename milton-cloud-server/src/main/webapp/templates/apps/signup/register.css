@@ -38,7 +38,9 @@ table.signup td {
     text-align: center;
 }
 table.signup td.last {
+    /** this causes the 3dn rego page to slightly misalign. maybe not necessary?
     text-align: right;
+    */
 }
 table.signup tr td.findOrg {
     text-align: left;
@@ -56,13 +58,14 @@ table.signup .col2, table.signup .col4 {
     text-align: left;
 }
 
-
+/** shouldnt need this, should be covered by theme
 .regoPage #content .SubContent h1 { 
     background: #499abf; 
     padding: 10px 20px;
     color: white;
     margin-bottom: 20px;
 }
+*/
 
 .regoPage legend {
     display: none;
@@ -73,13 +76,6 @@ input.SubmitRegister {
     width: 135px !important;
     height: 42px !important;
     border: 0 none !important;
-}
-
-#content .SubContent {
-    margin: 0 auto;
-    min-height: 640px;
-    padding: 10px 46px 0;
-    width: 876px;
 }
 
 .regoPage .Box02 {

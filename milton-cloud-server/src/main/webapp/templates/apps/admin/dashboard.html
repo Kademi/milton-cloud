@@ -2,8 +2,18 @@
     <head>
         <title>$view.title</title>
     </head>
-    <body>
-        #portlets("adminDashboardPrimary")
+    <body class="dashboard">
+        <table class="plain dashboard">
+            <tr>
+                <td class="primary">
+                    #portlets("adminDashboardPrimary")
+                </td>
+                <td class="gap"></td>
+                <td class="secondary">
+                    #portlets("adminDashboardSecondary")
+                </td>                
+            </tr>
+        </table>                
     </body>
 </html>
 

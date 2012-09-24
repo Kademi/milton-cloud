@@ -14,10 +14,15 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Auth;
@@ -44,13 +49,12 @@ import io.milton.vfs.db.Website;
  * @author brad
  */
 public class ReportsHomeFolder extends AbstractCollectionResource implements GetableResource {
-    
+
     private final CommonCollectionResource parent;
     private final String name;
     private final ApplicationManager applicationManager;
-    
     private ResourceList children;
-    
+
     public ReportsHomeFolder(String name, CommonCollectionResource parent) {
         this.name = name;
         this.parent = parent;
@@ -63,21 +67,44 @@ public class ReportsHomeFolder extends AbstractCollectionResource implements Get
         _(HtmlTemplater.class).writePage("reporting/home", this, params, out);
     }
 
+
+
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if( children == null ) {
+        if (children == null) {
             children = new ResourceList();
-            if( getOrganisation().getWebsites() != null ) {
-                for( Website w : getOrganisation().getWebsites() ) {
+            
+            // Add per website reports
+            if (getOrganisation().getWebsites() != null) {
+                for (Website w : getOrganisation().getWebsites()) {
                     WebsiteReportsFolder f = new WebsiteReportsFolder(w, parent);
                     children.add(f);
                 }
             }
+            
+            // Add reports for organisation level
+            RootFolder rootFolder = WebUtils.findRootFolder(this);
+            for( Application app : applicationManager.getActiveApps(rootFolder) ) {
+                if( app instanceof ReportingApplication ) {
+                    ReportingApplication rapp = (ReportingApplication) app;
+                    for( JsonReport rep : rapp.getReports(getOrganisation(), null)) {
+                        String title = rep.getTitle(getOrganisation(), null);
+                        System.out.println("title: " + title + " from report: " + rep.getClass());
+                        ReportPage p = new ReportPage("org-" + rep.getReportId(), this, title, rep, null);
+                        children.add(p);
+                    }
+                }
+            }
+            
             applicationManager.addBrowseablePages(this, children);
         }
         return children;
-    }    
-    
+    }
+
+    public String getTitle() {
+        return "Reports home: " + getOrganisation().getTitle();
+    }
+
     @Override
     public CommonCollectionResource getParent() {
         return parent;
@@ -116,6 +143,5 @@ public class ReportsHomeFolder extends AbstractCollectionResource implements Get
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.READ_CONTENT;
-    }      
-    
+    }
 }

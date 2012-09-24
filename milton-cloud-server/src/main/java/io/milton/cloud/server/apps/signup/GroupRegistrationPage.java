@@ -197,6 +197,11 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         return null;
     }
 
+    public boolean isHasOrgs() {
+        List<Organisation> childOrgs = getOrganisation().getChildOrgs();
+        return childOrgs != null && !childOrgs.isEmpty();
+    }
+    
     @Override
     public String getContentType(String accepts) {
         if (jsonResult != null) {

@@ -28,6 +28,7 @@ import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.reporting.ReportingApp;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.GroupMembershipApplication;
@@ -72,7 +73,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
     private static final Logger log = LoggerFactory.getLogger(SignupApp.class);
     public static final String NEXT_HREF = "signup.next.href";
-    
     private String signupPageName = "signup";
     private StateProcess userManagementProcess;
     private TimerService timerService;
@@ -84,7 +84,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     public SignupApp() {
         reports = new ArrayList<>();
         reports.add(new GroupSignupsReport());
-        
+
     }
 
     @Override
@@ -119,9 +119,9 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 return new GroupRegistrationPage(requestedName, wrf, this);
             }
         }
-        if( parent instanceof OrganisationFolder) {
+        if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
-            if( requestedName.equals("pendingApps")) {
+            if (requestedName.equals("pendingApps")) {
                 return new ProcessPendingPage("pendingApps", orgFolder, this);
             }
         }
@@ -144,16 +144,14 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     @Override
     public List<JsonReport> getReports(Organisation org, Website website) {
         return reports;
-    }    
-    
+    }
+
     private StateProcess buildProcess() {
         StateProcessBuilder b = new StateProcessBuilder("userSubscription", "start");
         b.from("start").transition("started").to("active").when(new TrueRule()).then(signupEvent(SubscriptionEvent.SubscriptionAction.ACCEPTED));;
         // TODO: more stuff here eventually
         return b.getProcess();
     }
-
-
 
     private ActionHandler signupEvent(SubscriptionEvent.SubscriptionAction a) {
         return new SubscriptionEventActionHandler(a);
@@ -176,15 +174,15 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
     /**
      * Get the URL to redirect the new user to
-     * 
+     *
      * @param newUser
-     * @return 
+     * @return
      */
     public String getNextHref(Profile newUser, Website website) {
         String s = config.get(NEXT_HREF, website);
         return s;
     }
-    
+
     @Override
     public void onEvent(Event e) {
     }
@@ -192,15 +190,15 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     @Override
     public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {
         String href; // = findSetting("gaAccountNumber", rootFolder);
-        if( website != null ) {
+        if (website != null) {
             System.out.println("get from website - " + website.getName());
             href = config.get(NEXT_HREF, website);
         } else {
             System.out.println("get from org");
             href = config.get(NEXT_HREF, org);
-        }        
+        }
         System.out.println("current href: " + href);
-        if( href == null ) {
+        if (href == null) {
             href = "";
         }
         writer.write("<label for='signupNextHref'>First page after signup</label>");
@@ -208,17 +206,16 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         writer.flush();
     }
 
-    
     @Override
     public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {
         System.out.println("save settings");
         String signupNextHref = parameters.get("signupNextHref");
-        if( website != null ) {
+        if (website != null) {
             config.set(NEXT_HREF, website, signupNextHref);
         } else {
             config.set(NEXT_HREF, org, signupNextHref);
         }
-        return new JsonResult(true);        
+        return new JsonResult(true);
     }
 
     @Override
@@ -229,18 +226,35 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getName() + " - " + r.getClass());
             context.put("applications", applications);
             _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
+
+            writer.append("<div class='report'>\n");
+            writer.append("<h3>Signup activity</h3>\n");
+            writer.append("<div class='signupReport'></div>\n");
+            writer.append("<script type='text/javascript' >\n");
+            writer.append("jQuery(function() {\n");
+            //17/09/2012 - 24/09/2012
+            String range = ReportingApp.getDashboardDateRange();
+            OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
+            if (orgFolder != null) {
+                //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
+                String href = orgFolder.getHref() + "reporting/org-groupSignups";
+                writer.append(" runReport(\"" + range + "\", jQuery('.report .signupReport'), \"" + href + "\");\n");
+                writer.append("});\n");
+                writer.append("</script>\n");
+            }
+            writer.append("</div>\n");
         }
     }
 
     /**
      * accept or reject the given app
-     * 
+     *
      * @param gma
-     * @param b 
+     * @param b
      */
-    public void processPending(GroupMembershipApplication gma, Boolean b, Session session) {        
-        if( b ) {
-            Profile p = gma.getMember();            
+    public void processPending(GroupMembershipApplication gma, Boolean b, Session session) {
+        if (b) {
+            Profile p = gma.getMember();
             Organisation org = gma.getWithinOrg();
             Group group = gma.getGroupEntity();
             p.addToGroup(group, org, session);
@@ -250,7 +264,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         }
         session.delete(gma);
     }
-      
 
     public class SubscriptionEventActionHandler implements ActionHandler {
 
@@ -270,7 +283,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 website = wrf.getWebsite();
             }
             try {
-                
+
                 SubscriptionEvent e = new SubscriptionEvent(gm, website, action);
                 eventManager.fireEvent(e);
             } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {

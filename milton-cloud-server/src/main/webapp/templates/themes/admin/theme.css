@@ -937,3 +937,82 @@ table.data th {
 table.data th, table.data td {
     padding: 5px;
 }
+
+body.dashboard div.content {
+    margin-top: 10px;
+}
+
+body.dashboard .report {
+    width: 50%;
+    height: 200px;
+    float: left;
+    margin-bottom: 20px;
+}
+
+body.dashboard .report > div {
+    width: 100%;
+    height: 200px;
+} 
+table.dashboard {
+    width: 100%;
+}
+table.dashboard td.primary {
+    width: 70%;
+    vertical-align: top;
+}
+table.dashboard td.secondary {
+    width: 30%;
+    vertical-align: top;
+}
+body ul.barList {
+    margin: 0;
+    font-size: 1em;
+}
+ul.barList li{
+    list-style:none;
+    border-top:1px solid #dbdada;
+    padding:7px 0 7px 10px;
+    margin: 0;
+    font-size: 0.75em;    
+}
+ul.barList li:last-child {
+    border-bottom: 1px solid #dbdada;
+}
+.profilePic{
+    float:left;
+    margin-right:8px;
+}
+a.module {
+    color: $page.parent.settings.heroColour1;
+    font-weight: bold;
+}
+a.user {
+    color: #262626;    
+    font-weight: bold;
+}
+ul.barList li .textBox{
+    float:left;
+    width:70%;
+}
+ul.barList div.post {    
+   margin-left: 60px; /** width of the image to prevent text wrapping */    
+}
+ul.barList p {    
+    padding-top: 5px;
+    line-height: 12px;
+    margin: 0;
+}
+ul.barList p, ul.barList em{
+    font-size: 0.85em;    
+}
+ul.barList em{
+    color:#262626;    
+    margin-right:7px;
+}
+ul.barList small{
+    color:$page.parent.settings.heroColour1;    
+    font-style:italic;
+    background:url(images/plus.gif) top left no-repeat;
+    padding-left:10px;
+    background-position:0 4px;
+}

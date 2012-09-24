@@ -49,42 +49,53 @@ import org.slf4j.LoggerFactory;
 public class PostSearchResource extends AbstractResource implements GetableResource {
 
     private static final Logger log = LoggerFactory.getLogger(PostSearchResource.class);
-    
     private final String name;
     private final CommonCollectionResource parent;
     private final Website website;
-    
+    private final Organisation org;
 
-    public PostSearchResource(String name, Website website, CommonCollectionResource parent) {        
+    public PostSearchResource(String name, Website website, CommonCollectionResource parent) {
         this.website = website;
+        this.org = website.getOrganisation();
         this.parent = parent;
         this.name = name;
     }
-        
-    
+
+    public PostSearchResource(String name, Organisation org, CommonCollectionResource parent) {
+        this.website = null;
+        this.org = org;
+        this.parent = parent;
+        this.name = name;
+    }
+
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {               
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         JsonWriter jsonWriter = new JsonWriter();
         List<PostBean> beans = new ArrayList<>();
-        for( Post p : Post.findByWebsite(website, 100, SessionManager.session())) {
+        List<Post> posts;
+        if (website != null) {
+            posts = Post.findByWebsite(website, 100, SessionManager.session());
+        } else {
+            posts = Post.findByOrg(org, 100, SessionManager.session());            
+        }
+        for (Post p : posts) {
             PostBean b = PostBean.toBean(p);
             beans.add(b);
         }
+
         jsonWriter.write(beans, out);
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.READ_CONTENT;
-    }    
+    }
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
         return true;
     }
-    
-    
-        
+
     @Override
     public boolean isDir() {
         return false;
@@ -115,7 +126,6 @@ public class PostSearchResource extends AbstractResource implements GetableResou
         return null;
     }
 
-
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
@@ -130,10 +140,9 @@ public class PostSearchResource extends AbstractResource implements GetableResou
     public Long getContentLength() {
         return null;
     }
-    
+
     @Override
     public Organisation getOrganisation() {
         return website.getOrganisation();
     }
-               
 }

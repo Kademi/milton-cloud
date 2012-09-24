@@ -88,7 +88,7 @@ public class WebsiteReportsFolder extends AbstractCollectionResource implements 
     }    
     
     public String getTitle() {
-        return "Reports home";
+        return website.getName() + " Reports";
     }
     
     @Override

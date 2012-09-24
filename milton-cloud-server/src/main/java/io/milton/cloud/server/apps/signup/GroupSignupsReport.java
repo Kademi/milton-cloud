@@ -14,14 +14,13 @@
  */
 package io.milton.cloud.server.apps.signup;
 
-import io.milton.cloud.server.apps.reporting.TimeDataPointBean;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
@@ -34,9 +33,11 @@ import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.milton.context.RequestContext._;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
@@ -53,7 +54,11 @@ public class GroupSignupsReport implements JsonReport{
 
     @Override
     public String getTitle(Organisation organisation, Website website) {
-        return "Group signups report: " + website.getName();
+        if( website != null ) {
+            return "Group signups report: " + website.getName();
+        } else {
+            return "Group signups report: " + (organisation.getTitle() == null ? organisation.getName() : organisation.getTitle());
+        }
     }
     
         
@@ -61,6 +66,7 @@ public class GroupSignupsReport implements JsonReport{
     public GraphData runReport(Organisation org, Website website, Date start, Date finish, JsonResult jsonResult) {
         log.info("runReport: " + start + " - " + finish);
         Session session = SessionManager.session();
+        Formatter f = _(Formatter.class);
         Criteria crit = session.createCriteria(SignupLog.class)
                 .setProjection(Projections.projectionList()
                 .add(Projections.min("reqDate"))
@@ -68,20 +74,19 @@ public class GroupSignupsReport implements JsonReport{
                 .add(Projections.groupProperty("groupEntity"))
                 .add(Projections.groupProperty("reqYear"))
                 .add(Projections.groupProperty("reqMonth"))
-                .add(Projections.groupProperty("reqDay"))
-                .add(Projections.groupProperty("reqHour")));
-//        if (start != null) {
-//            crit.add(Restrictions.ge("reqDate", start));
-//        }
-//        if (finish != null) {
-//            crit.add(Restrictions.le("reqDate", finish));
-//        }
-//        if( website != null ) {
-//            crit.add(Restrictions.le("website", website));
-//        }
-//        if( org != null ) {
-//            crit.add(Restrictions.le("organisation", org));
-//        }
+                .add(Projections.groupProperty("reqDay")));
+        if (start != null) {
+            crit.add(Restrictions.ge("reqDate", start));
+        }
+        if (finish != null) {
+            crit.add(Restrictions.le("reqDate", finish));
+        }
+        if( website != null ) {
+            crit.add(Restrictions.le("website", website));
+        }
+        if( org != null ) {
+            crit.add(Restrictions.le("organisation", org));
+        }
         List list = crit.list();
         Set<String> groupsInSeries = new HashSet<>();
         List<Map<String,Object>> dataPoints = new ArrayList<>();
@@ -89,10 +94,9 @@ public class GroupSignupsReport implements JsonReport{
         log.info("results: " + list.size());
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
-            log.info("got row: " + arr);
             Date date = (Date) arr[0];
             Long time = date.getTime();
-            Integer count = (Integer) arr[1];
+            Long count = f.toLong(arr[1]);
             Group group = (Group) arr[2];
             
             groupsInSeries.add(group.getName()); // keep a set of group names for labels

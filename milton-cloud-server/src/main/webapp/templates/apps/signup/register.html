@@ -40,6 +40,7 @@
                                                     <td><label class="last" for="confirmPassword">Confirm</label></td>
                                                     <td><input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" /></td>                                                
                                                 </tr>  
+                                                #if( $page.hasOrgs )
                                                 <tr>
                                                     <td><label class="first" for="orgName">Pharmacy</label></td>
                                                     <td colspan="3" class="findOrg">
@@ -47,6 +48,7 @@
                                                         <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your pharmacy" />
                                                     </td>
                                                 </tr>
+                                                #end
                                             </tbody>
                                         </table>
                                     </div>
@@ -85,6 +87,12 @@
             <p><a href="/">Click here</a> to return to the home page</p>
         </div>           
         <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>        
+        <script type="text/javascript">
+            $(document).ready(function(){
+                initRegister("/dashboard");
+            });            
+            
+        </script>        
     </body>    
 </html> 
 

@@ -1,53 +1,54 @@
 $(function() {
-    $('.dateRange input').daterangepicker({
-        dateFormat : "dd/mm/yy",
-        onChange : function() {
-            runReport();
-        }
-    });         
-    $('#reportRange').change(function() {
-        log("change");
-        runReport();
-    });     
-    runReport();
+    var reportContainer = $("#annual");
+    var reportRange = $("#reportRange");
+    var rangeInputs = $('.dateRange input');
+    if( rangeInputs.length > 0 ) {
+        rangeInputs.daterangepicker({
+            dateFormat : "dd/mm/yy",
+            onChange : function() {
+                runReport(reportRange.val(), reportContainer, window.location.pathname);
+            }
+        });         
+        $('#reportRange').change(function() {
+            log("change");
+            runReport(reportRange.val(), reportContainer, window.location.pathname);
+        });     
+        runReport(reportRange.val(), reportContainer, window.location.pathname);
+    }
 });
-function runReport() {
-    var range = $("#reportRange").val();
+function runReport(range, reportContainer, href) {
     var arr = range.split("-");
     log("range", range, arr)
-    var start = "";
+    var data = {};
     if( arr.length > 0 ) {
-        start = arr[0];
+        data.startDate = arr[0];
     }
-    var finish = "";
     if( arr.length > 1) {
-        finish = arr[1];
+        data.finishDate = arr[1];
     }
     $.ajax({
         type: 'GET',
-        url: window.location.pathname,
+        url: href,
         dataType: "json",
-        data: {
-            startDate: start,
-            finishDate : finish
-        },
+        data: data,
         success: function(resp) {
             log("response", resp.data);
-            showGraph(resp.data);
+            showGraph(resp.data, reportContainer);
                 
         }
     });                
 }
-function showGraph(graphData) {
-    log("showGraph", graphData);
-    $("#annual").html("");
+function showGraph(graphData, reportContainer) {
+    log("showGraph",reportContainer, graphData);
+    reportContainer.html("");
     if( graphData ) {
         Morris.Line({
-            element: 'annual',
+            element: reportContainer,
             data: graphData.data,
             xkey: graphData.xkey,
             ykeys: graphData.ykeys,
-            labels: graphData.labels
+            labels: graphData.labels,
+            hideHover: true
         });
     }
 }
