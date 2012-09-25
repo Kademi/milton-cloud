@@ -19,6 +19,8 @@ import io.milton.cloud.server.db.Comment;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommentBean;
 import io.milton.cloud.server.web.ProfileBean;
+import io.milton.common.Path;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -39,8 +41,9 @@ public class CommentService {
         this.currentDateService = currentDateService;
     }
 
-    public List<CommentBean> comments(UUID id) {
-        List<Comment> comments = Comment.findByContentId(id, SessionManager.session());
+    public List<CommentBean> comments(AbstractContentResource r) {
+        String contentId = getContentId(r);
+        List<Comment> comments = Comment.findByContentId(contentId, SessionManager.session());
         List<CommentBean> beans = new ArrayList<>();
         for (Comment c : comments) {
             CommentBean b = toBean(c);
@@ -50,7 +53,7 @@ public class CommentService {
     }
 
     public Comment newComment(AbstractContentResource r, String s, Website website, Profile poster, Session session) {
-        UUID contentId = r.loadNodeMeta().getId(); 
+        String contentId = getContentId(r);
         if (contentId == null) {
             throw new RuntimeException("No contentid for: " + r.getPath());
         }
@@ -68,6 +71,12 @@ public class CommentService {
         return c;
     }
 
+    public String getContentId(AbstractContentResource r) {
+        Path p = r.getPath();
+        Organisation org = r.getOrganisation();
+        return org.getOrgId() + ":" + p;
+    }
+    
     private CommentBean toBean(Comment c) {
         CommentBean b = new CommentBean();
         b.setComment(c.getNotes());

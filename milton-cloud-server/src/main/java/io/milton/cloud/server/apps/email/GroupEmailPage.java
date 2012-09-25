@@ -86,11 +86,13 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         Transaction tx = session.beginTransaction();
 
         if (parameters.containsKey("sendMail")) {
-            startSendJob(session);
+            boolean reallySend = WebUtils.getParamAsBool(parameters, "reallySend");
+            startSendJob(session, reallySend);
             tx.commit();
-
-            SendMailProcessable processable = new SendMailProcessable(job.getId());
-            _(AsynchProcessor.class).enqueue(processable);
+            if (reallySend) {
+                SendMailProcessable processable = new SendMailProcessable(job.getId());
+                _(AsynchProcessor.class).enqueue(processable);
+            }
 
         } else {
 
@@ -119,8 +121,8 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
-    }            
-    
+    }
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (params.containsKey("status")) {
@@ -369,11 +371,30 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
 
     }
 
-    private void startSendJob(Session session) {
-        job.setStatus("r");
+    private void startSendJob(Session session, boolean reallySend) {
         Date now = _(CurrentDateService.class).getNow();
-        job.setStatusDate(now);
-        session.save(job);
+        if (reallySend) {
+            log.info("Sending real email");
+            job.setStatus("r");
+            job.setStatusDate(now);
+            session.save(job);
+        } else {
+            log.info("Sending preview email");
+            //just send to current user immediately
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            EmailItem i = new EmailItem();
+            i.setCreatedDate(now);
+            i.setFromAddress(job.getFromAddress());
+            i.setHtml(job.getHtml()); // todo: templating
+            i.setJob(null);
+            i.setRecipient(p);
+            i.setRecipientAddress(p.getEmail());
+            i.setReplyToAddress(job.getFromAddress()); // todo: make this something more robust in terms of SPF?
+            i.setSendStatusDate(now);
+            i.setSubject(job.getSubject());
+            session.save(i);
+
+        }
     }
 
     private EmailSendAttempt findLastAttempt(EmailItem e) {
@@ -418,8 +439,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
         }
         return b;
     }
-    
-    
+
     public class SendStatus {
 
         private String statusCode;
@@ -448,8 +468,8 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
 
         /**
          * A list of email IDs of successfully completed email items
-         * 
-         * @return 
+         *
+         * @return
          */
         public List<Long> getSuccessful() {
             return successful;

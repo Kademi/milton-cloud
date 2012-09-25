@@ -7,7 +7,7 @@
     <body>
         <section id="manageEmail" class="MainContent">
             <header class="ClearFix">
-                <a class="SmallBtn Add" href="javascript:showAddJob()"><span>Send email</span></a>
+                <a class="SmallBtn Add" href="javascript:showAddJob()"><span>Create group email</span></a>
             </header>
             <div class="Content">
                 <header>
@@ -22,7 +22,7 @@
                     <li>
                         <div class="emailStatus${email.statusCode}">
                             <span class="Date">$formatter.formatDate($email.statusDate)</span>
-                            <span class="Name">$!email.title</span>
+                            <span class="Name">$formatter.htmlEncode($email.title)</span>
                             <span class="Status">$!email.status</span>
                             <aside>
                                 #if($email.status == "Draft" )

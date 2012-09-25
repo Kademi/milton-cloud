@@ -39,7 +39,9 @@
   
         log("register submit event", $("form", this));
   
-        $("form", this).submit(function() {
+        $("form", this).submit(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             try {
                 sendNewForumComment(config.pageUrl, $("textarea",this), config.renderCommentFn, config.currentUser);            
             } catch(e) {

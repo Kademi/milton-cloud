@@ -218,11 +218,6 @@ function addForum() {
                                                 ' + tempDialog + '\
                                         </div>\
                                 </header>\
-                                <div class="ContentForum ClearFix">\
-                                        <h4>Available Topics</h4>\
-                                        <ul class="TopicList" data-forum="' + maxOrderForum() + '"></ul>\
-                                        <button class="SmallBtn Add AddTopic"><span>Add New Topic</span></button>\
-                                </div>\
                         </div>\
                 ');
             $("#manageForum").append(newDiv);    

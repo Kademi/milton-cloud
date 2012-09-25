@@ -26,6 +26,7 @@ import java.util.Set;
 import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,6 +56,9 @@ public class BatchEmailService {
         }
         log.info("recipients: " + profiles.size());
         Date now = _(CurrentDateService.class).getNow();
+        if( j.getEmailItems() == null ) {
+            j.setEmailItems(new ArrayList<EmailItem>());
+        }
         for (Profile p : profiles) {
             EmailItem i = new EmailItem();
             i.setCreatedDate(now);
@@ -66,6 +70,7 @@ public class BatchEmailService {
             i.setReplyToAddress(j.getFromAddress()); // todo: make this something more robust in terms of SPF?
             i.setSendStatusDate(now);
             i.setSubject(j.getSubject());
+            j.getEmailItems().add(i);
             session.save(i);
             log.info("Created email item: " + i.getId() + " to " + p.getEmail());
         }

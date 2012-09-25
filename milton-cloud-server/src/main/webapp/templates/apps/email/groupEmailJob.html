@@ -95,10 +95,10 @@
                 <div class="TabContent">
                     <div class="Content Send">
                         <h4>Before you send be sure to check your email information, message content and recipients.</h4>
-                        <p><button class="Btn">PREVIEW YOUR EMAIL</button></p>
+                        <p><button class="Btn preview">PREVIEW YOUR EMAIL</button></p>
                         <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
                         <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
-                        <p><button class="Btn Big Cancel SendEmail" onclick="sendMail()">SEND NOW</button></p>
+                        <p><button class="Btn Big Cancel SendEmail send">SEND NOW</button></p>
                     </div>
                 </div>
                 <div class="TabContent status">
@@ -116,6 +116,9 @@
                             <div class="Percent"></div>
                             <div class="stats"></div>
                         </div>
+                        <br/>
+                        <br/>
+                        <strong>Failed and in progress emails, if any, are shown below</strong>
                         <table id="emails">
                             <thead>
                                 <tr>

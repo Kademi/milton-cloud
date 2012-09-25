@@ -91,9 +91,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                     writer.append("<link href='/static/inline-edit/inline-edit.css' rel='stylesheet' type='text/css' />\n");
                 }
                 // Resources for classifier - TODO: make this configurable somehow
-                writer.append("<script type='text/javascript' src='/static/classifier/jquery.mc-classifier.js'>//</script>\n");
                 writer.append("<script type='text/javascript' src='/static/common/jquery.debounce-1.0.5.js'>//</script>\n");
-                writer.append("<link href='/static/classifier/classifier.css' rel='stylesheet' type='text/css' />\n");
             }
         }
     }
@@ -215,6 +213,12 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         }
     }
     
+//    TODO: These roles should return privs as configured for the repository
+//            this will allow in milton content viewers to edit content for website repo
+//    
+//                    
+//                    Also, add Repository access screen to website
+                    
     public class ContentAuthorRole implements Role {
         
         @Override

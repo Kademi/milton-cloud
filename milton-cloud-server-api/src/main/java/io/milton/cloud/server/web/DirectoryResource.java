@@ -18,6 +18,7 @@ package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Response.Status;
@@ -133,7 +134,8 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
+        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this)); // For front end
+        MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
         getTemplater().writePage("myfiles/directoryIndex", this, params, out);
     }
 

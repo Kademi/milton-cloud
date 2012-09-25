@@ -74,8 +74,10 @@ public class ManageGroupEmailsPage extends AbstractResource implements GetableRe
         String nameToCreate = parameters.get("name");
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        GroupEmailJob job = new GroupEmailJob();
-        job.setName(nameToCreate);
+        GroupEmailJob job = new GroupEmailJob();        
+        job.setTitle(nameToCreate);
+        String nm = NewPageResource.findAutoCollectionName(nameToCreate, parent, parameters);
+        job.setName(nm);
         job.setOrganisation(organisation);
         Date now = _(CurrentDateService.class).getNow();
         job.setStatusDate(now);

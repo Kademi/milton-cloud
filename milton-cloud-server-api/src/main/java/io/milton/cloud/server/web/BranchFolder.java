@@ -6,6 +6,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.*;
 import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
@@ -205,6 +206,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
         log.trace("sendContent: render template");
         WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
+        MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
         getTemplater().writePage(false, "myfiles/directoryIndex", this, params, out);
     }
 

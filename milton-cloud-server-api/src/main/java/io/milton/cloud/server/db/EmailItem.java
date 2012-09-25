@@ -148,6 +148,10 @@ public class EmailItem implements Serializable {
         this.id = id;
     }
 
+    /**
+     * Optional reference to the job which caused this to be sent
+     * @return 
+     */
     @ManyToOne
     public BaseEmailJob getJob() {
         return job;

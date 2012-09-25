@@ -240,7 +240,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
     }
 
     public List<CommentBean> getComments() {
-        return _(CommentService.class).comments(this.loadNodeMeta().getId());
+        return _(CommentService.class).comments(this);
     }
 
     public int getNumComments() {

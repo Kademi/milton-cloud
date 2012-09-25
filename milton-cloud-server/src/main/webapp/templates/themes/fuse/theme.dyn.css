@@ -1037,25 +1037,6 @@ table.tree-browser {
     width: 100%;    
 }
 
-table.bar {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-table.bar tbody {
-    background-color: #F0F0F0;
-}
-
-table.bar td {
-    border-width: 1px 0;
-    vertical-align: middle;
-}
-table.bar td a {
-    color: $page.parent.settings.textColour2;
-}
-table.bar td a:hover {
-    text-decoration: none;
-}
 
 table.striped h2 {
     font-size: 14px;    
@@ -1089,6 +1070,7 @@ table.striped h1, table.striped h2, table.striped h3, table.striped h4 {
     margin-bottom:5px;
     text-align: left;
     position: relative;
+    min-height: 3em;
 }
 #comments div.forumReply div{
     position: absolute;
@@ -1098,6 +1080,14 @@ table.striped h1, table.striped h2, table.striped h3, table.striped h4 {
 #comments button {
     margin: 0;
 }
+#comments a.user {
+    font-size: 0.8em;
+}
+#comments p {
+    font-size: 0.7em;
+    padding: 0;
+}
+
 .error, .validationError, #validationMessage {
     font-size: 0.8em;
 }
@@ -2036,12 +2026,7 @@ a.user {
     color: #262626;    
     font-weight: bold;
 }
-#comments a.user {
-    font-size: 0.8em;
-}
-#comments p {
-    font-size: 0.7em;
-}
+
 
 ul.barList li .textBox{
     float:left;
@@ -2111,6 +2096,26 @@ table.bar tr.odd td {
     background-color: white;
 }
 
+
+table.bar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.bar tbody {
+    background-color: #F0F0F0;
+}
+
+table.bar td {
+    border-width: 1px 0;
+    vertical-align: middle;
+}
+table.bar td a {
+    color: $page.parent.settings.textColour2;
+}
+table.bar td a:hover {
+    text-decoration: none;
+}
 
 tr.seperator {
     display: block;

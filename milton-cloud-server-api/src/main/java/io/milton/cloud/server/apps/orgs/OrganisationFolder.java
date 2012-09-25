@@ -51,7 +51,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource {
+public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource, MakeCollectionableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationFolder.class);
     private final CommonCollectionResource parent;
@@ -85,6 +85,19 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         tx.commit();
     }
 
+    @Override
+    public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
+        Repository r = getOrganisation().createRepository(newName, currentUser, session);
+        tx.commit();
+        return new RepositoryFolder(this, r, false);               
+    }
+
+    
+    
     @Override
     public String getName() {
         return organisation.getName();

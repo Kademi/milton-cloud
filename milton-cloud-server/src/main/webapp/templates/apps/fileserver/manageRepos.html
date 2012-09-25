@@ -1,0 +1,66 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="manageRepos.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageRepos.js">//</script>
+    </head>
+    <body>
+        <section id="manageRepos" class="MainContent">
+            <div class="Left">
+                <a class="SmallBtn Add" onclick="return showAddItem(this)" href="#">Add new repository</a>
+                <div class="Modal">
+                    <header>
+                        <h3>Add new repository</h3>
+                        <a title="Close" href="#" class="Close"><span class="Hidden">Close</span></a>
+                    </header>
+
+                    <div class="ModalContent">
+                        <form class="addRepo" method="POST" action=".">
+                            <div class="pageMessage">.</div>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th><label for="newName">Enter a name</label></th>
+                                        <td><input type="text" class="required simpleChars" placeholder="Enter a simple name, eg MyFiles" id="newName" name="newName"/></td>
+                                    </tr>                                    
+                                    <tr>
+                                        <td class="BtnBar" colspan="2">
+                                            <button class="Btn">Save changes</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>                    
+                </div>
+            </div>
+
+            <table class="Summary tick">
+                #foreach($w in $page.repositories)
+                <tr>
+                    <td>
+                        <h5>$w.name</h5>
+                        <p>Details go here</p>
+                    </td>
+                    <th>
+                        <a href="../$w.name" class="Btn ViewWebsite">View</a> 
+                    </th>                                        
+                </tr>
+                #end
+
+            </table>
+        </section>
+        <script type="text/javascript">
+            jQuery(function() {
+                initManageRepositories();
+                $("form.addOrg").forms({
+                    callback: function(resp) {
+                        log("done", resp);
+                        window.location.reload();
+                    }
+                });                
+                
+            });
+        </script>
+    </body>
+</html>

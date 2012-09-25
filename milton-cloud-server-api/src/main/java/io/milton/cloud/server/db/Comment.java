@@ -35,7 +35,7 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("C")
 public class Comment extends Post {
     
-    public static List<Comment> findByContentId(UUID contentId, Session session) {
+    public static List<Comment> findByContentId(String contentId, Session session) {
         Criteria crit = session.createCriteria(Comment.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("contentId", contentId));
@@ -43,16 +43,16 @@ public class Comment extends Post {
         return DbUtils.toList(crit, Comment.class);        
     }
     
-    private UUID contentId;
+    private String contentId;
     private String contentHref;
     private String contentTitle;
 
     @Column(nullable=false)
-    public UUID getContentId() {
+    public String getContentId() {
         return contentId;
     }
 
-    public void setContentId(UUID contentId) {
+    public void setContentId(String contentId) {
         this.contentId = contentId;
     }
     

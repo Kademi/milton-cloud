@@ -198,16 +198,20 @@ public class SpliffySecurityManager {
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();
                 Role role = mapOfRoles.get(roleName);
+                Organisation checkOrg = withinOrg;
+                if( gr.getWithinOrg() != null ) {
+                    checkOrg = gr.getWithinOrg();
+                }
                 if (role != null) {
-                    if (role.appliesTo(resource, withinOrg, g)) {
-                        Set<Priviledge> privsToAdd = role.getPriviledges(resource, withinOrg, g);
+                    if (role.appliesTo(resource, checkOrg, g)) {
+                        Set<Priviledge> privsToAdd = role.getPriviledges(resource, checkOrg, g);
                         if (log.isTraceEnabled()) {
-                            log.trace("role:" + roleName + " does apply to: " + withinOrg.getName() + ", add privs " + privsToAdd);
+                            log.trace("role:" + roleName + " does apply to: " + checkOrg.getName() + ", add privs " + privsToAdd);
                         }
                         privs.addAll(privsToAdd);
                     } else {
                         if (log.isTraceEnabled()) {
-                            log.trace("role:" + roleName + " does not apply to: " + withinOrg.getName());
+                            log.trace("role:" + roleName + " does not apply to: " + checkOrg.getName());
                         }
                     }
 

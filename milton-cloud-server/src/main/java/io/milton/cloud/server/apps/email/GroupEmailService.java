@@ -79,8 +79,12 @@ public class GroupEmailService {
         }  
         batchEmailService.generateEmailItems(j, directRecips, session);
         
-        Date now = _(CurrentDateService.class).getNow();
-        j.setStatus("p");
+        if( directRecips.isEmpty()) {
+            j.setStatus(GroupEmailJob.STATUS_COMPLETED);
+        } else {
+            j.setStatus(GroupEmailJob.STATUS_IN_PROGRESS);
+        }
+        Date now = _(CurrentDateService.class).getNow();        
         j.setStatusDate(now);
         session.save(j);
         

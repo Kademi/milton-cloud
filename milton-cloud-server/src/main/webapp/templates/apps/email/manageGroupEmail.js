@@ -10,7 +10,17 @@ function initEditEmailPage() {
     addGroupBtn();
     eventForModal();
     initGroupCheckbox();
-    initStatusPolling();    
+    initStatusPolling();
+    $("button.send").click(function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        sendMail();
+    });
+    $("button.preview").click(function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        previewMail();
+    });
 }
 
 function initGroupCheckbox() {
@@ -293,23 +303,63 @@ function eventForModal() {
 	
 }
 
+function validateEmail() {
+    // Check it has recipients
+    if( $("ul.GroupList li").length == 0  ) {
+        alert("Please enter at least one recipient");
+        return false;
+    }
+    // Check it has a message
+    var msg = $("textarea[name=html]").val();
+    if( msg == null || msg.length == 0 ) {
+        alert("Please enter a message to send");
+        return false;
+    }
+    // Check subject
+    var subject = $("input[name=subject]").val();
+    if( subject == null || subject.length == 0) {
+        alert("Please enter a subject for the email");
+        return false;
+    }
+    // Check from address    
+    var fromAddress = $("input[name=fromAddress]").val();
+    if( fromAddress == null || fromAddress.length == 0) {
+        alert("Please enter a from address for the email");
+        return false;
+    }
+    return true;
+}
+
 function sendMail() {
-    log("sendMail click");
-		
-    //    $('div.Send').addClass('Hidden');
-    //    $('div.SendProgress').removeClass('Hidden');
-        
+    sendMailAjax(true);
+}
+
+function previewMail() {
+    sendMailAjax(false);
+}
+
+function sendMailAjax(reallySend) {
+    if( !validateEmail() ) {
+        return;
+    }
     try {
         $.ajax({
             type: 'POST',
             url: window.location.href,
             data: {
-                sendMail: "true"
+                sendMail: "true",
+                reallySend: reallySend
             },
             success: function(data) {
                 log("send has been initiated", data);
-                $(".TabContent").hide();
-                $(".TabContent.status").show();
+                if( reallySend ) {
+                    alert("Email sending has been initiated. If there is a large number of users this might take some time. This screen will display progress");
+                    $(".TabContent").hide();
+                    $(".TabContent.status").show();       
+                    initStatusPolling();
+                } else {
+                    alert("The preview email has been sent to your email address. Please review it");
+                }
             },
             error: function(resp) {
                 log("error", resp);
@@ -328,7 +378,7 @@ function initStatusPolling() {
 }
 
 function pollStatus() {
-    log("pollStatus");
+    //log("pollStatus");
     if( $("div.status:visible").length == 0 ) {
         window.setTimeout(pollStatus, 2000);
         return;
@@ -341,9 +391,13 @@ function pollStatus() {
             data: {
                 status: "true"
             },
-            success: function(resp) {
+            success: function(resp) {                
                 displayStatus(resp.data);
-                window.setTimeout(pollStatus, 2000);
+                if( resp.data.statusCode != "c") {
+                    window.setTimeout(pollStatus, 2000);
+                } else {
+                    log("job status is finished, so don't poll");
+                }
             },
             error: function(resp) {
                 log("error", resp);
@@ -377,8 +431,10 @@ function displayStatus(data) {
         }
         $("div.status div.stats").text(txtProgress);
         
-        $.each(data.successful, function(i, e) {
-            tbody.find("#" + e.emailId).remove();
+        $.each(data.successful, function(i, emailId) {
+            var tr = tbody.find("#" + emailId);
+            log("remove", emailId, tr)
+            tr.remove();
         });
         addRows(data.sending, "Sending..", tbody);
         addRows(data.retrying, "Retrying..", tbody);

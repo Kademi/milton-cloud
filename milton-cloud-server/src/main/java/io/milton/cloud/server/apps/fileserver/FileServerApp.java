@@ -12,13 +12,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.syncpush;
+package io.milton.cloud.server.apps.fileserver;
 
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.LifecycleApplication;
+import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.admin.ManageAppsPage;
+import io.milton.cloud.server.apps.admin.ManageGroupsFolder;
+import io.milton.cloud.server.apps.admin.ManageOrgsPage;
+import io.milton.cloud.server.apps.admin.ManageUsersFolder;
+import io.milton.cloud.server.apps.admin.ManageWebsitesFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
+import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -27,13 +41,12 @@ import io.milton.vfs.db.utils.SessionManager;
  *
  * @author brad
  */
-public class FileSyncPushNotificationsApp implements LifecycleApplication{
+public class FileServerApp implements LifecycleApplication, MenuApplication, ChildPageApplication {
 
     public static final int DEFAULT_PUSH_SYNC_PORT = 7020;
     public static final String DEFAULT_PUSH_SYNC_NAME = "push.sync.port";
-    
     private PushManager pushManager;
-    
+
     @Override
     public String getInstanceId() {
         return "fileSyncPush";
@@ -42,14 +55,14 @@ public class FileSyncPushNotificationsApp implements LifecycleApplication{
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         Integer port = config.getInt(DEFAULT_PUSH_SYNC_NAME);
-        if( port == null ) {
+        if (port == null) {
             port = DEFAULT_PUSH_SYNC_PORT;
         }
         CurrentRootFolderService currentRootFolderService = config.getContext().get(CurrentRootFolderService.class);
         SessionManager sessionManager = resourceFactory.getSessionManager();
         pushManager = new PushManager(port, resourceFactory.getEventManager(), resourceFactory.getSecurityManager(), currentRootFolderService, sessionManager);
         config.getContext().put(pushManager);
-        
+
         pushManager.start();
     }
 
@@ -72,5 +85,36 @@ public class FileSyncPushNotificationsApp implements LifecycleApplication{
     public void initDefaultProperties(AppConfig config) {
         config.setInt(DEFAULT_PUSH_SYNC_NAME, DEFAULT_PUSH_SYNC_PORT);
     }
-    
+
+    @Override
+    public void appendMenu(MenuItem parent) {
+        String parentId = parent.getId();
+        OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
+        if (parentOrg == null) {
+            return;
+        }
+        Path parentPath = parentOrg.getPath();
+        switch (parentId) {
+            case "menuDashboard":
+                parent.getOrCreate("menuFileManager", "File manager").setOrdering(40);
+                break;
+            case "menuFileManager":
+                parent.getOrCreate("menuManageRepos", "Manage repositories", parentPath.child("manageRepos")).setOrdering(10);
+                break;
+        }
+    }
+
+    @Override
+    public Resource getPage(Resource parent, String requestedName) {
+        if (parent instanceof OrganisationFolder) {
+            CommonCollectionResource p = (CommonCollectionResource) parent;
+            switch (requestedName) {
+                case "manageRepos":
+                    MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos");
+                    return new ManageRepositoriesFolder(requestedName, p.getOrganisation(), p);
+
+            }
+        }
+        return null;
+    }
 }

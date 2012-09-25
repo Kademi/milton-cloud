@@ -50,6 +50,11 @@ import org.hibernate.Transaction;
 
 /**
  * Listens for PUT events and generates alternative file formats as appropriate
+ * 
+ * Ubuntu commands to setup native dependencies:
+ * sudo apt-get install libav-tools
+ * sudo apt-get install mediainfo
+ * sudo apt-get install libavcodec-extra-53
  *
  * @author brad
  */

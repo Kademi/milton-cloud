@@ -40,7 +40,7 @@
                         dataType: "json",
                         success: function(resp) {
                             ajaxLoadingOff();                            
-                            if( resp.status) {
+                            if( resp && resp.status) {
                                 log("save success", resp)
                                 config.callback(resp, form)
                             } else {

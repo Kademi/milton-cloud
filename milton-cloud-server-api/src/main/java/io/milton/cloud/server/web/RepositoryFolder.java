@@ -37,6 +37,7 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.http.Request.Method;
 
 /**
  * A RepositoryFolder just holds the branches of the folder
@@ -77,6 +78,22 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return children;
     }
 
+    @Override
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
+        if( request.getMethod().equals(Method.GET)) {
+            if( request.getParams().isEmpty()) {
+                Branch b = repo.getTrunk();
+                if( b != null) {
+                    BranchFolder bf = new BranchFolder(b.getName(), this, b, renderMode);
+                    return bf.getHref();
+                }
+            }
+        }
+        return super.checkRedirect(request);
+    }
+
+    
+    
     public String getTitle() {
         return repo.getTitle();
     }

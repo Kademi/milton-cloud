@@ -140,14 +140,14 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     /**
      * getContentType will return the content type of the data which will be
-     * generated for this request, which might be a transformation of the underlying
-     * data (eg transformed to JSON)
-     * 
+     * generated for this request, which might be a transformation of the
+     * underlying data (eg transformed to JSON)
+     *
      * getUnderlyingContentType returns the content type of the underlying data,
      * which is invariant with respect to request information
-     * 
+     *
      * @param accepts
-     * @return 
+     * @return
      */
     public String getUnderlyingContentType() {
         String acceptable = ContentTypeUtils.findContentTypes(getName().toLowerCase());
@@ -169,7 +169,11 @@ public class FileResource extends AbstractContentResource implements Replaceable
         if (fileNode == null || fileNode.getHash() == null) {
             return null;
         }
-        return fileNode.getContentLength();
+        try {
+            return fileNode.getContentLength();
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     @Override
@@ -286,9 +290,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     @Override
     public boolean is(String type) {
-        return is(type,getName());
+        return is(type, getName());
     }
-    
+
     public boolean is(String type, String name) {
         if (type.equals("file")) {
             return true;
@@ -308,7 +312,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             }
         }
         return false;
-    }    
+    }
 
     @Override
     public void setHash(String s) {

@@ -216,12 +216,10 @@ nav#nav li a {
 }
 .menu li li a {
     background:url(images/circle.png) left center no-repeat !important;
-    padding:0 0 0 18px !important;
+    padding: 6px 0 6px 18px !important;
     font-weight:bold;
     color:#2e2e2e;
-    display: block;
-    height: 30px;
-    line-height: 30px;
+    display: block;    
 }
 .menu li li a.active, .menu li li a:hover { background:url(images/circle-blue.png) left center no-repeat !important }
 .changebackg { background:url(images/arrow-open.png) 177px 15px no-repeat }
@@ -1015,4 +1013,77 @@ ul.barList small{
     background:url(images/plus.gif) top left no-repeat;
     padding-left:10px;
     background-position:0 4px;
+}
+
+
+
+table.bar thead * {
+    color: white;
+}
+table.bar .left {
+    text-align: left;
+}
+
+table.bar td, table.bar th {
+    padding: 5px;
+    vertical-align: central;
+    text-align: center;
+}
+table.bar thead tr th {
+    background: #45AFDF;
+    border: none;
+    font-size: 0.9em;
+    font-style: italic;    
+    font-weight: 400;    
+}
+
+table.bar thead th:first-child {
+    border-radius: 5px 0 0 5px;
+    font-style: normal;
+    text-align: left;
+}
+
+table.bar th:first-child, table.bar td:first-child {
+    padding-left: 10px;    
+}
+
+table.bar th:last-child, table.bar td:last-child {
+    padding-right: 10px;    
+}
+
+table.bar thead tr th:last-child {
+    border-radius: 0 5px 5px 0;
+}
+table.bar tr.odd td {
+    background-color: white;
+}
+
+
+table.bar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.bar tbody {
+    background-color: #F0F0F0;
+}
+
+table.bar td {
+    border-width: 1px 0;
+    vertical-align: middle;
+}
+table.bar td a {
+    color: #333333;
+    font-size: 12px;
+}
+table.bar td a:hover {
+    text-decoration: none;
+}
+
+.directory .fileupload-buttonbar {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.directory .fileupload-buttonbar .muploadBtn span{
+    top: 0.2em;
 }

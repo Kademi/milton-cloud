@@ -1,4 +1,4 @@
-package io.milton.cloud.server.apps.syncpush;
+package io.milton.cloud.server.apps.fileserver;
 
 import io.milton.cloud.server.sync.push.AreYouThere;
 import io.milton.cloud.server.sync.push.MemberRemoved;

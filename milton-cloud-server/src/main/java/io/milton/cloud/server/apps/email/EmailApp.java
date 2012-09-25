@@ -152,8 +152,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if (parent instanceof GroupEmailAdminFolder) {
-            GroupEmailAdminFolder faf = (GroupEmailAdminFolder) parent;
+        if (parent instanceof ManageGroupEmailsFolder) {
+            ManageGroupEmailsFolder faf = (ManageGroupEmailsFolder) parent;
             if (requestedName.equals("manage")) {
                 MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
                 return new ManageGroupEmailsPage(requestedName, faf.getOrganisation(), faf);
@@ -172,7 +172,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
-            children.add(new GroupEmailAdminFolder("groupEmails", orgFolder, orgFolder.getOrganisation()));
+            children.add(new ManageGroupEmailsFolder("groupEmails", orgFolder, orgFolder.getOrganisation()));
             children.add(new ManageAutoEmailsFolder("autoEmails", orgFolder, orgFolder.getOrganisation()));
         }
         if (parent instanceof BaseEntityResource) {
