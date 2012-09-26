@@ -23,6 +23,7 @@ import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
@@ -121,17 +122,19 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
         if (curUser == null) {
             return;
         }
-        switch (parent.getId()) {
-            case "menuRoot":
-                String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
-                for (Repository r : curUser.getRepositories()) {
-                    if (r.type().equals("R")) { // dont handle specialised repo's like contacts
-                        String repoHref = userHref + r.getName() + "/";
-                        String title = r.getTitle() == null ? r.getName() : r.getTitle();
-                        parent.getOrCreate("menu-myfiles-" + r.getName(), title, repoHref).setOrdering(50);
+        if (parent.getRootFolder() instanceof WebsiteRootFolder) {
+            switch (parent.getId()) {
+                case "menuRoot":
+                    String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
+                    for (Repository r : curUser.getRepositories()) {
+                        if (r.type().equals("R")) { // dont handle specialised repo's like contacts
+                            String repoHref = userHref + r.getName() + "/";
+                            String title = r.getTitle() == null ? r.getName() : r.getTitle();
+                            parent.getOrCreate("menu-myfiles-" + r.getName(), title, repoHref).setOrdering(50);
+                        }
                     }
-                }
-                break;
+                    break;
+            }
         }
 
     }

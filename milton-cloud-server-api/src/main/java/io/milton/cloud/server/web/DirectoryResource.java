@@ -87,6 +87,8 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
             _(ApplicationManager.class).addBrowseablePages(this, children);
             children = children.getSortByName(); // ensure a stable and predictable sorting
+            System.out.println("xxx getChildren: " + getHref());
+            System.out.println(" = " + children.size());
         }
         return children;
     }
@@ -187,44 +189,54 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
+        return getIndex(false);
+    }
+    
+    public RenderFileResource getIndex(boolean autoCreate) throws NotAuthorizedException, BadRequestException {
         if (indexPage == null) {
-            indexPage = getHtmlPage("index.html", true);
+            indexPage = getHtmlPage("index.html", autoCreate);
         }
         return indexPage;
     }
 
+    @Override
     public FileResource getOrCreateFile(String name) throws NotAuthorizedException, BadRequestException {
         Resource r = child(name);
         FileResource fr;
-        if( r == null ) {
+        if (r == null) {
             DataSession.FileNode newNode = getDirectoryNode().addFile(name);
             fr = new FileResource(newNode, this);
         } else {
-            if( r instanceof FileResource) {
-                fr = (FileResource) r;          
+            if (r instanceof FileResource) {
+                fr = (FileResource) r;
             } else {
                 throw new RuntimeException("Resource exists, but is not a FileResource: " + name + " is a " + r.getClass());
             }
         }
         return fr;
     }
-    
-    public DirectoryResource getOrCreateDirectory(String name) throws NotAuthorizedException, NotAuthorizedException, BadRequestException {
+
+    @Override
+    public DirectoryResource getOrCreateDirectory(String name, boolean autoCreate) throws NotAuthorizedException, NotAuthorizedException, BadRequestException {
         Resource r = child(name);
         DirectoryResource fr;
-        if( r == null ) {
-            DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
-            fr = new DirectoryResource(newNode, this, false);
+        if (r == null) {
+            if (autoCreate) {
+                DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
+                fr = new DirectoryResource(newNode, this, false);
+            } else {
+                return null;
+            }
         } else {
-            if( r instanceof DirectoryResource) {
-                fr = (DirectoryResource) r;          
+            if (r instanceof DirectoryResource) {
+                fr = (DirectoryResource) r;
             } else {
                 throw new RuntimeException("Resource exists, but is not a DirectoryResource: " + name + " is a " + r.getClass());
             }
         }
         return fr;
-    }    
-    
+    }
+
     public RenderFileResource getHtmlPage(String name, boolean autocreate) throws NotAuthorizedException, BadRequestException {
         RenderFileResource rfr;
         Resource r = child(name);
@@ -270,7 +282,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     }
 
     public void setTitle(String s) throws NotAuthorizedException, BadRequestException {
-        RenderFileResource r = getIndex();
+        RenderFileResource r = getIndex(true);
         if (r != null) {
             updatedIndex = true;
             r.setTitle(s);
@@ -291,7 +303,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void setParam(String name, String value) throws NotAuthorizedException, BadRequestException {
-        RenderFileResource html = getIndex();
+        RenderFileResource html = getIndex(true);
         updatedIndex = true;
         html.setParam(name, value);
     }
@@ -387,7 +399,8 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         List<ContentResource> list = new ArrayList<>();
         for (Resource r : getChildren()) {
             if ((r instanceof ContentResource) && !(r instanceof ContentDirectoryResource)) {
-                list.add((ContentResource) r);
+                ContentResource cr = (ContentResource) r;
+                list.add(cr);
             }
         }
         return list;

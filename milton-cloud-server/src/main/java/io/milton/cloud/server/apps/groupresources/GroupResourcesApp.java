@@ -3,9 +3,13 @@ package io.milton.cloud.server.apps.groupresources;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
@@ -50,6 +54,12 @@ public class GroupResourcesApp implements MenuApplication, ChildPageApplication 
                     return new ResourcesPage(requestedName, wrf);
                     
             }
+        } else if( parent instanceof OrganisationFolder ) {
+            OrganisationFolder parentOrg = (OrganisationFolder) parent;
+            if( requestedName.equals("manageGroupResources")) {
+                MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager","menuGroupResources");
+                return new ManageGroupResourcesPage(requestedName, parentOrg);
+            }
         }
 
         return null;
@@ -57,7 +67,7 @@ public class GroupResourcesApp implements MenuApplication, ChildPageApplication 
 
     @Override
     public void appendMenu(MenuItem parent) {
-        String parentId = parent.getId();
+        String parentId = parent.getId();        
         switch (parentId) {
             case "menuRoot":
                 if (parent.getRootFolder() instanceof WebsiteRootFolder) {
@@ -65,6 +75,13 @@ public class GroupResourcesApp implements MenuApplication, ChildPageApplication 
                         parent.getOrCreate("menuResources", "Resources", "/resources").setOrdering(30);
                     }
                 }
+                break;
+            case "menuWebsiteManager":
+                OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
+                Path parentPath = parentOrg.getPath();                
+                parent.getOrCreate("menuGroupResources", "Group resources", parentPath.child("manageGroupResources")).setOrdering(90);
+                break;
+                
         }
     }
 }

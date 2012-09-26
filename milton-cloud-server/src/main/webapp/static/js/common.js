@@ -586,6 +586,26 @@ function createFolder(name, parentHref, callback) {
     });
 }
 
+/**
+ *  Prompts the user for a new name, and the does a rename (ie move)
+ */
+function promptRename(sourceHref, callback) {
+    var currentName = getFileName(sourceHref);
+    var newName = prompt("Please enter a new name for " + currentName, currentName);
+    if( newName ) {
+        newName = newName.trim();
+        if( newName.length > 0 && currentName != newName ) {        
+            var currentFolder = getFolderPath(sourceHref);
+            var dest = currentFolder;
+            if( !dest.endsWith("/")) {
+                dest += "/";
+            }
+            dest += newName;
+            move(sourceHref, dest, callback);
+        }
+    }
+}
+
 function move(sourceHref, destHref, callback) {
     //    ajaxLoadingOn();    
     var url = "_DAV/MOVE";

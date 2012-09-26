@@ -48,5 +48,16 @@ public interface ContentDirectoryResource extends CommonCollectionResource, Cont
     
     FileResource getOrCreateFile(String name) throws NotAuthorizedException, BadRequestException;
             
-    DirectoryResource getOrCreateDirectory(String name) throws NotAuthorizedException, NotAuthorizedException, BadRequestException; 
+    /**
+     * Locate teh given directory if it exists, and if it doesnt create it if
+     * autoCreate is true
+     * 
+     * @param name
+     * @param autoCreate
+     * @return
+     * @throws NotAuthorizedException
+     * @throws NotAuthorizedException
+     * @throws BadRequestException 
+     */
+    DirectoryResource getOrCreateDirectory(String name, boolean autoCreate) throws NotAuthorizedException, NotAuthorizedException, BadRequestException; 
 }

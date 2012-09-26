@@ -91,12 +91,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException{
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 
     @Override
-    public ResourceList getChildren() throws NotAuthorizedException, BadRequestException{
+    public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
         }
@@ -413,42 +413,47 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public Profile getOwnerProfile() {
         Branch b = getBranch();
         BaseEntity be = b.getRepository().getBaseEntity();
-        if( be instanceof Profile) {
+        if (be instanceof Profile) {
             return (Profile) be;
         }
         return null;
     }
 
+    @Override
     public FileResource getOrCreateFile(String name) throws NotAuthorizedException, BadRequestException {
         Resource r = child(name);
         FileResource fr;
-        if( r == null ) {
+        if (r == null) {
             DataSession.FileNode newNode = getDirectoryNode().addFile(name);
             fr = new FileResource(newNode, this);
         } else {
-            if( r instanceof FileResource) {
-                fr = (FileResource) r;          
+            if (r instanceof FileResource) {
+                fr = (FileResource) r;
             } else {
                 throw new RuntimeException("Resource exists, but is not a FileResource: " + name + " is a " + r.getClass());
             }
         }
         return fr;
-    }    
-    
-    public DirectoryResource getOrCreateDirectory(String name) throws NotAuthorizedException, NotAuthorizedException, BadRequestException {
+    }
+
+    @Override
+    public DirectoryResource getOrCreateDirectory(String name, boolean autoCreate) throws NotAuthorizedException, NotAuthorizedException, BadRequestException {
         Resource r = child(name);
         DirectoryResource fr;
-        if( r == null ) {
-            DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
-            fr = new DirectoryResource(newNode, this, false);
+        if (r == null) {
+            if (autoCreate) {
+                DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
+                fr = new DirectoryResource(newNode, this, false);
+            } else {
+                return null;
+            }
         } else {
-            if( r instanceof DirectoryResource) {
-                fr = (DirectoryResource) r;          
+            if (r instanceof DirectoryResource) {
+                fr = (DirectoryResource) r;
             } else {
                 throw new RuntimeException("Resource exists, but is not a DirectoryResource: " + name + " is a " + r.getClass());
             }
         }
         return fr;
     }
-    
 }

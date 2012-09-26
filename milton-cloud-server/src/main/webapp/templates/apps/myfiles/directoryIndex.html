@@ -3,6 +3,7 @@
         <title>Directory</title>
         <link href="directoryIndex.css" rel="stylesheet" type="text/css" />
         <link href="/static/css/jquery.lightbox-0.5.css" rel="stylesheet" type="text/css" media="screen" />
+        <script type="text/javascript" src="myfiles.js"></script>
     </head>    
     <body class="directory">
         <div class="input" id='myUploaded'></div>
@@ -11,7 +12,7 @@
                 <tr>
                     <th colspan="2">Files: $page.name</th>
                     <th>Modified</th>
-                    <th>Download</th>
+                    <th>Tools</th>
                 </tr>
                 <tr class="seperator">
 
@@ -28,9 +29,7 @@
                     </td>
                     <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$f.modifiedDate</abbr></td>
                     <td>
-                        <a href="$f.href" class="downloadIcon">
-                            <span>Download</span>                            
-                        </a>
+                        
                     </td>
                 </tr>
                 #end
@@ -43,11 +42,9 @@
                     <td class="left">
                         <a href="$f.href" class="$imgClass">$f.name</a>
                     </td>
-                    <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$f.modifiedDate</abbr></td>
+                    <td><abbr title="$formatter.formatDateISO8601($!f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
                     <td>
-                        <a href="$f.href" class="downloadIcon">
-                            <span>Download</span>                            
-                        </a>
+                        <a href="$f.href" class="hidden">hidden</a>
                     </td>
                 </tr>
                 #end                 
@@ -56,50 +53,6 @@
         <script type="text/javascript" src="/static/js/types.js">// </script>
         <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
         <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>
-        <script type="text/javascript" src="/static/js/jquery.lightbox-0.5.js"></script>
-        <script type="text/javascript">       
-            jQuery(document).ready(function(){
-                initFiles();
-                $("#myUploaded").mupload({
-                    url: window.location.pathname,
-                    buttonText: "Upload a file",
-                    oncomplete: function(data, name, href) {
-                        // reload the file list
-                        log("uploaded ok, now reload file list")
-                        $.get(window.location.pathname, "", function(resp) {
-                            log("got file list", resp);
-                            var html = $(resp);
-                            $("#fileList").replaceWith(html.find("#fileList"));
-                            initPseudoClasses();
-                            initFiles();
-                        });
-                    }
-                });
-            });            
-            function initFiles() {
-                $('a.image').each(function(i, n) {
-                    var href = $(n).attr("href");
-                    $(n).attr("href", href + "/alt-640-360.png");
-                });
-                $('a.image').lightBox(
-                {
-                    imageLoading: '/static/images/lightbox-ico-loading.gif',
-                    imageBtnClose: '/static/images/lightbox-btn-close.gif',
-                    imageBtnPrev: '/static/images/lightbox-btn-prev.gif',
-                    imageBtnNext: '/static/images/lightbox-btn-next.gif',
-                    imageBlank: '/static/images/lightbox-blank.gif',
-                    containerResizeSpeed: 350                    
-                }                
-            );
-                jQuery("abbr.timeago").timeago();
-                jQuery("table.bar .file a").each(function(index, node) {                    
-                    tag = $(node);
-                    var href = tag.attr("href");
-                    var icon = findIconByExt(href);
-                    $("img", tag).attr("src", icon);
-                });
-            
-            }
-        </script>   
+        <script type="text/javascript" src="/static/js/jquery.lightbox-0.5.js"></script>        
     </body>
 </html>

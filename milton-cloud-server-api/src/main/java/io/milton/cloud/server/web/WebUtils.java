@@ -60,6 +60,12 @@ public class WebUtils {
         return s;
     }
 
+    /**
+     * Find the nearest OrganisationFolder to the given resource
+     * 
+     * @param page
+     * @return 
+     */
     public static OrganisationFolder findParentOrg(Resource page) {
         if (page instanceof OrganisationFolder) {
             return (OrganisationFolder) page;
