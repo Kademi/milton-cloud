@@ -250,20 +250,22 @@ function eventForModal() {
             case "Group":
                 var _name = _modal.find("input[name=name]").val();
                 // Check name textbox is blank or not
-                if(_name.trim() !== "") {
-				
-                    // If is adding Group		
-                    if(_type === "Add") {
+                if(_name.trim() !== "") {				                    
+                    if(_type === "Add") { // If is adding Group		
                         createFolder(_name, null, function(name, resp) {
                             window.location.reload();                        
+                        });					                    
+                    } else { // If is editing Group
+                        var groupDiv = $("div.Group").filter("[data-group=" + _modal.attr("data-group") + "]");
+                        var groupNameSpan = groupDiv.find("header div.ShowDialog span");
+                        var src = groupNameSpan.text();
+                        src = $.URLEncode(src);
+                        var dest = _name;                        
+                        //dest = $.URLEncode(dest);
+                        dest = window.location.pathname + dest;
+                        move(src, dest, function() {                                                        
+                            groupNameSpan.text(_name);                            
                         });
-					
-                    // If is editing Group
-                    } else {
-                        $("div.Group")
-                        .filter("[data-group=" + _modal.attr("data-group") + "]")
-                        .find("header div.ShowDialog span")
-                        .html(_name);
                     }
 				
                     resetModalControl();

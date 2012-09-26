@@ -325,6 +325,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     @Override
     public void delete(Session session) {
+        // Delete links from this to each parent
+        if( getParentOrgLinks() != null ) {
+            for( SubOrg so : getParentOrgLinks()) {
+                session.delete(so);
+            }
+            setParentOrgLinks(null);
+        }
         if (getWebsites() != null) {
             for (Website w : getWebsites()) {
                 w.delete(session);
@@ -341,7 +348,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             childOrg.delete(session);
         }
         session.delete(this);
-
+        Organisation parent = getOrganisation();
+        if( parent != null ) {
+            parent.getChildOrgs().remove(this);
+            session.save(parent);
+        }
     }
 
     /**

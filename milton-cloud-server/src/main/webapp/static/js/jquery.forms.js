@@ -242,7 +242,7 @@ function checkValidEmailAddress(container) {
 function checkSimpleChars(container) {
     var target = $(".simpleChars", container); // either with id of email, or with class email
     var isOk = true;
-    var pattern = new RegExp("^[a-zA-Z0-9_]+$");
+    var pattern = new RegExp("^[a-zA-Z0-9_\.]+$");
     target.each(function(i, n) {
         var node = $(n);
         var val = node.val();

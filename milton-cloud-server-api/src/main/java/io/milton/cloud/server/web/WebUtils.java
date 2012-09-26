@@ -26,7 +26,6 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -96,19 +95,25 @@ public class WebUtils {
     public static String findAutoName(CollectionResource folder, Map<String, String> parameters) {
         String nameToUse = getImpliedName(parameters, folder);
         if (nameToUse != null) {
-            nameToUse = nameToUse.toLowerCase().replace("/", "");
-            nameToUse = nameToUse.replace("'", "");
-            nameToUse = nameToUse.replace("\"", "");
-            nameToUse = nameToUse.replace("@", "-");
-            nameToUse = nameToUse.replace(" ", "-");
-            nameToUse = nameToUse.replace("?", "-");
-            nameToUse = nameToUse.replace(":", "-");
-            nameToUse = nameToUse.replace("--", "-");
-            nameToUse = nameToUse.replace("--", "-");
+            nameToUse = nameToUse.toLowerCase();
+            nameToUse = replaceSpecialChars(nameToUse);
             nameToUse = WebUtils.getUniqueName(folder, nameToUse);
         } else {
             nameToUse = WebUtils.getDateAsNameUnique(folder);
         }
+        return nameToUse;
+    }
+
+    public static String replaceSpecialChars(String nameToUse) {
+        nameToUse = nameToUse.replace("/", "");
+        nameToUse = nameToUse.replace("'", "");
+        nameToUse = nameToUse.replace("\"", "");
+        nameToUse = nameToUse.replace("@", "-");
+        nameToUse = nameToUse.replace(" ", "-");
+        nameToUse = nameToUse.replace("?", "-");
+        nameToUse = nameToUse.replace(":", "-");
+        nameToUse = nameToUse.replace("--", "-");
+        nameToUse = nameToUse.replace("--", "-");
         return nameToUse;
     }
 
@@ -285,5 +290,4 @@ public class WebUtils {
         }
         return s.equalsIgnoreCase("true");
     }
-    
 }

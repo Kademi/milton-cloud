@@ -94,6 +94,7 @@
                     <div class="groups">
                         <h3>Group membership</h3>
                         <p>Please select a group and an organisation to make this user a member of</p>
+                        <label for="orgId">Organisation:</label>
                         <input type="text" class="required" autocomplete="off" name="orgId" id="orgId" value="$page.organisation.orgId" />
                         <table id="orgSearchResults">
                             #if( $page.orgSearchResults.isEmpty() ) 
@@ -110,9 +111,11 @@
                             #end
                         </table>                
 
+                        <h4>Group:</h4>
                         <ul>
                             #foreach($group in $groups)
-                            #set($id = "radGroup_" + $group.name)
+                            #set($id1 = $formatter.htmlAttEncode($group.name))
+                            #set($id = "radGroup_" + $id1)
                             <li>
                                 $formatter.radio($id, "group", false, $group.name)
                                 <label for="$id">$group.name</label>

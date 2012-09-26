@@ -44,9 +44,13 @@ public class MediaInfoService {
         String ext = FileUtils.getExtension(fileResource.getName());
         File file = createSourceFile(fileResource.getHash(), ext);
         System.out.println("run media info runner...");
+        return getInfo(file);
+    }
+    
+    public MediaInfo getInfo(File file) throws IOException {
         MediaInfoRunner runner = new MediaInfoRunner();
         return runner.getInfo(file);
-    }
+    }    
     
     private File createSourceFile(String fileHash, String ext) {
         File temp = null;

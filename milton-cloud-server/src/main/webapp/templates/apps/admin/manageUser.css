@@ -3,160 +3,160 @@
 #manageUser > header { padding-bottom: 5px; position: relative; }
 #manageUser > header .Right { float: right; }
 #manageUser > header .Right button {
-	padding: 0;
-	width: 35px;
-	background-position: 50% 50%;
-	background-repeat: no-repeat;
+    padding: 0;
+    width: 35px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
 }
 #manageUser > header .Left {
-	margin-right: 80px;
-	border: 1px solid #dedede;
-	border-radius: 3px;
-	height: 24px;
-	line-height: 24px;
+    margin-right: 80px;
+    border: 1px solid #dedede;
+    border-radius: 3px;
+    height: 24px;
+    line-height: 24px;
 }
 #manageUser > header .Left a.Search {
-	display: block;
-	float: left;
-	border-radius: 3px 0 0 3px;
-	border-right: 1px solid #dedede;
-	width: 35px;
-	height: 24px;
+    display: block;
+    float: left;
+    border-radius: 3px 0 0 3px;
+    border-right: 1px solid #dedede;
+    width: 35px;
+    height: 24px;
 }
 #manageUser > header .Left nav {
-	float: left;
-	padding: 0 8px;
+    float: left;
+    padding: 0 8px;
 }
 #manageUser > header .Left nav a {
-	color: #333;
-	text-decoration: underline;
-	font-size: 11px;
+    color: #333;
+    text-decoration: underline;
+    font-size: 11px;
 }
 #manageUser > header .Left div.Info {
-	position: absolute;
-	top: 27px;
-	left: 0;
-	right: 0;
-	z-index: 999;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-	padding-bottom: 20px;
+    position: absolute;
+    top: 27px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding-bottom: 20px;
 }
 #manageUser > header .Left div.Info table.Summary {
-	border-bottom: 1px solid #dedede;
+    border-bottom: 1px solid #dedede;
 }
 /* Table summary with search button */
 #manageUser div.Info {
-	border: 1px solid #dedede;
-	border-radius: 3px;
-	background: #FFF;
+    border: 1px solid #dedede;
+    border-radius: 3px;
+    background: #FFF;
 }
 #manageUser div.Info > header {
-	background-color: #f0f0f0;
-	padding: 8px;
+    background-color: #f0f0f0;
+    padding: 8px;
 }
 #manageUser div.Info header div.Setting {
-	float: right;
-	position: relative;
+    float: right;
+    position: relative;
 }
 #manageUser div.Info header div.Setting > a {
-	display: block;
-	width: 28px;
-	height: 24px;
-	border: 1px solid #dedede;
-	border-radius: 2px;
+    display: block;
+    width: 28px;
+    height: 24px;
+    border: 1px solid #dedede;
+    border-radius: 2px;
 }
 #manageUser div.Info header div.Setting div.SettingContent {
-	position: absolute;
-	z-index: 99;
-	border: 1px solid #ababab;
-	border-radius: 3px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-	background: #FFF;
-	right: 0;
-	top: 27px;
-	padding: 15px 5px 5px 15px;
-	width: 180px;
+    position: absolute;
+    z-index: 99;
+    border: 1px solid #ababab;
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    background: #FFF;
+    right: 0;
+    top: 27px;
+    padding: 15px 5px 5px 15px;
+    width: 180px;
 }
 #manageUser div.Info header div.Setting div.SettingContent header select { padding: 3px; min-width: 60px; max-width: 170px; height: 26px; }
 #manageUser div.Info header div.Setting div.SettingContent ul { width: 175px; }
 #manageUser div.Info header div.Setting div.SettingContent ul li { margin-top: 7px; }
 #manageUser div.Info header div.Setting div.SettingContent ul li:last-child {
-	padding-top: 7px;
-	border-top: 1px solid #ababab;
+    padding-top: 7px;
+    border-top: 1px solid #ababab;
 }
 #manageUser div.Info header div.Setting div.SettingContent ul li label { font-size: 11px; }
 #manageUser div.Info header div.Setting div.SettingContent .Btn {
-	float: right;
-	margin-top: 15px;
+    float: right;
+    margin-top: 15px;
 }
 /* Search box */
 #manageUser div.Info header div.SearchBox {
-	position: relative;
-	float: left;
+    position: relative;
+    float: left;
 }
 #manageUser div.Info header div.SearchBox input {
-	border: 1px solid #d0d0d0;
-	padding: 0 30px 0 10px;
-	height: 30px;
-	line-height: 30px;
-	font-size: 12px;
-	width: 280px;
-	background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
-	background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
-	font-style: italic;
+    border: 1px solid #d0d0d0;
+    padding: 0 30px 0 10px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+    width: 280px;
+    background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
+    font-style: italic;
 }
 #manageUser div.Info header div.SearchBox input:focus { font-style: normal; }
 #manageUser div.Info header div.SearchBox a.ClearText {
-	position: absolute;
-	top: 6px;
-	right: 6px;	
-	width: 19px;
-	height: 19px;
+    position: absolute;
+    top: 6px;
+    right: 6px;	
+    width: 19px;
+    height: 19px;
 }
 #manageUser div.Info table.Summary {
-	width: 100%;
-	font-size: 12px;
+    width: 100%;
+    font-size: 12px;
 }
 #manageUser div.Info table.Summary th, #manageUser div.Info table.Summary td {
-	height: 33px;
-	line-height: 33px;
-	padding-left: 13px;
+    height: 33px;
+    line-height: 33px;
+    padding-left: 13px;
 }
 #manageUser div.Info table.Summary th {
-	background-color: #f0f0f0;
-	text-align: left;
+    background-color: #f0f0f0;
+    text-align: left;
 }
 #manageUser div.Info table.Summary td { border-top: 1px solid #dedede; }
 #manageUser div.Info table.Summary td div.Controller {
-	float: right;
-	padding-right: 8px;
-	position: relative;
+    float: right;
+    padding-right: 8px;
+    position: relative;
 }
 #manageUser div.Info table.Summary td div.Controller div.Dialog {
-	top: 26px;
+    top: 26px;
 }
 #manageUser div.Info table.Summary td div.Controller a.ShowDialog {
-	float: left;
-	width: 23px;
-	height: 23px;
-	padding: 1px;
+    float: left;
+    width: 23px;
+    height: 23px;
+    padding: 1px;
 }
 #manageUser div.Info table.Summary td div.Controller a.ShowDialog:hover, #manageUser div.Info table.Summary td div.Controller a.ShowDialog.Active {
-	padding: 0;
-	border: 1px solid #c7c7c7;
-	background-color: #e3e3e3;
-	border-radius: 3px;
+    padding: 0;
+    border: 1px solid #c7c7c7;
+    background-color: #e3e3e3;
+    border-radius: 3px;
 }
 div.newUser div.groups p {
     margin: 10px 0;
 }
 div.newUser div.groups ul {
     margin-left: 10px;
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 #orgSearchResults {
@@ -168,4 +168,9 @@ div.newUser div.groups ul {
     padding: 2px 13px;
     border-top: 1px solid #CCCCCC;
     background: white;
+}
+
+.groups > label {
+    font-size: 12px;
+    font-weight: bold;    
 }

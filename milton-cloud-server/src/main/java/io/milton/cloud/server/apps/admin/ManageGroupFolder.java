@@ -42,6 +42,7 @@ import io.milton.property.BeanPropertyAccess;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.DeletableResource;
+import io.milton.resource.MoveableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
@@ -54,7 +55,7 @@ import org.hibernate.Transaction;
  * @author brad
  */
 @BeanPropertyResource(value = "milton", enableByDefault = false)
-public class ManageGroupFolder extends AbstractResource implements GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource {
+public class ManageGroupFolder extends AbstractResource implements GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource, MoveableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupFolder.class);
     private final Group group;
@@ -199,6 +200,20 @@ public class ManageGroupFolder extends AbstractResource implements GetableResour
 
     public Group getGroup() {
         return group;
+    }
+
+    @Override
+    public void moveTo(CollectionResource rDest, String name) throws ConflictException, NotAuthorizedException, BadRequestException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        
+        if( !(rDest instanceof ManageGroupsFolder)) {
+            throw new ConflictException("Parent folder must be manage groups folder. Is a: " + rDest.getClass() + " with name: " + rDest.getName());
+        }
+        group.setName(name);
+        
+        session.save(group);
+        tx.commit();
     }
     
     

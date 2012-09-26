@@ -24,7 +24,7 @@
                 <div class="$activeClass">
                     <a class="close" href="#">delete</a>                    
                     <abbr title="$formatter.formatDateISO8601($msg.date)" class="info timeago">$msg.date</abbr>
-                    <h3><a href="$msg.href">$msg.from</a></h3>
+                    <h3><a href="$msg.href">$msg.fromStr</a></h3>
                     <p>$msg.subject</p>
                 </div>         
                     #end
@@ -39,12 +39,16 @@
                 #if($page.is("message"))
                 <div class="titleBox">
                     <h2>$page.subject</h2>                    
-                    <h3>From:  $page.from</h3>
+                    <h3>From:  $page.fromStr</h3>
                     <abbr class="info" title="$formatter.formatDateISO8601($page.date)">$formatter.formatDateLong($page.date)</abbr>
 
                 </div>
                 <div>
+                    #if( $page.html )
                     $page.html
+                    #else
+                    $page.text
+                    #end
                 </div>
                 #end
             </div>

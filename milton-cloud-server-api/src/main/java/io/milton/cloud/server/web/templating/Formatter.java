@@ -15,6 +15,7 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.calc.Calc;
 import io.milton.common.FileUtils;
 import io.milton.common.Utils;
@@ -495,8 +496,31 @@ public class Formatter {
         return d1.doubleValue() == d2.doubleValue();
     }
 
+    /**
+     * Makes the given string suitable for rendering in HTML. Symbols like angle 
+     * brackets will be encoded so they can be displayed
+     * 
+     * @param s
+     * @return 
+     */
     public String htmlEncode(String s) {
         return EncodeUtils.encodeHTML(s);
+    }
+    
+    /**
+     * Modifies the given value so that it is suitable for use in HTML attributes
+     * 
+     * This is a lossy conversion, in that multiple unencoded strings might
+     * encode to the same att value
+     * 
+     * @param s
+     * @return 
+     */
+    public String htmlAttEncode(String s) {
+        String s2 = WebUtils.replaceSpecialChars(s);
+        System.out.println(s + " -->> " + s2);
+        return s2;
+        //return htmlEncode(s2);
     }
 
     /**

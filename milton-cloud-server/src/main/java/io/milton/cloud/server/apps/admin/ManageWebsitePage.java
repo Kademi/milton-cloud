@@ -21,6 +21,7 @@ import io.milton.cloud.server.event.GroupInWebsiteEvent;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -113,9 +114,31 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("name")) {
             try {
+                String websiteName = WebUtils.getParam(parameters, "name");
+                if (websiteName == null) {
+                    jsonResult = JsonResult.fieldError("name", "Please enter a name for the website");
+                    return null;
+                }
+                if (!websiteName.equals(website.getName())) {
+                    Website checkOther = Website.findByName(websiteName, session);
+                    if (checkOther != null) {
+                        jsonResult = JsonResult.fieldError("name", "There is alreay a website with that name. Please choose a unique website name");
+                        return null;
+                    }
+                }
+                String domainName = WebUtils.getParam(parameters, "domainName");
+                if (domainName != null && domainName.equals(website.getDomainName())) {
+                    Website checkOther = Website.findByDomainName(website.getDomainName(), session);
+                    if (checkOther != null && checkOther != website) {
+                        jsonResult = JsonResult.fieldError("name", "There is alreay a website with that domain name. Please choose a unique domain name");
+                        return null;
+                    }
+
+                }
+
                 // the details tab
-                website.setName(parameters.get("name"));
-                website.setDomainName(parameters.get("domainName"));
+                website.setName(websiteName);
+                website.setDomainName(domainName);
                 website.setRedirectTo(parameters.get("redirectTo"));
                 Website aliasTo = null;
                 String sAlias = parameters.get("aliasTo");
@@ -173,10 +196,10 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
 
     @Override
     public List<AppControlBean> getApps() {
-        List<Application> activeApps;
-        activeApps = appManager.findActiveApps(website);
+        List<Application> activeApps = appManager.findActiveApps(website);
+        List<Application> availApps = appManager.findActiveApps(getOrganisation());
         List<AppControlBean> beans = new ArrayList<>();
-        for (Application app : appManager.getApps()) {
+        for (Application app : availApps) {
             boolean enabled = isEnabled(app, activeApps);
             AppControlBean bean = new AppControlBean(app.getInstanceId(), enabled);
             beans.add(bean);

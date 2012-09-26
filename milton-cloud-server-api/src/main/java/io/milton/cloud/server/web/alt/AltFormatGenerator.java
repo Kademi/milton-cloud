@@ -82,23 +82,23 @@ public class AltFormatGenerator implements EventListener {
         this.sessionManager = sessionManager;
         this.formats = new ArrayList<>();
         this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
-        formats.add(new FormatSpec("image", "png", 150, 150, "-f", "mjpeg"));
-        profileSpec = new FormatSpec("image", "png", 52, 52, "-f", "mjpeg");
+        formats.add(new FormatSpec("image", "png", 150, 150, true, "-f", "mjpeg"));
+        profileSpec = new FormatSpec("image", "png", 52, 52, true, "-f", "mjpeg");
         formats.add(profileSpec);
 
-        formats.add(new FormatSpec("video", "flv", 1280, 720, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "m4v", 1280, 720, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 1280, 720, "-r", "15", "-b:v", "512k"));
-        formats.add(new FormatSpec("video", "webm", 1280, 720, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "flv", 1280, 720, false, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "m4v", 1280, 720, false,"-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 1280, 720, false,"-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 1280, 720, false,"-r", "15", "-b:v", "512k"));
         
-        formats.add(new FormatSpec("video", "flv", 640, 360, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "m4v", 640, 360, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 640, 360, "-r", "15", "-b:v", "512k"));
-        formats.add(new FormatSpec("video", "webm", 640, 360, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "flv", 640, 360, false,"-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "m4v", 640, 360, false,"-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 640, 360, false,"-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 640, 360, false,"-r", "15", "-b:v", "512k"));
         
 
-        formats.add(new FormatSpec("video", "png", 640, 360, "-ss", "0", "-vframes", "1", "-f", "mjpeg"));
-        formats.add(new FormatSpec("video", "png", 1280, 720, "-ss", "0", "-vframes", "1", "-f", "mjpeg"));
+        formats.add(new FormatSpec("video", "png", 640, 360, false,"-ss", "0", "-vframes", "1", "-f", "mjpeg"));
+        formats.add(new FormatSpec("video", "png", 1280, 720, false,"-ss", "0", "-vframes", "1", "-f", "mjpeg"));
 
         System.out.println("register put event on: " + eventManager);
         eventManager.registerEventListener(this, PutEvent.class);
@@ -224,8 +224,8 @@ public class AltFormatGenerator implements EventListener {
      */
     public String generateProfileImage(String primaryFileHash, String primaryFileName) throws Exception {
         final Parser parser = new Parser();
-        String ext = FileUtils.getExtension(primaryFileName);
-        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore);
+        String ext = FileUtils.getExtension(primaryFileName);        
+        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService);
         String altHash = converter.generate(new With<InputStream, String>() {
             @Override
             public String use(InputStream t) throws Exception {
@@ -254,7 +254,7 @@ public class AltFormatGenerator implements EventListener {
                 throw new RuntimeException("formatSpec cannot be null");
             }
             String ext = FileUtils.getExtension(primaryFileName);
-            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore);
+            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService);
         }
 
         public File getDestFile() {

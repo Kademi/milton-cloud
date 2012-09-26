@@ -59,8 +59,7 @@ public class SubOrg implements Serializable{
             parent = parent.getOrganisation();
         }
     }
-    
-    
+        
     private Long id;
     private Organisation owner;
     private Organisation suborg;

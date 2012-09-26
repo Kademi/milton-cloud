@@ -25,13 +25,15 @@ public class FormatSpec {
     final String type; // eg flv, png
     final int height;
     final int width;
+    final boolean cropToFit;
     private String[] converterArgs;
 
-    public FormatSpec(String inputType, String type, int width, int height, String ... converterArgs) {
+    public FormatSpec(String inputType, String type, int width, int height, boolean cropToFit, String ... converterArgs) {
         this.inputType = inputType;
         this.type = type;
         this.height = height;
         this.width = width;
+        this.cropToFit = cropToFit;
         this.converterArgs = converterArgs;
     }
 

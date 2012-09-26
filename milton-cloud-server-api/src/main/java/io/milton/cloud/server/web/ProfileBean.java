@@ -29,7 +29,7 @@ public class ProfileBean {
     }
 
     public static void populateBean(Profile p, ProfileBean b) {
-        b.setHref("/users/" + p.getId());
+        b.setHref("/users/" + p.getName() + "/public" );
         b.setName(p.getNickName());
         if( b.getName() == null ) {
             b.setName(p.getName());

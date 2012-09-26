@@ -73,10 +73,10 @@ public class WebsiteAccessReport implements JsonReport{
             crit.add(Restrictions.le("reqDate", finish));
         }
         if( website != null ) {
-            crit.add(Restrictions.le("website", website));
+            crit.add(Restrictions.eq("website", website));
         }
         if( org != null ) {
-            crit.add(Restrictions.le("organisation", org));
+            crit.add(Restrictions.eq("organisation", org));
         }
         crit.add(Restrictions.eq("contentType", "text/html")); // might need to include application/html at some point...
         List list = crit.list();

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.mail.SendMailProcessable;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailSendAttempt;

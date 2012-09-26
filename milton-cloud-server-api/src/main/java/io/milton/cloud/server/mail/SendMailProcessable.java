@@ -12,14 +12,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.email;
+package io.milton.cloud.server.mail;
+
+import static io.milton.context.RequestContext._;
 
 import io.milton.cloud.server.queue.Processable;
 import io.milton.context.Context;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
-
-import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * TODO: this needs to be a static class, but currently needs a reference to

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.email;
+package io.milton.cloud.server.mail;
 
 import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.common.CurrentDateService;

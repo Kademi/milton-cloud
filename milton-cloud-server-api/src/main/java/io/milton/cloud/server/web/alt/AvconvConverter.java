@@ -1,6 +1,7 @@
 package io.milton.cloud.server.web.alt;
 
 import com.bradmcevoy.utils.FileUtils;
+import com.ettrema.logging.LogUtils;
 import io.milton.cloud.common.With;
 import io.milton.cloud.util.ScriptExecutor;
 import io.milton.common.ContentTypeService;
@@ -30,14 +31,16 @@ public class AvconvConverter implements Closeable {
     private final String inputExt;
     private final HashStore hashStore;
     private final BlobStore blobStore;
+    private final MediaInfoService mediaInfoService;
     private File source;
     private final File dest;
     private long sourceLength;
 
-    public AvconvConverter(String process, String primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore) {
+    public AvconvConverter(String process, String primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore, MediaInfoService mediaInfoService) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.process = process;
+        this.mediaInfoService = mediaInfoService;
         this.format = format;
         if (format == null) {
             throw new RuntimeException("Format cannot be null");
@@ -83,10 +86,44 @@ public class AvconvConverter implements Closeable {
         source = createSourceFile();
         try {
             List<String> args = new ArrayList<>();
-            // TODO: determine original dimensions, then choose x or y axis to scale on so that 
-            // the resulting image or video is bound by the format dimensions
 
-            String scale = "scale=" + format.getWidth() + ":-1"; // only scale on width            
+            // determine original dimensions, then choose x or y axis to scale on so that 
+            // the resulting image or video is bound by the format dimensions            
+            MediaInfo info = mediaInfoService.getInfo(source);
+            String scale;
+            if (info == null) {
+                log.warn("Failed to find dimensions of source file, might not be able to generate thumb");
+                scale = "scale=" + format.getWidth() + ":-1"; // only scale on width            
+            } else {
+                if (format.getWidth() < 100 || format.getHeight() < 100 && (info.getHeight() > 2000 || info.getWidth() > 2000)) {
+                    scale = "scale=-1:500,";  // bring down to a reasonable size, avconv fails if trying to downsize by too much (eg 3000 to 40 seems to fail)
+                } else {
+                    scale = "";
+                }
+
+                Proportion prop = new Proportion(info.getWidth(), info.getHeight(), format.getWidth(), format.getHeight());
+                System.out.println("prop: " + prop);
+                if (format.cropToFit) {
+                    if (info.getWidth() > info.getHeight()) {
+                        //if (prop.scaleByHeight()) {
+                        System.out.println("by height, crop");
+                        scale += "scale=-1:" + prop.maxHeight;
+                    } else {
+                        System.out.println("by width, crop");
+                        scale += "scale=" + prop.maxWidth + ":-1";
+                    }
+                    scale += ",crop=" + prop.maxWidth + ":" + prop.maxHeight;
+                } else {
+                    if (info.getWidth() > info.getHeight()) {
+                        //if (prop.scaleByHeight()) {
+                        System.out.println("by height, scale to fit");
+                        scale += "scale=-1:" + prop.getContrainedHeight();
+                    } else {
+                        System.out.println("by width, scale to fit");
+                        scale += "scale=" + prop.getConstrainedWidth() + ":-1";
+                    }
+                }
+            }
 
             // set the input file
             args.add("-i");
@@ -184,5 +221,68 @@ public class AvconvConverter implements Closeable {
             }
         }
         return false;
+    }
+
+    /**
+     * Eg: Given an image of these dimensions 2592h x 3888w, and lets say we
+     * want that to fit into a bounding box of 52x52..
+     *
+     * First we determine which is the contrained dimension. In this case the
+     * target ratio (width/height) is 1, and the actual ration is 0.666
+     *
+     * Because the actualRatio is less then targetRation we need to constrain
+     * the width, ie we will set the width to 52 and allow the height to be
+     * whatever maintains the actual ration = 52 x 0.666 = 34.6
+     *
+     * Because avconv/ffmpeg will only scale on the smaller of the dimensions,
+     * we must tell it to scale height to 34.6, and allow it to adjust the width
+     *
+     */
+    private class Proportion {
+
+        double targetRatio;
+        double actualRatio;
+        double maxWidth;
+        double maxHeight;
+        double origHeight;
+        double origWidth;
+
+        public Proportion(double width, double height, double maxWidth, double maxHeight) {
+            targetRatio = maxWidth / maxHeight;
+            actualRatio = width / height;
+            origHeight = height;
+            origWidth = width;
+            this.maxHeight = maxHeight;
+            this.maxWidth = maxWidth;
+        }
+
+        public boolean scaleByHeight() {
+            return actualRatio > targetRatio;
+        }
+
+        public boolean scaleByWidth() {
+            return !scaleByHeight();
+        }
+
+        public double getConstrainedWidth() {
+            if (scaleByHeight()) {
+                return maxWidth;
+            } else {
+                return actualRatio * maxHeight;
+            }
+        }
+
+        public double getContrainedHeight() {
+            if (scaleByWidth()) {
+                return maxHeight;
+            } else {
+                return maxWidth / actualRatio;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "orig " + origHeight + "h x" + origWidth + "w -scaleByHeight=" + scaleByHeight() + " -->> " + getContrainedHeight() + "h x " + getConstrainedWidth() + "w";
+        }
     }
 }

@@ -18,7 +18,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.apps.email.GroupEmailPage;
-import io.milton.cloud.server.apps.email.SendMailProcessable;
+import io.milton.cloud.server.mail.SendMailProcessable;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.db.GroupEmailJob;

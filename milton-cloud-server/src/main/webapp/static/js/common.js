@@ -574,14 +574,46 @@ function createFolder(name, parentHref, callback) {
         },
         dataType: "json",
         success: function(resp) {
-            //            ajaxLoadingOff();
-            //window.location = encodedName + "/index.html";
+            $("body").trigger("ajaxLoading", {loading: false});
             if( callback ) {
                 callback(name, resp);
             }
         },
         error: function() {
-            //            ajaxLoadingOff();
+            $("body").trigger("ajaxLoading", {loading: false});
+            alert('There was a problem creating the folder');
+        }
+    });
+}
+
+function move(sourceHref, destHref, callback) {
+    //    ajaxLoadingOn();    
+    var url = "_DAV/MOVE";
+    if( sourceHref ) {
+        var s = sourceHref;
+        log("s", s);
+        if( !s.endsWith("/")) {
+            s+="/";
+        }
+        url = s + url;
+    }
+    log("move", sourceHref, destHref, "url=", url);
+    $("body").trigger("ajaxLoading", {loading: true});
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: {
+            destination: destHref
+        },
+        dataType: "json",
+        success: function(resp) {
+            $("body").trigger("ajaxLoading", {loading: false});
+            if( callback ) {
+                callback(resp);
+            }
+        },
+        error: function() {
+            $("body").trigger("ajaxLoading", {loading: false});
             alert('There was a problem creating the folder');
         }
     });

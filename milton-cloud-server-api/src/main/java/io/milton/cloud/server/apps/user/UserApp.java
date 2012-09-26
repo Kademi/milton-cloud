@@ -110,6 +110,11 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
                     MenuItem.setActiveIds("menuDashboard");
                     return new ProfilePage(requestedName, rf);
             }
+        } else if( parent instanceof UserResource) {
+            UserResource user = (UserResource) parent;
+            if( requestedName.equals("public")) {
+                return new PublicProfilePage(requestedName, user.getThisUser(), user);
+            }
         }
         if (parent instanceof RootFolder) {            
             RootFolder rf = (RootFolder) parent;

@@ -82,10 +82,10 @@ public class GroupSignupsReport implements JsonReport{
             crit.add(Restrictions.le("reqDate", finish));
         }
         if( website != null ) {
-            crit.add(Restrictions.le("website", website));
+            crit.add(Restrictions.eq("website", website));
         }
         if( org != null ) {
-            crit.add(Restrictions.le("organisation", org));
+            crit.add(Restrictions.eq("organisation", org));
         }
         List list = crit.list();
         Set<String> groupsInSeries = new HashSet<>();
