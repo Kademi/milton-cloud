@@ -110,6 +110,11 @@ public class SpliffyResourceFactory implements ResourceFactory {
             Resource rootFolder = currentRootFolderService.getRootFolder(host);
             return rootFolder;
         } else {
+            Path pPathParent = p.getParent();
+            if( pPathParent == null ) {
+                System.out.println("Thats odd, got a null parent from: " + p + " root?" + p.isRoot() + " relative?" + p.isRelative());
+                return null;
+            }
             Resource rParent = find(host, p.getParent());
             if (rParent == null) {
                 return null;

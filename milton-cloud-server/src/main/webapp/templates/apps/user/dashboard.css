@@ -1,0 +1,100 @@
+
+.welcomeBox{
+    background:#ebebeb;
+    border-bottom-left-radius: 5px 5px;
+    border-bottom-right-radius: 5px 5px;
+    border-top-left-radius: 5px 5px;
+    border-top-right-radius: 5px 5px;
+    padding:10px 0 10px 100px;
+    position:relative;
+    margin-bottom:15px;
+    overflow:hidden;    
+    display: none;
+}
+a.crossSign{
+    display:block;
+    position:absolute;
+    top:8px;
+    right:8px;
+    width:12px;
+    height:13px;
+}
+.txtR{
+    width:85%;
+    float:left;
+    margin-top:12px;
+}
+.txtR h3{
+    color:$page.parent.settings.textColour2;
+    font-size:15px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+.txtR p{
+    font-size:13px;
+    color:$page.parent.settings.textColour2;
+}
+.moduleBox1 {
+    float:right;
+}
+/*colLeft*/
+.colLeft{
+    float:left;
+    width:70%;
+}
+.progressBox{
+    background:#fff;
+    padding-top:7px;
+}
+a.view{
+    text-decoration:underline;
+    color:$page.parent.settings.textColour2;
+    font-size:11px;
+    text-align:center;
+    display:block;
+}
+a:hover.view{
+    text-decoration:none;
+}
+
+
+.strongTxt {
+    font-weight:bold;
+    font-size:1.15em;
+    color:#242424;
+    margin-bottom:10px;
+    line-height:1em;
+    display:block;
+}
+.smllTxt {
+    color:$page.parent.settings.textColour2;
+    font-size:0.7em;
+    font-style:italic;
+    display:block;
+    margin-bottom:7px;
+    display:block;
+}
+.p_Txt {
+    color:$page.parent.settings.textColour2;
+    font-size:0.7em;
+    line-height:1.4em;
+    display:block;
+}
+
+.contentLeft {
+    width:30%;
+    float:left;
+}
+.contentRight {
+    width:70%;
+    float:right;
+}
+
+
+.strongText {
+    color:#fff;
+    font-size:14px;
+    font-weight:normal;
+    display:block;
+    line-height: 30px;
+}

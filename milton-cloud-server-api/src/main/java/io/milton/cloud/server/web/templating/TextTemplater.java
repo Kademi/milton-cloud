@@ -76,6 +76,10 @@ public class TextTemplater implements Templater {
             }
         }
     }
+    
+    public TemplateSource getTemplateSource(String path) {
+        return templateLoader.findTemplateSource(path);
+    }
 
     @Override
     public void writePage(String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
@@ -195,17 +199,10 @@ public class TextTemplater implements Templater {
         }
     }
 
-    private interface TemplateSource {
-
-        InputStream getInputStream() throws IOException;
-
-        long getTimestamp();
-    }
-
     private class ClassPathTemplateSource implements TemplateSource {
 
-        private final URL resource;
-        private final long timestamp;
+        final URL resource;
+        final long timestamp;
 
         public ClassPathTemplateSource(URL resource) {
             this.resource = resource;
@@ -225,7 +222,7 @@ public class TextTemplater implements Templater {
 
     private class FileTemplateSource implements TemplateSource {
 
-        private final File file;
+        final File file;
 
         public FileTemplateSource(File file) {
             this.file = file;

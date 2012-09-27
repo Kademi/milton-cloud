@@ -43,6 +43,9 @@ import io.milton.http.Request;
 public class HtmlTemplateRenderer {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateRenderer.class);
+    
+    public static final String EXT_COMPILE_LESS = ".compile.less";
+    
     private final ApplicationManager applicationManager;
     private final Formatter formatter;
 
@@ -51,18 +54,18 @@ public class HtmlTemplateRenderer {
         this.formatter = formatter;
     }
 
-    public void renderHtml(RootFolder rootFolder, Resource page, Map<String, String> params, UserResource user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, OutputStream out) throws IOException {
+    public void renderHtml(RootFolder rootFolder, Resource page, Map<String, String> params, UserResource user, Template themeTemplate, TemplateHtmlPage themeTemplateTemplateMeta, Template contentTemplate, TemplateHtmlPage bodyTemplateMeta, String themeName, String themePath, OutputStream out) throws IOException {
         Context datamodel = new VelocityContext();
         datamodel.put("rootFolder", rootFolder);
         CommonCollectionResource folder;
-        if( page instanceof CommonResource) {
+        if (page instanceof CommonResource) {
             CommonResource cr = (CommonResource) page;
             folder = cr.getParent();
             datamodel.put("folder", folder);
         }
         datamodel.put("page", page);
         datamodel.put("params", params);
-        Profile profile = null;        
+        Profile profile = null;
         if (user != null) {
             datamodel.put("user", user);
             profile = user.getThisUser();
@@ -72,18 +75,18 @@ public class HtmlTemplateRenderer {
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);
         Request request = HttpManager.request();
-        if( request != null ) {
+        if (request != null) {
             datamodel.put("request", request);
         }
 
         OrganisationFolder orgFolder = WebUtils.findParentOrg(page);
-        if( orgFolder != null ) {
+        if (orgFolder != null) {
             datamodel.put("parentOrg", orgFolder);
         }
-        
+
         System.out.println("themeTemplateTemplateMeta: " + themeTemplateTemplateMeta.getId());
         System.out.println("bodyTemplateMeta: " + bodyTemplateMeta.getId());
-        
+
         PrintWriter pw = new PrintWriter(out);
         pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
         pw.write("<html xmlns='http://www.w3.org/1999/xhtml'>\n");
@@ -97,21 +100,18 @@ public class HtmlTemplateRenderer {
             pageWebResources = htmlPage.getWebResources();
             pageBodyClasses = htmlPage.getBodyClasses();
             BodyRenderer bodyRenderer = new BodyRenderer(htmlPage);
-            datamodel.put("body", bodyRenderer);            
+            datamodel.put("body", bodyRenderer);
         }
-        
-        if( page instanceof TitledPage) {
+
+        if (page instanceof TitledPage) {
             TitledPage titledPage = (TitledPage) page;
             pw.write("<title>" + titledPage.getTitle() + "</title>");
         }
 
         List<WebResource> webResources = deDupe(themeTemplateTemplateMeta.getWebResources(), bodyTemplateMeta.getWebResources(), pageWebResources);
-        for (WebResource wr : webResources) {
-            String html = wr.toHtml(themeName);
-            pw.write(html + "\n");
-        }
-        if( !themeTemplateTemplateMeta.getId().endsWith("/plain.html")) { // don't render the header for plain pages, these might be used as PDF input
-            applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel , pw); 
+        printWebResources(webResources, themeName, themePath, pw);
+        if (!themeTemplateTemplateMeta.getId().endsWith("/plain.html")) { // don't render the header for plain pages, these might be used as PDF input
+            applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel, pw);
         }
         pw.write("</head>\n");
         pw.write("<body class=\"");
@@ -121,12 +121,12 @@ public class HtmlTemplateRenderer {
         pw.flush();
         // do theme body (then content body)
 
-        if( VelocityContentDirective.getContentTemplate(datamodel) != null  ) {
+        if (VelocityContentDirective.getContentTemplate(datamodel) != null) {
             log.error("recurisve content invoication");
-            Thread.dumpStack();            
+            Thread.dumpStack();
             throw new RuntimeException("recursive contetn invocation");
         }
-        
+
         VelocityContentDirective.setContentTemplate(contentTemplate, datamodel);
         System.out.println("user: " + datamodel.get("user"));
         themeTemplate.merge(datamodel, pw);
@@ -175,8 +175,49 @@ public class HtmlTemplateRenderer {
         }
     }
 
-    
+    private void printWebResources(List<WebResource> webResources, String themeName, String themePath, PrintWriter pw) {
+        System.out.println("printWebResources ---");
+        Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();
+        for (WebResource wr : webResources) {
+            if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel")) ) {
+                String media = wr.getAtts().get("media");
+                List<String> cssFilesForMedia = mapOfCssFilesByMedia.get(media);
+                if( cssFilesForMedia == null ) {
+                    cssFilesForMedia = new ArrayList<>();
+                    mapOfCssFilesByMedia.put(media, cssFilesForMedia);
+                }
+                String href = wr.getAtts().get("href");
+                href = wr.adjustRelativePath("href", href, themeName);
+                cssFilesForMedia.add(href);
+            } else {
+                String html = wr.toHtml(themeName);
+                pw.write(html + "\n");
+            }
+        }
+
+        // Now write out the combined css files as a link to a LESS css file
+        // This is so that less files (such as for apps) can use the mixins provided
+        // by the theme
+        for( String media : mapOfCssFilesByMedia.keySet() ) {
+            List<String> paths = mapOfCssFilesByMedia.get(media);
+            String link = "<link rel='stylesheet' type='text/css'";
+            if( media != null ) {                
+                link += " media='" + media + "'";
+            }
+            link += " href='" + themePath;
+            String cssName = "";
+            for( String path : paths ) {
+                cssName += path.replace("/", "\\") + ",";
+            }
+            link += cssName + EXT_COMPILE_LESS + "' />";
+            pw.println(link);
+            System.out.println("link=" + link);
+        }
+        System.out.println(" end ... printWebResources");
+    }
+
     public class BodyRenderer {
+
         private final HtmlPage htmlPage;
 
         public BodyRenderer(HtmlPage htmlPage) {
@@ -186,6 +227,6 @@ public class HtmlTemplateRenderer {
         @Override
         public String toString() {
             return htmlPage.getBody();
-        }                
+        }
     }
 }

@@ -263,7 +263,7 @@ body .jp-video .jp-volume-bar {
 }
 
 body .jp-video .jp-volume-bar-value {
-    background: rgba(112,109,109.01);
+    background: #706D6D;
     width:0px;
     height:10px;
     position: relative;

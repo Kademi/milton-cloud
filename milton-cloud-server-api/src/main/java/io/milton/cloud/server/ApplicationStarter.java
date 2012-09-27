@@ -71,6 +71,7 @@ public class ApplicationStarter implements InitListener, Service{
         final ApplicationManager applicationManager = rootContext.get(ApplicationManager.class);
         final SpliffyResourceFactory resourceFactory = rootContext.get(SpliffyResourceFactory.class);
         rootContext.get(DefaultCurrentRootFolderService.class).setApplicationManager(applicationManager);
+        rootContext.put(m);
         rootContext.execute(new Executable2() {
 
             @Override

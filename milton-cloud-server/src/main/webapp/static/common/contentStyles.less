@@ -1,0 +1,1278 @@
+
+@import url("/static/common/modal.css");
+
+
+/** Mixins */
+.text1 {
+    color: @text1 !important;
+}
+.text2 {
+    color:@text2 !important;
+}
+.hero1 {
+    color:@hero1 !important;
+}
+.hero2 {
+    color:@hero2 !important;
+}
+html body .bg-text1 {
+    background-color: @text1;
+}
+html body .bg-text2 {
+    background-color:@text2;
+}
+html body .bg-hero1 {
+    background-color:@hero2
+}
+html body .bg-hero2 {
+    background-color:@hero2;
+}
+
+.box (@radius: @borderRadius) {
+    border-radius: @radius;
+    -webkit-border-radius: @radius;
+    -moz-border-radius: @radius;
+}
+
+.bordered {
+    border: 1px solid @border1;    
+}
+
+
+.activity, .keyPoint {
+    position: relative;        
+    font-weight: 700;
+    padding: 18px 15px 15px 60px;
+    .box;
+}
+
+.keyPoint h1, .keyPoint h2, .keyPoint h3, .keyPoint h4 {
+    margin-top: 0;
+}
+
+
+/** this span is inserted by jquery so we can use a sprite as background image for the icon. Will not be present in the editor */
+.activity > span.sprite, .keyPoint > span.sprite {
+    background-image: url("images/icons.png");
+    background-repeat: no-repeat;
+    height: 34px;
+    left: 12px;
+    position: absolute;
+    top: 12px;
+    width: 35px;
+}
+
+/** paddy added this so he can position just the lighbulb icon */
+.lightbulb h6 span.sprite {
+    background-image: url("images/icons.png");
+    background-repeat: no-repeat;
+    height: 34px;
+    left: 5px;
+    position: absolute;
+    top: 5px !important;
+    width: 35px;
+}
+
+.activity > span.sprite {
+    background-position: -1px -48px;    
+}
+body .lightbulb div h6 {
+    line-height: 36px;    
+    margin: 0;
+    padding: 0px 40px 0px 40px;
+}
+
+.keyPoint > span.sprite {
+    background-position: -46px -48px;    
+}
+
+body .lightbulb div > span.sprite {
+    top: 8px;
+}
+
+body .lightbulb div h6 span.sprite {
+    background-position: -93px -47px;
+    height: 34px;
+    width: 35px;
+}
+
+/** Display as inline in the editor style dropdown combo box */
+body .cke_panel_listItem .activity {
+    display: inline;
+    padding: 5px 5px 5px 50px;
+}
+
+div.dropdown {
+    border: 1px solid #D3D3D3;
+    border-radius: 6px;
+    padding: 0;
+    position: relative;
+    text-align: left;
+}
+
+div.dropdown.dropdown2 {
+    border: 1px solid #D3D3D3;
+}
+
+
+.btnHideFollowing {
+    background-color: @hero1;
+    border-radius: 4px;
+    /* border: 1px solid #98a686;*/
+    color: white;
+    padding: 8px 38px 8px 12px;
+    margin: 0px 0px 0px 0px;
+    display: inline-block;
+    position: relative;
+    font-weight: 500;    
+    zoom: 1; /** for IE7 */
+    *display: inline;
+}
+
+
+.lightbulb div.dropdown, .lightbulb div.dropdown h6 {
+    background-color: #fbf5e9;
+}
+
+.lightbulb {
+    text-align: right;
+}
+
+div.dropdown > div {
+    border-top: 1px solid #d3d3d3;
+}
+
+/** This refers to the content div within the dropdown section */
+div.dropdown > div {
+    padding: 10px 15px;
+}
+
+/** The open class is added to the dropdown div when its open */
+.content div.dropdown.open {
+    display: block;    
+}
+/** turn off bottom rounded corners on header when open **/
+.content div.dropdown.open h6 {
+    border-radius: 6px 6px 0 0;
+}
+
+
+/** make the dropdown div inline so its width is sized to the heading, instead of full width */
+.content div.dropdown {
+    display: inline-block; 
+}
+
+div.dropdown h6 {
+    background-color: #e9e9e9;
+    border-radius: 6px;
+}
+
+div.dropdown h6 {
+    line-height: 36px;    
+    margin: 0;
+    padding: 00px 40px 0px 13px;
+}
+
+/*
+div.dropdown h3, div.dropdown h4, div.dropdown h5 {
+    margin: 0;
+    padding: 10px 40px 10px 10px;
+}
+*/
+
+/** this span is inserted by jquery so we can use a sprite as background image for the icon. Will not be present in the editor */
+div.dropdown span.sprite, .btnHideFollowing > span.sprite {
+    background-color: transparent;
+    background-image: url("images/icons.png");
+    background-repeat: no-repeat;
+    background-position: -2px -94px;
+    display: inline-block;
+    height: 21px;
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    width: 21px; 
+}
+
+/** Note that we trigger on the  */
+
+.btnHideFollowing:hover, .modulePage div.dropdown h6:hover {
+    cursor: pointer;
+    /*background-color: #e9e9e9;*/
+    border-color:#d7d7d7;
+    color: @text1;
+}
+
+#editor div.dropdown > span, div.dropdown.open > span {
+    background-position: -28px -94px;
+}
+.edifyIsViewMode.modulePage div.dropdown > div {
+    display: none;
+}
+
+.accentuated {
+    background-color: #e7f0e4;
+    border: 1px solid #c5cfb8;
+    border-radius: 6px;
+    padding: 15px 20px 15px 20px;           
+}
+
+div.dropdown.accentuated h6 {
+    background-color: #e1eece;
+}
+
+.accentuated p {
+    margin:0px !important;
+    padding:0px !important;
+
+}
+
+ul.checkpoints {
+    margin-left: 0;
+}
+ul.checkpoints li {        
+    .box;
+    .bordered;
+}
+
+ul.steps {
+    overflow: hidden; /** force to height of contained elements */
+    padding: 20px;
+    background-color: @bg1;
+    .box;
+    .bordered;
+}
+
+ul.steps li {
+    float: left;
+    width: 27%;
+    list-style-type: none;
+    margin-right: 20px;
+    background-image: url("images/step.png");
+    background-position: right center;
+    background-repeat: no-repeat;
+    padding: 0 60px 0 0;
+}
+ul.steps li img.photo {
+    border-width: 0;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+}        
+ul.steps    li:last-child {
+    padding: 0;
+    background-image: none;
+    margin-right: 0;
+}
+
+
+ul.checkpoints li {
+    background: url("images/icon_tick.png") no-repeat scroll 5px 5px transparent;
+    margin: 0 0 5px;
+    padding: 7px 80px 15px 45px;
+}
+
+.activity {
+    background-color: #ECF1F7;
+    border: 1px solid #d3dbe1;
+}
+.keyPoint {
+    background-color: #f8ecee;
+    border: 1px solid #d6c2c7;
+}
+
+
+p {
+    margin: 0 0 10px 0;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    color: @text1;
+}
+a, a:visited {
+    color: @hero1;
+}
+
+h2 {
+    color: @hero1;
+    font-size: 19px;
+    margin-top: 20px;
+}
+
+table {
+    border: none;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+
+
+body h1 {
+    background-color: @hero1;    
+    color: white;
+    display: inline-block;
+    font-size: 25px;
+    font-weight: 500;
+    left: -15px;
+    margin: 0 0 15px;
+    padding: 10px 15px;
+    position: relative;
+    width: 100%;
+    .box;
+}
+
+
+
+img.photo {
+    border: 10px solid #E7E7E7;
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+table.striped {
+    margin-bottom: 10px;
+}
+th.striped {
+    text-align: left;
+}
+table.striped th {
+    background-color: @hero1;
+    color: white;
+}
+table.striped tbody tr:nth-child(odd) td {
+    background-color: #f1f1f1;
+}
+table.striped td, table.striped th {
+    border-color: #D4D4D4;    
+    border-width: 1px;    
+    padding: 10px;
+}
+table.striped td {
+    border-top-style: solid;
+}
+table.striped td:first-child {
+    border-left-style: solid;
+}
+table.striped td:last-child {
+    border-right-style: solid;
+}
+
+table.striped tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;    
+}
+table.striped tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;    
+}
+table.striped tr:last-child td {
+    border-bottom-style: solid;
+}
+table.striped th:first-child {
+    border-radius: 8px 0 0 0;
+}
+table.striped th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+
+/** from fuse/theme.dyn.css, needs fixing **/
+
+input, textarea {
+    border-style: solid;
+    border-width: 1px;
+    background-color: white;
+    margin-right: 10px; 
+    padding: 5px;
+}
+
+blockquote{
+    background: url("images/blockquote.gif") no-repeat scroll left 6px #FAFAFA;
+    margin: 10px 0 10px 0;
+    padding: 10px 10px 10px 50px;
+    line-height: 22px;
+}
+
+
+div, h1, h2, h3, h4, ul, form {
+    margin:0;
+    padding:0;
+}
+ul, ol {
+    list-style-position: inside;
+}
+a, img {
+    border:none;
+    outline:none;
+}
+a:link, a:visited {
+    color:@hero1;
+    text-decoration:none;
+    outline:none;
+}
+a:hover {
+    text-decoration:none;
+}
+body h2, body h2 a {
+    color: @hero1;
+    font-weight: 500;
+    padding: 0px 0px 15px 0px;
+    margin:0px;
+}
+body h2 {
+    font-size: 1.6em;        
+}
+
+body h3, body h3 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.4em;
+    font-weight: 500;
+
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+body h4, body h4 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.1em;
+    font-weight: 400;    
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+body h5, body h5 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 1.1em;
+    font-weight: 400;
+    font-style: italic;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+
+body h6, body h6 a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 0.9em;
+    font-weight: 400;
+    line-height:18px;
+    padding: 0px 0px 7px 0px;
+    margin:0px;
+}
+
+
+
+body p, body p a {
+    color: $rootFolder.settings.textColour1;
+    font-size: 0.8em;
+    font-weight: 400;
+    margin:0px;
+}
+
+p, ul, ol {
+    padding: 0px 0px 0.7em;
+}
+
+body p a {   
+    font-size: 1em !important;
+
+}
+
+ul {
+    margin: 0px 0px 0px 40px;
+    font-size: 0.8em;
+    color: $rootFolder.settings.textColour1;
+    font-weight: 400;
+    list-style:outside;
+}
+
+ul ul {
+    font-size: 1em;
+}
+ul ul li {
+    list-style-type: circle;
+}
+li {
+    margin: 0 0 0 40px;
+    padding:0 0 5px 0;    
+}
+
+li a {
+    color: #88c03f;
+    font-weight: 600;
+    text-decoration:underline;
+}
+
+textarea {
+    width: 98%;
+    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+}
+body h1, body h1 a,body h2, body h2 a,body h3, body h3 a,body h4, body h4 a {
+    margin-top: 5px;
+}
+body h1, body h1 a {
+    position:relative;
+    background-color: @hero1;
+    display: inline-block;
+    color: white;
+    padding: 10px 15px;
+    margin: 0px 0px 15px 0px;
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1.6em;
+    font-weight: 500;
+    left:-15px;
+}
+table { 
+    border-collapse: collapse;
+}
+
+table td {
+    vertical-align:top;
+}
+td input, td textarea {
+    margin-right: 0;
+}
+
+
+abbr {
+    border: none;    
+}
+
+#editor {
+    padding: 5px 10px; /** give the editor a bit of padding around content */
+}
+
+
+h1, h1.a, h2, h2.a, h3, h3.a, h4, h4 a {    
+    color: @text2;
+    font-family: 'Arial', sans-serif;
+    font-weight: 400;    
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+fieldset {
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+img {
+    border: none;
+    vertical-align: top;
+}
+
+label {
+    font-size: 0.8em;
+}
+
+
+:focus { outline: 0 none; }
+a, input[type="image"], input[type="submit"], input[type="button"], input[type="reset"], button, object, embed { outline: 0 none; }
+
+hr {
+    border-style: solid none none;
+    border-width: 1px medium medium;    
+    border-color: lightgray;
+}
+
+
+button, .content a.button, .muploadBtn {
+    margin: 10px;
+    padding: 6px 20px;
+    text-align:center;
+    color:#fff;
+    font-size:15px;
+    background: @hero2;
+    border-radius: 5px;
+    border:none;
+    outline:none;
+    cursor:pointer;        
+    font-size:13px;    
+}
+
+a.button{
+    line-height:21px;
+}
+
+
+td button, td a.button {
+    margin: 0;
+}
+
+input[type=text], input[type=password], textarea{
+    border:1px solid #d3d3d3;
+    background:#fff;
+    outline:none;
+    color:@text2;
+    font-size:13px;
+}
+
+.line { 
+    clear: both;
+    border-bottom: 1px solid #ddd;
+    margin: 0 0 45px;
+}
+
+table {
+    border: none;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th.striped {
+    text-align: left;
+}
+table.striped thead th {
+    background-color: #4c4c4c;
+    color: white;
+}
+table.striped tbody tr:nth-child(odd) td {
+    background-color: #f1f1f1;
+}
+table.striped td, table.striped th {
+    border-color: #D4D4D4;    
+    border-width: 1px;    
+    padding: 10px;
+    border-style: solid none none none;
+}
+
+table.striped td:first-child {
+    border-left-style: solid;
+}
+table.striped td:last-child {
+    border-right-style: solid;
+}
+
+table.striped tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;    
+}
+table.striped tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;    
+}
+table.striped tr:last-child td {
+    border-bottom-style: solid;
+}
+table.striped thead th:first-child {
+    border-radius: 8px 0 0 0;
+}
+table.striped thead th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+table.verticalFields tbody tr td, table.verticalFields tbody tr th {
+    background-color: transparent;
+    border: none;
+}
+
+.clr {
+    clear:both;
+    overflow:hidden;
+    height:0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    font-size: 1em;
+}
+body.normal {
+    margin:0;
+    padding:0;
+    color:@text2;
+    height:100%;    
+}
+
+
+div.left {
+    float: left;
+    width: 48%;
+    padding-right: 10px;
+}
+div.right {
+    float: right;
+    width: 48%;
+    padding-left: 10px;
+}
+
+
+
+.auxText {
+    font-size: 10px;
+    font-style: italic;
+    border-bottom: medium none;
+}
+.auxText a, a.auxText{
+    text-decoration:none;
+    font-size:10px;
+    color:@hero1;
+}
+.auxText a:after {
+    content: ",";
+}
+.auxText a:last-child:after {
+    content: none;
+}
+
+div.section {
+    width: 45%;
+    float: left;
+    margin-right: 5%;
+    margin-top: 15px;
+    border-top: 1px solid lightgray;
+}
+
+
+#comments input, #comments textarea{
+    padding: 4px 10px 2p;
+    width:95%;
+    height:19px;
+    margin: 0;
+}
+.fBox{
+    margin:0 auto;
+    padding:5px 0 18px;
+}
+#comments fieldset {
+    text-align: center;
+    position: relative;
+}
+#comments div.forumReply{
+    padding:10px 10px 9px;
+    background:#fff;
+    border-top:1px solid #d4d4d4;
+    border-bottom: 1px solid #D4D4D4;
+    margin-bottom:5px;
+    text-align: left;
+    position: relative;
+    min-height: 3em;
+}
+#comments div.forumReply div{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+#comments button {
+    margin: 0;
+}
+#comments a.user {
+    font-size: 0.8em;
+}
+#comments p {
+    font-size: 0.7em;
+    padding: 0;
+}
+
+.leftBar{
+    background:#f0f0f0;
+}
+
+.tick {
+    background-image: url(images/tick1.gif);
+    background-position: center center;
+    background-repeat: no-repeat;    
+    text-indent: -10000px;
+}
+
+
+a.questSign{
+    line-height:30px;
+    float:right;
+}
+a.questSign span{
+    border-radius: 15px;
+    background:#fff;
+    font-weight: 800;
+    padding: 4px 7px;    
+    font-size: 13px;
+}
+
+a.module {
+    color: @hero1;
+    font-weight: bold;
+}
+a.user {
+    color: #262626;    
+    font-weight: bold;
+}
+
+.auxText a, a.auxText{
+    margin-left:12px;
+}
+
+
+
+body .citation {
+    font-size: 0.6em !important;
+    font-weight: 400;
+    font-style:italic;
+    padding: 0px 0px 0px 0px;
+    margin:0px;
+}
+
+
+/** cke_panel_listItem is part of the CKEditor toolbar, which shows the h1 style. Must not be display:block for toolbar */
+body .cke_panel_listItem h1 {
+    display: inline;
+    padding-left: 0;
+}
+
+
+a.hero {
+    background-color: @hero1;
+    border-style: solid;
+    border-width: 6px;
+    border-color: @hero1;
+    color: white;
+}
+
+a.hero.disabled, a.bg-hero1.disabled {
+    background-color: #d7d7d7;
+    border-color: #d7d7d7;
+    color: white;
+    cursor: not-allowed;
+}
+a.hero.active {
+    color: #1C1D1F;
+}
+
+.editableContent {
+    position: relative;
+}
+.border-text1 {
+    border-color: lightgray;
+}
+h1.really-big {
+    font-family: 'FrutigerLTStd45LightRegular';
+    font-size: 45px;
+    line-height: 100%;
+    background: none;
+    color: #333;
+}
+
+/**
+A few fixes to undo the default styles when viewing the editor
+*/
+body .cke_panel_grouptitle {
+    width: auto;
+    position: inherit;
+    left: auto;
+    display: block;
+    border-radius: inherit;
+}
+
+div.textOverImage {
+
+}
+
+div.textOverImage .bgImage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+div.textOverImage div {
+    z-index: 2;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    text-align: center;    
+}
+
+
+p.lessSpace {
+    padding-bottom: 0;
+}
+a.external {
+    background: url("/static/common/icon_external_link.gif")  no-repeat scroll right center transparent;
+    margin-right: 5px;
+    padding-right: 10px;
+}
+
+
+.hide {
+    display: none;
+}
+.hide-force {
+    display: none !important;
+}
+.hide-text {
+    background-color: transparent;
+    border: 0 none;
+    color: transparent;
+    font: 0px/0 a;
+    text-shadow: none;
+}
+.clearfix {
+    *zoom: 1;
+}
+.clearfix:before, .clearfix:after {
+    display: table;
+    content: "";
+}
+.clearfix:after {
+    clear: both;
+}
+
+td.primary {
+    width: 70%;
+}
+
+table.dashboard {
+    width: 100%;
+}
+table.myLearning {
+    width: 100%;
+}
+table.dashboard td.gap, table.myLearning td.gap {
+    width: 1em;
+}
+
+
+.sideBar{
+    width:29%;
+    float:right;
+}
+
+/**
+    For links which open modal dialogs
+*/
+a.anchor-modal { cursor: pointer; }
+.linked-modal {
+    background: #FFF;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    min-height: 100px;
+}
+.linked-modal a.close-modal {
+    background: transparent url(btn_modal_close.png) no-repeat 50% 50%;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    border: 0 none;
+    color: transparent;
+    font: 0px/0 a;
+    text-shadow: none;
+}
+
+
+
+body ul.barList {
+    margin: 0;
+    font-size: 1em;
+}
+ul.barList li{
+    list-style:none;
+    border-top:1px solid #dbdada;
+    padding:7px 0 7px 10px;
+    margin: 0;
+    font-size: 0.75em;    
+}
+ul.barList li:last-child {
+    border-bottom: 1px solid #dbdada;
+}
+.profilePic{
+    float:left;
+    margin-right:8px;
+}
+a.module {
+    color: @hero1;
+    font-weight: bold;
+}
+a.user {
+    color: #262626;    
+    font-weight: bold;
+}
+
+
+ul.barList li .textBox{
+    float:left;
+    width:70%;
+}
+ul.barList div.post {    
+   margin-left: 60px; /** width of the image to prevent text wrapping */    
+}
+ul.barList p {    
+    padding-top: 5px;
+    line-height: 12px;
+    margin: 0;
+}
+ul.barList p, ul.barList em{
+    font-size: 0.85em;    
+}
+ul.barList em{
+    color:#262626;    
+    margin-right:7px;
+}
+ul.barList small{
+    color:@hero1;    
+    font-style:italic;
+    background:url(images/plus.gif) top left no-repeat;
+    padding-left:10px;
+    background-position:0 4px;
+}
+
+table.bar thead * {
+    color: white;
+}
+table.bar .left {
+    text-align: left;
+}
+
+table.bar td, table.bar th {
+    padding: 5px;
+    vertical-align: central;
+    text-align: center;
+}
+table.bar thead tr th {
+    background:@hero1;
+    border: none;
+    font-size: 0.9em;
+    font-style: italic;    
+    font-weight: 400;    
+}
+
+table.bar thead th:first-child {
+    border-radius: 5px 0 0 5px;
+    font-style: normal;
+    text-align: left;
+}
+
+table.bar th:first-child, table.bar td:first-child {
+    padding-left: 10px;    
+}
+
+table.bar th:last-child, table.bar td:last-child {
+    padding-right: 10px;    
+}
+
+table.bar thead tr th:last-child {
+    border-radius: 0 5px 5px 0;
+}
+table.bar tr.odd td {
+    background-color: white;
+}
+
+
+table.bar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.bar tbody {
+    background-color: #F0F0F0;
+}
+
+table.bar td {
+    border-width: 1px 0;
+    vertical-align: middle;
+}
+table.bar td a {
+    color: @text2;
+}
+table.bar td a:hover {
+    text-decoration: none;
+}
+
+tr.seperator {
+    display: block;
+    height: 10px;
+}
+
+tr.bar td.first, div.bar {
+   padding: 0 8px;    
+}
+
+tr.bar td.title {
+    font-size: 0.9em;
+    font-style: normal;
+}
+tr.bar td.first {
+    border-radius: 5px 0 0 5px;
+
+}
+tr.bar td {
+    background: @hero1;
+    line-height: 2em;
+    padding: 0 8px;
+    color: white;
+    font-size: 0.7em;
+    font-style: italic;
+}
+tr.bar td.last {
+    border-radius: 0 5px 5px 0;
+}
+
+div.bar {
+    background:@hero1;
+    margin-bottom:2px;
+    border-radius: 5px;
+    padding: 0 8px;
+    font-size: 1.0em;    
+    position: relative;   
+    top: 0;
+    left: 0;
+}
+div.bar h3 {
+    color: #FFFFFF;
+    font-size: 0.9em;
+    font-weight: normal;
+    line-height: 2em;
+    margin: 0;
+    padding: 0;    
+}
+div.bar.alt {
+    background:@hero2;
+    position: static; /** fix IE7 bug on community updates **/
+}
+
+
+a.courseBox.active, a.courseBox:hover {
+    border-top:8px solid @hero1;
+}
+
+.downloadIcon {
+    display: inline-block;
+    background-image: url(/static/common/download.png);
+    background-position: center center;
+    background-repeat: no-repeat;    
+    cursor: pointer;
+    height: 31px;
+    width: 34px;
+}
+.downloadIcon span {
+    display: none;
+}
+
+
+
+/* Modal */
+.Modal {
+    width: 555px;
+    padding: 20px;
+    border: 1px solid #b2b2b2;
+    border-radius: 5px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    position: relative;
+    display: none;
+    background: #FFF;
+}
+.Modal a.Close {
+    display: block;
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    background: url(images/icon_close.png) no-repeat 50% 50%;
+    z-index: 9;
+    text-indent: -9999px;
+}
+.Modal .Button {
+    text-align: center;
+    width: 65px;
+}
+.Modal .Title {
+    font-size: 20px;
+    color: #33a9c8;
+    margin-bottom: 15px;
+}
+.Modal input, .Modal textarea {
+    border: 1px solid #c6c6c6;
+    background: #F0F0F0;
+    padding: 10px 13px;
+    width: 435px;
+}
+.Modal input { 
+    font-size: 16px; 
+    margin-bottom: 10px;
+}
+.Modal textarea {
+    resize: none;
+    height: 200px;
+    overflow: auto;
+}
+
+
+.ajaxLoading {
+    display: none;
+}
+
+p.not_tested {
+    color: black;
+}
+
+p.failed_test {
+    color: red;
+}
+
+p.complete {
+    color: green;
+}
+tr.hidden_true td {
+    color: gray;
+}
+#signin label {
+    display: inline-block;
+    width: 100px;
+}
+#signin button {
+    margin-left: 100px;
+}
+#signin p {
+    margin-left: 100px;
+}
+.instructions {
+    border: 1px dashed #C1C2A8;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    padding: 20px;
+    width: 90%;
+}
+
+
+
+.error, .validationError, #validationMessage {
+    color: red;
+}
+
+.errorField {
+    border: solid red 1px !important;
+}
+
+.pageMessage {
+    padding: 10px;
+    border: dashed #cccccc 1px !important;
+    background: white;
+    display: none; /** initial state */
+}
+p.validationError {
+    margin: 0 0 0.1em 0;
+}
+
+/**
+Initially hidden message, is displayed after successful processing
+*/
+p.confirm {
+    display: none; 
+}
+
+body.edifyIsViewMode .edifyEditMode {
+    display: none;
+}
+
+body.edifyIsEditMode .edifyViewMode {
+    display: none;
+}
+
+
+.contentLeft {
+    float: left;
+    width: 30%;
+}

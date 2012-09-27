@@ -193,7 +193,7 @@ public class HtmlTemplater {
             throw new RuntimeException("Couldnt find meta for template: " + themeTemplatePath);
         }
 
-        templateRenderer.renderHtml(rootFolder, aThis, params, user, themeTemplate, themeTemplateTemplateMeta, bodyTemplate, bodyTemplateMeta, theme, out);
+        templateRenderer.renderHtml(rootFolder, aThis, params, user, themeTemplate, themeTemplateTemplateMeta, bodyTemplate, bodyTemplateMeta, theme, themePath, out);
     }
 
     public String findTheme(Resource r, boolean isPublic) {

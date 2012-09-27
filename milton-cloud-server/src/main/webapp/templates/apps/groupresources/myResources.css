@@ -1,0 +1,101 @@
+
+.myResources .col11{
+    width:80%;
+    float:left;
+}
+.myResources .col12{
+    width:10%;
+    min-width:65px;
+    float:left;
+}
+.myResources .col12 small{
+    color:#fff;
+    font-size:11px;
+    font-style:italic;
+    display:block;
+}
+.imageL{
+    float:left;
+    display:block;
+    margin:12px 15px 0 18px;
+}
+.p_Text{
+    float:left;
+    width:80%;
+    font-size:11px;
+    color:$page.parent.settings.textColour2;
+    display:block;
+}
+.hTxt{
+    margin:10px 0 3px;
+    padding:0;
+}
+.date{
+    color:$page.parent.settings.textColour2;
+    font-size:12px !important;
+    display:block;
+    margin-top:28px !important;
+    font-weight:normal !important;
+}
+.conArea{
+    position:relative;
+    background:#f0f0f0;
+    overflow:hidden;
+}
+
+a.gBox {
+    display:block;
+    background:none;
+    border-top:1px solid #dbdada;
+    border-bottom:1px solid #dbdada;
+    min-height:52px;
+}
+a.gBox1{
+    display:block;
+    background:none;
+    border-top:1px solid #dbdada;
+    border-bottom:1px solid #dbdada;
+    min-height:39px;
+    padding-bottom:13px;
+}
+.col1 img {
+    float:left;
+    margin-right:12px;
+    display:block;
+}
+.pText1 {
+    margin-top:12px;
+    line-height:1em;
+}
+.tick {
+    background-image: url(images/tick1.gif);
+    background-position: center center;
+    background-repeat: no-repeat;    
+    text-indent: -10000px;
+}
+
+.pTxt {
+    color:$page.parent.settings.textColour2;
+    font-size:0.7em;
+    margin:2px 0 8px 65px;
+    display:block;
+}
+
+a.arrowL {
+    background:$page.parent.settings.heroColour1;
+    width:18px;
+    height:19px;
+    border-bottom-left-radius: 15px 15px;
+    border-bottom-right-radius: 15px 15px;
+    border-top-left-radius: 15px 15px;
+    border-top-right-radius: 15px 15px;
+    float:left;
+    display:block;
+    padding-top:6px;
+    padding-left:7px;
+}
+
+a.arrowR {
+    float:right;
+    padding-left:10px;
+}

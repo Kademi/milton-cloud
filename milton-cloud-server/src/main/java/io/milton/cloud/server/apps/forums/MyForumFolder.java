@@ -41,6 +41,8 @@ import java.util.Collections;
 import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -48,6 +50,8 @@ import org.hibernate.Transaction;
  */
 public class MyForumFolder extends AbstractCollectionResource implements GetableResource, IForumResource, PostableResource {
 
+    private static final Logger log = LoggerFactory.getLogger(MyForumFolder.class);
+    
     private final Forum forum;
     private final CommonCollectionResource parent;
     private ResourceList children;
@@ -67,6 +71,7 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
             String newQuestion = parameters.get("newQuestion");
             String comment = parameters.get("comment");
             ForumPost p = createQuestion(newQuestion, comment, session);
+            log.info("Created post: " + p.getId() + " - " + p.getName());
             tx.commit();
             jsonResult = new JsonResult(true, "Created", p.getName());
         }
@@ -112,8 +117,7 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     private ForumPost createQuestion(String newQuestion, String comment, Session session) {
         ForumPost p = new ForumPost();
         p.setForum(forum);
-        String newName = NewPageResource.findAutoName(newQuestion, this, null);
-        newName = newName.replace(".html", ""); // hack
+        String newName = NewPageResource.findAutoCollectionName(newQuestion, this, null);
         p.setName(newName);
         p.setTitle(newQuestion);
         p.setNotes(comment);

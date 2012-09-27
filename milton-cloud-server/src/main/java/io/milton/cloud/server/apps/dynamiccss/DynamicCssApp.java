@@ -22,13 +22,15 @@ import com.asual.lesscss.LessOptions;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ResourceApplication;
-import io.milton.cloud.server.apps.email.EmailApp;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.common.Path;
 import io.milton.http.Auth;
+import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
+import io.milton.http.ResourceFactory;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -38,13 +40,19 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -53,17 +61,11 @@ import java.util.Map;
 public class DynamicCssApp implements ResourceApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DynamicCssApp.class);
-    
-    private SpliffyResourceFactory resourceFactory;
+    private ResourceFactory resourceFactory;
     private Date modDate;
     private LessEngine engine;
 
     public DynamicCssApp() {
-        LessOptions options = new LessOptions();
-        options.setCss(true);
-        options.setCharset("UTF-8");
-        engine = new LessEngine(options);
-
     }
 
     @Override
@@ -85,20 +87,47 @@ public class DynamicCssApp implements ResourceApplication {
             TemplatedTextPage t = new TemplatedTextPage(p.getName(), webRoot, "text/css", path);
             t.setModifiedDate(modDate);
             return t;
-        } else if (path.endsWith(".less.css")) {
+        } else if (path.endsWith(HtmlTemplateRenderer.EXT_COMPILE_LESS)) {
+            // Give a request path like this: /themes/x/\a\b.css,\x\y.css.less
+            // 1. get just the name part => \a\b.css,\x\y.css.less
+            // 2. chop off the extension => \a\b.css,\x\y.css
+            // 3. split it and swap folder seperators =>  ["/a/b.css","/x/y.css"]
+            // 4. then locate each resource, merge the content of all resources, then do LESS compilation
+            // 5. Note the current path for resources resolved from css ends up being /themes/x
+
             Path p = Path.path(path);
             String reqName = p.getName();
-            String physName = reqName.replace(".less.css", ".css");
-            p = p.getParent().child(physName);
-            Resource rBase = resourceFactory.findFromRoot(webRoot, p);
-            if (rBase != null) {
-                if (rBase instanceof GetableResource) {
-                    GetableResource fr = (GetableResource) rBase;
-                    System.out.println("less res");
-                    return new LessCssResource(reqName, fr);
+            // Note we ignore the folder, only interested in resource names encoded into resource name
+            String[] paths = reqName.substring(0, reqName.length() - HtmlTemplateRenderer.EXT_COMPILE_LESS.length()).split(","); // need to chop off extension, then split
+            System.out.println("paths size: " + paths.length);
+            List<GetableResource> resources = new ArrayList<>();
+            List<String> notFound = new ArrayList<>();
+            String host = HttpManager.request().getHostHeader();
+            for (String s : paths) {
+                s = s.replace("\\", "/"); // HtmlTemplater changes path characters to avoid changing relative path
+                System.out.println("Look for: " + s + " in " + webRoot.getClass());
+                Resource rBase = resourceFactory.getResource(host, s);
+                if (rBase != null) {
+                    System.out.println("got one");
+                    if (rBase instanceof GetableResource) {
+                        System.out.println("adding");
+                        GetableResource fr = (GetableResource) rBase;
+                        resources.add(fr);
+                    } else {
+                        notFound.add("Not GET'able: " + s);
+                        log.warn(" css resource is not getable: " + s + " - " + rBase.getClass());
+                    }
+                } else {
+                    notFound.add("Not found: " + s);
+                    log.warn("CSS resource is not found: " + s + " in host: " + host);
                 }
             }
-            return null;
+            if (resources.isEmpty()) {
+                log.warn("No paths found: " + path);
+                return null;
+            } else {
+                return new LessCssResource(reqName, resources, notFound);
+            }
         } else {
             return null;
         }
@@ -111,17 +140,40 @@ public class DynamicCssApp implements ResourceApplication {
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        this.resourceFactory = resourceFactory;
+        this.resourceFactory = config.getContext().get(HttpManager.class).getResourceFactory();
+        LessOptions options = new LessOptions();
+        //options.setCss(true);
+        options.setCharset("UTF-8");
+        engine = new LessEngine(options);
+
         modDate = config.getContext().get(CurrentDateService.class).getNow();
     }
 
     public class LessCssResource implements GetableResource, DigestResource {
 
-        private final GetableResource fileResource;
+        private final List<GetableResource> fileResources;
+        private final GetableResource mostRecentModResource;
+        private final List<String> notFound;
         private final String name;
 
-        public LessCssResource(String name, GetableResource fileResource) {
-            this.fileResource = fileResource;
+        public LessCssResource(String name, List<GetableResource> fileResources, List<String> notFound) {
+            this.fileResources = fileResources;
+            this.notFound = notFound;
+            Date mostRecent = null;
+            GetableResource mostRecentRes = null;
+            for (GetableResource r : fileResources) {
+                Date resModDate = r.getModifiedDate();
+                if (resModDate != null) {
+                    if (mostRecent == null || resModDate.after(modDate)) {
+                        mostRecent = resModDate;
+                        mostRecentRes = r;
+                    }
+                }
+            }
+            if (mostRecentRes == null) {
+                mostRecentRes = fileResources.get(0);
+            }
+            this.mostRecentModResource = mostRecentRes;
             this.name = name;
         }
 
@@ -132,15 +184,26 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            // Lets be nice and say if we didnt find something
+            for (String s : notFound) {
+                String msg = "/** " + s + " */\n";
+                bout.write(msg.getBytes());
+            }
+            for (GetableResource gr : fileResources) {
+                String header = "/** " + gr.getName() + " */\n";
+                bout.write(header.getBytes());
+                gr.sendContent(bout, range, params, contentType);
+                bout.write("\n".getBytes());
+            }
+            String rawCss = bout.toString("UTF-8");
             try {
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                fileResource.sendContent(bout, range, params, contentType);
-                String rawCss = bout.toString("UTF-8");
                 String text = engine.compile(rawCss);
                 out.write(text.getBytes("UTF-8"));
             } catch (LessException ex) {
                 log.warn("LESS compilation exception", ex);
-                sendLessError(ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
+                sendLessError(rawCss, ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
                 //throw new RuntimeException("Bad LESS from:" + fileResource.getName() + " - " + fileResource.getClass() ,ex);
             }
 
@@ -158,22 +221,22 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public Date getModifiedDate() {
-            return fileResource.getModifiedDate();
+            return mostRecentModResource.getModifiedDate();
         }
 
         @Override
         public String getContentType(String accepts) {
-            return fileResource.getContentType(accepts);
+            return "text/css";
         }
 
         @Override
         public String getUniqueId() {
-            return fileResource.getUniqueId();
+            return fileResources.get(0).getUniqueId();
         }
 
         @Override
         public Object authenticate(String user, String password) {
-            return fileResource.authenticate(user, password);
+            return mostRecentModResource.authenticate(user, password);
         }
 
         @Override
@@ -183,7 +246,7 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public String getRealm() {
-            return fileResource.getRealm();
+            return mostRecentModResource.getRealm();
         }
 
         @Override
@@ -193,8 +256,8 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public Object authenticate(DigestResponse digestRequest) {
-            if (fileResource instanceof DigestResource) {
-                DigestResource dr = (DigestResource) fileResource;
+            if (mostRecentModResource instanceof DigestResource) {
+                DigestResource dr = (DigestResource) mostRecentModResource;
                 return dr.authenticate(digestRequest);
             } else {
                 return null;
@@ -204,28 +267,40 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public boolean isDigestAllowed() {
-            if (fileResource instanceof DigestResource) {
-                DigestResource dr = (DigestResource) fileResource;
+            if (mostRecentModResource instanceof DigestResource) {
+                DigestResource dr = (DigestResource) mostRecentModResource;
                 return dr.isDigestAllowed();
             } else {
                 return false;
             }
         }
 
-        private void sendLessError(int line, int column, List<String> extract, String message, OutputStream out) {
-            PrintWriter pw = new PrintWriter(out);
-            pw.println("LESS Compile error");
-            pw.println("Line: " + line);
-            pw.println("Column: " + column);
-            pw.println("Reason: " + message);
-            if (extract != null && extract.size() > 0) {
-                pw.println("-------");
-                pw.println("Extract: ");
-                for (String extractLine : extract) {
-                    System.out.println(extractLine);
+        private void sendLessError(String rawCss, int line, int column, List<String> extract, String message, OutputStream out) {
+            try {
+                PrintWriter pw = new PrintWriter(out);
+                pw.println("LESS Compile error");
+                pw.println("Line: " + line);
+                pw.println("Column: " + column);
+                pw.println("Reason: " + message);
+                if (extract != null && extract.size() > 0) {
+                    pw.println("-------");
+                    pw.println("Extract: ");
+                    for (String extractLine : extract) {
+                        System.out.println(extractLine);
+                    }
                 }
+                pw.println("---- Raw CSS follows ---");
+                LineNumberReader reader = new LineNumberReader(new StringReader(rawCss));
+                String cssLine = reader.readLine();
+                while (cssLine != null) {
+                    pw.println("Line:" + reader.getLineNumber() + "   " + cssLine);
+                    cssLine = reader.readLine();
+                }
+                pw.print(rawCss);
+                pw.flush();
+            } catch (IOException ex) {
+                log.error("Exception generating error content for Less CSS", ex);
             }
-            pw.flush();
         }
     }
 }

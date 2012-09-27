@@ -18,7 +18,6 @@ package io.milton.cloud.server.web;
 
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import java.util.Map;

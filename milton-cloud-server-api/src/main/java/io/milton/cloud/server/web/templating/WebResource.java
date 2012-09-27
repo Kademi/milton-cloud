@@ -133,7 +133,7 @@ public class WebResource {
      * @param value
      * @return
      */
-    private String adjustRelativePath(String name, String value, String themeName) {
+    public String adjustRelativePath(String name, String value, String themeName) {
         if (name.equals("href") || name.equals("src")) {
             if (value != null && value.length() > 0) {
                 if (!value.startsWith("/") && !value.startsWith("http")) {
