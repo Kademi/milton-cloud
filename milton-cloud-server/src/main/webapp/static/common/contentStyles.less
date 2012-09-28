@@ -479,9 +479,9 @@ body p a {
 }
 
 ul {
-    margin: 0px 0px 0px 40px;
+    margin: 0px 0px 0px @listIndent;
     font-size: 0.8em;
-    color: $rootFolder.settings.textColour1;
+    color: @text1;
     font-weight: 400;
     list-style:outside;
 }
@@ -491,10 +491,6 @@ ul ul {
 }
 ul ul li {
     list-style-type: circle;
-}
-li {
-    margin: 0 0 0 40px;
-    padding:0 0 5px 0;    
 }
 
 li a {
@@ -1275,4 +1271,40 @@ body.edifyIsEditMode .edifyViewMode {
 .contentLeft {
     float: left;
     width: 30%;
+}
+
+.dropBox {
+    position:absolute;
+    background:#fff;
+    border:1px solid #cbcbcb;
+    border-radius: 0.3em;
+    z-index:999;
+    padding: 0.18em 0.18em 0 0.18em;
+    display:none;
+    line-height: 1.4em;    
+}
+.dropBox ul {
+    margin: 0;
+}
+.dropBox li {
+    list-style:none;
+    font-size: 0.68em;
+    margin: 0;
+    padding: 0;
+}
+.dropBox li:hover a {
+    background:#e6e6e6;
+    text-decoration: none;
+}
+.dropBox li a {
+    text-decoration:none;
+    color:@text2;
+    display:block;
+    padding: 0.3em 0 0 0.625em;
+    border-radius: 0.3em;
+    font-size: 1.3em;
+}
+
+br {
+    clear: both;
 }

@@ -92,7 +92,7 @@ public class ParameterisedResourcePropertySource implements PropertySource {
             }
             return qnames;
         } else {
-            throw new RuntimeException("Unsupported type: " + r);
+            return null;
         }
     }
 }
