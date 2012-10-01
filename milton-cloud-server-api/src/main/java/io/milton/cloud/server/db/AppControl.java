@@ -43,10 +43,10 @@ import org.hibernate.criterion.Restrictions;
 public class AppControl implements Serializable {
 
 
-    public static List<AppControl> find(Website c, Session session) {
+    public static List<AppControl> find(Branch websiteBranch, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
         crit.setCacheable(true);
-        crit.add(Restrictions.eq("website", c));
+        crit.add(Restrictions.eq("websiteBranch", websiteBranch));
         return DbUtils.toList(crit, AppControl.class);
     }
 
@@ -70,8 +70,8 @@ public class AppControl implements Serializable {
         return null;
     }
     
-    public static AppControl find(Website c, String appId, Session session) {
-        List<AppControl> list = find(c, session);
+    public static AppControl find(Branch websiteBranch, String appId, Session session) {
+        List<AppControl> list = find(websiteBranch, session);
         if (list == null || list.isEmpty()) {
             return null;
         }
@@ -98,12 +98,12 @@ public class AppControl implements Serializable {
         return ac;
     }
 
-    public static AppControl setStatus(String appId, Website website, boolean enabled, Profile currentUser, Date currentDate, Session session) {
-        AppControl ac = find(website, appId, session);
+    public static AppControl setStatus(String appId, Branch websiteBranch, boolean enabled, Profile currentUser, Date currentDate, Session session) {
+        AppControl ac = find(websiteBranch, appId, session);
         if( ac == null ) {
             ac = new AppControl();
             ac.setName(appId);
-            ac.setWebsite(website);            
+            ac.setWebsiteBranch(websiteBranch);            
         }
         ac.setEnabled(enabled);
         ac.setModifiedBy(currentUser);
@@ -137,15 +137,15 @@ public class AppControl implements Serializable {
         }
     }
     
-    public static void initDefaultApps(Website website, Profile currentUser, Date now, Session session) {
-        System.out.println("initDefaultApps");
-        for( AppControl ac : find(website.getOrganisation(), session)) {
+    public static void initDefaultApps(Branch websiteBranch, Profile currentUser, Date now, Session session) {
+        Organisation org = (Organisation) websiteBranch.getRepository().getBaseEntity();
+        for( AppControl ac : find(org, session)) {
             AppControl newac = new AppControl();
             if( ac.isEnabled()) {
                 System.out.println("enabled: " + ac.getName());
                 newac.setEnabled(true);
                 newac.setName(ac.getName());
-                newac.setWebsite(website);
+                newac.setWebsiteBranch(websiteBranch);
                 newac.setModifiedBy(currentUser);
                 newac.setModifiedDate(now);
                 session.save(newac);
@@ -156,7 +156,7 @@ public class AppControl implements Serializable {
     
     
     private long id;
-    private Website website; // the container for the application will either be a website or an organisation
+    private Branch branch; // the branch of the website the app control is affecting
     private Organisation organisation;
     private String name; // the name of the application
     private boolean enabled; // if the app is enabled for the specified container
@@ -184,13 +184,15 @@ public class AppControl implements Serializable {
     }
 
     @ManyToOne
-    public Website getWebsite() {
-        return website;
+    public Branch getWebsiteBranch() {
+        return branch;
     }
 
-    public void setWebsite(Website website) {
-        this.website = website;
+    public void setWebsiteBranch(Branch branch) {
+        this.branch = branch;
     }
+
+    
 
     @ManyToOne
     public Organisation getOrganisation() {

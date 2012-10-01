@@ -41,6 +41,7 @@ import org.apache.velocity.context.Context;
 import static io.milton.context.RequestContext._;
 import io.milton.http.AclUtils;
 import io.milton.resource.AccessControlledResource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
@@ -73,14 +74,14 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Forums, topics and questions";
     }
 
     
     
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides forums for end users to ask questions and answer them, and gives administrators functions to manage them";
     }
     

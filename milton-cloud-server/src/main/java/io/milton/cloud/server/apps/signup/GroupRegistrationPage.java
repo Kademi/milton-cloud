@@ -185,8 +185,8 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             //_(SignupApp.class).onNewProfile(u, parent.getGroup(),  rf);
 
             tx.commit();
-
-            String nextHref = app.getNextHref(p, WebUtils.getWebsite(this));
+                        
+            String nextHref = app.getNextHref(p, wrf.getBranch());
             String userPath = "/users/" + p.getName(); // todo: encoding
             log.info("Created user: " + userPath);
             jsonResult = new JsonResult(true, result, nextHref);

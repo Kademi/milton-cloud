@@ -19,8 +19,6 @@ package io.milton.cloud.server.web.templating;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.SettingsApplication;
-import io.milton.cloud.server.web.RootFolder;
-import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import java.io.IOException;
 import java.io.Writer;
@@ -33,6 +31,7 @@ import org.apache.velocity.runtime.parser.node.Node;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.HttpManager;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -54,12 +53,12 @@ public class RenderAppSettingsDirective extends Directive {
     }
     
     
-    public static void setWebsite(Website w) {
+    public static void setWebsiteBranch(Branch w) {
         HttpManager.request().getAttributes().put("render-app-website", w);
     }
     
-    public static Website getWebsite() {
-        return (Website) HttpManager.request().getAttributes().get("render-app-website");
+    public static Branch getWebsiteBranch() {
+        return (Branch) HttpManager.request().getAttributes().get("render-app-website");
     }
     
     @Override
@@ -88,10 +87,11 @@ public class RenderAppSettingsDirective extends Directive {
         }
         
         Organisation org = getOrganisation();
-        Website w = getWebsite();
+        Branch b = getWebsiteBranch();
+
         
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        settingsApplication.renderSettings(currentUser, org, w, context, writer);
+        settingsApplication.renderSettings(currentUser, org, b, context, writer);
         return true;
     }
 }

@@ -30,8 +30,10 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 
 import io.milton.http.http11.auth.CookieAuthenticationHandler;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import java.util.List;
 
 /**
  *
@@ -45,6 +47,11 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     public static PrincipalResource findEntity(Profile u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
         log.info("findEntity");
         Resource r = rootFolder.child(USERS_FOLDER_NAME);
+        if( r == null ) {
+            r = new UsersFolder(rootFolder, USERS_FOLDER_NAME);
+            List children = rootFolder.getChildren();
+            children.add(r);
+        }
         if (r instanceof UsersFolder) {
             UsersFolder uf = (UsersFolder) r;
             Resource p = uf.findUserResource(u);
@@ -76,12 +83,12 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Users";
     }
         
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Core application which provides user functions, such as dashboard, login and profile pages";
     }
     

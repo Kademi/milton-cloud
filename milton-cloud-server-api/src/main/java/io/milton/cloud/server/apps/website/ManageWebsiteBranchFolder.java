@@ -14,15 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.admin;
+package io.milton.cloud.server.apps.website;
 
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.event.GroupInWebsiteEvent;
+import io.milton.cloud.server.web.BranchFolder;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -58,15 +62,18 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageWebsitePage extends AbstactAppsPage implements GetableResource, PostableResource {
+public class ManageWebsiteBranchFolder extends BranchFolder implements GetableResource, PostableResource, AppsPage {
 
-    private static final Logger log = LoggerFactory.getLogger(ManageWebsitePage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageWebsiteBranchFolder.class);
+    private Website website;
     private Map<String, String> themeParams;
 
-    public ManageWebsitePage(Website website, CommonCollectionResource parent) {
-        super(website.getName(), website.getOrganisation(), parent, website);
+    public ManageWebsiteBranchFolder(Website website, Branch branch, CommonCollectionResource parent) {
+        super(website.getName(), parent, branch);
+        this.website = website;
     }
 
+    @Override
     public String getTitle() {
         return "Manage website: " + website.getName();
     }
@@ -102,7 +109,7 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             website.setInternalTheme(internalTheme);
             session.save(website);
 
-            Repository r = website.getRepository();
+            Repository r = website;
 
             r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
             r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
@@ -148,7 +155,7 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
                 website.setAliasTo(aliasTo);
                 session.save(website);
 
-                Repository r = website.getRepository();
+                Repository r = website;
                 r.setName(website.getName());
                 session.save(r);
 
@@ -159,9 +166,9 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
                 tx.rollback();
             }
         } else if (parameters.containsKey("settingsAppId")) {
-            updateApplicationSettings(parameters, files, tx);
+            jsonResult = _(AppsPageHelper.class).updateApplicationSettings(getOrganisation(), branch, parameters, files, tx);
         } else if (parameters.containsKey("appId")) {
-            updateApplicationEnabled(parameters, session, tx);
+            jsonResult = _(AppsPageHelper.class).updateApplicationEnabled(getOrganisation(), branch, parameters, session, tx);
         }
 
         return null;
@@ -175,7 +182,7 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
     }
 
     public List<String> getThemes() {
-        List<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>(); // TODO: HACK!
         list.add("fuse");
         list.add("milton");
         list.add("custom");
@@ -185,8 +192,8 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
     public Map<String, String> getThemeParams() {
         if (themeParams == null) {
             themeParams = new HashMap<>();
-            if (website.getRepository().getNvPairs() != null) {
-                for (NvPair pair : website.getRepository().getNvPairs()) {
+            if (website.getNvPairs() != null) {
+                for (NvPair pair : website.getNvPairs()) {
                     themeParams.put(pair.getName(), pair.getPropValue());
                 }
             }
@@ -196,19 +203,7 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
 
     @Override
     public List<AppControlBean> getApps() {
-        List<Application> activeApps = appManager.findActiveApps(website);
-        List<Application> availApps = appManager.findActiveApps(getOrganisation());
-        List<AppControlBean> beans = new ArrayList<>();
-        for (Application app : availApps) {
-            boolean enabled = isEnabled(app, activeApps);
-            AppControlBean bean = new AppControlBean(app.getInstanceId(), enabled);
-            beans.add(bean);
-        }
-        return beans;
-    }
-
-    private boolean isEnabled(Application app, List<Application> activeApps) {
-        return activeApps.contains(app);
+        return _(AppsPageHelper.class).getApps(null, branch);
     }
 
     @Override
@@ -217,9 +212,9 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
             jsonResult.write(out);
         } else {
             // push web and org into request variables for templating
-            RenderAppSettingsDirective.setOrganisation(organisation);
-            RenderAppSettingsDirective.setWebsite(website);
-
+            RenderAppSettingsDirective.setOrganisation(getOrganisation());
+            RenderAppSettingsDirective.setWebsiteBranch(branch);
+            MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
             _(HtmlTemplater.class).writePage("admin", "admin/manageWebsite", this, params, out);
         }
     }
@@ -236,7 +231,7 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
 
     @Override
     public String getName() {
-        return website.getName();
+        return this.branch.getName();
     }
 
     @Override
@@ -301,5 +296,31 @@ public class ManageWebsitePage extends AbstactAppsPage implements GetableResourc
 
     public boolean isSelected(Group g) {
         return getSelectedGroups().contains(g);
+    }
+
+    @Override
+    public boolean hasSettings(AppControlBean appBean) {
+        Application app = _(ApplicationManager.class).get(appBean.getAppId());
+        return (app instanceof SettingsApplication);
+    }
+
+    @Override
+    public String getSummary(String appId) {
+        Application app = _(ApplicationManager.class).get(appId);
+        if (app != null) {
+            return app.getSummary(getOrganisation(), branch);
+        } else {
+            return "Unknown app: " + appId;
+        }
+    }
+
+    @Override
+    public String getTitle(String appId) {
+        Application app = _(ApplicationManager.class).get(appId);
+        if (app != null) {
+            return app.getTitle(getOrganisation(), branch);
+        } else {
+            return "Unknown app: " + appId;
+        }
     }
 }

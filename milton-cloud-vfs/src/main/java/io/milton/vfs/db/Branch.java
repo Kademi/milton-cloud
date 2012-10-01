@@ -26,7 +26,7 @@ public class Branch implements Serializable, VfsAcceptor {
     /**
      * Special branch which always exists on a repository
      */
-    public static String TRUNK = "trunk";
+    public static String TRUNK = "version1";
     private long id;
     private String name;
     private Long version;
@@ -107,4 +107,6 @@ public class Branch implements Serializable, VfsAcceptor {
     public void delete(Session session) {
         session.delete(this);
     }
+
+
 }

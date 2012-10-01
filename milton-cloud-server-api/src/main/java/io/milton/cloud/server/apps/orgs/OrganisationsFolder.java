@@ -14,8 +14,12 @@
  */
 package io.milton.cloud.server.apps.orgs;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -34,26 +38,58 @@ import java.io.OutputStream;
 import java.util.*;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.FileItem;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.resource.PostableResource;
+import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
  * @author brad
  */
-public class OrganisationsFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource {
+public class OrganisationsFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationRootFolder.class);
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private final String name;
     private ResourceList children;
+    private JsonResult jsonResult;
 
-    public OrganisationsFolder(String name, CommonCollectionResource parent,  Organisation organisation) {
-        
+    public OrganisationsFolder(String name, CommonCollectionResource parent,  Organisation organisation) {       
         this.name = name;
         this.parent = parent;
         this.organisation = organisation;
     }
+    
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+        String newTitle = parameters.get("newTitle");
+        if (newTitle != null) {
+            log.info("processForm: newTitle: " + newTitle);
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            String newName = NewPageResource.findAutoCollectionName(newTitle, this.getParent(), parameters);
+            Organisation c = getOrganisation().createChildOrg(newName, session);
+            session.save(c);
+            
+            Date now = _(CurrentDateService.class).getNow();
+            Profile curUser= _(SpliffySecurityManager.class).getCurrentUser();            
+            AppControl.initDefaultApps(organisation, curUser, now, session);
+            
+            tx.commit();
+            jsonResult = new JsonResult(true, "Created", c.getName());
+        }
+        return null;
+    }    
 
+    public String getTitle() {
+        return "Manage business units";
+    }
+    
+    
     @Override
     public String getName() {
         return name;
@@ -97,19 +133,17 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        } else {
+            MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
+            _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
+        }        
     }
 
     @Override
     public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
-        String s = super.checkRedirect(request);
-        if( s != null ) {
-            return s;
-        }
-        if( request.getMethod().equals(Method.GET)) {
-            return "manage";
-        }        
-        return null;
+        return super.checkRedirect(request);
     }
     
     

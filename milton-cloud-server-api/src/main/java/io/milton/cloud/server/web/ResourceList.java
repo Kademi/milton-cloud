@@ -91,6 +91,10 @@ public class ResourceList extends ArrayList<CommonResource> {
     public CommonResource get(String name) {
         return map.get(name);
     }
+    
+    public boolean hasChild(String name) {
+        return get(name) != null;
+    }
 
     @Override
     public boolean remove(Object o) {

@@ -15,17 +15,10 @@
 package io.milton.cloud.server.apps.fileserver;
 
 import io.milton.cloud.server.apps.AppConfig;
-import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
-import io.milton.cloud.server.apps.admin.ManageAppsPage;
-import io.milton.cloud.server.apps.admin.ManageGroupsFolder;
-import io.milton.cloud.server.apps.admin.ManageOrgsPage;
-import io.milton.cloud.server.apps.admin.ManageUsersFolder;
-import io.milton.cloud.server.apps.admin.ManageWebsitesFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -33,6 +26,7 @@ import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -67,12 +61,12 @@ public class FileServerApp implements LifecycleApplication, MenuApplication, Chi
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "File sync push";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Notifies connected file sync clients when a file change has occured on the server";
     }
 

@@ -14,6 +14,8 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.apps.website.AppControlBean;
+import io.milton.cloud.server.apps.website.AppsPageHelper;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
@@ -61,9 +63,9 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("settingsAppId")) {
-            updateApplicationSettings(parameters, files, tx);
+            jsonResult = _(AppsPageHelper.class).updateApplicationSettings(getOrganisation(), websiteBranch, parameters, files, tx);
         } else if (parameters.containsKey("appId")) {
-            updateApplicationEnabled(parameters, session, tx);
+            jsonResult = _(AppsPageHelper.class).updateApplicationEnabled(getOrganisation(), websiteBranch,parameters, session, tx);
         }
         return null;
     }
@@ -75,7 +77,7 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
         } else {
             // push web and org into request variables for templating
             RenderAppSettingsDirective.setOrganisation(organisation);
-            RenderAppSettingsDirective.setWebsite(website);
+            RenderAppSettingsDirective.setWebsiteBranch(websiteBranch);
 
             _(HtmlTemplater.class).writePage("admin", "admin/manageApps", this, params, out);
         }
@@ -87,5 +89,10 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
             return true;
         }
         return super.is(type);
+    }
+
+    @Override
+    public List<AppControlBean> getApps() {
+        return _(AppsPageHelper.class).getApps(null, websiteBranch);
     }
 }

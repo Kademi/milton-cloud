@@ -31,7 +31,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
-import java.io.DataInputStream;
 
 /**
  *
@@ -85,7 +84,7 @@ public class UploadUtils {
     public static Resource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         DataSession.DirectoryNode thisNode = col.getDirectoryNode();
         DataSession.FileNode newFileNode = thisNode.addFile(newName);
-        FileResource fileResource = col.newFileResource(newFileNode, col, false);
+        FileResource fileResource = new FileResource(newFileNode, col);
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {

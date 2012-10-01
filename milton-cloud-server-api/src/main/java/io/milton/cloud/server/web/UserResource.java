@@ -93,7 +93,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
                 for (Repository r : user.getRepositories()) {
                     Branch b = r.getTrunk();
                     if( b != null ) {
-                        BranchFolder rr = new BranchFolder(r.getName(), this, b, false);
+                        BranchFolder rr = new BranchFolder(r.getName(), this, b);
                         children.add(rr);
                     }
                 }
@@ -120,7 +120,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         Repository r = user.createRepository(newName, user, SessionManager.session());
         Branch b = r.getTrunk();
         SessionManager.session().save(r);
-        return new BranchFolder(r.getName(), this, b, false);
+        return new BranchFolder(r.getName(), this, b);
     }
 
     @Override

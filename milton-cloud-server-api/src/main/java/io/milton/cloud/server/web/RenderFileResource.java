@@ -427,7 +427,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public boolean isPublic() {
-        return fileResource.isPublic();
+        return getParent().isPublic();
     }
 
     public io.milton.cloud.server.web.FileResource getFileResource() {

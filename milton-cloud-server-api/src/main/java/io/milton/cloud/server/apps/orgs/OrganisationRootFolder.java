@@ -80,7 +80,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
             children = new ResourceList();
             if (organisation.getRepositories() != null) {
                 for (Repository repo : organisation.getRepositories()) {
-                    RepositoryFolder rf = new RepositoryFolder(this, repo, false);
+                    RepositoryFolder rf = new RepositoryFolder(this, repo);
                     children.add(rf);
                 }
             }

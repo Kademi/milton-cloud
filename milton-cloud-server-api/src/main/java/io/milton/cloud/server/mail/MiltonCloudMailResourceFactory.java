@@ -28,6 +28,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 
 /**
@@ -58,7 +59,15 @@ public class MiltonCloudMailResourceFactory implements MailResourceFactory{
         Website w = wrf.getWebsite();
 
         // Now look for a profile which has a admin org that owns the website
-        Profile p = Profile.find(w.getOrganisation(), add.user, SessionManager.session());
+        Profile p;
+        if( w.getBaseEntity() instanceof Organisation ) {
+            Organisation org = (Organisation) w.getBaseEntity();
+            p = Profile.find(org, add.user, SessionManager.session());
+        } else if( w.getBaseEntity() instanceof Profile) {
+            p = (Profile) w.getBaseEntity();
+        } else {
+            throw new RuntimeException("Unsupported website owner type");
+        }
         if( p == null ) {
             log.info("baseentity not found: " + add.user + " in website: " + w.getDomainName());
             return null;

@@ -1,7 +1,7 @@
 /** Begin admin/theme.css **/
 @import url("/static/common/modal.css");
 @import url("/templates/themes/fuse/base.css");
-@import url("/templates/themes/fuse/theme.dyn.css");
+@import url("/templates/themes/fuse/theme.less");
 /******************************************* Font face *******************************************/
 @font-face {
     font-family: "FrutigerRoman";

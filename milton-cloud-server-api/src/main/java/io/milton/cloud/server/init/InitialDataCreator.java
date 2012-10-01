@@ -59,14 +59,14 @@ public class InitialDataCreator implements LifecycleApplication {
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Initial data creator";
     }
 
     
     
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Runs on startup and checks that a minimum core set of data is present in the database";
     }
 
@@ -122,22 +122,22 @@ public class InitialDataCreator implements LifecycleApplication {
         }
         
         admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
-        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io
-        initHelper.enableApps(miltonSite, admin, session, "admin", "userApp", "forums", "email", "content","search", "signup","userDashboardApp");
+        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io        
+        initHelper.enableApps(miltonSite.getTrunk(), admin, session, "admin", "userApp", "forums", "email", "content","search", "signup","userDashboardApp");
         miltonSite.addGroup(users, session);
         String menu = "/content/index.html,Home\n" +
                         "/content/maven/index.html,Downloads\n" +
                         "/content/guide/index.html,Documentation";
                 
-        miltonSite.getRepository().setAttribute("logo", "milton.io", session);
-        miltonSite.getRepository().setAttribute("menu", menu, session);
+        miltonSite.setAttribute("logo", "milton.io", session);
+        miltonSite.setAttribute("menu", menu, session);
         
-        AppControl ac = AppControl.find(miltonSite, "signup", session);
+        AppControl ac = AppControl.find(miltonSite.getTrunk(), "signup", session);
         ac.setSetting("signup.next.href", "/content/gettingStarted.html", session);
 
         Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "milton", admin); // can be accessed on mymilton.localhost or my.milton.io
-        miltonSite.getRepository().setAttribute("logo", "my.milton.io", session);
-        initHelper.enableApps(myMiltonSite, admin, session, "admin", "userApp", "myFiles", "calendar", "contacts", "signup","userDashboardApp");
+        miltonSite.setAttribute("logo", "my.milton.io", session);
+        initHelper.enableApps(myMiltonSite.getTrunk(), admin, session, "admin", "userApp", "myFiles", "calendar", "contacts", "signup","userDashboardApp");
         myMiltonSite.addGroup(users, session);
 
         tx.commit();

@@ -25,12 +25,12 @@ import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
@@ -53,14 +53,14 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Calendars and events";
     }
     
     
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides users with calendars";
     }
 
@@ -88,7 +88,7 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
             Group group = joinEvent.getMembership().getGroupEntity();
             List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
             for (GroupInWebsite giw  : giws) {
-                if (applicationManager.isActive(this, giw.getWebsite())) {
+                if (applicationManager.isActive(this, giw.getWebsite().liveBranch() )) {
                     addCalendar("cal", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }

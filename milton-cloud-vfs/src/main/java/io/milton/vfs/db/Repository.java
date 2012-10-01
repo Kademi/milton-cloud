@@ -30,12 +30,12 @@ public class Repository implements Serializable {
     private String name; // identifies the resource to webdav
     private String title; // user friendly title
     private String notes;
+    private String liveBranch;
     private boolean publicContent; // allow anonymous users to view this content
     private Date createdDate;
     private BaseEntity baseEntity; // the direct owner of this repository
     private List<Branch> branches;
     private List<NvPair> nvPairs; // holds data capture information
-    
 
     @Id
     @GeneratedValue
@@ -80,6 +80,15 @@ public class Repository implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Column
+    public String getLiveBranch() {
+        return liveBranch;
+    }
+
+    public void setLiveBranch(String liveBranch) {
+        this.liveBranch = liveBranch;
     }
 
     @Column
@@ -129,8 +138,6 @@ public class Repository implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
-    
-    
 
     @Column(nullable = false)
     public boolean isPublicContent() {
@@ -155,7 +162,7 @@ public class Repository implements Serializable {
         }
         if (value == null) {
             Iterator<NvPair> it = list.iterator();
-            while( it.hasNext() ) {
+            while (it.hasNext()) {
                 NvPair nv = it.next();
                 if (nv.getName().equals(name)) {
                     session.delete(nv);
@@ -170,13 +177,13 @@ public class Repository implements Serializable {
                     break;
                 }
             }
-            if( found == null ) {
+            if (found == null) {
                 found = new NvPair();
                 found.setRepository(this);
                 found.setName(name);
                 list.add(found);
             }
-            found.setPropValue(value);            
+            found.setPropValue(value);
             session.save(found);
         }
         return this;
@@ -197,14 +204,7 @@ public class Repository implements Serializable {
 
     @Transient
     public Branch getTrunk() {
-        if (getBranches() != null) {
-            for (Branch b : getBranches()) {
-                if (Branch.TRUNK.equals(b.getName())) {
-                    return b;
-                }
-            }
-        }
-        return null;
+        return liveBranch();
     }
 
     /**
@@ -222,7 +222,7 @@ public class Repository implements Serializable {
         head.setItemHash(null);
         session.save(head);
 
-        Branch b = new Branch();        
+        Branch b = new Branch();
         b.setName(name);
         b.setRepository(this);
         b.setHead(head);
@@ -251,14 +251,34 @@ public class Repository implements Serializable {
         }
         session.delete(this);
     }
-    
+
     /**
      * Get the discriminator type for this instance. Should just use getType,
      * but for some reason is returning null
-     * 
-     * @return 
+     *
+     * @return
      */
     public String type() {
         return "R";
+    }
+
+    public Branch branch(String branchName) {
+        if (getBranches() == null) {
+            return null;
+        }
+        for (Branch b : getBranches()) {
+            if (b.getName().equals(branchName)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    public Branch liveBranch() {
+        if (getLiveBranch() != null) {
+            return branch(getLiveBranch());
+        } else {
+            return null;
+        }
     }
 }

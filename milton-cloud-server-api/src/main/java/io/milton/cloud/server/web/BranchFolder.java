@@ -6,6 +6,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.*;
 import io.milton.principal.Principal;
@@ -16,7 +17,6 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.data.DataSession.DirectoryNode;
-import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
@@ -26,33 +26,32 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Website;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
 /**
- * Represents the current version of a branch in a repository
+ * Represents a branch in a repository
  *
  * This behaves much the same as a DirectoryResource but is defined differently
  *
  *
  * @author brad
  */
-public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource, NodeChildUtils.ResourceCreator {
+public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-    protected final boolean renderMode;
     protected final CommonCollectionResource parent;
     protected final String name;
     protected final Branch branch;
     protected ResourceList children;
     protected Commit commit; // may be null
     protected final DataSession dataSession;
-    private JsonResult jsonResult; // set after completing a POST
+    protected JsonResult jsonResult; // set after completing a POST
     protected NodeMeta nodeMeta;
     private RenderFileResource indexPage;
 
-    public BranchFolder(String name, CommonCollectionResource parent, Branch branch, boolean renderMode) {
-        this.renderMode = renderMode;
+    public BranchFolder(String name, CommonCollectionResource parent, Branch branch) {
         this.name = name;
         this.parent = parent;
         this.branch = branch;
@@ -98,9 +97,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = NodeChildUtils.toResources(this, dataSession.getRootDataNode(), renderMode, this);
+            ApplicationManager am = _(ApplicationManager.class);
+            children = am.toResources(this, dataSession.getRootDataNode());
+            am.addBrowseablePages(this, children);
         }
-        System.out.println("children: " + children.size() + " - " + getHref());
         return children;
     }
 
@@ -126,7 +126,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException, IOException {
         DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
-        DirectoryResource rdr = newDirectoryResource(newNode, this, false);
+        DirectoryResource rdr = new DirectoryResource(newNode, this);
         onAddedChild(rdr);
         rdr.updateModDate();
         save();
@@ -198,12 +198,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if (renderMode) {
-            if (getIndex() != null) {
-                getIndex().sendContent(out, null, params, null);
-                return;
-            }
-        }
+//        if (renderMode) {
+//            if (getIndex() != null) {
+//                getIndex().sendContent(out, null, params, null);
+//                return;
+//            }
+//        }
         log.trace("sendContent: render template");
         WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
         MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
@@ -307,16 +307,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         } catch (NotAuthorizedException | BadRequestException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    @Override
-    public FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
-        return new FileResource(dm, parent);
-    }
-
-    @Override
-    public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
-        return new DirectoryResource(dm, parent, renderMode);
     }
 
     @Override
@@ -443,7 +433,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         if (r == null) {
             if (autoCreate) {
                 DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
-                fr = new DirectoryResource(newNode, this, false);
+                fr = new DirectoryResource(newNode, this);
             } else {
                 return null;
             }
@@ -455,5 +445,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             }
         }
         return fr;
+    }
+
+    public String getPublicTheme() {
+        Website website = (Website) this.branch.getRepository();
+        return website.getPublicTheme(); // TODO: move this to something inside branch
     }
 }

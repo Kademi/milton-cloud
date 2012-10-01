@@ -21,6 +21,7 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.DataResourceApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.event.SubscriptionEvent;
@@ -35,7 +36,6 @@ import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
-import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
@@ -43,12 +43,15 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Contact;
 
 /**
  *
  * @author brad
  */
-public class ContactsApp implements Application, EventListener, BrowsableApplication, MenuApplication {
+public class ContactsApp implements Application, EventListener, BrowsableApplication, MenuApplication, DataResourceApplication {
 
     public static final String ADDRESS_BOOK_HOME_NAME = "abs";
     private ContactManager contactManager;
@@ -56,19 +59,15 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
     private SpliffyResourceFactory resourceFactory;
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Contacts and address books";
     }
 
-    
-    
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides end users with address books, which can be accessed and synced from email clients and mobile devices";
     }
 
-    
-    
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws IOException {
         contactManager = new ContactManager();
@@ -141,7 +140,8 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
             Group group = joinEvent.getMembership().getGroupEntity();
             List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
             for (GroupInWebsite giw : giws) {
-                if (applicationManager.isActive(this, giw.getWebsite())) {
+                Branch b = giw.getWebsite().liveBranch();
+                if (applicationManager.isActive(this, b)) {
                     addAddressBook("contact", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }
@@ -167,7 +167,7 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
             case "menuRoot":
                 String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
                 for (Repository r : curUser.getRepositories()) {
-                    if (r instanceof AddressBook) { 
+                    if (r instanceof AddressBook) {
                         String repoHref = userHref + ADDRESS_BOOK_HOME_NAME + "/" + r.getName() + "/";
                         String title = r.getTitle() == null ? r.getName() : r.getTitle();
                         parent.getOrCreate("menu-mycontacts-" + r.getName(), title, repoHref).setOrdering(50);
@@ -175,5 +175,18 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
                 }
                 break;
         }
+    }
+
+    @Override
+    public ContentResource instantiateResource(Object dm, CommonCollectionResource parent, RootFolder rf) {
+        if (parent instanceof ContactsFolder) {
+            if (dm instanceof DataSession.FileNode) {
+                DataSession.FileNode fn = (DataSession.FileNode) dm;
+                ContactsFolder contactsFolder = (ContactsFolder) parent;
+                Contact c = contactsFolder.getAddressBook().contact(fn.getName());
+                return new ContactResource(fn, contactsFolder, c, contactManager);
+            }
+        }
+        return null;
     }
 }

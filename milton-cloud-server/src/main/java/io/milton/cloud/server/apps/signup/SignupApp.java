@@ -93,12 +93,12 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "User registration and signup";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides signup pages, which allows people to join your websites and groups";
     }
 
@@ -178,8 +178,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
      * @param newUser
      * @return
      */
-    public String getNextHref(Profile newUser, Website website) {
-        String s = config.get(NEXT_HREF, website);
+    public String getNextHref(Profile newUser, Branch websiteBranch) {
+        String s = config.get(NEXT_HREF, websiteBranch);
         return s;
     }
 
@@ -188,13 +188,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     }
 
     @Override
-    public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {
+    public void renderSettings(Profile currentUser, Organisation org, Branch websiteBranch, Context context, Writer writer) throws IOException {
         String href; // = findSetting("gaAccountNumber", rootFolder);
-        if (website != null) {
-            System.out.println("get from website - " + website.getName());
-            href = config.get(NEXT_HREF, website);
+        if (websiteBranch != null) {
+            href = config.get(NEXT_HREF, websiteBranch);
         } else {
-            System.out.println("get from org");
             href = config.get(NEXT_HREF, org);
         }
         System.out.println("current href: " + href);
@@ -207,11 +205,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     }
 
     @Override
-    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org,  Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
         System.out.println("save settings");
         String signupNextHref = parameters.get("signupNextHref");
-        if (website != null) {
-            config.set(NEXT_HREF, website, signupNextHref);
+        if (websiteBranch != null) {
+            config.set(NEXT_HREF, websiteBranch, signupNextHref);
         } else {
             config.set(NEXT_HREF, org, signupNextHref);
         }

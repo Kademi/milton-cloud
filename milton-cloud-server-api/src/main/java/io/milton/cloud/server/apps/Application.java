@@ -16,10 +16,8 @@
  */
 package io.milton.cloud.server.apps;
 
-import io.milton.cloud.server.web.ResourceList;
-import io.milton.resource.CollectionResource;
-import io.milton.resource.Resource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 
@@ -55,7 +53,7 @@ public interface Application {
      * @param website
      * @return 
      */
-    String getTitle(Organisation organisation, Website website);
+    String getTitle(Organisation organisation, Branch websiteBranch);
 
     
     /**
@@ -65,7 +63,7 @@ public interface Application {
      * @param rootFolder
      * @return 
      */
-    String getSummary(Organisation organisation, Website website);
+    String getSummary(Organisation organisation,Branch websiteBranch);
 
 
     

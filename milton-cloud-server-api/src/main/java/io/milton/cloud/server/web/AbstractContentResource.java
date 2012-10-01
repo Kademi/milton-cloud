@@ -33,11 +33,11 @@ import io.milton.vfs.db.Branch;
  *
  * @author brad
  */
-public abstract class AbstractContentResource extends AbstractResource implements ContentResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
+public abstract class AbstractContentResource<T extends DataNode, P extends ContentDirectoryResource> extends AbstractResource implements ContentResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractContentResource.class);
-    protected ContentDirectoryResource parent;
-    protected DataNode contentNode;
+    protected P parent;
+    protected T contentNode;
     protected NodeMeta nodeMeta;
 
     public abstract String getTitle();
@@ -51,12 +51,12 @@ public abstract class AbstractContentResource extends AbstractResource implement
      * freshly created, in which case the given parent is the set
      * @param services
      */
-    public AbstractContentResource(DataNode contentNode, ContentDirectoryResource parent) {
+    public AbstractContentResource(T contentNode, P parent) {
         this.contentNode = contentNode;
         this.parent = parent;
     }
 
-    public AbstractContentResource(ContentDirectoryResource parent) {
+    public AbstractContentResource(P parent) {
         this.parent = parent;
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
         DirectoryNode newParentNode = newParent.getDirectoryNode();
         contentNode.move(newParentNode, newName);
-        parent = newParent;
+        parent = (P) newParent;
         newParent.onAddedChild(this);
         oldParent.onRemovedChild(this);
         try {
@@ -131,11 +131,17 @@ public abstract class AbstractContentResource extends AbstractResource implement
 
     @Override
     public Date getCreateDate() {
+        if( this.contentNode == null ) {
+            return null;
+        }        
         return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
+        if( this.contentNode == null ) {
+            return null;
+        }
         return loadNodeMeta().getModDate();
     }
 
@@ -217,7 +223,7 @@ public abstract class AbstractContentResource extends AbstractResource implement
     }
 
     @Override
-    public ContentDirectoryResource getParent() {
+    public P getParent() {
         return parent;
     }
 

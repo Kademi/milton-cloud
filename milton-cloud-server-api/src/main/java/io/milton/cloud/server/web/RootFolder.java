@@ -59,5 +59,6 @@ public interface RootFolder extends CommonCollectionResource {
      * @return 
      */
     String getEmailAddress();
+    
 
 }

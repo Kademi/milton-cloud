@@ -17,7 +17,6 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -26,23 +25,21 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
 /**
- * A Website is an alias for a repository. The name of the website is the DNS
- * name
+ * A Website is a repository which can be accessed via a DNS name. The DNS name
+ * can be specified explicitly or it can be the name + primary domain name
  *
  * @author brad
  */
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"}),
-    @UniqueConstraint(columnNames = {"domainName"}),
-}// website DNS names must be unique across whole system
+    @UniqueConstraint(columnNames = {"domainName"}),}// website DNS names must be unique across whole system
 )
-public class Website implements Serializable, VfsAcceptor {
+@DiscriminatorValue("W")
+public class Website extends Repository implements VfsAcceptor {
 
     public static List<Website> findByRepository(Repository repository, Session session) {
         Criteria crit = session.createCriteria(Website.class);
@@ -66,62 +63,36 @@ public class Website implements Serializable, VfsAcceptor {
         }
         return w;
     }
-    
+
     public static Website findByDomainNameDirect(String domainName, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("domainName", domainName));
         return DbUtils.unique(crit);
-    }    
+    }
 
     public static Website findByName(String name, Session session) {
         Website w = findByNameDirect(name, session);
         while (w != null && w.getAliasTo() != null) {
             w = w.getAliasTo();
         }
-        return w;        
+        return w;
     }
-    
+
     public static Website findByNameDirect(String name, Session session) {
         Criteria crit = session.createCriteria(Website.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("name", name));
         return DbUtils.unique(crit);
     }
-    
-    private Organisation organisation;
-    private long id;    
-    private String name; // the logical name for the website, this will be accessible on an internal domain name, eg bradsite.milton.io
+    private Organisation organisation; // will generally be same as baseEntity on underlying repo
     private String domainName; // identifies the resource to webdav. This is the DNS name, eg www.bradsite.com
     private Website aliasTo; // if not null, this website is really just an alias for that one
     private String redirectTo; // if not null, this website will redirect to that one
     private String mailServer; // if not null, will be used for email sending and generating MX records
-    private Repository repository;
     private String internalTheme;
-    private String publicTheme;
-    private String currentBranch;
-    private Date createdDate;
+    private String publicTheme;    
 
-    @Id
-    @GeneratedValue
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    @Column(length = 255, nullable = false)
-    @Index(name = "idx_name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }    
-    
     @Column(length = 255, nullable = true)
     @Index(name = "idx_domain_name")
     public String getDomainName() {
@@ -130,6 +101,15 @@ public class Website implements Serializable, VfsAcceptor {
 
     public void setDomainName(String name) {
         this.domainName = name;
+    }
+
+    @ManyToOne(optional = false)
+    public Organisation getOrganisation() {
+        return organisation;
+    }
+
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
     }
 
     /**
@@ -192,54 +172,6 @@ public class Website implements Serializable, VfsAcceptor {
         this.publicTheme = publicTheme;
     }
 
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    @Column(nullable = false)
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getCurrentBranch() {
-        return currentBranch;
-    }
-
-    public void setCurrentBranch(String currentBranch) {
-        this.currentBranch = currentBranch;
-    }
-
-    public Branch currentBranch() {
-        if (repository.getBranches() == null) {
-            return null;
-        }
-        for (Branch b : repository.getBranches()) {
-            if (b.getName().equals(getCurrentBranch())) {
-                return b;
-            }
-        }
-        return null;
-    }
-
-    @ManyToOne(optional = false)
-    public Organisation getOrganisation() {
-        return organisation;
-    }
-
-    public void setOrganisation(Organisation organisation) {
-        this.organisation = organisation;
-    }
-
-    @ManyToOne
-    public Repository getRepository() {
-        return repository;
-    }
-
-    public void setRepository(Repository repository) {
-        this.repository = repository;
-    }
-
     public String getMailServer() {
         return mailServer;
     }
@@ -247,8 +179,6 @@ public class Website implements Serializable, VfsAcceptor {
     public void setMailServer(String mailServer) {
         this.mailServer = mailServer;
     }
-    
-    
 
     @Override
     public void accept(VfsVisitor visitor) {
@@ -283,23 +213,22 @@ public class Website implements Serializable, VfsAcceptor {
         return GroupInWebsite.findByWebsite(this, session);
     }
 
+    @Override
     public void delete(Session session) {
-        session.delete(this);
+        super.delete(session);
     }
 
     public Website createAlias(String aliasDnsName, Session session) {
         Website aliasWebsite = new Website();
-        aliasWebsite.setOrganisation(getOrganisation());
+        aliasWebsite.setBaseEntity(getBaseEntity());
         aliasWebsite.setCreatedDate(new Date());
         aliasWebsite.setDomainName(aliasDnsName);
         aliasWebsite.setPublicTheme(null);
         aliasWebsite.setInternalTheme(null);
-        aliasWebsite.setCurrentBranch(Branch.TRUNK);
+        aliasWebsite.setLiveBranch(Branch.TRUNK);
         aliasWebsite.setAliasTo(this);
         session.save(aliasWebsite);
         return aliasWebsite;
 
     }
-    
-
 }

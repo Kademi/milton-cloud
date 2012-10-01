@@ -25,6 +25,7 @@ import io.milton.http.FileItem;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -49,17 +50,17 @@ public class GaApp implements PortletApplication, SettingsApplication{
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Google Analytics";
     }
     
     
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         String gaAccNum;
-        if( website != null ) {
-            gaAccNum = config.get("gaAccountNumber", website);
+        if( websiteBranch != null ) {
+            gaAccNum = config.get("gaAccountNumber", websiteBranch);
         } else {
             gaAccNum = config.get("gaAccountNumber", organisation);
         }
@@ -104,7 +105,7 @@ public class GaApp implements PortletApplication, SettingsApplication{
 
     private String findSetting(String setting, RootFolder rootFolder) {
         if( rootFolder instanceof WebsiteRootFolder ) {
-            return config.get(setting, ((WebsiteRootFolder)rootFolder).getWebsite());
+            return config.get(setting, ((WebsiteRootFolder)rootFolder).getBranch());
         } else {
             return config.get(setting, rootFolder.getOrganisation());
         }
@@ -112,10 +113,10 @@ public class GaApp implements PortletApplication, SettingsApplication{
         
     
     @Override
-    public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {        
+    public void renderSettings(Profile currentUser, Organisation org, Branch websiteBranch, Context context, Writer writer) throws IOException {        
         String acc; // = findSetting("gaAccountNumber", rootFolder);
-        if( website != null ) {
-            acc = config.get("gaAccountNumber", website);
+        if( websiteBranch != null ) {
+            acc = config.get("gaAccountNumber", websiteBranch);
         } else {
             acc = config.get("gaAccountNumber", org);
         }
@@ -129,11 +130,11 @@ public class GaApp implements PortletApplication, SettingsApplication{
     }
 
     @Override
-    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {        
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {        
         String newAcc = parameters.get("gaAccNum");
         System.out.println("GaApp: proces form: " + newAcc);
-        if( website != null ) {
-            config.set("gaAccountNumber", website, newAcc);
+        if( websiteBranch != null ) {
+            config.set("gaAccountNumber", websiteBranch, newAcc);
         } else {
             config.set("gaAccountNumber", org, newAcc);
         }

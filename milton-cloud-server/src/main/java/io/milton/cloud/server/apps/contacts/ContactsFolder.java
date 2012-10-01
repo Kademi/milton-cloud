@@ -22,7 +22,6 @@ import io.milton.cloud.server.web.BranchFolder;
 import io.milton.vfs.db.Contact;
 import io.milton.vfs.db.AddressBook;
 import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.ContentDirectoryResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.NewPageResource;
 import io.milton.cloud.server.web.PersonalResource;
@@ -45,7 +44,6 @@ import java.util.Map;
 import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
 import io.milton.vfs.data.DataSession;
-import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.utils.SessionManager;
@@ -69,7 +67,7 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
     private JsonResult jsonResult;
 
     public ContactsFolder(String name, CommonCollectionResource parent, AddressBook addressBook, Branch branch, ContactManager contactManager) {
-        super(name, parent, branch, false);
+        super(name, parent, branch);
         this.addressBook = addressBook;
         this.contactManager = contactManager;
     }
@@ -89,13 +87,6 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
         } else {
             _(HtmlTemplater.class).writePage("contacts/contactsHome", this, params, out);
         }
-    }
-
-    @Override
-    public ContactResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
-        //return super.newFileResource(dm, parent, renderMode);
-        Contact c = addressBook.contact(dm.getName());
-        return new ContactResource(dm, this, c, contactManager);
     }
 
     @Override
@@ -195,7 +186,8 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
             newName += ".vcf";
             newName = NewPageResource.getUniqueName(this, newName);
             DataSession.FileNode newFileNode = thisNode.addFile(newName);
-            ContactResource fileResource = this.newFileResource(newFileNode, this, false);
+            Contact c = getAddressBook().contact(newFileNode.getName());
+            ContactResource fileResource = new ContactResource(newFileNode, this, c, contactManager);
             String vcardText = contactManager.format(vc);
             ByteArrayInputStream bin = new ByteArrayInputStream(vcardText.getBytes("UTF-8"));
             newFileNode.setContent(bin);

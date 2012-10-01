@@ -23,6 +23,7 @@ import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Utils;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -144,14 +145,33 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
             // otherwise, look for a website with a name that matches the subdomain
             Website website = Website.findByName(subdomain, session);
             if (website != null) {
-                return new WebsiteRootFolder(applicationManager, website);
+                Branch b = website.liveBranch();
+                if( b != null) {
+                    return new WebsiteRootFolder(applicationManager, website, b);
+                }
+            }
+            
+            // not exact match on website, but might have a branch suffic. Eg qa.mysite.somewhere.com
+            // which would be QA branch of the "mysite" website, with somewhere.com as primary domain
+            if( subdomain.contains(".")) {
+                // split the subdomain
+                int pos = subdomain.indexOf(".");
+                String first = subdomain.substring(0, pos);
+                String otherPart = subdomain.substring(pos);
+                System.out.println("first=" + first + " -- second=" + otherPart );
+                website = Website.findByName(otherPart, session);
+                if( website != null ) {
+                    // now look for branch
+                    Branch b = website.branch(first);
+                    return new WebsiteRootFolder(applicationManager, website, b);
+                }
             }
         }
 
         // Didnt find anything matching primary domain, so look for an exact match on website
         Website website = Website.findByDomainName(host, session);
         if (website != null) {
-            return new WebsiteRootFolder(applicationManager, website);
+            return new WebsiteRootFolder(applicationManager, website, website.liveBranch());
         }
 
         // Still nothing found, so drop to root org admin console

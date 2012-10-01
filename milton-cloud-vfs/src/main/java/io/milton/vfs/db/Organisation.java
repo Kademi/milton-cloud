@@ -249,23 +249,23 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * creates an alias subdomain if the alias argument is not null
      *
      */
-    public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {
-        Repository r = createRepository(name, user, session);
-
+    public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {   
         Website w = new Website();
+        w.setBaseEntity(this);
         w.setOrganisation(this);
         w.setCreatedDate(new Date());
         w.setName(name);
         w.setDomainName(dnsName);
         w.setPublicTheme(theme);
         w.setInternalTheme(null);
-        w.setCurrentBranch(Branch.TRUNK);
-        w.setRepository(r);
+        w.setLiveBranch(Branch.TRUNK);
         if( this.getWebsites() == null ) {
             this.setWebsites(new ArrayList<Website>());
         }
         this.getWebsites().add(w);
         session.save(w);
+        
+        Branch b = w.createBranch(Branch.TRUNK, user, session);
 
         return w;
     }

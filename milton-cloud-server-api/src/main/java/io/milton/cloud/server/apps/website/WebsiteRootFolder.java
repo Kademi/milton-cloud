@@ -18,15 +18,10 @@ package io.milton.cloud.server.apps.website;
 
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.http.*;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.exceptions.NotFoundException;
-import io.milton.principal.Principal;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.user.UserApp;
@@ -37,6 +32,9 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.exceptions.NotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Represents the root of a website. A "website" in this context is a product,
@@ -50,18 +48,31 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class WebsiteRootFolder extends AbstractResource implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
+public class WebsiteRootFolder extends BranchFolder implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
 
     private final ApplicationManager applicationManager;
     private final Website website;
-    private ResourceList children;
     private Map<String, Object> attributes;
 
-    public WebsiteRootFolder(ApplicationManager applicationManager, Website website) {
+    public WebsiteRootFolder(ApplicationManager applicationManager, Website website, Branch branch) {
+        super("", null, branch);
         this.website = website;
         this.applicationManager = applicationManager;
     }
 
+    @Override
+    protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        RenderFileResource index = getIndex();
+        if( index != null ) {
+            index.sendContent(out, null, params, "text/html");
+        } else {
+            super.renderPage(out, params);
+        }
+    }
+
+    
+    
+    
     @Override
     public String getName() {
         return "";
@@ -69,7 +80,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
 
     @Override
     public String getId() {
-        return website.getName();
+        return website.getName() + "_" + branch.getName();
     }
 
     @Override
@@ -103,67 +114,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         return UserApp.findEntity(u, this);
     }
 
-    @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if (children == null) {
-            children = new ResourceList();
-            Branch currentLive = website.currentBranch();
-            if (currentLive != null) {
-                BranchFolder rf = new BranchFolder("content", this, currentLive, true);
-                children.add(rf);
-            }
-            if (website.getRepository().getBranches() != null) {
-                for (Branch b : website.getRepository().getBranches()) {
-                    BranchFolder rf = new BranchFolder(b.getName(), this, b, false);
-                    children.add(rf);
-                }
-            }
-            applicationManager.addBrowseablePages(this, children);
-        }
-        return children;
-    }
-
-    @Override
-    public String checkRedirect(Request request) {
-        if (request.getMethod().equals(Method.GET)) {
-            return "/content/index.html";
-        }
-        return null;
-    }
-
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-    }
-
-    @Override
-    public Long getMaxAgeSeconds(Auth auth) {
-        return null;
-    }
-
-    @Override
-    public Long getContentLength() {
-        return null;
-    }
-
-    @Override
-    public CommonCollectionResource getParent() {
-        return null;
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return null;
-    }
-
-    @Override
-    public boolean isDir() {
-        return true;
-    }
-
-    @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
-        return Collections.EMPTY_MAP;
-    }
 
     @Override
     public Organisation getOrganisation() {
@@ -175,12 +125,7 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
     }
 
     public SettingsMap getSettings() {
-        return new SettingsMap(website.getRepository());
-    }
-
-    @Override
-    public boolean isPublic() {
-        return true;
+        return new SettingsMap(website);
     }
 
     @Override
@@ -191,10 +136,6 @@ public class WebsiteRootFolder extends AbstractResource implements RootFolder, C
         return attributes;
     }
 
-    @Override
-    public Priviledge getRequiredPostPriviledge(Request request) {
-        return null;
-    }
 
     @Override
     public String getEmailAddress() {

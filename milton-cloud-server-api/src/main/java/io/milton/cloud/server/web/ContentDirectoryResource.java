@@ -14,12 +14,9 @@
  */
 package io.milton.cloud.server.web;
 
-import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.MakeCollectionableResource;
-import io.milton.resource.Resource;
-import io.milton.vfs.data.DataSession;
 import io.milton.vfs.data.DataSession.DirectoryNode;
 import java.util.List;
 
@@ -29,7 +26,7 @@ import java.util.List;
  *
  * @author brad
  */
-public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource, MakeCollectionableResource, ResourceCreator{
+public interface ContentDirectoryResource extends CommonCollectionResource, ContentResource, MakeCollectionableResource {
     
     /**
      * Get the underlying directory node for this instance

@@ -4,15 +4,14 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Website;
 
 /**
  *
@@ -26,14 +25,14 @@ public class GroupResourcesApp implements MenuApplication, ChildPageApplication 
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Group resources and files";
     }
 
     
     
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Allows users groups to have folders of files, which members of the group can download";
     }
 

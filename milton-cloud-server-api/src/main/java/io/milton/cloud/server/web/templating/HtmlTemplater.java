@@ -113,12 +113,15 @@ public class HtmlTemplater {
      * @throws IOException
      */
     public void writePage(String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
+        System.out.println("------ write page: " + aThis.getClass());
         boolean isPublic = false;
         if (aThis instanceof CommonResource) {
             CommonResource cr = (CommonResource) aThis;
             isPublic = cr.isPublic();
+            System.out.println("   public=" + isPublic);
         }
         String theme = findTheme(aThis, isPublic);
+        System.out.println("  theme: " + theme);
         writePage(theme, templatePath, aThis, params, out);
     }
 
@@ -153,7 +156,7 @@ public class HtmlTemplater {
         }        
         String themePath; // path that contains the theme templates Eg /templates/themes/admin/ or /content/theme/
         if (theme.equals("custom")) {
-            themePath = "/content/theme/";
+            themePath = "/theme/";
         } else {
             themePath = "/templates/themes/" + theme + "/";
         }        

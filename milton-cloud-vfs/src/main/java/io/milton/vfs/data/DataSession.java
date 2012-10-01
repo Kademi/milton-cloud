@@ -54,6 +54,9 @@ public class DataSession {
     private final Branch branch;
 
     public DataSession(Branch branch, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService) {
+        if( branch == null ) {
+            throw new RuntimeException("Branch is null");
+        }
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.session = session;

@@ -21,6 +21,7 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -59,12 +60,12 @@ public class ContactUsApp implements ChildPageApplication, PortletApplication{
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Contact Us";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Add a 'Contact Us' page to websites, allowing non-logged in users to email the site administrators";
     }
     

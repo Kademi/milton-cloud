@@ -14,17 +14,21 @@
  */
 package io.milton.cloud.server.apps.admin;
 
-import io.milton.cloud.server.apps.signup.GroupSignupsReport;
+import io.milton.cloud.server.apps.website.AppsPageHelper;
+import io.milton.cloud.server.apps.website.ManageWebsiteBranchFolder;
+import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
+import io.milton.cloud.server.apps.website.ManageWebsiteFolder;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
+import io.milton.cloud.server.apps.DataResourceApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationsFolder;
 import io.milton.cloud.server.apps.reporting.ReportingApp;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
@@ -39,7 +43,10 @@ import io.milton.vfs.db.Website;
 import java.util.Set;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.CollectionResource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Repository;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -50,10 +57,11 @@ import org.apache.velocity.context.Context;
  *
  * @author brad
  */
-public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication, PortletApplication {
+public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication, PortletApplication, DataResourceApplication, BrowsableApplication {
 
     private ApplicationManager applicationManager;
     private List<JsonReport> reports;
+    private AppsPageHelper appsPageHelper;
 
     public AdminApp() {
         reports = new ArrayList<>();
@@ -66,19 +74,21 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Administration";
     }
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         applicationManager = _(ApplicationManager.class);
+        appsPageHelper = new AppsPageHelper(applicationManager);
+        config.getContext().put(appsPageHelper);
         resourceFactory.getSecurityManager().add(new AdminRole());
         resourceFactory.getSecurityManager().add(new UserAdminRole());
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation,Branch websiteBranch) {
         return "Provides most admin console functionality, such as managing users, groups, websites, etc";
     }
 
@@ -93,19 +103,10 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 case "groups":
                     MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
                     return new ManageGroupsFolder(requestedName, p.getOrganisation(), p);
-                case "manageWebsites":
-                    MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
-                    return new ManageWebsitesFolder(requestedName, p.getOrganisation(), p);
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
 
-            }
-        } else if (parent instanceof OrganisationsFolder) {
-            OrganisationsFolder orgsFolder = (OrganisationsFolder) parent;
-            if (requestedName.equals("manage")) {
-                MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
-                return new ManageOrgsPage(requestedName, orgsFolder.getOrganisation(), orgsFolder);
             }
         }
         return null;
@@ -130,11 +131,11 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
             case "menuGroupsUsers":
                 parent.getOrCreate("menuUsers", "Manage users", parentPath.child("manageUsers")).setOrdering(10);
                 parent.getOrCreate("menuGroups", "Manage groups", parentPath.child("groups")).setOrdering(20);
-                Path p = parentOrg.getPath().child("organisations").child("manage");
-                parent.getOrCreate("menuOrgs", "Manage Business units", p).setOrdering(30);
+                Path p = parentOrg.getPath().child("organisations");
+                parent.getOrCreate("menuOrgs", "Manage Business units", p + "/").setOrdering(30);
                 break;
             case "menuWebsiteManager":
-                parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("manageWebsites")).setOrdering(10);
+                parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("websites")).setOrdering(10);
                 //parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
                 parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;
@@ -158,7 +159,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
      */
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if (rootFolder instanceof OrganisationRootFolder && currentUser != null ) {
+        if (rootFolder instanceof OrganisationRootFolder && currentUser != null) {
             if (portletSection.equals("adminDashboardPrimary")) {
                 writer.append("<div class='report'>\n");
                 writer.append("<h3>Website activity</h3>\n");
@@ -178,6 +179,25 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 }
                 writer.append("</div>\n");
             }
+        }
+    }
+
+    @Override
+    public ContentResource instantiateResource(Object o, CommonCollectionResource parent, RootFolder rf) {
+        if (parent instanceof ManageWebsiteFolder && o instanceof Branch) {
+            Branch b = (Branch) o;
+            Repository r = b.getRepository();
+            Website w = (Website) r;            
+            return new ManageWebsiteBranchFolder(w, b, parent);
+        }
+        return null;
+    }
+
+    @Override
+    public void addBrowseablePages(CollectionResource parent, ResourceList children) {
+       if (parent instanceof OrganisationFolder) {
+            CommonCollectionResource p = (CommonCollectionResource) parent;
+            children.add(new ManageWebsitesFolder("websites", p.getOrganisation(), p));            
         }
     }
 

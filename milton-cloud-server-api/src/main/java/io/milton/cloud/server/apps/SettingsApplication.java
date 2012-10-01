@@ -15,11 +15,11 @@
 package io.milton.cloud.server.apps;
 
 import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.http.FileItem;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -52,7 +52,7 @@ public interface SettingsApplication extends Application{
      * @param context - the current velocity context
      * @param writer - to write content to
      */
-    void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException;
+    void renderSettings(Profile currentUser, Organisation org, Branch websiteBranch, Context context, Writer writer) throws IOException;
     
     /**
      * Process a form POST 
@@ -68,5 +68,5 @@ public interface SettingsApplication extends Application{
      * @throws NotAuthorizedException
      * @throws ConflictException 
      */
-    JsonResult processForm(Map<String,String> parameters, Map<String,FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException;
+    JsonResult processForm(Map<String,String> parameters, Map<String,FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException;
 }

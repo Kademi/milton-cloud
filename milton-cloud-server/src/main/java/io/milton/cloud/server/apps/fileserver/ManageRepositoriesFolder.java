@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.fileserver;
 
+import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
 import io.milton.cloud.server.apps.admin.*;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
@@ -90,7 +91,7 @@ public class ManageRepositoriesFolder extends AbstractCollectionResource impleme
                 jsonResult = JsonResult.fieldError("newName", "There is already a resource with that name, please choose another");
             } else {
                 Repository r = org.createRepository(newName, curUser, session);
-                RepositoryFolder rf = new RepositoryFolder(parent, r, true);
+                RepositoryFolder rf = new RepositoryFolder(parent, r);
                 log.info("created: " + r.getName());
                 jsonResult = new JsonResult(true, "Created ok", rf.getHref());
             }

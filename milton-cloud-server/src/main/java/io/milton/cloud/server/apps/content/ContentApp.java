@@ -17,18 +17,21 @@ package io.milton.cloud.server.apps.content;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.DataResourceApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.AbstractContentResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
+import io.milton.cloud.server.web.ContentDirectoryResource;
 import io.milton.cloud.server.web.ContentResource;
+import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.http.HttpManager;
@@ -38,6 +41,9 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.data.DataSession.FileNode;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
@@ -52,35 +58,35 @@ import org.apache.velocity.context.Context;
  *
  * @author brad
  */
-public class ContentApp implements Application, PortletApplication, ResourceApplication, MenuApplication {
-    
+public class ContentApp implements Application, PortletApplication, ResourceApplication, MenuApplication, DataResourceApplication {
+
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
     public static final String PATH_SUFFIX_HISTORY = ".history";
     public static final String PATH_SUFFIX_PREVIEW = ".preview";
     private SpliffyResourceFactory resourceFactory;
-    
+
     @Override
     public String getInstanceId() {
         return "content";
     }
-    
+
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Content viewing and authoring";
     }
-    
+
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides content viewing functions, such as generating menus based on folders";
     }
-    
+
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         this.resourceFactory = resourceFactory;
         resourceFactory.getSecurityManager().add(new ContentViewerRole());
         resourceFactory.getSecurityManager().add(new ContentAuthorRole());
     }
-    
+
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (rootFolder instanceof WebsiteRootFolder) {
@@ -95,7 +101,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             }
         }
     }
-    
+
     @Override
     public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
         System.out.println("getResource: " + path);
@@ -119,11 +125,11 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                     return new ViewFromHistoryResource(p.getName(), cr);
                 }
             }
-            
+
         }
         return null;
     }
-    
+
     private Resource findFromRoot(RootFolder rootFolder, Path p) throws NotAuthorizedException, BadRequestException {
         CollectionResource col = rootFolder;
         Resource r = null;
@@ -143,22 +149,22 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         }
         return r;
     }
-    
+
     @Override
     public void appendMenu(MenuItem parent) {
         appendWebsiteMenu(parent);
     }
-   
+
     /**
-     * Get the current website and look for a "menu" attribute on its repository. If
-     * it exists then parse it and generate menu items
-     * 
-     * @param parent 
+     * Get the current website and look for a "menu" attribute on its
+     * repository. If it exists then parse it and generate menu items
+     *
+     * @param parent
      */
     public void appendWebsiteMenu(MenuItem parent) {
         String thisHref = null;
         Request req = HttpManager.request();
-        if( req != null ) {
+        if (req != null) {
             thisHref = req.getAbsolutePath();
         }
         if (parent.getId().equals("menuRoot")) {
@@ -166,7 +172,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             if (rootFolder instanceof WebsiteRootFolder) {
                 WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
                 Website website = wrf.getWebsite();
-                Repository r = website.getRepository();
+                Repository r = website;
                 String sMenu = r.getAttribute("menu");
                 if (sMenu != null && sMenu.length() > 0) {
                     String[] arr = sMenu.split("\n");
@@ -177,23 +183,39 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                         String menuHref = pair[0];
                         MenuItem i = parent.getOrCreate(id, pair[1], menuHref);
                         i.setOrdering(cnt * 10);
-                        if( thisHref != null && thisHref.startsWith(menuHref)) {
+                        if (thisHref != null && thisHref.startsWith(menuHref)) {
                             MenuItem.setActiveId(id);
                         }
                     }
                 }
             }
         }
-    }    
-    
-    
+    }
+
+    @Override
+    public ContentResource instantiateResource(Object sourceObject, CommonCollectionResource parent, RootFolder rf) {
+        if (rf instanceof WebsiteRootFolder && sourceObject instanceof DataSession.FileNode) {
+            FileNode fn = (FileNode) sourceObject;
+            if (fn.getName().endsWith(".html")) {
+                if (parent instanceof ContentDirectoryResource) {
+                    ContentDirectoryResource contentParent = (ContentDirectoryResource) parent;
+
+                    FileResource fr = new FileResource(fn, contentParent);
+                    RenderFileResource rfr = new RenderFileResource(fr);
+                    return rfr;
+                }
+            }
+        }
+        return null;
+    }
+
     public class ContentViewerRole implements Role {
-        
+
         @Override
         public String getName() {
             return ROLE_CONTENT_VIEWER;
         }
-        
+
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (isContentResource(resource)) {
@@ -202,30 +224,29 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             }
             return false;
         }
-        
+
         @Override
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Collections.singleton(AccessControlledResource.Priviledge.READ);
         }
-        
+
         private boolean isContentResource(CommonResource resource) {
             return resource instanceof ContentResource;
         }
     }
-    
+
 //    TODO: These roles should return privs as configured for the repository
 //            this will allow in milton content viewers to edit content for website repo
 //    
 //                    
 //                    Also, add Repository access screen to website
-                    
     public class ContentAuthorRole implements Role {
-        
+
         @Override
         public String getName() {
             return "Content author";
         }
-        
+
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (resource instanceof AbstractContentResource) {
@@ -238,7 +259,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             }
             return false;
         }
-        
+
         @Override
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Role.READ_WRITE;

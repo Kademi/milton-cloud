@@ -17,9 +17,7 @@
 package io.milton.cloud.server.apps.orgs;
 
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.apps.website.SettingsMap;
 import io.milton.cloud.server.db.AppControl;
-import io.milton.cloud.server.db.GroupMembershipApplication;
 import io.milton.http.*;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -29,7 +27,6 @@ import java.util.*;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.principal.Principal;
@@ -58,7 +55,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     private final Organisation organisation;
     private ResourceList children;
     private Map<String, String> fakeSettings;
-    
+
     public OrganisationFolder(CommonCollectionResource parent, Organisation organisation) {
         this.parent = parent;
         this.organisation = organisation;
@@ -71,10 +68,15 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
         if (organisation.getWebsites() != null) {
             for (Website w : organisation.getWebsites()) {
-                for (AppControl ac : AppControl.find(w, session)) {
-                    session.delete(ac);
+                for (Branch b : w.getBranches()) {
+                    for (AppControl ac : AppControl.find(b, session)) {
+                        session.delete(ac);
+                    }
                 }
+
+                w.delete(session);
             }
+            organisation.setWebsites(null);
         }
         for (AppControl ac : AppControl.find(organisation, session)) {
             session.delete(ac);
@@ -93,11 +95,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
         Repository r = getOrganisation().createRepository(newName, currentUser, session);
         tx.commit();
-        return new RepositoryFolder(this, r, false);               
+        return new RepositoryFolder(this, r);
     }
 
-    
-    
     @Override
     public String getName() {
         return organisation.getName();
@@ -123,7 +123,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
             children = new ResourceList();
             if (organisation.getRepositories() != null) {
                 for (Repository repo : organisation.getRepositories()) {
-                    RepositoryFolder rf = new RepositoryFolder(this, repo, false);
+                    RepositoryFolder rf = new RepositoryFolder(this, repo);
                     children.add(rf);
                 }
             }
@@ -204,9 +204,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         }
         return fakeSettings;
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }        
+    }
 }

@@ -44,18 +44,15 @@ import io.milton.http.Request.Method;
  *
  * @author brad
  */
-@BeanPropertyResource(value="milton")
-public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource{
+@BeanPropertyResource(value = "milton")
+public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-    protected final boolean renderMode;
     protected final CommonCollectionResource parent;
     protected final Repository repo;
     protected ResourceList children;
-    
 
-    public RepositoryFolder(CommonCollectionResource parent, Repository r, boolean renderMode) {
-        this.renderMode = renderMode;
+    public RepositoryFolder(CommonCollectionResource parent, Repository r) {
         this.repo = r;
         this.parent = parent;
     }
@@ -69,22 +66,35 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
     public ResourceList getChildren() {
         if (children == null) {
             children = new ResourceList();
-            for( Branch b : repo.getBranches()) {
-                BranchFolder bf = new BranchFolder(b.getName(), this, b, renderMode);
-                children.add(bf);
-            }
-            _(ApplicationManager.class).addBrowseablePages(this, children);
+            ApplicationManager am = _(ApplicationManager.class);
+            children = am.toResources(this);
+            am.addBrowseablePages(this, children);
         }
         return children;
     }
 
+    public BranchFolder getLive() {
+        String liveBranchName = repo.getLiveBranch();
+        if (liveBranchName != null) {
+            for (Resource r : getChildren()) {
+                if (r instanceof BranchFolder) {
+                    BranchFolder bf = (BranchFolder) r;
+                    if (bf.getName().equals(liveBranchName)) {
+                        return bf;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
-        if( request.getMethod().equals(Method.GET)) {
-            if( request.getParams().isEmpty()) {
+        if (request.getMethod().equals(Method.GET)) {
+            if (request.getParams().isEmpty()) {
                 Branch b = repo.getTrunk();
-                if( b != null) {
-                    BranchFolder bf = new BranchFolder(b.getName(), this, b, renderMode);
+                if (b != null) {
+                    BranchFolder bf = new BranchFolder(b.getName(), this, b);
                     return bf.getHref();
                 }
             }
@@ -92,12 +102,10 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return super.checkRedirect(request);
     }
 
-    
-    
     public String getTitle() {
         return repo.getTitle();
     }
-    
+
     public String getNotes() {
         return repo.getNotes();
     }
@@ -105,9 +113,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
     public Repository getRepository() {
         return repo;
     }
-    
-    
-    
+
     @Override
     public String getName() {
         return repo.getName();
@@ -118,15 +124,13 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         log.info("createCollection: " + newName);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        
+
         Branch b = repo.createBranch(newName, _(SpliffySecurityManager.class).getCurrentUser(), session);
-        BranchFolder bf = new BranchFolder(newName, this, b, false);
-        
+        BranchFolder bf = new BranchFolder(newName, this, b);
+
         tx.commit();
         return bf;
     }
-
-    
 
     @Override
     public Date getCreateDate() {
@@ -140,7 +144,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-
     }
 
     @Override
@@ -173,7 +176,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return parent;
     }
 
-
     /**
      * Get all allowed priviledges for all principals on this resource. Note
      * that a principal might be a user, a group, or a built-in webdav group
@@ -186,12 +188,11 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return null;
     }
 
-
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
-    
+
     @Override
     public boolean isLockedOutRecursive(Request request) {
         return false;
@@ -203,14 +204,12 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         Transaction tx = session.beginTransaction();
         this.repo.getBaseEntity().getRepositories().remove(this.repo);
         List<Website> websites = Website.findByRepository(repo, session);
-        if( websites != null ) {
-            for( Website w : websites ) {
+        if (websites != null) {
+            for (Website w : websites) {
                 w.delete(session);
             }
         }
         this.repo.delete(session);
         tx.commit();
-    }    
+    }
 }
-
-

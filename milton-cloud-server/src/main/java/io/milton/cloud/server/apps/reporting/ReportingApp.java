@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Branch;
 import java.util.Date;
 
 /**
@@ -96,12 +97,12 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Reports";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides reporting and analytics of user behaviour";
     }
 
@@ -164,7 +165,8 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
 
     private List<JsonReport> findReports(Website website) {
         List<JsonReport> reports = new ArrayList<>();
-        for (Application app : applicationManager.findActiveApps(website)) {
+        Branch b = website.liveBranch();
+        for (Application app : applicationManager.findActiveApps(b)) {
             if (app instanceof ReportingApplication) {
                 ReportingApplication rapp = (ReportingApplication) app;
                 for (JsonReport r : rapp.getReports(website.getOrganisation(), website)) {

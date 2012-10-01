@@ -12,6 +12,7 @@ import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.dns.server.JNameServer;
 import io.milton.dns.utils.Utils;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -118,12 +119,12 @@ public class NameServerApp implements Application, LifecycleApplication {
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "DNS Nameserver";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         // TODO Auto-generated method stub
         return NAMES + ": A comma separated list of n ";
     }

@@ -17,7 +17,6 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.web.NodeChildUtils.ResourceCreator;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -34,7 +33,6 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.data.DataSession.DirectoryNode;
-import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 
 import java.io.IOException;
@@ -57,19 +55,18 @@ import io.milton.vfs.db.Profile;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class DirectoryResource extends AbstractContentResource implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, ResourceCreator {
+public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
-    private final DirectoryNode directoryNode;
-    private final boolean renderMode;
-    private ResourceList children;
-    private RenderFileResource indexPage;
-    private boolean updatedIndex;
+    protected DirectoryNode directoryNode;
+    protected ResourceList children;
+    protected RenderFileResource indexPage;
+    protected boolean updatedIndex;
+    protected JsonResult jsonResult;
 
-    public DirectoryResource(DirectoryNode directoryNode, ContentDirectoryResource parent, boolean renderMode) {
+    public DirectoryResource(DirectoryNode directoryNode, P parent) {
         super(directoryNode, parent);
         this.directoryNode = directoryNode;
-        this.renderMode = renderMode;
     }
 
     @Override
@@ -84,11 +81,9 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = NodeChildUtils.toResources(this, directoryNode, renderMode, this);
-            _(ApplicationManager.class).addBrowseablePages(this, children);
-            children = children.getSortByName(); // ensure a stable and predictable sorting
-            System.out.println("xxx getChildren: " + getHref());
-            System.out.println(" = " + children.size());
+            ApplicationManager am = _(ApplicationManager.class);
+            children = am.toResources(this, directoryNode);
+            am.addBrowseablePages(this, children);
         }
         return children;
     }
@@ -104,8 +99,12 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
+        if (directoryNode == null) {
+            directoryNode = parent.getDirectoryNode().addDirectory(getName());
+            this.contentNode = directoryNode;
+        }
         DirectoryNode newNode = directoryNode.addDirectory(newName);
-        DirectoryResource rdr = new DirectoryResource(newNode, this, renderMode);
+        DirectoryResource rdr = new DirectoryResource(newNode, this);
         rdr.updateModDate();
         onAddedChild(this);
         try {
@@ -136,21 +135,34 @@ public class DirectoryResource extends AbstractContentResource implements Conten
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            renderPage(out, params, contentType);
+        }
+    }
+
+    public void renderPage(OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this)); // For front end
         MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
         getTemplater().writePage("myfiles/directoryIndex", this, params, out);
+
     }
 
     @Override
     public String getContentType(String accepts) {
-        String type = HttpManager.request().getParams().get("type");
-        if (type == null || type.length() == 0) {
-            return "text/html";
+        if (jsonResult != null) {
+            return JsonResult.CONTENT_TYPE;
         } else {
-            if (type.equals("hashes")) {
-                return "text/plain";
+            String type = HttpManager.request().getParams().get("type");
+            if (type == null || type.length() == 0) {
+                return "text/html";
             } else {
-                return type;
+                if (type.equals("hashes")) {
+                    return "text/plain";
+                } else {
+                    return type;
+                }
             }
         }
     }
@@ -191,7 +203,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
     public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
         return getIndex(false);
     }
-    
+
     public RenderFileResource getIndex(boolean autoCreate) throws NotAuthorizedException, BadRequestException {
         if (indexPage == null) {
             indexPage = getHtmlPage("index.html", autoCreate);
@@ -223,7 +235,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         if (r == null) {
             if (autoCreate) {
                 DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
-                fr = new DirectoryResource(newNode, this, false);
+                fr = new DirectoryResource(newNode, this);
             } else {
                 return null;
             }
@@ -248,11 +260,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
             FileResource fr = new FileResource(newNode, this);
             rfr = fr.getHtml();
             rfr.setParsed(true);
-            if (renderMode) {
-                children.add(rfr);
-            } else {
-                children.add(fr);
-            }
+            children.add(fr);
         } else if (r instanceof FileResource) {
             FileResource fr = (FileResource) r;
             rfr = fr.getHtml();
@@ -286,6 +294,29 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         if (r != null) {
             updatedIndex = true;
             r.setTitle(s);
+        } else {
+            throw new RuntimeException("no index page");
+        }
+    }
+
+    public String getBody() {
+        try {
+            RenderFileResource r = getIndex();
+            if (r != null) {
+                return r.getBody();
+            } else {
+                return "";
+            }
+        } catch (NotAuthorizedException | BadRequestException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void setBody(String s) throws NotAuthorizedException, BadRequestException {
+        RenderFileResource r = getIndex(true);
+        if (r != null) {
+            updatedIndex = true;
+            r.setBody(s);
         } else {
             throw new RuntimeException("no index page");
         }
@@ -336,7 +367,7 @@ public class DirectoryResource extends AbstractContentResource implements Conten
      * Save any parameters which have been set to HTML content
      */
     public void doSaveHtml() throws NotAuthorizedException, BadRequestException, IOException {
-        if (updatedIndex = true) {
+        if (updatedIndex == true) {
             RenderFileResource html = getIndex();
             if (html != null) {
                 html.doSaveHtml();
@@ -346,16 +377,6 @@ public class DirectoryResource extends AbstractContentResource implements Conten
         } else {
             System.out.println("not updatedIndex ---");
         }
-    }
-
-    @Override
-    public FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode) {
-        return new FileResource(dm, parent);
-    }
-
-    @Override
-    public DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode) {
-        return new DirectoryResource(dm, parent, renderMode);
     }
 
     @Override

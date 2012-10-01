@@ -1,9 +1,8 @@
 package io.milton.cloud.server.apps;
 
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.context.RootContext;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -76,10 +75,9 @@ public class AppConfig {
         return appControl.getSetting(setting);
     }
     
-    public String get(String setting, Website w) {
-        AppControl appControl = AppControl.find(w, applicationId, SessionManager.session());
+    public String get(String setting, Branch b) {
+        AppControl appControl = AppControl.find(b, applicationId, SessionManager.session());
         if( appControl == null ) {
-            System.out.println("app control not found - " + applicationId + " website-id: " + w.getId() + " website-name:" + w.getName());            
             return null;
         }
         return appControl.getSetting(setting);
@@ -95,9 +93,8 @@ public class AppConfig {
         
     }
     
-    public void set(String settingName, Website w, String settingValue) {
-        AppControl appControl = AppControl.find(w, applicationId, SessionManager.session());
-        System.out.println("find for website: " + w.getDomainName() + " = " + appControl);
+    public void set(String settingName, Branch websiteBranch, String settingValue) {
+        AppControl appControl = AppControl.find(websiteBranch, applicationId, SessionManager.session());
         if( appControl == null ) {
             throw new RuntimeException("Cant save setting because there is no Appcontrol record");
         }

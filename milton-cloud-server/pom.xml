@@ -262,7 +262,7 @@
             <dependencies>
                 <dependency>
                     <groupId>com.fuselms</groupId>
-                    <artifactId>fuse-app</artifactId>
+                    <artifactId>fuse-app2</artifactId>
                     <version>1.0-SNAPSHOT</version>
                 </dependency>            
             </dependencies>         
@@ -288,15 +288,18 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
+                                    <!--
                                     <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
+                                    -->
+                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>
-                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                    <value>../../fuse-admin/fuse-app2/src/main/resources</value>
                                 </systemProperty>                                  
                                 <systemProperty>
                                     <name>template.file.roots</name>
-                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                    <value>../../fuse-admin/fuse-app2/src/main/resources</value>
                                 </systemProperty>  
                             </systemProperties>    
                             <connectors>
@@ -319,7 +322,7 @@
             <dependencies>
                 <dependency>
                     <groupId>com.fuselms</groupId>
-                    <artifactId>fuse-app</artifactId>
+                    <artifactId>fuse-app2</artifactId>
                     <version>1.0-SNAPSHOT</version>
                 </dependency>            
             </dependencies>         
@@ -348,11 +351,11 @@
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>
-                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                    <value>../../fuse-admin/fuse-app2/src/main/resources</value>
                                 </systemProperty>                                  
                                 <systemProperty>
                                     <name>template.file.roots</name>
-                                    <value>../../fuse-admin/fuse-app/src/main/resources</value>
+                                    <value>../../fuse-admin/fuse-app2/src/main/resources</value>
                                 </systemProperty>  
                                 <systemProperty>
                                     <name>fuse.autoloader.dir</name>

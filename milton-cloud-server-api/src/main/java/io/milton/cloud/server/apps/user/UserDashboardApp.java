@@ -22,6 +22,7 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 
@@ -40,12 +41,12 @@ public class UserDashboardApp implements Application, MenuApplication, ChildPage
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "User Dashboard";
     }
         
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Gives each user a dashboard page which can display all sorts of things";
     }
     

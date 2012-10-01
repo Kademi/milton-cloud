@@ -19,9 +19,9 @@ import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.Writer;
 import org.apache.velocity.context.Context;
@@ -64,12 +64,12 @@ public class SearchApp implements PortletApplication {
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Website Search";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Allows users to search for content in a website";
     }
 }

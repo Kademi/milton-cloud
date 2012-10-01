@@ -35,50 +35,12 @@ import java.util.List;
  */
 public class NodeChildUtils {
 
-    /**
-     * Produce a web resource representation of the given ItemHistory.
-     *
-     * This will be either a FileResource or a DirectoryResource, depending on
-     * the type associated with the member
-     *
-     * @param parent
-     * @param dm
-     * @return
-     */
-    public static CommonResource toResource(ContentDirectoryResource parent, DataNode contentNode, boolean renderMode, ResourceCreator resourceCreator) {
-        if (contentNode instanceof DirectoryNode) {
-            DirectoryNode dm = (DirectoryNode) contentNode;
-            DirectoryResource rdr = resourceCreator.newDirectoryResource(dm, parent, renderMode);
-            return rdr;
-        } else if (contentNode instanceof FileNode) {
-            FileNode dm = (FileNode) contentNode;
-            FileResource fr = resourceCreator.newFileResource(dm, parent, renderMode);
-            if (renderMode) {
-                if (isHtml(fr)) {
-                    return fr.getHtml();
-                }
-                return fr;
-            } else {
-                return fr;
-            }
-        } else {
-            throw new RuntimeException("Unknown resource type: " + contentNode);
-        }
-    }
 
     public static boolean isHtml(FileResource rfr) {
         String ct = rfr.getUnderlyingContentType();
         return ct != null && ct.contains("html");
     }
 
-    public static ResourceList toResources(ContentDirectoryResource parent, DirectoryNode dir, boolean renderMode, ResourceCreator resourceCreator) {
-        ResourceList list = new ResourceList();
-        for (DataNode n : dir) {
-            CommonResource r = toResource(parent, n, renderMode, resourceCreator);
-            list.add(r);
-        }
-        return list;
-    }
 
     public static Resource childOf(List<? extends Resource> children, String name) {
         if (children == null) {
@@ -152,12 +114,4 @@ public class NodeChildUtils {
         }
         return false;
     }    
-        
-    
-    public interface ResourceCreator {
-
-        FileResource newFileResource(FileNode dm, ContentDirectoryResource parent, boolean renderMode);
-
-        DirectoryResource newDirectoryResource(DirectoryNode dm, ContentDirectoryResource parent, boolean renderMode);
-    }
 }

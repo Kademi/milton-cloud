@@ -47,9 +47,9 @@ import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.CollectionResource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Website;
 import java.io.IOException;
 
 /**
@@ -66,12 +66,12 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "My files";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides end users with file storage, which they can syncronise with their own computers";
     }
 
@@ -88,7 +88,8 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
             Group group = joinEvent.getMembership().getGroupEntity();
             List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
             for (GroupInWebsite giw : giws) {
-                if (applicationManager.isActive(this, giw.getWebsite())) {
+                Branch b = giw.getWebsite().liveBranch();
+                if (applicationManager.isActive(this, b)) {
                     Profile u = joinEvent.getMembership().getMember();
                     Session session = SessionManager.session();
                     addRepo("Documents", "docs", u, session);

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.admin;
+package io.milton.cloud.server.apps.website;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.AppControl;
@@ -24,6 +24,7 @@ import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -53,6 +54,7 @@ import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
@@ -83,13 +85,16 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        String newName = parameters.get("newName");
+        String newName = WebUtils.getParam(parameters, "newName");
         if (newName != null) {
-            newName = newName.trim();
+            newName = newName.trim().toLowerCase();
             log.info("processForm: newName: " + newName);
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
-            String newDnsName = parameters.get("newDnsName");
+            String newDnsName = WebUtils.getParam(parameters, "newDnsName");
+            if( newDnsName != null ) {
+                newDnsName = newDnsName.trim().toLowerCase();
+            }
 
             {
                 Website existing = Website.findByName(newName, session);
@@ -100,8 +105,9 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
                 }
             }
             Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-            Website c = getOrganisation().createWebsite(newName, newDnsName, null, curUser, session);
-            Repository r = c.getRepository();
+            Website website = getOrganisation().createWebsite(newName, newDnsName, null, curUser, session);
+            Branch websiteBranch = website.liveBranch();
+            Repository r = website;
             r.setPublicContent(true); // allow public access
             r.setAttribute("heroColour1", "#88c03f", session);
             r.setAttribute("heroColour2", "#88c03f", session);
@@ -110,13 +116,13 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             r.setAttribute("logo", "<img src='/content/theme/images/IDH_logo.png' >", session);
             session.save(r);
 
-            session.save(c);
+            session.save(website);
 
             Date now = _(CurrentDateService.class).getNow();
-            AppControl.initDefaultApps(c, curUser, now, session);
-            createDefaultWebsiteContent(c, curUser, session);
+            AppControl.initDefaultApps(websiteBranch, curUser, now, session);
+            createDefaultWebsiteContent(websiteBranch, curUser, session);
             tx.commit();
-            jsonResult = new JsonResult(true, "Created", c.getDomainName());
+            jsonResult = new JsonResult(true, "Created", website.getDomainName());
         }
         return null;
     }
@@ -126,6 +132,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
             _(HtmlTemplater.class).writePage("admin", "admin/manageWebsites", this, params, out);
         }
     }
@@ -135,11 +142,21 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
         if (children == null) {
             children = new ResourceList();
             for (Website w : getWebsites()) {
-                ManageWebsitePage p = new ManageWebsitePage(w, this);
+                ManageWebsiteFolder p = new ManageWebsiteFolder(this, w);
                 children.add(p);
             }
         }
         return children;
+    }
+    
+    public List<ManageWebsiteFolder> getWebsiteFolders()  throws NotAuthorizedException, BadRequestException {
+        List<ManageWebsiteFolder> list = new ArrayList<>();
+        for( Resource r : getChildren() ) {
+            if( r instanceof ManageWebsiteFolder) {
+                list.add((ManageWebsiteFolder)r);
+            }
+        }
+        return list;
     }
 
     @Override
@@ -205,7 +222,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
         return Priviledge.WRITE_CONTENT;
     }
 
-    private void createDefaultWebsiteContent(Website c, Profile user, Session session) {
+    private void createDefaultWebsiteContent(Branch websiteBranch, Profile user, Session session) {
         try {
             String html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">";
             html += "<html xmlns=\"http://www.w3.org/1999/xhtml\">";
@@ -217,10 +234,8 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             html += "<h1>Welcome to your new site!</h1>\n";
             html += "<p>Login with the menu in the navigation above, then you will be able to start editing</p>\n";
             html += "</body>\n";
-            html += "</html>\n";
-            Repository r = c.getRepository();
-            Branch b = r.getTrunk();
-            DataSession dataSession = new DataSession(b, session, _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
+            html += "</html>\n";            
+            DataSession dataSession = new DataSession(websiteBranch, session, _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
             DataSession.DirectoryNode rootDir = (DataSession.DirectoryNode) dataSession.find(Path.root);
             FileNode file = rootDir.addFile("index.html");
             ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes("UTF-8"));

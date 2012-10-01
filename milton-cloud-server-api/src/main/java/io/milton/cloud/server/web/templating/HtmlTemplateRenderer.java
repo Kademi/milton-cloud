@@ -176,7 +176,6 @@ public class HtmlTemplateRenderer {
     }
 
     private void printWebResources(List<WebResource> webResources, String themeName, String themePath, PrintWriter pw) {
-        System.out.println("printWebResources ---");
         Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();
         for (WebResource wr : webResources) {
             if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel")) ) {
@@ -187,7 +186,9 @@ public class HtmlTemplateRenderer {
                     mapOfCssFilesByMedia.put(media, cssFilesForMedia);
                 }
                 String href = wr.getAtts().get("href");
+                System.out.println("href1: " + href);
                 href = wr.adjustRelativePath("href", href, themeName);
+                System.out.println("href2: " + href);
                 cssFilesForMedia.add(href);
             } else {
                 String html = wr.toHtml(themeName);
@@ -211,9 +212,7 @@ public class HtmlTemplateRenderer {
             }
             link += cssName + EXT_COMPILE_LESS + "' />";
             pw.println(link);
-            System.out.println("link=" + link);
         }
-        System.out.println(" end ... printWebResources");
     }
 
     public class BodyRenderer {

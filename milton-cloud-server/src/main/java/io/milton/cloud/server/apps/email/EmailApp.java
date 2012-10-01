@@ -55,6 +55,7 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.mail.*;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
@@ -99,14 +100,14 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Email";
     }
 
     
     
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides end users with an email inbox, and allows administrators to send emails to groups of users";
     }
 

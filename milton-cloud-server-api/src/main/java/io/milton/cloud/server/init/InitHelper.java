@@ -176,7 +176,7 @@ public class InitHelper {
 
         Website mainWebsite = org.createWebsite(name, dnsName, theme, user, session);
 
-        Repository r = mainWebsite.getRepository();
+        Repository r = mainWebsite;
         r.setPublicContent(true); // allow public access
         r.setAttribute("heroColour1", "#88c03f", session);
         r.setAttribute("heroColour2", "#88c03f", session);
@@ -199,18 +199,19 @@ public class InitHelper {
     }
     
     
-    public void enableAllApps(Website w, Profile user, Session session) {
-        enableAllApps(w.getOrganisation(), user, session);
+    public void enableAllApps(Branch websiteBranch, Profile user, Session session) {
+        Organisation org = (Organisation) websiteBranch.getRepository().getBaseEntity();
+        enableAllApps(org, user, session);
         for (Application app : applicationManager.getApps()) {
-            AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
+            AppControl.setStatus(app.getInstanceId(), websiteBranch, true, user, new Date(), session);
         }
     }
 
-    public void enableApps(Website w, Profile user, Session session, String... appIds) {
+    public void enableApps(Branch websiteBranch, Profile user, Session session, String... appIds) {
         for (String appId : appIds) {
             Application app = applicationManager.get(appId);
             if (app != null) {
-                AppControl.setStatus(app.getInstanceId(), w, true, user, new Date(), session);
+                AppControl.setStatus(app.getInstanceId(), websiteBranch, true, user, new Date(), session);
             } else {
                 log.error("App not found: " + appId);
             }

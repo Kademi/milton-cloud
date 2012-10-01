@@ -25,10 +25,8 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import java.util.List;
 import java.util.Map;
 

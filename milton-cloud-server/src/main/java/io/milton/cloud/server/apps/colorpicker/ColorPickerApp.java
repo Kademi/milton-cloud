@@ -18,6 +18,7 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -53,12 +54,12 @@ public class ColorPickerApp implements PortletApplication {
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Color Picker (content editing)";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides editor support for choosing color values from a graphical colour pallette, by injecting javascript references";
     }
 }

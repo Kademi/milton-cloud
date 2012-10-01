@@ -21,8 +21,15 @@ import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.mail.EmailTriggerType;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
+import io.milton.cloud.server.web.BranchFolder;
+import io.milton.cloud.server.web.CommonResource;
+import io.milton.cloud.server.web.ContentDirectoryResource;
+import io.milton.cloud.server.web.ContentResource;
+import io.milton.cloud.server.web.DirectoryResource;
+import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.GroupResource;
 import io.milton.cloud.server.web.PrincipalResource;
+import io.milton.cloud.server.web.RepositoryFolder;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.MenuItem;
 import java.io.*;
@@ -36,8 +43,10 @@ import io.milton.mail.MessageFolder;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Website;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.HashMap;
 import java.util.Map;
@@ -163,7 +172,7 @@ public class ApplicationManager {
     public Resource getPage(Resource parent, String name) {
         for (Application app : getActiveApps()) {
             if (app instanceof ChildPageApplication) {
-                ChildPageApplication cpa = (ChildPageApplication)app;
+                ChildPageApplication cpa = (ChildPageApplication) app;
                 Resource child = cpa.getPage(parent, name);
                 if (child != null) {
                     return child;
@@ -175,8 +184,8 @@ public class ApplicationManager {
 
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         for (Application app : getActiveApps()) {
-            if( app instanceof BrowsableApplication ) {
-                BrowsableApplication ba = (BrowsableApplication)app;
+            if (app instanceof BrowsableApplication) {
+                BrowsableApplication ba = (BrowsableApplication) app;
                 ba.addBrowseablePages(parent, children);
             }
         }
@@ -248,16 +257,17 @@ public class ApplicationManager {
     private List<Application> findActiveApps(RootFolder rootFolder) {
         if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-            return findActiveApps(wrf.getWebsite());
+            return findActiveApps(wrf.getBranch());
         } else {
             Organisation org = rootFolder.getOrganisation();
             return findActiveApps(org);
         }
     }
 
-    public List<Application> findActiveApps(io.milton.vfs.db.Website website) {
-        List<Application> available = findActiveApps(website.getOrganisation());
-        List<AppControl> appControls = AppControl.find(website, SessionManager.session());
+    public List<Application> findActiveApps(io.milton.vfs.db.Branch websiteBranch) {
+        Organisation org = (Organisation) websiteBranch.getRepository().getBaseEntity();
+        List<Application> available = findActiveApps(org);
+        List<AppControl> appControls = AppControl.find(websiteBranch, SessionManager.session());
         return findActiveApps(available, appControls);
     }
 
@@ -302,8 +312,8 @@ public class ApplicationManager {
 
     }
 
-    public boolean isActive(Application aThis, Website website) {
-        List<Application> activeApps = findActiveApps(website);
+    public boolean isActive(Application aThis, Branch websiteBranch) {
+        List<Application> activeApps = findActiveApps(websiteBranch);
         for (Application a : activeApps) {
             if (a.getInstanceId().equals(aThis.getInstanceId())) {
                 return true;
@@ -359,5 +369,96 @@ public class ApplicationManager {
      */
     public List<EmailTriggerType> getEmailTriggerTypes() {
         return emailTriggerTypes;
+    }
+
+    public ResourceList toResources(RepositoryFolder parent) {
+        ResourceList children = new ResourceList();
+        RootFolder rf = currentRootFolderService.peekRootFolder();
+        List<DataResourceApplication> resourceCreators = getResourceCreators(rf);
+        Repository repo = parent.getRepository();
+        for (Branch b : repo.getBranches()) {
+            CommonResource r = toResource(parent, b, resourceCreators, rf);
+            System.out.println(" repo child - " + r.getName() + " - " + r.getClass());
+            children.add(r);
+        }
+        return children;
+    }
+    
+    private CommonResource toResource(RepositoryFolder parent, Branch branch, List<DataResourceApplication> resourceCreators, RootFolder rf) {
+        for (DataResourceApplication rc : resourceCreators) {
+            ContentResource r = rc.instantiateResource(branch, parent, rf);
+            if (r != null) {
+                return r;
+            }
+        }
+
+        return new BranchFolder(branch.getName(), parent, branch);
+    }
+
+    public ResourceList toResources(ContentDirectoryResource parent, DataSession.DirectoryNode dir) {
+        RootFolder rf = currentRootFolderService.peekRootFolder();
+        ResourceList list = new ResourceList();
+        if (dir != null) {
+            List<DataResourceApplication> resourceCreators = getResourceCreators(rf);
+            for (DataSession.DataNode n : dir) {
+                CommonResource r = toResource(parent, n, resourceCreators, rf);
+                list.add(r);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Produce a web resource representation of the given ItemHistory.
+     *
+     * This will be either a FileResource or a DirectoryResource, depending on
+     * the type associated with the member
+     *
+     * @param parent
+     * @param dm
+     * @return
+     */
+    private CommonResource toResource(ContentDirectoryResource parent, DataSession.DataNode contentNode, List<DataResourceApplication> resourceCreators, RootFolder rf) {
+        for (DataResourceApplication rc : resourceCreators) {
+            ContentResource r = rc.instantiateResource(contentNode, parent, rf);
+            if (r != null) {
+                return r;
+            }
+        }
+
+        if (contentNode instanceof DataSession.DirectoryNode) {
+            DataSession.DirectoryNode dm = (DataSession.DirectoryNode) contentNode;
+            DirectoryResource rdr = newDirectoryResource(dm, parent);
+            return rdr;
+        } else if (contentNode instanceof DataSession.FileNode) {
+            DataSession.FileNode dm = (DataSession.FileNode) contentNode;
+            FileResource fr = newFileResource(dm, parent);
+            return fr;
+        } else {
+            throw new RuntimeException("Unknown resource type: " + contentNode);
+        }
+    }
+
+    public FileResource newFileResource(DataSession.FileNode dm, ContentDirectoryResource parent) {
+        return new FileResource(dm, parent);
+    }
+
+    public DirectoryResource newDirectoryResource(DataSession.DirectoryNode dm, ContentDirectoryResource parent) {
+        return new DirectoryResource(dm, parent);
+    }
+
+    private List<DataResourceApplication> getResourceCreators(RootFolder rf) {
+        List<DataResourceApplication> list = (List<DataResourceApplication>) rf.getAttributes().get("resourceCreators");
+        if (list == null) {
+            list = new ArrayList<>();
+            for (Application app : getActiveApps(rf)) {
+                if (app instanceof DataResourceApplication) {
+                    DataResourceApplication rc = (DataResourceApplication) app;
+                    list.add(rc);
+                }
+            }
+            rf.getAttributes().put("resourceCreators", list);
+        }
+        return list;
     }
 }

@@ -17,7 +17,6 @@ package io.milton.cloud.server.apps.contactus;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.SettingsApplication;
-import io.milton.cloud.server.apps.email.GroupEmailPage;
 import io.milton.cloud.server.mail.SendMailProcessable;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
@@ -55,6 +54,7 @@ import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.http.XmlWriter;
 import io.milton.http.XmlWriter.Element;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -123,14 +123,16 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     private Long generateEmailItems(ContactRequest r, Session session) {
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         Website website;
+        Branch branch;
         if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             website = wrf.getWebsite();
+            branch = wrf.getBranch();
         } else {
             throw new RuntimeException("Cant proceess contact for an organisation");
         }
 
-        AppControl appControl = AppControl.find(website, ContactUsApp.CONTACT_US_ID, session);
+        AppControl appControl = AppControl.find(branch, ContactUsApp.CONTACT_US_ID, session);
         if (appControl == null) {
             throw new RuntimeException("Cant process contact request, no AppControl record");
         }
@@ -301,12 +303,12 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     }
 
     @Override
-    public void renderSettings(Profile currentUser, Organisation org, Website website, Context context, Writer writer) throws IOException {
+    public void renderSettings(Profile currentUser, Organisation org, Branch websiteBranch, Context context, Writer writer) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Website website) throws BadRequestException, NotAuthorizedException, ConflictException {
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -321,12 +323,12 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

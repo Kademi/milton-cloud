@@ -38,9 +38,9 @@ import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.DigestResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
+import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -51,8 +51,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -69,12 +67,12 @@ public class DynamicCssApp implements ResourceApplication {
     }
 
     @Override
-    public String getTitle(Organisation organisation, Website website) {
+    public String getTitle(Organisation organisation, Branch websiteBranch) {
         return "Dynamic CSS files";
     }
 
     @Override
-    public String getSummary(Organisation organisation, Website website) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Allows CSS files to have parameterised which can be configured through the website";
     }
 
@@ -99,7 +97,6 @@ public class DynamicCssApp implements ResourceApplication {
             String reqName = p.getName();
             // Note we ignore the folder, only interested in resource names encoded into resource name
             String[] paths = reqName.substring(0, reqName.length() - HtmlTemplateRenderer.EXT_COMPILE_LESS.length()).split(","); // need to chop off extension, then split
-            System.out.println("paths size: " + paths.length);
             List<GetableResource> resources = new ArrayList<>();
             List<String> notFound = new ArrayList<>();
             String host = HttpManager.request().getHostHeader();
