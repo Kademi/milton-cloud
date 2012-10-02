@@ -34,17 +34,18 @@ public class SettingsMap implements Map<String, String> {
 
     @Override
     public String get(Object key) {
-        String s = repository.getAttribute(key.toString());
-        return s;
+//        String s = repository.getAttribute(key.toString());
+//        return s;
+        return null;
     }
 
     @Override
     public int size() {
-        if (repository.getNvPairs() != null) {
-            return repository.getNvPairs().size();
-        } else {
+//        if (repository.getNvPairs() != null) {
+//            return repository.getNvPairs().size();
+//        } else {
             return 0;
-        }
+//        }
     }
 
     @Override
@@ -95,29 +96,29 @@ public class SettingsMap implements Map<String, String> {
     @Override
     public Set<Entry<String, String>> entrySet() {
         Set<Entry<String, String>> set = new HashSet<>();
-        if (repository.getNvPairs() != null) {
-            for (NvPair nv : repository.getNvPairs()) {
-                final NvPair pair = nv;
-                Entry<String, String> e = new Entry<String, String>() {
-
-                    @Override
-                    public String getKey() {
-                        return pair.getName();
-                    }
-
-                    @Override
-                    public String getValue() {
-                        return pair.getPropValue();
-                    }
-
-                    @Override
-                    public String setValue(String value) {
-                        throw new UnsupportedOperationException("Not supported yet.");
-                    }
-                };
-                set.add(e);
-            }
-        }
+//        if (repository.getNvPairs() != null) {
+//            for (NvPair nv : repository.getNvPairs()) {
+//                final NvPair pair = nv;
+//                Entry<String, String> e = new Entry<String, String>() {
+//
+//                    @Override
+//                    public String getKey() {
+//                        return pair.getName();
+//                    }
+//
+//                    @Override
+//                    public String getValue() {
+//                        return pair.getPropValue();
+//                    }
+//
+//                    @Override
+//                    public String setValue(String value) {
+//                        throw new UnsupportedOperationException("Not supported yet.");
+//                    }
+//                };
+//                set.add(e);
+//            }
+//        }
         return set;
     }
     

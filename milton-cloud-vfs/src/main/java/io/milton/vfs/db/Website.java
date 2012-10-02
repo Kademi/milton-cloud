@@ -90,8 +90,6 @@ public class Website extends Repository implements VfsAcceptor {
     private Website aliasTo; // if not null, this website is really just an alias for that one
     private String redirectTo; // if not null, this website will redirect to that one
     private String mailServer; // if not null, will be used for email sending and generating MX records
-    private String internalTheme;
-    private String publicTheme;    
 
     @Column(length = 255, nullable = true)
     @Index(name = "idx_domain_name")
@@ -142,35 +140,6 @@ public class Website extends Repository implements VfsAcceptor {
         this.redirectTo = redirectTo;
     }
 
-    /**
-     * The internal theme is intended for logged in access
-     *
-     * @return
-     */
-    @Column
-    public String getInternalTheme() {
-        return internalTheme;
-    }
-
-    public void setInternalTheme(String internalTheme) {
-        this.internalTheme = internalTheme;
-    }
-
-    /**
-     * The public theme is intended for non-logged in access. It will usually
-     * control the landing page and other content pages available to users prior
-     * to signing up or logging in
-     *
-     * @return
-     */
-    @Column
-    public String getPublicTheme() {
-        return publicTheme;
-    }
-
-    public void setPublicTheme(String publicTheme) {
-        this.publicTheme = publicTheme;
-    }
 
     public String getMailServer() {
         return mailServer;
@@ -223,8 +192,6 @@ public class Website extends Repository implements VfsAcceptor {
         aliasWebsite.setBaseEntity(getBaseEntity());
         aliasWebsite.setCreatedDate(new Date());
         aliasWebsite.setDomainName(aliasDnsName);
-        aliasWebsite.setPublicTheme(null);
-        aliasWebsite.setInternalTheme(null);
         aliasWebsite.setLiveBranch(Branch.TRUNK);
         aliasWebsite.setAliasTo(this);
         session.save(aliasWebsite);

@@ -35,7 +35,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class NvPair implements Serializable{
     private Long id;
     private BaseEntity baseEntity;
-    private Repository repository;
     private String name;
     private String propValue;
     
@@ -65,15 +64,6 @@ public class NvPair implements Serializable{
 
     public void setPropValue(String propValue) {
         this.propValue = propValue;
-    }
-
-    @ManyToOne
-    public Repository getRepository() {
-        return repository;
-    }
-
-    public void setRepository(Repository repository) {
-        this.repository = repository;
     }
 
     @ManyToOne

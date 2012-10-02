@@ -105,6 +105,7 @@
             <list>
                 <ref local="event.manager" />
                 <ref local="current.root.folder.service"/>
+                <ref local="lock.manager"/>                
             </list>
         </constructor-arg>
     </bean>       
@@ -150,7 +151,7 @@
         <constructor-arg ref="root.context" />
     </bean>    
 
-    <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
+    <bean id="milton.http.manager" class="io.milton.ent.config.HttpManagerBuilderEnt"> <!-- Note enterprise version. Only available for AGPL + Commercial users of milton -->
         <property name="listeners">
             <list>
                 <ref local="applicationStarter" />

@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.website;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.RepositoryFolder;
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.Website;
 
 /**
  * A website is a specialisation of a repository. But most work is done on 
@@ -29,5 +30,11 @@ public class ManageWebsiteFolder extends RepositoryFolder {
     public ManageWebsiteFolder(CommonCollectionResource parent, Repository r) {
         super(parent, r);
     }
+    
+    public Website getWebsite() {
+        return (Website) repo;
+    }
+    
+
     
 }

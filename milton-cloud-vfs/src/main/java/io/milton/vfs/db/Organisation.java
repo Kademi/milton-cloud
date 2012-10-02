@@ -256,8 +256,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         w.setCreatedDate(new Date());
         w.setName(name);
         w.setDomainName(dnsName);
-        w.setPublicTheme(theme);
-        w.setInternalTheme(null);
         w.setLiveBranch(Branch.TRUNK);
         if( this.getWebsites() == null ) {
             this.setWebsites(new ArrayList<Website>());
@@ -266,7 +264,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         session.save(w);
         
         Branch b = w.createBranch(Branch.TRUNK, user, session);
-
+        b.setPublicTheme(theme);
+        b.setInternalTheme(null);
+        
         return w;
     }
 

@@ -17,6 +17,7 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.website.ManageWebsiteBranchFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
@@ -62,9 +63,9 @@ public class WebUtils {
 
     /**
      * Find the nearest OrganisationFolder to the given resource
-     * 
+     *
      * @param page
-     * @return 
+     * @return
      */
     public static OrganisationFolder findParentOrg(Resource page) {
         if (page instanceof OrganisationFolder) {
@@ -210,27 +211,27 @@ public class WebUtils {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             Website website = wrf.getWebsite();
             Repository r = website;
-            String sMenu = r.getAttribute("menu");
-            if (sMenu != null && sMenu.length() > 0) {
-                String[] arr = sMenu.split("\n");
-                int cnt = 0;
-                for (String s : arr) {
-                    String[] pair = s.split(",");
-                    String id = "menuContent" + cnt++;
-                    String href = pair[0];
-                    Path p = Path.path(href);
-                    String parentHref = p.getParent().toString();
-                    if (thisHref.startsWith(parentHref)) {
-                        if (longestHref == null || parentHref.length() > longestHref.length()) {
-                            longestHref = parentHref;
-                            menuId = id;
-                        }
-                    }
-                }
-                if (menuId != null) {
-                    MenuItem.setActiveId(menuId);
-                }
-            }
+//            String sMenu = r.getAttribute("menu");
+//            if (sMenu != null && sMenu.length() > 0) {
+//                String[] arr = sMenu.split("\n");
+//                int cnt = 0;
+//                for (String s : arr) {
+//                    String[] pair = s.split(",");
+//                    String id = "menuContent" + cnt++;
+//                    String href = pair[0];
+//                    Path p = Path.path(href);
+//                    String parentHref = p.getParent().toString();
+//                    if (thisHref.startsWith(parentHref)) {
+//                        if (longestHref == null || parentHref.length() > longestHref.length()) {
+//                            longestHref = parentHref;
+//                            menuId = id;
+//                        }
+//                    }
+//                }
+//                if (menuId != null) {
+//                    MenuItem.setActiveId(menuId);
+//                }
+//            }
 
         }
 
@@ -295,5 +296,16 @@ public class WebUtils {
             return null;
         }
         return s.equalsIgnoreCase("true");
+    }
+
+    public static BranchFolder findBranchFolder(CommonResource r) {
+        if (r instanceof BranchFolder) {
+            return (BranchFolder) r;
+        }
+        if (r.getParent() == null) {
+            return null;
+        } else {
+            return findBranchFolder(r.getParent());
+        }
     }
 }

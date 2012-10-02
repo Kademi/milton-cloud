@@ -113,15 +113,12 @@ public class HtmlTemplater {
      * @throws IOException
      */
     public void writePage(String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        System.out.println("------ write page: " + aThis.getClass());
         boolean isPublic = false;
         if (aThis instanceof CommonResource) {
             CommonResource cr = (CommonResource) aThis;
             isPublic = cr.isPublic();
-            System.out.println("   public=" + isPublic);
         }
         String theme = findTheme(aThis, isPublic);
-        System.out.println("  theme: " + theme);
         writePage(theme, templatePath, aThis, params, out);
     }
 
@@ -207,9 +204,9 @@ public class HtmlTemplater {
         } else if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder websiteFolder = (WebsiteRootFolder) rootFolder;
             if (isPublic) {
-                theme = websiteFolder.getWebsite().getPublicTheme();
+                theme = websiteFolder.getBranch().getPublicTheme();
             } else {
-                theme = websiteFolder.getWebsite().getInternalTheme();
+                theme = websiteFolder.getBranch().getInternalTheme();
             }
             if (theme == null) {
                 theme = defaultPublicTheme;
@@ -218,6 +215,22 @@ public class HtmlTemplater {
             theme = defaultPublicTheme;
         }
         return theme;
+    }
+    
+    public String findThemePath(CommonResource r) {
+        boolean isPublic = r.isPublic();
+        String theme = findTheme(r, isPublic);
+        return findThemePath(theme);
+    }
+    
+    public String findThemePath(String theme) {
+        String themePath; // path that contains the theme templates Eg /templates/themes/admin/ or /content/theme/
+        if (theme.equals("custom")) {
+            themePath = "/theme/";
+        } else {
+            themePath = "/templates/themes/" + theme + "/";
+        }             
+        return themePath;
     }
 
     private String findThemeTemplateName(TemplateHtmlPage bodyTemplateMeta) {

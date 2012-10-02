@@ -23,7 +23,15 @@ import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReportableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.LockInfo;
+import io.milton.http.LockManager;
+import io.milton.http.LockResult;
+import io.milton.http.LockTimeout;
+import io.milton.http.LockToken;
+import io.milton.http.exceptions.LockedException;
+import io.milton.http.exceptions.PreConditionFailedException;
 import io.milton.resource.GetableResource;
+import io.milton.resource.LockableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import java.util.Date;
@@ -33,7 +41,7 @@ import java.util.Set;
  *
  * @author brad
  */
-public abstract class AbstractResource implements CommonResource, PropFindableResource, AccessControlledResource, ReportableResource {
+public abstract class AbstractResource implements CommonResource, PropFindableResource, AccessControlledResource, ReportableResource, LockableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractResource.class);
 
@@ -310,4 +318,26 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public Map<Principal, List<Priviledge>> getAccessControlList() {
         return null;
     }
+
+    @Override
+    public LockResult lock(LockTimeout timeout, LockInfo lockInfo) throws NotAuthorizedException, PreConditionFailedException, LockedException {
+        return _(LockManager.class).lock(timeout, lockInfo, this);
+    }
+
+    @Override
+    public void unlock(String tokenId) throws NotAuthorizedException, PreConditionFailedException {
+        _(LockManager.class).unlock(tokenId, this);
+    }
+
+    @Override
+    public LockResult refreshLock(String token) throws NotAuthorizedException, PreConditionFailedException {
+        return _(LockManager.class).refresh(token, this);
+    }
+
+    @Override
+    public LockToken getCurrentLock() {
+        return _(LockManager.class).getCurrentToken(this);
+    }
+    
+    
 }

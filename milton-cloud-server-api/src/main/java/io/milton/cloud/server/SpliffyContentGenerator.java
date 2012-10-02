@@ -52,14 +52,14 @@ public class SpliffyContentGenerator implements ContentGenerator {
     
     @Override
     public void generate(Resource resource, Request request, Response response, Status status) {
-        log.error("Showing error page for: " + request.getAbsolutePath());
+        log.error("Showing error page for: " + request.getAbsolutePath() +  " status: " + status + "  resource: " + resource );
         try {
             CurrentRootFolderService currentRootFolderService = _(CurrentRootFolderService.class);
             RootFolder rf = currentRootFolderService.getRootFolder(request.getHostHeader());
             Resource r = new ErrorResource(rf, status.code + "", status.text);
             _(HtmlTemplater.class).writePage("error/" + r.getName(), r, null, response.getOutputStream());
         } catch (IOException ex) {
-            log.error("Exception sending error page", ex);
+            log.error("Exception sending error page for status: " + status, ex);
         }
     }
 

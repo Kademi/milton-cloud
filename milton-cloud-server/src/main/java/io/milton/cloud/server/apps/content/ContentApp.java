@@ -173,7 +173,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                 WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
                 Website website = wrf.getWebsite();
                 Repository r = website;
-                String sMenu = r.getAttribute("menu");
+                String sMenu = wrf.getThemeAttributes().get("menu");
                 if (sMenu != null && sMenu.length() > 0) {
                     String[] arr = sMenu.split("\n");
                     int cnt = 0;

@@ -66,7 +66,6 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
 
     private static final Logger log = LoggerFactory.getLogger(ManageWebsiteBranchFolder.class);
     private Website website;
-    private Map<String, String> themeParams;
 
     public ManageWebsiteBranchFolder(Website website, Branch branch, CommonCollectionResource parent) {
         super(website.getName(), parent, branch);
@@ -105,18 +104,32 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             log.info("Update theme info");
             String publicTheme = parameters.get("publicTheme");
             String internalTheme = parameters.get("internalTheme");
-            website.setPublicTheme(publicTheme);
-            website.setInternalTheme(internalTheme);
+            
+            branch.setPublicTheme(publicTheme);
+            branch.setInternalTheme(internalTheme);
             session.save(website);
 
-            Repository r = website;
+            Map<String,String> themeParams = new HashMap<>();
 
-            r.setAttribute("heroColour1", parameters.get("heroColour1"), session);
-            r.setAttribute("heroColour2", parameters.get("heroColour2"), session);
-            r.setAttribute("textColour1", parameters.get("textColour1"), session);
-            r.setAttribute("textColour2", parameters.get("textColour2"), session);
-            r.setAttribute("logo", parameters.get("logo"), session);
-            r.setAttribute("menu", parameters.get("menu"), session);
+            themeParams.put("hero1", parameters.get("hero1"));
+            themeParams.put("hero2", parameters.get("hero2"));
+            themeParams.put("text1", parameters.get("text1"));
+            themeParams.put("text2", parameters.get("text2"));            
+            
+            Map<String,String> themeAtts = new HashMap<>();
+            
+            themeAtts.put("logo", parameters.get("logo"));
+            themeAtts.put("menu", parameters.get("menu"));
+            
+            try {
+                setThemeParams(themeParams);
+                setThemeAttributes(themeAtts);
+                save();
+            } catch (IOException ex) {
+                jsonResult = new JsonResult(false, ex.getMessage());
+                return null;
+            }
+                        
             tx.commit();
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("name")) {
@@ -179,26 +192,6 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
         website.removeGroup(group, SessionManager.session());
         GroupInWebsiteEvent e = new GroupInWebsiteEvent(group, website, false);
         EventUtils.fireQuietly(_(EventManager.class), e);
-    }
-
-    public List<String> getThemes() {
-        List<String> list = new ArrayList<>(); // TODO: HACK!
-        list.add("fuse");
-        list.add("milton");
-        list.add("custom");
-        return list;
-    }
-
-    public Map<String, String> getThemeParams() {
-        if (themeParams == null) {
-            themeParams = new HashMap<>();
-            if (website.getNvPairs() != null) {
-                for (NvPair pair : website.getNvPairs()) {
-                    themeParams.put(pair.getName(), pair.getPropValue());
-                }
-            }
-        }
-        return themeParams;
     }
 
     @Override

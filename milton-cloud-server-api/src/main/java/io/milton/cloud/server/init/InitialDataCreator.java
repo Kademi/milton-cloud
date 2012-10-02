@@ -129,14 +129,14 @@ public class InitialDataCreator implements LifecycleApplication {
                         "/content/maven/index.html,Downloads\n" +
                         "/content/guide/index.html,Documentation";
                 
-        miltonSite.setAttribute("logo", "milton.io", session);
-        miltonSite.setAttribute("menu", menu, session);
+//        miltonSite.setAttribute("logo", "milton.io", session);
+//        miltonSite.setAttribute("menu", menu, session);
         
         AppControl ac = AppControl.find(miltonSite.getTrunk(), "signup", session);
         ac.setSetting("signup.next.href", "/content/gettingStarted.html", session);
 
         Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "milton", admin); // can be accessed on mymilton.localhost or my.milton.io
-        miltonSite.setAttribute("logo", "my.milton.io", session);
+        //miltonSite.setAttribute("logo", "my.milton.io", session);
         initHelper.enableApps(myMiltonSite.getTrunk(), admin, session, "admin", "userApp", "myFiles", "calendar", "contacts", "signup","userDashboardApp");
         myMiltonSite.addGroup(users, session);
 

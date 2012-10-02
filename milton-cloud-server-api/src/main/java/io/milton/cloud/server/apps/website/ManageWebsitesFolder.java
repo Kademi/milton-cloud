@@ -55,6 +55,8 @@ import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
@@ -109,15 +111,27 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             Branch websiteBranch = website.liveBranch();
             Repository r = website;
             r.setPublicContent(true); // allow public access
-            r.setAttribute("heroColour1", "#88c03f", session);
-            r.setAttribute("heroColour2", "#88c03f", session);
-            r.setAttribute("textColour1", "#1C1D1F", session);
-            r.setAttribute("textColour2", "#2F2F2F", session);
-            r.setAttribute("logo", "<img src='/content/theme/images/IDH_logo.png' >", session);
             session.save(r);
-
-            session.save(website);
-
+            
+            Map<String,String> themeParams = new HashMap<>();
+            themeParams.put("heroColour1", "#88c03f");
+            themeParams.put("heroColour2", "#88c03f");
+            themeParams.put("textColour1", "#1C1D1F");
+            themeParams.put("textColour2", "#2F2F2F");
+            
+            Map<String,String> themeAttributes = new HashMap<>();
+            themeAttributes.put("logo", "<img src='/content/theme/images/IDH_logo.png' >");            
+            
+            ManageWebsiteBranchFolder websiteBranchFolder = new ManageWebsiteBranchFolder(website, websiteBranch, this);
+            try {
+                websiteBranchFolder.setThemeParams(themeParams);
+                websiteBranchFolder.setThemeAttributes(themeAttributes);
+                websiteBranchFolder.save();
+            } catch (IOException ex) {
+                jsonResult = new JsonResult(false, ex.getMessage());
+                return null;
+            }
+            
             Date now = _(CurrentDateService.class).getNow();
             AppControl.initDefaultApps(websiteBranch, curUser, now, session);
             createDefaultWebsiteContent(websiteBranch, curUser, session);

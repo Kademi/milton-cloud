@@ -7,6 +7,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.website.LessParameterParser;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.*;
 import io.milton.principal.Principal;
@@ -26,7 +27,6 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Website;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
@@ -50,6 +50,8 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     protected JsonResult jsonResult; // set after completing a POST
     protected NodeMeta nodeMeta;
     private RenderFileResource indexPage;
+    private Map<String, String> themeParams;
+    private Map<String, String> themeAttributes;
 
     public BranchFolder(String name, CommonCollectionResource parent, Branch branch) {
         this.name = name;
@@ -448,7 +450,132 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     public String getPublicTheme() {
-        Website website = (Website) this.branch.getRepository();
-        return website.getPublicTheme(); // TODO: move this to something inside branch
+        return branch.getPublicTheme();
     }
+
+    public List<String> getThemes() {
+        List<String> list = new ArrayList<>(); // TODO: HACK!
+        list.add("fuse");
+        list.add("milton");
+        list.add("custom");
+        return list;
+    }
+
+    /**
+     * Theme params are CSS variables (ie using LESS).
+     * 
+     * Reads the LESS file in /theme/theme-params.less and returns a map of
+     * variable values
+     *
+     * @return
+     */
+    public Map<String, String> getThemeParams() {
+        if (themeParams == null) {
+            DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");
+            themeParams = new HashMap<>();
+            if (themeDir != null) {
+                DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-params.less");
+                if (paramsFile != null) {
+                    try {
+                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                        paramsFile.writeContent(bout);
+                        InputStream in = new ByteArrayInputStream(bout.toByteArray());
+                        LessParameterParser lessParameterParser = new LessParameterParser();
+                        lessParameterParser.findParams(in, themeParams);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        }
+        return themeParams;
+    }
+
+    /**
+     * Merges the given map of variables into the theme-params.less file, or
+     * creates if it doesnt exist
+     * 
+     * @param map
+     * @throws IOException 
+     */
+    public void setThemeParams(Map<String, String> map) throws IOException {
+        this.themeParams = null;
+
+        DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");
+        themeParams = new HashMap<>();
+        if (themeDir != null) {
+            DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-params.less");
+            InputStream bin = null;
+            if (paramsFile == null) {
+                paramsFile = themeDir.addFile("theme-params.less");
+            } else {
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                paramsFile.writeContent(bout);
+                bin = new ByteArrayInputStream(bout.toByteArray());
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            LessParameterParser lessParameterParser = new LessParameterParser();
+            lessParameterParser.setParams(map, bin, out);
+            paramsFile.setContent(new ByteArrayInputStream(out.toByteArray()));            
+        }
+    }
+    
+
+    /**
+     * Theme attributes are things like logo text and additional menu items, which
+     * are part of the theme but not CSS. These are stored in a properties
+     * file in the theme folder
+     * 
+     * @param themeAttributes 
+     */
+    public void setThemeAttributes(Map<String, String> atts) throws IOException {
+        this.themeAttributes = null;
+        
+        Properties props = new Properties();
+        for( Map.Entry<String, String> entry : atts.entrySet() ) {
+            props.setProperty(entry.getKey(), entry.getValue());
+        }
+
+        DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");
+        if (themeDir == null) {
+            themeDir = this.getDirectoryNode().addDirectory("theme");
+        }
+        
+        DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-attributes.properties");
+        InputStream bin = null;
+        if (paramsFile == null) {
+            paramsFile = themeDir.addFile("theme-attributes.properties");
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        props.store(out, null);
+        paramsFile.setContent(new ByteArrayInputStream(out.toByteArray()));
+        
+    }    
+    
+    public Map<String, String> getThemeAttributes() {
+        if (themeAttributes == null) {
+            DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");
+            themeAttributes = new HashMap<>();
+            if (themeDir != null) {
+                DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-attributes.properties");
+                if (paramsFile != null) {
+                    try {
+                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                        paramsFile.writeContent(bout);
+                        InputStream in = new ByteArrayInputStream(bout.toByteArray());
+                        Properties props = new Properties();
+                        props.load(in);
+                        for( String key : props.stringPropertyNames() ) {
+                            String val = props.getProperty(key);
+                            themeAttributes.put(key, val);
+                        }
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        }
+        return themeAttributes;
+    }
+    
 }

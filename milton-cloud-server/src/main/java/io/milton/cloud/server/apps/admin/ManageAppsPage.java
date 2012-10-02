@@ -93,6 +93,6 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
 
     @Override
     public List<AppControlBean> getApps() {
-        return _(AppsPageHelper.class).getApps(null, websiteBranch);
+        return _(AppsPageHelper.class).getApps(getOrganisation(), websiteBranch);
     }
 }

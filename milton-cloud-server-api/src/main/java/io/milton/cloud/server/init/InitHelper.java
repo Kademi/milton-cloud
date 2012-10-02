@@ -178,11 +178,6 @@ public class InitHelper {
 
         Repository r = mainWebsite;
         r.setPublicContent(true); // allow public access
-        r.setAttribute("heroColour1", "#88c03f", session);
-        r.setAttribute("heroColour2", "#88c03f", session);
-        r.setAttribute("textColour1", "#1C1D1F", session);
-        r.setAttribute("textColour2", "#2F2F2F", session);
-        r.setAttribute("logo", "<img src='/content/theme/images/IDH_logo.png' >", session);
 
         for (String alias : aliases) {
             System.out.println("-- Create website: " + dnsName + " with alias: " + alias);

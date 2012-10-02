@@ -33,6 +33,9 @@ public class Branch implements Serializable, VfsAcceptor {
     private Commit head;
     private Repository repository;
     private Date createdDate;
+    private String internalTheme;
+    private String publicTheme;    
+    
 
     public Branch() {
     }
@@ -44,6 +47,36 @@ public class Branch implements Serializable, VfsAcceptor {
     public void setName(String name) {
         this.name = name;
     }
+    
+    /**
+     * The internal theme is intended for logged in access
+     *
+     * @return
+     */
+    @Column
+    public String getInternalTheme() {
+        return internalTheme;
+    }
+
+    public void setInternalTheme(String internalTheme) {
+        this.internalTheme = internalTheme;
+    }
+
+    /**
+     * The public theme is intended for non-logged in access. It will usually
+     * control the landing page and other content pages available to users prior
+     * to signing up or logging in
+     *
+     * @return
+     */
+    @Column
+    public String getPublicTheme() {
+        return publicTheme;
+    }
+
+    public void setPublicTheme(String publicTheme) {
+        this.publicTheme = publicTheme;
+    }    
 
     @Version
     @Column(name="LOCKVERSION")

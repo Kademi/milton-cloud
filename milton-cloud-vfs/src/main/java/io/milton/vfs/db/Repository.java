@@ -34,8 +34,7 @@ public class Repository implements Serializable {
     private boolean publicContent; // allow anonymous users to view this content
     private Date createdDate;
     private BaseEntity baseEntity; // the direct owner of this repository
-    private List<Branch> branches;
-    private List<NvPair> nvPairs; // holds data capture information
+    private List<Branch> branches;    
 
     @Id
     @GeneratedValue
@@ -120,16 +119,6 @@ public class Repository implements Serializable {
         this.branches = branches;
     }
 
-    @OneToMany(mappedBy = "repository")
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    public List<NvPair> getNvPairs() {
-        return nvPairs;
-    }
-
-    public void setNvPairs(List<NvPair> nvPairs) {
-        this.nvPairs = nvPairs;
-    }
-
     @Column
     public String getType() {
         return type;
@@ -146,60 +135,6 @@ public class Repository implements Serializable {
 
     public void setPublicContent(boolean publicContent) {
         this.publicContent = publicContent;
-    }
-
-    public Repository setAttribute(String name, String value, Session session) {
-        if (value != null) {
-            value = value.trim();
-            if (value.length() == 0) {
-                value = null;
-            }
-        }
-        List<NvPair> list = getNvPairs();
-        if (list == null) {
-            list = new ArrayList<>();
-            setNvPairs(list);
-        }
-        if (value == null) {
-            Iterator<NvPair> it = list.iterator();
-            while (it.hasNext()) {
-                NvPair nv = it.next();
-                if (nv.getName().equals(name)) {
-                    session.delete(nv);
-                    it.remove();
-                }
-            }
-        } else {
-            NvPair found = null;
-            for (NvPair nv : list) {
-                if (nv.getName().equals(name)) {
-                    found = nv;
-                    break;
-                }
-            }
-            if (found == null) {
-                found = new NvPair();
-                found.setRepository(this);
-                found.setName(name);
-                list.add(found);
-            }
-            found.setPropValue(value);
-            session.save(found);
-        }
-        return this;
-    }
-
-    public String getAttribute(String name) {
-        List<NvPair> list = getNvPairs();
-        if (list == null) {
-            return null;
-        }
-        for (NvPair nv : list) {
-            if (nv.getName().equals(name)) {
-                return nv.getPropValue();
-            }
-        }
-        return null;
     }
 
     @Transient
@@ -242,12 +177,6 @@ public class Repository implements Serializable {
                 b.delete(session);
             }
             setBranches(null);
-        }
-        if (getNvPairs() != null) {
-            for (NvPair p : getNvPairs()) {
-                p.delete(session);
-            }
-            setNvPairs(null);
         }
         session.delete(this);
     }

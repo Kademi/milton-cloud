@@ -12,14 +12,15 @@
                 <nav class="ClearFix"><a href="">Details</a><a href="">Themes</a><a href="">Group Access</a><a href="">Mail server</a><a href="">Apps</a></nav>
                 <div class="TabContent">
                     <div class="Content">
-                        <form name="frmDetails" action="$page.name" method="post" class="Details">
+                        <form name="frmDetails" action="." method="post" class="Details">
                             <div class="pageMessage">.</div>
+                            <i>Note: Changes in this section apply immediately to all versions of the website, including the live version</i>
                             <table>
                                 <tbody>
                                     <tr>
                                         <th>Website name</th>
                                         <td>
-                                            <input type="text" name="name" value="$!page.name" class="required simpleChars" />
+                                            <input type="text" name="name" value="$!page.website.name" class="required simpleChars" />
                                         </td>
                                     </tr>
                                     <tr>
@@ -55,7 +56,7 @@
                 </div>	
                 <div class="TabContent">
                     <div class="Content">
-                        <form name="frmDetails" action="$page.name" method="post" class="Details">
+                        <form name="frmDetails" action="." method="post" class="Details">
                             <p class="pageMessage"></p>
                             <table>
                                 <tbody>
@@ -82,25 +83,25 @@
                                     <tr>
                                         <th class="Short">Logo</th>
                                         <td colspan="3">
-                                            <textarea class="htmleditor required toolbar-Logo" name="logo" id="logo" rows="4" cols="20">$!page.themeParams.logo</textarea>
+                                            <textarea class="htmleditor required toolbar-Logo" name="logo" id="logo" rows="4" cols="20">$!page.themeAttributes.logo</textarea>
                                         </td>
                                     </tr>                                    
                                     <tr>
                                         <th class="Short">Hero colour 1</th>
-                                        <td><input type="text" name="heroColour1" value="$!page.themeParams.heroColour1" class="required color" /></td>
+                                        <td><input type="text" name="hero1" value="$!page.themeParams.hero1" class="required color" /></td>
                                         <th class="Short">Text colour 1</th>
-                                        <td><input type="text" name="textColour1" value="$!page.themeParams.textColour1" class="required color" /></td>                                        
+                                        <td><input type="text" name="text1" value="$!page.themeParams.text1" class="required color" /></td>                                        
                                     </tr>
                                     <tr>
                                         <th class="Short">Hero colour 2</th>
-                                        <td><input type="text" name="heroColour2" value="$!page.themeParams.heroColour2" class="required color" /></td>
+                                        <td><input type="text" name="hero2" value="$!page.themeParams.hero2" class="required color" /></td>
                                         <th class="Short">Text colour 2</th>
-                                        <td><input type="text" name="textColour2" value="$!page.themeParams.textColour2" class="required color" /></td>                                        
+                                        <td><input type="text" name="text2" value="$!page.themeParams.text2" class="required color" /></td>                                        
                                     </tr>
                                     <tr>
                                         <th class="Short">Menu</th>
                                         <td colspan="3">
-                                            <textarea name="menu">$!page.themeParams.menu</textarea>
+                                            <textarea name="menu">$!page.themeAttributes.menu</textarea>
                                             <br/>
                                             Menu is in the form of address,title. Eg /faq.html,FAQ
                                         </td>
@@ -132,7 +133,7 @@
                 </div>
                 <div class="TabContent">
                     <div class="Content">
-                        <form name="frmDetails" action="$page.name" method="post" class="Details">
+                        <form name="frmDetails" action="." method="post" class="Details">
                             <p class="pageMessage"></p>
                             <table>
                                 <tbody>
@@ -206,7 +207,7 @@
                                 <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
                             </header>                           
                             <div class="ModalContent">
-                                <form method="POST" action="$page.name">
+                                <form method="POST" action=".">
                                     <input type="hidden" name="settingsAppId" value="$app.appId"/>
                                     #appSettings($app.appId)
                                     <button type="submit" class="Btn" style="float: right">Save</button>
