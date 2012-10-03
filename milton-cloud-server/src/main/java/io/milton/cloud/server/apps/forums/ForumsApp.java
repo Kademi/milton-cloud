@@ -41,9 +41,11 @@ import org.apache.velocity.context.Context;
 import static io.milton.context.RequestContext._;
 import io.milton.http.AclUtils;
 import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
 import java.util.Date;
 import java.util.Set;
@@ -196,6 +198,21 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {            
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE_CONTENT);
         }
+        
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            if( resource instanceof CommonRepositoryResource ) {
+                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+                return ( cr.getRepository() == applicableRepo );                                    
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+            return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE_CONTENT);
+        }        
     }    
     
     public class ForumViewerRole implements Role {
@@ -218,5 +235,22 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {            
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ);
         }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            if( resource instanceof CommonRepositoryResource ) {
+                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+                return ( cr.getRepository() == applicableRepo );                                    
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+            return AclUtils.asSet(AccessControlledResource.Priviledge.READ);
+        }
+        
+        
     }       
 }

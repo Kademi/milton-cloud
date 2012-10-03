@@ -224,6 +224,21 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Collections.singleton(Priviledge.ALL);
         }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            if( resource instanceof CommonRepositoryResource ) {
+                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+                return ( cr.getRepository() == applicableRepo );                                    
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+            return Collections.singleton(Priviledge.ALL);
+        }
     }
 
     public class UserAdminRole implements Role {
@@ -245,6 +260,16 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         @Override
         public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return Role.READ_WRITE;
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            return false;
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+            return null;
         }
     }
 }

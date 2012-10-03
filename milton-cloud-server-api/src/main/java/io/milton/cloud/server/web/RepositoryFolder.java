@@ -45,7 +45,7 @@ import io.milton.http.Request.Method;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource {
+public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource, CommonRepositoryResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
     protected final CommonCollectionResource parent;
@@ -114,6 +114,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return repo.getNotes();
     }
 
+    @Override
     public Repository getRepository() {
         return repo;
     }

@@ -17,6 +17,7 @@ import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.GroupRole;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Collection;
 import java.util.Collections;
@@ -199,19 +200,28 @@ public class SpliffySecurityManager {
                 String roleName = gr.getRoleName();
                 Role role = mapOfRoles.get(roleName);
                 Organisation checkOrg = withinOrg;
-                if( gr.getWithinOrg() != null ) {
+                if (gr.getWithinOrg() != null) {
                     checkOrg = gr.getWithinOrg();
                 }
                 if (role != null) {
-                    if (role.appliesTo(resource, checkOrg, g)) {
-                        Set<Priviledge> privsToAdd = role.getPriviledges(resource, checkOrg, g);
-                        if (log.isTraceEnabled()) {
-                            log.trace("role:" + roleName + " does apply to: " + checkOrg.getName() + ", add privs " + privsToAdd);
+                    Repository applicableRepo = gr.getRepository();
+                    if (applicableRepo != null) {
+                        // role applies to a repository, so check if current resource is within the applicable repo
+                        if( role.appliesTo(resource,applicableRepo, g)) {
+                            Set<Priviledge> privsToAdd = role.getPriviledges(resource, applicableRepo, g);
+                            privs.addAll(privsToAdd);                            
                         }
-                        privs.addAll(privsToAdd);
                     } else {
-                        if (log.isTraceEnabled()) {
-                            log.trace("role:" + roleName + " does not apply to: " + checkOrg.getName());
+                        if (role.appliesTo(resource, checkOrg, g)) {
+                            Set<Priviledge> privsToAdd = role.getPriviledges(resource, checkOrg, g);
+                            if (log.isTraceEnabled()) {
+                                log.trace("role:" + roleName + " does apply to: " + checkOrg.getName() + ", add privs " + privsToAdd);
+                            }
+                            privs.addAll(privsToAdd);
+                        } else {
+                            if (log.isTraceEnabled()) {
+                                log.trace("role:" + roleName + " does not apply to: " + checkOrg.getName());
+                            }
                         }
                     }
 

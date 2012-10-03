@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Repository;
 import java.util.HashMap;
 import java.util.Iterator;
 import javax.xml.stream.XMLStreamException;
@@ -532,6 +533,13 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public Branch getBranch() {
         return fileResource.getBranch();
     }
+
+    @Override
+    public Repository getRepository() {
+        return getBranch().getRepository();
+    }
+    
+    
 
     @Override
     public Profile getOwnerProfile() {

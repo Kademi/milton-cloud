@@ -17,8 +17,10 @@ package io.milton.cloud.server.role;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Repository;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -81,4 +83,24 @@ public interface Role {
      * @return 
      */
     Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g);
+
+    /**
+     * Determine if this role applies to the given repository
+     * 
+     * @param resource
+     * @param applicableRepo
+     * @param g
+     * @return 
+     */
+    boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g);
+
+    /**
+     * Get priviledges conferred by this role on the repository
+     * 
+     * @param resource
+     * @param applicableRepo
+     * @param g
+     * @return 
+     */
+    Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g);
 }

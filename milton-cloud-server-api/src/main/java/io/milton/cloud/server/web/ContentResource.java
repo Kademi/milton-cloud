@@ -23,7 +23,7 @@ import java.io.IOException;
  *
  * @author brad
  */
-public interface ContentResource extends CommonResource, PersonalResource {
+public interface ContentResource extends CommonRepositoryResource, PersonalResource {
     
     /**
      * Get the "fingerprint" of the current version of this resource

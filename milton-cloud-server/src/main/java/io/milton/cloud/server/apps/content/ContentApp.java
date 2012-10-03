@@ -25,6 +25,7 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.CommonRepositoryResource;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.ContentDirectoryResource;
 import io.milton.cloud.server.web.ContentResource;
@@ -39,6 +40,7 @@ import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.AccessControlledResource;
+import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.data.DataSession;
@@ -233,6 +235,21 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         private boolean isContentResource(CommonResource resource) {
             return resource instanceof ContentResource;
         }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            if( resource instanceof CommonRepositoryResource ) {
+                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+                return ( cr.getRepository() == applicableRepo );                                    
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+            return Collections.singleton(AccessControlledResource.Priviledge.READ);
+        }
     }
 
 //    TODO: These roles should return privs as configured for the repository
@@ -262,6 +279,21 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
 
         @Override
         public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
+            return Role.READ_WRITE;
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            if( resource instanceof CommonRepositoryResource ) {
+                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+                return ( cr.getRepository() == applicableRepo );                                    
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
             return Role.READ_WRITE;
         }
     }

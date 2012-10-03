@@ -360,6 +360,13 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
+    public Repository getRepository() {
+        return branch.getRepository();
+    }
+
+    
+    
+    @Override
     public String getHash() {
         Commit c = branch.getHead();
         if (c == null) {

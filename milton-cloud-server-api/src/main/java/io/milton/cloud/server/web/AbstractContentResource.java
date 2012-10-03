@@ -28,6 +28,7 @@ import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.property.BeanProperty;
 import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Repository;
 
 /**
  *
@@ -340,6 +341,17 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
         }
         return parent.getBranch();
     }
+
+    @Override
+    public Repository getRepository() {
+        Branch b = getBranch();
+        if( b != null ) {
+            return b.getRepository();
+        }
+        return null;
+    }
+    
+    
     
     @Override
     public Profile getOwnerProfile() {
