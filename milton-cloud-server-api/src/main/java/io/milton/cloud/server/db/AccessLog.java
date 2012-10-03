@@ -124,6 +124,7 @@ public class AccessLog {
         this.url = url;
     }
 
+    @Column(length=1024)
     public String getReferrer() {
         return referrer;
     }

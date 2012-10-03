@@ -84,6 +84,7 @@ public class AppsPageHelper {
 
     public JsonResult updateApplicationEnabled(Organisation organisation, Branch websiteBranch, Map<String, String> parameters, Session session, Transaction tx) throws HibernateException {
         // Enabling or disabling an app
+        log.info("updateApplicationEnabled");
         JsonResult jsonResult;
         String appId = parameters.get("appId");
         String sEnabled = parameters.get("enabled");
@@ -124,7 +125,7 @@ public class AppsPageHelper {
     }
 
     private void setStatus(Organisation organisation, Branch websiteBranch, String appId, boolean enabled, Session session) {
-        log.info("setStatus: " + appId + " = " + enabled);
+        log.info("setStatus: " + appId + " = " + enabled + " org=" + organisation + " website=" + websiteBranch);
         Date currentDate = _(CurrentDateService.class).getNow();
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
         if (websiteBranch != null) {

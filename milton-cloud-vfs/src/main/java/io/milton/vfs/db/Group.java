@@ -21,14 +21,13 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Index;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -236,9 +235,9 @@ public class Group implements Serializable, VfsAcceptor {
     
     public boolean isMember(BaseEntity u, Organisation withinOrg) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
-        crit.add(Expression.eq("member", u));
-        crit.add(Expression.eq("groupEntity", this));
-        crit.add(Expression.eq("withinOrg", withinOrg));
+        crit.add(Restrictions.eq("member", u));
+        crit.add(Restrictions.eq("groupEntity", this));
+        crit.add(Restrictions.eq("withinOrg", withinOrg));
         boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
         return b;
     }
@@ -255,8 +254,8 @@ public class Group implements Serializable, VfsAcceptor {
      */
     public boolean isMember(BaseEntity entity) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
-        crit.add(Expression.eq("member", entity));
-        crit.add(Expression.eq("groupEntity", this));
+        crit.add(Restrictions.eq("member", entity));
+        crit.add(Restrictions.eq("groupEntity", this));
         boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
         return b;        
     }
@@ -268,9 +267,14 @@ public class Group implements Serializable, VfsAcceptor {
             }
         }
         if( getGroupMemberships() != null ) {
-            for( GroupMembership gm : getGroupMemberships() ) {
+            List<GroupMembership> list = new ArrayList<>(getGroupMemberships());
+            for( GroupMembership gm : list ) {
                 gm.delete(session);
+                session.flush();
             }
+        }
+        for( GroupInWebsite giw : GroupInWebsite.findByGroup(this, session) ) {
+            session.delete(giw);
         }
         session.delete(this);
     }

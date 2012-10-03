@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.event.GroupDeletedEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
@@ -32,18 +33,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.event.EventManager;
 import io.milton.http.Request;
 import io.milton.http.Response.Status;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
-import io.milton.http.webdav.PropertySourcePatchSetter;
+import io.milton.http.webdav.PropertySourcePatchSetter; 
 import io.milton.property.BeanPropertyAccess;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.MoveableResource;
 import io.milton.resource.Resource;
+import io.milton.sync.event.EventUtils;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
 import javax.xml.namespace.QName;
@@ -79,6 +82,7 @@ public class ManageGroupFolder extends AbstractResource implements GetableResour
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
+        EventUtils.fireQuietly(_(EventManager.class), new GroupDeletedEvent(group));
         group.delete(session);
         tx.commit();
     }

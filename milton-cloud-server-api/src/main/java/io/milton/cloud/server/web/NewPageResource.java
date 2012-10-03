@@ -169,7 +169,9 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        return getCreated(true, parameters).processForm(parameters, files);
+        RenderFileResource rfr = getCreated(true, parameters);
+        String redirect = rfr.processForm(parameters, files);
+        return redirect;
     }
 
     @Override
@@ -183,6 +185,7 @@ public class NewPageResource implements GetableResource, PostableResource, Diges
                 createdName = findAutoName(params);
                 DataSession.FileNode newNode = parent.getDirectoryNode().addFile(createdName);
                 FileResource newFr = new FileResource(newNode, parent);
+                parent.onAddedChild(newFr);
                 created = newFr.getHtml();
             } else {
                 FileResource tempFr = new FileResource(null, parent);

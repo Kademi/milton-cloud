@@ -57,17 +57,17 @@ import java.util.logging.Level;
  */
 @BeanPropertyResource(value = "milton")
 public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource {
-
+    
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     protected final FileNode fileNode;
     private RenderFileResource htmlPage; // for parsing html pages
     protected JsonResult jsonResult;
-
+    
     public FileResource(FileNode fileNode, ContentDirectoryResource parent) {
         super(fileNode, parent);
         this.fileNode = fileNode;
     }
-
+    
     @Override
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
         UploadUtils.replaceContent(this, in, length);
@@ -83,7 +83,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
     public void setContent(InputStream in) throws BadRequestException {
         UploadUtils.setContent(this, in);
     }
-
+    
     @Override
     public final void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
         if (jsonResult != null) {
@@ -98,7 +98,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             if (asJson) {
                 sendContentAsJson(out);
             } else {
-
+                
                 if (range == null) {
                     fileNode.writeContent(out);
                 } else {
@@ -106,7 +106,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             }
         }
     }
-
+    
     private void sendContentAsJson(OutputStream out) throws IOException {
         RenderFileResource page = getHtml();
         Map<String, String> map = new HashMap<>();
@@ -153,9 +153,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
         String acceptable = ContentTypeUtils.findContentTypes(getName().toLowerCase());
         String ct = ContentTypeUtils.findAcceptableContentType(acceptable, null);
         return ct;
-
+        
     }
-
+    
     @Override
     public Long getContentLength() {
         Request req = HttpManager.request();
@@ -175,12 +175,12 @@ public class FileResource extends AbstractContentResource implements Replaceable
             return null;
         }
     }
-
+    
     @Override
     public boolean isDir() {
         return false;
     }
-
+    
     public RenderFileResource getHtml() {
         if (htmlPage == null) {
             if (getName() == null || NodeChildUtils.isHtml(this)) { // name will be null when editing new html pages
@@ -189,7 +189,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         }
         return htmlPage;
     }
-
+    
     @Override
     public String getTitle() {
         RenderFileResource r = getHtml();
@@ -199,7 +199,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             return getName();
         }
     }
-
+    
     public String getBody() {
         RenderFileResource r = getHtml();
         if (r != null) {
@@ -207,9 +207,9 @@ public class FileResource extends AbstractContentResource implements Replaceable
         } else {
             return "";
         }
-
+        
     }
-
+    
     @Override
     public String getParam(String name) {
         if (getHtml() != null) {
@@ -218,12 +218,12 @@ public class FileResource extends AbstractContentResource implements Replaceable
             return null;
         }
     }
-
+    
     @Override
     public void setParam(String name, String value) {
         getHtml().setParam(name, value);
     }
-
+    
     @Override
     public List<String> getParamNames() {
         if (getHtml() != null) {
@@ -232,19 +232,19 @@ public class FileResource extends AbstractContentResource implements Replaceable
             return null;
         }
     }
-
+    
     @Override
     public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-
+        
         doSaveHtml();
         try {
             parent.save();
         } catch (IOException ex) {
             throw new BadRequestException("ioex", ex);
         }
-
+        
         tx.commit();
     }
 
@@ -273,7 +273,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             log.warn("No htmlPage, so nothing to save");
         }
     }
-
+    
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         if (this.is("html")) {
@@ -281,19 +281,20 @@ public class FileResource extends AbstractContentResource implements Replaceable
         } else {
             return 60 * 60 * 24 * 7 * 4l; // 1 month
         }
-
+        
     }
-
+    
     public FileNode getFileNode() {
         return fileNode;
     }
-
+    
     @Override
     public boolean is(String type) {
         return is(type, getName());
     }
-
+    
     public boolean is(String type, String name) {
+        System.out.println("---- is: type=" + type + " name=" + name);
         if (type.equals("file")) {
             return true;
         }
@@ -311,9 +312,24 @@ public class FileResource extends AbstractContentResource implements Replaceable
                 }
             }
         }
+
+        // If the resource is a html page we can check if its template matches the type
+        // Eg if html page has template learner/modulePage then page.is("modulePage) should return true
+        if (name.endsWith(".html")) {            
+            RenderFileResource html = getHtml();
+            System.out.println("a1 - " + html);
+            if (html != null) {                
+                System.out.println("a2");
+                if (html.isTemplate(type)) {
+                    System.out.println("YES!!!");
+                    return true;
+                }
+            }
+        }
+        System.out.println("no   :(");
         return false;
     }
-
+    
     @Override
     public void setHash(String s) {
         if (htmlPage != null) {
@@ -321,7 +337,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         }
         super.setHash(s);
     }
-
+    
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;

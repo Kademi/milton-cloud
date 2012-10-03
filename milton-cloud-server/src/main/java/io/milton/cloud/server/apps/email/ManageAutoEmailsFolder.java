@@ -3,9 +3,11 @@ package io.milton.cloud.server.apps.email;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
+import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.NewPageResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -61,11 +63,18 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource  implemen
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         // this form post is to create a shell group email job
         String nameToCreate = parameters.get("name");
+        nameToCreate = NewPageResource.findAutoCollectionName(nameToCreate, this, parameters);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         Date now = _(CurrentDateService.class).getNow();
         
-        
+        EmailTrigger t = new EmailTrigger();
+        t.setEventId(SubscriptionEvent.ID);
+        t.setEnabled(false);
+        t.setName(nameToCreate);
+        t.setTitle(name);
+        t.setOrganisation(getOrganisation());
+        session.save(t);
         
         tx.commit();
         
@@ -74,6 +83,11 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource  implemen
         return null;
     }    
         
+    
+    public String getTitle() {
+        return "Manage automatic email triggers";
+    }
+    
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
@@ -94,7 +108,6 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource  implemen
         if (children == null) {
             children = new ResourceList();
             List<EmailTrigger> jobs = EmailTrigger.findByOrg(org, SessionManager.session()); 
-            System.out.println("jobs: " + jobs.size());
             for( EmailTrigger f : jobs ) {
                 ManageAutoEmailPage page = new ManageAutoEmailPage(f, parent);
                 children.add(page);

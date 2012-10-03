@@ -42,7 +42,6 @@ import org.hibernate.criterion.Restrictions;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppControl implements Serializable {
 
-
     public static List<AppControl> find(Branch websiteBranch, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
         crit.setCacheable(true);
@@ -69,7 +68,7 @@ public class AppControl implements Serializable {
         }
         return null;
     }
-    
+
     public static AppControl find(Branch websiteBranch, String appId, Session session) {
         List<AppControl> list = find(websiteBranch, session);
         if (list == null || list.isEmpty()) {
@@ -82,15 +81,21 @@ public class AppControl implements Serializable {
         }
         return null;
     }
-    
 
     public static AppControl setStatus(String appId, Organisation organisation, boolean enabled, Profile currentUser, Date currentDate, Session session) {
-        AppControl ac = find(organisation, appId, session);
-        if( ac == null ) {
-            ac = new AppControl();
-            ac.setName(appId);
-            ac.setOrganisation(organisation);            
+        List<AppControl> list = find(organisation, session);
+        if (list != null) {
+            for (AppControl ac : list) {
+                if (ac.getName().equals(appId)) {
+                    session.delete(ac);
+                }
+            }
         }
+
+        AppControl ac = new AppControl();
+        ac.setName(appId);
+        ac.setOrganisation(organisation);
+
         ac.setEnabled(enabled);
         ac.setModifiedBy(currentUser);
         ac.setModifiedDate(currentDate);
@@ -99,33 +104,39 @@ public class AppControl implements Serializable {
     }
 
     public static AppControl setStatus(String appId, Branch websiteBranch, boolean enabled, Profile currentUser, Date currentDate, Session session) {
-        AppControl ac = find(websiteBranch, appId, session);
-        if( ac == null ) {
-            ac = new AppControl();
-            ac.setName(appId);
-            ac.setWebsiteBranch(websiteBranch);            
+        List<AppControl> list = find(websiteBranch, session);
+        if (list != null) {
+            for (AppControl ac : list) {
+                if (ac.getName().equals(appId)) {
+                    session.delete(ac);
+                }
+            }
         }
+
+        AppControl ac = new AppControl();
+        ac.setName(appId);
+        ac.setWebsiteBranch(websiteBranch);
         ac.setEnabled(enabled);
         ac.setModifiedBy(currentUser);
         ac.setModifiedDate(currentDate);
         session.save(ac);
         return ac;
-        
+
     }
 
     /**
      * Enable all available apps for the given organisation
-     * 
+     *
      * @param organisation
-     * @param session 
+     * @param session
      */
     public static void initDefaultApps(Organisation organisation, Profile currentUser, Date now, Session session) {
-        if( organisation.getOrganisation() == null ) {
+        if (organisation.getOrganisation() == null) {
             // is root org, so nothing to do
         }
-        for( AppControl ac : find(organisation.getOrganisation(), session)) {
+        for (AppControl ac : find(organisation.getOrganisation(), session)) {
             AppControl newac = new AppControl();
-            if( ac.isEnabled()) {
+            if (ac.isEnabled()) {
                 newac.setEnabled(true);
                 newac.setName(ac.getName());
                 newac.setOrganisation(organisation);
@@ -133,15 +144,15 @@ public class AppControl implements Serializable {
                 newac.setModifiedDate(now);
                 session.save(newac);
             }
-            
+
         }
     }
-    
+
     public static void initDefaultApps(Branch websiteBranch, Profile currentUser, Date now, Session session) {
         Organisation org = (Organisation) websiteBranch.getRepository().getBaseEntity();
-        for( AppControl ac : find(org, session)) {
+        for (AppControl ac : find(org, session)) {
             AppControl newac = new AppControl();
-            if( ac.isEnabled()) {
+            if (ac.isEnabled()) {
                 System.out.println("enabled: " + ac.getName());
                 newac.setEnabled(true);
                 newac.setName(ac.getName());
@@ -150,11 +161,9 @@ public class AppControl implements Serializable {
                 newac.setModifiedDate(now);
                 session.save(newac);
             }
-            
+
         }
-    }    
-    
-    
+    }
     private long id;
     private Branch branch; // the branch of the website the app control is affecting
     private Organisation organisation;
@@ -162,7 +171,7 @@ public class AppControl implements Serializable {
     private boolean enabled; // if the app is enabled for the specified container
     private Profile modifiedBy;
     private Date modifiedDate;
-    private List<AppSetting> appSettings;    
+    private List<AppSetting> appSettings;
 
     @Id
     @GeneratedValue
@@ -192,8 +201,6 @@ public class AppControl implements Serializable {
         this.branch = branch;
     }
 
-    
-
     @ManyToOne
     public Organisation getOrganisation() {
         return organisation;
@@ -212,7 +219,7 @@ public class AppControl implements Serializable {
         this.enabled = enabled;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Profile getModifiedBy() {
         return modifiedBy;
     }
@@ -221,8 +228,8 @@ public class AppControl implements Serializable {
         this.modifiedBy = modifiedBy;
     }
 
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)        
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getModifiedDate() {
         return modifiedDate;
     }
@@ -242,9 +249,9 @@ public class AppControl implements Serializable {
     }
 
     public String getSetting(String setting) {
-        if( getAppSettings() != null ) {
-            for( AppSetting appSetting : getAppSettings() ) {
-                if( appSetting.getName().equals(setting)) {
+        if (getAppSettings() != null) {
+            for (AppSetting appSetting : getAppSettings()) {
+                if (appSetting.getName().equals(setting)) {
                     System.out.println("Get setting: " + appSetting.getName() + " = " + appSetting.getPropValue());
                     return appSetting.getPropValue();
                 }
@@ -252,36 +259,35 @@ public class AppControl implements Serializable {
         }
         return null;
     }
-    
+
     public void setSetting(String name, String settingValue, Session session) {
         AppSetting setting = null;
-        if( getAppSettings() != null ) {
-            for( AppSetting appSetting : getAppSettings() ) {
-                if( appSetting.getName().equals(name)) {
+        if (getAppSettings() != null) {
+            for (AppSetting appSetting : getAppSettings()) {
+                if (appSetting.getName().equals(name)) {
                     setting = appSetting;
                     break;
                 }
             }
         }
-        if( setting == null ) {
-            if( settingValue == null ) {
-                return ; // DONE
+        if (setting == null) {
+            if (settingValue == null) {
+                return; // DONE
             }
             setting = new AppSetting();
             setting.setAppControl(this);
             setting.setName(name);
-            if( getAppSettings() == null ) {
+            if (getAppSettings() == null) {
                 setAppSettings(new ArrayList<AppSetting>());
             }
             getAppSettings().add(setting);
         }
-        if( settingValue == null ) {
+        if (settingValue == null) {
             session.delete(setting);
-        } else {            
-            setting.setPropValue(settingValue);        
+        } else {
+            setting.setPropValue(settingValue);
             session.save(setting);
             System.out.println("Set setting: " + setting.getName() + " = " + setting.getPropValue());
         }
-    }    
-    
+    }
 }

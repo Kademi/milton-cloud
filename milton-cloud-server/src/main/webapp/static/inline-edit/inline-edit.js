@@ -12,7 +12,7 @@ $(function() {
     btnNew.click(function() {
         var href = window.location.href;
         href = getFolderPath(href);
-        href = href + "/autoname.new";
+        href = href + "/autoname.new?template=learner/modulePage"; // TODO: make configurable somewhoe
         window.location.href = href;
     });
     adminToolbar.append(btnEdit).append(btnNew);
@@ -41,6 +41,7 @@ function edifyPage(selector) {
         opacity: 0
     }, 500);
     
+    log("do ajax get...");
     $.ajax({
         type: 'GET',
         url: window.location.pathname,
@@ -64,12 +65,11 @@ function edifyPage(selector) {
             });        
             container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
             var form = $("#edifyForm");
-            log("hide", form);
-            form.css("opacity", 0);            
-            $("#edifyForm").append("<input type='hidden' name='body' value='' />");
+            form.append("<input type='hidden' name='body' value='' />");
             var buttons = $("<div class='buttons'></div>");
-            $("#edifyForm").prepend(buttons);
-            var title = $("<input type='text' name='title' id='title' title='Enter the page title here' />");
+            form.prepend(buttons);
+            form.prepend("<div class='pageMessage'>.</div>");
+            var title = $("<input type='text' name='title' id='title' title='Enter the page title here' class='required' />");
             title.val(document.title);
             buttons.append(title);
             buttons.append("<button title='Save edits to the page' class='save' type='submit'>Save</button>");
@@ -83,7 +83,7 @@ function edifyPage(selector) {
                 showHistory();
             });
                             
-            $("#edifyForm").submit(function(e) {
+            form.submit(function(e) {
                 e.preventDefault();
                 log("inlineedit: edifyPage: submit page");
                 submitEdifiedForm(function(resp) {
@@ -94,8 +94,8 @@ function edifyPage(selector) {
                     }
                 });
             });
-            log("done hide, now show again");
-            form.animate({
+            log("now show again");
+            container.animate({
                 opacity: 1
             },500);            
         },
@@ -106,6 +106,61 @@ function edifyPage(selector) {
             
     });    
 
+}
+
+
+
+function submitEdifiedForm(callback) {
+    var form = $("#edifyForm");
+    log("submit form", form);
+    for( var key in CKEDITOR.instances) {
+        var editor = CKEDITOR.instances[key];
+        var content = editor.getData();
+        var inp = $("input[name=" + key + "], textarea[name=" + key + "]");
+        if( inp.length > 0 ) {
+            inp.val(content);
+        } else {
+            inp = $("<input type='hidden' name='" + key + "/>");
+            form.append(inp);
+            inp.val(content);
+        }
+        log("copied html editor val to:", inp, "for", key);
+    }
+        
+    resetValidation(form);
+    if( !checkRequiredFields(form)) {
+        return false;
+    }        
+        
+    var data = form.serialize();
+    log("serialied", data);
+
+    try {
+        //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
+        $.ajax({
+            type: 'POST',
+            url: $("#edifyForm").attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(resp) {
+                ajaxLoadingOff();
+                log("common.js: edify: save success", resp, window.location.path);
+                if( callback ) {
+                    log("call callback", callback);
+                    callback(resp);
+                } else {
+                    log("no callback");
+                }
+            },
+            error: function(resp) {
+                ajaxLoadingOff();
+                alert("err");
+            }
+        });     
+    } catch(e) {
+        log("exception", e);
+    }
+    return false;    
 }
 
 function showHistory() {

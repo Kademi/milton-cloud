@@ -313,13 +313,19 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public boolean is(String type) {
+        if( isTemplate(type) ) {
+            return true;
+        }
+        return fileResource.is(type, getName());
+    }
+    
+    public boolean isTemplate(String type) {
         checkParse();
         // eg, if template is learner/modulePage, then is("modulePage") returns true
         if (this.template != null && template.endsWith(type)) {
             return true;
         }
-        boolean b = fileResource.is(type, getName());
-        return b;
+        return false;
     }
 
     @Override

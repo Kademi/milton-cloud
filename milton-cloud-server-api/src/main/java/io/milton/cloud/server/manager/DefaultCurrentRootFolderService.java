@@ -151,13 +151,14 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
                 }
             }
             
-            // not exact match on website, but might have a branch suffic. Eg qa.mysite.somewhere.com
+            // not exact match on website, but might have a branch suffix. Eg qa.mysite.somewhere.com
             // which would be QA branch of the "mysite" website, with somewhere.com as primary domain
+            System.out.println("resolve: subdomain=" + subdomain);
             if( subdomain.contains(".")) {
                 // split the subdomain
                 int pos = subdomain.indexOf(".");
                 String first = subdomain.substring(0, pos);
-                String otherPart = subdomain.substring(pos);
+                String otherPart = subdomain.substring(pos+1);
                 System.out.println("first=" + first + " -- second=" + otherPart );
                 website = Website.findByName(otherPart, session);
                 if( website != null ) {
