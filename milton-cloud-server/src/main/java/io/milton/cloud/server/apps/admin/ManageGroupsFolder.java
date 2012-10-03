@@ -18,7 +18,6 @@ import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
-import io.milton.http.FileItem;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -27,7 +26,6 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
-import io.milton.resource.PostableResource;
 import io.milton.vfs.db.Organisation;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,7 +47,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageGroupsFolder extends AbstractResource implements GetableResource, PostableResource, MakeCollectionableResource, CommonCollectionResource {
+public class ManageGroupsFolder extends AbstractResource implements GetableResource, MakeCollectionableResource, CommonCollectionResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupsFolder.class);
     private final String name;
@@ -62,31 +60,6 @@ public class ManageGroupsFolder extends AbstractResource implements GetableResou
         this.organisation = organisation;
         this.parent = parent;
         this.name = name;
-    }
-
-    @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        log.info("processForm");
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-
-        if (parameters.containsKey("role")) {
-            String groupName = parameters.get("group");
-            Group g = findGroup(groupName);
-            if (g != null) {
-                String role = parameters.get("role");                
-                boolean isRecip = WebUtils.getParamAsBool(parameters, "isRecip");
-                //boolean isWithinThisOrg = WebUtils.getParamAsBool(parameters, "isWithinThisOrg");
-                //log.info("grant or revoke role: " + role + " - " + isRecip + " - " + isWithinThisOrg);
-                g.grantRole(role, isRecip, session);
-                tx.commit();
-                jsonResult = new JsonResult(true);
-            } else {
-                jsonResult = new JsonResult(false, "Group not found: " + groupName);
-            }
-        }        
-        
-        return null;
     }
     
     @Override

@@ -35,12 +35,19 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * Note: when referring here to "the principal" we are talking about the user
  * which is having its permissions calculated, and is a member of a group with a grouprole
  *
+ * A GroupRole can be attached to a protected resource in one of three ways
+ *  - if a repository is specified then that is what the permissions apply to
+ *  - otherwise, if an organsiation is specified that that is the applicable object
+ *  - otherwise, ie if nothing is explicitly stated, then the applicable organisation
+ * is inferred from the user's group membership. Ie whatever organisation their
+ * membership is on
+ * 
  * @author brad
  */
 @Entity
 @Table(
 uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"roleName", "grantee"})}
+    @UniqueConstraint(columnNames = {"roleName", "grantee","within_org","repository"})}
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupRole implements Serializable{
@@ -49,6 +56,7 @@ public class GroupRole implements Serializable{
     private String roleName;
     private Group grantee;
     private Organisation withinOrg; // optional. If null the withinorg is the org of the group membership which has this role
+    private Repository repository; // optional
 
 
     @Id
@@ -94,7 +102,16 @@ public class GroupRole implements Serializable{
     public void setWithinOrg(Organisation withinOrg) {
         this.withinOrg = withinOrg;
     }
-    
+
+    @ManyToOne
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(Repository repository) {
+        this.repository = repository;
+    }
+            
     
 
     public void delete(Session session) {

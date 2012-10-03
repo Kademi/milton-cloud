@@ -20,43 +20,76 @@
                     #portlets("groupDetails")
                     <h4>Roles</h4>
                     <ul class="PermissionList ClearFix">
-                        #foreach($role in $group.group.groupRoles)
-                        <li><span>$role.roleName</span></li>
+                        #foreach($role in $group.children)
+                        <li>
+                            <span>$role.title</span>
+                            <a href="$role.href">Delete</a>
+                        </li>
                         #end
                     </ul>	
-                    <div class="ClearFix"><button onclick="showPermissionModal(this)" class="SmallBtn Add AddPermission"><span>Add/remove roles</span></button></div>
-                    <div class="Modal roles">
-                        <header>
-                            <h3>Edit roles</h3>
-                            <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
-                        </header>
-
-                        <div class="ModalContent">
-                            <table>
-                                <tr>
-                                    <td colspan="2">
-                                        <ul class="ListItem roles">
-                                            #foreach($role in $page.allRoles)
-                                            <li>
-                                                $role
-                                                <aside rel="$group.name">
-                                                    <div class="CheckBoxWrapper">
-                                                        $formatter.checkbox($role, $page.isSelected($group.group, $role) )
-                                                        <label><!----></label>
-                                                    </div>
-                                                </aside>
-                                            </li>
-                                            #end
-                                        </ul>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>                    
-                    </div>
+                    <div class="ClearFix">
+                        <button onclick="showPermissionModal(this)" class="SmallBtn Add AddPermission"><span>Add roles</span></button>
+                    </div>                    
                 </div>
             </div>
             #end
         </section>
+
+        <div class="Modal roles">
+            <header>
+                <h3>Edit roles</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+
+            <div class="ModalContent">
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <p>Role applies to:</p>
+                            <ul class="appliesTo">
+                                <li>
+                                    <input type="radio" name="appliesTo" value="ownOrg" id="appliesToOwnOrg" /> 
+                                    <label for="appliesToOwnOrg">Their own organistion</label>
+                                </li>
+                                <li>
+                                    <input type="radio" name="appliesTo" value="selectRepo" id="appliesToRepository"/> 
+                                    <label for="appliesToRepository">A repository</label>
+                                    <select>
+                                        <option value="">-- Select a repository --</option>
+                                        #foreach($r in $page.organisation.repositories)
+                                        <option value="$r.name">$r.name</option>
+                                        #end
+                                    </select>
+                                </li>
+                                <li>
+                                    <input type="radio" name="appliesTo" value="selectOrg" id="appliesToOrg"/> 
+                                    <label for="appliesToOrg">An organistion</label>
+                                    <select>
+                                        <option value="">-- Select an organisation --</option>
+                                        <option value="$page.organisation.orgId">$page.organisation.name (this organisation)</option>
+                                        #foreach($org in $page.organisation.childOrgs)
+                                        <option value="$org.orgId">$org.name</option>
+                                        #end
+                                    </select>
+
+                                </li>
+                            </ul>
+                            <ul class="ListItem roles">
+                                #foreach($role in $page.allRoles)
+                                <li>
+                                    <span>$role</span>
+                                    <aside>
+                                        <button class="SmallBtn Add"><span>Add role</span></button>
+                                    </aside>
+                                </li>
+                                #end
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>                    
+        </div>        
+
         <div class="Hidden">
             <div id="dialogGroup">
                 <div class="Dialog Hidden">
@@ -70,6 +103,7 @@
                 </aside>
             </div>
         </div>
+
         <div id="modalGroup" class="Modal">
             <header>
                 <h3>Edit Group</h3>
@@ -108,11 +142,11 @@
                         <td><a class="Btn" href="#" rel="c">Closed</a></td>
                         <td>Registration is not available. Instead administrators create accounts as required</td>
                     </tr>
-                    
+
                 </table>
             </div>
         </div>
-        
+
         <script type="text/javascript" >
             jQuery(function() {
                 initManageGroup();

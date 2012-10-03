@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.event.EventManager;
+import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.Response.Status;
 import io.milton.http.exceptions.ConflictException;
@@ -45,6 +46,7 @@ import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.MoveableResource;
+import io.milton.resource.PostableResource;
 import io.milton.resource.Resource;
 import io.milton.sync.event.EventUtils;
 import io.milton.vfs.db.*;
@@ -58,12 +60,13 @@ import org.hibernate.Transaction;
  * @author brad
  */
 @BeanPropertyResource(value = "milton", enableByDefault = false)
-public class ManageGroupFolder extends AbstractResource implements GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource, MoveableResource {
+public class ManageGroupFolder extends AbstractResource implements PostableResource, CommonCollectionResource, GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource, MoveableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupFolder.class);
     private final Group group;
     private final CommonCollectionResource parent;
     private ResourceList children;
+    private JsonResult jsonResult;
 
     public ManageGroupFolder(CommonCollectionResource parent, Group group) {
         this.parent = parent;
@@ -71,9 +74,77 @@ public class ManageGroupFolder extends AbstractResource implements GetableResour
     }
 
     @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        log.info("processForm");
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        if (parameters.containsKey("role")) {
+            String appliesToType = WebUtils.getParam(parameters, "appliesToType");
+            String appliesTo = WebUtils.getParam(parameters, "appliesTo");
+            String role = WebUtils.getParam(parameters, "role");
+            if( appliesToType == null ) {
+                jsonResult = JsonResult.fieldError("appliesToType", "Please select a appliesToType");
+                return null;
+            } else if( role == null ) {
+                jsonResult = JsonResult.fieldError("role", "Please select a role");
+                return null;                
+            }
+            GroupRole gr;
+            switch (appliesToType) {
+                case "selectRepo":
+                    Repository r = getOrganisation().repository(appliesTo);
+                    if( r == null ) {
+                        jsonResult = JsonResult.fieldError("appliesTo", "Could not locate repository: " + appliesTo);
+                        return null;
+                    } else {
+                        gr = group.grantRole(r, role, session);
+                    }
+                    break;
+                case "selectOrg":
+                    Organisation org;
+                    if( getOrganisation().getOrgId().equals(appliesTo)) {
+                        org = getOrganisation();
+                    } else {
+                        org = getOrganisation().childOrg(appliesTo);
+                    }
+                    if( org == null ) {
+                        jsonResult = JsonResult.fieldError("appliesTo", "Could not locate child organistion: " + appliesTo);
+                        return null;
+                    } else {
+                        gr = group.grantRole(org, role, session);
+                    }
+                    break;
+                default:            
+                    gr = group.grantRole(role, session);
+                    break;
+            }
+            if( gr != null ) {
+                tx.commit();
+                ManageGroupRolePage grPage = new ManageGroupRolePage(this, gr);
+                jsonResult = new JsonResult(true, "Added role", grPage.getHref());
+            } else {
+                jsonResult = new JsonResult(false, "That role already exists");
+            }
+        }        
+        
+        return null;
+    }
+
+    
+    
+    @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
+            if( group.getGroupRoles() != null ) {
+                for( GroupRole gr : group.getGroupRoles()) {
+                    System.out.println("GroupRole: " + group.getName() + " = " + gr.getRoleName() + " " + gr.getId());
+                    ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
+                    System.out.println("    title: " + p.getTitle());
+                    children.add(p);
+                }
+            }
         }
         return children;
     }
@@ -89,12 +160,16 @@ public class ManageGroupFolder extends AbstractResource implements GetableResour
 
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
-        return Priviledge.WRITE_CONTENT;
+        return Priviledge.WRITE_ACL;
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("admin", "admin/manageGroup", this, params, out);
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        } else {
+            _(HtmlTemplater.class).writePage("admin", "admin/manageGroup", this, params, out);
+        }
     }
 
     public List<Group> getGroups() {

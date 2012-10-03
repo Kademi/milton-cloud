@@ -19,7 +19,9 @@
     height: 25px;
 }
 #manageGroup div.Group div.ContentGroup ul li > a {
+    /**
     float: left;
+    */
 }
 #manageGroup div.Group div.ContentGroup ul li form, #manageGroup div.Group div.ContentGroup ul li aside { float: right; }
 #manageGroup div.Group div.ContentGroup ul li aside a {
@@ -65,4 +67,28 @@
 #modalRegoMode td a {
     font-size: 12px;
     margin-right: 10px;
+}
+
+ul.PermissionList li a {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-indent: -9999px;
+    margin-left: 10px;
+}
+ul.PermissionList li:hover a {
+     background-image: url(/templates/themes/admin/images/btn_delete_small.png);
+     background-position: right center;
+     background-repeat: no-repeat;
+     cursor: pointer;
+}
+ul.roles li button {
+    padding-right: 0;
+    margin-right: 0;
+}
+ul.roles li button span {
+    display: none;
+}
+ul.appliesTo select {
+    display: none;
 }

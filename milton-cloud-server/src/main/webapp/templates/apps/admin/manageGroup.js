@@ -7,6 +7,126 @@ function initManageGroup() {
     eventForModal();
     initPermissionCheckboxes();
     initRegoMode();
+    initRemoveRole();
+    initAddRole();
+}
+
+var currentGroupDiv;
+
+function showPermissionModal(source) {
+    log("showPermissionModal", source);
+    $("ul.appliesTo input").removeAttr("checked");
+    currentGroupDiv = $(source).closest("div.Group");
+    var modal = $(".Modal.roles");
+    log("modal", modal);
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });   
+}
+
+
+function initAddRole() {
+    var appliesTo = $("ul.appliesTo");
+    appliesTo.find("input")
+    .removeAttr("checked")
+    .click(function() {
+        appliesTo.find("select").hide();
+        appliesTo.find("input[type=radio]:checked").closest("li").find("select").show();
+    });
+    
+    $("div.roles button.Add").click(function(e) {
+        e.preventDefault();
+        var roleLi = $(e.target).closest("li");
+        var appliesToType = appliesTo.find("input:checked");
+        
+        if( appliesToType.length == 0 ) {
+            alert("Please select what the role applies to");
+            return;
+        }
+        var appliesToTypeVal = appliesToType.val();
+        var select = appliesToType.closest("li").find("select");
+        var appliesToVal = ""; // if need to select a target then this has its value
+        if( select.length > 0 ) {
+            appliesToVal = select.val();
+            if( appliesToVal.length == 0 ) {
+                alert("Please select a target for the role");
+                return;
+            }
+        }
+        
+        log("add role", appliesToTypeVal, appliesToVal);
+        log("currentGroupDiv", currentGroupDiv);
+        var groupHref = currentGroupDiv.find("header > div > span").text();
+        var roleName = roleLi.find("> span").text();
+        addRoleToGroup(groupHref,roleName,appliesToTypeVal, appliesToVal, function(resp) {
+            var newLi = $("<li></li>");
+            if( appliesToVal.length == 0 ) {
+                appliesToVal = "their own organisation";
+            }
+            var newSpan = $("<span>").text(roleName + ", on " + appliesToVal);
+            newLi.append(newSpan);
+            var newDelete = $("<a href=''>Delete</a>");
+            newDelete.attr("href", resp.nextHref);
+            newLi.append(newDelete);
+            currentGroupDiv.find("ul.PermissionList").append(newLi);
+        });
+    });
+}
+
+function addRoleToGroup(groupHref,roleName,appliesToType, appliesTo, callback) {
+    log("addRoleToGroup", groupHref, roleName, appliesToType, appliesTo);
+    try {
+        $.ajax({
+            type: 'POST',
+            url: groupHref,
+            dataType: "json",
+            data: {
+                appliesToType: appliesToType,
+                role: roleName,
+                appliesTo: appliesTo
+            },
+            success: function(data) {
+                log("success", data);
+                if( data.status) {
+                    log("saved ok", data);
+                    callback(data);
+                    alert("Added role");
+                } else {
+                    var msg = data.messages + "\n";
+                    if( data.fieldMessages) {
+                        $.each(data.fieldMessages, function(i, n) {
+                            msg += "\n" + n.message;
+                        });                        
+                    }
+                    log("error msg", msg);
+                    alert("Couldnt save the new role: " + msg);
+                }
+            },
+            error: function(resp) {
+                log("error", resp);
+                alert("Error, couldnt add role");
+            }
+        });          
+    } catch(e) {
+        log("exception in createJob", e);
+    }       
+}
+
+function initRemoveRole() {
+    $("ul.PermissionList").on("click", "li a", function(e) {
+        log("click", this);
+        e.preventDefault();
+        e.stopPropagation();
+        if( confirm("Are you sure you want to remove this role?")) {
+            var a = $(e.target);
+            log("do it", a);
+            var href = a.attr("href");
+            deleteFile(href, function() {
+                a.closest("li").remove();
+            });
+        }
+    });    
 }
 
 function initPermissionCheckboxes() {
@@ -206,17 +326,6 @@ function addGroupButton() {
     });
 }
 
-
-
-function showPermissionModal(source) {
-    log("showPermissionModal", source);
-    var modal = $(source).parent().parent().find(".Modal.roles");
-    log("modal", modal);
-    $.tinybox.show(modal, {
-        overlayClose: false,
-        opacity: 0
-    });   
-}
 
 function maxOrderGroup() {
     var _order = [];

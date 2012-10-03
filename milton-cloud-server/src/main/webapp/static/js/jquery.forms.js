@@ -56,13 +56,7 @@
                                         messagesContainer.append("<p>Sorry, we couldnt process your request</p>");
                                     }
                                     messagesContainer.show(100);
-                                    if( resp.fieldMessages ) {
-                                        $.each(resp.fieldMessages, function(i, n) {
-                                            log("field message", n);
-                                            var target = $("#" + n.field);
-                                            showValidation(target, n.message, container);
-                                        });
-                                    }
+                                    showFieldMessages(resp.fieldMessages, container)
                                 } catch(e) {
                                     log("ex", e);
                                 }
@@ -90,6 +84,16 @@
     };
 })( jQuery );
 
+function showFieldMessages(fieldMessages, container) {
+    if( fieldMessages ) {
+        $.each(fieldMessages, function(i, n) {
+            log("field message", n);
+            var target = $("#" + n.field);
+            showValidation(target, n.message, container);
+        });
+    }
+    
+}
 
 function resetValidation(container) {
     $(".validationError", container).remove();    

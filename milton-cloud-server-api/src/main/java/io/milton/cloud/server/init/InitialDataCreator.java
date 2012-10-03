@@ -105,14 +105,14 @@ public class InitialDataCreator implements LifecycleApplication {
 
         
         Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, 0, session, null, "c");
-        administrators.grantRole("Administrator", true, session);
-        administrators.grantRole("Content author", true, session);
+        administrators.grantRole("Administrator", session);
+        administrators.grantRole("Content author", session);
 
         Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin, "o");
-        users.grantRole("Content author", true, session);
+        users.grantRole("Content author", session);
 
         Group publicGroup = initHelper.checkCreateGroup(rootOrg, Group.PUBLIC, groupDao, 50, session, admin, "o");
-        publicGroup.grantRole("Forums viewer", true, session);
+        publicGroup.grantRole("Forums viewer", session);
         
         
         Profile normalUser = initHelper.checkCreateUser("a1", adminPassword, session, rootOrg, null);

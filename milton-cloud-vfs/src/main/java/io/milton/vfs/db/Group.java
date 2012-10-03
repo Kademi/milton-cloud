@@ -21,7 +21,6 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
@@ -70,12 +69,10 @@ public class Group implements Serializable, VfsAcceptor {
         crit.add(Restrictions.eq("name", name));
         return (Group) crit.uniqueResult();
     }
-    
     private long id;
-    private String name;    
+    private String name;
     private Date createdDate;
     private Date modifiedDate;
-    
     private Organisation organisation;
     private List<GroupMembership> groupMemberships; // those entities in this group
     private List<GroupRole> groupRoles;
@@ -110,9 +107,8 @@ public class Group implements Serializable, VfsAcceptor {
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
-    
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Organisation getOrganisation() {
         return organisation;
     }
@@ -128,8 +124,8 @@ public class Group implements Serializable, VfsAcceptor {
 
     public void setName(String name) {
         this.name = name;
-    }    
-    
+    }
+
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
@@ -179,9 +175,7 @@ public class Group implements Serializable, VfsAcceptor {
     public void setRegistrationMode(String registrationMode) {
         this.registrationMode = registrationMode;
     }
-  
-    
-    
+
     /**
      * Add or remove the role to this group. Updates the groupRoles list and
      * also saves the change in the session
@@ -190,35 +184,46 @@ public class Group implements Serializable, VfsAcceptor {
      * @param isGrant - true means to grant permission, false to remove
      * @param session
      */
-    public void grantRole(String roleName, boolean isGrant, Session session) {
-        grantRole(null, roleName, isGrant, session);
+    public GroupRole grantRole(String roleName, Session session) {
+        return grantRole(null, null, roleName, session);
     }
-    
-    public void grantRole(Organisation withinOrg, String roleName, boolean isGrant, Session session) {
+
+    public GroupRole grantRole(Repository repository, String roleName, Session session) {
+        return grantRole(repository, null, roleName, session);
+    }
+
+    public GroupRole grantRole(Organisation org, String roleName, Session session) {
+        return grantRole(null, org, roleName, session);
+    }
+
+    private GroupRole grantRole(Repository repo, Organisation withinOrg, String roleName, Session session) {
         if (getGroupRoles() == null) {
             setGroupRoles(new ArrayList<GroupRole>());
         }
 
+        // Check if this role already exists
         for (GroupRole gr : getGroupRoles()) {
+            System.out.println("gr = " + gr.getRoleName());
             if (gr.getRoleName().equals(roleName)) {
-                if (isGrant) {
-                    if( gr.getWithinOrg() != null && gr.getWithinOrg() == withinOrg ) {
-                        // nothing to do
-                    } else {
-                        
-                    }
-                } else {
-                    session.delete(gr);
-                    getGroupRoles().remove(gr);
+                if (gr.getWithinOrg() != null && gr.getWithinOrg() == withinOrg) {
+                    // nothing to do
+                    return null;
+                } else if (gr.getRepository() != null && gr.getRepository() == repo) {
+                    // nothing to do
+                    return null;
+                } else if( withinOrg == null && repo == null && gr.getRepository() == null && gr.getWithinOrg() == null) {
+                    return null;
                 }
-                return;
             }
         }
         GroupRole gr = new GroupRole();
         gr.setGrantee(this);
         gr.setRoleName(roleName);
+        gr.setRepository(repo);
+        gr.setWithinOrg(withinOrg);
         session.save(gr);
         getGroupRoles().add(gr);
+        return gr;
     }
 
     public boolean hasRole(String roleName) {
@@ -232,7 +237,7 @@ public class Group implements Serializable, VfsAcceptor {
         }
         return false;
     }
-    
+
     public boolean isMember(BaseEntity u, Organisation withinOrg) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
         crit.add(Restrictions.eq("member", u));
@@ -248,35 +253,34 @@ public class Group implements Serializable, VfsAcceptor {
 
     /**
      * Is the given entity a member of this group, regardless of organisation
-     * 
+     *
      * @param entity
-     * @return 
+     * @return
      */
     public boolean isMember(BaseEntity entity) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
         crit.add(Restrictions.eq("member", entity));
         crit.add(Restrictions.eq("groupEntity", this));
         boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
-        return b;        
+        return b;
     }
 
     public void delete(Session session) {
-        if( getGroupRoles() != null ) {
-            for( GroupRole gr : getGroupRoles() ) {
+        if (getGroupRoles() != null) {
+            for (GroupRole gr : getGroupRoles()) {
                 gr.delete(session);
             }
         }
-        if( getGroupMemberships() != null ) {
+        if (getGroupMemberships() != null) {
             List<GroupMembership> list = new ArrayList<>(getGroupMemberships());
-            for( GroupMembership gm : list ) {
+            for (GroupMembership gm : list) {
                 gm.delete(session);
                 session.flush();
             }
         }
-        for( GroupInWebsite giw : GroupInWebsite.findByGroup(this, session) ) {
+        for (GroupInWebsite giw : GroupInWebsite.findByGroup(this, session)) {
             session.delete(giw);
         }
         session.delete(this);
     }
-    
 }
