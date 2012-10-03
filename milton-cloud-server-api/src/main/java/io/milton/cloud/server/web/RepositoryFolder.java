@@ -59,6 +59,10 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public Resource child(String childName) {
+        Resource r = _(ApplicationManager.class).getPage(this, childName);
+        if (r != null) {
+            return r;
+        }        
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 
@@ -212,4 +216,14 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         this.repo.delete(session);
         tx.commit();
     }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("repository")) {
+            return true;
+        }        
+        return super.is(type);
+    }
+    
+    
 }

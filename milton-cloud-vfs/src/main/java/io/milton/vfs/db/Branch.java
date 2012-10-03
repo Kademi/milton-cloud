@@ -1,6 +1,7 @@
 package io.milton.vfs.db;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.persistence.*;
 import org.hibernate.Session;
@@ -19,7 +20,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name = "BRANCH")
+@Table(name = "BRANCH", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"repository","name"})}// unique names within a repository
+)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Branch implements Serializable, VfsAcceptor {
 
@@ -31,11 +34,11 @@ public class Branch implements Serializable, VfsAcceptor {
     private String name;
     private Long version;
     private Commit head;
+    private Commit fromCommit;
     private Repository repository;
     private Date createdDate;
     private String internalTheme;
-    private String publicTheme;    
-    
+    private String publicTheme;
 
     public Branch() {
     }
@@ -47,7 +50,7 @@ public class Branch implements Serializable, VfsAcceptor {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * The internal theme is intended for logged in access
      *
@@ -76,10 +79,10 @@ public class Branch implements Serializable, VfsAcceptor {
 
     public void setPublicTheme(String publicTheme) {
         this.publicTheme = publicTheme;
-    }    
+    }
 
     @Version
-    @Column(name="LOCKVERSION")
+    @Column(name = "LOCKVERSION")
     public Long getVersion() {
         return version;
     }
@@ -87,8 +90,6 @@ public class Branch implements Serializable, VfsAcceptor {
     public void setVersion(Long version) {
         this.version = version;
     }
-    
-    
 
     @ManyToOne(optional = false)
     public Repository getRepository() {
@@ -127,11 +128,24 @@ public class Branch implements Serializable, VfsAcceptor {
         this.head = head;
     }
 
+    /**
+     * Get the commit this branch was created from, if any
+     *
+     * @return
+     */
+    @ManyToOne(optional = true)
+    public Commit getFromCommit() {
+        return fromCommit;
+    }
+
+    public void setFromCommit(Commit from) {
+        this.fromCommit = from;
+    }
+
     public Commit latestVersion(Session session) {
         return head;
     }
 
-    
     @Override
     public void accept(VfsVisitor visitor) {
         visitor.visit(this);
@@ -141,5 +155,34 @@ public class Branch implements Serializable, VfsAcceptor {
         session.delete(this);
     }
 
-
+    public Branch copy(String newName, Date now, Session session) {
+        return copy(repository, newName, now, session);
+    }
+    
+    /**
+     * Creates and saves a copy of this branch with the new name
+     *
+     * @param newName
+     * @param now
+     * @param session
+     * @return
+     */
+    public Branch copy(Repository repo, String newName, Date now, Session session) {
+        Branch b = new Branch();
+        b.setFromCommit(this.getHead());
+        b.setCreatedDate(now);
+        b.setInternalTheme(getInternalTheme());
+        b.setName(newName);
+        b.setPublicTheme(getPublicTheme());
+        b.setRepository(repo);
+        b.setHead(head);
+        session.save(b);
+        
+        if( repo.getBranches() == null ) {
+            repo.setBranches(new ArrayList<Branch>());
+        }
+        repo.getBranches().add(b);
+        
+        return b;
+    }
 }

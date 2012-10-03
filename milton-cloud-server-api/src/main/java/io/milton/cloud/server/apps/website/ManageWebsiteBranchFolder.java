@@ -80,6 +80,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processForm");
+        String redirect = null;
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("isRecip")) {
@@ -104,23 +105,23 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             log.info("Update theme info");
             String publicTheme = parameters.get("publicTheme");
             String internalTheme = parameters.get("internalTheme");
-            
+
             branch.setPublicTheme(publicTheme);
             branch.setInternalTheme(internalTheme);
             session.save(website);
 
-            Map<String,String> themeParams = new HashMap<>();
+            Map<String, String> themeParams = new HashMap<>();
 
             themeParams.put("hero1", parameters.get("hero1"));
             themeParams.put("hero2", parameters.get("hero2"));
             themeParams.put("text1", parameters.get("text1"));
-            themeParams.put("text2", parameters.get("text2"));            
-            
-            Map<String,String> themeAtts = new HashMap<>();
-            
+            themeParams.put("text2", parameters.get("text2"));
+
+            Map<String, String> themeAtts = new HashMap<>();
+
             themeAtts.put("logo", parameters.get("logo"));
             themeAtts.put("menu", parameters.get("menu"));
-            
+
             try {
                 setThemeParams(themeParams);
                 setThemeAttributes(themeAtts);
@@ -129,7 +130,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
                 jsonResult = new JsonResult(false, ex.getMessage());
                 return null;
             }
-                        
+
             tx.commit();
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("name")) {
@@ -182,9 +183,11 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             jsonResult = _(AppsPageHelper.class).updateApplicationSettings(getOrganisation(), branch, parameters, files, tx);
         } else if (parameters.containsKey("appId")) {
             jsonResult = _(AppsPageHelper.class).updateApplicationEnabled(getOrganisation(), branch, parameters, session, tx);
+        } else {
+            redirect = super.processForm(parameters, files);
         }
 
-        return null;
+        return redirect;
     }
 
     private void removeGroup(String groupName) {

@@ -34,7 +34,12 @@ public class ManageWebsiteFolder extends RepositoryFolder {
     public Website getWebsite() {
         return (Website) repo;
     }
-    
 
-    
+    @Override
+    public boolean is(String type) {
+        if( type.equals("website")) {
+            return true;
+        }
+        return super.is(type);
+    }
 }

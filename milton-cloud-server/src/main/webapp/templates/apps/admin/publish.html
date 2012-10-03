@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="publish.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="publish.js">//</script>
+        
+    </head>
+    <body class="dashboard">
+        <section id="publish" class="MainContent">
+            <h3>Make this branch live   </h3>
+            <form action="$page.name" method="POST">
+                <button>Publish $page.name</button>
+            </form>
+        </section>
+        <script type="text/javascript">
+            jQuery(function() {
+                $("#publish form").forms({
+                    callback: function() {
+                        alert("Done!");
+                    }
+                });
+            });
+        </script>               
+    </body>
+</html>
+

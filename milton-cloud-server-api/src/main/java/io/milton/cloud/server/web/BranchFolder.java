@@ -27,6 +27,7 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Repository;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
@@ -38,7 +39,7 @@ import org.hashsplit4j.api.HashStore;
  *
  * @author brad
  */
-public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource {
+public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource, CopyableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
     protected final CommonCollectionResource parent;
@@ -93,6 +94,11 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        Resource r = _(ApplicationManager.class).getPage(this, childName);
+        if (r != null) {
+            return r;
+        }
+        
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 
@@ -266,7 +272,14 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+        String copyToName = WebUtils.getParam(parameters, "copyToName");
+        log.info("processForm: " + copyToName);
+        if( copyToName != null ) {             
+            copyTo(getParent(), copyToName);
+            String newHref = parent.getPath().child(copyToName).toString();
+            jsonResult = new JsonResult(true, "Copied", newHref);
+        }
 //        String shareWith = parameters.get("shareWith");
 //        String priv = parameters.get("priviledge");
 //        AccessControlledResource.Priviledge p = AccessControlledResource.Priviledge.valueOf(priv);
@@ -313,7 +326,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public boolean is(String type) {
-        if ("branch".equals(type) || "folder".equals(type) || "directory".equals(type)) {
+        if ("branch".equals(type) ) {
             return true;
         }
         return super.is(type);
@@ -577,5 +590,33 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
         return themeAttributes;
     }
-    
+
+    public boolean isLive() {
+        String sBranch = this.branch.getRepository().getLiveBranch();
+        if( sBranch == null ) {
+            return false;
+        }
+        return sBranch.equals(this.getName());
+    }
+
+    @Override
+    public void copyTo(CollectionResource toCollection, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
+        log.info("createCollection: " + newName);
+        if( !(toCollection instanceof RepositoryFolder)) {
+            throw new BadRequestException("The target folder must be a repository folder to copy a branch. Is a: " + toCollection.getClass());
+        }
+        RepositoryFolder toFolder = (RepositoryFolder) toCollection;
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        Repository toRepo = toFolder.getRepository();
+        Branch newBranch;
+        Date now = _(CurrentDateService.class).getNow();
+        if( toRepo == branch.getRepository()) {
+            newBranch = branch.copy(newName, now, session);
+        } else {
+            newBranch = branch.copy(toRepo, newName, now, session);
+        }
+        log.info("Created branch: " + newBranch.getId() + " with name: " + newBranch.getName());
+        tx.commit();
+    }
 }

@@ -209,4 +209,14 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
     }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("organisation")) {
+            return true;
+        }
+        return super.is(type);
+    }
+    
+    
 }

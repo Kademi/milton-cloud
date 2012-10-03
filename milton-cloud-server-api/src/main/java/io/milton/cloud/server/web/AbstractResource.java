@@ -338,6 +338,15 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     public LockToken getCurrentLock() {
         return _(LockManager.class).getCurrentToken(this);
     }
-    
-    
+
+    public CommonResource closest(String type) {
+        CommonResource r = this;
+        while (r != null) {
+            if (r.is(type)) {
+                return r;
+            }
+            r = r.getParent();
+        }
+        return null;
+    }
 }

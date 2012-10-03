@@ -108,6 +108,11 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
 
             }
+        } else if( parent instanceof BranchFolder) {
+            BranchFolder bf = (BranchFolder) parent;
+            if( requestedName.equals("publish")) {
+                return new PublishBranchPage(requestedName, bf);
+            }
         }
         return null;
     }

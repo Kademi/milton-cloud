@@ -63,7 +63,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
 
     @Override
     public boolean is(String type) {
-        if( type.equals("folder") || type.equals("collection")) {
+        if( type.equals("folder") || type.equals("collection") || "directory".equals(type) ) {
             return true;
         }
         return super.is(type);

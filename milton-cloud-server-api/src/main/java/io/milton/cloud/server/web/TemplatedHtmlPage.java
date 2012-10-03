@@ -46,22 +46,22 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     protected final String name;
     protected final CommonCollectionResource parent;
     protected final String template;
-    protected Map<String,Object> model;
+    protected Map<String, Object> model;
     protected String title;
-    
+    protected JsonResult jsonResult;
     private boolean forceLogin;
-    
+
     public TemplatedHtmlPage(String name, CommonCollectionResource parent, String template, String title) {
         this.name = name;
-        this.parent = parent;       
+        this.parent = parent;
         this.template = template;
         this.title = title;
     }
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        if( forceLogin ) {
-            if( auth == null || auth.getTag() == null ) {
+        if (forceLogin) {
+            if (auth == null || auth.getTag() == null) {
                 return false;
             }
         }
@@ -76,19 +76,21 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
         this.forceLogin = forceLogin;
     }
 
-    
-    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        model = buildModel(params);
-        _(HtmlTemplater.class).writePage(template, this, params, out);
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            model = buildModel(params);
+            _(HtmlTemplater.class).writePage(template, this, params, out);
+        }
     }
-       
+
     @Override
     public Long getContentLength() {
         return null;
     }
-                       
+
     @Override
     public boolean isDir() {
         return false;
@@ -103,7 +105,6 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
-
 
     @Override
     public String getName() {
@@ -146,10 +147,9 @@ public class TemplatedHtmlPage extends AbstractResource implements GetableResour
     public String getTitle() {
         return title;
     }
-        
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }      
-    
+    }
 }
