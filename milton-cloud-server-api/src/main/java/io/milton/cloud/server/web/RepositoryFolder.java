@@ -38,6 +38,7 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
+import java.util.ArrayList;
 
 /**
  * A RepositoryFolder just holds the branches of the folder
@@ -77,6 +78,17 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         return children;
     }
 
+    public List<BranchFolder> getBranchFolders() throws NotAuthorizedException, BadRequestException {
+        List<BranchFolder> list = new ArrayList<>();
+        for (Resource r : getChildren()) {
+            if (r instanceof BranchFolder) {
+                BranchFolder cf = (BranchFolder) r;
+                list.add(cf);
+            }
+        }
+        return list;
+    }        
+    
     public BranchFolder getLive() {
         String liveBranchName = repo.getLiveBranch();
         if (liveBranchName != null) {

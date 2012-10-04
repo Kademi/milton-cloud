@@ -8,6 +8,7 @@ import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.LessParameterParser;
+import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.*;
 import io.milton.principal.Principal;
@@ -213,6 +214,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 //            }
 //        }
         log.trace("sendContent: render template");
+        ContentRedirectorPage.select(this);
         WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
         MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
         getTemplater().writePage(false, "myfiles/directoryIndex", this, params, out);
@@ -622,6 +624,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             newBranch = branch.copy(newName, now, session);
         } else {
             newBranch = branch.copy(toRepo, newName, now, session);
+        }
+        Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
+        for( AppControl ac : AppControl.find(branch, session) ) {
+            ac.copyTo(newBranch, currentUser, now, session);
         }
         log.info("Created branch: " + newBranch.getId() + " with name: " + newBranch.getName());
         tx.commit();

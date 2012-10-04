@@ -85,5 +85,6 @@ public class ApplicationStarter implements InitListener, Service{
         SessionManager sessionManager = resourceFactory.getSessionManager();        
         PdfGenerator pdfGenerator = new PdfGenerator();
         rootContext.put(pdfGenerator);
+        rootContext.put(b.getCookieAuthenticationHandler()); // Needed for admin to redirect to website
     }
 }

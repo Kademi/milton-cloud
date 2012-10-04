@@ -46,6 +46,7 @@ a.Button {
     border-left-style: solid;
     text-transform: uppercase;
     font-size: 11px;
+    color: white;
 }
 ul.PostList {
     background-color: #eeeeee;

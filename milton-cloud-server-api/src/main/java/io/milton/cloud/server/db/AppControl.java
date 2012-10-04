@@ -24,7 +24,6 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -289,5 +288,29 @@ public class AppControl implements Serializable {
             session.save(setting);
             System.out.println("Set setting: " + setting.getName() + " = " + setting.getPropValue());
         }
+    }
+
+    /**
+     * Copy this object and its parameters to the new branch
+     * 
+     * @param newBranch
+     * @param session 
+     */
+    public AppControl copyTo(Branch newBranch, Profile currentUser, Date now, Session session) {
+        AppControl newac = new AppControl();
+        newac.setEnabled(isEnabled());
+        newac.setModifiedBy(currentUser);
+        newac.setModifiedDate(now);
+        newac.setName(name);
+        newac.setOrganisation(organisation);
+        newac.setWebsiteBranch(newBranch);
+        session.save(newac);
+        
+        if( getAppSettings() != null ) {
+            for( AppSetting setting :getAppSettings()) {
+                newac.setSetting(setting.getName(), setting.getPropValue(), session);
+            }
+        }
+        return newac;
     }
 }

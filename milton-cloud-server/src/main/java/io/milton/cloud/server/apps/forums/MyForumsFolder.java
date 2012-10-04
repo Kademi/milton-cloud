@@ -1,6 +1,5 @@
 package io.milton.cloud.server.apps.forums;
 
-import io.milton.cloud.server.apps.signup.GroupRegistrationPage;
 import io.milton.cloud.server.db.Forum;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -15,9 +14,7 @@ import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;

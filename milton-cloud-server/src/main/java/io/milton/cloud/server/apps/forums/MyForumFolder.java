@@ -37,6 +37,7 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import org.hibernate.Session;
@@ -117,6 +118,10 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     private ForumPost createQuestion(String newQuestion, String comment, Session session) {
         ForumPost p = new ForumPost();
         p.setForum(forum);
+        if( forum.getForumPosts() == null ) {
+            forum.setForumPosts(new ArrayList<ForumPost>());
+        }
+        forum.getForumPosts().add(p);
         String newName = NewPageResource.findAutoCollectionName(newQuestion, this, null);
         p.setName(newName);
         p.setTitle(newQuestion);

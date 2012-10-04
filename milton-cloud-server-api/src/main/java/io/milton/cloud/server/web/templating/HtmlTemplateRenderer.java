@@ -43,9 +43,7 @@ import io.milton.http.Request;
 public class HtmlTemplateRenderer {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateRenderer.class);
-    
     public static final String EXT_COMPILE_LESS = ".compile.less";
-    
     private final ApplicationManager applicationManager;
     private final Formatter formatter;
 
@@ -84,8 +82,8 @@ public class HtmlTemplateRenderer {
             datamodel.put("parentOrg", orgFolder);
         }
 
-        System.out.println("themeTemplateTemplateMeta: " + themeTemplateTemplateMeta.getId());
-        System.out.println("bodyTemplateMeta: " + bodyTemplateMeta.getId());
+//        System.out.println("themeTemplateTemplateMeta: " + themeTemplateTemplateMeta.getId());
+//        System.out.println("bodyTemplateMeta: " + bodyTemplateMeta.getId());
 
         PrintWriter pw = new PrintWriter(out);
         pw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
@@ -128,7 +126,6 @@ public class HtmlTemplateRenderer {
         }
 
         VelocityContentDirective.setContentTemplate(contentTemplate, datamodel);
-        System.out.println("user: " + datamodel.get("user"));
         themeTemplate.merge(datamodel, pw);
         VelocityContentDirective.setContentTemplate(null, datamodel);
 
@@ -178,18 +175,21 @@ public class HtmlTemplateRenderer {
     private void printWebResources(List<WebResource> webResources, String themeName, String themePath, PrintWriter pw) {
         Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();
         for (WebResource wr : webResources) {
-            if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel")) ) {
+            if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel"))) {
                 String media = wr.getAtts().get("media");
-                List<String> cssFilesForMedia = mapOfCssFilesByMedia.get(media);
-                if( cssFilesForMedia == null ) {
-                    cssFilesForMedia = new ArrayList<>();
-                    mapOfCssFilesByMedia.put(media, cssFilesForMedia);
+                if (media != null && media.length() > 0) {
+                    List<String> cssFilesForMedia = mapOfCssFilesByMedia.get(media);
+                    if (cssFilesForMedia == null) {
+                        cssFilesForMedia = new ArrayList<>();
+                        mapOfCssFilesByMedia.put(media, cssFilesForMedia);
+                    }
+                    String href = wr.getAtts().get("href");
+                    href = wr.adjustRelativePath("href", href, themeName);
+                    cssFilesForMedia.add(href);
+                } else {
+                    String html = wr.toHtml(themeName);
+                    pw.write(html + "\n");
                 }
-                String href = wr.getAtts().get("href");
-                System.out.println("href1: " + href);
-                href = wr.adjustRelativePath("href", href, themeName);
-                System.out.println("href2: " + href);
-                cssFilesForMedia.add(href);
             } else {
                 String html = wr.toHtml(themeName);
                 pw.write(html + "\n");
@@ -199,15 +199,15 @@ public class HtmlTemplateRenderer {
         // Now write out the combined css files as a link to a LESS css file
         // This is so that less files (such as for apps) can use the mixins provided
         // by the theme
-        for( String media : mapOfCssFilesByMedia.keySet() ) {
+        for (String media : mapOfCssFilesByMedia.keySet()) {
             List<String> paths = mapOfCssFilesByMedia.get(media);
             String link = "<link rel='stylesheet' type='text/css'";
-            if( media != null ) {                
+            if (media != null) {
                 link += " media='" + media + "'";
             }
             link += " href='" + themePath;
             String cssName = "";
-            for( String path : paths ) {
+            for (String path : paths) {
                 cssName += path.replace("/", "\\") + ",";
             }
             link += cssName + EXT_COMPILE_LESS + "' />";

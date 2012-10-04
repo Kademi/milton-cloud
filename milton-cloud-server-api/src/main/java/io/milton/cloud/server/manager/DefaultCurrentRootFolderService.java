@@ -159,7 +159,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
                 int pos = subdomain.indexOf(".");
                 String first = subdomain.substring(0, pos);
                 String otherPart = subdomain.substring(pos+1);
-                System.out.println("first=" + first + " -- second=" + otherPart );
                 website = Website.findByName(otherPart, session);
                 if( website != null ) {
                     // now look for branch

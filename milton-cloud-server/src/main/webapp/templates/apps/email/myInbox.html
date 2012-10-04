@@ -54,7 +54,8 @@
         </div>
         <!--contentRightEnd-->  
         <div class="clr"></div>
-        #set($markRead = $targetPage.is("message") and !$targetPage.read)
+        
+        #set($markRead = $page.is("message") and !$page.read)
         <script type="text/javascript">       
             jQuery(document).ready(function(){
                 initMessage($markRead, "");
@@ -64,13 +65,13 @@
                 if(!markRead) {
                     return;
                 }
-                var url = page + "_DAV/PROPPATCH";
+                log("mark read");
                 jQuery.ajax({
                     type: 'POST',
-                    url: url,
-                    data: "clyde:read=true",
-                    success: function() {
-
+                    url: page,
+                    data: "read=true",
+                    success: function(resp) {
+                        log("set read status", resp);
                     },
                     error: function(resp) {
                         log("Failed to set read flag", resp);

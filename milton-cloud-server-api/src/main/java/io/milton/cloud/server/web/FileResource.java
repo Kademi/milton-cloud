@@ -294,7 +294,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
     }
     
     public boolean is(String type, String name) {
-        System.out.println("---- is: type=" + type + " name=" + name);
         if (type.equals("file")) {
             return true;
         }
@@ -317,16 +316,12 @@ public class FileResource extends AbstractContentResource implements Replaceable
         // Eg if html page has template learner/modulePage then page.is("modulePage) should return true
         if (name.endsWith(".html")) {            
             RenderFileResource html = getHtml();
-            System.out.println("a1 - " + html);
             if (html != null) {                
-                System.out.println("a2");
                 if (html.isTemplate(type)) {
-                    System.out.println("YES!!!");
                     return true;
                 }
             }
         }
-        System.out.println("no   :(");
         return false;
     }
     

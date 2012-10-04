@@ -18,9 +18,11 @@ import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -36,7 +38,6 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,31 +48,57 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.resource.PostableResource;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Represents a single email, which might contain attachments
  *
  * @author brad
  */
-public class EmailItemFolder extends AbstractCollectionResource implements GetableResource, MessageResource, StandardMessage {
+public class EmailItemFolder extends AbstractCollectionResource implements GetableResource, MessageResource, StandardMessage, PostableResource {
 
     private final EmailFolder parent;
     private final EmailItem emailItem;
     private ResourceList children;
+    private JsonResult jsonResult;
 
-    public EmailItemFolder(EmailFolder parent, EmailItem emailItem) {
-        
+    public EmailItemFolder(EmailFolder parent, EmailItem emailItem) {        
         this.parent = parent;
         this.emailItem = emailItem;
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        _(HtmlTemplater.class).writePage("email/myInbox", this, params, out);
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        } else {
+            MenuItem.setActiveIds("menuNotifications");
+            _(HtmlTemplater.class).writePage("email/myInbox", this, params, out);
+        }
     }
 
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        if(parameters.containsKey("read")) {
+            if( emailItem != null ) {
+                emailItem.setReadStatus(true);
+                session.save(emailItem);
+                tx.commit();
+                jsonResult = new JsonResult(true);
+            }
+        }
+        return null;
+    }
+    
+    
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
         if( parent.getBaseEntity() == null ) {
@@ -172,7 +199,9 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
     @Override
     public boolean is(String type) {
         if (type.equals("message")) {
-            return true;
+            if( emailItem != null ) {
+                return true;
+            }
         }
         return super.is(type);
     }
@@ -357,6 +386,10 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
     
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
-        return null;
+        return Priviledge.WRITE_PROPERTIES;
     }            
+    
+    public boolean isRead() {
+        return emailItem.isReadStatus();
+    }
 }

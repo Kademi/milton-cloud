@@ -177,7 +177,7 @@ public class Branch implements Serializable, VfsAcceptor {
         b.setRepository(repo);
         b.setHead(head);
         session.save(b);
-        
+                
         if( repo.getBranches() == null ) {
             repo.setBranches(new ArrayList<Branch>());
         }

@@ -15,9 +15,17 @@
 package io.milton.cloud.server.apps.website;
 
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ContentRedirectorPage;
 import io.milton.cloud.server.web.RepositoryFolder;
+import io.milton.http.Range;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.exceptions.NotFoundException;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * A website is a specialisation of a repository. But most work is done on 
@@ -35,6 +43,14 @@ public class ManageWebsiteFolder extends RepositoryFolder {
         return (Website) repo;
     }
 
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        ContentRedirectorPage.select(this);
+        super.sendContent(out, range, params, contentType);
+    }
+
+    
+    
     @Override
     public boolean is(String type) {
         if( type.equals("website")) {
