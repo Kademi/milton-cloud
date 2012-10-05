@@ -16,7 +16,6 @@
  */
 package io.milton.cloud.server.apps;
 
-import io.milton.cloud.server.web.RootFolder;
 import io.milton.resource.Resource;
 
 /**

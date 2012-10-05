@@ -178,7 +178,7 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
 
     @Override
     public boolean is(String type) {
-        if (type.equals("manageRewards")) {
+        if (type.equals("forum")) {
             return true;
         }
         return super.is(type);

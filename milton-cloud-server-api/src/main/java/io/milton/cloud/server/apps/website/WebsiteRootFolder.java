@@ -71,8 +71,6 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     }
 
     
-    
-    
     @Override
     public String getName() {
         return "";
@@ -106,6 +104,17 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         if (r != null) {
             return r;
         }
+        // Check for a repository of the organisation
+        Repository repo = website.getOrganisation().repository(childName);
+        if( repo != null ) {
+            Branch b = repo.liveBranch();
+            if( b != null ) {
+                BranchFolder bf = new BranchFolder(childName, this, b);
+                children.add(bf);
+                return bf;
+            }
+        }
+        
         return r;
     }
 
@@ -122,10 +131,6 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
 
     public Website getWebsite() {
         return website;
-    }
-
-    public SettingsMap getSettings() {
-        return new SettingsMap(website);
     }
 
     @Override
@@ -147,4 +152,14 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         fromAddress += d;
         return fromAddress;
     }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("website")) {
+            return true;
+        }
+        return super.is(type);
+    }
+    
+    
 }

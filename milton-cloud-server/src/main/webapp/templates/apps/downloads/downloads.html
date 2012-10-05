@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Downloads</title>
+    </head>
+    <body class="downloads">
+        <div id="content">
+            <div class="SubContent">
+                <div class="contentForm">
+                    <div class="htmleditor" id="body"> 
+                        $!{page.body}
+                    </div>
+                    <br class="Clear" />
+                </div>
+                
+                <ul>
+                #foreach($folder in $page.find($page.getParam('sourceFolder')).children.ofType.folder )
+                    #set($version = $folder.child($page.getParam('version')))
+                    #if( $version )
+                <li>
+                    <h3 href="$folder.href">$folder.name</h3>
+                    <ul>
+                    #foreach($file in $version.children.ofType.file)
+                    <li><a href="$file.href">$file.name</a></li>
+                    #end
+                    </ul>
+                </li>
+                    #end
+                #end
+                </ul>
+            </div>
+        </div>        
+        
+    </body>
+</html>
+
+

@@ -1,8 +1,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>        
+        <link rel="stylesheet" type="text/css" href="/theme/theme-params.less" media="screen" />
+        <link rel="stylesheet" type="text/css" href="/static/common/contentStyles.less" media="screen" />
         <link rel="stylesheet" type="text/css" href="theme.less" media="screen" />
-        <link rel="stylesheet" type="text/css" href="/static/common/edify.css" media="screen" />
-        <link rel="stylesheet" type="text/css" href="/static/common/jquery-ui-1.8.11.custom.css" media="screen" />        
+        <link rel="stylesheet" type="text/css" href="themePrint.css" media="print" />        
+
 
         <script type="text/javascript" src="/static/js/jquery-1.7.2.src.js" >//</script>
         <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>
@@ -29,7 +31,7 @@
             <!--header-->
             <div class="header">
                 <!--logo-->
-                <h1 class="logo"><a href="/content/index.html">$!rootFolder.settings.logo</a></h1>
+                <h1 class="logo"><a href="/">$page.closest("website").themeAttributes.logo</a></h1>
                 <!--headRight-->
                 <div class="headRight">
                     <div class="formBox">

@@ -93,7 +93,7 @@ public class HtmlTemplateParser {
             if (wrTag.getName().equals("title")) {
                 meta.setTitle(JDomUtils.getValueOf(elHead, "title"));
             } else {
-                WebResource wr = new WebResource(webPath);
+                WebResource wr = new WebResource(webPath);                
                 meta.getWebResources().add(wr);
                 wr.setTag(wrTag.getName());
                 String body = getContent(wrTag);

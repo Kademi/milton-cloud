@@ -7,7 +7,9 @@
     <body>
         <section id="manageForum" class="MainContent">
 
-            <article class="Note">Use this page to create and manage the forums in your websites. Select a website to begin.</article>
+            <article class="Note">                
+                Use this page to create and manage the forums in your websites. Select a website to begin.
+            </article>
 
             <section class="Control ClearFix">
                 <div class="DropdownControl ClearFix NoLabel">
@@ -17,14 +19,14 @@
                     </div>
                     <div class="DropdownContent Hidden">
                         <div class="Content ClearFix">
-                            <section>
+                            <section>                                
                                 #set($websites = $page.forumsRoot.children)
                                 <ul class="Websites">
                                 #if( $websites.isEmpty() )
                                 <li>You need at least one website to add a forum</li>
                                 #else
                                 #foreach($websiteFolder in $websites)
-                                <li><a href="$websiteFolder.name">$websiteFolder.name</a></li>
+                                <li><a href="$websiteFolder.href">$websiteFolder.name</a></li>
                                 #end
                                 #end
                                 </ul>

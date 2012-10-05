@@ -55,7 +55,7 @@ public class InitialDataCreator implements LifecycleApplication {
         this.initHelper = new InitHelper(passwordManager, applicationManager);
 
         initTestData();
-        //initContentAutoLoad();
+        initContentAutoLoad();
     }
 
     @Override
@@ -83,19 +83,17 @@ public class InitialDataCreator implements LifecycleApplication {
 
         GroupDao groupDao = new GroupDao();
         Organisation rootOrg = Organisation.getRootOrg(session);
-        boolean newOrg = false;
-        if (rootOrg == null) {
-            System.out.println("Create new organisation");
-            newOrg = true;
-            rootOrg = new Organisation();
-            rootOrg.setName(initialRootOrgName);
-            rootOrg.setOrgId(initialRootOrgName);
-            rootOrg.setModifiedDate(new Date());
-            rootOrg.setCreatedDate(new Date());
-            session.save(rootOrg);
-        } else {
-            System.out.println("Root org exists: " + rootOrg.getName());
+        if (rootOrg != null) {
+            System.out.println("Root org exists, do nothing");
+            return ;
         }
+        System.out.println("Create new organisation");
+        rootOrg = new Organisation();
+        rootOrg.setName(initialRootOrgName);
+        rootOrg.setOrgId(initialRootOrgName);
+        rootOrg.setModifiedDate(new Date());
+        rootOrg.setCreatedDate(new Date());
+        session.save(rootOrg);
 
         Profile admin = initHelper.checkCreateUser(adminUserName, adminPassword, session, rootOrg, null);
 
@@ -108,10 +106,10 @@ public class InitialDataCreator implements LifecycleApplication {
         administrators.grantRole("Administrator", session);
         administrators.grantRole("Content author", session);
 
-        Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 50, session, admin, "o");
+        Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 0, session, admin, "o");
         users.grantRole("Content author", session);
 
-        Group publicGroup = initHelper.checkCreateGroup(rootOrg, Group.PUBLIC, groupDao, 50, session, admin, "o");
+        Group publicGroup = initHelper.checkCreateGroup(rootOrg, Group.PUBLIC, groupDao, 0, session, admin, "o");
         publicGroup.grantRole("Forums viewer", session);
         
         
@@ -172,12 +170,13 @@ public class InitialDataCreator implements LifecycleApplication {
     }
 
     private void initContentAutoLoad() throws Exception {
+        System.out.println("-------- Initial Content Auto load ---------------");
         String sRootDir = "../sites";
         File rootDir = new File(sRootDir);
         if( !rootDir.exists()) {
             throw new RuntimeException("Fuse autoloader root directory does not exist: " + rootDir.getAbsolutePath());
         }
-        System.out.println("FuseAutoloader: " + rootDir.getAbsolutePath());
+        System.out.println("Autoload source path: " + rootDir.getAbsolutePath());
         
         File miltonContent = new File(rootDir, "milton");
         File mymiltonContent = new File(rootDir, "mymilton");

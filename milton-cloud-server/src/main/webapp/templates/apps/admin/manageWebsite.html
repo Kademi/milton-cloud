@@ -65,7 +65,7 @@
                                         <td colspan="3">
                                             <select name="publicTheme">                                            
                                             #foreach($t in $page.themes)
-                                                $formatter.option($t, $t, $page.website.publicTheme)
+                                                $formatter.option($t, $t, $page.branch.publicTheme)
                                             #end
                                             </select>                                            
                                         </td>
@@ -75,7 +75,7 @@
                                         <td colspan="3">
                                             <select name="internalTheme">                                            
                                             #foreach($t in $page.themes)
-                                                $formatter.option($t, $t, $page.website.internalTheme)
+                                                $formatter.option($t, $t, $page.branch.internalTheme)
                                             #end
                                             </select>                                            
                                         </td>

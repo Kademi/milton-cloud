@@ -13,9 +13,7 @@ import io.milton.principal.Principal;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -120,4 +118,14 @@ public class ManageForumsFolder extends AbstractCollectionResource implements Ge
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
     }        
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("forums")) {
+            return true;
+        }
+        return super.is(type);
+    }
+    
+    
 }

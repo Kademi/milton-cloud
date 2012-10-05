@@ -99,6 +99,15 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
 
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
+
+        DirectoryResource rdr = createDirectoryResource(newName);
+        
+        tx.commit();
+
+        return rdr;
+    }
+    
+    public DirectoryResource createDirectoryResource(String newName) throws BadRequestException {
         if (directoryNode == null) {
             directoryNode = parent.getDirectoryNode().addDirectory(getName());
             this.contentNode = directoryNode;
@@ -112,9 +121,6 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         } catch (IOException ex) {
             throw new BadRequestException("io ex", ex);
         }
-
-        tx.commit();
-
         return rdr;
     }
 

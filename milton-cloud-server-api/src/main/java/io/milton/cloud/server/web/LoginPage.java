@@ -3,10 +3,8 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.Map;
 import io.milton.vfs.db.Organisation;
-import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -15,7 +13,6 @@ import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.GetableResource;
 
 import static io.milton.context.RequestContext._;
@@ -24,7 +21,7 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class LoginPage implements GetableResource, CommonResource {
+public class LoginPage extends AbstractResource implements GetableResource, CommonResource {
 
     private final CommonCollectionResource parent;
 
@@ -47,17 +44,7 @@ public class LoginPage implements GetableResource, CommonResource {
     }
 
     @Override
-    public String getContentType(String accepts) {
-        return "text/html";
-    }
-
-    @Override
     public Long getContentLength() {
-        return null;
-    }
-
-    @Override
-    public String getUniqueId() {
         return null;
     }
 
@@ -67,29 +54,10 @@ public class LoginPage implements GetableResource, CommonResource {
     }
 
     @Override
-    public Object authenticate(String user, String password) {
-        return _(SpliffySecurityManager.class).authenticate(parent.getOrganisation(), user, password);
-    }
-
-    @Override
-    public Object authenticate(DigestResponse digestRequest) {
-        return _(SpliffySecurityManager.class).authenticate(parent.getOrganisation(), digestRequest);
-    }
-
-    @Override
     public boolean authorise(Request request, Method method, Auth auth) {
         return auth != null; // this is just to force authentication
     }
 
-    @Override
-    public String getRealm() {
-        return _(SpliffySecurityManager.class).getRealm();
-    }
-
-    @Override
-    public Date getModifiedDate() {
-        return null;
-    }
 
     @Override
     public String checkRedirect(Request request) {
@@ -112,28 +80,16 @@ public class LoginPage implements GetableResource, CommonResource {
     }
 
     @Override
-    public boolean isDigestAllowed() {
-        return true;
-    }
-
-    @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
 
     @Override
     public boolean is(String type) {
-        return type.equals("loginPage");
-    }
-
-    @Override
-    public Path getPath() {
-        CommonCollectionResource p = getParent();
-        if (p != null) {
-            return p.getPath().child(this.getName());
-        } else {
-            return Path.root;
+        if( type.equals("loginPage") ) {
+            return true;
         }
+        return super.is(type);
     }
 
     @Override

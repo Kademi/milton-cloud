@@ -54,7 +54,7 @@ public class DataSession {
     private final Branch branch;
 
     public DataSession(Branch branch, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService) {
-        if( branch == null ) {
+        if (branch == null) {
             throw new RuntimeException("Branch is null");
         }
         this.blobStore = blobStore;
@@ -127,7 +127,6 @@ public class DataSession {
         newCommit.setEditor(currentUser);
         newCommit.setItemHash(newHash);
         session.save(newCommit);
-        System.out.println("commit hash: " + newHash + " id " + newCommit.getId());
         branch.setHead(newCommit);
         session.save(branch);
 
@@ -150,8 +149,9 @@ public class DataSession {
             item.setHash(newHash);
             byte[] arrTriplets = bout.toByteArray();
             blobStore.setBlob(newHash, arrTriplets);
-            log.info("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
-
+            if (log.isTraceEnabled()) {
+                log.trace("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
+            }
         }
     }
 
@@ -197,10 +197,10 @@ public class DataSession {
             DirectoryNode oldParent = this.getParent();
             if (oldParent != newParent) {
                 this.setParent(newParent);
+                newParent.getChildren().add(this);
                 if (oldParent.members != null) {
                     oldParent.members.remove(this);
                 }
-                newParent.getChildren().add(this);
                 setDirty();
                 newParent.setDirty();
                 oldParent.setDirty();
@@ -250,7 +250,9 @@ public class DataSession {
         }
 
         public void setHash(String hash) {
-            log.info("setHash: " + hash + " on " + getName());
+            if (log.isTraceEnabled()) {
+                log.trace("setHash: " + hash + " on " + getName());
+            }
             this.hash = hash;
             setDirty();
         }

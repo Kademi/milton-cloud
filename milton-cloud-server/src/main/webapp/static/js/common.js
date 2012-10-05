@@ -284,7 +284,7 @@ function ValidateForm(){
 function getFileName(path) {
     var arr = path.split('/');
     var name = arr[arr.length-1];
-    if( name.length == 0 ) { // might be empty if trailing slash
+    if( name == null || name.length == 0 ) { // might be empty if trailing slash
         name = arr[arr.length-2];
     }    
     if( name.contains("#")) {
@@ -432,27 +432,29 @@ function suffixSlash(href) {
     return href + "/";
 }
 
-function showCreateFolder() {
+function showCreateFolder(parentHref, text, callback, validatorFn) {
     log("showCreateFolder");
-    $("#createFolderModal").dialog({
-        modal: true,
-        width: 500,
-        title: "Create folder",
-        buttons: { 
-            "Ok": function() { 
-                var name = $("#createFolderModal input[type=text]").val();
-                if( name && name.length > 0 ) {
-                    createFolder(name);
-                    $(this).dialog("close");                     
-                } else {
-                    alert("Please enter a name to create");
-                }
-            } ,
-            "Cancel": function() {
-                $(this).dialog("close"); 
-            }
+    var s = text;
+    if( !s ) {
+        s = "Please enter a name for the new folder";
+    }
+    var newName = "";
+    while( true ) {
+        newName = prompt(s, newName);
+        if( newName == null ) {
+            return;
         }
-    });
+        var msg = null;
+        if( validatorFn ) {
+            msg = validatorFn(newName);
+        }
+        if( msg == null ) {
+            createFolder(newName, parentHref,callback);
+            return;
+        } else {
+            alert(msg);
+        }
+    }
 }
 
 function createFolder(name, parentHref, callback) {

@@ -90,6 +90,7 @@ public abstract class ContentRedirectorPage extends TemplatedHtmlPage {
 
     protected <T extends CommonResource> T getSelected(CommonCollectionResource parentItem, List<T> list) {
         if (list == null || list.isEmpty()) {
+            System.out.println("getSelected: no items available from " + parentItem.getName());
             return null;
         }
         String childName = cookie(parentItem);

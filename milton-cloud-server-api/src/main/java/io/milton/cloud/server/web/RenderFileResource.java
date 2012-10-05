@@ -365,6 +365,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         checkParse();
         List<String> names = new ArrayList<>();
         for (WebResource wr : this.webResources) {
+            System.out.println("    wr= " + wr.getRawHtml());
             if (wr.getTag().equals("script")) {
                 String type = wr.getAtts().get("type");
                 if ("data/parameter".equals(type)) {
@@ -426,6 +427,16 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
     }
 
+    /**
+     * Call this after setting parameters or properties like title and body. This
+     * will generate new HTML and write it to the blob store.
+     * 
+     * It will then call save to the repository is updated
+     * 
+     * @throws BadRequestException
+     * @throws NotAuthorizedException
+     * @throws IOException 
+     */
     public void doSaveHtml() throws BadRequestException, NotAuthorizedException, IOException {
         log.info("doSaveHtml: " + getName());
         fileResource.doSaveHtml();
