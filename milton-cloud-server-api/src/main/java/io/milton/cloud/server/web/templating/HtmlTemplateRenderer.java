@@ -44,6 +44,7 @@ public class HtmlTemplateRenderer {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateRenderer.class);
     public static final String EXT_COMPILE_LESS = ".compile.less";
+    public static final String COMBINED_RESOURCE_SEPERATOR = "--";
     private final ApplicationManager applicationManager;
     private final Formatter formatter;
 
@@ -208,7 +209,7 @@ public class HtmlTemplateRenderer {
             link += " href='" + themePath;
             String cssName = "";
             for (String path : paths) {
-                cssName += path.replace("/", "\\") + ",";
+                cssName += path.replace("/", COMBINED_RESOURCE_SEPERATOR) + ",";
             }
             link += cssName + EXT_COMPILE_LESS + "' />";
             pw.println(link);

@@ -81,6 +81,7 @@ public abstract class ContentRedirectorPage extends TemplatedHtmlPage {
      */
     protected String cookie(CommonCollectionResource parentItem) {
         String cookieName = cookieName(parentItem);
+        
         Cookie c = request().getCookie(cookieName);
         if (c == null) {
             return null;
@@ -90,7 +91,6 @@ public abstract class ContentRedirectorPage extends TemplatedHtmlPage {
 
     protected <T extends CommonResource> T getSelected(CommonCollectionResource parentItem, List<T> list) {
         if (list == null || list.isEmpty()) {
-            System.out.println("getSelected: no items available from " + parentItem.getName());
             return null;
         }
         String childName = cookie(parentItem);
@@ -136,7 +136,8 @@ public abstract class ContentRedirectorPage extends TemplatedHtmlPage {
         OrganisationFolder orgFolder = getOrganisationFolder();
         ManageWebsitesFolder websitesFolder = (ManageWebsitesFolder) orgFolder.child("websites");
         List<ManageWebsiteFolder> websites = websitesFolder.getWebsiteFolders();
-        return getSelected(orgFolder, websites);
+        ManageWebsiteFolder w = getSelected(websitesFolder, websites);
+        return w;
     }
 
     protected OrganisationFolder getOrganisationFolder() {

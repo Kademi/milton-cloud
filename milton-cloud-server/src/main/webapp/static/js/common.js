@@ -608,3 +608,28 @@ String.prototype.replaceAll = function(token, newToken, ignoreCase) {
     }
 return str;
 };
+
+/**
+ * Evaluate a relative path from an absolute path to get an absolute path to he relative path from the absolute path
+ * 
+ * wow, i think thats a recursive javadoc...
+ */
+function evaluateRelativePath(startFrom, relPath) {
+    var arr = relPath.split("/");
+    var href = startFrom;
+    log("relatph", relPath);
+    for( i=0; i<arr.length; i++) {        
+        var part = arr[i];
+        log("eval", part, href);
+        if( part == "..") {
+            href = getFolderPath(href);
+        } else if( part == ".") {
+            // do nothing
+        } else {
+            href += "/" + part;
+        }
+        log("eval2", href);
+    }
+    log("evaluateRelativePath", startFrom, relPath, " ==> " , href);
+    return href;
+}

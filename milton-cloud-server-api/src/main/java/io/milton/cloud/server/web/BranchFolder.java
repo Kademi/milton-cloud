@@ -99,7 +99,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         if (r != null) {
             return r;
         }
-        
+
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 
@@ -274,10 +274,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         String copyToName = WebUtils.getParam(parameters, "copyToName");
         log.info("processForm: " + copyToName);
-        if( copyToName != null ) {             
+        if (copyToName != null) {
             copyTo(getParent(), copyToName);
             String newHref = parent.getPath().child(copyToName).toString();
             jsonResult = new JsonResult(true, "Copied", newHref);
@@ -328,7 +328,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public boolean is(String type) {
-        if ("branch".equals(type) ) {
+        if ("branch".equals(type)) {
             return true;
         }
         return super.is(type);
@@ -366,8 +366,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return branch.getRepository();
     }
 
-    
-    
     @Override
     public String getHash() {
         Commit c = branch.getHead();
@@ -474,6 +472,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public String getPublicTheme() {
         return branch.getPublicTheme();
     }
+    
+    public String getInternalTheme() {
+        return branch.getInternalTheme();
+    }
 
     public List<String> getThemes() {
         List<String> list = new ArrayList<>(); // TODO: HACK!
@@ -485,7 +487,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     /**
      * Theme params are CSS variables (ie using LESS).
-     * 
+     *
      * Reads the LESS file in /theme/theme-params.less and returns a map of
      * variable values
      *
@@ -516,45 +518,51 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     /**
      * Merges the given map of variables into the theme-params.less file, or
      * creates if it doesnt exist
-     * 
+     *
      * @param map
-     * @throws IOException 
+     * @throws IOException
      */
     public void setThemeParams(Map<String, String> map) throws IOException {
-        this.themeParams = null;
-
         DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");
-        themeParams = new HashMap<>();
-        if (themeDir != null) {
-            DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-params.less");
-            InputStream bin = null;
-            if (paramsFile == null) {
-                paramsFile = themeDir.addFile("theme-params.less");
-            } else {
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                paramsFile.writeContent(bout);
-                bin = new ByteArrayInputStream(bout.toByteArray());
-            }
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            LessParameterParser lessParameterParser = new LessParameterParser();
-            lessParameterParser.setParams(map, bin, out);
-            paramsFile.setContent(new ByteArrayInputStream(out.toByteArray()));            
+        if (themeDir == null) {
+            themeDir = this.getDirectoryNode().addDirectory("theme");
         }
+
+        themeParams = map;
+
+        // Read the current file content, if any
+        DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-params.less");
+        InputStream bin = null;
+        if (paramsFile == null) {
+            paramsFile = themeDir.addFile("theme-params.less");
+        } else {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            paramsFile.writeContent(bout);
+            bin = new ByteArrayInputStream(bout.toByteArray());
+        }
+        
+        // Now merge new variables map with existing content
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        LessParameterParser lessParameterParser = new LessParameterParser();
+        lessParameterParser.setParams(map, bin, out);
+        
+        // And finally write the new file content
+        paramsFile.setContent(new ByteArrayInputStream(out.toByteArray()));
+
     }
-    
 
     /**
-     * Theme attributes are things like logo text and additional menu items, which
-     * are part of the theme but not CSS. These are stored in a properties
+     * Theme attributes are things like logo text and additional menu items,
+     * which are part of the theme but not CSS. These are stored in a properties
      * file in the theme folder
-     * 
-     * @param themeAttributes 
+     *
+     * @param themeAttributes
      */
     public void setThemeAttributes(Map<String, String> atts) throws IOException {
         this.themeAttributes = null;
-        
+
         Properties props = new Properties();
-        for( Map.Entry<String, String> entry : atts.entrySet() ) {
+        for (Map.Entry<String, String> entry : atts.entrySet()) {
             props.setProperty(entry.getKey(), entry.getValue());
         }
 
@@ -562,7 +570,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         if (themeDir == null) {
             themeDir = this.getDirectoryNode().addDirectory("theme");
         }
-        
+
         DataSession.FileNode paramsFile = (DataSession.FileNode) themeDir.get("theme-attributes.properties");
         InputStream bin = null;
         if (paramsFile == null) {
@@ -571,9 +579,9 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         props.store(out, null);
         paramsFile.setContent(new ByteArrayInputStream(out.toByteArray()));
-        
-    }    
-    
+
+    }
+
     public Map<String, String> getThemeAttributes() {
         if (themeAttributes == null) {
             DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");
@@ -587,7 +595,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
                         InputStream in = new ByteArrayInputStream(bout.toByteArray());
                         Properties props = new Properties();
                         props.load(in);
-                        for( String key : props.stringPropertyNames() ) {
+                        for (String key : props.stringPropertyNames()) {
                             String val = props.getProperty(key);
                             themeAttributes.put(key, val);
                         }
@@ -602,7 +610,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     public boolean isLive() {
         String sBranch = this.branch.getRepository().getLiveBranch();
-        if( sBranch == null ) {
+        if (sBranch == null) {
             return false;
         }
         return sBranch.equals(this.getName());
@@ -611,7 +619,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     @Override
     public void copyTo(CollectionResource toCollection, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
         log.info("createCollection: " + newName);
-        if( !(toCollection instanceof RepositoryFolder)) {
+        if (!(toCollection instanceof RepositoryFolder)) {
             throw new BadRequestException("The target folder must be a repository folder to copy a branch. Is a: " + toCollection.getClass());
         }
         RepositoryFolder toFolder = (RepositoryFolder) toCollection;
@@ -620,13 +628,13 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         Repository toRepo = toFolder.getRepository();
         Branch newBranch;
         Date now = _(CurrentDateService.class).getNow();
-        if( toRepo == branch.getRepository()) {
+        if (toRepo == branch.getRepository()) {
             newBranch = branch.copy(newName, now, session);
         } else {
             newBranch = branch.copy(toRepo, newName, now, session);
         }
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        for( AppControl ac : AppControl.find(branch, session) ) {
+        for (AppControl ac : AppControl.find(branch, session)) {
             ac.copyTo(newBranch, currentUser, now, session);
         }
         log.info("Created branch: " + newBranch.getId() + " with name: " + newBranch.getName());

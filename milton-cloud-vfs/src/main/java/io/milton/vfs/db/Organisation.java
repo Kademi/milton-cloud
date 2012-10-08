@@ -61,7 +61,9 @@ import org.hibernate.criterion.Restrictions;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
         
-    
+    public static String getDeletedName(String origName) {
+        return origName + "-deleted-" + System.currentTimeMillis();
+    }
 
     public static Organisation findRoot(Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
@@ -80,6 +82,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public static List<Organisation> search(String q, Organisation organisation, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.TRUE));
+        crit.add(notDeleted);
         String s = q + "%";
         Disjunction or = Restrictions.disjunction();
         or.add(Restrictions.ilike("title", s));
@@ -120,6 +126,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private String title;
     private String orgId; // globally unique; used for web addresses for this organisation
     private Organisation organisation;
+    private Boolean deleted;
     private List<Organisation> childOrgs;
     private List<Website> websites;
     private List<Group> groups;
@@ -175,6 +182,25 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     }
 
     /**
+     * Used for soft deletions. When this flag is set to true the organisation
+     * will generally not be shown. As part of soft deleting, any  unique
+     * values on this organisation or logically contained within it must
+     * be set to values not likely to be used
+     * 
+     * @return 
+     */
+    @Column
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    
+
+    /**
      * Updates the organisation reference and also any SubOrg links
      * 
      * @param organisation
@@ -223,7 +249,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
         } else {
-            return getWebsites();
+            List<Website> list = new ArrayList<>();
+            for( Website w : getWebsites() ) {
+                if( !w.deleted() ) {
+                    list.add(w);
+                }
+            }
+            return list;
         }
     }
 
@@ -231,7 +263,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (getChildOrgs() == null) {
             return Collections.EMPTY_LIST;
         } else {
-            return getChildOrgs();
+            List<Organisation> list = new ArrayList<>();
+            for( Organisation o : getChildOrgs()) {
+                if( !o.deleted() ) {
+                    list.add(o);
+                }
+            }
+            return list;
         }
     }
 
@@ -403,6 +441,26 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
         getGroups().add(g);
         return g;
+    }
+
+    public void softDelete(Session session) {
+        this.setDeleted(true);
+        this.setOrgId(getDeletedName(orgId));                        
+        session.save(this);
+        
+        if( this.getWebsites() != null ) {
+            for( Website w : getWebsites() ) {
+                w.softDelete(session);
+            }
+        }
+    }
+
+    /**
+     * null-safe alias for getDeleted
+     * @return 
+     */
+    public boolean deleted() {
+        return getDeleted() != null && getDeleted();
     }
 
         

@@ -15,6 +15,7 @@
 package io.milton.cloud.server.apps.orgs;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.*;
@@ -58,14 +59,14 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     private ResourceList children;
     private JsonResult jsonResult;
 
-    public OrganisationsFolder(String name, CommonCollectionResource parent,  Organisation organisation) {       
+    public OrganisationsFolder(String name, CommonCollectionResource parent, Organisation organisation) {
         this.name = name;
         this.parent = parent;
         this.organisation = organisation;
     }
-    
+
     @Override
-    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         String newTitle = parameters.get("newTitle");
         if (newTitle != null) {
             log.info("processForm: newTitle: " + newTitle);
@@ -74,22 +75,27 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             String newName = NewPageResource.findAutoCollectionName(newTitle, this.getParent(), parameters);
             Organisation c = getOrganisation().createChildOrg(newName, session);
             session.save(c);
-            
+
             Date now = _(CurrentDateService.class).getNow();
-            Profile curUser= _(SpliffySecurityManager.class).getCurrentUser();            
-            AppControl.initDefaultApps(organisation, curUser, now, session);
-            
+            Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+            List<Application> avail = _(ApplicationManager.class).findAvailableApps(c);
+            List<String> availAppIds = new ArrayList<>();
+            for (Application app : avail) {
+                availAppIds.add(app.getInstanceId());
+            }
+            log.info("init apps: " + avail.size());
+            AppControl.initApps(availAppIds, c, curUser, now, session);
+
             tx.commit();
             jsonResult = new JsonResult(true, "Created", c.getName());
         }
         return null;
-    }    
+    }
 
     public String getTitle() {
         return "Manage business units";
     }
-    
-    
+
     @Override
     public String getName() {
         return name;
@@ -111,7 +117,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         Resource r = _(ApplicationManager.class).getPage(this, childName);
-        if( r != null ) {
+        if (r != null) {
             return r;
         }
         return NodeChildUtils.childOf(getChildren(), childName);
@@ -121,11 +127,11 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            for( Organisation o : organisation.childOrgs()) {
+            for (Organisation o : organisation.childOrgs()) {
                 OrganisationFolder of = new OrganisationFolder(this, o);
                 children.add(of);
             }
-            
+
             _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
@@ -133,20 +139,18 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if( jsonResult != null ) {
+        if (jsonResult != null) {
             jsonResult.write(out);
         } else {
             MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
             _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
-        }        
+        }
     }
 
     @Override
     public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
         return super.checkRedirect(request);
     }
-    
-    
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
@@ -187,10 +191,9 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     public boolean isPublic() {
         return false;
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
-        return null;
-    }     
+        return Priviledge.WRITE_CONTENT;
+    }
 }
-

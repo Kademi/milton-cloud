@@ -33,6 +33,7 @@ public class Repository implements Serializable {
     private String liveBranch;
     private boolean publicContent; // allow anonymous users to view this content
     private Date createdDate;
+    private Boolean deleted;    
     private BaseEntity baseEntity; // the direct owner of this repository
     private List<Branch> branches;    
 
@@ -81,6 +82,21 @@ public class Repository implements Serializable {
         this.title = title;
     }
 
+    /**
+     * To support soft deletes
+     * 
+     * @return 
+     */
+    @Column
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    
     @Column
     public String getLiveBranch() {
         return liveBranch;
@@ -210,4 +226,9 @@ public class Repository implements Serializable {
             return null;
         }
     }
+    
+    public void softDelete(Session session) {
+        this.setDeleted(true);
+        session.save(this);
+    }    
 }

@@ -18,6 +18,7 @@ package io.milton.cloud.server.manager;
 
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
+import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Utils;
@@ -28,6 +29,8 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -67,6 +70,8 @@ import org.hibernate.Session;
  */
 public class DefaultCurrentRootFolderService implements CurrentRootFolderService {
 
+    private static final Logger log = LoggerFactory.getLogger(DefaultCurrentRootFolderService.class);
+    
     public static String ROOT_FOLDER_NAME = "_spliffy_root_folder";
     private String primaryDomain = "localhost";
 
@@ -171,7 +176,11 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         // Didnt find anything matching primary domain, so look for an exact match on website
         Website website = Website.findByDomainName(host, session);
         if (website != null) {
-            return new WebsiteRootFolder(applicationManager, website, website.liveBranch());
+            if( !website.deleted() ) {
+                return new WebsiteRootFolder(applicationManager, website, website.liveBranch());
+            } else {
+                log.warn("Request for deleted website");
+            }
         }
 
         // Still nothing found, so drop to root org admin console

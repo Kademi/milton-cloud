@@ -94,16 +94,25 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
             String newDnsName = WebUtils.getParam(parameters, "newDnsName");
-            if( newDnsName != null ) {
+            if (newDnsName != null) {
                 newDnsName = newDnsName.trim().toLowerCase();
             }
 
             {
                 Website existing = Website.findByName(newName, session);
                 if (existing != null) {
-                    jsonResult = new JsonResult(false, "Domain name is already registered in this system");
+                    jsonResult = new JsonResult(false, "Sorry, that website name is already registered in this system. Please choose a unique name for your website");
                     jsonResult.addFieldMessage("newName", "Please choose a unique name");
                     return null;
+                }
+
+                if (newDnsName != null) {
+                    existing = Website.findByDomainNameDirect(newDnsName, session);
+                    if (existing != null) {
+                        jsonResult = new JsonResult(false, "Sorry, that domain name is already registered in this system. Please choose a unique domain name for your website");
+                        jsonResult.addFieldMessage("newName", "Please choose a unique domain name");
+                        return null;
+                    }
                 }
             }
             Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
@@ -112,16 +121,20 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             Repository r = website;
             r.setPublicContent(true); // allow public access
             session.save(r);
-            
-            Map<String,String> themeParams = new HashMap<>();
-            themeParams.put("heroColour1", "#88c03f");
-            themeParams.put("heroColour2", "#88c03f");
-            themeParams.put("textColour1", "#1C1D1F");
-            themeParams.put("textColour2", "#2F2F2F");
-            
-            Map<String,String> themeAttributes = new HashMap<>();
-            themeAttributes.put("logo", "<img src='/content/theme/images/IDH_logo.png' >");            
-            
+
+            Map<String, String> themeParams = new HashMap<>();
+            themeParams.put("hero1", "#88c03f");
+            themeParams.put("hero2", "#88c03f");
+            themeParams.put("text1", "#1C1D1F");
+            themeParams.put("text2", "#2F2F2F");
+            themeParams.put("border1", "#2F2F2F");
+            themeParams.put("bg1", "#2F2F2F");
+            themeParams.put("borderRadius", "5px");
+            themeParams.put("listIndent", "40px");            
+
+            Map<String, String> themeAttributes = new HashMap<>();
+            themeAttributes.put("logo", website.getName());
+
             ManageWebsiteBranchFolder websiteBranchFolder = new ManageWebsiteBranchFolder(website, websiteBranch, this);
             try {
                 websiteBranchFolder.setThemeParams(themeParams);
@@ -131,7 +144,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
                 jsonResult = new JsonResult(false, ex.getMessage());
                 return null;
             }
-            
+
             Date now = _(CurrentDateService.class).getNow();
             AppControl.initDefaultApps(websiteBranch, curUser, now, session);
             createDefaultWebsiteContent(websiteBranch, curUser, session);
@@ -162,12 +175,12 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
         }
         return children;
     }
-    
-    public List<ManageWebsiteFolder> getWebsiteFolders()  throws NotAuthorizedException, BadRequestException {
+
+    public List<ManageWebsiteFolder> getWebsiteFolders() throws NotAuthorizedException, BadRequestException {
         List<ManageWebsiteFolder> list = new ArrayList<>();
-        for( Resource r : getChildren() ) {
-            if( r instanceof ManageWebsiteFolder) {
-                list.add((ManageWebsiteFolder)r);
+        for (Resource r : getChildren()) {
+            if (r instanceof ManageWebsiteFolder) {
+                list.add((ManageWebsiteFolder) r);
             }
         }
         return list;
@@ -248,7 +261,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             html += "<h1>Welcome to your new site!</h1>\n";
             html += "<p>Login with the menu in the navigation above, then you will be able to start editing</p>\n";
             html += "</body>\n";
-            html += "</html>\n";            
+            html += "</html>\n";
             DataSession dataSession = new DataSession(websiteBranch, session, _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
             DataSession.DirectoryNode rootDir = (DataSession.DirectoryNode) dataSession.find(Path.root);
             FileNode file = rootDir.addFile("index.html");

@@ -30,52 +30,52 @@ import java.util.Map;
  * @author brad
  */
 public class LessParameterParser {
-    
-    public void findParams(InputStream in, Map<String,String> map) throws IOException {
+
+    public void findParams(InputStream in, Map<String, String> map) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String line = reader.readLine();
-        while( line != null ) {
+        while (line != null) {
             line = line.trim();
-            if( line.startsWith("@") && line.contains(":")) {
+            if (line.startsWith("@") && line.contains(":")) {
                 String[] arr = line.split(":");
                 String key = arr[0].trim();
                 key = key.substring(1); // drop the @
                 String val = arr[1];
-                val = val.substring(0, val.length()-1); // drop the ;
+                val = val.substring(0, val.length() - 1); // drop the ;
                 val = val.trim();
                 map.put(key, val);
             }
             line = reader.readLine();
         }
     }
-    
-    public void setParams(Map<String,String> params, InputStream in, OutputStream out) throws IOException {
+
+    public void setParams(Map<String, String> params, InputStream in, OutputStream out) throws IOException {
         params = new HashMap<>(params); // make a copy that we can change
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        BufferedWriter writer  = new BufferedWriter(new OutputStreamWriter(out));
-        String line = reader.readLine();
-        while( line != null ) {
-            line = line.trim();
-            if( line.startsWith("@") && line.contains(":")) {
-                String[] arr = line.split(":");
-                String key = arr[0].trim();
-                key = key.substring(1); // drop the @                
-                if( params.containsKey(key)) {
-                    String val = params.get(key);
-                    System.out.println("setParams: " + key + "=" + val);
-                    line = "@" + key + ": " + val + ";";
-                    params.remove(key); // remove processed entries so we know whats left to add at end
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        if (in != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String line = reader.readLine();
+            while (line != null) {
+                line = line.trim();
+                if (line.startsWith("@") && line.contains(":")) {
+                    String[] arr = line.split(":");
+                    String key = arr[0].trim();
+                    key = key.substring(1); // drop the @                
+                    if (params.containsKey(key)) {
+                        String val = params.get(key);
+                        line = "@" + key + ": " + val + ";";
+                        params.remove(key); // remove processed entries so we know whats left to add at end
+                    }
+                    writer.write(line);
+                    writer.newLine();
                 }
-                writer.write(line);
-                System.out.println("wrote line: " + line);
-                writer.newLine();
+                line = reader.readLine();
             }
-            line = reader.readLine();
         }
         // Now add params not already written
-        for( String key : params.keySet()) {
+        for (String key : params.keySet()) {
             String val = params.get(key);
-            line = "@" + key + ": " + val;
+            String line = "@" + key + ": " + val + ";";
             writer.write(line);
             writer.newLine();
         }

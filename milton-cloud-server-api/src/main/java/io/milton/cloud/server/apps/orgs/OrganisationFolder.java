@@ -61,28 +61,26 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         this.organisation = organisation;
     }
 
+    /**
+     * Instead of actually deleting, we set the hiddn flag and give it
+     * a name and orgId like originalname-deleted-1234 (where 1234 is the timestamp) 
+     * 
+     * Any contained websites have their domain names set to blank, and their names
+     * modified to prevent conflicting values
+     * 
+     * Any contained org's have their orgId's modified to prevent conflicting values
+     * 
+     * 
+     * @throws NotAuthorizedException
+     * @throws ConflictException
+     * @throws BadRequestException 
+     */
     @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        if (organisation.getWebsites() != null) {
-            for (Website w : organisation.getWebsites()) {
-                for (Branch b : w.getBranches()) {
-                    for (AppControl ac : AppControl.find(b, session)) {
-                        session.delete(ac);
-                    }
-                }
-
-                w.delete(session);
-            }
-            organisation.setWebsites(null);
-        }
-        for (AppControl ac : AppControl.find(organisation, session)) {
-            session.delete(ac);
-        }
-
-        organisation.delete(session);
+        organisation.softDelete(session);
 
         tx.commit();
     }

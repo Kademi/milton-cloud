@@ -31,6 +31,7 @@ import io.milton.http.Auth;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.http11.SimpleContentGenerator;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.vfs.db.Organisation;
@@ -44,6 +45,8 @@ import java.util.Date;
 public class SpliffyContentGenerator implements ContentGenerator {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffyContentGenerator.class);
+    
+    private ContentGenerator defaultContentGenerator = new SimpleContentGenerator();
     
     public SpliffyContentGenerator() {
     }
@@ -60,6 +63,7 @@ public class SpliffyContentGenerator implements ContentGenerator {
             _(HtmlTemplater.class).writePage("error/" + r.getName(), r, null, response.getOutputStream());
         } catch (IOException ex) {
             log.error("Exception sending error page for status: " + status, ex);
+            defaultContentGenerator.generate(resource, request, response, status);            
         }
     }
 

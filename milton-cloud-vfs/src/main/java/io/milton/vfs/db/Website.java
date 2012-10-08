@@ -68,7 +68,8 @@ public class Website extends Repository implements VfsAcceptor {
         Criteria crit = session.createCriteria(Website.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("domainName", domainName));
-        return DbUtils.unique(crit);
+        Website w = DbUtils.unique(crit);
+        return w;        
     }
 
     public static Website findByName(String name, Session session) {
@@ -100,7 +101,7 @@ public class Website extends Repository implements VfsAcceptor {
     public void setDomainName(String name) {
         this.domainName = name;
     }
-
+        
     @ManyToOne(optional = false)
     public Organisation getOrganisation() {
         return organisation;
@@ -197,5 +198,20 @@ public class Website extends Repository implements VfsAcceptor {
         session.save(aliasWebsite);
         return aliasWebsite;
 
+    }
+
+    @Override
+    public void softDelete(Session session) {
+        this.setDeleted(true);
+        this.setDomainName(null);
+        session.save(this);
+    }
+    
+    /**
+     * null safe alias for getDeleted
+     * @return 
+     */
+    public boolean deleted() {
+        return getDeleted() != null && getDeleted();
     }
 }

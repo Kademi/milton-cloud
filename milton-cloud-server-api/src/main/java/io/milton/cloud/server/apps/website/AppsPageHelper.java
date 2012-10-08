@@ -104,12 +104,9 @@ public class AppsPageHelper {
             availableApps = appManager.findActiveApps(org);
             activeApps = appManager.findActiveApps(websiteBranch);
         } else {
-            if (organisation.getOrganisation() == null) {
-                availableApps = appManager.getApps(); // all of them
-            } else {
-                availableApps = appManager.findActiveApps(organisation.getOrganisation()); // from parent
-            }
+            availableApps = appManager.findAvailableApps(organisation);
             activeApps = appManager.findActiveApps(organisation);
+            System.out.println("active apps: " + activeApps.size());
         }
         List<AppControlBean> beans = new ArrayList<>();
         for (Application app : availableApps) {

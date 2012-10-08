@@ -39,7 +39,13 @@ import org.hibernate.criterion.Restrictions;
  */
 @javax.persistence.Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "organisation", "website_branch"})}// item names must be unique within a directory
+)
 public class AppControl implements Serializable {
+
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AppControl.class);
 
     public static List<AppControl> find(Branch websiteBranch, Session session) {
         final Criteria crit = session.createCriteria(AppControl.class);
@@ -129,21 +135,16 @@ public class AppControl implements Serializable {
      * @param organisation
      * @param session
      */
-    public static void initDefaultApps(Organisation organisation, Profile currentUser, Date now, Session session) {
-        if (organisation.getOrganisation() == null) {
-            // is root org, so nothing to do
-        }
-        for (AppControl ac : find(organisation.getOrganisation(), session)) {
+    public static void initApps(List<String> appIds, Organisation organisation, Profile currentUser, Date now, Session session) {
+        for (String appId : appIds) {
             AppControl newac = new AppControl();
-            if (ac.isEnabled()) {
-                newac.setEnabled(true);
-                newac.setName(ac.getName());
-                newac.setOrganisation(organisation);
-                newac.setModifiedBy(currentUser);
-                newac.setModifiedDate(now);
-                session.save(newac);
-            }
-
+            newac.setEnabled(true);
+            newac.setName(appId);
+            newac.setOrganisation(organisation);
+            newac.setModifiedBy(currentUser);
+            newac.setModifiedDate(now);
+            session.save(newac);
+            System.out.println("added app control: " + newac.getId());
         }
     }
 
@@ -292,9 +293,9 @@ public class AppControl implements Serializable {
 
     /**
      * Copy this object and its parameters to the new branch
-     * 
+     *
      * @param newBranch
-     * @param session 
+     * @param session
      */
     public AppControl copyTo(Branch newBranch, Profile currentUser, Date now, Session session) {
         AppControl newac = new AppControl();
@@ -305,9 +306,9 @@ public class AppControl implements Serializable {
         newac.setOrganisation(organisation);
         newac.setWebsiteBranch(newBranch);
         session.save(newac);
-        
-        if( getAppSettings() != null ) {
-            for( AppSetting setting :getAppSettings()) {
+
+        if (getAppSettings() != null) {
+            for (AppSetting setting : getAppSettings()) {
                 newac.setSetting(setting.getName(), setting.getPropValue(), session);
             }
         }

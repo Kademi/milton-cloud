@@ -279,16 +279,19 @@ public class ApplicationManager {
      * @return
      */
     public List<Application> findActiveApps(Organisation org) {
-        List<Application> available;
-        if (org.getOrganisation() == null) {
-            available = getApps();
-        } else {
-            available = findActiveApps(org.getOrganisation());
-        }
+        List<Application> available = findAvailableApps(org);
         List<AppControl> appControls = AppControl.find(org, SessionManager.session());
         return findActiveApps(available, appControls);
     }
 
+    public List<Application> findAvailableApps(Organisation org) {
+        if (org.getOrganisation() == null) {
+            return getApps();
+        } else {
+            return findActiveApps(org.getOrganisation());
+        }        
+    }
+    
     public List<Application> findActiveApps(List<Application> available, List<AppControl> appControls) {
         Map<String, Boolean> enablement = toEnabledMap(appControls);
         List<Application> activApps = new ArrayList<>();

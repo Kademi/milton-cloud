@@ -23,6 +23,7 @@ import io.milton.cloud.server.event.GroupInWebsiteEvent;
 import io.milton.cloud.server.web.BranchFolder;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ContentRedirectorPage;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
@@ -211,6 +212,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             RenderAppSettingsDirective.setOrganisation(getOrganisation());
             RenderAppSettingsDirective.setWebsiteBranch(branch);
             MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "menuWebsites");
+            ContentRedirectorPage.select(this);
             _(HtmlTemplater.class).writePage("admin", "admin/manageWebsite", this, params, out);
         }
     }
