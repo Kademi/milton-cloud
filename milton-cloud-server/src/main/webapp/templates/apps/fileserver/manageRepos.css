@@ -37,3 +37,12 @@
     right: 0;
     top: 0;
 }
+
+body a.DeleteRepo {
+    background: #E78B00; 
+}
+
+a.togglePublic {
+    font-size: 12px;
+    color: #45AFDF;
+}

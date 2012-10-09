@@ -71,12 +71,13 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ContactUsFormPage extends AbstractResource implements GetableResource, PostableResource, SettingsApplication {
+public class ContactUsFormPage extends AbstractResource implements GetableResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ContactUsFormPage.class);
     private CommonCollectionResource parent;
     private String name;
     private JsonResult jsonResult;
+    private AppControl _appControl;
 
     public ContactUsFormPage(CommonCollectionResource parent, String name) {
         this.parent = parent;
@@ -85,7 +86,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if( jsonResult != null ) {
+        if (jsonResult != null) {
             jsonResult.write(out);
         } else {
             _(HtmlTemplater.class).writePage("contactus/contactForm", this, params, out);
@@ -104,7 +105,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
             Long jobId = generateEmailItems(r, session);
             jsonResult = new JsonResult(true);
             tx.commit();
-            
+
             SendMailProcessable processable = new SendMailProcessable(jobId);
             _(AsynchProcessor.class).enqueue(processable);
         } catch (Exception e) {
@@ -118,21 +119,33 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.READ_CONTENT;
-    }        
-    
-    private Long generateEmailItems(ContactRequest r, Session session) {
-        RootFolder rootFolder = WebUtils.findRootFolder(this);
-        Website website;
-        Branch branch;
-        if (rootFolder instanceof WebsiteRootFolder) {
-            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-            website = wrf.getWebsite();
-            branch = wrf.getBranch();
-        } else {
-            throw new RuntimeException("Cant proceess contact for an organisation");
-        }
+    }
 
-        AppControl appControl = AppControl.find(branch, ContactUsApp.CONTACT_US_ID, session);
+    private AppControl appControl() {
+        if (_appControl == null) {
+            RootFolder rootFolder = WebUtils.findRootFolder(this);
+            Website website;
+            Branch branch;
+            if (rootFolder instanceof WebsiteRootFolder) {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+                website = wrf.getWebsite();
+                branch = wrf.getBranch();
+            } else {
+                throw new RuntimeException("Cant proceess contact for an organisation");
+            }
+
+            _appControl = AppControl.find(branch, ContactUsApp.CONTACT_US_ID, SessionManager.session());
+            if (_appControl == null) {
+                throw new RuntimeException("Cant process contact request, no AppControl record");
+            }
+        }
+        return _appControl;
+    }
+
+    private Long generateEmailItems(ContactRequest r, Session session) {
+
+        Website website = (Website) appControl().getWebsiteBranch().getRepository();
+        AppControl appControl = appControl();
         if (appControl == null) {
             throw new RuntimeException("Cant process contact request, no AppControl record");
         }
@@ -144,7 +157,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         job.setName("contact");
         job.setOrganisation(getOrganisation());
         job.setStatusDate(now);
-        job.setFromAddress(getFromAddress(appControl, website, group));        
+        job.setFromAddress(getFromAddress(appControl, website, group));
         job.setSubject(getSubject(appControl, website));
         job.setTitle(getTitle(appControl, website, r));
         job.setHtml(emailBody);
@@ -177,16 +190,28 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
      * @return
      */
     public String getIntro() {
-        // TODO: use app setting
-        return "<p>The 3DN team is here to support you through your eLearning experience.  Whether you have a question regarding registering or want further information about the programs 3DN offer in the Intellectual Disability space, please feel free to use the form below and one of our friendly staff will get in touch as soon as possible.</p>";
+        String intro = appControl().getSetting("intro");
+        return intro;
+        //return "<p>The 3DN team is here to support you through your eLearning experience.  Whether you have a question regarding registering or want further information about the programs 3DN offer in the Intellectual Disability space, please feel free to use the form below and one of our friendly staff will get in touch as soon as possible.</p>";
     }
 
     public String getTitle() {
-        return "<h1>Contact 3DN</h1>";
+        RootFolder rf = WebUtils.findRootFolder(this);
+        if (rf instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
+            return "<h1>Contact " + wrf.getWebsite().getName() + "</h1>";
+        } else {
+            return "<h1>Contact</h1>";
+        }
     }
-    
+
     public String getThankYouMessage() {
-        return "<p>Thank you for your enquiry. Our team will respond as soon as possible.</p>";
+        String thankyou = appControl().getSetting("thankyou");
+        if( thankyou == null || thankyou.trim().length() == 0 ) {
+            thankyou = "Thank you for your message, we will reply shortly.";
+        }
+        return thankyou;
+        //return "<p>Thank you for your enquiry. Our team will respond as soon as possible.</p>";
     }
 
     @Override
@@ -255,11 +280,11 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         }
     }
 
-    private List<GroupRecipient> getGroupRecipients(GroupEmailJob job, Group group, Session session) {        
+    private List<GroupRecipient> getGroupRecipients(GroupEmailJob job, Group group, Session session) {
         List<GroupRecipient> list = new ArrayList<>();
         GroupRecipient gr = new GroupRecipient();
         gr.setJob(job);
-        gr.setRecipient(group);        
+        gr.setRecipient(group);
         session.save(gr);
         return list;
     }
@@ -302,33 +327,4 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         return "Contact from: " + name + " for " + website.getName();
     }
 
-    @Override
-    public void renderSettings(Profile currentUser, Organisation org, Branch websiteBranch, Context context, Writer writer) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String getInstanceId() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String getTitle(Organisation organisation, Branch websiteBranch) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String getSummary(Organisation organisation, Branch websiteBranch) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

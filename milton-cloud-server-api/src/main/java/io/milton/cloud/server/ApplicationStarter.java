@@ -86,5 +86,6 @@ public class ApplicationStarter implements InitListener, Service{
         PdfGenerator pdfGenerator = new PdfGenerator();
         rootContext.put(pdfGenerator);
         rootContext.put(b.getCookieAuthenticationHandler()); // Needed for admin to redirect to website
+        rootContext.put(b.getFormAuthenticationHandler()); // Needed for ajax login
     }
 }

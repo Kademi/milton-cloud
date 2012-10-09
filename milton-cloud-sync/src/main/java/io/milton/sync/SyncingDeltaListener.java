@@ -95,10 +95,29 @@ public class SyncingDeltaListener implements DeltaListener {
     }
 
     @Override
-    public void onTreeConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) {
+    public void onTreeConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {
         Thread.dumpStack();
         final File localChild = toFile(path);
-        JOptionPane.showMessageDialog(null, "Oh oh, remote is a file but local is a directory: " + localChild.getAbsolutePath());
+        Object[] options = {"Use my local file",
+            "Use the remote file",
+            "Do nothing"};
+        String message = "Oh oh, remote is a " + typeOf(remoteTriplet) +" but local is a " + typeOf(localTriplet) +": " + localChild.getAbsolutePath();
+        String title = "Tree conflict";
+        int n = JOptionPane.showOptionDialog(null,
+                message,
+                title,
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[2]);
+        if (n == JOptionPane.YES_OPTION) {
+            onLocalDeletion(path, remoteTriplet);
+            onLocalChange(localTriplet, path);
+        } else if (n == JOptionPane.NO_OPTION) {
+            onRemoteDelete(localTriplet, path);
+            onRemoteChange(remoteTriplet, localTriplet, path);
+        }
     }
 
     @Override
@@ -140,5 +159,13 @@ public class SyncingDeltaListener implements DeltaListener {
 
     public void setReadonlyLocal(boolean readonlyLocal) {
         this.readonlyLocal = readonlyLocal;
+    }
+
+    private String typeOf(ITriplet remoteTriplet) {
+        if( remoteTriplet.getType().equals("d")) {
+            return "directory";
+        } else {
+            return "file";
+        }
     }
 }

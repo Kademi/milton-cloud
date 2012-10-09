@@ -132,7 +132,10 @@ public abstract class BaseResource implements CommonResource{
     }     
     
     
-    
+    @Override
+    public CommonResource closest(String type) {
+        return null; // ignore, not used for templating
+    }    
     
     
 

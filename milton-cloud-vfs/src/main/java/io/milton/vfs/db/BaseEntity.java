@@ -144,6 +144,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         r.setCreatedDate(new Date());
         r.setName(name);
         r.setTitle(name);
+        r.setLiveBranch(Branch.TRUNK);
         session.save(r);
 
         r.createBranch(Branch.TRUNK, user, session);
@@ -169,6 +170,23 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         session.delete(this);
     }
 
+    /**
+     * Returns all non-soft deleted repositories. Does not return null if empty
+     * 
+     * @return 
+     */
+    public List<Repository> repositories() {
+        List<Repository> list = new ArrayList<>();
+        if( getRepositories() != null ) {
+            for( Repository r : getRepositories() ) {
+                if( !r.deleted() ) {
+                    list.add(r);
+                }
+            }
+        }
+        return list;
+    }
+    
     public Repository repository(String name) {
         if (getRepositories() != null) {
             for (Repository r : getRepositories()) {

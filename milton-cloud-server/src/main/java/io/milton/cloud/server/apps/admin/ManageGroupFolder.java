@@ -139,9 +139,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             children = new ResourceList();
             if( group.getGroupRoles() != null ) {
                 for( GroupRole gr : group.getGroupRoles()) {
-                    System.out.println("GroupRole: " + group.getName() + " = " + gr.getRoleName() + " " + gr.getId());
                     ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
-                    System.out.println("    title: " + p.getTitle());
                     children.add(p);
                 }
             }

@@ -103,7 +103,7 @@ public class MyForumsFolder extends AbstractCollectionResource implements Getabl
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        out.write("<html><body>Sorry, no forums yet!</body></html>".getBytes());
     }
 
     @Override

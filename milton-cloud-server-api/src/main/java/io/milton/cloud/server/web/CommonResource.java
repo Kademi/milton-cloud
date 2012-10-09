@@ -67,4 +67,16 @@ public interface CommonResource extends DigestResource{
      * @return 
      */
     Priviledge getRequiredPostPriviledge(Request request);
+    
+    /**
+     * Find the closest parent resource (or this) which satisfies the is(..)
+     * function for the given type
+     * 
+     * For example page.closest("branch") would return a BranchFolder because
+     * BranchFolder.is returns true for "branch"
+     * 
+     * @param type
+     * @return 
+     */
+    CommonResource closest(String type);
 }

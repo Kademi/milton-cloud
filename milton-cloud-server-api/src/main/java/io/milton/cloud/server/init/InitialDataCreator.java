@@ -120,7 +120,9 @@ public class InitialDataCreator implements LifecycleApplication {
         }
         
         admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
-        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.localhost or milton.io        
+        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.[primary_domain] or milton.io        
+        System.out.println("milton site: " + miltonSite.getName() + " - " + miltonSite.getId());
+        
         initHelper.enableApps(miltonSite.getTrunk(), admin, session, "admin", "userApp", "forums", "email", "content","search", "signup","userDashboardApp");
         miltonSite.addGroup(users, session);
         String menu = "/content/index.html,Home\n" +
@@ -180,13 +182,15 @@ public class InitialDataCreator implements LifecycleApplication {
         
         File miltonContent = new File(rootDir, "milton");
         File mymiltonContent = new File(rootDir, "mymilton");
+        File mavenContent = new File(rootDir, "maven");
         
         System.out.println("Beginning monitor of content dir: " + miltonContent.getAbsolutePath());
         File dbFile = new File("target/sync-db");
         boolean localReadonly = true;
         List<SyncJob> jobs = Arrays.asList(
                 new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
-                new SyncJob(mymiltonContent, "http://127.0.0.1:8080/mymilton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly)
+                new SyncJob(mymiltonContent, "http://127.0.0.1:8080/mymilton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
+                new SyncJob(mavenContent, "http://127.0.0.1:8080/maven/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly) // load the maven repo with some test data
         );
         EventManager eventManager = new EventManagerImpl();
         SyncCommand.start(dbFile, jobs, eventManager);        

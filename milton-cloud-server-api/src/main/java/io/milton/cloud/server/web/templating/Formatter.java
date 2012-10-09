@@ -14,6 +14,7 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.web.JsonWriter;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.calc.Calc;
@@ -22,6 +23,8 @@ import io.milton.common.Utils;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.vfs.db.Profile;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -497,24 +500,25 @@ public class Formatter {
     }
 
     /**
-     * Makes the given string suitable for rendering in HTML. Symbols like angle 
+     * Makes the given string suitable for rendering in HTML. Symbols like angle
      * brackets will be encoded so they can be displayed
-     * 
+     *
      * @param s
-     * @return 
+     * @return
      */
     public String htmlEncode(String s) {
         return EncodeUtils.encodeHTML(s);
     }
-    
+
     /**
-     * Modifies the given value so that it is suitable for use in HTML attributes
-     * 
+     * Modifies the given value so that it is suitable for use in HTML
+     * attributes
+     *
      * This is a lossy conversion, in that multiple unencoded strings might
      * encode to the same att value
-     * 
+     *
      * @param s
-     * @return 
+     * @return
      */
     public String htmlAttEncode(String s) {
         String s2 = WebUtils.replaceSpecialChars(s);
@@ -906,7 +910,7 @@ public class Formatter {
         }
     }
 
-    public String toCsv(List list) {
+    public String toCsv(Iterable list) {
         StringBuilder sb = new StringBuilder();
         if (list != null) {
             for (Object o : list) {
@@ -919,13 +923,33 @@ public class Formatter {
         return sb.toString();
     }
 
+    public String toCsv(String[] list) {
+        StringBuilder sb = new StringBuilder();
+        if (list != null) {
+            for (Object o : list) {
+                if (sb.length() > 0) {
+                    sb.append(",");
+                }
+                sb.append(o.toString());
+            }
+        }
+        return sb.toString();
+    }
+
+    public String toJson(Object val) throws IOException {
+        ByteArrayOutputStream bout= new ByteArrayOutputStream();
+        JsonWriter jsonWriter = new JsonWriter();
+        jsonWriter.write(val, bout);
+        return bout.toString("UTF-8");
+    }
+
     /**
      * Return a date which has the given number of days added (or subtracted if
      * negative) to the given date
-     * 
+     *
      * @param now
      * @param i
-     * @return 
+     * @return
      */
     public Date addDays(Date now, int days) {
         Calendar cal = Calendar.getInstance();

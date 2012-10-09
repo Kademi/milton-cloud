@@ -41,13 +41,6 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("W")
 public class Website extends Repository implements VfsAcceptor {
 
-    public static List<Website> findByRepository(Repository repository, Session session) {
-        Criteria crit = session.createCriteria(Website.class);
-        crit.setCacheable(true);
-        crit.add(Restrictions.eq("repository", repository));
-        return DbUtils.toList(crit, Website.class);
-    }
-
     /**
      * Attempts to locate a website with the exact name give. Will follow alias
      * links
@@ -202,16 +195,10 @@ public class Website extends Repository implements VfsAcceptor {
 
     @Override
     public void softDelete(Session session) {
+        String deletedName = Organisation.getDeletedName(getName()); // change name to avoid name conflicts with new resources
+        this.setName(deletedName);        
         this.setDeleted(true);
         this.setDomainName(null);
         session.save(this);
-    }
-    
-    /**
-     * null safe alias for getDeleted
-     * @return 
-     */
-    public boolean deleted() {
-        return getDeleted() != null && getDeleted();
     }
 }

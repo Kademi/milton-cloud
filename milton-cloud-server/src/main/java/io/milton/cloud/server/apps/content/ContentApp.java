@@ -33,12 +33,14 @@ import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.values.Pair;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.CollectionResource;
@@ -53,6 +55,7 @@ import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Set;
 import org.apache.velocity.context.Context;
 
@@ -171,23 +174,16 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         }
         if (parent.getId().equals("menuRoot")) {
             RootFolder rootFolder = parent.getRootFolder();
-            if (rootFolder instanceof WebsiteRootFolder) {
-                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-                Website website = wrf.getWebsite();
-                Repository r = website;
-                String sMenu = wrf.getThemeAttributes().get("menu");
-                if (sMenu != null && sMenu.length() > 0) {
-                    String[] arr = sMenu.split("\n");
-                    int cnt = 0;
-                    for (String s : arr) {
-                        String[] pair = s.split(",");
-                        String id = "menuContent" + cnt++;
-                        String menuHref = pair[0];
-                        MenuItem i = parent.getOrCreate(id, pair[1], menuHref);
-                        i.setOrdering(cnt * 10);
-                        if (thisHref != null && thisHref.startsWith(menuHref)) {
-                            MenuItem.setActiveId(id);
-                        }
+            List<Pair<String, String>> pairs = WebUtils.getThemeMenu(rootFolder);
+            if (pairs != null) {
+                int cnt = 0;
+                for (Pair<String, String> pair : pairs) {
+                    String id = "menuContent" + cnt++;
+                    String menuHref = pair.getObject1();
+                    MenuItem i = parent.getOrCreate(id, pair.getObject2(), menuHref);
+                    i.setOrdering(cnt * 10);
+                    if (thisHref != null && thisHref.startsWith(menuHref)) {
+                        MenuItem.setActiveId(id);
                     }
                 }
             }
@@ -201,10 +197,16 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             if (fn.getName().endsWith(".html")) {
                 if (parent instanceof ContentDirectoryResource) {
                     ContentDirectoryResource contentParent = (ContentDirectoryResource) parent;
-
-                    FileResource fr = new FileResource(fn, contentParent);
-                    RenderFileResource rfr = new RenderFileResource(fr);
-                    return rfr;
+                    
+                    // Only wrap if content is directly within a website. Resource which are included
+                    // from sibling repositories should be presented as-is, ie without rendering, because
+                    // they tend to be used for static resources which can include html pages
+                    CommonResource closestBranch = contentParent.closest("branch");
+                    if (closestBranch == rf) {
+                        FileResource fr = new FileResource(fn, contentParent);
+                        RenderFileResource rfr = fr.getHtml();
+                        return rfr;
+                    }                    
                 }
             }
         }
@@ -238,9 +240,9 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
 
         @Override
         public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
-            if( resource instanceof CommonRepositoryResource ) {
+            if (resource instanceof CommonRepositoryResource) {
                 CommonRepositoryResource cr = (CommonRepositoryResource) resource;
-                return ( cr.getRepository() == applicableRepo );                                    
+                return (cr.getRepository() == applicableRepo);
             } else {
                 return false;
             }
@@ -284,9 +286,9 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
 
         @Override
         public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
-            if( resource instanceof CommonRepositoryResource ) {
+            if (resource instanceof CommonRepositoryResource) {
                 CommonRepositoryResource cr = (CommonRepositoryResource) resource;
-                return ( cr.getRepository() == applicableRepo );                                    
+                return (cr.getRepository() == applicableRepo);
             } else {
                 return false;
             }

@@ -186,11 +186,7 @@ public class ManageRepositoriesFolder extends AbstractCollectionResource impleme
     }
     
     public List<Repository> getRepositories() {
-        List<Repository> list = getOrganisation().getRepositories();
-        if( list == null ) {
-            list = Collections.EMPTY_LIST;
-        }
-        return list;
+        return getOrganisation().repositories();
     }
 
 }

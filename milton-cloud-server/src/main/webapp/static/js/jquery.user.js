@@ -24,8 +24,8 @@
         log("init login plugin2", this);
         initUser();
         var config = $.extend( {
-            urlSuffix: "/.login",
-            afterLoginUrl: "index.html",
+            urlSuffix: "/.dologin",
+            afterLoginUrl: null,
             logoutSelector: ".logout",
             valiationMessageSelector: "#validationMessage",
             requiredFieldsMessage: "Please enter your credentials.",
@@ -75,14 +75,21 @@ function doLogin(userName, password, config) {
         success: function(resp) {
             log("login success", resp)
             initUser();                
-            if( userUrl ) {
+            if( resp.status ) {
                 if( config.afterLoginUrl == null) {
-                    window.location.reload();
+                    // If not url in config then use the next href in the response, if given, else reload current page
+                    if( resp.nextHref ) {
+                        window.location.href = resp.nextHref;
+                    } else {
+                        window.location.reload();
+                    }                    
                 } else if( config.afterLoginUrl.startsWith("/")) {
+                    // if config has an absolute path the redirect to it
                     log("redirect to1: " + config.afterLoginUrl);
                     //return;
                     window.location = config.afterLoginUrl;
                 } else {
+                    // if config has a relative path, then evaluate it relative to the user's own url in response
                     log("redirect to2: " + userUrl + config.afterLoginUrl);
                     //return;
                     window.location = userUrl + config.afterLoginUrl;
@@ -160,7 +167,7 @@ function doLogout() {
     log("doLogout");
     $.ajax({
         type: 'POST',
-        url: "/.login",
+        url: "/.dologin",
         data: "miltonLogout=true",
         dataType: "text",
         success: function() {

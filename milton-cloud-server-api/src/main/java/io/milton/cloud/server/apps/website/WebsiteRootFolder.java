@@ -45,6 +45,17 @@ import java.io.OutputStream;
  * they were located under a OrganisationRootFolder, because the assumption is
  * that websites are for customers, while aadministrators will accessing the
  * organisation directly
+ * 
+ * While WebsiteRootFolder is a view of a repository (or rather a branch within a repository)
+ * it also provides access to other repositories. Any repository within the containing
+ * organisation can be access by name from the root folder. For example, if an org
+ * has this structure:
+ * 
+ * myOrg
+ *  - milton.io
+ *  - maven
+ * 
+ * ... then requests to http://milton.io/maven will show the maven repository
  *
  * @author brad
  */

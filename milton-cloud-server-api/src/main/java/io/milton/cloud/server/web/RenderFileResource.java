@@ -508,11 +508,11 @@ public class RenderFileResource extends AbstractResource implements GetableResou
      */
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
-        if (!method.isWrite) {
-            if (isPublic()) {
-                return true;
-            }
-        }
+//        if (!method.isWrite) {
+//            if (isPublic()) {
+//                return true;
+//            }
+//        }
         return super.authorise(request, method, auth);
     }
 

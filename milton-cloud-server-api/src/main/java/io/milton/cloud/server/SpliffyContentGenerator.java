@@ -78,7 +78,13 @@ public class SpliffyContentGenerator implements ContentGenerator {
             this.errorCode = errorCode;
             this.errorText = errorText;
         }
+
+        @Override
+        public CommonResource closest(String type) {
+            return null;
+        }
  
+        
         
         @Override
         public String getUniqueId() {

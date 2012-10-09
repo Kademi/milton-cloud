@@ -229,6 +229,20 @@ public class Repository implements Serializable {
     
     public void softDelete(Session session) {
         this.setDeleted(true);
+        String deletedName = Organisation.getDeletedName(getName()); // change name to avoid name conflicts with new resources
+        this.setName(deletedName);
         session.save(this);
     }    
+    
+    /**
+     * null safe alias for getDeleted
+     * @return 
+     */
+    public boolean deleted() {
+        if( getDeleted() == null ) {
+            return false;
+        } else{
+            return getDeleted();
+        }
+    }
 }

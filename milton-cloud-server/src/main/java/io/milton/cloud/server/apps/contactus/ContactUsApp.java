@@ -17,16 +17,22 @@ package io.milton.cloud.server.apps.contactus;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.PortletApplication;
+import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.http.FileItem;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 import org.apache.velocity.context.Context;
 
 /**
@@ -34,7 +40,7 @@ import org.apache.velocity.context.Context;
  *
  * @author brad
  */
-public class ContactUsApp implements ChildPageApplication, PortletApplication{
+public class ContactUsApp implements ChildPageApplication, PortletApplication, SettingsApplication{
 
     public static final String CONTACT_US_ID = "contactUs";
     
@@ -83,6 +89,16 @@ public class ContactUsApp implements ChildPageApplication, PortletApplication{
                 writer.append("<link href='/templates/apps/contactus/contactus.css' rel='stylesheet' type='text/css' />\n");                
             }
         }
+    }
+
+    @Override
+    public void renderSettings(Profile currentUser, Organisation org, Branch websiteBranch, Context context, Writer writer) throws IOException {
+
+    }
+
+    @Override
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

@@ -47,7 +47,9 @@ import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -134,7 +136,12 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         switch (parent.getId()) {
             case "menuRoot":
                 if (parent.getRootFolder() instanceof WebsiteRootFolder) {
-                    parent.getOrCreate("menuCommunity", "Community", "/community").setOrdering(40);
+                    WebsiteRootFolder wrf = (WebsiteRootFolder) parent.getRootFolder();
+                    Website website = wrf.getWebsite();
+                    List<Forum> forums = Forum.findByWebsite(website, SessionManager.session());
+                    if( !forums.isEmpty()) {
+                        parent.getOrCreate("menuCommunity", "Community", "/community").setOrdering(40);
+                    }
                 } else {
                     parent.getOrCreate("menuTalk", "Talk &amp; Connect").setOrdering(30);
                 }

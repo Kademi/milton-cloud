@@ -140,17 +140,24 @@ public class SpliffySecurityManager {
             }
         }
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
+        System.out.println("authorise - set privs: " + privs);
+        req.getAttributes().put("privs", privs); // stash them for later, page rendering might be interested
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource, req);
-        boolean allows = AclUtils.containsPriviledge(required, privs);
-        if (!allows) {
-            if (curUser != null) {
-                log.info("Authorisation declined for user: " + curUser.getName());
-            } else {
-                log.info("Authorisation declined for anonymous access");
+        boolean allows;
+        if (required == null) {
+            allows = true;
+        } else {
+            allows = AclUtils.containsPriviledge(required, privs);
+            if (!allows) {
+                if (curUser != null) {
+                    log.info("Authorisation declined for user: " + curUser.getName());
+                } else {
+                    log.info("Authorisation declined for anonymous access");
+                }
+                log.info("Required priviledge: " + required + " was not found in assigned priviledge list of size: " + privs.size());
             }
-            log.info("Required priviledge: " + required + " was not found in assigned priviledge list of size: " + privs.size());
-        }
 //        log.info("allows = " + allows + " rsource: " + resource.getClass());
+        }
         return allows;
     }
 
@@ -195,6 +202,10 @@ public class SpliffySecurityManager {
     }
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {
+        if (resource.isPublic()) {
+            privs.add(Priviledge.READ);
+        }
+
         if (g.getGroupRoles() != null) {
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();
@@ -207,9 +218,9 @@ public class SpliffySecurityManager {
                     Repository applicableRepo = gr.getRepository();
                     if (applicableRepo != null) {
                         // role applies to a repository, so check if current resource is within the applicable repo
-                        if( role.appliesTo(resource,applicableRepo, g)) {
+                        if (role.appliesTo(resource, applicableRepo, g)) {
                             Set<Priviledge> privsToAdd = role.getPriviledges(resource, applicableRepo, g);
-                            privs.addAll(privsToAdd);                            
+                            privs.addAll(privsToAdd);
                         }
                     } else {
                         if (role.appliesTo(resource, checkOrg, g)) {

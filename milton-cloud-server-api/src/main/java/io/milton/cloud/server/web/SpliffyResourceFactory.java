@@ -111,7 +111,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
             return rootFolder;
         } else {
             Path pPathParent = p.getParent();
-            if( pPathParent == null ) {
+            if (pPathParent == null) {
                 System.out.println("Thats odd, got a null parent from: " + p + " root?" + p.isRoot() + " relative?" + p.isRelative());
                 return null;
             }
@@ -119,6 +119,11 @@ public class SpliffyResourceFactory implements ResourceFactory {
             if (rParent == null) {
                 return null;
             } else {
+                if (rParent instanceof RootFolder && p.getName().equals(".dologin")) {
+                    RootFolder rf = (RootFolder) rParent;
+                    return new SpliffyAjaxLoginResource(rf, p.getName());
+                }
+
                 if (rParent instanceof CollectionResource) {
                     CollectionResource parent = (CollectionResource) rParent;
                     return parent.child(p.getName());

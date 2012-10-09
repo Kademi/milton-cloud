@@ -57,7 +57,7 @@ public class ManageGroupRolePage extends AbstractResource implements DeletableRe
     public String getTitle() {
         String t = groupRole.getRoleName();
         if( groupRole.getRepository() != null ) {
-            t += ", on " + groupRole.getRepository();
+            t += ", on " + groupRole.getRepository().getName();
         } else if( groupRole.getWithinOrg() != null ) {
             t += ", on " + groupRole.getWithinOrg().getOrgId();
         } else {

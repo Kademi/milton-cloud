@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.server.web.CommonResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -70,4 +71,7 @@ public class GetResource extends BaseResource implements GetableResource {
     public Long getContentLength() {
         return fanout.getActualContentLength();
     }
+
+    
+    
 }

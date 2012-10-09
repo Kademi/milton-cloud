@@ -33,7 +33,9 @@ import io.milton.vfs.db.Website;
 public class UserDashboardApp implements Application, MenuApplication, ChildPageApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserDashboardApp.class);
-    public static String USERS_FOLDER_NAME = "users";
+    public static final String USERS_FOLDER_NAME = "users";
+    public static final String DASHBOARD_NAME = "dashboard";
+    public static final String DASHBOARD_HREF = "/" + DASHBOARD_NAME;
 
     @Override
     public String getInstanceId() {
@@ -61,7 +63,7 @@ public class UserDashboardApp implements Application, MenuApplication, ChildPage
         if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             switch (requestedName) {
-                case "dashboard":
+                case DASHBOARD_NAME:
                     MenuItem.setActiveIds("menuDashboard");
                     return new DashboardPage(requestedName, wrf);                    
             }

@@ -27,7 +27,7 @@ function initTheme() {
     // the login box in header is normally for logging in from a public page. So
     // in this case we want to navigate to the user's dashboard
     $(".header .Login").user({
-        afterLoginUrl: "/dashboard"
+        
     });
     // the login form appears in content when the requested page requires a login
     // so in this case we do not give a post-login url, we will just refresh the current page
@@ -75,7 +75,6 @@ function checkCloseLogin() {
         $(".Login .dropBox").show(300);        
     }
     window.setTimeout(function() {                
-        log("check close", isMouseOver);
         if( !isMouseOver ) {
             $(".Login .dropBox").hide(300);
         }

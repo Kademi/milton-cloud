@@ -1,8 +1,19 @@
 $(function() {
-    var formContainer = $(".contentForm");
-    if( formContainer.length == 0 ) {
-        return;
+    if( privs) {
+        log("check privs", privs, $.inArray("WRITE", privs));
+        if( $.inArray("WRITE", privs) < 0 ) {
+            return;
+        }
+        var formContainer = $(".contentForm");
+        if( formContainer.length == 0 ) {
+            return;
+        }        
+        initInlineEdit(formContainer);
     }
+});
+
+function initInlineEdit(formContainer) {    
+    log("initInlineEdit", formContainer, privs);
     var adminToolbar = $("<div class='adminToolbar'>");
     var btnEdit = $("<button class='edit'>Edit page</button>");
     btnEdit.click(function() {
@@ -28,8 +39,8 @@ $(function() {
     });
     if( window.location.href.endsWith(".new")) {
         edifyPage(".contentForm");
-    }
-});
+    }    
+}
 
 function edifyPage(selector) {
     log("edifyPage", container);

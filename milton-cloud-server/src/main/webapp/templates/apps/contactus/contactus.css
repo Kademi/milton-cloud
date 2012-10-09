@@ -1,5 +1,5 @@
 form.contactus {
-    padding: 20px;
+    
 }
 
 form.contactus fieldset {
@@ -35,6 +35,7 @@ form.contactus textarea {
 
 form.contactus button {
     cursor: pointer;    
+    float: right;
 }
 .contactus .thankyou {
     display: none;

@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import java.util.ArrayList;
@@ -46,18 +47,46 @@ import java.util.ArrayList;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource, CommonRepositoryResource {
+public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource, CommonRepositoryResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
     protected final CommonCollectionResource parent;
     protected final Repository repo;
     protected ResourceList children;
+    protected JsonResult jsonResult;
 
     public RepositoryFolder(CommonCollectionResource parent, Repository r) {
         this.repo = r;
         this.parent = parent;
     }
 
+    
+    
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {        
+        log.info("processForm");
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+
+        Boolean isPublic = WebUtils.getParamAsBool(parameters, "isPublic");
+        if( isPublic != null ) {
+            repo.setPublicContent(isPublic);
+            session.save(repo);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Set public status to " + isPublic);
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_ACL;
+    }
+
+    
+    
+    
     @Override
     public Resource child(String childName) {
         Resource r = _(ApplicationManager.class).getPage(this, childName);
@@ -115,7 +144,11 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
                 }
             }
         }
-        return super.checkRedirect(request);
+        String s = super.checkRedirect(request);
+        if( s == null ) {
+            log.warn("NO BRANCH FOR REPOSITORY: " + getHref() + " branches: " + repo.getBranches());
+        }
+        return s;
     }
 
     public String getTitle() {
@@ -161,6 +194,9 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if( jsonResult != null ) {
+            jsonResult.write(out);
+        }
     }
 
     @Override
@@ -219,14 +255,7 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        this.repo.getBaseEntity().getRepositories().remove(this.repo);
-        List<Website> websites = Website.findByRepository(repo, session);
-        if (websites != null) {
-            for (Website w : websites) {
-                w.delete(session);
-            }
-        }
-        this.repo.delete(session);
+        this.repo.softDelete(session);
         tx.commit();
     }
 

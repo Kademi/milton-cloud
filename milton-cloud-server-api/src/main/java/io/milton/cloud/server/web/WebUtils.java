@@ -17,12 +17,12 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.website.ManageWebsiteBranchFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.values.Pair;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Repository;
@@ -30,8 +30,10 @@ import io.milton.vfs.db.Website;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.w3c.tidy.Tidy;
 
@@ -211,30 +213,47 @@ public class WebUtils {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             Website website = wrf.getWebsite();
             Repository r = website;
-//            String sMenu = r.getAttribute("menu");
-//            if (sMenu != null && sMenu.length() > 0) {
-//                String[] arr = sMenu.split("\n");
-//                int cnt = 0;
-//                for (String s : arr) {
-//                    String[] pair = s.split(",");
-//                    String id = "menuContent" + cnt++;
-//                    String href = pair[0];
-//                    Path p = Path.path(href);
-//                    String parentHref = p.getParent().toString();
-//                    if (thisHref.startsWith(parentHref)) {
-//                        if (longestHref == null || parentHref.length() > longestHref.length()) {
-//                            longestHref = parentHref;
-//                            menuId = id;
-//                        }
-//                    }
-//                }
-//                if (menuId != null) {
-//                    MenuItem.setActiveId(menuId);
-//                }
-//            }
-
+            List<Pair<String,String>> menuPairs = getThemeMenu(wrf);
+            if (menuPairs != null) {
+                int cnt = 0;
+                for (Pair<String,String> pair : menuPairs) {
+                    String id = "menuContent" + cnt++;
+                    String href = pair.getObject1();
+                    Path p = Path.path(href);
+                    String parentHref = p.getParent().toString();
+                    if (thisHref.startsWith(parentHref)) {
+                        if (longestHref == null || parentHref.length() > longestHref.length()) {
+                            longestHref = parentHref;
+                            menuId = id;
+                        }
+                    }                    
+                }
+                if (menuId != null) {
+                    MenuItem.setActiveId(menuId);
+                }
+            }
         }
+    }
 
+    public static List<Pair<String,String>> getThemeMenu(Resource res) {
+        RootFolder rootFolder = WebUtils.findRootFolder(res);
+        if (rootFolder instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+            Website website = wrf.getWebsite();
+            Repository r = website;
+            String sMenu = wrf.getThemeAttributes().get("menu");
+            if (sMenu != null && sMenu.length() > 0) {
+                String[] arr = sMenu.split("\n");
+                int cnt = 0;
+                List<Pair<String,String>> list = new ArrayList<>();
+                for (String s : arr) {
+                    String[] sPair = s.split(",");
+                    list.add(new Pair<>(sPair[0], sPair[1]));
+                }
+                return list;
+            }
+        }
+        return null;
     }
 
     public static Website getWebsite(Resource r) {
