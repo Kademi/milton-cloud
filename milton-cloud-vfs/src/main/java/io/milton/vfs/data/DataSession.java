@@ -102,7 +102,6 @@ public class DataSession {
         }
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
         try {
-            System.out.println("got blob: " + hash);
             return hashCalc.parseTriplets(bin);
         } catch (IOException ex) {
             throw new RuntimeException(ex);

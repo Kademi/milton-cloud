@@ -381,7 +381,6 @@ public class ApplicationManager {
         Repository repo = parent.getRepository();
         for (Branch b : repo.getBranches()) {
             CommonResource r = toResource(parent, b, resourceCreators, rf);
-            System.out.println(" repo child - " + r.getName() + " - " + r.getClass());
             children.add(r);
         }
         return children;
@@ -404,7 +403,6 @@ public class ApplicationManager {
         if (dir != null) {
             List<DataResourceApplication> resourceCreators = getResourceCreators(rf);
             for (DataSession.DataNode n : dir) {
-                System.out.println("datanode: " + n.getName() + " name length=" + n.getName().length());
                 CommonResource r = toResource(parent, n, resourceCreators, rf);
                 list.add(r);
             }

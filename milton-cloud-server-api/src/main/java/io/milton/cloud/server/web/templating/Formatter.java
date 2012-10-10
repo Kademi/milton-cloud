@@ -522,7 +522,6 @@ public class Formatter {
      */
     public String htmlAttEncode(String s) {
         String s2 = WebUtils.replaceSpecialChars(s);
-        System.out.println(s + " -->> " + s2);
         return s2;
         //return htmlEncode(s2);
     }
@@ -540,6 +539,10 @@ public class Formatter {
             return "";
         }
         return Utils.decodePath(s);
+    }
+    
+    public String percentEncode(String s) {
+        return Utils.percentEncode(s);
     }
 
     /**

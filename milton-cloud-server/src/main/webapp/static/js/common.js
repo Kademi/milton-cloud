@@ -438,7 +438,7 @@ function showCreateFolder(parentHref, title, text, callback, validatorFn) {
     if( !s ) {
         s = "Please enter a name for the new folder";
     }    
-    myPrompt("createFolder", parentHref, title, text, "Enter a name","newName", "Create folder", "", "Enter a name for the folder", function(newName, form) {
+    myPrompt("createFolder", parentHref, title, text, "Enter a name","newName", "Create", "", "Enter a name to create", function(newName, form) {
         log("create folder", form);
         if( validatorFn ) {
             msg = validatorFn(newName);
@@ -635,4 +635,17 @@ function evaluateRelativePath(startFrom, relPath) {
         }
     }
     return href;
+}
+
+function replaceSpecialChars(nameToUse) {
+    nameToUse = nameToUse.replace("/", "");
+    nameToUse = nameToUse.replace("'", "");
+    nameToUse = nameToUse.replace("\"", "");
+    nameToUse = nameToUse.replace("@", "-");
+    nameToUse = nameToUse.replace(" ", "-");
+    nameToUse = nameToUse.replace("?", "-");
+    nameToUse = nameToUse.replace(":", "-");
+    nameToUse = nameToUse.replace("--", "-");
+    nameToUse = nameToUse.replace("--", "-");
+    return nameToUse;
 }

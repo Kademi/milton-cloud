@@ -23,8 +23,9 @@ function initRegister(afterRegisterHref) {
                 var userName = form.find("input[name=email]").val();
                 var password = form.find("input[name=password]").val();
                 doLogin(userName, password, {
-                    afterLoginUrl: afterRegisterHref
-                });
+                    afterLoginUrl: afterRegisterHref,
+                    urlSuffix: "/.dologin"
+                }, this);
             }
         }
     });

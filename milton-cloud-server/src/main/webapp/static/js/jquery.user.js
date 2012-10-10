@@ -51,7 +51,7 @@
                     $(config.valiationMessageSelector, container).show(200);
                     return false;
                 }
-                doLogin(userName, password, config);
+                doLogin(userName, password, config, container);
             } catch(e) {
                 log("exception sending forum comment", e);
             }            
@@ -61,7 +61,8 @@
 })( jQuery );
 
 
-function doLogin(userName, password, config) {
+function doLogin(userName, password, config, container) {
+    log("doLogin", userName, config.urlSuffix);
     $(config.valiationMessageSelector).hide();
     $.ajax({
         type: 'POST',
