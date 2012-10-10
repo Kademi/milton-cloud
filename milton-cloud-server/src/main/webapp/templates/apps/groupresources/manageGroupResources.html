@@ -5,12 +5,19 @@
     </head>
     <body>
         <section id="manageGroupResources" class="MainContent">
+            <article class="Note">Group resources provides a page for each group, in each website, containing files for download. This might include word documents, PDF's or large high res videos</article>
+            <br/>
             <table class="Summary tick">
                 #foreach($f in $page.groupFolders)
                 <tr>
                     <td>
                         <h5>$f.website.name - $f.group.name</h5>
+                        #if( $f.directory )
                         <p>Files: $!f.directory.files.size</p>
+                        #else
+                        The folder for this group has not been created yet. Please click
+                        the Create button to create it and then add resources.
+                        #end
                     </td>
                     <th>
                         #if( $f.directory )

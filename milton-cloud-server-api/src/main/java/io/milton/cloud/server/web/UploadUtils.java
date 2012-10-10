@@ -83,6 +83,12 @@ public class UploadUtils {
      */
     public static Resource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         DataSession.DirectoryNode thisNode = col.getDirectoryNode();
+        
+        if( thisNode.get(newName) != null ) {
+            throw new BadRequestException(col, "Resource with that name already exists: " + newName);
+        }
+        
+        
         DataSession.FileNode newFileNode = thisNode.addFile(newName);
         FileResource fileResource = new FileResource(newFileNode, col);
 

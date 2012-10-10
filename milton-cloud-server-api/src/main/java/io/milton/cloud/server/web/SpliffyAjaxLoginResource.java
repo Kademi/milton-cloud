@@ -21,6 +21,7 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.user.UserDashboardApp;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.http.*;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -74,7 +75,10 @@ public class SpliffyAjaxLoginResource extends AbstractResource implements Getabl
         String userUrl = (String) request.getAttributes().get(userUrlAttName);
         // Need to find out if user dashboard page is enabled. If so page will probably want to redirect there
         List<Application> apps = _(ApplicationManager.class).getActiveApps(rootFolder);
-        boolean hasDashboard = hasDashboardApp(apps);
+        boolean hasDashboard = false;
+        if( rootFolder instanceof WebsiteRootFolder ) {
+            hasDashboard = hasDashboardApp(apps);
+        }
         
         jsonResult = new JsonResult();
         if( loginResult != null ) {

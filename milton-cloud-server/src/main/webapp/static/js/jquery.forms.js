@@ -32,49 +32,7 @@
             log("form submit", form, "to" , form.attr("action"));
             resetValidation(container);
             if( checkRequiredFields(form) ) {
-                try {                    
-                    $.ajax({
-                        type: 'POST',
-                        url: form.attr("action"),
-                        data: form.serialize(),
-                        dataType: "json",
-                        success: function(resp) {
-                            ajaxLoadingOff();                            
-                            if( resp && resp.status) {
-                                log("save success", resp)
-                                config.callback(resp, form)
-                            } else {
-                                log("status indicates failure", resp)
-                                try {                                    
-                                    var messagesContainer = $(config.valiationMessageSelector, container);
-                                    if( resp.messages && resp.messages.length > 0 ) {
-                                        for( i=0; i<resp.messages.length; i++) {
-                                            var msg = resp.messages[i];
-                                            messagesContainer.append("<p>" + msg + "</p>");
-                                        }
-                                    } else {
-                                        messagesContainer.append("<p>Sorry, we couldnt process your request</p>");
-                                    }
-                                    messagesContainer.show(100);
-                                    showFieldMessages(resp.fieldMessages, container)
-                                } catch(e) {
-                                    log("ex", e);
-                                }
-                                alert("Sorry, an error occured and the form could not be processed. Please check for validation messages");
-                            }                            
-                        },
-                        error: function(resp) {
-                            ajaxLoadingOff();
-                            log("error posting form", form, resp);
-                            alert("err " + resp);
-                            $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
-                            log("set message", $(config.valiationMessageSelector, this), config.loginFailedMessage);
-                            $(config.valiationMessageSelector, container).show(100);
-                        }
-                    });                
-                } catch(e) {
-                    log("exception sending forum comment", e);
-                }            
+                postForm(form, config.valiationMessageSelector, config.validationFailedMessage, config.callback);
             } else {
                 showValidation(null, config.validationFailedMessage, container);
                 //$(config.valiationMessageSelector, container).text(config.validationFailedMessage);
@@ -84,6 +42,53 @@
         });    
     };
 })( jQuery );
+
+function postForm(form, valiationMessageSelector, validationFailedMessage, callback) {
+    log("postForm", form);
+    try {                    
+        $.ajax({
+            type: 'POST',
+            url: form.attr("action"),
+            data: form.serialize(),
+            dataType: "json",
+            success: function(resp) {
+                ajaxLoadingOff();                            
+                if( resp && resp.status) {
+                    log("save success", resp)
+                    callback(resp, form)
+                } else {
+                    log("status indicates failure", resp)
+                    try {                                    
+                        var messagesContainer = $(valiationMessageSelector, form);
+                        if( resp.messages && resp.messages.length > 0 ) {
+                            for( i=0; i<resp.messages.length; i++) {
+                                var msg = resp.messages[i];
+                                messagesContainer.append("<p>" + msg + "</p>");
+                            }
+                        } else {
+                            messagesContainer.append("<p>Sorry, we couldnt process your request</p>");
+                        }
+                        messagesContainer.show(100);
+                        showFieldMessages(resp.fieldMessages, form)
+                    } catch(e) {
+                        log("ex", e);
+                    }
+                    alert("Sorry, an error occured and the form could not be processed. Please check for validation messages");
+                }                            
+            },
+            error: function(resp) {
+                ajaxLoadingOff();
+                log("error posting form", form, resp);
+                alert("err " + resp);
+                $(valiationMessageSelector, container).text(validationFailedMessage);
+                $(valiationMessageSelector, container).show(100);
+            }
+        });                
+    } catch(e) {
+        log("exception sending forum comment", e);
+    }      
+}
+
 
 function showFieldMessages(fieldMessages, container) {
     if( fieldMessages ) {

@@ -57,7 +57,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
 import io.milton.vfs.db.Branch;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -71,8 +73,22 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
     public static String getDashboardDateRange() {
         Date now = _(CurrentDateService.class).getNow();
         now = _(Formatter.class).addDays(now, -7);
-        return _(Formatter.class).formatDate(now);        
+        return formatDate(now);
     }
+    
+    public static SimpleDateFormat sdf() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setLenient(false);
+        return sdf;
+    }
+    
+    public static String formatDate(Date dt) {
+        if (dt == null) {
+            return "";
+        }
+        return sdf().format(dt);
+    }    
+        
     
     private final java.util.concurrent.LinkedBlockingQueue<Access> queue = new LinkedBlockingQueue<>();
     private RootContext rootContext;

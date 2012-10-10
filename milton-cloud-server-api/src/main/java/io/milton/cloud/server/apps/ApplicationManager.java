@@ -404,6 +404,7 @@ public class ApplicationManager {
         if (dir != null) {
             List<DataResourceApplication> resourceCreators = getResourceCreators(rf);
             for (DataSession.DataNode n : dir) {
+                System.out.println("datanode: " + n.getName() + " name length=" + n.getName().length());
                 CommonResource r = toResource(parent, n, resourceCreators, rf);
                 list.add(r);
             }

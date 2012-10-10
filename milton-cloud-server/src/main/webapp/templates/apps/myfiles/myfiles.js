@@ -15,6 +15,9 @@ jQuery(document).ready(function(){
             });
         }
     });
+    $(".importFromUrl").click(function() {
+        showImportFromUrl();
+    });
 });            
 function initFiles() {
     log("initFiles");
@@ -51,7 +54,10 @@ function initFiles() {
         e.stopPropagation();
         e.preventDefault();
         var target = $(e.target);
+        log("click target", target);
+        target = target.closest("tr").find("> td a");
         var href = target.attr("href");
+        log("click delete. href", href);
         var name = getFileName(href);
         var tr = target.closest("tr");
         confirmDelete(href, name, function() {
@@ -82,4 +88,32 @@ function addFileTools(tr) {
 
 function removeFileTools(tr) {
     tr.find(".tools").remove();
+}
+
+function showImportFromUrl() {
+    var url = prompt("Please enter a url to import files from");
+    if( url ) {
+        $.ajax({
+            type: 'POST',
+            url: window.location.pathname,
+            dataType: "json",
+            data: {
+                importFromUrl: url
+            },
+            success: function(data) {
+                log("response", data);
+                if( !data.status ) {
+                    alert("Failed to import");
+                    return;
+                } else {
+                    alert("Importing has finished");
+                    window.location.reload();
+                }
+            },
+            error: function(resp) {
+                log("error", resp);
+                alert("err");
+            }
+        });           
+    }
 }

@@ -47,7 +47,7 @@ function initTheme() {
     initPseudoClasses();
     initPrintLink();
     initLoginDropDown();
-    initDropDownHiding();        
+    initDropDownHiding();     
          
     log("initTheme: run page init functions");
     for( i=0; i<pageInitFunctions.length; i++) {
@@ -383,6 +383,82 @@ function initDropDownHiding() {
         }
     });
     
+}
+
+/**
+ *  Although this function is defined here in the theme, it should be called
+ *  from each page.
+ *  
+ *  Each page should decide what url to pass as the pageUrl, as this can be used
+ *  to share comments across pages (such as when the logical context is the folder
+ *  the pages are in, rather then each page)
+ *  
+ *  Eg initComments(window.location.pathname);
+ */
+function initComments(pageUrl) {
+    log("initComments", pageUrl);
+    $(".hideBtn").click(function() {
+        var oldCommentsHidden = $("#comments:visible").length == 0;
+        log("store new comments hidden", oldCommentsHidden);
+        jQuery.cookie("commentsHidden", !oldCommentsHidden, {
+            path: "/"
+        });
+        $("#comments").toggle(100, function() {
+            if(!oldCommentsHidden) {
+                $(".hideBtn a").text("Show comments");
+            }
+        });
+        return false;
+    });
+    var commentsHidden = jQuery.cookie("commentsHidden", {
+        path: "/"
+    });
+    log("comments hidden", commentsHidden);    
+    if( commentsHidden == "true" ) {
+        $("#comments").hide();
+        $(".hideBtn a").text("Show comments");
+        log("hiding comments")
+    }
+    
+    
+    $("#comments").comments({
+        currentUser : {
+            name: userName,
+            href: userUrl, 
+            photoHref: "/profile/pic"
+        },
+        pageUrl: pageUrl,
+        renderCommentFn: function(user, date, comment) {
+            log("module.js renderCommentFn", user);
+            if( user == null ) {
+                log("no user so dont render");
+                return;
+            }            
+            var profilePic = profileImg(user);
+            var profLink = $("<a class='profilePic' href='" + user.href + "'>" + profilePic + "</a>");
+            var nameLink = $("<a class='user' href='" + user.href + "'>" + user.name + "</a>");
+            var commentPara = $("<p>" + comment + "</p>");
+            //var dateSpan = $("<span class='auxText'>" + toDisplayDateNoTime(date) + "<a href='#'>Reply to this comment</a></span>");
+            
+            var dateSpan = $("<abbr title='" + date.toISOString() + "' class='auxText'>" + toDisplayDateNoTime(date) + "</abbr>");
+            var toolsDiv = $("<div></div>");
+            /**
+            var del = $("<a class='auxText' href='#'>Delete</a>");
+            var abuse = $("<a class='auxText' href='#'>Report abuse</a>");
+            toolsDiv.append(del);
+            toolsDiv.append(abuse);
+             **/
+            var outerDiv = $("<div class='forumReply'></div>");
+            outerDiv.append(profLink);
+            outerDiv.append(nameLink);
+            outerDiv.append(commentPara);
+            outerDiv.append(dateSpan);
+            outerDiv.append(toolsDiv);
+            outerDiv.insertAfter($("#comments .fBox"));
+            
+            jQuery("abbr.auxText", outerDiv).timeago();
+        }
+    });    
 }
 
 /** End init-theme.js */

@@ -44,9 +44,13 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.FileItem;
+import io.milton.resource.PostableResource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Represents a version of a directory, containing the members which are in that
@@ -55,7 +59,7 @@ import io.milton.vfs.db.Profile;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource {
+public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
     protected DirectoryNode directoryNode;
@@ -67,6 +71,30 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     public DirectoryResource(DirectoryNode directoryNode, P parent) {
         super(directoryNode, parent);
         this.directoryNode = directoryNode;
+    }
+
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        log.info("processForm");
+        if (parameters.containsKey("importFromUrl")) {
+            String importFromUrl = WebUtils.getParam(parameters, "importFromUrl");
+            log.info("Start import from url: " + importFromUrl);
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            if (p != null) {
+                try {
+                    URI uri = new URI(importFromUrl);
+                    Importer importer = Importer.create(p, this, uri);
+                    importer.doImport();
+                    jsonResult = new JsonResult(true);
+                    jsonResult.setData(importer);
+                } catch (URISyntaxException ex) {
+                    jsonResult = new JsonResult(false, "Invalid url: " + importFromUrl + " Please enter something like http://domain.com/folder/file");
+                }
+            }
+        }
+
+        return null;
+
     }
 
     @Override
@@ -83,7 +111,9 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         if (children == null) {
             ApplicationManager am = _(ApplicationManager.class);
             children = am.toResources(this, directoryNode);
+            System.out.println("getChildren1 -- " + getHref() + " = " + children.size());
             am.addBrowseablePages(this, children);
+            System.out.println("getChildren2 -- " + getHref() + " = " + children.size());
         }
         return children;
     }
@@ -101,16 +131,19 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         Transaction tx = session.beginTransaction();
 
         DirectoryResource rdr = createDirectoryResource(newName);
-        
+
         tx.commit();
 
         return rdr;
     }
-    
+
     public DirectoryResource createDirectoryResource(String newName) throws BadRequestException {
         if (directoryNode == null) {
             directoryNode = parent.getDirectoryNode().addDirectory(getName());
             this.contentNode = directoryNode;
+        }
+        if( directoryNode.get(newName) != null ) {
+            throw new BadRequestException(this, "Resource with that name already exists: " + newName);
         }
         DirectoryNode newNode = directoryNode.addDirectory(newName);
         DirectoryResource rdr = new DirectoryResource(newNode, this);
@@ -141,6 +174,20 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (params.containsKey("importStatus")) {
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            if (p != null) {                
+                Importer importer = Importer.getImporter(p, this);
+                if( importer != null ) {
+                    jsonResult = new JsonResult(true);
+                    jsonResult.setData(importer);
+                } else {
+                    jsonResult = new JsonResult(false, "Importer not found ");
+                }
+            } else {
+                jsonResult = new JsonResult(false, "Not logged in");
+            }
+        }
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {

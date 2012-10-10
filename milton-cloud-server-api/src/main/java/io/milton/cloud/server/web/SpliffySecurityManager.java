@@ -140,8 +140,8 @@ public class SpliffySecurityManager {
             }
         }
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
-        System.out.println("authorise - set privs: " + privs);
-        req.getAttributes().put("privs", privs); // stash them for later, page rendering might be interested
+        Set<Priviledge> expanded = AclUtils.expand(privs);
+        req.getAttributes().put("privs", expanded); // stash them for later, page rendering might be interested
         AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource, req);
         boolean allows;
         if (required == null) {
@@ -171,6 +171,10 @@ public class SpliffySecurityManager {
 
     public Set<AccessControlledResource.Priviledge> getPriviledges(Profile curUser, CommonResource resource) {
         Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
+        if (resource.isPublic()) {
+            privs.add(Priviledge.READ);
+        }
+        
         if (curUser != null) {
             // If the resource is a content resource and the current user is the direct owner of the repository, then grant R/W
             if (resource instanceof PersonalResource) {
@@ -202,10 +206,6 @@ public class SpliffySecurityManager {
     }
 
     private void appendPriviledges(Group g, Organisation withinOrg, CommonResource resource, Set<AccessControlledResource.Priviledge> privs) {
-        if (resource.isPublic()) {
-            privs.add(Priviledge.READ);
-        }
-
         if (g.getGroupRoles() != null) {
             for (GroupRole gr : g.getGroupRoles()) {
                 String roleName = gr.getRoleName();

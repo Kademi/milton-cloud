@@ -432,29 +432,27 @@ function suffixSlash(href) {
     return href + "/";
 }
 
-function showCreateFolder(parentHref, text, callback, validatorFn) {
+function showCreateFolder(parentHref, title, text, callback, validatorFn) {
     log("showCreateFolder");
     var s = text;
     if( !s ) {
         s = "Please enter a name for the new folder";
-    }
-    var newName = "";
-    while( true ) {
-        newName = prompt(s, newName);
-        if( newName == null ) {
-            return;
-        }
-        var msg = null;
+    }    
+    myPrompt("createFolder", parentHref, title, text, "Enter a name","newName", "Create folder", "", "Enter a name for the folder", function(newName, form) {
+        log("create folder", form);
         if( validatorFn ) {
             msg = validatorFn(newName);
         }
         if( msg == null ) {
-            createFolder(newName, parentHref,callback);
-            return;
+            createFolder(newName, parentHref,function() {
+                callback(newName);
+                closeMyPrompt();
+            });
         } else {
             alert(msg);
         }
-    }
+        return false;
+    });        
 }
 
 function createFolder(name, parentHref, callback) {
@@ -477,13 +475,17 @@ function createFolder(name, parentHref, callback) {
         },
         dataType: "json",
         success: function(resp) {
-            $("body").trigger("ajaxLoading", {loading: false});
+            $("body").trigger("ajaxLoading", {
+                loading: false
+            });
             if( callback ) {
                 callback(name, resp);
             }
         },
         error: function() {
-            $("body").trigger("ajaxLoading", {loading: false});
+            $("body").trigger("ajaxLoading", {
+                loading: false
+            });
             alert('There was a problem creating the folder');
         }
     });
@@ -521,7 +523,9 @@ function move(sourceHref, destHref, callback) {
         url = s + url;
     }
     log("move", sourceHref, destHref, "url=", url);
-    $("body").trigger("ajaxLoading", {loading: true});
+    $("body").trigger("ajaxLoading", {
+        loading: true
+    });
     $.ajax({
         type: 'POST',
         url: url,
@@ -530,13 +534,17 @@ function move(sourceHref, destHref, callback) {
         },
         dataType: "json",
         success: function(resp) {
-            $("body").trigger("ajaxLoading", {loading: false});
+            $("body").trigger("ajaxLoading", {
+                loading: false
+            });
             if( callback ) {
                 callback(resp);
             }
         },
         error: function() {
-            $("body").trigger("ajaxLoading", {loading: false});
+            $("body").trigger("ajaxLoading", {
+                loading: false
+            });
             alert('There was a problem creating the folder');
         }
     });
@@ -593,43 +601,38 @@ String.prototype.replaceAll = function(token, newToken, ignoreCase) {
         _token = ignoreCase === true? token.toLowerCase() : undefined;
         while((i = (
             _token !== undefined? 
-                str.toLowerCase().indexOf(
-                            _token, 
-                            i >= 0? i + newToken.length : 0
+            str.toLowerCase().indexOf(
+                _token, 
+                i >= 0? i + newToken.length : 0
                 ) : str.indexOf(
-                            token,
-                            i >= 0? i + newToken.length : 0
+                token,
+                i >= 0? i + newToken.length : 0
                 )
-        )) !== -1 ) {
+            )) !== -1 ) {
             str = str.substring(0, i)
-                    .concat(newToken)
-                    .concat(str.substring(i + token.length));
+            .concat(newToken)
+            .concat(str.substring(i + token.length));
         }
     }
-return str;
+    return str;
 };
 
 /**
  * Evaluate a relative path from an absolute path to get an absolute path to he relative path from the absolute path
  * 
- * wow, i think thats a recursive javadoc...
  */
 function evaluateRelativePath(startFrom, relPath) {
     var arr = relPath.split("/");
     var href = startFrom;
-    log("relatph", relPath);
     for( i=0; i<arr.length; i++) {        
         var part = arr[i];
-        log("eval", part, href);
         if( part == "..") {
             href = getFolderPath(href);
         } else if( part == ".") {
-            // do nothing
+        // do nothing
         } else {
             href += "/" + part;
         }
-        log("eval2", href);
     }
-    log("evaluateRelativePath", startFrom, relPath, " ==> " , href);
     return href;
 }

@@ -36,8 +36,8 @@ function setRepoPublicAccess(link, isPublic) {
         url: link.attr("href"),
         success: function(data) {
             link.parent().find(".repoPublicAccess").text(isPublic);
-            node.addClass("togglePublic-" + isPublic);
-            node.removeClass("togglePublic-" + !isPublic);
+            link.addClass("togglePublic-" + isPublic);
+            link.removeClass("togglePublic-" + !isPublic);
         },
         error: function(resp) {
             alert("Sorry, couldnt update public access: " +resp);            

@@ -29,6 +29,10 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Repository;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.ConcurrentHashMap;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
@@ -184,6 +188,20 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (params.containsKey("importStatus")) {
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            if (p != null) {                
+                Importer importer = Importer.getImporter(p, this);
+                if( importer != null ) {
+                    jsonResult = new JsonResult(true);
+                    jsonResult.setData(importer);
+                } else {
+                    jsonResult = new JsonResult(false, "Importer not found ");
+                }
+            } else {
+                jsonResult = new JsonResult(false, "Not logged in");
+            }
+        }
         if (jsonResult != null) {
             jsonResult.write(out);
             return;
@@ -281,6 +299,21 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             copyTo(getParent(), copyToName);
             String newHref = parent.getPath().child(copyToName).toString();
             jsonResult = new JsonResult(true, "Copied", newHref);
+        } else if (parameters.containsKey("importFromUrl")) {
+            String importFromUrl = WebUtils.getParam(parameters, "importFromUrl");
+            log.info("Start import from url: " + importFromUrl);
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            if (p != null) {
+                try {
+                    URI uri = new URI(importFromUrl);
+                    Importer importer = Importer.create(p, this, uri);
+                    importer.doImport();
+                    jsonResult = new JsonResult(true);
+                    jsonResult.setData(importer);
+                } catch (URISyntaxException ex) {
+                    jsonResult = new JsonResult(false, "Invalid url: " + importFromUrl + " Please enter something like http://domain.com/folder/file");
+                }
+            }
         }
 //        String shareWith = parameters.get("shareWith");
 //        String priv = parameters.get("priviledge");
@@ -293,6 +326,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return null;
 
     }
+
 
     @Override
     public Organisation getOrganisation() {
@@ -472,7 +506,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public String getPublicTheme() {
         return branch.getPublicTheme();
     }
-    
+
     public String getInternalTheme() {
         return branch.getInternalTheme();
     }
@@ -540,12 +574,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
             paramsFile.writeContent(bout);
             bin = new ByteArrayInputStream(bout.toByteArray());
         }
-        
+
         // Now merge new variables map with existing content
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         LessParameterParser lessParameterParser = new LessParameterParser();
         lessParameterParser.setParams(map, bin, out);
-        
+
         // And finally write the new file content
         paramsFile.setContent(new ByteArrayInputStream(out.toByteArray()));
 

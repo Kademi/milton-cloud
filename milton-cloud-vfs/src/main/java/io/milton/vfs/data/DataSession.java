@@ -102,6 +102,7 @@ public class DataSession {
         }
         ByteArrayInputStream bin = new ByteArrayInputStream(arr);
         try {
+            System.out.println("got blob: " + hash);
             return hashCalc.parseTriplets(bin);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -231,6 +232,7 @@ public class DataSession {
         }
 
         private void setName(String name) {
+            checkNameIsLegal(name);
             this.name = name;
             setDirty();
         }
@@ -270,6 +272,17 @@ public class DataSession {
                 parent.setDirty();
             }
         }
+        
+        /**
+         * Check that the name is composed of legal characters
+         * 
+         * @param name 
+         */
+        void checkNameIsLegal(String name) {
+            if( name.contains(":") || name.contains("\n")|| name.contains("\r") ) {
+                throw new RuntimeException("Invalid character in name: " + name + " Colons and newline characters are not permitted");
+            }
+        }        
     }
 
     public class DirectoryNode extends DataNode implements Iterable<DataNode> {
@@ -312,7 +325,10 @@ public class DataSession {
         }
 
         public FileNode addFile(String name, String hash) {
-            log.info("addFile: " + name + " - " + hash);
+            if( log.isTraceEnabled()) {
+                log.trace("addFile: " + name + " - " + hash);
+            }
+            checkNameForAdd(name);
             FileNode item = new FileNode(this, name, hash);
             getChildren().add(item);
             checkConsistency(item);
@@ -321,6 +337,10 @@ public class DataSession {
         }
 
         public DirectoryNode addDirectory(String name, String hash) {
+            if( log.isTraceEnabled()) {
+                log.trace("addDirectory: " + name + " - " + hash);
+            }
+            checkNameForAdd(name);
             DirectoryNode item = new DirectoryNode(this, name, hash);
             getChildren().add(item);
             setDirty();
@@ -381,6 +401,13 @@ public class DataSession {
                 }
                 names.add(item.getName());
             }
+        }
+
+        private void checkNameForAdd(String name) {
+            if( get(name) != null  ) {
+                throw new RuntimeException("Attempt to add duplicate name: " + name);
+            }
+            checkNameIsLegal(name);
         }
     }
 

@@ -140,7 +140,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 parent.getOrCreate("menuOrgs", "Manage Business units", p + "/").setOrdering(30);
                 break;
             case "menuWebsiteManager":
-                parent.getOrCreate("menuWebsites", "Setup your websites", parentPath.child("websites")).setOrdering(10);
+                parent.getOrCreate("menuWebsites", "Manage websites", parentPath.child("websites")).setOrdering(10);
                 //parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
                 parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;

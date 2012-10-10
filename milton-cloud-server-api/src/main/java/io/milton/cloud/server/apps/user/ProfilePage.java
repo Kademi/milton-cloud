@@ -48,7 +48,6 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.data.DataSession;
-import io.milton.vfs.data.DataSession.DataNode;
 import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
@@ -88,23 +87,23 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("nickName")) {
-            try {                
+            try {
                 String oldEmail = p.getEmail();
                 String newEmail = parameters.get("email");
-                if( newEmail != null ) {
+                if (newEmail != null) {
                     newEmail = newEmail.trim();
                 }
                 System.out.println("checjk email:" + oldEmail + " == " + newEmail);
-                if( oldEmail == null || (newEmail != null && !newEmail.equals(oldEmail))) {
+                if (oldEmail == null || (newEmail != null && !newEmail.equals(oldEmail))) {
                     Profile someOtherUser = Profile.findByEmail(newEmail, getOrganisation(), session);
-                    if( someOtherUser != null ) {
+                    if (someOtherUser != null) {
                         log.warn("Found another user with that email: " + newEmail);
                         jsonResult = JsonResult.fieldError("email", "There is another user account registered with that email");
                         return null;
                     }
                 }
                 _(DataBinder.class).populate(p, parameters);
-                
+
                 session.save(p);
                 tx.commit();
                 jsonResult = new JsonResult(true);
@@ -194,7 +193,6 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
     }
 
-
     private Repository findProfilePics(Profile p) {
         Repository r = p.repository(PICS_REPO_NAME);
         if (r == null) {
@@ -202,7 +200,6 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
         return r;
     }
-
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
@@ -226,18 +223,18 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         public ProfilePicResource(String name) {
             this.name = name;
         }
-        
+
         @Override
         public Long getContentLength() {
             return fanout().getActualContentLength();
-        }        
-        
+        }
+
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
             Combiner combiner = new Combiner();
             combiner.combine(fanout().getHashes(), _(HashStore.class), _(BlobStore.class), out);
-        }        
-        
+        }
+
         @Override
         public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
             if (fanout() == null) {
@@ -245,18 +242,21 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             } else {
                 return null;
             }
-        }        
-        
+        }
+
         private Fanout fanout() {
-            if( loaded ) {
+            if (loaded) {
                 return fanout;
             }
             loaded = true;
-            String hash = getProfile().getPhotoHash();
-            if (hash != null) {
-                fanout = _(HashStore.class).getFileFanout(hash);
-            } else {
-                fanout = null;
+            Profile p = getProfile();
+            if (p != null) {
+                String hash = p.getPhotoHash();
+                if (hash != null) {
+                    fanout = _(HashStore.class).getFileFanout(hash);
+                } else {
+                    fanout = null;
+                }
             }
             return fanout;
         }

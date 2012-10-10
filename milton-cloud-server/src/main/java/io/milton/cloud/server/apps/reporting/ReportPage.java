@@ -38,7 +38,6 @@ import java.util.Map;
  */
 public class ReportPage extends TemplatedHtmlPage {
 
-    private final SimpleDateFormat sdf;
     private final JsonReport jsonReport;
     private final Website website;
 
@@ -47,8 +46,6 @@ public class ReportPage extends TemplatedHtmlPage {
         this.website = website;
         this.jsonReport = jsonReport;
         setForceLogin(true);
-        sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setLenient(false);
     }
     
 
@@ -62,16 +59,15 @@ public class ReportPage extends TemplatedHtmlPage {
                 start = parseDate(sStart);
                 String sFinish = params.get("finishDate");
                 finish = parseDate(sFinish);
-                JsonResult jsonResult = new JsonResult(true);
+                jsonResult = new JsonResult(true);
                 GraphData graphData = jsonReport.runReport(getOrganisation(), website, start, finish, jsonResult);
                 if( jsonResult.isStatus() ) {
                     jsonResult.setData(graphData);
                 }
                 jsonResult.write(out);
             } catch (ParseException parseException) {
-                JsonResult jsonResult = new JsonResult(false, "Invalid date: " + parseException.getMessage());
+                jsonResult = new JsonResult(false, "Invalid date: " + parseException.getMessage());
                 jsonResult.write(out);
-                return;
             }            
         } else {
             String nm = website == null ? getOrganisation().getTitle() : website.getName();
@@ -85,6 +81,8 @@ public class ReportPage extends TemplatedHtmlPage {
         if( s == null || s.trim().length() == 0 ) {
             return null;
         }
-        return sdf.parse(s);
+        Date dt = ReportingApp.sdf().parse(s);
+        System.out.println("parseDate: " + s + " -->> " + dt);
+        return dt;
     }
 }

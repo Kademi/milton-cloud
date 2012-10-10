@@ -1,14 +1,20 @@
 $(function() {
-    if( privs) {
-        log("check privs", privs, $.inArray("WRITE", privs));
-        if( $.inArray("WRITE", privs) < 0 ) {
-            return;
+    if (typeof privs === 'undefined') {
+        // just means the page has not declared this variable    
+        log("privs is not defined");
+    } else {
+        log("check privs");
+        if( privs) {
+            log("check privs", privs, $.inArray("WRITE", privs));
+            if( $.inArray("WRITE", privs) < 0 ) {
+                return;
+            }
+            var formContainer = $(".contentForm");
+            if( formContainer.length == 0 ) {
+                return;
+            }        
+            initInlineEdit(formContainer);
         }
-        var formContainer = $(".contentForm");
-        if( formContainer.length == 0 ) {
-            return;
-        }        
-        initInlineEdit(formContainer);
     }
 });
 

@@ -6,7 +6,8 @@
         <script type="text/javascript" src="myfiles.js">//</script>
     </head>    
     <body class="directory">
-        <div class="input" id='myUploaded'></div>
+        <button class="importFromUrl Btn" style="float: right;">Import from url</button>
+        <div class="input" id='myUploaded'></div>        
         <table id="fileList" class="bar">
             <thead>
                 <tr>
@@ -27,7 +28,7 @@
                     <td class="left">
                         <a href="$f.href">$f.name</a>
                     </td>
-                    <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$f.modifiedDate</abbr></td>
+                    <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
                     <td>
                         
                     </td>

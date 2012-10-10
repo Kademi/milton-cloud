@@ -56,14 +56,22 @@
 })( jQuery );
 
 function sendNewForumComment( pageUrl, commentInput, renderComment, currentUser) {
-    log("sendNewForumComment", pageUrl, commentInput);
+    log("sendNewForumComment", pageUrl, commentInput, currentUser);
+    if( currentUser.href == null ) {
+        alert("You must be logged in to post comments");
+        return;
+    }
     var comment = commentInput.val();
     commentInput.removeClass("errorField");
     if( comment.trim().length < 1 ) {
         commentInput.addClass("errorField");
         return;
     }
-    var url = pageUrl + "_DAV/PROPPATCH";
+    var url = pageUrl;
+    if( !url.endsWith("/")) {
+        url += "/";
+    }
+    url += "_DAV/PROPPATCH";
     ajaxLoadingOn();
     $.ajax({
         type: 'POST',
@@ -86,6 +94,9 @@ function sendNewForumComment( pageUrl, commentInput, renderComment, currentUser)
 function loadComments(page, renderCommentFn, clearContainerFn, aggregated) {
     commentUrl = page;
     var url = page;
+    if( !url.endsWith("/")) {
+        url += "/";
+    }    
     if( aggregated ) {
         url += "/_comments";
     } else {
