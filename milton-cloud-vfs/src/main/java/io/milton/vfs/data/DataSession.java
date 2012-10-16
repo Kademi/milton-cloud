@@ -70,6 +70,25 @@ public class DataSession {
         rootDataNode = new DirectoryNode(null, null, hash);
     }
 
+    /**
+     * Creates a readonly session to view the given commit
+     *
+     * @param commit
+     * @param session
+     * @param hashStore
+     * @param blobStore
+     * @param currentDateService
+     */
+    public DataSession(Commit commit, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService) {
+        this.blobStore = blobStore;
+        this.hashStore = hashStore;
+        this.session = session;
+        this.branch = null;
+        this.currentDateService = currentDateService;
+        String hash = commit.getItemHash();
+        rootDataNode = new DirectoryNode(null, null, hash);
+    }
+
     public DirectoryNode getRootDataNode() {
         return rootDataNode;
     }
@@ -118,39 +137,56 @@ public class DataSession {
      * @return
      */
     public String save(Profile currentUser) throws IOException {
+        if (branch == null) {
+            throw new RuntimeException("Cannot save to a readonly session. Session is readonly because no branch was given");
+        }
+        String oldHash = rootDataNode.loadedHash;
         recalcHashes(rootDataNode);
-
         String newHash = rootDataNode.hash;
 
-        Commit newCommit = new Commit();
-        newCommit.setCreatedDate(currentDateService.getNow());
-        newCommit.setEditor(currentUser);
-        newCommit.setItemHash(newHash);
-        session.save(newCommit);
-        branch.setHead(newCommit);
-        session.save(branch);
+        if (!newHash.equals(oldHash)) {
+            Commit newCommit = new Commit();
+            newCommit.setBranch(branch);
+            newCommit.setPreviousCommit(branch.getHead());
+            newCommit.setCreatedDate(currentDateService.getNow());
+            newCommit.setEditor(currentUser);
+            newCommit.setItemHash(newHash);
+            session.save(newCommit);
+            branch.setHead(newCommit);
+            session.save(branch);
+        } else {
+            log.warn("Hashes are unchanged, will not save");
+        }
 
         return rootDataNode.hash;
     }
 
     private void recalcHashes(DataNode item) throws IOException {
+        System.out.println("recalcHashes: " + item.name);
         if (item.dirty == null) {
             return; // not dirty, which means no children are dirty
         }
         // only directories have derived hashes        
         if (item instanceof DirectoryNode) {
             DirectoryNode dirNode = (DirectoryNode) item;
-            for (DataNode child : dirNode) {
-                recalcHashes(child);
-            }
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            hashCalc.sort(dirNode.getChildren());
-            String newHash = hashCalc.calcHash(dirNode, bout);
-            item.setHash(newHash);
-            byte[] arrTriplets = bout.toByteArray();
-            blobStore.setBlob(newHash, arrTriplets);
-            if (log.isTraceEnabled()) {
-                log.trace("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
+            System.out.println("is directory. hash=" + item.hash + " loaded=" + item.loadedHash);
+            if (item.hash != null && !item.hash.equals(item.loadedHash)) {
+                System.out.println("hash appears to have been set explicitly, will not recalc: " + item.hash + " old=" + item.loadedHash + " name=" + item.name);
+            } else {
+                for (DataNode child : dirNode) {
+                    recalcHashes(child);
+                }
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                hashCalc.sort(dirNode.getChildren());
+                String newHash = hashCalc.calcHash(dirNode, bout);
+                item.setHash(newHash);
+                byte[] arrTriplets = bout.toByteArray();
+                blobStore.setBlob(newHash, arrTriplets);
+                System.out.println("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
+                if (log.isTraceEnabled()) {
+                    log.trace("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
+                }
+
             }
         }
     }
@@ -271,17 +307,17 @@ public class DataSession {
                 parent.setDirty();
             }
         }
-        
+
         /**
          * Check that the name is composed of legal characters
-         * 
-         * @param name 
+         *
+         * @param name
          */
         void checkNameIsLegal(String name) {
-            if( name.contains(":") || name.contains("\n")|| name.contains("\r") ) {
+            if (name.contains(":") || name.contains("\n") || name.contains("\r")) {
                 throw new RuntimeException("Invalid character in name: " + name + " Colons and newline characters are not permitted");
             }
-        }        
+        }
     }
 
     public class DirectoryNode extends DataNode implements Iterable<DataNode> {
@@ -324,7 +360,7 @@ public class DataSession {
         }
 
         public FileNode addFile(String name, String hash) {
-            if( log.isTraceEnabled()) {
+            if (log.isTraceEnabled()) {
                 log.trace("addFile: " + name + " - " + hash);
             }
             checkNameForAdd(name);
@@ -336,7 +372,7 @@ public class DataSession {
         }
 
         public DirectoryNode addDirectory(String name, String hash) {
-            if( log.isTraceEnabled()) {
+            if (log.isTraceEnabled()) {
                 log.trace("addDirectory: " + name + " - " + hash);
             }
             checkNameForAdd(name);
@@ -403,7 +439,7 @@ public class DataSession {
         }
 
         private void checkNameForAdd(String name) {
-            if( get(name) != null  ) {
+            if (get(name) != null) {
                 throw new RuntimeException("Attempt to add duplicate name: " + name);
             }
             checkNameIsLegal(name);

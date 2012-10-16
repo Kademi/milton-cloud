@@ -92,7 +92,19 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
         Resource r = _(ApplicationManager.class).getPage(this, childName);
         if (r != null) {
             return r;
-        }        
+        }
+        if( childName.startsWith("commit-")) {
+            try {
+                Long commitId = Long.parseLong(childName.replace("commit-", ""));
+                Commit c = Commit.find(repo, commitId, SessionManager.session());
+                if (c != null) {
+                    BranchFolder bf = new BranchFolder(childName, this, c);
+                    return bf;
+                }
+            } catch (NumberFormatException numberFormatException) {
+                log.warn("Invalid commit id");
+            }
+        }
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 

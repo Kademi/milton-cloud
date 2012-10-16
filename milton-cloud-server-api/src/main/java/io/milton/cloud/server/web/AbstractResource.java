@@ -235,6 +235,10 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         }
         return s;
     }
+    
+    public String getLink() {
+        return "<a href=\"" + getHref() + "\">" + getName() + "</a>";
+    }
 
     @Override
     public boolean isPublic() {
@@ -339,6 +343,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         return _(LockManager.class).getCurrentToken(this);
     }
 
+    @Override
     public CommonResource closest(String type) {
         CommonResource r = this;
         while (r != null) {

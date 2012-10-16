@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.content;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.DataResourceApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
@@ -24,6 +25,7 @@ import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.AbstractContentResource;
+import io.milton.cloud.server.web.BranchFolder;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonRepositoryResource;
 import io.milton.cloud.server.web.CommonResource;
@@ -63,7 +65,7 @@ import org.apache.velocity.context.Context;
  *
  * @author brad
  */
-public class ContentApp implements Application, PortletApplication, ResourceApplication, MenuApplication, DataResourceApplication {
+public class ContentApp implements Application, PortletApplication, ResourceApplication, MenuApplication, DataResourceApplication, ChildPageApplication {
 
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
     public static final String PATH_SUFFIX_HISTORY = ".history";
@@ -209,6 +211,15 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
                     }                    
                 }
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Resource getPage(Resource parent, String requestedName) {
+        if( parent instanceof BranchFolder && requestedName.equals("commits")) {
+            BranchFolder branchRes = (BranchFolder) parent;
+            return new CommitsResource(requestedName, branchRes);
         }
         return null;
     }

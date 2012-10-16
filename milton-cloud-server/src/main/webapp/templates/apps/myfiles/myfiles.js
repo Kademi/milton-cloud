@@ -44,11 +44,11 @@ function initFiles() {
     });
     $("#fileList tbody").on("mouseenter", "tr", function(e) {
         var target = $(e.target);
-        addFileTools(target.closest("tr"));
+        showFileTools(target.closest("tr"));
     });
     $("#fileList tbody").on("mouseleave", "tr", function(e) {
         var target = $(e.target);
-        removeFileTools(target.closest("tr"));
+        hideFileTools(target.closest("tr"));
     });    
     $("#fileList tbody").on("click", "a.delete", function(e) {
         e.stopPropagation();
@@ -77,17 +77,22 @@ function initFiles() {
     });
 }
 
-function addFileTools(tr) {
+function showFileTools(tr) {
     var td = tr.find("td:last-child");
-    log("addFileTools", td);
+    log("showFileTools", td);
     var href = tr.find("a.hidden").first().attr("href"); // a.hidden does not get changed by lightbox
-    var toolsDiv = $("<div class='tools'><a class='delete'>Delete</a><a class='rename'>Rename</a><a target='_blank' class='download'>Download</a></div>")
-    toolsDiv.find("a").attr("href", href);
-    td.append(toolsDiv);
+    var toolsDiv = td.find("div.tools");
+    if( toolsDiv != null ) {
+        toolsDiv = $("<div class='tools'><a class='delete'>Delete</a><a class='rename'>Rename</a><a target='_blank' class='download'>Download</a></div>")
+        toolsDiv.find("a").attr("href", href);
+        td.append(toolsDiv);
+    } else {
+        toolsDiv.show();
+    }
 }
 
-function removeFileTools(tr) {
-    tr.find(".tools").remove();
+function hideFileTools(tr) {
+    tr.find(".tools").hide();
 }
 
 function showImportFromUrl() {

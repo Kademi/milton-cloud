@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.content;
 
+import io.milton.cloud.server.apps.dns.SpliffyDomainResourceFactory;
 import io.milton.cloud.server.db.Version;
 import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.JsonResult;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -49,6 +51,8 @@ import org.hibernate.Transaction;
  */
 public class HistoryResource implements GetableResource, PostableResource, DigestResource {
 
+    private static Logger log = Logger.getLogger(HistoryResource.class);
+    
     private final String name;
     private final ContentResource contentResource;
     private JsonResult jsonResult;
@@ -62,7 +66,7 @@ public class HistoryResource implements GetableResource, PostableResource, Diges
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         Session session = SessionManager.session();
         if (params.containsKey("preview")) {
-            sendPreview(params, session);                
+            sendPreview(params, session);
         } else {
             sendHistoryAsJson(session, out);
         }
@@ -70,16 +74,17 @@ public class HistoryResource implements GetableResource, PostableResource, Diges
 
     @Override
     public String getContentType(String accepts) {
-        
+
         return JsonResult.CONTENT_TYPE;
-    }    
-    
+    }
+
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         if (parameters.containsKey("revertHash")) {
             String revertHash = parameters.get("revertHash");
+            log.info("revertHash: " + revertHash);
             try {
                 revert(revertHash, session);
             } catch (IOException ex) {
@@ -157,6 +162,7 @@ public class HistoryResource implements GetableResource, PostableResource, Diges
     }
 
     private void revert(String revertHash, Session session) throws IOException {
+        log.info("revert: set hash on: " + contentResource.getClass());
         this.contentResource.setHash(revertHash);
         this.contentResource.save();
     }
@@ -164,21 +170,30 @@ public class HistoryResource implements GetableResource, PostableResource, Diges
     private void sendPreview(Map<String, String> params, Session session) throws NotFoundException {
         String previewModHash = params.get("preview");
         Version v = Version.find(previewModHash, session);
-        if( v == null ) {
+        if (v == null) {
             throw new NotFoundException("Version not found: " + previewModHash);
         } else {
             String resHash = v.getResourceHash();
-            
+            // TODO
         }
     }
 
     private void sendHistoryAsJson(Session session, OutputStream out) throws IOException {
         List<HistoryItem> history = new ArrayList<>();
         Profile lastModifiedBy = contentResource.getModifiedBy();
-        Version v = Version.find(contentResource.getHash(), contentResource.getModifiedDate(), lastModifiedBy.getId(), SessionManager.session());            
-        while (history.size() < 100 && v != null) {
-            history.add(toHistory(v));
-            v = v.previousVersion(session);
+        long modifiedById = 0;
+        if (lastModifiedBy != null) {
+            modifiedById = lastModifiedBy.getId();
+        }
+        Date modDate = contentResource.getModifiedDate();
+        if (modDate != null) {
+            Version v = Version.find(contentResource.getHash(), modDate, modifiedById, SessionManager.session());
+            while (history.size() < 100 && v != null) {
+                history.add(toHistory(v));
+                v = v.previousVersion(session);
+            }
+        } else {
+            log.warn("modified date is null on resource: " + contentResource.getClass());
         }
         jsonResult = new JsonResult(true);
         jsonResult.setData(history);

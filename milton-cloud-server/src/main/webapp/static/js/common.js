@@ -495,6 +495,7 @@ function createFolder(name, parentHref, callback) {
  *  Prompts the user for a new name, and the does a rename (ie move)
  */
 function promptRename(sourceHref, callback) {
+    log("promptRename", sourceHref);
     var currentName = getFileName(sourceHref);
     var newName = prompt("Please enter a new name for " + currentName, currentName);
     if( newName ) {

@@ -88,7 +88,7 @@ public class UploadUtils {
             throw new BadRequestException(col, "Resource with that name already exists: " + newName);
         }
         
-        
+        log.info("createNew file: " + newName);
         DataSession.FileNode newFileNode = thisNode.addFile(newName);
         FileResource fileResource = new FileResource(newFileNode, col);
 
@@ -114,7 +114,7 @@ public class UploadUtils {
         }
         col.onAddedChild(fileResource);
         fileResource.updateModDate();
-
+        log.info("added ok");
         return fileResource;
     }
 

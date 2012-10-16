@@ -40,10 +40,13 @@
                 <tr>
                     <td>
                         <h5>$w.name</h5>
-                        <p>Current branch: $w.liveBranch, Public: <span class="repoPublicAccess">$w.publicContent</span> <a href="../$w.name" class="togglePublic togglePublic-$w.publicContent">(change)</a> </p>
+                        <p>Current branch: $w.liveBranch, Public: <span class="repoPublicAccess">$w.publicContent</span> 
+                            <a href="../$w.name" class="togglePublic togglePublic-$w.publicContent">(change)</a> 
+                        </p>
                     </td>
                     <th>
                         <a href="../$w.name" class="Btn ViewWebsite">View</a> 
+                        <a href="../$w.name/$w.liveBranch/commits" class="Btn ViewWebsite history">History</a> 
                         <a class="Btn DeleteRepo" href="../$w.name">Delete</a>
                     </th>                                        
                 </tr>

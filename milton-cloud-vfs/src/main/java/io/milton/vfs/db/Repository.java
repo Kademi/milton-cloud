@@ -179,6 +179,9 @@ public class Repository implements Serializable {
         b.setHead(head);
         session.save(b);
 
+        head.setBranch(b);
+        session.save(b);
+        
         if (getBranches() == null) {
             setBranches(new ArrayList<Branch>());
         }

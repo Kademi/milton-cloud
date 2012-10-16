@@ -7,6 +7,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.http.http11.auth.DigestGenerator;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
 
 /**
  *
@@ -42,10 +43,17 @@ public class PasswordManager {
             epc.setCreatedDate(new Date());
             epc.setModifiedDate(new Date());
             epc.setProfile(user);
+            
+            if( user.getCredentials() == null ) {
+                user.setCredentials(new ArrayList<Credential>());
+            }
+            user.getCredentials().add(epc);
         }
         String hash = calcPasswordHash(user.getName(), newPassword);
         epc.setPassword(hash);
+        SessionManager.session().save(user);
         SessionManager.session().save(epc);
+        
     }
 
     public String calcPasswordHash(String userName, String password) {

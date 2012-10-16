@@ -1,10 +1,16 @@
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * A Commit is a link between a Repository and an TreeItem
@@ -21,7 +27,28 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name="COMMIT_ITEM")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Commit implements Serializable {
+
+    public static Commit find(Repository repo, long commitId, Session session) {
+        Commit c = (Commit) session.get(Commit.class, commitId);
+        if( c == null ) {
+            return null;
+        }
+        if( c.getBranch().getRepository() != repo ) {
+            return null;
+        }
+        return c;
+    }
+    
+    public static List<Commit> findByBranch(Branch branch, Session session) {
+        Criteria c = session.createCriteria(Commit.class);
+        c.add(Restrictions.eq("branch", branch));
+        c.addOrder(Order.desc("createdDate"));
+        return DbUtils.toList(c, Commit.class);
+    }
+    
     private long id;
+    private Branch branch;
+    private Commit previousCommit;
     private String itemHash; // this is the root directory for the repository (in this version)   
     private Date createdDate; 
     private Profile editor;
@@ -29,6 +56,29 @@ public class Commit implements Serializable {
     public Commit() {
     }
 
+    @ManyToOne
+    public Branch getBranch() {
+        return branch;
+    }
+
+    public void setBranch(Branch branch) {
+        this.branch = branch;
+    }
+
+    @ManyToOne
+    public Commit getPreviousCommit() {
+        return previousCommit;
+    }
+
+    public void setPreviousCommit(Commit previousCommit) {
+        this.previousCommit = previousCommit;
+    }
+
+    
+    
+
+    
+    
     @Column
     public String getItemHash() {
         return itemHash;

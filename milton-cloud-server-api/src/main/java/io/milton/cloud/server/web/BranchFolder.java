@@ -29,10 +29,8 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Repository;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.ConcurrentHashMap;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 
@@ -69,13 +67,28 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         this.dataSession = new DataSession(branch, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
     }
 
+    public BranchFolder(String name, CommonCollectionResource parent, Commit commit) {
+        this.name = name;
+        this.parent = parent;
+        this.branch = null;
+        this.commit = commit;
+        this.dataSession = new DataSession(commit, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
+    }
+
     @Override
     public String getUniqueId() {
-        return "br" + branch.getId();
+        if (branch != null) {
+            return "br" + branch.getId();
+        } else {
+            return "cm" + commit.getId();
+        }
     }
 
     @Override
     public void save() throws IOException {
+        if (branch == null) {
+            throw new RuntimeException("Cannot save because the branch is null. this is probably because you're viewing a commit");
+        }
         String lastHash = null;
         Long lastId = null;
         if (branch != null && branch.getHead() != null) {
@@ -166,12 +179,20 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public Date getCreateDate() {
-        return loadNodeMeta().getCreatedDate();
+        return getBranch().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        return loadNodeMeta().getModDate();
+        if( branch != null) {
+            if( branch.getHead() != null ) {
+                return branch.getHead().getCreatedDate();
+            } else {
+                return branch.getCreatedDate();
+            }
+        } else {
+            return commit.getCreatedDate();
+        }
     }
 
     private NodeMeta loadNodeMeta() {
@@ -190,9 +211,9 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (params.containsKey("importStatus")) {
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-            if (p != null) {                
+            if (p != null) {
                 Importer importer = Importer.getImporter(p, this);
-                if( importer != null ) {
+                if (importer != null) {
                     jsonResult = new JsonResult(true);
                     jsonResult.setData(importer);
                 } else {
@@ -327,14 +348,22 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     }
 
-
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
 
     public String getTitle() {
-        return this.branch.getRepository().getTitle();
+        if (branch != null) {
+            return this.branch.getRepository().getTitle();
+        } else {
+            if (commit != null) {
+                if (commit.getBranch() != null) {
+                    return commit.getBranch().getRepository().getTitle();
+                }
+            }
+            return "Unknown branch";
+        }
     }
 
     @Override
@@ -387,37 +416,59 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     @Override
     public boolean isPublic() {
-        return branch.getRepository().isPublicContent();
+        return getBranch().getRepository().isPublicContent();
     }
 
     @Override
     public Branch getBranch() {
-        return branch;
+        if (branch != null) {
+            return branch;
+        } else {
+            return commit.getBranch();
+        }
+    }
+
+    public Commit getCommit() {
+        if (branch != null) {
+            return branch.getHead();
+        } else {
+            return commit;
+        }
     }
 
     @Override
     public Repository getRepository() {
-        return branch.getRepository();
+        return getBranch().getRepository();
     }
 
     @Override
     public String getHash() {
-        Commit c = branch.getHead();
-        if (c == null) {
-            return null;
+        if (branch != null) {
+            Commit c = branch.getHead();
+            if (c == null) {
+                return null;
+            } else {
+                return c.getItemHash();
+            }
         } else {
-            return c.getItemHash();
+            return commit.getItemHash();
         }
     }
 
     @Override
     public void setHash(String s) {
         this.dataSession.getRootDataNode().setHash(s);
+        children = null;
     }
 
     @Override
     public Profile getModifiedBy() {
-        Commit h = branch.getHead();
+        Commit h;
+        if (branch != null) {
+            h = branch.getHead();
+        } else {
+            h = commit;
+        }
         if (h == null) {
             return null;
         } else {
@@ -504,11 +555,11 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     public String getPublicTheme() {
-        return branch.getPublicTheme();
+        return getBranch().getPublicTheme();
     }
 
     public String getInternalTheme() {
-        return branch.getInternalTheme();
+        return getBranch().getInternalTheme();
     }
 
     public List<String> getThemes() {
@@ -643,7 +694,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     public boolean isLive() {
-        String sBranch = this.branch.getRepository().getLiveBranch();
+        String sBranch = this.getBranch().getRepository().getLiveBranch();
         if (sBranch == null) {
             return false;
         }
