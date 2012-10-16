@@ -317,7 +317,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Organisation createChildOrg(String orgName, Session session) {
-        System.out.println("createChildOrg");
         Organisation o = new Organisation();
         o.setOrganisation(this);
         o.setName(orgName);
@@ -330,7 +329,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.getChildOrgs().add(o);
         session.save(o);
         SubOrg.updateSubOrgs(o, session);
-        System.out.println("done");
         return o;
     }
 

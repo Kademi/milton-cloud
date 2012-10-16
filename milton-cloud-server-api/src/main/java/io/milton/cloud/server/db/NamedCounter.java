@@ -48,13 +48,13 @@ public class NamedCounter implements Serializable {
     public static NamedCounter findOrCreate(String name, Session session) {
         NamedCounter c = findByName(name, session);
         if( c == null ) {
-            System.out.println("counter not found: " + name);
+//            System.out.println("counter not found: " + name);
             c = new NamedCounter();
             c.setName(name);
             c.setCounter(1);
             session.save(c);
         } else {
-            System.out.println("found counter: " + name + " - " + c.getCounter());
+//            System.out.println("found counter: " + name + " - " + c.getCounter());
         }
         return c;
     }

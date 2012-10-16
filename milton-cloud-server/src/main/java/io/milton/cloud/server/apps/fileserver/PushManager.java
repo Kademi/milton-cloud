@@ -21,6 +21,9 @@ import io.milton.cloud.server.apps.fileserver.TcpChannelHub.Client;
 import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.context.Context;
+import io.milton.context.Executable2;
+import io.milton.context.RootContext;
 import io.milton.event.DeleteEvent;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
@@ -48,29 +51,31 @@ public class PushManager implements EventListener {
     private final CurrentRootFolderService currentRootFolderService;
     private final Map<Long, Client> authenticatedClients = new ConcurrentHashMap<>(); // key is the profile id
     private final SessionManager sessionManager;
+    private final RootContext rootContext;
 
-    public PushManager(int port, EventManager eventManager, SpliffySecurityManager securityManager, CurrentRootFolderService currentRootFolderService, SessionManager sessionManager) {
+    public PushManager(int port, EventManager eventManager, SpliffySecurityManager securityManager, CurrentRootFolderService currentRootFolderService, SessionManager sessionManager, RootContext rootContext) {
         if (sessionManager == null) {
             throw new RuntimeException("sessionManager cannot be null");
         }
         this.eventManager = eventManager;
+        this.rootContext = rootContext;
         hub = new TcpChannelHub(port, new ClientConnectionClientListener());
         this.securityManager = securityManager;
         this.currentRootFolderService = currentRootFolderService;
         this.sessionManager = sessionManager;
     }
-    
+
     public void start() {
         hub.start();
         eventManager.registerEventListener(this, PutEvent.class);
         eventManager.registerEventListener(this, DeleteEvent.class);
-        eventManager.registerEventListener(this, MoveEvent.class);        
+        eventManager.registerEventListener(this, MoveEvent.class);
     }
 
     public void stop() {
         hub.stop();
     }
-    
+
     @Override
     public void onEvent(Event e) {
         log.info("onEvent: " + e);
@@ -102,29 +107,35 @@ public class PushManager implements EventListener {
     public class ClientConnectionClientListener implements ClientListener {
 
         @Override
-        public void handleNotification(Client client, Serializable msg) {
+        public void handleNotification(final Client client, final Serializable msg) {
             if (msg instanceof AuthenticateMessage) {
-                sessionManager.open();
-                try {
-                    log.info("handleNotification: authenticate");
-                    AuthenticateMessage auth = (AuthenticateMessage) msg;
-                    RootFolder rootFolder = currentRootFolderService.getRootFolder(auth.getWebsite());
-                    if (rootFolder == null) {
-                        log.warn("No such host: " + auth.getWebsite());
-                        respondNoSuchHost(client, auth.getWebsite());
-                    } else {
-                        Profile p = securityManager.authenticate(rootFolder.getOrganisation(), auth.getUsername(), auth.getPassword());
-                        if (p == null) {
-                            log.warn("Login failed: " + auth.getWebsite() + " user=" + auth.getUsername() + " pwd:" + auth.getPassword());
-                            respondLoginFailed(client, auth.getUsername(), rootFolder.getOrganisation().getName());
-                        } else {
-                            log.info("handleNotification: auth ok: " + auth.getUsername());
-                            authenticatedClients.put(p.getId(), client);
+                rootContext.execute(new Executable2() {
+                    @Override
+                    public void execute(Context context) {
+                        sessionManager.open();
+                        try {
+                            log.info("handleNotification: authenticate");
+                            AuthenticateMessage auth = (AuthenticateMessage) msg;
+                            RootFolder rootFolder = currentRootFolderService.getRootFolder(auth.getWebsite());
+                            if (rootFolder == null) {
+                                log.warn("No such host: " + auth.getWebsite());
+                                respondNoSuchHost(client, auth.getWebsite());
+                            } else {
+                                Profile p = securityManager.authenticate(rootFolder.getOrganisation(), auth.getUsername(), auth.getPassword());
+                                if (p == null) {
+                                    log.warn("Login failed: " + auth.getWebsite() + " user=" + auth.getUsername() + " pwd:" + auth.getPassword());
+                                    respondLoginFailed(client, auth.getUsername(), rootFolder.getOrganisation().getName());
+                                } else {
+                                    log.info("handleNotification: auth ok: " + auth.getUsername());
+                                    authenticatedClients.put(p.getId(), client);
+                                }
+                            }
+                        } finally {
+                            sessionManager.close();
                         }
+
                     }
-                } finally {
-                    sessionManager.close();
-                }
+                });
             }
         }
 

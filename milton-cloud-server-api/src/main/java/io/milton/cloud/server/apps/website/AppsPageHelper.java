@@ -106,7 +106,6 @@ public class AppsPageHelper {
         } else {
             availableApps = appManager.findAvailableApps(organisation);
             activeApps = appManager.findActiveApps(organisation);
-            System.out.println("active apps: " + activeApps.size());
         }
         List<AppControlBean> beans = new ArrayList<>();
         for (Application app : availableApps) {

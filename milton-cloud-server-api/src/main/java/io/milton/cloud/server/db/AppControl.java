@@ -144,7 +144,6 @@ public class AppControl implements Serializable {
             newac.setModifiedBy(currentUser);
             newac.setModifiedDate(now);
             session.save(newac);
-            System.out.println("added app control: " + newac.getId());
         }
     }
 
@@ -153,7 +152,6 @@ public class AppControl implements Serializable {
         for (AppControl ac : find(org, session)) {
             AppControl newac = new AppControl();
             if (ac.isEnabled()) {
-                System.out.println("enabled: " + ac.getName());
                 newac.setEnabled(true);
                 newac.setName(ac.getName());
                 newac.setWebsiteBranch(websiteBranch);
@@ -252,7 +250,6 @@ public class AppControl implements Serializable {
         if (getAppSettings() != null) {
             for (AppSetting appSetting : getAppSettings()) {
                 if (appSetting.getName().equals(setting)) {
-                    System.out.println("Get setting: " + appSetting.getName() + " = " + appSetting.getPropValue());
                     return appSetting.getPropValue();
                 }
             }
@@ -287,7 +284,6 @@ public class AppControl implements Serializable {
         } else {
             setting.setPropValue(settingValue);
             session.save(setting);
-            System.out.println("Set setting: " + setting.getName() + " = " + setting.getPropValue());
         }
     }
 

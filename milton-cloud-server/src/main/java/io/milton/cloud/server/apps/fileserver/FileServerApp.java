@@ -53,8 +53,8 @@ public class FileServerApp implements LifecycleApplication, MenuApplication, Chi
             port = DEFAULT_PUSH_SYNC_PORT;
         }
         CurrentRootFolderService currentRootFolderService = config.getContext().get(CurrentRootFolderService.class);
-        SessionManager sessionManager = resourceFactory.getSessionManager();
-        pushManager = new PushManager(port, resourceFactory.getEventManager(), resourceFactory.getSecurityManager(), currentRootFolderService, sessionManager);
+        SessionManager sessionManager = resourceFactory.getSessionManager();        
+        pushManager = new PushManager(port, resourceFactory.getEventManager(), resourceFactory.getSecurityManager(), currentRootFolderService, sessionManager, config.getContext()); 
         config.getContext().put(pushManager);
 
         pushManager.start();

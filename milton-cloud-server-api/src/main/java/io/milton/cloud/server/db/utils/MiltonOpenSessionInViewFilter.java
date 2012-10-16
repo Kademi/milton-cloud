@@ -9,6 +9,8 @@ import io.milton.http.FilterChain;
 import io.milton.http.Request;
 import io.milton.http.Response;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,6 +18,8 @@ import org.hibernate.Session;
  */
 public class MiltonOpenSessionInViewFilter implements Filter {
 
+    private static final Logger log = LoggerFactory.getLogger(MiltonOpenSessionInViewFilter.class);
+    
     private final SessionManager sessionManager;
     private final MCRootContext rootContext;
 
@@ -41,6 +45,6 @@ public class MiltonOpenSessionInViewFilter implements Filter {
             }
         });
         tm = System.currentTimeMillis() - tm;
-        System.out.println("Finished request: " + tm + "ms  for " + request.getAbsolutePath());
+        log.info("Finished request: " + tm + "ms  for " + request.getAbsolutePath() + " method=" + request.getMethod());
     }
 }

@@ -93,7 +93,6 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                 if (newEmail != null) {
                     newEmail = newEmail.trim();
                 }
-                System.out.println("checjk email:" + oldEmail + " == " + newEmail);
                 if (oldEmail == null || (newEmail != null && !newEmail.equals(oldEmail))) {
                     Profile someOtherUser = Profile.findByEmail(newEmail, getOrganisation(), session);
                     if (someOtherUser != null) {

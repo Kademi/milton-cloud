@@ -223,6 +223,14 @@
                         <version>6.1.26</version>
                         <executions>
                             <execution>
+                                <id>stop</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>run</id>
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -333,6 +341,14 @@
                         <artifactId>maven-jetty-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>stop</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>run</id>
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>run</goal>

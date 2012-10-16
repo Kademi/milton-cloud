@@ -11,7 +11,6 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;

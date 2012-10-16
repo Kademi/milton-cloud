@@ -203,7 +203,6 @@ public class Group implements Serializable, VfsAcceptor {
 
         // Check if this role already exists
         for (GroupRole gr : getGroupRoles()) {
-            System.out.println("gr = " + gr.getRoleName());
             if (gr.getRoleName().equals(roleName)) {
                 if (gr.getWithinOrg() != null && gr.getWithinOrg() == withinOrg) {
                     // nothing to do

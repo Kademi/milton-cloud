@@ -85,7 +85,6 @@ public class AppConfig {
     
     public void set(String settingName, Organisation org, String settingValue) {
         AppControl appControl = AppControl.find(org, applicationId, SessionManager.session());
-        System.out.println("find for org: " + org.getName() + " = " + appControl);
         if( appControl == null ) {
             throw new RuntimeException("Cant save setting because there is no Appcontrol record");
         }

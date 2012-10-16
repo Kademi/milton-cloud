@@ -84,7 +84,7 @@ public class DirWalker {
                         //log.info("in sync: " + childPath);
                         syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
                     } else {
-                        // log.info("different hashes: " + childPath);
+                         log.info("different hashes: " + childPath + " local hash: " + localTriplet.getHash() +  " remote hash: " + remoteTriplet.getHash());
                         doDifferentHashes(remoteTriplet, localTriplet, childPath);
                     }
                 }

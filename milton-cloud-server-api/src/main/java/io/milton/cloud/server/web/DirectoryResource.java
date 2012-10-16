@@ -111,9 +111,7 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         if (children == null) {
             ApplicationManager am = _(ApplicationManager.class);
             children = am.toResources(this, directoryNode);
-            System.out.println("getChildren1 -- " + getHref() + " = " + children.size());
             am.addBrowseablePages(this, children);
-            System.out.println("getChildren2 -- " + getHref() + " = " + children.size());
         }
         return children;
     }
@@ -425,10 +423,10 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
             if (html != null) {
                 html.doSaveHtml();
             } else {
-                System.out.println("No html page to save");
+                log.warn("No html page to save");
             }
         } else {
-            System.out.println("not updatedIndex ---");
+            log.debug("not updatedIndex ---");
         }
     }
 

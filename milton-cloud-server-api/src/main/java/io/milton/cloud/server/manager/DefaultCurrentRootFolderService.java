@@ -158,7 +158,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
             
             // not exact match on website, but might have a branch suffix. Eg qa.mysite.somewhere.com
             // which would be QA branch of the "mysite" website, with somewhere.com as primary domain
-            System.out.println("resolve: subdomain=" + subdomain);
+            //System.out.println("resolve: subdomain=" + subdomain);
             if( subdomain.contains(".")) {
                 // split the subdomain
                 int pos = subdomain.indexOf(".");

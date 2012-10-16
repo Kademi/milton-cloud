@@ -136,7 +136,7 @@ public class TcpChannelClient implements Channel, LocalAddressAccessor {
 
     private synchronized void connect() {
         boolean didConnect = false;
-        log.debug( "attempt to connect: " + hubAddress + ":" + hubPort );
+        log.info( "attempt to connect: " + hubAddress + ":" + hubPort );
         try {
             MessageReceiver rcv = new MessageReceiver();
             Map<String, Object> options = new HashMap<>();
@@ -201,7 +201,10 @@ public class TcpChannelClient implements Channel, LocalAddressAccessor {
             try {
                 while( running ) {
                     if( !isConnected() ) {
+                        System.out.println("not connected");
                         connect();
+                    } else {
+//                        System.out.println("is connected");
                     }
                     Thread.sleep( 5000 );
                 }
@@ -213,6 +216,9 @@ public class TcpChannelClient implements Channel, LocalAddressAccessor {
 
     private class MessageReceiver implements IDataHandler {
 
+        public MessageReceiver() {
+        }       
+        
         @Override
         public boolean onData( INonBlockingConnection con ) throws IOException, BufferUnderflowException, ClosedChannelException, MaxReadSizeExceededException {
             try {

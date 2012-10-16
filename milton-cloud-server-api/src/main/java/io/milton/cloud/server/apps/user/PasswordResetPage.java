@@ -90,7 +90,6 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        System.out.println("xxxxxaaaaa");
         if( jsonResult != null ) {
             jsonResult.write(out);
         } else {

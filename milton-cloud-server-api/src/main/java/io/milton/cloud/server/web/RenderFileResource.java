@@ -365,7 +365,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         checkParse();
         List<String> names = new ArrayList<>();
         for (WebResource wr : this.webResources) {
-            System.out.println("    wr= " + wr.getRawHtml());
             if (wr.getTag().equals("script")) {
                 String type = wr.getAtts().get("type");
                 if ("data/parameter".equals(type)) {

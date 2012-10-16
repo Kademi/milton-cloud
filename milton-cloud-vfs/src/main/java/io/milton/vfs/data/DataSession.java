@@ -162,16 +162,14 @@ public class DataSession {
     }
 
     private void recalcHashes(DataNode item) throws IOException {
-        System.out.println("recalcHashes: " + item.name);
         if (item.dirty == null) {
             return; // not dirty, which means no children are dirty
         }
         // only directories have derived hashes        
         if (item instanceof DirectoryNode) {
             DirectoryNode dirNode = (DirectoryNode) item;
-            System.out.println("is directory. hash=" + item.hash + " loaded=" + item.loadedHash);
             if (item.hash != null && !item.hash.equals(item.loadedHash)) {
-                System.out.println("hash appears to have been set explicitly, will not recalc: " + item.hash + " old=" + item.loadedHash + " name=" + item.name);
+                log.info("hash appears to have been set explicitly, will not recalc: " + item.hash + " old=" + item.loadedHash + " name=" + item.name);
             } else {
                 for (DataNode child : dirNode) {
                     recalcHashes(child);
@@ -182,7 +180,6 @@ public class DataSession {
                 item.setHash(newHash);
                 byte[] arrTriplets = bout.toByteArray();
                 blobStore.setBlob(newHash, arrTriplets);
-                System.out.println("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
                 if (log.isTraceEnabled()) {
                     log.trace("recalcHashes: " + item.name + " children:" + dirNode.members.size() + " hash=" + newHash);
                 }
