@@ -8,12 +8,12 @@
     <distributionManagement>
         <repository>
             <id>ettrema-repo</id>
-            <url>http://www.ettrema.com/maven2</url>
+            <url>http://milton.io/maven</url>
         </repository>
         <snapshotRepository>
             <uniqueVersion>false</uniqueVersion>
             <id>ettrema-repo</id>
-            <url>http://www.ettrema.com/maven2</url>
+            <url>http://milton.io/maven</url>
         </snapshotRepository>
     </distributionManagement>
     <developers>
@@ -27,7 +27,7 @@
     <properties>
         <milton.version>2.2.1-SNAPSHOT</milton.version>
         <endrick.version>1.7.8</endrick.version>
-        <hashsplit4j.version>2.0.3-SNAPSHOT</hashsplit4j.version>
+        <hashsplit4j.version>2.0.3</hashsplit4j.version>
         <hibernate.version>3.2.6.ga</hibernate.version>
         <hibernate.annotations.version>3.3.0.ga</hibernate.annotations.version>
         <jpa.version>1.0</jpa.version>
