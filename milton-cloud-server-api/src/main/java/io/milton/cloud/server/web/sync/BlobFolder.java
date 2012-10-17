@@ -15,6 +15,7 @@ import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.Request;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.PutableResource;
+import org.apache.log4j.Logger;
 
 /**
  * This folder allows blobs to be written directly to the blob store, independently
@@ -24,6 +25,8 @@ import io.milton.resource.PutableResource;
  */
 class BlobFolder extends  BaseResource implements PutableResource {
 
+    private static final Logger log = Logger.getLogger(BlobFolder.class);
+    
     private final BlobStore blobStore;
     private final String name;
     
@@ -53,19 +56,25 @@ class BlobFolder extends  BaseResource implements PutableResource {
      * @throws BadRequestException 
      */
     @Override 
-    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {        
+        long tm = System.currentTimeMillis();
         ByteArrayOutputStream bout = new ByteArrayOutputStream(length.intValue());
         long actualBytes = IOUtils.copyLarge(inputStream, bout);
         if( length != null && !length.equals(actualBytes)) {
             throw new RuntimeException("Blob is not of expected length: expected=" + length + " actual=" + actualBytes);
         }
         byte[] bytes = bout.toByteArray();
+        log.info("createNew: " + newName + " size=" + length + " actual bytes=" + bytes.length + " duration=" + (System.currentTimeMillis()-tm));
         
         // Verify that the given hash does match the data
+        log.info("verify that filename matches hash...");
         ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
         HashCalc.getInstance().verifyHash(bin, newName); // will throw exception if not valid
+        log.info("done verify" + " duration=" + (System.currentTimeMillis()-tm));
         
+        log.info("set blob into store: " + blobStore.getClass());
         blobStore.setBlob(newName, bytes);
+        log.info("done set blob" + " duration=" + (System.currentTimeMillis()-tm));
         return new BlobResource(bytes, newName, securityManager, org);
     }
 

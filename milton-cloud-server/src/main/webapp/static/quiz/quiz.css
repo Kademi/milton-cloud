@@ -1,0 +1,57 @@
+
+#quizQuestions {
+    min-height: 400px;
+}
+#quizQuestions p, #quizQuestions h3, #quizQuestions li  {
+    line-height: 16px;
+}
+#quizQuestions h3 {
+    margin: 0;
+    display: inline-block;
+}
+#quizQuestions h3, #quizQuestions p, #quizQuestions label {
+    padding: 5px 7px;        
+    border: solid 1px transparent;
+}
+#quizQuestions h3:hover, #quizQuestions p:hover, #quizQuestions label:hover {
+    border: solid 1px #dedede;
+    background-color: white;
+}
+#quizQuestions input {
+    margin-top: 5px;
+    background-image: none;
+}
+#quizQuestions input.question {
+    display: block;
+}
+#quizQuestions input.helptext {
+    display: block;
+}
+#quizQuestions input.answer {
+    display: block;
+}
+#quizQuestions ol.quiz {
+    list-style-position: outside;
+    padding: 10px 0 0 20px;
+    list-style-type: decimal;
+}
+#quizQuestions ol.quiz > li {
+    padding: 10px 0;
+    position: relative;
+}
+#quizQuestions input.P, #quizQuestions input.H3 {
+    display: block;
+}
+#quizQuestions li label {
+    min-width: 100px;
+    display: inline;
+}
+#quizQuestions li span.delete {
+    display: block;
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    width: 11px;
+    height: 11px;
+    background-image: url(/templates/themes/admin/images/icon_delete.png);
+}

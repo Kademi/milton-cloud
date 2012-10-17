@@ -35,6 +35,9 @@ import java.util.List;
 public class Formatter {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Formatter.class);
+    
+    public static final String CHECKBOX_SUFFIX = "_checkbox";
+    
     public static ThreadLocal<DateFormat> tlSdfUkShort = new ThreadLocal<DateFormat>() {
         @Override
         protected DateFormat initialValue() {
@@ -801,6 +804,10 @@ public class Formatter {
         return checkbox(null, name, oChecked, "true");
     }
 
+    public String checkbox(String id, String name, Object oChecked) {
+        return checkbox(id, name, oChecked, "true");
+    }
+    
     public String checkbox(String id, String name, Object oChecked, String value) {
         Boolean checked = toBool(oChecked);
         if (checked == null) {
@@ -816,6 +823,7 @@ public class Formatter {
             sb.append(" id=\"").append(id).append("\"");
         }
         sb.append(" />");
+        sb.append("<input type='hidden' value='' name='").append(name).append(CHECKBOX_SUFFIX).append("'/>");
         return sb.toString();
     }
 

@@ -43,9 +43,7 @@ public class GetResource extends BaseResource implements GetableResource {
     public boolean authorise(Request rqst, Method method, Auth auth) {
         return true;
     }
-
-    
-    
+        
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> map, String string) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         Combiner combiner = new Combiner();

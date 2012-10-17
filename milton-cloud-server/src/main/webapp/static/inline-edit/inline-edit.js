@@ -129,6 +129,8 @@ function edifyPage(selector) {
 
 function submitEdifiedForm(callback) {
     var form = $("#edifyForm");
+    log("trigger event..");
+    form.trigger("submitEdified");
     log("submit form", form);
     for( var key in CKEDITOR.instances) {
         var editor = CKEDITOR.instances[key];

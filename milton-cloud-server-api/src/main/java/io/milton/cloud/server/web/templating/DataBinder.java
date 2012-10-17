@@ -17,12 +17,12 @@
 package io.milton.cloud.server.web.templating;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean2;
-import org.apache.commons.beanutils.converters.DateConverter;
 import org.apache.commons.beanutils.converters.DateTimeConverter;
 
 /**
@@ -45,6 +45,20 @@ public class DataBinder {
     }
 
     public void populate(Object bean, Map properties) throws IllegalAccessException, InvocationTargetException {
+        // need to cater for check boxes which send no value if not set
+        // we use a convention that every check has a hidden input with name=name_checkbox
+        // see Formatter.checkbox for details
+        List keys = new ArrayList(properties.keySet());
+        for(Object key : keys) {
+            String k = key.toString();
+            if( k.endsWith("_checkbox")) {
+                String propName = k.replace(Formatter.CHECKBOX_SUFFIX, "");
+                if( !properties.containsKey(propName)) {
+                    System.out.println("adding prop: " + propName);
+                    properties.put(propName, "");
+                }
+            }
+        }
         bub.populate(bean, properties);
     }
 

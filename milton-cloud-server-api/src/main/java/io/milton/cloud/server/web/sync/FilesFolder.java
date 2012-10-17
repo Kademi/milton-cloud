@@ -20,6 +20,7 @@ import io.milton.resource.PostableResource;
 import io.milton.resource.PutableResource;
 import java.util.Arrays;
 import java.util.Map;
+import org.hashsplit4j.api.Fanout;
 import org.hashsplit4j.api.HashStore;
 import org.hashsplit4j.api.Parser;
 
@@ -51,14 +52,26 @@ class FilesFolder extends BaseResource implements PutableResource, PostableResou
         return name;
     }
 
+    /**
+     * Note that, contrary to the spec, this will create resources which do not
+     * have the name given. The name of the resource will always be that of its hash
+     * 
+     * @param newName
+     * @param inputStream
+     * @param length
+     * @param contentType
+     * @return
+     * @throws IOException
+     * @throws ConflictException
+     * @throws NotAuthorizedException
+     * @throws BadRequestException 
+     */
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Parser parser = new Parser();
-
-        InputStream in = HttpManager.request().getInputStream();
-        String hash = parser.parse(in, hashStore, blobStore);
-
-        return new GetResource(null, hash, securityManager, org, blobStore, hashStore);
+        String hash = parser.parse(inputStream, hashStore, blobStore);
+        Fanout fanout = hashStore.getFileFanout(hash);
+        return new GetResource(fanout, hash, securityManager, org, blobStore, hashStore);
     }
 
     @Override

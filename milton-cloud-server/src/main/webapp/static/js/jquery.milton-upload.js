@@ -50,12 +50,11 @@
                         $('.progress .bar', buttonBar).css('width','0%');
                     });
                 },
-                progressall: function (e, data) {
-                    log("progress", e, data)
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
-                    log("progress", progress);
+                progressall: function (e, data) {                    
+                    var progress = parseInt(data.loaded / data.total * 100, 10);                    
                     $('.progress').show();
                     $('.progress .bar', buttonBar).css('width',progress + '%');
+                    log("progress", e, data, progress);
                 }        
             });
             log("done fileupload init");
