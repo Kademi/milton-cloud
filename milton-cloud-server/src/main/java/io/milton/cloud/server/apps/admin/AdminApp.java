@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.apps.user.DashboardMessageUtils;
 import io.milton.cloud.server.apps.website.AppsPageHelper;
 import io.milton.cloud.server.apps.website.ManageWebsiteBranchFolder;
 import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
@@ -30,6 +31,7 @@ import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.reporting.ReportingApp;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.reporting.JsonReport;
@@ -43,14 +45,18 @@ import io.milton.vfs.db.Website;
 import java.util.Set;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
 import io.milton.resource.CollectionResource;
 import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import org.apache.velocity.context.Context;
 
 /**
@@ -88,14 +94,14 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     }
 
     @Override
-    public String getSummary(Organisation organisation,Branch websiteBranch) {
+    public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides most admin console functionality, such as managing users, groups, websites, etc";
     }
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
         if (parent instanceof OrganisationFolder) {
-            CommonCollectionResource p = (CommonCollectionResource) parent;
+            OrganisationFolder p = (OrganisationFolder) parent;
             switch (requestedName) {
                 case "manageUsers":
                     MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuUsers");
@@ -106,12 +112,20 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
+                case "manageDashboardMessages":
+                    return new ManageDashboardMessagesListPage(p, requestedName);
 
             }
-        } else if( parent instanceof BranchFolder) {
-            BranchFolder bf = (BranchFolder) parent;
-            if( requestedName.equals("publish")) {
+        } else if (parent instanceof ManageWebsiteBranchFolder) {
+            ManageWebsiteBranchFolder bf = (ManageWebsiteBranchFolder) parent;
+            if (requestedName.equals("publish")) {
                 return new PublishBranchPage(requestedName, bf);
+            } else if (requestedName.startsWith("_dashboard_")) {
+                String groupName = requestedName.replace("_dashboard_", "");
+                Group g = bf.getOrganisation().group(groupName, SessionManager.session());
+                if (g != null) {
+                    return new ManageDashboardMessagePage(g, bf);
+                }
             }
         }
         return null;
@@ -144,6 +158,13 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 //parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
                 parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;
+            case "menuTalk":
+                parent.getOrCreate("menuDashboardMessages", "Dashboard messages").setOrdering(10);
+                break;
+            case "menuDashboardMessages":
+                parent.getOrCreate("menuGroupDashboardMessages", "Group dashboard messages", parentOrg.getPath().child("manageDashboardMessages")).setOrdering(60);
+                break;
+
         }
     }
 
@@ -183,8 +204,9 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                     writer.append("</script>\n");
                 }
                 writer.append("</div>\n");
-            }
+            }            
         }
+
     }
 
     @Override
@@ -192,7 +214,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         if (parent instanceof ManageWebsiteFolder && o instanceof Branch) {
             Branch b = (Branch) o;
             Repository r = b.getRepository();
-            Website w = (Website) r;            
+            Website w = (Website) r;
             return new ManageWebsiteBranchFolder(w, b, parent);
         }
         return null;
@@ -200,9 +222,9 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
 
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
-       if (parent instanceof OrganisationFolder) {
+        if (parent instanceof OrganisationFolder) {
             CommonCollectionResource p = (CommonCollectionResource) parent;
-            children.add(new ManageWebsitesFolder("websites", p.getOrganisation(), p));            
+            children.add(new ManageWebsitesFolder("websites", p.getOrganisation(), p));
         }
     }
 
@@ -227,9 +249,9 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
 
         @Override
         public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
-            if( resource instanceof CommonRepositoryResource ) {
+            if (resource instanceof CommonRepositoryResource) {
                 CommonRepositoryResource cr = (CommonRepositoryResource) resource;
-                return ( cr.getRepository() == applicableRepo );                                    
+                return (cr.getRepository() == applicableRepo);
             } else {
                 return false;
             }

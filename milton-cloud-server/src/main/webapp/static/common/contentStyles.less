@@ -1,7 +1,6 @@
 
 @import url("/static/common/modal.css");
 
-
 /** Mixins */
 .text1 {
     color: @text1 !important;
@@ -27,6 +26,9 @@ html body .bg-hero1 {
 html body .bg-hero2 {
     background-color:@hero2;
 }
+
+
+
 
 .box (@radius: @borderRadius) {
     border-radius: @radius;
@@ -823,12 +825,6 @@ a.hero {
     color: white;
 }
 
-a.hero.disabled, a.bg-hero1.disabled {
-    background-color: #d7d7d7;
-    border-color: #d7d7d7;
-    color: white;
-    cursor: not-allowed;
-}
 a.hero.active {
     color: #1C1D1F;
 }
@@ -1329,10 +1325,9 @@ legend {
     text-align: center;
     margin:16px 15px 0;
     position:relative;
-    overflow:hidden;
     margin: 0 auto;
     background-color: #EEEEEE;
-    padding: 0 15px;
+    padding: 5px 15px;
 }
 
 body.edifyIsEditMode .commentArea {
@@ -1348,7 +1343,7 @@ body.edifyIsEditMode .commentArea {
     background:@hero1;
     border-radius: 5px;
     text-align:center;
-    margin-top:30px;
+    margin-top: 0;
 }
 .content .hideBtn a{
     text-decoration:none;
@@ -1359,3 +1354,32 @@ body.edifyIsEditMode .commentArea {
     font-size:0.6875em;
 }
 
+div.popout {
+    color: @frameworkHighlightColor;
+    background-color: @frameworkHighlightInverseColor;
+    position: absolute;
+    width: 200px;
+    min-height: 50px;
+    z-index: 20000;
+    right: 15px;
+    text-align: left;
+    bottom: 65px;
+    padding: 10px;
+    font-size: 14px;
+    .box;
+    .bordered;
+}
+
+div.popout a {
+    color: @frameworkHighlightColor;
+    text-decoration: underline;
+}
+
+div.popout .spike {
+    background-image: url(/static/common/spike.png);
+    width: 32px;
+    height: 21px;
+    position: absolute;
+    bottom: -21px;
+    right: 30px;
+}

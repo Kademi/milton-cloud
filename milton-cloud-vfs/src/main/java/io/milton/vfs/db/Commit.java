@@ -48,7 +48,7 @@ public class Commit implements Serializable {
     
     private long id;
     private Branch branch;
-    private Commit previousCommit;
+    private Long previousCommitId;
     private String itemHash; // this is the root directory for the repository (in this version)   
     private Date createdDate; 
     private Profile editor;
@@ -65,13 +65,19 @@ public class Commit implements Serializable {
         this.branch = branch;
     }
 
-    @ManyToOne
-    public Commit getPreviousCommit() {
-        return previousCommit;
+    /**
+     * This was originally a reference to the object, but it caused a StackOverflowError
+     * in some cases. Was impossible to determine exact cause but changing to
+     * an id instead of reference for safety.
+     * 
+     * @return 
+     */
+    public Long getPreviousCommitId() {
+        return previousCommitId;
     }
 
-    public void setPreviousCommit(Commit previousCommit) {
-        this.previousCommit = previousCommit;
+    public void setPreviousCommitId(Long previousCommitId) {
+        this.previousCommitId = previousCommitId;
     }
 
     

@@ -147,7 +147,9 @@ public class DataSession {
         if (!newHash.equals(oldHash)) {
             Commit newCommit = new Commit();
             newCommit.setBranch(branch);
-            newCommit.setPreviousCommit(branch.getHead());
+            if( branch.getHead() != null ) {
+                newCommit.setPreviousCommitId(branch.getHead().getId());
+            }
             newCommit.setCreatedDate(currentDateService.getNow());
             newCommit.setEditor(currentUser);
             newCommit.setItemHash(newHash);

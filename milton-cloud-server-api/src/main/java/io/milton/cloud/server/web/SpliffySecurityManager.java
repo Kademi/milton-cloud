@@ -18,6 +18,7 @@ import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.GroupRole;
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Collection;
 import java.util.Collections;
@@ -169,6 +170,21 @@ public class SpliffySecurityManager {
         return userDao;
     }
 
+    public Set<Group> getGroups(Profile p, Website website) {
+        if( p == null ) {
+            return null;
+        }
+        Set<Group> set = new HashSet<>();
+        if( p.getMemberships() != null ) {
+            for( GroupMembership gm : p.getMemberships() ) {
+                if(website.hasGroup(gm.getGroupEntity(), SessionManager.session())) {
+                    set.add(gm.getGroupEntity());
+                }
+            }
+        }
+        return set;
+    }
+    
     public Set<AccessControlledResource.Priviledge> getPriviledges(Profile curUser, CommonResource resource) {
         Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
         if (resource.isPublic()) {

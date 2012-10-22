@@ -175,6 +175,15 @@ public class Website extends Repository implements VfsAcceptor {
     public List<GroupInWebsite> groups(Session session) {
         return GroupInWebsite.findByWebsite(this, session);
     }
+    
+    public boolean hasGroup(Group g, Session session) {
+        for( GroupInWebsite giw : groups(session)) {
+            if( g == giw.getUserGroup()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void delete(Session session) {

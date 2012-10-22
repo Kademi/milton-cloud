@@ -122,8 +122,13 @@ public class SyncingDeltaListener implements DeltaListener {
 
     @Override
     public void onFileConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {
+        final File localChild = toFile(path);        
+        if( localChild.getParentFile().getName().equals(".mil")) {
+            log.info("Conflict on .mil file, use remote: " + localChild.getAbsolutePath());
+            onRemoteChange(remoteTriplet, localTriplet, path);
+            return;
+        }
         Thread.dumpStack();
-        final File localChild = toFile(path);
 
         Object[] options = {"Use my local file",
             "Use the remote file",

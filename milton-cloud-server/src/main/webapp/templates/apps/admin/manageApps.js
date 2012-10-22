@@ -31,7 +31,7 @@ function initApps() {
             log("done save", resp);
             $.tinybox.close();
             window.location.reload();
-}
+        }
     });
     
 }
