@@ -46,7 +46,7 @@ public class EmailItemQueueStore implements QueueStore {
     private final ListenerManager listenerManager;
     private final CurrentDateService currentDateService;
     private List<QueueInfo> currentQueue;
-    private long retryIntervalMs = 5 * 1000l; // 5secs
+    private long retryIntervalMs = 30 * 1000l; // 30secs
     private int maxAttempts = 3;
 
     public EmailItemQueueStore(SessionManager sessionManager, Configuration aspirinConfiguration, ListenerManager listenerManager, CurrentDateService currentDateService) {
@@ -83,20 +83,20 @@ public class EmailItemQueueStore implements QueueStore {
     }
 
     @Override
-    public void init() {        
+    public void init() {
         Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
         try {
             log.info("init: reset any in progress statuses");
             List<EmailItem> items = EmailItem.findInProgress(session);
             log.info("EmailItems to reset inprogress state to retry: " + items.size());
-            for( EmailItem i : items ) {
+            for (EmailItem i : items) {
                 i.setSendStatus("r");
                 session.save(i);
             }
-            
+
             log.info("init: check for any completed group email jobs");
-            for( GroupEmailJob j : GroupEmailJob.findInProgress(session) ) {
+            for (GroupEmailJob j : GroupEmailJob.findInProgress(session)) {
                 Date now = currentDateService.getNow();
                 log.info("Check: " + j.getTitle());
                 j.checkStatus(now, session);
@@ -104,7 +104,7 @@ public class EmailItemQueueStore implements QueueStore {
             tx.commit();
         } finally {
             sessionManager.close();
-        }        
+        }
     }
 
     @Override
@@ -165,8 +165,8 @@ public class EmailItemQueueStore implements QueueStore {
             i.setSendStatusDate(now);
             session.save(i);
             tx.commit();
-            
-            log.info("next item: " + i.getRecipientAddress() + " attempts: " + i.getNumAttempts() + " id: " + i.getId() );
+
+            log.info("next item: " + i.getRecipientAddress() + " attempts: " + i.getNumAttempts() + " id: " + i.getId());
         } finally {
             sessionManager.close();
         }
@@ -185,7 +185,7 @@ public class EmailItemQueueStore implements QueueStore {
     }
 
     @Override
-    public void setSendingResult(QueueInfo qi) {        
+    public void setSendingResult(QueueInfo qi) {
         final Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
         try {
@@ -205,33 +205,38 @@ public class EmailItemQueueStore implements QueueStore {
 
             i.setSendStatusDate(currentDateService.getNow());
             //boolean sentOk = qi.getResultInfo() != null && qi.getResultInfo().startsWith("250");
-            if (qi.getState() == DeliveryState.FAILED) {
-                i.setSendStatus("f");
-            } else if (qi.getState() == DeliveryState.SENT || qi.getState() == DeliveryState.QUEUED) {
+            // BM: fastmail is rejecting emails with resultInfo=451 4.7.1 <admin@bradmcevoy.com>: Recipient address rejected: Temporary deferral, try again soon
+            // and delivery state is QUEUED
+            // BUT, i think i've seen the queued state before where delivery was queued by the remote server, so we should not send again
+            // If this is true then we should check the code in resultInfo to decide what to do, 451 definitely means retry
+
+            // 250 2.0.0 Ok: queued as 69277F8010A
+            // 451 4.7.1 <admin@bradmcevoy.com>: Recipient address rejected: Temporary deferral, try again soon
+            String sStatus = qi.getResultInfo();
+            Integer status = SmtpUtils.getStatusCode(sStatus);
+            if (status != null && (status >= 200 || status < 300)) {
+                System.out.println("setting complete email status complete --------------------------");
                 i.setSendStatus("c");
-            } else if (qi.getState() == DeliveryState.IN_PROGRESS) {
-                i.setSendStatus("p");
-//            } else if (qi.getState() == DeliveryState.QUEUED) {
-//                long tm = currentDateService.getNow().getTime();
-//                tm = tm + retryIntervalMs;
-//                Date retryDate = new Date(tm);
-//                int attempts = 0;
-//                if (i.getNumAttempts() != null) {
-//                    attempts = i.getNumAttempts();
-//                }
-//                if (attempts >= maxAttempts) {
-//                    i.setSendStatus("f");
-//                    log.warn("Set retry. Reached max attempts=" + attempts + " for id: " + i.getId());
-//                } else {
-//                    attempts++;
-//                    i.setNextAttempt(retryDate); // when next to attempt delivery
-//                    i.setNumAttempts(attempts);
-//                    i.setSendStatus("r"); // is now a retry
-//                    log.warn("Set retry. Attempts=" + attempts + " for id: " + i.getId());
-//                }
             } else {
-                log.warn("------------------ unhandled state: " + qi.getState() + " ------------------");
+                long tm = currentDateService.getNow().getTime();
+                tm = tm + retryIntervalMs;
+                Date retryDate = new Date(tm);
+                int attempts = 0;
+                if (i.getNumAttempts() != null) {
+                    attempts = i.getNumAttempts();
+                }
+                if (attempts >= maxAttempts) {
+                    i.setSendStatus("f");
+                    log.warn("Set retry. Reached max attempts=" + attempts + " for id: " + i.getId());
+                } else {
+                    attempts++;
+                    i.setNextAttempt(retryDate); // when next to attempt delivery
+                    i.setNumAttempts(attempts);
+                    i.setSendStatus("r"); // is now a retry
+                    log.warn("Set retry. Attempts=" + attempts + " for id: " + i.getId());
+                }
             }
+
             session.save(i);
             // Check if this is the last email in a batch job, in which case we mark it as completed
             log.info("check if completed");
@@ -248,7 +253,7 @@ public class EmailItemQueueStore implements QueueStore {
             } else {
                 log.info("email item not attached to a job");
             }
-                    
+
             tx.commit();
         } finally {
             sessionManager.close();

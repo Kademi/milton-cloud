@@ -259,7 +259,7 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
 
     @Override
     public String getName() {
-        return job.getName();
+        return "email-" + job.getId();
     }
 
     @Override
