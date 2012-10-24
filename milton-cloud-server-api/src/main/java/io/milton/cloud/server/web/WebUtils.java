@@ -213,10 +213,10 @@ public class WebUtils {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             Website website = wrf.getWebsite();
             Repository r = website;
-            List<Pair<String,String>> menuPairs = getThemeMenu(wrf);
+            List<Pair<String, String>> menuPairs = getThemeMenu(wrf);
             if (menuPairs != null) {
                 int cnt = 0;
-                for (Pair<String,String> pair : menuPairs) {
+                for (Pair<String, String> pair : menuPairs) {
                     String id = "menuContent" + cnt++;
                     String href = pair.getObject1();
                     Path p = Path.path(href);
@@ -226,7 +226,7 @@ public class WebUtils {
                             longestHref = parentHref;
                             menuId = id;
                         }
-                    }                    
+                    }
                 }
                 if (menuId != null) {
                     MenuItem.setActiveId(menuId);
@@ -235,7 +235,7 @@ public class WebUtils {
         }
     }
 
-    public static List<Pair<String,String>> getThemeMenu(Resource res) {
+    public static List<Pair<String, String>> getThemeMenu(Resource res) {
         RootFolder rootFolder = WebUtils.findRootFolder(res);
         if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
@@ -245,7 +245,7 @@ public class WebUtils {
             if (sMenu != null && sMenu.length() > 0) {
                 String[] arr = sMenu.split("\n");
                 int cnt = 0;
-                List<Pair<String,String>> list = new ArrayList<>();
+                List<Pair<String, String>> list = new ArrayList<>();
                 for (String s : arr) {
                     String[] sPair = s.split(",");
                     list.add(new Pair<>(sPair[0], sPair[1]));
@@ -326,5 +326,28 @@ public class WebUtils {
         } else {
             return findBranchFolder(r.getParent());
         }
+    }
+
+    /**
+     * Just concatenate the two strings, ensuring there is exactly one slash
+     * between then
+     *
+     * @param s1
+     * @param s2
+     * @return
+     */
+    static String combinePathParts(String s1, String s2) {
+        if (s1.endsWith("/")) {
+            // make sure second does not start with a slash
+            if (s2.startsWith("/")) {
+                s2 = s2.substring(1);
+            }            
+        } else {
+            // make sure second does start with a slash
+            if( !s2.startsWith("/")) {
+                s2 = "/" + s2;
+            }
+        }
+        return s1 + s2;
     }
 }

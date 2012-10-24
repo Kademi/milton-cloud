@@ -557,11 +557,13 @@ function move(sourceHref, destHref, callback) {
  */
 function initActiveNav(containerSelector) {
     var url = window.location.pathname;
-    log("initActiveNav", url);
-    $(containerSelector + " a").each(function(i, n) {
+    var container = $(containerSelector);
+    log("initActiveNav", url, "container:", container);
+    container.find("a").each(function(i, n) {
         var node = $(n);
         var href = node.attr("href");
         if( href ) {
+            log("initActiveNav, check", url, href);
             if( href.startsWith(url) ) {
                 node.addClass("active");
             }

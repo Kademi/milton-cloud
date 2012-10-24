@@ -48,7 +48,6 @@ import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Request;
 import java.util.HashMap;
-import java.util.logging.Level;
 
 /**
  *
@@ -59,6 +58,7 @@ import java.util.logging.Level;
 public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
+    private static final Range docTypeRange = new Range(0, 30);
     protected final FileNode fileNode;
     private RenderFileResource htmlPage; // for parsing html pages
     protected JsonResult jsonResult;
@@ -184,13 +184,38 @@ public class FileResource extends AbstractContentResource implements Replaceable
         return false;
     }
 
+    /**
+     * Create an instance of a HTML renderable object to use with this file, if
+     * this file is a suitable type (ie is html)
+     *
+     * Note the ContentApp is responsible for locating these resources for the
+     * resource factory at the appropriate times. It will use a DocType to
+     * determine if a html file should be rendered with a template or raw
+     *
+     * @return
+     */
     public RenderFileResource getHtml() {
         if (htmlPage == null) {
-            if (getName() == null || NodeChildUtils.isHtml(this)) { // name will be null when editing new html pages
-                htmlPage = new RenderFileResource(this);
+            if (getName() == null || NodeChildUtils.isHtml(this)) { // name will be null when editing new html pages                
+                if (!hasDocType()) { // only use a RFR if no doctype, this provides a means to have plain, unrendered, html files
+                    htmlPage = new RenderFileResource(this);
+                }
             }
         }
         return htmlPage;
+    }
+
+    private boolean hasDocType() {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream(10);
+        try {
+            sendContent(bout, docTypeRange, null, null);
+            String s = bout.toString("UTF-8");
+            System.out.println("doctype: " + s);
+            return s.startsWith("<!DOCTYPE");
+        } catch (IOException ex) {
+            log.warn("ioexception checking for doc type", ex);
+            return false;
+        }
     }
 
     @Override

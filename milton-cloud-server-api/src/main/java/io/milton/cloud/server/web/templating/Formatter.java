@@ -545,6 +545,9 @@ public class Formatter {
     }
     
     public String percentEncode(String s) {
+        if( s == null ) {
+            return null;
+        }
         return Utils.percentEncode(s);
     }
 

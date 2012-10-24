@@ -53,7 +53,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     protected final DataSession dataSession;
     protected JsonResult jsonResult; // set after completing a POST
     protected NodeMeta nodeMeta;
-    private RenderFileResource indexPage;
+    private GetableResource indexPage;
     private Map<String, String> themeParams;
     private Map<String, String> themeAttributes;
 
@@ -397,14 +397,19 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return super.is(type);
     }
 
-    public RenderFileResource getIndex() throws NotAuthorizedException, BadRequestException {
+    public GetableResource getIndex() throws NotAuthorizedException, BadRequestException {
         if (indexPage == null) {
             Resource r = child("index.html");
             if (r == null) {
                 return null;
             } else if (r instanceof FileResource) {
                 FileResource fr = (FileResource) r;
-                indexPage = fr.getHtml();
+                GetableResource p = fr.getHtml();
+                if( p != null ) {
+                    indexPage = p;
+                } else {
+                    indexPage = fr;
+                }
             } else if (r instanceof RenderFileResource) {
                 indexPage = (RenderFileResource) r;
             } else {

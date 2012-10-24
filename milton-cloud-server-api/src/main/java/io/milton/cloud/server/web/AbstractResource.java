@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,6 +123,17 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
      */
     @Override
     public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
+        // Check if the host has its redirect set
+        RootFolder rf = WebUtils.findRootFolder(this);
+        if( rf instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
+            String redirect = wrf.getWebsite().getRedirectTo();
+            if( redirect != null && redirect.trim().length() > 0 ) {
+                return WebUtils.combinePathParts(redirect, request.getAbsolutePath());
+            }
+        }
+        
+        // If this resource is a collection, and its a GET method, ensure url ends with a slash
         if (request.getMethod().equals(Request.Method.GET)) {
             if (this instanceof CollectionResource) {
                 if (request.getParams().isEmpty()) { // only do redirect if no request params

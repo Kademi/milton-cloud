@@ -21,6 +21,7 @@
                 <h2>Current release: $page.getParam('version')</h2>                
                 <ul>
                 #foreach($folder in $page.find($page.getParam('sourceFolder')).children.ofType.folder )
+                    #set($version = false)
                     #set($version = $folder.child($page.getParam('version')))
                     #if( $version )
                 <li style="float:left; width: 300px">

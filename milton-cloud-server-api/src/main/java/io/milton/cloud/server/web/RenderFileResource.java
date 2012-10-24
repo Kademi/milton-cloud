@@ -249,7 +249,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public String getName() {
-        if( nameOverride != null ) {
+        if (nameOverride != null) {
             return nameOverride;
         }
         String name = fileResource.getName();
@@ -314,12 +314,12 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public boolean is(String type) {
-        if( isTemplate(type) ) {
+        if (isTemplate(type)) {
             return true;
         }
         return fileResource.is(type, getName());
     }
-    
+
     public boolean isTemplate(String type) {
         checkParse();
         // eg, if template is learner/modulePage, then is("modulePage") returns true
@@ -427,14 +427,14 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     }
 
     /**
-     * Call this after setting parameters or properties like title and body. This
-     * will generate new HTML and write it to the blob store.
-     * 
+     * Call this after setting parameters or properties like title and body.
+     * This will generate new HTML and write it to the blob store.
+     *
      * It will then call save to the repository is updated
-     * 
+     *
      * @throws BadRequestException
      * @throws NotAuthorizedException
-     * @throws IOException 
+     * @throws IOException
      */
     public void doSaveHtml() throws BadRequestException, NotAuthorizedException, IOException {
         log.info("doSaveHtml: " + getName());
@@ -548,8 +548,6 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public Repository getRepository() {
         return getBranch().getRepository();
     }
-    
-    
 
     @Override
     public Profile getOwnerProfile() {
@@ -563,6 +561,4 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public String getNameOverride() {
         return nameOverride;
     }
-    
-    
 }

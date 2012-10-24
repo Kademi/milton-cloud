@@ -68,8 +68,6 @@ public class HtmlTemplateParser {
                     meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
                 }
             }
-
-            // TODO: move ftl directive into top level trmplate only
             String body = JDomUtils.getValueOf(elRoot, "body");
             meta.setBody(body);
         }
@@ -85,15 +83,12 @@ public class HtmlTemplateParser {
         htmlFormatter.update(r, bout);
     }
 
-
-
-
     private void parseWebResourcesFromHtml(Element elHead, HtmlPage meta, Path webPath) {
         for (Element wrTag : JDomUtils.children(elHead)) {
             if (wrTag.getName().equals("title")) {
                 meta.setTitle(JDomUtils.getValueOf(elHead, "title"));
             } else {
-                WebResource wr = new WebResource(webPath);                
+                WebResource wr = new WebResource(webPath);
                 meta.getWebResources().add(wr);
                 wr.setTag(wrTag.getName());
                 String body = getContent(wrTag);
@@ -106,10 +101,9 @@ public class HtmlTemplateParser {
         }
     }
 
-    
     public String getContent(org.jdom.Element el) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JDomUtils.transformDocument(out, el);
         return out.toString().trim();
-    }    
+    }
 }

@@ -30,6 +30,7 @@ public abstract class TemplateHtmlPage implements HtmlPage{
     private final String id;
     private String body;
     private String title;
+    private String template;
     
     abstract long getTimestamp();
     
@@ -78,8 +79,5 @@ public abstract class TemplateHtmlPage implements HtmlPage{
 
     public String getId() {
         return id;
-    }
-
-    
-    
+    }    
 }

@@ -396,7 +396,7 @@ function initDropDownHiding() {
  *  Eg initComments(window.location.pathname);
  */
 function initComments(pageUrl) {
-    log("initComments", pageUrl);
+//    log("initComments", pageUrl);
     $(".hideBtn").click(function() {
         var oldCommentsHidden = $("#comments:visible").length == 0;
         log("store new comments hidden", oldCommentsHidden);

@@ -3,7 +3,7 @@ table.classifier tr td {
 }
 table.classifier tr td.last {
     width: 716px;
-    background-image: url(shade.png);
+    background-image: url(/static/classifier/shade.png);
     background-repeat: no-repeat;
 }
 table.classifier div.rule {
@@ -17,7 +17,7 @@ table.classifier div.graph {
     background-repeat: no-repeat;
 }
 table.classifier tr td:first-child {
-    background-image: url(button.png);
+    background-image: url(/static/classifier/button.png);
     background-repeat: no-repeat;
     width: 191px;
     height: 71px;
@@ -32,7 +32,7 @@ table.classifier h4 {
     padding: 0;
 }
 table.classifier td span {
-    background-image: url(arrows.png);
+    background-image: url(/static/classifier/arrows.png);
     height: 45px;
     width: 24px;  
     display: block;

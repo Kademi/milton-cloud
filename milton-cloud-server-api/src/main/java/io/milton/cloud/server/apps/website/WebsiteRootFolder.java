@@ -73,7 +73,7 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
 
     @Override
     protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        RenderFileResource index = getIndex();
+        GetableResource index = getIndex();
         if( index != null ) {
             index.sendContent(out, null, params, "text/html");
         } else {

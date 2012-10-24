@@ -39,6 +39,7 @@ import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.http.HttpManager;
+import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -55,6 +56,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -62,14 +64,23 @@ import java.util.Set;
 import org.apache.velocity.context.Context;
 
 /**
+ * Does lots of things to do with content delivery. 
+ * 
+ * The main thing it does is convert FileResource objects to RenderFileResource
+ * objects, for html files which are accessed within a website. This is what
+ * allows templating to occur.
+ * 
+ * Note that this will not return a RenderFileResource for html files which have
+ * a doctype
  *
  * @author brad
  */
 public class ContentApp implements Application, PortletApplication, ResourceApplication, MenuApplication, DataResourceApplication, ChildPageApplication {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ContentApp.class);
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
     public static final String PATH_SUFFIX_HISTORY = ".history";
-    public static final String PATH_SUFFIX_PREVIEW = ".preview";
+    public static final String PATH_SUFFIX_PREVIEW = ".preview";    
     private SpliffyResourceFactory resourceFactory;
 
     @Override
@@ -111,7 +122,6 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
 
     @Override
     public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
-        System.out.println("getResource: " + path);
         if (path.endsWith(PATH_SUFFIX_HISTORY)) {
             String resourcePath = path.substring(0, path.length() - PATH_SUFFIX_HISTORY.length()); // chop off suffix to get real resource path
             Path p = Path.path(resourcePath);
@@ -199,16 +209,17 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             if (fn.getName().endsWith(".html")) {
                 if (parent instanceof ContentDirectoryResource) {
                     ContentDirectoryResource contentParent = (ContentDirectoryResource) parent;
-                    
+
                     // Only wrap if content is directly within a website. Resource which are included
                     // from sibling repositories should be presented as-is, ie without rendering, because
                     // they tend to be used for static resources which can include html pages
                     CommonResource closestBranch = contentParent.closest("branch");
                     if (closestBranch == rf) {
                         FileResource fr = new FileResource(fn, contentParent);
+                        // Dont use a render resource for files with a doctype. This provides a way to have plain html files which dont get parsed or rendered
                         RenderFileResource rfr = fr.getHtml();
                         return rfr;
-                    }                    
+                    }
                 }
             }
         }
@@ -217,12 +228,14 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if( parent instanceof BranchFolder && requestedName.equals("commits")) {
+        if (parent instanceof BranchFolder && requestedName.equals("commits")) {
             BranchFolder branchRes = (BranchFolder) parent;
             return new CommitsResource(requestedName, branchRes);
         }
         return null;
     }
+
+    
 
     public class ContentViewerRole implements Role {
 
