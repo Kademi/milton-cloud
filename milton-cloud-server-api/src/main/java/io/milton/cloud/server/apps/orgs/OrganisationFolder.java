@@ -119,12 +119,8 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            if (organisation.getRepositories() != null) {
-                for (Repository repo : organisation.getRepositories()) {
-                    RepositoryFolder rf = new RepositoryFolder(this, repo);
-                    children.add(rf);
-                }
-            }
+
+            children.add(new RepositoriesFolder("repositories", this));
             children.add(new OrganisationsFolder("organisations", this, organisation));
 
             _(ApplicationManager.class).addBrowseablePages(this, children);

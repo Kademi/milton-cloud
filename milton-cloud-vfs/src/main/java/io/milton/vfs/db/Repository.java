@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -25,6 +26,20 @@ uniqueConstraints = {
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Repository implements Serializable {
 
+    public static void initRepo(Repository r, String name, Session session, Profile user, BaseEntity owner) throws HibernateException {
+        r.setBaseEntity(owner);
+        if( owner.getRepositories() == null ) {
+            owner.setRepositories( new ArrayList<Repository>() );
+        }
+        owner.getRepositories().add(r);
+        r.setCreatedDate(new Date());
+        r.setName(name);
+        r.setTitle(name);
+        r.setLiveBranch(Branch.TRUNK);
+        session.save(r);
+
+        r.createBranch(Branch.TRUNK, user, session);
+    }
     private long id;
     private String type;
     private String name; // identifies the resource to webdav
@@ -33,9 +48,12 @@ public class Repository implements Serializable {
     private String liveBranch;
     private boolean publicContent; // allow anonymous users to view this content
     private Date createdDate;
-    private Boolean deleted;    
+    private Boolean deleted;
     private BaseEntity baseEntity; // the direct owner of this repository
-    private List<Branch> branches;    
+    private List<Branch> branches;
+
+    public Repository() {
+    }
 
     @Id
     @GeneratedValue
@@ -84,8 +102,8 @@ public class Repository implements Serializable {
 
     /**
      * To support soft deletes
-     * 
-     * @return 
+     *
+     * @return
      */
     @Column
     public Boolean getDeleted() {
@@ -95,8 +113,7 @@ public class Repository implements Serializable {
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
     }
-    
-    
+
     @Column
     public String getLiveBranch() {
         return liveBranch;
@@ -181,7 +198,7 @@ public class Repository implements Serializable {
 
         head.setBranch(b);
         session.save(b);
-        
+
         if (getBranches() == null) {
             setBranches(new ArrayList<Branch>());
         }
@@ -229,22 +246,23 @@ public class Repository implements Serializable {
             return null;
         }
     }
-    
+
     public void softDelete(Session session) {
         this.setDeleted(true);
         String deletedName = Organisation.getDeletedName(getName()); // change name to avoid name conflicts with new resources
         this.setName(deletedName);
         session.save(this);
-    }    
-    
+    }
+
     /**
      * null safe alias for getDeleted
-     * @return 
+     *
+     * @return
      */
     public boolean deleted() {
-        if( getDeleted() == null ) {
+        if (getDeleted() == null) {
             return false;
-        } else{
+        } else {
             return getDeleted();
         }
     }

@@ -7,6 +7,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import java.util.ArrayList;
+import org.hibernate.HibernateException;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
@@ -47,6 +48,8 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             return (BaseEntity) list.get(0);
         }
     }
+
+    
     private long id;
     private String name;
     private String type;
@@ -139,15 +142,8 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             setRepositories(new ArrayList<Repository>());
         }
         Repository r = new Repository();
-        r.setBaseEntity(this);
-        getRepositories().add(r);
-        r.setCreatedDate(new Date());
-        r.setName(name);
-        r.setTitle(name);
-        r.setLiveBranch(Branch.TRUNK);
-        session.save(r);
 
-        r.createBranch(Branch.TRUNK, user, session);
+        Repository.initRepo(r, name, session, user, this);
 
         return r;
     }
@@ -172,21 +168,21 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     /**
      * Returns all non-soft deleted repositories. Does not return null if empty
-     * 
-     * @return 
+     *
+     * @return
      */
     public List<Repository> repositories() {
         List<Repository> list = new ArrayList<>();
-        if( getRepositories() != null ) {
-            for( Repository r : getRepositories() ) {
-                if( !r.deleted() ) {
+        if (getRepositories() != null) {
+            for (Repository r : getRepositories()) {
+                if (!r.deleted()) {
                     list.add(r);
                 }
             }
         }
         return list;
     }
-    
+
     public Repository repository(String name) {
         if (getRepositories() != null) {
             for (Repository r : getRepositories()) {

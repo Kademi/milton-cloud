@@ -35,6 +35,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.w3c.tidy.Tidy;
 
 /**
@@ -63,6 +64,19 @@ public class WebUtils {
         return s;
     }
 
+    public static String getParam(Properties parameters, String key) {
+        String s = parameters.getProperty(key);
+        if (s == null) {
+            return null;
+        }
+        s = s.trim();
+        if (s.length() == 0) {
+            return null;
+        }
+        return s;        
+    }
+    
+    
     /**
      * Find the nearest OrganisationFolder to the given resource
      *
@@ -274,7 +288,7 @@ public class WebUtils {
             tidy.setDocType(null);
             tidy.setIndentContent(true);
             tidy.setSmartIndent(true);
-            //tidy.setDocType(false);
+            tidy.setDocType("omit");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             tidy.parse(in, bout); // run tidy, providing an input and output stream
             return bout.toString("UTF-8");
@@ -317,6 +331,14 @@ public class WebUtils {
         return s.equalsIgnoreCase("true");
     }
 
+    public static Boolean getParamAsBool(Properties parameters, String key) {
+        String s = getParam(parameters, key);
+        if (s == null || s.length() == 0) {
+            return null;
+        }
+        return s.equalsIgnoreCase("true");        
+    }    
+    
     public static BranchFolder findBranchFolder(CommonResource r) {
         if (r instanceof BranchFolder) {
             return (BranchFolder) r;
@@ -350,4 +372,6 @@ public class WebUtils {
         }
         return s1 + s2;
     }
+
+
 }

@@ -143,6 +143,9 @@ public class DataSession {
         String oldHash = rootDataNode.loadedHash;
         recalcHashes(rootDataNode);
         String newHash = rootDataNode.hash;
+        if( newHash == null ) {
+            throw new RuntimeException("newHash is null");
+        }
 
         if (!newHash.equals(oldHash)) {
             Commit newCommit = new Commit();

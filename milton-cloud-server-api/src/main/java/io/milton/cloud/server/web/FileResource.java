@@ -210,7 +210,6 @@ public class FileResource extends AbstractContentResource implements Replaceable
         try {
             sendContent(bout, docTypeRange, null, null);
             String s = bout.toString("UTF-8");
-            System.out.println("doctype: " + s);
             return s.startsWith("<!DOCTYPE");
         } catch (IOException ex) {
             log.warn("ioexception checking for doc type", ex);
