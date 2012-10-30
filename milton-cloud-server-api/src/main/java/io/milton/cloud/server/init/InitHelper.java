@@ -7,7 +7,6 @@ import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
-import io.milton.cloud.server.db.utils.GroupDao;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.vfs.db.*;
 import java.util.*;
@@ -62,8 +61,8 @@ public class InitHelper {
      * @return
      * @throws HibernateException
      */
-    public Group checkCreateGroup(Organisation org, String name, GroupDao groupDao, int numUsers, Session session, Profile emailSender, String registrationMode) throws HibernateException {
-        Group g = groupDao.findGroup(org, name, session);
+    public Group checkCreateGroup(Organisation org, String name, int numUsers, Session session, Profile emailSender, String registrationMode) throws HibernateException {
+        Group g = Group.findGroup(org, name, session);
         if (g == null) {
             g = new Group();
             g.setOrganisation(org);

@@ -337,6 +337,8 @@ article.Note {
     background:#f6f6f6;
     padding:10px;
     color:#333333;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 /* Dropdown Controller */
 .DropdownControl {

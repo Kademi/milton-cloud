@@ -33,6 +33,7 @@ import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.event.TriggerEvent;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.queue.AsynchProcessor;
 import io.milton.cloud.server.queue.Processable;
 import io.milton.cloud.server.web.*;
@@ -63,11 +64,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.config.Configuration;
+import org.masukomi.aspirin.core.config.ConfigurationMBean;
 import org.masukomi.aspirin.core.listener.ListenerManager;
 
 /**
@@ -83,7 +86,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private SpliffySecurityManager securityManager;
     private BatchEmailService batchEmailService;
     private GroupEmailService groupEmailService;
-    private Configuration aspirinConfiguration = new Configuration();
+    private Configuration aspirinConfiguration;
     private ListenerManager listenerManager = new ListenerManager();
     private EmailItemQueueStore queueStore;
     private EmailItemMailStore mailStore;
@@ -117,6 +120,10 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         smtpPort = config.getInt("smtp.port");
         
+        Properties props = new Properties();
+        String hostName = config.getContext().get(CurrentRootFolderService.class).getPrimaryDomain();
+        props.setProperty(ConfigurationMBean.PARAM_HOSTNAME, hostName);
+        aspirinConfiguration = new Configuration(props);
         batchEmailService = new BatchEmailService();
         groupEmailService = new GroupEmailService(batchEmailService);
         config.getContext().put(groupEmailService);

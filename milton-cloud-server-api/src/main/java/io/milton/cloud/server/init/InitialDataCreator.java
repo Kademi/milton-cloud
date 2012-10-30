@@ -5,7 +5,6 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.db.AppControl;
-import io.milton.cloud.server.db.utils.GroupDao;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
@@ -63,15 +62,11 @@ public class InitialDataCreator implements LifecycleApplication {
         return "Initial data creator";
     }
 
-    
-    
     @Override
     public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Runs on startup and checks that a minimum core set of data is present in the database";
     }
 
-    
-    
     /**
      * Can be called from spring init-method
      *
@@ -81,11 +76,10 @@ public class InitialDataCreator implements LifecycleApplication {
         Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
 
-        GroupDao groupDao = new GroupDao();
         Organisation rootOrg = Organisation.getRootOrg(session);
         if (rootOrg != null) {
             System.out.println("Root org exists, do nothing");
-            return ;
+            return;
         }
         System.out.println("Create new organisation");
         rootOrg = new Organisation();
@@ -101,43 +95,43 @@ public class InitialDataCreator implements LifecycleApplication {
             AppControl.setStatus(app.getInstanceId(), rootOrg, true, admin, new Date(), session);
         }
 
-        
-        Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, groupDao, 0, session, null, "c");
+
+        Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, 0, session, null, "c");
         administrators.grantRole("Administrator", session);
         administrators.grantRole("Content author", session);
 
-        Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, groupDao, 0, session, admin, "o");
+        Group users = initHelper.checkCreateGroup(rootOrg, Group.USERS, 0, session, admin, "o");
         users.grantRole("Content author", session);
 
-        Group publicGroup = initHelper.checkCreateGroup(rootOrg, Group.PUBLIC, groupDao, 0, session, admin, "o");
+        Group publicGroup = initHelper.checkCreateGroup(rootOrg, Group.PUBLIC, 0, session, admin, "o");
         publicGroup.grantRole("Forums viewer", session);
-        
-        
+
+
         Profile normalUser = initHelper.checkCreateUser("a1", adminPassword, session, rootOrg, null);
         normalUser.addToGroup(users, rootOrg, session);
-        if( normalUser.repository("files") == null ) {
+        if (normalUser.repository("files") == null) {
             normalUser.createRepository("files", normalUser, session);
         }
-        
+
         admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
-        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg,"milton", "milton.io", "milton", admin); // can be accessed on milton.[primary_domain] or milton.io        
+        Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton", "milton.io", "milton", admin); // can be accessed on milton.[primary_domain] or milton.io        
         System.out.println("milton site: " + miltonSite.getName() + " - " + miltonSite.getId());
-        
-        initHelper.enableApps(miltonSite.getTrunk(), admin, session, "admin", "userApp", "forums", "email", "content","search", "signup","userDashboardApp");
+
+        initHelper.enableApps(miltonSite.getTrunk(), admin, session, "admin", "userApp", "forums", "email", "content", "search", "signup", "userDashboardApp");
         miltonSite.addGroup(users, session);
-        String menu = "/content/index.html,Home\n" +
-                        "/content/maven/index.html,Downloads\n" +
-                        "/content/guide/index.html,Documentation";
-                
+        String menu = "/content/index.html,Home\n"
+                + "/content/maven/index.html,Downloads\n"
+                + "/content/guide/index.html,Documentation";
+
 //        miltonSite.setAttribute("logo", "milton.io", session);
 //        miltonSite.setAttribute("menu", menu, session);
-        
+
         AppControl ac = AppControl.find(miltonSite.getTrunk(), "signup", session);
         ac.setSetting("signup.next.href", "/content/gettingStarted.html", session);
 
         Website myMiltonSite = initHelper.checkCreateWebsite(session, rootOrg, "mymilton", "my.milton.io", "milton", admin); // can be accessed on mymilton.localhost or my.milton.io
         //miltonSite.setAttribute("logo", "my.milton.io", session);
-        initHelper.enableApps(myMiltonSite.getTrunk(), admin, session, "admin", "userApp", "myFiles", "calendar", "contacts", "signup","userDashboardApp");
+        initHelper.enableApps(myMiltonSite.getTrunk(), admin, session, "admin", "userApp", "myFiles", "calendar", "contacts", "signup", "userDashboardApp");
         myMiltonSite.addGroup(users, session);
 
         tx.commit();
@@ -175,15 +169,15 @@ public class InitialDataCreator implements LifecycleApplication {
         System.out.println("-------- Initial Content Auto load ---------------");
         String sRootDir = "../sites";
         File rootDir = new File(sRootDir);
-        if( !rootDir.exists()) {
+        if (!rootDir.exists()) {
             throw new RuntimeException("Fuse autoloader root directory does not exist: " + rootDir.getAbsolutePath());
         }
         System.out.println("Autoload source path: " + rootDir.getAbsolutePath());
-        
+
         File miltonContent = new File(rootDir, "milton");
         File mymiltonContent = new File(rootDir, "mymilton");
         File mavenContent = new File(rootDir, "maven");
-        
+
         System.out.println("Beginning monitor of content dir: " + miltonContent.getAbsolutePath());
         File dbFile = new File("target/sync-db");
         boolean localReadonly = true;
@@ -191,8 +185,8 @@ public class InitialDataCreator implements LifecycleApplication {
                 new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
                 new SyncJob(mymiltonContent, "http://127.0.0.1:8080/mymilton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
                 new SyncJob(mavenContent, "http://127.0.0.1:8080/maven/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly) // load the maven repo with some test data
-        );
+                );
         EventManager eventManager = new EventManagerImpl();
-        SyncCommand.start(dbFile, jobs, eventManager);        
+        SyncCommand.start(dbFile, jobs, eventManager);
     }
 }

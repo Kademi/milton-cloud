@@ -99,12 +99,13 @@ public class FileResource extends AbstractContentResource implements Replaceable
                 sendContentAsJson(out);
             } else {
                 if (fileNode.getHash() == null) {
-                    throw new RuntimeException("Cant generate content for file, it has no hash");
-                }
-                if (range == null) {
-                    fileNode.writeContent(out);
+                    log.info("Cant generate content for file, it has no hash");
                 } else {
-                    fileNode.writeContent(out, range.getStart(), range.getFinish());
+                    if (range == null) {
+                        fileNode.writeContent(out);
+                    } else {
+                        fileNode.writeContent(out, range.getStart(), range.getFinish());
+                    }
                 }
             }
         }

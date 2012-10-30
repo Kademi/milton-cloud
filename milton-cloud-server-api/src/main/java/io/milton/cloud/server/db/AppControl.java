@@ -149,9 +149,9 @@ public class AppControl implements Serializable {
 
     public static void initDefaultApps(Branch websiteBranch, Profile currentUser, Date now, Session session) {
         Organisation org = (Organisation) websiteBranch.getRepository().getBaseEntity();
-        for (AppControl ac : find(org, session)) {
-            AppControl newac = new AppControl();
+        for (AppControl ac : find(org, session)) {            
             if (ac.isEnabled()) {
+                AppControl newac = new AppControl();
                 newac.setEnabled(true);
                 newac.setName(ac.getName());
                 newac.setWebsiteBranch(websiteBranch);

@@ -816,7 +816,9 @@ public class Formatter {
         if (checked == null) {
             checked = Boolean.FALSE;
         }
-        StringBuilder sb = new StringBuilder("<input type=\"checkbox\"");
+        StringBuilder sb = new StringBuilder();
+        sb.append("<input type='hidden' value='' name='").append(name).append(CHECKBOX_SUFFIX).append("'/>");
+        sb.append("<input type=\"checkbox\"");
         sb.append(" name=\"").append(name).append("\" ");
         if (checked) {
             sb.append("checked=\"true\"");
@@ -825,8 +827,7 @@ public class Formatter {
         if (id != null) {
             sb.append(" id=\"").append(id).append("\"");
         }
-        sb.append(" />");
-        sb.append("<input type='hidden' value='' name='").append(name).append(CHECKBOX_SUFFIX).append("'/>");
+        sb.append(" />");        
         return sb.toString();
     }
 

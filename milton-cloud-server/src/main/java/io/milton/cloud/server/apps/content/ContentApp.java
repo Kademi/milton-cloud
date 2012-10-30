@@ -15,6 +15,7 @@
 package io.milton.cloud.server.apps.content;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ChildPageApplication;
@@ -23,6 +24,7 @@ import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.event.WebsiteCreatedEvent;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.BranchFolder;
@@ -35,9 +37,12 @@ import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
+import io.milton.event.Event;
+import io.milton.event.EventListener;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -56,20 +61,27 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Set;
 import org.apache.velocity.context.Context;
+import org.hashsplit4j.api.BlobStore;
+import org.hashsplit4j.api.HashStore;
+import org.hibernate.Session;
+
+import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
- * Does lots of things to do with content delivery. 
- * 
+ * Does lots of things to do with content delivery.
+ *
  * The main thing it does is convert FileResource objects to RenderFileResource
  * objects, for html files which are accessed within a website. This is what
  * allows templating to occur.
- * 
+ *
  * Note that this will not return a RenderFileResource for html files which have
  * a doctype
  *
@@ -80,7 +92,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ContentApp.class);
     public static final String ROLE_CONTENT_VIEWER = "Content Viewer";
     public static final String PATH_SUFFIX_HISTORY = ".history";
-    public static final String PATH_SUFFIX_PREVIEW = ".preview";    
+    public static final String PATH_SUFFIX_PREVIEW = ".preview";
     private SpliffyResourceFactory resourceFactory;
 
     @Override
@@ -103,6 +115,15 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         this.resourceFactory = resourceFactory;
         resourceFactory.getSecurityManager().add(new ContentViewerRole());
         resourceFactory.getSecurityManager().add(new ContentAuthorRole());
+        resourceFactory.getEventManager().registerEventListener(new EventListener() {
+            @Override
+            public void onEvent(Event e) {
+                if( e instanceof WebsiteCreatedEvent ) {
+                    WebsiteCreatedEvent wce = (WebsiteCreatedEvent) e;
+                    createDefaultWebsiteContent(wce.getWebsite());
+                }
+            }
+        }, WebsiteCreatedEvent.class);
     }
 
     @Override
@@ -235,8 +256,6 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         return null;
     }
 
-    
-
     public class ContentViewerRole implements Role {
 
         @Override
@@ -321,6 +340,36 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         @Override
         public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
             return Role.READ_WRITE;
+        }
+    }
+
+    private void createDefaultWebsiteContent(Website website) {
+        Profile user = _(SpliffySecurityManager.class).getCurrentUser();
+        Branch b = website.liveBranch();
+        createDefaultWebsiteContent(b, user, SessionManager.session());
+    }
+    
+    private void createDefaultWebsiteContent(Branch websiteBranch, Profile user, Session session) {
+        try {
+            String html = "";
+            html += "<html xmlns=\"http://www.w3.org/1999/xhtml\">";
+            html += "<head>\n";
+            html += "<title>new page1</title>\n";
+            html += "<link rel=\"template\" href=\"theme/page\" />\n";
+            html += "</head>\n";
+            html += "<body>\n";
+            html += "<h1>Welcome to your new site!</h1>\n";
+            html += "<p>Login with the menu in the navigation above, then you will be able to start editing</p>\n";
+            html += "</body>\n";
+            html += "</html>\n";
+            DataSession dataSession = new DataSession(websiteBranch, session, _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
+            DataSession.DirectoryNode rootDir = (DataSession.DirectoryNode) dataSession.find(Path.root);
+            FileNode file = rootDir.addFile("index.html");
+            ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes("UTF-8"));
+            file.setContent(bin);
+            dataSession.save(user);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }

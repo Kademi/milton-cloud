@@ -24,6 +24,7 @@ public class ContactRequest {
     private String firstName;
     private String phone;
     private String surName;
+    private String message;
 
     public String getCompany() {
         return company;
@@ -64,5 +65,14 @@ public class ContactRequest {
     public void setSurName(String surName) {
         this.surName = surName;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+    
     
 }

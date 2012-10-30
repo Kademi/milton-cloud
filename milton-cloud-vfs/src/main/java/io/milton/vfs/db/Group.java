@@ -44,6 +44,12 @@ import org.hibernate.criterion.Restrictions;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Group implements Serializable, VfsAcceptor {
 
+    public static Group findGroup(Organisation org, String name, Session session) {
+        Criteria crit = session.createCriteria(Group.class);
+        crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
+        return (Group) crit.uniqueResult();
+    }    
+    
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
     /**
