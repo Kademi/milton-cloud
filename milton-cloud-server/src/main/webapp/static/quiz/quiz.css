@@ -2,32 +2,32 @@
 #quizQuestions {
     min-height: 400px;
 }
-#quizQuestions p, #quizQuestions h3, #quizQuestions li  {
+ol.quiz p, ol.quiz h3, ol.quiz li  {
     line-height: 16px;
 }
-#quizQuestions h3 {
+ol.quiz h3 {
     margin: 0;
     display: inline-block;
 }
-#quizQuestions h3, #quizQuestions p, #quizQuestions label {
+ol.quiz h3, ol.quiz p, ol.quiz label {
     padding: 5px 7px;        
     border: solid 1px transparent;
 }
-#quizQuestions h3:hover, #quizQuestions p:hover, #quizQuestions label:hover {
+.quizContainer #quizQuestions h3:hover, .quizContainer #quizQuestions p:hover, .quizContainer #quizQuestions label:hover {
     border: solid 1px #dedede;
     background-color: white;
 }
-#quizQuestions input {
+ol.quiz input {
     margin-top: 5px;
     background-image: none;
 }
-#quizQuestions input.question {
+ol.quiz input.question {
     display: block;
 }
-#quizQuestions input.helptext {
+ol.quiz input.helptext {
     display: block;
 }
-#quizQuestions input.answer {
+ol.quiz input.answer {
     display: block;
 }
 #quizQuestions ol.quiz {
@@ -35,18 +35,18 @@
     padding: 10px 0 0 20px;
     list-style-type: decimal;
 }
-#quizQuestions ol.quiz > li {
+ol.quiz > li {
     padding: 10px 0;
     position: relative;
 }
-#quizQuestions input.P, #quizQuestions input.H3 {
+ol.quiz input.P, ol.quiz input.H3 {
     display: block;
 }
-#quizQuestions li label {
+ol.quiz li label {
     min-width: 100px;
     display: inline;
 }
-#quizQuestions li span.delete {
+.quizContainer ol.quiz li span.delete {
     display: block;
     position: absolute;
     left: -9px;
@@ -54,4 +54,8 @@
     width: 11px;
     height: 11px;
     background-image: url(/templates/themes/admin/images/icon_delete.png);
+}
+
+.viewQuiz ol.quiz li li {
+    list-style-type: none;
 }

@@ -24,7 +24,8 @@ public class AvconvConverter implements Closeable {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AvconvConverter.class);
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
     private final ContentTypeService contentTypeService;
-    private final String process;
+    private final String videoConverterProcess;
+    private final String imageConverterProcess = "convert"; // ImageMagick
     private final String primaryMediaHash;
     private final FormatSpec format;
     private final String inputName;
@@ -39,7 +40,7 @@ public class AvconvConverter implements Closeable {
     public AvconvConverter(String process, String primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore, MediaInfoService mediaInfoService) {
         this.hashStore = hashStore;
         this.blobStore = blobStore;
-        this.process = process;
+        this.videoConverterProcess = process;
         this.mediaInfoService = mediaInfoService;
         this.format = format;
         if (format == null) {
@@ -84,6 +85,83 @@ public class AvconvConverter implements Closeable {
     public String generate(With<InputStream, String> with) throws Exception {
         log.info("generateThumb: " + format + " to " + dest.getAbsolutePath());
         source = createSourceFile();
+        if (format.inputType.equals("video")) {
+            return generateFromVideo(with);
+        } else {
+            return generateFromImage(with);
+        }
+    }
+
+    private String generateFromImage(With<InputStream, String> with) throws Exception {
+        try {
+            List<String> args = new ArrayList<>();
+            if (source.length() > 1000000) {
+                args.add("-thumbnail");
+            } else {
+                args.add("-resize");
+            }
+
+            // determine original dimensions, then choose x or y axis to scale on so that 
+            // the resulting image or video is bound by the format dimensions            
+            MediaInfo info = mediaInfoService.getInfo(source);
+            String scale;
+            if (info == null) {
+                log.warn("Failed to find dimensions of source file, might not be able to generate thumb");
+                scale = format.getWidth() + "";
+            } else {
+                Proportion prop = new Proportion(info.getWidth(), info.getHeight(), format.getWidth(), format.getHeight());
+                if (info.getWidth() > info.getHeight()) {
+                    scale = "x" + prop.getContrainedHeight();
+                } else {
+                    scale = prop.getConstrainedWidth() + "";
+                }
+            }
+            args.add(scale);            
+
+            // set the input file
+            args.add(source.getAbsolutePath());
+
+            // set output file - just a temp file
+            args.add(dest.getAbsolutePath());
+
+            int successCode = 0;
+            ScriptExecutor exec = new ScriptExecutor(imageConverterProcess, args, successCode);
+            try {
+                exec.exec();
+            } catch (Exception ex) {
+                throw new Exception("Failed to generate alternate format: " + format, ex);
+            }
+
+            if (!dest.exists()) {
+                throw new Exception("Conversion failed. Dest temp file was not created. Format: " + format);
+            }
+            if (dest.length() == 0) {
+                throw new Exception("Conversion failed. Dest temp file has size zero. format: " + format);
+            }
+
+            if (sourceLength > 0) {
+                long percent = dest.length() * 100 / sourceLength;
+                log.info("Compression: " + percent + "% of source file: " + sourceLength / 1000000 + "Mb");
+            }
+
+            log.debug(" ffmpeg ran ok. reading temp file back to out stream");
+            FileInputStream tempIn = null;
+            try {
+                tempIn = new FileInputStream(dest);
+                return with.use(tempIn);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            } finally {
+                FileUtils.close(tempIn);
+            }
+        } finally {
+//            if (dest.exists()) {
+//                dest.delete();
+//            }
+        }
+    }
+
+    private String generateFromVideo(With<InputStream, String> with) throws Exception {
         try {
             List<String> args = new ArrayList<>();
 
@@ -141,7 +219,7 @@ public class AvconvConverter implements Closeable {
             args.add(dest.getAbsolutePath());
 
             int successCode = 0;
-            ScriptExecutor exec = new ScriptExecutor(process, args, successCode);
+            ScriptExecutor exec = new ScriptExecutor(videoConverterProcess, args, successCode);
             try {
                 exec.exec();
             } catch (Exception ex) {

@@ -6,6 +6,7 @@
     var methods = {
         init : function( options ) { 
             var container = this;
+            
             var config = $.extend( {
                 url: "./",
                 useJsonPut: true,
@@ -14,11 +15,13 @@
                     log("finished upload", data);
                 }
                 }, options);  
+                
             log("init milton uploads", container);
             var actionUrl = config.url;
             if( config.useJsonPut ) {
                 actionUrl += "_DAV/PUT?overwrite=true";
             }
+            log("upload to url: ". actionUrl);
             var form = $("<form action='" + actionUrl + "' method='POST' enctype='multipart/form-data'><input type='hidden' name='overwrite' value='true'></form>");
             var buttonBar = $("<div class='row fileupload-buttonbar'></div>");
             form.append(buttonBar);

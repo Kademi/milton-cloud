@@ -29,6 +29,7 @@
             e.preventDefault();
             e.stopPropagation();
             var form = $(this);     
+            form.trigger("submitForm");
             log("form submit", form, "to" , form.attr("action"));
             resetValidation(container);
             if( checkRequiredFields(form) ) {
@@ -45,11 +46,13 @@
 
 function postForm(form, valiationMessageSelector, validationFailedMessage, callback) {
     log("postForm", form);
+    var serialised = form.serialize();
+    form.trigger("preSubmitForm", serialised);
     try {                    
         $.ajax({
             type: 'POST',
             url: form.attr("action"),
-            data: form.serialize(),
+            data: serialised,
             dataType: "json",
             success: function(resp) {
                 ajaxLoadingOff();                            
@@ -80,8 +83,8 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
                 ajaxLoadingOff();
                 log("error posting form", form, resp);
                 alert("err " + resp);
-                $(valiationMessageSelector, container).text(validationFailedMessage);
-                $(valiationMessageSelector, container).show(100);
+                $(valiationMessageSelector, form).text(validationFailedMessage);
+                $(valiationMessageSelector, form).show(100);
             }
         });                
     } catch(e) {

@@ -19,6 +19,7 @@ package io.milton.cloud.server.web.alt;
 import io.milton.cloud.server.db.AltFormat;
 import io.milton.cloud.server.db.MediaMetaData;
 import io.milton.cloud.server.web.FileResource;
+import io.milton.cloud.server.web.HashResource;
 import io.milton.cloud.server.web.alt.AltFormatGenerator.GenerateJob;
 import io.milton.common.ContentTypeUtils;
 import io.milton.common.Path;
@@ -69,24 +70,26 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
+        System.out.println("AltFormat: " + sPath);
         Path p = Path.path(sPath);
         if (p.getName().startsWith("alt-")) {
+            System.out.println("it does");
             Resource r = wrapped.getResource(host, p.getParent().toString());
-            if (r instanceof FileResource) {
-                FileResource fr = (FileResource) r;
-                String sourceHash = fr.getHash();
+            if (r instanceof HashResource) {
+                HashResource hr = (HashResource) r;
+                String sourceHash = hr.getHash();
                 String formatName = p.getName().replace("alt-", "");
                 AltFormat f = AltFormat.find(sourceHash, formatName, SessionManager.session());
                 FormatSpec format = altFormatGenerator.findFormat(formatName);
                 if (f != null) {
-                    AltFormatResource alt = new AltFormatResource((FileResource) r, p.getName(), f, format);
+                    AltFormatResource alt = new AltFormatResource(hr, p.getName(), f, format);
                     log.info("getResource: created resource for format: " + format + " - " + alt);
                     return alt;
                 } else {
                     log.warn("getResource: pre-generated alt format not found: " + sourceHash + " - " + p.getName());
                     // if the format is valid then create a resource which will generate on demand                                        
                     if (format != null) {
-                        AltFormatResource alt = new AltFormatResource((FileResource) r, p.getName(), format);
+                        AltFormatResource alt = new AltFormatResource(hr, p.getName(), format);
                         log.info("getResource: created resource for format: " + format + " - " + alt);
                         return alt;
                     } else {
@@ -108,7 +111,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
      */
     public class AltFormatResource implements GetableResource, DigestResource, BufferingControlResource {
 
-        private final FileResource rPrimary;
+        private final HashResource rPrimary;
         private final String name;
         private final FormatSpec formatSpec;
         private AltFormat altFormat;
@@ -116,14 +119,14 @@ public class AltFormatResourceFactory implements ResourceFactory {
         private boolean doneFanoutLookup;
         private Long sentContentLength;
 
-        public AltFormatResource(FileResource rPrimary, String name, AltFormat altFormat, FormatSpec formatSpec) {
+        public AltFormatResource(HashResource rPrimary, String name, AltFormat altFormat, FormatSpec formatSpec) {
             this.rPrimary = rPrimary;
             this.name = name;
             this.altFormat = altFormat;
             this.formatSpec = formatSpec;
         }
 
-        public AltFormatResource(FileResource rPrimary, String name, FormatSpec formatSpec) {
+        public AltFormatResource(HashResource rPrimary, String name, FormatSpec formatSpec) {
             this.rPrimary = rPrimary;
             this.name = name;
             this.altFormat = null;
@@ -357,7 +360,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                 log.error("-----------------------------------");
                 log.error("-----------------------------------");
                 log.error("ERROR: byte count mismatch. Sent content length=" + sentContentLength + " actually sent=" + bytesWritten);
-                log.error("rPrimary=" + rPrimary.getHref());
+                log.error("rPrimary=" + rPrimary.getName());
                 log.error("alt format id=" + altFormat.getId());
                 log.error("alt format name=" + altFormat.getName());
                 log.error("fanout content length=" + fanout.getActualContentLength());

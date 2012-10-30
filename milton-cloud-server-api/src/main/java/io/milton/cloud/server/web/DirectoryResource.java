@@ -109,11 +109,15 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            ApplicationManager am = _(ApplicationManager.class);
-            children = am.toResources(this, directoryNode);
-            am.addBrowseablePages(this, children);
+            initChildren();
         }
         return children;
+    }
+
+    protected void initChildren() {
+        ApplicationManager am = _(ApplicationManager.class);
+        children = am.toResources(this, directoryNode);
+        am.addBrowseablePages(this, children);
     }
 
     @Override
@@ -140,7 +144,7 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
             directoryNode = parent.getDirectoryNode().addDirectory(getName());
             this.contentNode = directoryNode;
         }
-        if( directoryNode.get(newName) != null ) {
+        if (directoryNode.get(newName) != null) {
             throw new BadRequestException(this, "Resource with that name already exists: " + newName);
         }
         DirectoryNode newNode = directoryNode.addDirectory(newName);
@@ -174,9 +178,9 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (params.containsKey("importStatus")) {
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-            if (p != null) {                
+            if (p != null) {
                 Importer importer = Importer.getImporter(p, this);
-                if( importer != null ) {
+                if (importer != null) {
                     jsonResult = new JsonResult(true);
                     jsonResult.setData(importer);
                 } else {

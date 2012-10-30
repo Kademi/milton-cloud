@@ -83,6 +83,7 @@ public class AltFormatGenerator implements EventListener {
         this.formats = new ArrayList<>();
         this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
         formats.add(new FormatSpec("image", "png", 150, 150, true, "-f", "mjpeg"));
+        formats.add(new FormatSpec("image", "png", 600, 400, true, "-f", "mjpeg"));
         profileSpec = new FormatSpec("image", "png", 52, 52, true, "-f", "mjpeg");
         formats.add(profileSpec);
 

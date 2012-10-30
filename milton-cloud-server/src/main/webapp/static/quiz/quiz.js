@@ -40,11 +40,11 @@ function loadQuizEditor(modal, data) {
     });    
 }
 
-function prepareQuizForSave(form) {
+function prepareQuizForSave(form, data) {
     log("build data object for quiz");
-        
+    var quiz = form.find("#quizQuestions");
     // Set names onto all inputs. Just number them answer0, answer1, etc. And add a class to the li with the name of the input, to use in front end validation
-    var questions = form.find("ol.quiz > li");
+    var questions = quiz.find("ol.quiz > li");
     questions.each(function(q, n) {
         var li = $(n);
         setClass(li, "answer", q); // will remove old classes
@@ -53,13 +53,19 @@ function prepareQuizForSave(form) {
         });
     });
         
-    data = {
-        pageName: form.find("input[name=pageName]").val(),
-        pageTitle: form.find("input[name=pageTitle]").val(),
-        template: form.find("input[name=template]").val()
-    };
+    if( data ) {
+        data.pageName = form.find("input[name=pageName]").val();
+        data.pageTitle = form.find("input[name=pageTitle]").val();
+        data.template = form.find("input[name=template]").val();
+    } else {
+        data = {
+            pageName: form.find("input[name=pageName]").val(),
+            pageTitle: form.find("input[name=pageTitle]").val(),
+            template: form.find("input[name=template]").val()
+        };
+    }
     // Find all inputs and add them to the data object
-    var inputs = form.find("input[type=text],select,textarea,input[type=radio]:checked").not(".newQuestionType,input[name=pageTitle],input[name=pageName]");
+    var inputs = quiz.find("input[type=text],select,textarea,input[type=radio]:checked").not(".newQuestionType,input[name=pageTitle],input[name=pageName]");
     log("add inputs", inputs);
     inputs.each(function(i,n){
         var inp = $(n);
@@ -68,10 +74,10 @@ function prepareQuizForSave(form) {
         
     // remove any "temp" elements that have been added as part of editing
     form.find(".temp").remove();
-    form.find("input[type=radio]").removeAttr("checked");        
-    removeEmptyRadios(form.find("ol ol"));
+    quiz.find("input[type=radio]").removeAttr("checked");        
+    removeEmptyRadios(quiz.find("ol ol"));
                         
-    data.body = form.find("#quizQuestions").html();    
+    data.body = quiz.html();    
     return data;
 }
 

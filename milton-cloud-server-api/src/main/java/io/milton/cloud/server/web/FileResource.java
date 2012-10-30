@@ -55,7 +55,7 @@ import java.util.HashMap;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource {
+public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource, HashResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     private static final Range docTypeRange = new Range(0, 30);

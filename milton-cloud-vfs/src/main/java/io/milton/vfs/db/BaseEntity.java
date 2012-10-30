@@ -141,8 +141,8 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         if (getRepositories() == null) {
             setRepositories(new ArrayList<Repository>());
         }
-        Repository r = new Repository();
-
+        Repository r = new Repository();        
+        getRepositories().add(r);
         Repository.initRepo(r, name, session, user, this);
 
         return r;

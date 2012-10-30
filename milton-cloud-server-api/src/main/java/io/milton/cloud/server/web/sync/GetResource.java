@@ -1,6 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
-import io.milton.cloud.server.web.CommonResource;
+import io.milton.cloud.server.web.HashResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -24,7 +24,7 @@ import org.hashsplit4j.api.HashStore;
  *
  * @author brad
  */
-public class GetResource extends BaseResource implements GetableResource {
+public class GetResource extends BaseResource implements GetableResource, HashResource {
 
     private final Fanout fanout;
     private final String hash;
@@ -52,6 +52,11 @@ public class GetResource extends BaseResource implements GetableResource {
 
     @Override
     public String getName() {
+        return hash;
+    }
+
+    @Override
+    public String getHash() {
         return hash;
     }
 

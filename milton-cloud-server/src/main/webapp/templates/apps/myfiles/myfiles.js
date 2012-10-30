@@ -25,16 +25,14 @@ function initFiles() {
         var href = $(n).attr("href");
         $(n).attr("href", href + "/alt-640-360.png");
     });
-    $('a.image').lightBox(
-    {
+    $('a.image').lightBox({
         imageLoading: '/static/images/lightbox-ico-loading.gif',
         imageBtnClose: '/static/images/lightbox-btn-close.gif',
         imageBtnPrev: '/static/images/lightbox-btn-prev.gif',
         imageBtnNext: '/static/images/lightbox-btn-next.gif',
         imageBlank: '/static/images/lightbox-blank.gif',
         containerResizeSpeed: 350                    
-    }                
-    );
+    } );
     jQuery("abbr.timeago").timeago();
     jQuery("table.bar .file a").each(function(index, node) {                    
         tag = $(node);
