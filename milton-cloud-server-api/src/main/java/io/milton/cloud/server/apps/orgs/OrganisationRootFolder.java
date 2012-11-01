@@ -39,7 +39,6 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationRootFolder.class);
     private final ApplicationManager applicationManager;
     private final Organisation organisation;
-    private ResourceList children;
     private Map<String,Object> attributes;
 
     public OrganisationRootFolder( ApplicationManager applicationManager, Organisation organisation) {
@@ -72,22 +71,6 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     @Override
     public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException{
         return UserApp.findEntity(u, this);
-    }
-
-    @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        if (children == null) {
-            children = new ResourceList();
-            if (organisation.getRepositories() != null) {
-                for (Repository repo : organisation.getRepositories()) {
-                    RepositoryFolder rf = new RepositoryFolder(this, repo);
-                    children.add(rf);
-                }
-            }
-            children.add(new OrganisationsFolder("organisations", this, organisation));
-            _(ApplicationManager.class).addBrowseablePages(this, children);
-        }
-        return children;
     }
 
     @Override

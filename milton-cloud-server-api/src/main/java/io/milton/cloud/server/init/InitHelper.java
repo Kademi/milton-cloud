@@ -187,7 +187,7 @@ public class InitHelper {
 
     public Website checkCreateWebsite(Session session, Organisation org, String name, String dnsName, String theme, Profile user, String... aliases) {
         for (Website w : org.websites()) {
-            if (w.getDomainName().equals(dnsName)) {
+            if (w.getName().equals(name)) {
                 return w;
             }
         }
