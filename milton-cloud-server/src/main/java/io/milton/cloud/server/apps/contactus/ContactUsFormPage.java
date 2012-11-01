@@ -269,6 +269,9 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         addRow(table, "Phone", r.getPhone());
         addRow(table, "Company", r.getCompany());
         table.close();
+        Element p = body.begin("p");
+        p.writeText(r.getMessage());
+        p.close();
         body.close();
         html.close();
         w.flush();

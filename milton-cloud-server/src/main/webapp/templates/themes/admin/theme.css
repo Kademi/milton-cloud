@@ -1227,3 +1227,6 @@ p.validationError {
     margin: 0 0 0.1em 0;
 }
 
+.ui-widget-content {
+    background-color: white;
+}

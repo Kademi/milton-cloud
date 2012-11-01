@@ -48,7 +48,8 @@ function showGraph(graphData, reportContainer) {
             xkey: graphData.xkey,
             ykeys: graphData.ykeys,
             labels: graphData.labels,
-            hideHover: true
+            hideHover: true,
+            dateFormat: function (x) { return new Date(x).formatDDMMYYYY(); } // see common.js
         });
     }
 }

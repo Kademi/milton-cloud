@@ -104,16 +104,17 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                 }
                 String email = WebUtils.getParam(parameters, "email");
                 Profile pExisting = Profile.find(email, session);
-                if (pExisting != null) {
-                    jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address.");
-                    return null;
+                if (pExisting == null) {
+                    profile = new Profile();
+                    String nameToCreate = Profile.findAutoName(nickName, session);
+                    Date now = _(CurrentDateService.class).getNow();
+                    profile.setName(nameToCreate);
+                    profile.setCreatedDate(now);
+                    profile.setModifiedDate(now);                    
+                } else {
+                    profile = pExisting;
+                    log.warn("An existing user account was found with that email address, this will be added to the group");
                 }
-                String nameToCreate = Profile.findAutoName(nickName, session);
-                Date now = _(CurrentDateService.class).getNow();
-                profile = new Profile();
-                profile.setName(nameToCreate);
-                profile.setCreatedDate(now);
-                profile.setModifiedDate(now);
                 isNew = true;
             }
 
@@ -134,6 +135,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                     jsonResult.setNextHref(newHref);
                 }
             } catch (Exception ex) {
+                System.out.println("ex: " + ex + " - " + profile);
                 log.error("exception: " + profile.getId(), ex);
                 jsonResult = new JsonResult(false, ex.getMessage());
             }

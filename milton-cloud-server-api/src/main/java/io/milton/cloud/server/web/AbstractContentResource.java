@@ -4,6 +4,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.Version;
 import io.milton.cloud.server.manager.CommentService;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
@@ -34,7 +35,7 @@ import io.milton.vfs.db.Repository;
  *
  * @author brad
  */
-public abstract class AbstractContentResource<T extends DataNode, P extends ContentDirectoryResource> extends AbstractResource implements ContentResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource {
+public abstract class AbstractContentResource<T extends DataNode, P extends ContentDirectoryResource> extends AbstractResource implements ContentResource, PropFindableResource, GetableResource, DeletableResource, CopyableResource, MoveableResource, TitledPage {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractContentResource.class);
     protected P parent;
@@ -119,7 +120,7 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
         }
         tx.commit();
     }
-    
+
     /**
      * Deletes the content node and removes from parent, but does not do a save
      * or commit
@@ -127,26 +128,26 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
     public void doDelete() {
         contentNode.delete();
         parent.onRemovedChild(this);
-        
+
     }
 
     @Override
     public Date getCreateDate() {
-        if( this.contentNode == null ) {
+        if (this.contentNode == null) {
             return null;
-        }        
+        }
         return loadNodeMeta().getCreatedDate();
     }
 
     @Override
     public Date getModifiedDate() {
-        if( this.contentNode == null ) {
+        if (this.contentNode == null) {
             return null;
         }
         return loadNodeMeta().getModDate();
     }
 
-    public void updateModDate() {        
+    public void updateModDate() {
         long previousProfileId = loadNodeMeta().getProfileId();
         Date previousModDate = loadNodeMeta().getModDate();
         String previousResourceHash = contentNode.getLoadedHash();
@@ -188,14 +189,14 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
 
     @Override
     public String getUniqueId() {
-        if( contentNode != null ) {
+        if (contentNode != null) {
             NodeMeta meta = loadNodeMeta();
-            if( meta != null ) {
+            if (meta != null) {
                 UUID id = meta.getId();
-                if( id != null ) {
+                if (id != null) {
                     return id.toString();
                 }
-            }             
+            }
         }
         return null;
     }
@@ -228,7 +229,6 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
         return parent;
     }
 
-
     /**
      * Get all allowed priviledges for all principals on this resource. Note
      * that a principal might be a user, a group, or a built-in webdav group
@@ -258,7 +258,7 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
             return list.size();
         }
     }
-    
+
     public void setNewComment(String s) throws NotAuthorizedException {
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         if (rootFolder instanceof WebsiteRootFolder) {
@@ -273,51 +273,51 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
      *
      * @return
      */
-    @BeanProperty(writeRole= Priviledge.READ)
+    @BeanProperty(writeRole = Priviledge.READ)
     public String getNewComment() {
         return null;
     }
 
     @Override
-    public boolean isPublic() {        
+    public boolean isPublic() {
         return parent.getBranch().getRepository().isPublicContent();
     }
 
     /**
      * For public repositories we allow all READ operations
-     * 
-     * TODO: should limit this to not include PROPFIND
-     * TODO: a POST is often available to anonymous users but will be rejected
-     * 
+     *
+     * TODO: should limit this to not include PROPFIND TODO: a POST is often
+     * available to anonymous users but will be rejected
+     *
      * @param request
      * @param method
      * @param auth
-     * @return 
+     * @return
      */
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        if( !method.isWrite ) {
-            if( isPublic() ) {
+        if (!method.isWrite) {
+            if (isPublic()) {
                 return true;
             }
         }
         return super.authorise(request, method, auth);
     }
-    
+
     @Override
     public String getHash() {
         return this.contentNode.getHash();
-    }    
+    }
 
     @Override
     public Profile getModifiedBy() {
         NodeMeta meta = loadNodeMeta();
-        if( meta == null ) {
+        if (meta == null) {
             return null;
         }
         return Profile.get(meta.getProfileId(), SessionManager.session());
-    }     
-    
+    }
+
     @Override
     public void save() throws IOException {
         getParent().save();
@@ -328,15 +328,15 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
         this.contentNode.setHash(s);
         updateModDate();
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }    
+    }
 
     @Override
     public Branch getBranch() {
-        if( parent == null ) {
+        if (parent == null) {
             return null;
         }
         return parent.getBranch();
@@ -345,21 +345,23 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
     @Override
     public Repository getRepository() {
         Branch b = getBranch();
-        if( b != null ) {
+        if (b != null) {
             return b.getRepository();
         }
         return null;
     }
-    
-    
-    
+
     @Override
     public Profile getOwnerProfile() {
         Branch b = getBranch();
+        if (b == null) {
+            log.warn("Null branch for this content resource");
+            return null;
+        }
         BaseEntity be = b.getRepository().getBaseEntity();
-        if( be instanceof Profile) {
+        if (be instanceof Profile) {
             return (Profile) be;
         }
         return null;
-    }    
+    }
 }

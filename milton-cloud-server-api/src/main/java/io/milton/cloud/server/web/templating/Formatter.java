@@ -254,7 +254,7 @@ public class Formatter {
         if (dt == null) {
             return "";
         }
-        return DateTimeFormat.shortDate().print(dt);
+        return DateTimeFormat.mediumDate().print(dt);
     }
 
     public String formatDateLong(Object o) {

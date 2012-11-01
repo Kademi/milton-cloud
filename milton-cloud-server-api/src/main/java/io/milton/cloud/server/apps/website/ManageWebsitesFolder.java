@@ -132,7 +132,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             themeParams.put("hero2", "#88c03f");
             themeParams.put("text1", "#1C1D1F");
             themeParams.put("text2", "#2F2F2F");
-            themeParams.put("border1", "#2F2F2F");
+            themeParams.put("border1", "#DBDADA");
             themeParams.put("bg1", "#2F2F2F");
             themeParams.put("borderRadius", "5px");
             themeParams.put("listIndent", "40px");            
@@ -153,11 +153,7 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
             Date now = _(CurrentDateService.class).getNow();
             AppControl.initDefaultApps(websiteBranch, curUser, now, session);
             EventUtils.fireQuietly(_(EventManager.class), new WebsiteCreatedEvent(website));
-            
-            InitHelper initHelper = new InitHelper(_(PasswordManager.class), _(ApplicationManager.class));
-            Group administrators = initHelper.checkCreateGroup(getOrganisation(), Group.ADMINISTRATORS, 0, session, null, Group.REGO_MODE_CLOSED);
-            curUser.addToGroup(administrators, organisation, session);
-            
+                        
             tx.commit();
             jsonResult = new JsonResult(true, "Created", website.getDomainName());
         }

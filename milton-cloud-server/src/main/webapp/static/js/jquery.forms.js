@@ -18,6 +18,9 @@
             callback: function() {
                 
             },
+            error: function() {
+                
+            },
             valiationMessageSelector: ".pageMessage",
             validationFailedMessage : "Some inputs are not valid."
         }, options);  
@@ -38,6 +41,7 @@
                 showValidation(null, config.validationFailedMessage, container);
                 //$(config.valiationMessageSelector, container).text(config.validationFailedMessage);
                 $(config.valiationMessageSelector, container).show(100);
+                error(form);
             }
             return false;
         });    

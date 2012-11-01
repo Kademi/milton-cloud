@@ -5,6 +5,18 @@ function startsWith(str, prefix) {
     return str.indexOf(prefix) === 0;
 }
 
+Date.prototype.formatMMDDYYYY = function(){
+    return this.getMonth() + 
+    "/" +  this.getDate() +
+    "/" +  this.getFullYear();
+}
+
+Date.prototype.formatDDMMYYYY = function(){
+    return this.getDate() +
+    "/" +  this.getMonth() + 
+    "/" +  this.getFullYear();
+}
+
 /**
  * Adds a contains function to String objects
  */

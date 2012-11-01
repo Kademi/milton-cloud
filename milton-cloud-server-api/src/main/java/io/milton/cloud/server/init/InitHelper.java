@@ -8,6 +8,7 @@ import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.manager.PasswordManager;
+import io.milton.cloud.server.role.Role;
 import io.milton.vfs.db.*;
 import java.util.*;
 import org.hibernate.HibernateException;
@@ -79,6 +80,24 @@ public class InitHelper {
             }
         }
         return g;
+    }
+    
+    /**
+     * Check that the given group has the roles (on their own organisation) and
+     * create if missing
+     * 
+     * @param group
+     * @param roles 
+     */
+    public void checkGroupRoles(Group group, Session session, String ... roles) {
+        if( group.getGroupRoles() == null ) {
+            group.setGroupRoles(new ArrayList<GroupRole>());
+        }
+        for( String r : roles ) {
+            if( !group.hasRole(r) ) {
+                group.grantRole(r, session);
+            }
+        }
     }
 
     public void createGroupEmailJobs(Organisation o, Session session, Group... groups) {
