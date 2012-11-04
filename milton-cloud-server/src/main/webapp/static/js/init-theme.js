@@ -58,28 +58,20 @@ function initTheme() {
     log("finished init-theme");
 } 
 
-var isMouseOver = false;
 function initLoginDropDown() {
-    $(".Login, .Login .dropBox").hover(function() {
-        isMouseOver = true;
-        checkCloseLogin();
-    }, function() {
-        isMouseOver = false;
-        checkCloseLogin();
-    });    
-}
-
-
-function checkCloseLogin() {
-    if( isMouseOver ) {
-        $(".Login .dropBox").show(300);        
-    }
-    window.setTimeout(function() {                
-        if( !isMouseOver ) {
-            $(".Login .dropBox").hide(300);
+    log("init login", $(".Login"));
+    var login = $(".Login");
+    var dropdown = login.find(".dropBox");
+    login.click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdown.toggle(300);
+    });
+    $("body").click(function() {
+        if( dropdown.is(":visible")) {
+            dropdown.toggle(300);
         }
-
-    }, 1000);    
+    });
 }
 
 function initModal() {
@@ -195,10 +187,10 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
         elements = $(".htmleditor");
     }
     if( !extraPlugins ) {
-        extraPlugins = 'autogrow,embed_video,modal';  // see /static/js/toolbars.js
+        extraPlugins = 'autogrow,embed_video,image2,modal';  // see /static/js/toolbars.js
     }
     if( !removePlugins ) {
-        removePlugins = 'resize';
+        removePlugins = 'resize,image';
     }    
     log("prepare html editors", elements);
     elements.each(function(i,n) {

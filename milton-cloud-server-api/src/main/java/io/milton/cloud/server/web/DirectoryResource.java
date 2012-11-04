@@ -45,6 +45,8 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
+import io.milton.http.Request;
+import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
@@ -59,7 +61,7 @@ import java.net.URISyntaxException;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, PostableResource {
+public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, PostableResource, DeletableCollectionResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
     protected DirectoryNode directoryNode;
@@ -480,5 +482,10 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
             }
         }
         return list;
+    }
+
+    @Override
+    public boolean isLockedOutRecursive(Request request) {
+        return false; // TODO: implement proper lock check
     }
 }

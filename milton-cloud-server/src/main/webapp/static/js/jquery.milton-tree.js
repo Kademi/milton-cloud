@@ -305,7 +305,11 @@ function toUrl(n, config) {
         var id = n.attr("id");
         log("toUrl", n, id);
         var url = config.nodeMap[id];
-        return url;
+        if( url ) {
+            return url;
+        } else {
+            return "";
+        }
     } else {
         return "";
     }
@@ -412,17 +416,26 @@ function deleteTreeItem(config) {
 
 function createTreeItemFolder(tree, config) {
     var node = $(config.selectedItem);
-    var href = config.basePath + toUrl(node, config);
+    if( node.hasClass("jstree-leaf")) {
+        log("node is a leaf, use parent", node, node.parent());
+        node = node.parent();
+    } else {
+        log("is not a leaf", node);
+    }
+    var nodePath = toUrl(node, config);
+    log("nodePath", nodePath);
+    var href = config.basePath + nodePath;
     var name = node.find("a").text();
     
     log("createTreeItemFolder", node, name, href);
     var newName = prompt("Please enter a name for the new folder");
     if( newName ) {
-        createFolder(newName, href, function() {
-            log("refresh tree", tree);
+        createFolder(newName, href, function() {            
             var treeNode = tree.find(".jstree")[0];
-            $.jstree._reference(treeNode).refresh(config.selectedItem);
-            config.onnewfolder(config.selectedItem);
+            var nodeToRefresh = node[0];
+            log("refresh tree", tree, treeNode, "selected", nodeToRefresh);
+            $.jstree._reference(treeNode).refresh(nodeToRefresh);
+            config.onnewfolder(nodeToRefresh);
         })        
     }
     
