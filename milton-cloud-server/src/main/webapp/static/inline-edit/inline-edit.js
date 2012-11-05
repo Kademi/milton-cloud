@@ -27,7 +27,7 @@ function initInlineEdit(formContainer) {
     });
     var btnNew = $("<button class='new'>New Page</button>");
     btnNew.click(function() {
-        var href = window.location.href;
+        var href = window.location.pathname;
         href = getFolderPath(href);
         href = href + "/autoname.new?template=learner/modulePage"; // TODO: make configurable somewhoe
         window.location.href = href;

@@ -98,7 +98,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             if (asJson) {
                 sendContentAsJson(out);
             } else {
-                if (fileNode.getHash() == null) {
+                if (fileNode == null || fileNode.getHash() == null) {
                     log.info("Cant generate content for file, it has no hash");
                 } else {
                     if (range == null) {

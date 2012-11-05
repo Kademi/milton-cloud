@@ -28,21 +28,24 @@ CKEDITOR.plugins.add( 'embed_video',
  
         if ( editor.contextMenu ) {
             editor.addMenuGroup( 'videoGroup' );
-            editor.addMenuItem( 'videoItem',
-            {
+            editor.addMenuItem( 'videoItem',{
                 label : 'Edit Video',
                 icon : iconPath,
                 command : 'videoDialog',
                 group : 'videoGroup'
             });
-            editor.contextMenu.addListener( function( element )
-            {
-                if ( element )
+            editor.contextMenu.addListener( function( element ) {
+                if ( element ) {
                     element = element.getAscendant( 'img', true );
-                if ( element && !element.isReadOnly() && !element.data( 'cke-realelement' ) )
-                    return {
-                        videoItem : CKEDITOR.TRISTATE_ON
-                    };
+                }
+                if ( element && !element.isReadOnly() && !element.data( 'cke-realelement' ) ) {
+                    if( element.hasClass("video")) {
+                        log("Found a video!", element);
+                        return {
+                            videoItem : CKEDITOR.TRISTATE_ON
+                        };
+                    }
+                }
                 return null;
             });
         }
@@ -160,9 +163,9 @@ CKEDITOR.plugins.add( 'embed_video',
                             }
                         });
                 
-                        // Setup the jplayer
-                        //insertJPlayer($("#vidContainer"), null, null, "360px","640px", "");
-                        //buildJPlayer("360", "640", "jp-video-360p", $("#vidContainer"), 100, null);
+                    // Setup the jplayer
+                    //insertJPlayer($("#vidContainer"), null, null, "360px","640px", "");
+                    //buildJPlayer("360", "640", "jp-video-360p", $("#vidContainer"), 100, null);
                     }
                 },
                 onOk : function() {

@@ -116,13 +116,14 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     }
 
     private ForumPost createQuestion(String newQuestion, String comment, Session session) {
+        String newName = NewPageResource.findAutoCollectionName(newQuestion, this, null);
         ForumPost p = new ForumPost();
         p.setForum(forum);
         if( forum.getForumPosts() == null ) {
             forum.setForumPosts(new ArrayList<ForumPost>());
         }
-        forum.getForumPosts().add(p);
-        String newName = NewPageResource.findAutoCollectionName(newQuestion, this, null);
+        forum.getForumPosts().add(p);        
+        log.info("createQuestion: newName=" + newName);
         p.setName(newName);
         p.setTitle(newQuestion);
         p.setNotes(comment);

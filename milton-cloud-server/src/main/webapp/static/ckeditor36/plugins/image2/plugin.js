@@ -71,7 +71,7 @@ CKEDITOR.plugins.add( 'image2',
                 contents :
                 [
                 {
-                    id : 'video',
+                    id : 'image2',
                     label : 'Insert/Edit Image',
                     elements :
                     [
@@ -97,6 +97,8 @@ CKEDITOR.plugins.add( 'image2',
                     if ( !element || element.getName() != 'img' || element.data( 'cke-realelement' ) ) {
                         element = editor.document.createElement( 'img' );
                         this.insertMode = true;
+                        src = "";
+                        url = "";
                     } else {
                         this.insertMode = false;
                         var p = getPathFromHref(window.location.href);
@@ -104,28 +106,40 @@ CKEDITOR.plugins.add( 'image2',
                         initialSelect = p;
                         mtype = element.getAttribute("mtype");
                         src = element.getAttribute("src");
-                        url = getFolderPath(src); // the url of the video is the parent of the preview image
+                        url = src;
                         log("update mode", initialSelect, url, mtype, src);
                     }
  
                     this.element = element;
  
                     this.setupContent( this.element );
-                    if( !initDone ) {
-                        initDone = true;
-                        var imageEditor = $(".imageEditor");                        
-                        var imageFloat = $("<select id='imageFloat'><option value=''>No alignment/float</option><option value='Left'>Align Left</option><option value='Right'>Align Right</option></select>");
+                    var imageEditor = $(".imageEditor");
+                    var imageCont = imageEditor.find("#imageContainer");
+                    var previewImg = $("#imageContainer img");
+                    if( previewImg.length == 0 ) {
+                        previewImg = $("<img/>");
+                        imageCont.prepend(previewImg);
+                        imageCont.append(loremIpsum());
+                    }
+                    var imageFloat = imageEditor.find("select");
+                    if( imageFloat.length == 0 ) {
+                        imageFloat = $("<select id='imageFloat'><option value=''>No alignment/float</option><option value='Left'>Align Left</option><option value='Right'>Align Right</option></select>");                        
                         imageFloat.click(function() {
-                            var img = imageCont.find("img");
-                            img.removeClass("floatLeft").removeClass("floatRight");
+                            previewImg.removeClass("floatLeft").removeClass("floatRight");
                             var val = imageFloat.val();
                             if( val ) {
-                                img.addClass("float" + val);
+                                previewImg.addClass("float" + val);
                             }
                         });
-                        $("#imageUploaded").append(imageFloat);
-                        
-                        var imageCont = imageEditor.find("#imageContainer")
+                        $("#imageUploaded").append(imageFloat);                        
+                    }
+                    log("set image source", previewImg, src);
+                    previewImg.attr("src", src);
+                                        
+                    if( !initDone ) {
+                        log("init not done, lets do it");
+                        initDone = true;
+                                                
                         $("#imageTree").mtree({
                             basePath: pagePath,
                             pagePath: "",
@@ -140,11 +154,6 @@ CKEDITOR.plugins.add( 'image2',
                                 url = selectedVideoUrl;
                                 log("selected file1", n, url);
                                 var img = imageCont.find("img");
-                                if( img.length == 0 ) {
-                                    img = $("<img/>");
-                                    imageCont.prepend(img);
-                                    imageCont.append(loremIpsum());
-                                }
                                 img.attr("src", url);
                                 log("done set img", img);
                             }
@@ -156,8 +165,7 @@ CKEDITOR.plugins.add( 'image2',
                                 $("#imageTree").mtree("addFile", name, href);
                                 url = href;
                             }
-                        });
-                
+                        });                
                     }
                 },
                 onOk : function() {
@@ -165,14 +173,22 @@ CKEDITOR.plugins.add( 'image2',
                     var dialog = this,
                     img = this.element;
                     var returnUrl = url;
-                    returnUrl = returnUrl.substring(pagePath.length+1);
+                    if( returnUrl.startsWith("/")) {
+                        returnUrl = returnUrl.substring(pagePath.length+1); // convert to relative path
+                    }
                     log("onOk", url, pagePath,"=", returnUrl);
-                    img.setAttribute( "src", returnUrl + "/alt-640-360.png" );
-                    img.setAttribute("class", "video");
+                    img.setAttribute( "src", returnUrl );
+                    var imageEditor = $(".imageEditor");
+                    var previewImage = imageEditor.find("#imageContainer img");
+                    var imageClass = previewImage.attr("class");
+                    if( imageClass ) {
+                        img.setAttribute("class", imageClass);
+                    }
                     if ( this.insertMode ) {
-                        log("inserted")
+                        log("insert mode", this.insertMode, img);
                         editor.insertElement( img );
                     } else {
+                        log("update mode", this.insertMode, img);
                         editor.updateElement();
                     }
                     this.commitContent( img );
@@ -189,12 +205,12 @@ CKEDITOR.plugins.add( 'image2',
  */
 function loremIpsum() {    
     return "<p>" +
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mollis fermentum libero, laoreet sodales enim sagittis at. In in dui a purus pharetra semper. Sed tincidunt varius lorem quis iaculis. Fusce placerat tellus eget mauris ultricies bibendum vestibulum diam lobortis. Donec in lacus ante, ac euismod lacus. Donec nibh sem, vehicula non eleifend non, posuere et enim. Curabitur venenatis eros in orci semper vehicula. Morbi venenatis lectus at tellus mollis quis porttitor purus vehicula." +
-            "</p>" +
-            "<p>" +
-            "Vivamus nibh elit, convallis vitae iaculis a, iaculis nec libero. Nulla diam lacus, ornare sed semper ac, faucibus eget neque. Sed ultricies erat vestibulum tortor bibendum iaculis. Sed consectetur nisl eu leo pharetra euismod. Pellentesque sed metus ligula. Vestibulum vel enim erat. Donec felis neque, gravida laoreet lacinia at, fringilla nec erat." +
-            "</p>" +
-            "<p>" +
-            "Fusce nec eros vel dolor iaculis fringilla. Suspendisse a felis enim, at iaculis arcu. Suspendisse vel nunc nec lorem suscipit mollis. In non nisl in velit rutrum commodo. Etiam bibendum ante non velit posuere tempus sodales turpis consequat. Nulla dapibus dignissim erat, a pretium massa tincidunt vel. Integer sit amet lacinia lectus. Pellentesque felis felis, aliquam eu laoreet et, facilisis non orci. Integer ligula lorem, dictum ut sodales eget, pretium quis ligula. Vivamus tincidunt." +
-            "</p>";
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mollis fermentum libero, laoreet sodales enim sagittis at. In in dui a purus pharetra semper. Sed tincidunt varius lorem quis iaculis. Fusce placerat tellus eget mauris ultricies bibendum vestibulum diam lobortis. Donec in lacus ante, ac euismod lacus. Donec nibh sem, vehicula non eleifend non, posuere et enim. Curabitur venenatis eros in orci semper vehicula. Morbi venenatis lectus at tellus mollis quis porttitor purus vehicula." +
+    "</p>" +
+    "<p>" +
+    "Vivamus nibh elit, convallis vitae iaculis a, iaculis nec libero. Nulla diam lacus, ornare sed semper ac, faucibus eget neque. Sed ultricies erat vestibulum tortor bibendum iaculis. Sed consectetur nisl eu leo pharetra euismod. Pellentesque sed metus ligula. Vestibulum vel enim erat. Donec felis neque, gravida laoreet lacinia at, fringilla nec erat." +
+    "</p>" +
+    "<p>" +
+    "Fusce nec eros vel dolor iaculis fringilla. Suspendisse a felis enim, at iaculis arcu. Suspendisse vel nunc nec lorem suscipit mollis. In non nisl in velit rutrum commodo. Etiam bibendum ante non velit posuere tempus sodales turpis consequat. Nulla dapibus dignissim erat, a pretium massa tincidunt vel. Integer sit amet lacinia lectus. Pellentesque felis felis, aliquam eu laoreet et, facilisis non orci. Integer ligula lorem, dictum ut sodales eget, pretium quis ligula. Vivamus tincidunt." +
+    "</p>";
 }
