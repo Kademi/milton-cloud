@@ -215,7 +215,7 @@ public class EmailItemQueueStore implements QueueStore {
             String sStatus = qi.getResultInfo();
             Integer status = SmtpUtils.getStatusCode(sStatus);
             if (status != null && (status >= 200 || status < 300)) {
-                System.out.println("setting complete email status complete --------------------------");
+                log.info("setting complete email status complete: status code=" + status + " sStatus=" + sStatus);
                 i.setSendStatus("c");
             } else {
                 long tm = currentDateService.getNow().getTime();

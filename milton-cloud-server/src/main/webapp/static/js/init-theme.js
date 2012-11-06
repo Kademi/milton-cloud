@@ -62,13 +62,18 @@ function initLoginDropDown() {
     log("init login", $(".Login"));
     var login = $(".Login");
     var dropdown = login.find(".dropBox");
-    login.click(function(e) {
+    login.find("> a").click(function(e) {
         e.preventDefault();
         e.stopPropagation();
+        log("hide1", e.target);
         dropdown.toggle(300);
+    });
+    dropdown.click(function(e) {
+        e.stopPropagation();
     });
     $("body").click(function() {
         if( dropdown.is(":visible")) {
+            log("hide2");
             dropdown.toggle(300);
         }
     });

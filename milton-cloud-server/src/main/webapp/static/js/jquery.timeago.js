@@ -55,14 +55,12 @@
       var $l = this.settings.strings;
       var prefix = $l.prefixAgo;
       var suffix = $l.suffixAgo;
-      log("distanceMillis", distanceMillis, this.settings.allowFuture);
       if (this.settings.allowFuture) {
         if (distanceMillis < 0) {
           prefix = $l.prefixFromNow;
           suffix = $l.suffixFromNow;
         }
       }
-      log("suffix:", suffix, $l.suffixFromNow);
 
       var seconds = Math.abs(distanceMillis) / 1000;
       var minutes = seconds / 60;

@@ -84,12 +84,13 @@ body.profile .muploadBtn {
     vertical-align: middle;                
     position: relative;    
     cursor: pointer;
-    width: 30%;    
+    width: 30%;   
+    height: 25px;
 }
 body.profile .muploadBtn span {
     position: absolute;
     top: 0.9em;
-    left: 40px;
+    left: 30px;
     color: white;
     text-decoration: none;
     font-size: 12px;

@@ -52,7 +52,8 @@ CKEDITOR.plugins.add( 'embed_video',
 
         // These interfere with page themes, but might need to be put back somehow for editor layout
         // 
-        editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
+        editor.element.getDocument().appendStyleSheet(this.path + 'videoPlugin.css');
+        editor.element.getDocument().appendStyleSheet('/static/common/plugin.css');
         //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap.min.css");
         //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-responsive.min.css");
         //        editor.element.getDocument().appendStyleSheet("/static/common/bootstrap-image-gallery.min.css");
@@ -97,7 +98,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     [
                     {
                         type : 'html',
-                        html: "<div id='myTree'></div><div id='myUploaded'></div><div class='vidEditor' style='position: absolute; top: 85px; left: 250px'><div id='vidContainer' class='jp-video'></div></div>",
+                        html: "<div id='myTree' class='tree'></div><div id='myUploaded'></div><div class='vidEditor' style='position: absolute; top: 85px; left: 250px'><div id='vidContainer' class='jp-video'></div></div>",
                         commit: function(data) {
                             log("commit, data=", data);
                         }

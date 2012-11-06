@@ -31,6 +31,10 @@
 .notificationBox > div:nth-child(even) {
     background-color: white;
 }
+.notificationBox h3 {
+    max-width: 170px;
+    overflow: hidden;
+}
 .notificationBox h3, .notificationBox h3 a{
     font-size:13px;
     color:@text2;
@@ -45,6 +49,7 @@
 .notificationBox p{
     color:#686868;
     font-size:11px;
+    padding: 0;
 }
 .notificationBox .info {
     float: right;

@@ -50,8 +50,9 @@ public class ProcessContext {
         boolean didTransition = false;
         while( _scan() ) {
             didTransition = true;
-            if( cnt++ > MAX_TRANSITIONS )
+            if( cnt++ > MAX_TRANSITIONS ) {
                 throw new RuntimeException( "Exceeded maximum auto transitions: " + cnt + ". Check for infinite recursion in process" );
+            }
         }
         return didTransition;
     }
@@ -74,15 +75,12 @@ public class ProcessContext {
         if( state == null ) {
             state = process.getStartState();
             token.setStateName(state.getName());
-            System.out.println("start: current state is now: " + token.getStateName());
-            System.out.println("start: current state is now: " + getCurrentState().getName());
+            log.info("start: current state is: " + token.getStateName());
             didTransition = true;
         }
-        System.out.println("transitions: " + state.getTransitions().size());
         for( Transition t : state.getTransitions() ) {
-            System.out.println("check transition: " + t.getName());
             if( evalAndTransition( t, false ) ) {
-                System.out.println("transition to: " + token.getStateName());
+                log.info("transitioned to: " + token.getStateName());
                 return true;
             }
         }
@@ -136,9 +134,9 @@ public class ProcessContext {
     }
 
     void executeTransition( Transition transition ) {
-        log.debug( "transitioning from " + transition.getFromState().getName() + " to " + transition.getToState().getName() );
+        log.info( "transitioning from " + transition.getFromState().getName() + " to " + transition.getToState().getName() );
         fireOnExit( transition.getFromState() );
-        transitionTo( transition.getToState() );
+        transitionTo( transition );
         fireOnEnter( transition.getToState() );
         if( transition.getToState().getInterval() != null ) {
             if( timerService != null ) {
@@ -186,9 +184,13 @@ public class ProcessContext {
      * 
      * @param toState
      */
-    void transitionTo( State toState ) {
+    void transitionTo( Transition transition ) {
+        State toState = transition.getToState();
         token.setStateName( toState.getName() );
         token.setTimeEntered( currentDateService.getNow() );
+        for( ActionHandler handler : transition.getOnTransitionHandlers() ) {
+            handler.process( this );
+        }        
     }
 
  

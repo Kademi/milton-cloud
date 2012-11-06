@@ -71,6 +71,10 @@ public class InitHelper {
             g.setCreatedDate(new Date());
             g.setModifiedDate(new Date());
             g.setRegistrationMode(registrationMode);
+            if( org.getGroups() == null ) {
+                org.setGroups(new ArrayList<Group>());
+            }
+            org.getGroups().add(g);
             session.save(g);
 
             for (int i = 0; i < numUsers; i++) {

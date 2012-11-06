@@ -26,11 +26,11 @@
             var buttonBar = $("<div class='row fileupload-buttonbar'></div>");
             form.append(buttonBar);
             var fileInputContainer = $("<div class='muploadBtn'></div>");
-            fileInputContainer.append($("<span>" + config.buttonText + "</span>"));
-            var fileInput = $("<input type='file' name='files[]' id='fileupload' style='opacity: 0; width: 100%' />");
+            fileInputContainer.append($("<span style='z-index: 5'>" + config.buttonText + "</span>"));
+            var fileInput = $("<input type='file' name='files[]' id='fileupload' style='opacity: 0; width: 100%; z-index: 6; position: absolute; left: 0' />");
             fileInputContainer.append(fileInput);
             buttonBar.append(fileInputContainer);
-            buttonBar.append("<div class='progress'><div class='bar'></div></div>");
+            fileInputContainer.append("<div class='progress' style='position: absolute; left: 0; top: 0; width: 100%; z-index: 3'><div class='bar'></div></div>");
             container.append(form);
 
             log("init fileupload", fileInput);
@@ -40,7 +40,7 @@
                 done: function (e, data) {
                     log("done", data);
                     //log("done", data.result[0], data.result[0].href);
-                    var href = null;
+                    var href = null; 
                     var name = null;
                     if( data.result && data.result[0]) {
                         href = data.result[0].href;

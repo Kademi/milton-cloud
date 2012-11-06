@@ -49,7 +49,8 @@ CKEDITOR.plugins.add( 'image2',
 
         // These interfere with page themes, but might need to be put back somehow for editor layout
         // 
-        editor.element.getDocument().appendStyleSheet(this.path + 'template.css');
+        editor.element.getDocument().appendStyleSheet(this.path + 'imagePlugin.css');
+        editor.element.getDocument().appendStyleSheet('/static/common/plugin.css');
 
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/js/jquery.jstree.js'));
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/js/jquery.hotkeys.js'));
@@ -77,7 +78,7 @@ CKEDITOR.plugins.add( 'image2',
                     [
                     {
                         type : 'html',
-                        html: "<div id='imageTree'></div><div id='imageUploaded'></div><div class='imageEditor' style='position: absolute; top: 85px; left: 250px'><div id='imageContainer'></div></div>",
+                        html: "<div id='imageTree' class='tree'></div><div id='imageUploaded'></div><div class='imageEditor' style='position: absolute; top: 85px; left: 250px'><div id='imageContainer'></div></div>",
                         commit: function(data) {
                             log("commit, data=", data);
                         }
@@ -121,7 +122,7 @@ CKEDITOR.plugins.add( 'image2',
                         imageCont.prepend(previewImg);
                         imageCont.append(loremIpsum());
                     }
-                    var imageFloat = imageEditor.find("select");
+                    var imageFloat = $("#imageUploaded").find("select");
                     if( imageFloat.length == 0 ) {
                         imageFloat = $("<select id='imageFloat'><option value=''>No alignment/float</option><option value='Left'>Align Left</option><option value='Right'>Align Right</option></select>");                        
                         imageFloat.click(function() {

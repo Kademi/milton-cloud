@@ -41,7 +41,7 @@
                 showValidation(null, config.validationFailedMessage, container);
                 //$(config.valiationMessageSelector, container).text(config.validationFailedMessage);
                 $(config.valiationMessageSelector, container).show(100);
-                error(form);
+                config.error(form);
             }
             return false;
         });    
