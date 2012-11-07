@@ -189,7 +189,10 @@ public class ManageGroupResourcesPage extends AbstractResource implements Getabl
     }
 
     private DirectoryResource findDirectory(GroupInWebsite giw, OrganisationFolder orgFolder, boolean autoCreate, Session session) throws NotAuthorizedException, BadRequestException {
-        Resource r = orgFolder.child(giw.getWebsite().getName());
+        Resource r = orgFolder.find("websites/" + giw.getWebsite().getName());
+        if( r == null ) {
+            throw new RuntimeException("Couldnt find website directory: " + giw.getWebsite().getName());
+        }
         if( r instanceof CollectionResource ) {
             CollectionResource col = (CollectionResource) r; // should be repo folder
             r = col.child(Branch.TRUNK);
@@ -198,10 +201,14 @@ public class ManageGroupResourcesPage extends AbstractResource implements Getabl
                 DirectoryResource dirRes = branch.getOrCreateDirectory("resources", autoCreate);
                 if( dirRes != null ) {
                     DirectoryResource dirGroup = dirRes.getOrCreateDirectory(giw.getUserGroup().getName(), autoCreate);
+                    if( dirGroup == null && autoCreate ) {
+                        throw new RuntimeException("Failed to get or create a directory when autoCreate is true");
+                    }
                     return dirGroup;
                 }
             }
         }
+        log.warn("Couldnt find or create directory because parent is not a collection: " + r);
         return null;
     }
 

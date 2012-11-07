@@ -23,7 +23,7 @@
                 #foreach($f in $page.subFolders)
                 <tr>
                     <td style="width: 70px">
-                        <a href="$f.href"><img alt="" src="/static/icons/folder.png"/></a>
+                        <a href="$f.href"><img  height="48" width="48" alt="" src="/static/icons/folder.png"/></a>
                     </td>
                     <td class="left">
                         <a href="$f.href">$f.name</a>
@@ -38,7 +38,7 @@
                 <tr class="file">
                     #set($imgClass = $formatter.ifTrue($f.is("image"), "image", "" ) )
                     <td style="width: 70px">
-                        <a href="$f.href" class="$imgClass"><img alt="" src="/templates/images/img8.gif"/></a>
+                        <a href="$f.href" class="$imgClass"><img height="48" width="48" alt="" src="/templates/images/img8.gif"/></a>
                     </td>
                     <td class="left">
                         <a href="$f.href" class="$imgClass">$f.name</a>

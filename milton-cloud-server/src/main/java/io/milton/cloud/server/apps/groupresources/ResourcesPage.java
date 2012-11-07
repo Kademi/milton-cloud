@@ -11,6 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
+import io.milton.http.exceptions.NotFoundException;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.GroupMembership;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
 
 /**
  * Displays resources based on what gruops the current user is enrolled in
@@ -23,16 +30,21 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class ResourcesPage extends TemplatedHtmlPage {
+public class ResourcesPage extends DirectoryResource<WebsiteRootFolder> {
 
-    public ResourcesPage(String name, CommonCollectionResource parent) {
-        super(name, parent, "groupresources/myResources", "My resources");
+    public ResourcesPage(DataSession.DirectoryNode dirNode, WebsiteRootFolder parent) {
+        super(dirNode, parent);
     }
 
     @Override
-    protected Map<String, Object> buildModel(Map<String, String> params) {
+    public void renderPage(OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this)); // For front end
+        getTemplater().writePage("groupresources/myResources", this, params, out);
+    }
+
+    public Map<String, Object> getModel() {
         try {
-            Map<String, Object> map = super.buildModel(params);
+            Map<String, Object> map = new HashMap<>();
             List<FileResource> resources = findResources(_(SpliffySecurityManager.class).getCurrentUser());
             map.put("resources", resources);
             return map;
@@ -43,22 +55,14 @@ public class ResourcesPage extends TemplatedHtmlPage {
 
     private List<FileResource> findResources(Profile currentUser) throws NotAuthorizedException, BadRequestException {
         List<FileResource> list = new ArrayList<>();
-        WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
-        Resource rContent = wrf.child("content");
-        if (rContent instanceof ContentDirectoryResource) {
-            ContentDirectoryResource content = (ContentDirectoryResource) rContent;
-            Resource rResources = content.child("resources");
-            if (rResources instanceof ContentDirectoryResource) {
-                ContentDirectoryResource colResources = (ContentDirectoryResource) rResources;
-                for (Resource rGroupResources : colResources.getChildren()) {
-                    if (rGroupResources instanceof ContentDirectoryResource) {
-                        // this should be a folder corresponding to a group name
-                        ContentDirectoryResource colGroupResources = (ContentDirectoryResource) rGroupResources;
-                        if( colGroupResources.is("folder")) {
-                            addResources(colGroupResources, currentUser, list);
-                        }
-                    }
-
+        for (Resource rGroupResources : getChildren()) {
+            if (rGroupResources instanceof ContentDirectoryResource) {
+                // this should be a folder corresponding to a group name
+                ContentDirectoryResource colGroupResources = (ContentDirectoryResource) rGroupResources;
+                String folderName = colGroupResources.getName();
+                // Check user is in a group with that name
+                if (userIsInGroup(currentUser, folderName)) {
+                    addResources(colGroupResources, currentUser, list);
                 }
             }
         }
@@ -74,12 +78,22 @@ public class ResourcesPage extends TemplatedHtmlPage {
      */
     private void addResources(ContentDirectoryResource colGroupResources, Profile currentUser, List<FileResource> list) throws NotAuthorizedException, BadRequestException {
         // TODO: filter out resources based on group membership
-        for( Resource r : colGroupResources.getChildren()) {
-            if( r instanceof FileResource) {
+        for (Resource r : colGroupResources.getChildren()) {
+            if (r instanceof FileResource) {
                 FileResource fr = (FileResource) r;
                 list.add(fr);
             }
         }
     }
-}
 
+    private boolean userIsInGroup(Profile currentUser, String folderName) {
+        for( GroupMembership gm : currentUser.getMemberships()) {
+            if( gm.getGroupEntity().getName().equals(folderName)) {
+                if( getOrganisation() == gm.getGroupEntity().getOrganisation()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}

@@ -1,6 +1,5 @@
 package io.milton.cloud.server.web;
 
-import io.milton.resource.Resource;
 import java.util.*;
 
 /**
@@ -17,6 +16,10 @@ public class Utils {
 
     public static String stripPrefix(String subdomain, String prefix) {
         return subdomain.substring(prefix.length());
+    }
+
+    public static boolean isEmpty(List websites) {
+        return websites == null || websites.isEmpty();
     }
 
 }

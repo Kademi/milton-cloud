@@ -1023,10 +1023,23 @@ body.dashboard div.content {
 }
 
 body.dashboard .report {
-    width: 50%;
+    width: 45%;
     height: 200px;
     float: left;
     margin-bottom: 20px;
+    border: solid lightgray 1px;
+    border-radius: 5px;
+    padding: 10px;
+    margin-right: 10px;
+}
+
+body.dashboard .report div.nodata {
+    text-align: center;
+    padding-top: 70px;
+}
+
+body.dashboard .report .nodata p {
+    
 }
 
 body.dashboard .report > div {

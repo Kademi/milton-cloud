@@ -6,11 +6,11 @@
     background-position: 0 0;
 }
 
-#imageUploaded .muploadBtn {
+#imageUploaded .muploadBtn, #myUploaded .muploadBtn {
     width: 150px;    
     height: 20px;
 }
-#imageUploaded .muploadBtn span {
+#imageUploaded .muploadBtn span, #myUploaded .muploadBtn span {
     position: absolute;
     top: 7px;
     left: 37px;
@@ -72,4 +72,8 @@
 
 .floatRight {
     float: right;
+}
+
+#fileupload:hover {
+    cursor: pointer;
 }

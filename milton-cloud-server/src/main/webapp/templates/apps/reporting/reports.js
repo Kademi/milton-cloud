@@ -39,17 +39,25 @@ function runReport(range, reportContainer, href) {
     });                
 }
 function showGraph(graphData, reportContainer) {
-    log("showGraph",reportContainer, graphData);
-    reportContainer.html("");
+    log("showGraph",reportContainer, graphData);    
     if( graphData ) {
-        Morris.Line({
-            element: reportContainer,
-            data: graphData.data,
-            xkey: graphData.xkey,
-            ykeys: graphData.ykeys,
-            labels: graphData.labels,
-            hideHover: true,
-            dateFormat: function (x) { return new Date(x).formatDDMMYYYY(); } // see common.js
-        });
+        reportContainer.removeClass("nodata");
+        reportContainer.html("");
+        if( graphData.data.length > 0 ) {
+            Morris.Line({
+                element: reportContainer,
+                data: graphData.data,
+                xkey: graphData.xkey,
+                ykeys: graphData.ykeys,
+                labels: graphData.labels,
+                hideHover: true,
+                dateFormat: function (x) {
+                    return new Date(x).formatDDMMYYYY();
+                } // see common.js
+            });
+        } else {
+            reportContainer.addClass("nodata");
+            reportContainer.html("<p class='nodata'>No data</p>");
+        }
     }
 }

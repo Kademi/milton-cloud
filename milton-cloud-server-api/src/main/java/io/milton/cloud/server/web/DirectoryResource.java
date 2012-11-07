@@ -307,10 +307,13 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     }
 
     public RenderFileResource getHtmlPage(String name, boolean autocreate) throws NotAuthorizedException, BadRequestException {
+        System.out.println("getHtmlPage: " + name + " - " + autocreate);
         RenderFileResource rfr;
         Resource r = child(name);
+        System.out.println("r: " + r);
         if (r == null) {
             if (!autocreate) {
+                System.out.println("nll1");
                 return null;
             }
             DataSession.FileNode newNode = getDirectoryNode().addFile(name);
@@ -321,11 +324,14 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         } else if (r instanceof FileResource) {
             FileResource fr = (FileResource) r;
             rfr = fr.getHtml();
+            System.out.println("rfr from fr: " + rfr);
         } else if (r instanceof RenderFileResource) {
             rfr = (RenderFileResource) r;
         } else {
+            System.out.println("nll2");
             return null;
         }
+        System.out.println("rfr: " + rfr);
         return rfr;
     }
 

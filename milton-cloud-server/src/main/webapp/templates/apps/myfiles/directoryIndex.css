@@ -40,6 +40,14 @@ body.directory .fileupload-buttonbar .progress div {
 #fileList tbody td:last-child {
     width: 175px;
 }
+#fileList tbody td.first a img {
+    display: block;
+    height: 48px;
+    width: 48px;    
+    background-image: url(/static/icons/file.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+}
 .tools {
     width: 170px;
     float: right;

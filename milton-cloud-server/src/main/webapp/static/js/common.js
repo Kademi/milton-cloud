@@ -385,7 +385,6 @@ function edify(container, callback) {
             opacity: 1
         },500);
     });
-
 }
 
 

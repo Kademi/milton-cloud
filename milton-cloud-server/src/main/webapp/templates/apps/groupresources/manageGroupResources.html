@@ -13,7 +13,7 @@
                     <td>
                         <h5>$f.website.name - $f.group.name</h5>
                         #if( $f.directory )
-                        <p>Files: $!f.directory.files.size</p>
+                        <p>Files: $!f.directory.files.size()</p>
                         #else
                         The folder for this group has not been created yet. Please click
                         the Create button to create it and then add resources.
@@ -21,7 +21,7 @@
                     </td>
                     <th>
                         #if( $f.directory )
-                        <a href="$f.diretory.href" class="Btn ViewWebsite">Manage</a> 
+                        <a href="$f.directory.href" class="Btn ViewWebsite">Manage</a> 
                         #else
                         <a href="$f.id" class="Btn EditWebsite createDir">Create</a>
                         #end

@@ -13,63 +13,67 @@
 
 #set($basePath = "/")
 #if( $parentOrg )
-    #set($basePath = $parentOrg.href)
+#set($basePath = $parentOrg.href)
 #end
 
 <script type="text/javascript">
-$(function() {
-    initPosts("$basePath");
-});
-
-function initPosts(basePath) {    
-    $.getJSON(basePath + "_postSearch?a", function(response) {
-        log("got posts response", response);
-        processPosts(response);
+    $(function() {
+        initPosts("$basePath");
     });
-}
 
-function processPosts(comments) {
-    $(".barList").html("");
-    if( comments ) {
-        comments.sort( dateOrd );
-        for( i=0; i<comments.length; i++ ) {
-            var comment = comments[i];
-            var dt = new Date(comment.date);
-            displayPost(comment.user, dt, comment.notes, comment.contentTitle, comment.contentHref); // pageTitle and pagePath are only present for aggregated results
+    function initPosts(basePath) {    
+        $.getJSON(basePath + "_postSearch?a", function(response) {
+            log("got posts response", response);
+            processPosts(response);
+        });
+    }
+
+    function processPosts(comments) {
+        $(".barList").html("");
+        if( comments ) {
+            if( comments.length > 0 ) {
+                comments.sort( dateOrd );
+                for( i=0; i<comments.length; i++ ) {
+                    var comment = comments[i];
+                    var dt = new Date(comment.date);
+                    displayPost(comment.user, dt, comment.notes, comment.contentTitle, comment.contentHref); // pageTitle and pagePath are only present for aggregated results
+                }
+                jQuery(".barList abbr").timeago();
+            } else {
+                $(".barList").html("<li>No recent posts</li>");
+            }
         }
-        jQuery(".barList abbr").timeago();
     }
-}
 
-function displayPost(user, date, comment, pageTitle, pagePath) {   
-    if( user == null ) {
-        log("missing user, ignore");
-        return;
-    }
-    var li = $("<li>");
-    if( user.photoHash ) {
-        li.append("<a class='profilePic' href='" + user.href + "'><img src='/_hashes/files/" + user.photoHash + "' alt='' /></a>");
-    } else {
-        li.append("<a class='profilePic' href='" + user.href + "'><img src='/templates/apps/user/profile.png' alt='' /></a>");
-    }
-    li.append("<a class='user' href='" + user.href + "'>" + user.name + "</a> posted in <a class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
-    var formattedDate = date.toISOString();
-    var commentHtml = "<div class='post'>";    
-    commentHtml += "<p>" + comment + "</p>";
-    commentHtml += "<em><abbr class='timeago' title='" + formattedDate + "'>" + formattedDate + "</abbr></em>";
-    commentHtml += "</div>";
-    li.append(commentHtml);
+    function displayPost(user, date, comment, pageTitle, pagePath) {   
+        if( user == null ) {
+            log("missing user, ignore");
+            return;
+        }
+        var li = $("<li>");
+        if( user.photoHash ) {
+            li.append("<a class='profilePic' href='" + user.href + "'><img src='/_hashes/files/" + user.photoHash + "' alt='' /></a>");
+        } else {
+            li.append("<a class='profilePic' href='" + user.href + "'><img src='/templates/apps/user/profile.png' alt='' /></a>");
+        }
+        li.append("<a class='user' href='" + user.href + "'>" + user.name + "</a> posted in <a class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
+        var formattedDate = date.toISOString();
+        var commentHtml = "<div class='post'>";    
+        commentHtml += "<p>" + comment + "</p>";
+        commentHtml += "<em><abbr class='timeago' title='" + formattedDate + "'>" + formattedDate + "</abbr></em>";
+        commentHtml += "</div>";
+        li.append(commentHtml);
     
-    li.append();
-    $(".barList").append(li);
+        li.append();
+        $(".barList").append(li);
             
-//                <li>
-//                    <a class="profilePic" href="#"><img src="/content/images/CarlBrown.jpg" alt="" /></a>
-//                    <a class='user' href='#'>Carl Brown</a> posted in <a class='module' href='module'><span>module 8</span></a>
-//                    <p>Lorem ipsum dolor sit amet, ultricies dui proin, eget aliquam tincidunt risus pede ullamcorper praesent...</p>
-//                    <em>Today 3:34</em>
-//                    <small>5 Comments</small>
-//                </li>             
-}
+        //                <li>
+        //                    <a class="profilePic" href="#"><img src="/content/images/CarlBrown.jpg" alt="" /></a>
+        //                    <a class='user' href='#'>Carl Brown</a> posted in <a class='module' href='module'><span>module 8</span></a>
+        //                    <p>Lorem ipsum dolor sit amet, ultricies dui proin, eget aliquam tincidunt risus pede ullamcorper praesent...</p>
+        //                    <em>Today 3:34</em>
+        //                    <small>5 Comments</small>
+        //                </li>             
+    }
     
 </script>

@@ -1,33 +1,17 @@
 package io.milton.cloud.server.web.sync;
 
-import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.server.web.JsonResult;
 import io.milton.resource.Resource;
 import io.milton.http.exceptions.BadRequestException;
-import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import java.io.*;
 import java.util.Collections;
 import java.util.List;
 import org.hashsplit4j.api.BlobStore;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
-import io.milton.http.Auth;
-import io.milton.http.FileItem;
-import io.milton.http.HttpManager;
-import io.milton.http.Range;
 import io.milton.http.Request;
-import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
-import io.milton.resource.PostableResource;
-import io.milton.resource.PutableResource;
-import io.milton.vfs.data.DataSession;
-import io.milton.vfs.db.utils.SessionManager;
-import java.util.Arrays;
-import java.util.Map;
 import org.hashsplit4j.api.HashStore;
-import org.hashsplit4j.api.Parser;
 
 /**
  * Implements raw access to file data. These are assembled blobs referenced by

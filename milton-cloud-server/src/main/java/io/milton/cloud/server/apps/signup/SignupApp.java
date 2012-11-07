@@ -23,7 +23,6 @@ import io.milton.resource.Resource;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
-import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.SettingsApplication;
@@ -39,11 +38,10 @@ import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.Utils;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.reporting.JsonReport;
-import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TextTemplater;
-import io.milton.common.Path;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
@@ -205,7 +203,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     }
 
     @Override
-    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org,  Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
+    public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
         System.out.println("save settings");
         String signupNextHref = parameters.get("signupNextHref");
         if (websiteBranch != null) {
@@ -220,27 +218,31 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (portletSection.equals("adminDashboardPrimary")) {
             CommonResource r = (CommonResource) context.get("page");
-            List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
-            System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getName() + " - " + r.getClass());
-            context.put("applications", applications);
-            _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
+            Organisation org = r.getOrganisation();
+            if (!Utils.isEmpty(org.getWebsites())) {
 
-            writer.append("<div class='report'>\n");
-            writer.append("<h3>Signup activity</h3>\n");
-            writer.append("<div class='signupReport'></div>\n");
-            writer.append("<script type='text/javascript' >\n");
-            writer.append("jQuery(function() {\n");
-            //17/09/2012 - 24/09/2012
-            String range = ReportingApp.getDashboardDateRange();
-            OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
-            if (orgFolder != null) {
-                //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
-                String href = orgFolder.getHref() + "reporting/org-groupSignups";
-                writer.append(" runReport(\"" + range + "\", jQuery('.report .signupReport'), \"" + href + "\");\n");
-                writer.append("});\n");
-                writer.append("</script>\n");
+                List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
+                System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getName() + " - " + r.getClass());
+                context.put("applications", applications);
+                _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
+
+                writer.append("<div class='report'>\n");
+                writer.append("<h3>Signup activity</h3>\n");
+                writer.append("<div class='signupReport'></div>\n");
+                writer.append("<script type='text/javascript' >\n");
+                writer.append("jQuery(function() {\n");
+                //17/09/2012 - 24/09/2012
+                String range = ReportingApp.getDashboardDateRange();
+                OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
+                if (orgFolder != null) {
+                    //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
+                    String href = orgFolder.getHref() + "reporting/org-groupSignups";
+                    writer.append(" runReport(\"" + range + "\", jQuery('.report .signupReport'), \"" + href + "\");\n");
+                    writer.append("});\n");
+                    writer.append("</script>\n");
+                }
+                writer.append("</div>\n");
             }
-            writer.append("</div>\n");
         }
     }
 
