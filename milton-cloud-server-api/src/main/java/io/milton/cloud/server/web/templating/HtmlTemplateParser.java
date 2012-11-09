@@ -33,6 +33,7 @@ import org.jdom.Element;
 public class HtmlTemplateParser {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateParser.class);
+    private static long time;
     private HtmlFormatter htmlFormatter = new HtmlFormatter();
 
     /**
@@ -43,7 +44,8 @@ public class HtmlTemplateParser {
      * @param meta
      */
     public void parse(HtmlPage meta, Path webPath) throws IOException, XMLStreamException {
-        log.info("parse: " + meta.getSource() + " - " + meta.getClass());
+        log.info("parse: " + meta.getSource() + " - " + meta.getClass() + " accumulated time=" + time + "ms");
+        long tm = System.currentTimeMillis();
         Document doc;
         try (InputStream fin = meta.getInputStream()) {
             if (fin != null) {
@@ -71,6 +73,8 @@ public class HtmlTemplateParser {
             String body = JDomUtils.getValueOf(elRoot, "body");
             meta.setBody(body);
         }
+        tm = System.currentTimeMillis() - tm;
+        time += tm;
     }
 
     /**

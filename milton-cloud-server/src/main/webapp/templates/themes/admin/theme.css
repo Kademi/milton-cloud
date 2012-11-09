@@ -1022,8 +1022,31 @@ body.dashboard div.content {
     margin-top: 10px;
 }
 
+body.dashboard .gettingStarted {
+    margin-bottom: 20px;
+    margin-right: 20px;
+    border: solid lightgray 1px;
+    border-radius: 5px;
+    padding: 20px;   
+    display: inline-block;
+}
+
+body.dashboard .gettingStarted a.Btn:last-child{
+    float: right;
+    margin-left: 30px;
+}
+
+body.dashboard .gettingStarted h3 {
+    font-size: 17px;
+    margin-bottom: 5px;
+}
+
+body.dashboard .gettingStarted p {
+    margin: 10px 0 10px;
+}
+
 body.dashboard .report {
-    width: 45%;
+    width: 43%;
     height: 200px;
     float: left;
     margin-bottom: 20px;

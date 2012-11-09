@@ -15,6 +15,7 @@
 package io.milton.cloud.server;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.init.InitHelper;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
@@ -87,5 +88,7 @@ public class ApplicationStarter implements InitListener, Service{
         rootContext.put(pdfGenerator);
         rootContext.put(b.getCookieAuthenticationHandler()); // Needed for admin to redirect to website
         rootContext.put(b.getFormAuthenticationHandler()); // Needed for ajax login
+        InitHelper initHelper = new InitHelper(securityManager.getPasswordManager(), applicationManager);
+        rootContext.put(initHelper);
     }
 }

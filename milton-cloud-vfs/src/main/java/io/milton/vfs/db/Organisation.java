@@ -317,10 +317,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Organisation createChildOrg(String orgName, Session session) {
+        return createChildOrg(orgName, orgName, session);
+    }
+    
+    public Organisation createChildOrg(String orgId, String orgName, Session session) {
         Organisation o = new Organisation();
         o.setOrganisation(this);
         o.setName(orgName);
-        o.setOrgId(orgName);
+        o.setOrgId(orgId);
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
         if( this.getChildOrgs() == null ) {

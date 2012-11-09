@@ -1,5 +1,6 @@
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -7,7 +8,6 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import java.util.ArrayList;
-import org.hibernate.HibernateException;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
@@ -37,16 +37,11 @@ uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name"})})
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
-    public static BaseEntity find(Organisation org, String name, Session session) {
+    public static BaseEntity find(String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
         crit.setCacheable(true);
-        crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
-        List list = crit.list();
-        if (list == null || list.isEmpty()) {
-            return null;
-        } else {
-            return (BaseEntity) list.get(0);
-        }
+        crit.add(Restrictions.eq("name", name));
+        return DbUtils.unique(crit);
     }
 
     

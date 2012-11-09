@@ -854,7 +854,7 @@ public class Formatter {
      *
      * @return
      */
-    public String option(String value, String text, String currentValue) {
+    public String option(Object value, String text, Object currentValue) {
         StringBuilder sb = new StringBuilder("<option");
         appendValue(sb, value);
         if (currentValue != null && currentValue.equals(value)) {
@@ -872,10 +872,12 @@ public class Formatter {
      * @param sb
      * @param value
      */
-    private void appendValue(StringBuilder sb, String value) {
+    private void appendValue(StringBuilder sb, Object value) {
         sb.append(" value=");
         sb.append("\"");
-        sb.append(htmlEncode(value));
+        if( value != null ) {
+            sb.append(htmlEncode(value.toString()));
+        }
         sb.append("\"");
     }
 

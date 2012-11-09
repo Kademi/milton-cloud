@@ -16,19 +16,15 @@
  */
 package io.milton.cloud.server.apps.website;
 
-import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.db.AppControl;
-import io.milton.cloud.server.event.WebsiteCreatedEvent;
 import io.milton.cloud.server.init.InitHelper;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
-import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.context.ClassNotInContextException;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -50,15 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
-import io.milton.event.EventManager;
 import io.milton.http.Request;
-import io.milton.sync.event.EventUtils;
-import io.milton.vfs.db.Branch;
-import io.milton.vfs.db.Group;
-import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
-import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -116,44 +106,14 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
                 }
             }
             Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
-            Website website = getOrganisation().createWebsite(newName, newDnsName, null, curUser, session);
-            Branch websiteBranch = website.liveBranch();
-            Repository r = website;
-            r.setPublicContent(true); // allow public access
-            session.save(r);
-
-            Map<String, String> themeParams = new HashMap<>();
-            themeParams.put("frameworkToolsColor", "#FFF");
-            themeParams.put("frameworkToolsInverseColor", " #414141");
-            themeParams.put("frameworkHighlightColor", " #FFF");
-            themeParams.put("frameworkHighlightInverseColor", " #FF9531");
-            
-            themeParams.put("hero1", "#88c03f");
-            themeParams.put("hero2", "#88c03f");
-            themeParams.put("text1", "#1C1D1F");
-            themeParams.put("text2", "#2F2F2F");
-            themeParams.put("border1", "#DBDADA");
-            themeParams.put("bg1", "#2F2F2F");
-            themeParams.put("borderRadius", "5px");
-            themeParams.put("listIndent", "40px");            
-
-            Map<String, String> themeAttributes = new HashMap<>();
-            themeAttributes.put("logo", website.getName());
-
-            ManageWebsiteBranchFolder websiteBranchFolder = new ManageWebsiteBranchFolder(website, websiteBranch, this);
+            Website website = null;
             try {
-                websiteBranchFolder.setThemeParams(themeParams);
-                websiteBranchFolder.setThemeAttributes(themeAttributes);
-                websiteBranchFolder.save();
-            } catch (IOException ex) {
+                website = _(InitHelper.class).createAndPopulateWebsite(session, getOrganisation(), newName, newDnsName, curUser, parent);
+            } catch (ClassNotInContextException | IOException ex) {
                 jsonResult = new JsonResult(false, ex.getMessage());
                 return null;
             }
 
-            Date now = _(CurrentDateService.class).getNow();
-            AppControl.initDefaultApps(websiteBranch, curUser, now, session);
-            EventUtils.fireQuietly(_(EventManager.class), new WebsiteCreatedEvent(website));
-                        
             tx.commit();
             jsonResult = new JsonResult(true, "Created", website.getDomainName());
         }
@@ -254,5 +214,4 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
     }
-    
 }

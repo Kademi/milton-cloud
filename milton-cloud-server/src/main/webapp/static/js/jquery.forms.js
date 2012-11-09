@@ -398,17 +398,19 @@ function showMessage(text, container) {
 
 function showErrorField(target) {
     target.addClass("errorField");
-    if( CKEDITOR ) {
-        log("check for editor1", target);
-        var name = target.attr("name");
-        if( !name ) {
-            name = target.attr("id");
-        }
-        editor = CKEDITOR.instances[name];
-        log("check for editor", name, editor);
-        if( editor ) {
-            log("add class", editor.container);
-            editor.container.addClass("errorField");
+    if (typeof CKEDITOR != 'undefined') {
+        if( CKEDITOR ) {
+            log("check for editor1", target);
+            var name = target.attr("name");
+            if( !name ) {
+                name = target.attr("id");
+            }
+            editor = CKEDITOR.instances[name];
+            log("check for editor", name, editor);
+            if( editor ) {
+                log("add class", editor.container);
+                editor.container.addClass("errorField");
+            }
         }
     }
 }

@@ -285,6 +285,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.rejected = rejected;
     }
 
+    public GroupMembership membership(Group group) {
+        if( getMemberships() != null ) {
+            for( GroupMembership gm : getMemberships() ) {
+                if( gm.getGroupEntity() == group ) {
+                    return gm;
+                }
+            }
+        }
+        return null;
+    }
+    
     /**
      * Create a GroupMembership linking this profile to the given group, within
      * the given organisation. Is immediately saved

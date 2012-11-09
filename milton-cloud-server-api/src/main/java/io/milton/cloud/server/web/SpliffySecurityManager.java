@@ -52,8 +52,11 @@ public class SpliffySecurityManager {
     public Profile getCurrentUser() {
         UserResource p = getCurrentPrincipal();
         if (p != null) {
-            return p.getThisUser();
+            Profile profile = p.getThisUser();
+            log.info("current user: " + profile);
+            return profile;
         }
+        log.info("no current user");
         return null;
     }
 
@@ -72,6 +75,17 @@ public class SpliffySecurityManager {
             log.warn("Got auth object but null tag");
         }
         return ur;
+    }
+    
+    public void setCurrentPrincipal(UserResource p) {
+        log.info("setCurrentPrincipal: " + p);
+        Auth auth = HttpManager.request().getAuthorization();
+        if( auth == null ) {
+            auth = new Auth(p.getName(), p);
+            HttpManager.request().setAuthorization(auth);
+        } else {
+            auth.setTag(p);
+        }
     }
 
     public Profile authenticate(Organisation org, String userName, String requestPassword) {

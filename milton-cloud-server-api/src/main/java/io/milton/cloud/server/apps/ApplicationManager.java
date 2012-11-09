@@ -108,6 +108,9 @@ public class ApplicationManager {
             List<Application> active = (List<Application>) rootFolder.getAttributes().get(attName);
             if (active == null) {
                 active = findActiveApps(rootFolder);
+                if( active.isEmpty()) {
+                    log.warn("No active apps for rootFolder: " + rootFolder.getId() + " ----");
+                }
                 //log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
                 rootFolder.getAttributes().put(attName, active);
             }
@@ -170,14 +173,20 @@ public class ApplicationManager {
     }
 
     public Resource getPage(Resource parent, String name) {
-        for (Application app : getActiveApps()) {
-            if (app instanceof ChildPageApplication) {
-                ChildPageApplication cpa = (ChildPageApplication) app;
-                Resource child = cpa.getPage(parent, name);
-                if (child != null) {
-                    return child;
+        List<Application> activeApps = getActiveApps();
+        if (activeApps.isEmpty()) {
+            log.warn("No active apps!!");
+        } else {
+            for (Application app : activeApps) {
+                if (app instanceof ChildPageApplication) {
+                    ChildPageApplication cpa = (ChildPageApplication) app;
+                    Resource child = cpa.getPage(parent, name);
+                    //System.out.println("ApplicationManager.getPage: " + name + " => " + child + " for app: " + app);
+                    if (child != null) {
+                        return child;
+                    }
                 }
-            }
+            }            
         }
         return null;
     }
@@ -289,9 +298,9 @@ public class ApplicationManager {
             return getApps();
         } else {
             return findActiveApps(org.getOrganisation());
-        }        
+        }
     }
-    
+
     public List<Application> findActiveApps(List<Application> available, List<AppControl> appControls) {
         Map<String, Boolean> enablement = toEnabledMap(appControls);
         List<Application> activApps = new ArrayList<>();
@@ -385,7 +394,7 @@ public class ApplicationManager {
         }
         return children;
     }
-    
+
     private CommonResource toResource(RepositoryFolder parent, Branch branch, List<DataResourceApplication> resourceCreators, RootFolder rf) {
         for (DataResourceApplication rc : resourceCreators) {
             ContentResource r = rc.instantiateResource(branch, parent, rf);

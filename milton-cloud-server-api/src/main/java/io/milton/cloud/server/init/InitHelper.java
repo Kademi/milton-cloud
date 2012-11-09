@@ -1,18 +1,26 @@
 package io.milton.cloud.server.init;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.website.ManageWebsiteBranchFolder;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
+import io.milton.cloud.server.event.WebsiteCreatedEvent;
 import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.cloud.server.role.Role;
+import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.event.EventManager;
+import io.milton.sync.event.EventUtils;
 import io.milton.vfs.db.*;
+import java.io.IOException;
 import java.util.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -71,7 +79,7 @@ public class InitHelper {
             g.setCreatedDate(new Date());
             g.setModifiedDate(new Date());
             g.setRegistrationMode(registrationMode);
-            if( org.getGroups() == null ) {
+            if (org.getGroups() == null) {
                 org.setGroups(new ArrayList<Group>());
             }
             org.getGroups().add(g);
@@ -85,20 +93,20 @@ public class InitHelper {
         }
         return g;
     }
-    
+
     /**
      * Check that the given group has the roles (on their own organisation) and
      * create if missing
-     * 
+     *
      * @param group
-     * @param roles 
+     * @param roles
      */
-    public void checkGroupRoles(Group group, Session session, String ... roles) {
-        if( group.getGroupRoles() == null ) {
+    public void checkGroupRoles(Group group, Session session, String... roles) {
+        if (group.getGroupRoles() == null) {
             group.setGroupRoles(new ArrayList<GroupRole>());
         }
-        for( String r : roles ) {
-            if( !group.hasRole(r) ) {
+        for (String r : roles) {
+            if (!group.hasRole(r)) {
                 group.grantRole(r, session);
             }
         }
@@ -140,7 +148,7 @@ public class InitHelper {
      * @throws HibernateException
      */
     public Profile checkCreateUser(String name, String password, Session session, Organisation org, Profile emailSender) throws HibernateException {
-        Profile be = Profile.find( name, session);
+        Profile be = Profile.find(name, session);
         if (be == null) {
             Profile t = new Profile();
             t.setName(name);
@@ -214,8 +222,7 @@ public class InitHelper {
             AppControl.setStatus(app.getInstanceId(), org, true, user, new Date(), session);
         }
     }
-    
-    
+
     public void enableAllApps(Branch websiteBranch, Profile user, Session session) {
         Organisation org = (Organisation) websiteBranch.getRepository().getBaseEntity();
         enableAllApps(org, user, session);
@@ -237,5 +244,42 @@ public class InitHelper {
 
     public Organisation createChildOrg(Organisation rootOrg, String branch1, Session session) {
         return rootOrg.createChildOrg(branch1, session);
+    }
+
+    public Website createAndPopulateWebsite(Session session, Organisation org, String newName, String newDnsName, Profile curUser, CommonCollectionResource parent) throws IOException {
+        Website website = org.createWebsite(newName, newDnsName, null, curUser, session);
+        Branch websiteBranch = website.liveBranch();
+        Repository r = website;
+        r.setPublicContent(true); // allow public access
+        session.save(r);
+
+        Map<String, String> themeParams = new HashMap<>();
+        themeParams.put("frameworkToolsColor", "#FFF");
+        themeParams.put("frameworkToolsInverseColor", " #414141");
+        themeParams.put("frameworkHighlightColor", " #FFF");
+        themeParams.put("frameworkHighlightInverseColor", " #FF9531");
+
+        themeParams.put("hero1", "#88c03f");
+        themeParams.put("hero2", "#88c03f");
+        themeParams.put("text1", "#1C1D1F");
+        themeParams.put("text2", "#2F2F2F");
+        themeParams.put("border1", "#DBDADA");
+        themeParams.put("bg1", "#2F2F2F");
+        themeParams.put("borderRadius", "5px");
+        themeParams.put("listIndent", "40px");
+
+        Map<String, String> themeAttributes = new HashMap<>();
+        themeAttributes.put("logo", website.getName());
+
+        ManageWebsiteBranchFolder websiteBranchFolder = new ManageWebsiteBranchFolder(website, websiteBranch, parent);
+
+        websiteBranchFolder.setThemeParams(themeParams);
+        websiteBranchFolder.setThemeAttributes(themeAttributes);
+        websiteBranchFolder.save();
+
+        Date now = _(CurrentDateService.class).getNow();
+        AppControl.initDefaultApps(websiteBranch, curUser, now, session);
+        EventUtils.fireQuietly(_(EventManager.class), new WebsiteCreatedEvent(website));
+        return website; 
     }
 }

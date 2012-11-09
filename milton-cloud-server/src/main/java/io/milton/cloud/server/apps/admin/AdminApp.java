@@ -19,6 +19,7 @@ import io.milton.cloud.server.apps.website.ManageWebsiteBranchFolder;
 import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
 import io.milton.cloud.server.apps.website.ManageWebsiteFolder;
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
@@ -33,6 +34,7 @@ import io.milton.cloud.server.apps.reporting.ReportingApp;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -51,6 +53,7 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.velocity.context.Context;
 
@@ -180,11 +183,10 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
      */
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        System.out.println("renderPortlets---");
         if (rootFolder instanceof OrganisationRootFolder && currentUser != null) {
             if (portletSection.equals("adminDashboardPrimary")) {
                 renderDashboardPortlets(writer, context);
-            }            
+            }
         }
 
     }
@@ -209,21 +211,27 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     }
 
     private void renderDashboardPortlets(Writer writer, Context context) throws IOException {
-        System.out.println("renderDashboardPortlets---");
         CommonResource r = (CommonResource) context.get("page");
         OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
-        if( orgFolder != null ) {            
+        if (orgFolder != null) {
             Organisation org = orgFolder.getOrganisation();
-            if( Utils.isEmpty(org.getWebsites()) ) {
+            if (Utils.isEmpty(org.getWebsites())) {
                 renderDashboardCreateWebsitePortlet(writer, orgFolder);
             } else {
-                renderDashboardReports(writer, orgFolder);
+                if (!isNewOrg(org)) {
+                    renderDashboardReports(writer, orgFolder);
+                }
             }
         }
     }
-    
+
+    private boolean isNewOrg(Organisation org) {
+        Date now = _(CurrentDateService.class).getNow();
+        Date endGettingStartedDate = _(Formatter.class).addDays(org.getCreatedDate(), 7);
+        return now.before(endGettingStartedDate);
+    }
+
     private void renderDashboardReports(Writer writer, OrganisationFolder orgFolder) throws IOException {
-        System.out.println("renderDashboardReports---");
         writer.append("<div class='report'>\n");
         writer.append("<h3>Website activity</h3>\n");
         writer.append("<div class='websiteAccess'></div>\n");
@@ -242,11 +250,10 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     }
 
     private void renderDashboardCreateWebsitePortlet(Writer writer, OrganisationFolder orgFolder) throws IOException {
-        System.out.println("renderDashboardCreateWebsitePortlet---");
         writer.append("<div class='wizard'>\n");
         writer.append("<h3>Getting started</h3>\n");
         writer.append("<p>To get started you should probably create a website <button class='createWebsite Btn'>Create a website</button></p>\n");
-        
+
         writer.append("</div>\n");
     }
 

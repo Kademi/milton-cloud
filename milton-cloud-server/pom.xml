@@ -363,7 +363,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
-                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader</value>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader,com.fuselms.apps.orgcreator.OrgCreatorApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>
