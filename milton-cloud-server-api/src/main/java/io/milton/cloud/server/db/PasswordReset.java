@@ -29,7 +29,7 @@ import javax.persistence.Temporal;
 import javax.persistence.UniqueConstraint;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Created when a user requests a password reset
@@ -56,7 +56,7 @@ public class PasswordReset implements Serializable {
 
     public static PasswordReset find(String token, Session session) {
         Criteria crit = session.createCriteria(PasswordReset.class);
-        crit.add(Expression.eq("token", token));
+        crit.add(Restrictions.eq("token", token));
         return DbUtils.unique(crit);
     }
     

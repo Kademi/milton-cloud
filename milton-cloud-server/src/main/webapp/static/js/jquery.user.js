@@ -16,6 +16,12 @@
  *      null = do a location.reload()
  *      "something" or "" = a relative path, will be avaluated relative to the user's url (returned in cookie)
  *      "/dashboard" = an absolute path, will be used exactly as given
+ *  logoutSelector
+ *  valiationMessageSelector
+ *  requiredFieldsMessage
+ *  loginFailedMessage
+ *  userNameProperty: property name to use in sending request to server
+ *  passwordProperty
  * 
  */
 
@@ -29,7 +35,9 @@
             logoutSelector: ".logout",
             valiationMessageSelector: "#validationMessage",
             requiredFieldsMessage: "Please enter your credentials.",
-            loginFailedMessage: "Sorry, those login details were not recognised."
+            loginFailedMessage: "Sorry, those login details were not recognised.",
+            userNameProperty: "_loginUserName",
+            passwordProperty: "_loginPassword"
         }, options);  
   
         $(config.logoutSelector).click(function() {
@@ -64,13 +72,13 @@
 function doLogin(userName, password, config, container) {
     log("doLogin", userName, config.urlSuffix);
     $(config.valiationMessageSelector).hide();
+    var data = new Object();
+    data[config.userNameProperty] = userName;
+    data[config.passwordProperty] = password;
     $.ajax({
         type: 'POST',
         url: config.urlSuffix,
-        data: {
-            _loginUserName: userName,
-            _loginPassword: password
-        },
+        data: data,
         dataType: "json",
         acceptsMap: "application/x-javascript",
         success: function(resp) {
@@ -127,10 +135,12 @@ function initUser() {
         // no cookie, so authentication hasnt been performed.
         log('initUser: no userUrl');
         $(".requiresuser").hide();
-        $(".sansuser").show();        
+        $(".sansuser").show();    
+        $("body").addClass("notLoggedIn");
         return false;
     } else {
         log("userUrl", userUrl);
+        $("body").addClass("isLoggedIn");
         userName = userUrl.substr(0, userUrl.length-1); // drop trailing slash
         var pos = userUrl.indexOf("users");
         userName = userName.substring(pos+6);
@@ -193,6 +203,9 @@ function dropQuotes(s) {
 }
 
 function dropHost(s) {
+    if( !s.startsWith("http")) {
+        return s;
+    }
     var pos = s.indexOf("/",8);
     log("pos",pos);
     s = s.substr(pos);

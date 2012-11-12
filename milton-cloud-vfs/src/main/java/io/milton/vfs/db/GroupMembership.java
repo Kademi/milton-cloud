@@ -71,6 +71,13 @@ public class GroupMembership implements Serializable{
         this.id = id;
     }
 
+    /**
+     * The organisation that the linked user is a member of this group within.
+     * 
+     * Eg Sally is a Manager in ACME Corporation
+     * 
+     * @return 
+     */
     @ManyToOne(optional=false)    
     public Organisation getWithinOrg() {
         return withinOrg;

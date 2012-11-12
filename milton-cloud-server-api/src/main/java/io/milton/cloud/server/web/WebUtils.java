@@ -73,10 +73,9 @@ public class WebUtils {
         if (s.length() == 0) {
             return null;
         }
-        return s;        
+        return s;
     }
-    
-    
+
     /**
      * Find the nearest OrganisationFolder to the given resource
      *
@@ -234,11 +233,19 @@ public class WebUtils {
                     String id = "menuContent" + cnt++;
                     String href = pair.getObject1();
                     Path p = Path.path(href);
-                    String parentHref = p.getParent().toString();
-                    if (thisHref.startsWith(parentHref)) {
-                        if (longestHref == null || parentHref.length() > longestHref.length()) {
-                            longestHref = parentHref;
+                    if (p.getParent() != null) {
+                        String parentHref = p.getParent().toString();
+                        if (thisHref.startsWith(parentHref)) {
+                            if (longestHref == null || parentHref.length() > longestHref.length()) {
+                                longestHref = parentHref;
+                                menuId = id;
+                            }
+                        }
+                    } else {
+                        // is root
+                        if( thisHref.equals("/") || thisHref.equals("/index.html")) {
                             menuId = id;
+                            break;
                         }
                     }
                 }
@@ -336,9 +343,9 @@ public class WebUtils {
         if (s == null || s.length() == 0) {
             return null;
         }
-        return s.equalsIgnoreCase("true");        
-    }    
-    
+        return s.equalsIgnoreCase("true");
+    }
+
     public static BranchFolder findBranchFolder(CommonResource r) {
         if (r instanceof BranchFolder) {
             return (BranchFolder) r;
@@ -363,15 +370,13 @@ public class WebUtils {
             // make sure second does not start with a slash
             if (s2.startsWith("/")) {
                 s2 = s2.substring(1);
-            }            
+            }
         } else {
             // make sure second does start with a slash
-            if( !s2.startsWith("/")) {
+            if (!s2.startsWith("/")) {
                 s2 = "/" + s2;
             }
         }
         return s1 + s2;
     }
-
-
 }

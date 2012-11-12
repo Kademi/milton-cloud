@@ -167,7 +167,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     @Override
     public String getPrincipalURL() {
         CommonResource r = this;
-        while (!(r instanceof PrincipalResource)) {
+        while (r != null && !(r instanceof PrincipalResource)) {
             r = r.getParent();
         }
         if (r != null) {

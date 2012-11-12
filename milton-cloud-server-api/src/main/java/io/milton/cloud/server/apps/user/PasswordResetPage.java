@@ -110,10 +110,10 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         final String fromAddress = rootFolder.getEmailAddress();
         if( rootFolder instanceof WebsiteRootFolder) {
             website = ((WebsiteRootFolder)rootFolder).getWebsite();
-            subject = "Password reset for " + website.getDomainName();
-            String d = website.getDomainName();
-            if( d.startsWith("www")) {
-                d = d.replace("www.", "");
+            if( website.getDomainName() != null ) {
+                subject = "Password reset for " + website.getDomainName();
+            } else {
+                subject = "Password reset for " + website.getName();
             }
         } else {
             subject = "Password reset for " + org.getName();
@@ -121,7 +121,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         String returnUrl = this.getHref();
         Date now = _(CurrentDateService.class).getNow();
         passwordReset = PasswordReset.create(user, now, returnUrl, website, session);
-        log.info("created resetddd: " + passwordReset.getToken());
+        log.info("created reset token: " + passwordReset.getToken());
         
         String emailHtml = createEmailHtml();
         

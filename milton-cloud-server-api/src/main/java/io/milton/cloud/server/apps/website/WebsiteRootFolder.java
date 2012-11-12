@@ -25,6 +25,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PropFindableResource;
@@ -45,16 +46,14 @@ import java.io.OutputStream;
  * they were located under a OrganisationRootFolder, because the assumption is
  * that websites are for customers, while aadministrators will accessing the
  * organisation directly
- * 
- * While WebsiteRootFolder is a view of a repository (or rather a branch within a repository)
- * it also provides access to other repositories. Any repository within the containing
- * organisation can be access by name from the root folder. For example, if an org
- * has this structure:
- * 
- * myOrg
- *  - milton.io
- *  - maven
- * 
+ *
+ * While WebsiteRootFolder is a view of a repository (or rather a branch within
+ * a repository) it also provides access to other repositories. Any repository
+ * within the containing organisation can be access by name from the root
+ * folder. For example, if an org has this structure:
+ *
+ * myOrg - milton.io - maven
+ *
  * ... then requests to http://milton.io/maven will show the maven repository
  *
  * @author brad
@@ -74,14 +73,13 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     @Override
     protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         GetableResource index = getIndex();
-        if( index != null ) {
+        if (index != null) {
             index.sendContent(out, null, params, "text/html");
         } else {
             super.renderPage(out, params);
         }
     }
 
-    
     @Override
     public String getName() {
         return "";
@@ -117,15 +115,15 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         }
         // Check for a repository of the organisation
         Repository repo = website.getOrganisation().repository(childName);
-        if( repo != null ) {
+        if (repo != null) {
             Branch b = repo.liveBranch();
-            if( b != null ) {
+            if (b != null) {
                 BranchFolder bf = new BranchFolder(childName, this, b);
                 children.add(bf);
                 return bf;
             }
         }
-        
+
         return r;
     }
 
@@ -133,7 +131,6 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     public PrincipalResource findEntity(Profile u) throws NotAuthorizedException, BadRequestException {
         return UserApp.findEntity(u, this);
     }
-
 
     @Override
     public Organisation getOrganisation() {
@@ -152,13 +149,16 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         return attributes;
     }
 
-
     @Override
     public String getEmailAddress() {
         String fromAddress = "noreply@";
         String d = website.getDomainName();
-        if (d.startsWith("www")) {
-            d = d.replace("www.", "");
+        if (d == null) {
+            d = website.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+        } else {
+            if (d.startsWith("www")) {
+                d = d.replace("www.", "");
+            }
         }
         fromAddress += d;
         return fromAddress;
@@ -166,11 +166,9 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
 
     @Override
     public boolean is(String type) {
-        if( type.equals("website")) {
+        if (type.equals("website")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
 }

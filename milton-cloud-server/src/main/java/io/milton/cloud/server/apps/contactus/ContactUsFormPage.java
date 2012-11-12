@@ -320,7 +320,9 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     private void addRow(Element table, String name, String val) {
         Element tr = table.begin("tr");
         tr.begin("td").writeText(name).close();
-        tr.begin("td").writeText(val).close();
+        if( val != null ) {
+            tr.begin("td").writeText(val).close();
+        }
         tr.close();
     }
 
