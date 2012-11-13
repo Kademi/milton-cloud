@@ -21,22 +21,30 @@
             if( config.useJsonPut ) {
                 actionUrl += "_DAV/PUT?overwrite=true";
             }
-            log("upload to url: ". actionUrl);
-            var form = $("<form action='" + actionUrl + "' method='POST' enctype='multipart/form-data'><input type='hidden' name='overwrite' value='true'></form>");
-            var buttonBar = $("<div class='row fileupload-buttonbar'></div>");
+            log("upload to url: ", actionUrl);
+            var form = $("<form action='" + actionUrl + "' method='POST' enctype='multipart/form-data' style='position: relative'><input type='hidden' name='overwrite' value='true'></form>");
+            var buttonBar = $("<div class='row fileupload-buttonbar' style='position:relative; overflow: hidden'></div>");
+            var fileInput = $("<input type='file' name='files[]' id='fileupload' style='opacity: 0; font-size: 50px; min-width: 100%; z-index: 6; position: absolute; right: 0' />");
             form.append(buttonBar);
-            var fileInputContainer = $("<div class='muploadBtn'></div>");
-            fileInputContainer.append($("<span style='z-index: 5'>" + config.buttonText + "</span>"));
-            var fileInput = $("<input type='file' name='files[]' id='fileupload' style='opacity: 0; width: 100%; z-index: 6; position: absolute; left: 0' />");
+            
+            var fileInputContainer = $("<div class='muploadBtn' style='position: relative'></div>");            
+            fileInputContainer.append($("<span>" + config.buttonText + "</span>"));
+            
             fileInputContainer.append(fileInput);
             buttonBar.append(fileInputContainer);
             fileInputContainer.append("<div class='progress' style='position: absolute; left: 0; top: 0; width: 100%; z-index: 3'><div class='bar'></div></div>");
             container.append(form);
+            var loading = $("<img src='/static/common/loading.gif' style='position: absolute; right: 5px; top: 5px'/>");
+            loading.hide();
+            form.append(loading);
 
             log("init fileupload", fileInput);
             fileInput.fileupload({
                 dataType: 'json',
                 progressInterval: 10,
+                complete: function(e, data) {
+                    loading.hide();
+                },
                 done: function (e, data) {
                     log("done", data);
                     //log("done", data.result[0], data.result[0].href);
@@ -52,12 +60,14 @@
                     $('.progress').hide(4000, function() {
                         $('.progress .bar', buttonBar).css('width','0%');
                     });
+                    loading.hide();
                 },
-                progressall: function (e, data) {                    
+                progressall: function (e, data) {  
                     var progress = parseInt(data.loaded / data.total * 100, 10);                    
                     $('.progress').show();
                     $('.progress .bar', buttonBar).css('width',progress + '%');
                     log("progress", e, data, progress);
+                    loading.show();                    
                 }        
             });
             log("done fileupload init");

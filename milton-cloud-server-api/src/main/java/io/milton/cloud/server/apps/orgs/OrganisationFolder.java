@@ -100,6 +100,14 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public String getName() {
         return organisation.getName();
     }
+    
+    public String getDisplayName() {
+        if( organisation.getTitle() != null && organisation.getTitle().length() > 0 ) {
+            return organisation.getTitle();
+        } else {
+            return organisation.getName();
+        }
+    }
 
     @Override
     public Date getModifiedDate() {

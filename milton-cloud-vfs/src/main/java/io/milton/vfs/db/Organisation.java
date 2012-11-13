@@ -36,6 +36,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An organisation contains users and websites. An organisation can have a
@@ -60,7 +62,9 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
-        
+
+    private static final Logger log = LoggerFactory.getLogger(Organisation.class);
+
     public static String getDeletedName(String origName) {
         return origName + "-deleted-" + System.currentTimeMillis();
     }
@@ -97,7 +101,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         critParentLink.add(Restrictions.eq("owner", organisation));
         return DbUtils.toList(crit, Organisation.class);
     }
-    
+
     public static Organisation getOrganisation(String name, Session session) {
         return (Organisation) session.get(Organisation.class, name);
     }
@@ -110,21 +114,23 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return org;
     }
 
-    public static Organisation getOrganisation(Organisation organisation, String name, Session session) {        
+    public static Organisation getOrganisation(Organisation organisation, String name, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
         crit.add(
                 Restrictions.and(
-                    Restrictions.eq("organisation", organisation), 
-                    Restrictions.eq("name", name)
-                )
-        );        
+                Restrictions.eq("organisation", organisation),
+                Restrictions.eq("name", name)));
         Organisation org = (Organisation) crit.uniqueResult();
         return org;
-    }    
-    
+    }
     private String title;
     private String orgId; // globally unique; used for web addresses for this organisation
+    private String phone;
+    private String address;
+    private String addressLine2;
+    private String state;
+    private String postcode;
     private Organisation organisation;
     private Boolean deleted;
     private List<Organisation> childOrgs;
@@ -134,12 +140,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     @Transient
     public String getFormattedName() {
-        if( getTitle() != null && getTitle().length() > 0 ) {
+        if (getTitle() != null && getTitle().length() > 0) {
             return getTitle();
         }
         return getName();
     }
-    
+
     @Column(nullable = false)
     @Index(name = "idx_orgId")
     public String getOrgId() {
@@ -159,8 +165,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public void setGroups(List<Group> groups) {
         this.groups = groups;
     }
-    
-    
+
     @Column
     public String getTitle() {
         return title;
@@ -170,8 +175,51 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.title = title;
     }
 
-    
-    
+    @Column
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    @Column
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Column
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
+
+    @Column
+    public String getAddressState() {
+        return state;
+    }
+
+    public void setAddressState(String state) {
+        this.state = state;
+    }
+
+    @Column
+    public String getPostcode() {
+        return postcode;
+    }
+
+    public void setPostcode(String postcode) {
+        this.postcode = postcode;
+    }
+
     @ManyToOne
     public Organisation getOrganisation() {
         return organisation;
@@ -183,11 +231,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     /**
      * Used for soft deletions. When this flag is set to true the organisation
-     * will generally not be shown. As part of soft deleting, any  unique
-     * values on this organisation or logically contained within it must
-     * be set to values not likely to be used
-     * 
-     * @return 
+     * will generally not be shown. As part of soft deleting, any unique values
+     * on this organisation or logically contained within it must be set to
+     * values not likely to be used
+     *
+     * @return
      */
     @Column
     public Boolean getDeleted() {
@@ -197,24 +245,42 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
     }
-    
-    
 
     /**
      * Updates the organisation reference and also any SubOrg links
-     * 
-     * @param organisation
-     * @param session 
+     *
+     * @param newParent
+     * @param session
      */
-    public void setOrganisation(Organisation organisation, Session session) {
-        Organisation previous = this.getOrganisation();
-        this.organisation = organisation;
-        if( previous != null && previous != organisation) {
+    public void setOrganisation(Organisation newParent, Session session) {
+        log.info("setOrganisation: this=" + getOrgId());
+        Organisation oldParent = this.getOrganisation();
+        if (oldParent != null) {
+            oldParent.getChildOrgs().remove(this);
+        }
+        if (newParent != null) {
+            if (newParent.getChildOrgs() == null) {
+                newParent.setChildOrgs(new ArrayList<Organisation>());
+            }
+            newParent.getChildOrgs().add(this);
+        }
+
+        this.organisation = newParent;
+
+        if (oldParent != null && oldParent != newParent) {
+            log.info("update subs");
             SubOrg.updateSubOrgs(this, SessionManager.session());
         }
+        if (oldParent != null) {
+            session.save(oldParent);
+        }
+        if (newParent != null) {
+            session.save(newParent);
+        }
+        session.save(this);
+        log.info("finished move");
     }
-    
-    
+
     @OneToMany(mappedBy = "organisation")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Organisation> getChildOrgs() {
@@ -243,15 +309,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public void setParentOrgLinks(List<SubOrg> parentOrgLinks) {
         this.parentOrgLinks = parentOrgLinks;
-    }    
-    
+    }
+
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
         } else {
             List<Website> list = new ArrayList<>();
-            for( Website w : getWebsites() ) {
-                if( !w.deleted() ) {
+            for (Website w : getWebsites()) {
+                if (!w.deleted()) {
                     list.add(w);
                 }
             }
@@ -264,8 +330,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             return Collections.EMPTY_LIST;
         } else {
             List<Organisation> list = new ArrayList<>();
-            for( Organisation o : getChildOrgs()) {
-                if( !o.deleted() ) {
+            for (Organisation o : getChildOrgs()) {
+                if (!o.deleted()) {
                     list.add(o);
                 }
             }
@@ -287,7 +353,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * creates an alias subdomain if the alias argument is not null
      *
      */
-    public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {   
+    public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {
         Website w = new Website();
         w.setBaseEntity(this);
         w.setOrganisation(this);
@@ -295,16 +361,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         w.setName(name);
         w.setDomainName(dnsName);
         w.setLiveBranch(Branch.TRUNK);
-        if( this.getWebsites() == null ) {
+        if (this.getWebsites() == null) {
             this.setWebsites(new ArrayList<Website>());
         }
         this.getWebsites().add(w);
         session.save(w);
-        
+
         Branch b = w.createBranch(Branch.TRUNK, user, session);
         b.setPublicTheme(theme);
         b.setInternalTheme(null);
-        
+
         return w;
     }
 
@@ -319,7 +385,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public Organisation createChildOrg(String orgName, Session session) {
         return createChildOrg(orgName, orgName, session);
     }
-    
+
     public Organisation createChildOrg(String orgId, String orgName, Session session) {
         Organisation o = new Organisation();
         o.setOrganisation(this);
@@ -327,7 +393,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         o.setOrgId(orgId);
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
-        if( this.getChildOrgs() == null ) {
+        if (this.getChildOrgs() == null) {
             this.setChildOrgs(new ArrayList<Organisation>());
         }
         this.getChildOrgs().add(o);
@@ -366,8 +432,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     @Override
     public void delete(Session session) {
         // Delete links from this to each parent
-        if( getParentOrgLinks() != null ) {
-            for( SubOrg so : getParentOrgLinks()) {
+        if (getParentOrgLinks() != null) {
+            for (SubOrg so : getParentOrgLinks()) {
                 session.delete(so);
             }
             setParentOrgLinks(null);
@@ -378,18 +444,18 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             }
         }
         setWebsites(null);
-        if( getGroups() != null ) {
-            for( Group g : getGroups() ) {
+        if (getGroups() != null) {
+            for (Group g : getGroups()) {
                 g.delete(session);
             }
         }
-        
-        for( Organisation childOrg : childOrgs() ) {
+
+        for (Organisation childOrg : childOrgs()) {
             childOrg.delete(session);
         }
         session.delete(this);
         Organisation parent = getOrganisation();
-        if( parent != null ) {
+        if (parent != null) {
             parent.getChildOrgs().remove(this);
             session.save(parent);
         }
@@ -414,7 +480,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
-    
+
     /**
      * Return true if this entity contains or is the given user
      *
@@ -423,14 +489,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      */
     public boolean containsUser(Profile p, Session session) {
         Subordinate s = Subordinate.find(this, p, session);
-        return  s != null;
-    }    
+        return s != null;
+    }
 
     /**
      * Creates and adds to this Org's groups, but does not save
-     * 
+     *
      * @param newName
-     * @return 
+     * @return
      */
     public Group createGroup(String newName) {
         Group g = new Group();
@@ -438,7 +504,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         g.setOrganisation(this);
         g.setCreatedDate(new Date());
         g.setModifiedDate(new Date());
-        if( this.getGroups() == null ) {
+        if (this.getGroups() == null) {
             this.setGroups(new ArrayList<Group>());
         }
         getGroups().add(g);
@@ -447,11 +513,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public void softDelete(Session session) {
         this.setDeleted(true);
-        this.setOrgId(getDeletedName(orgId));                        
+        this.setOrgId(getDeletedName(orgId));
         session.save(this);
-        
-        if( this.getWebsites() != null ) {
-            for( Website w : getWebsites() ) {
+
+        if (this.getWebsites() != null) {
+            for (Website w : getWebsites()) {
                 w.softDelete(session);
             }
         }
@@ -459,11 +525,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     /**
      * null-safe alias for getDeleted
-     * @return 
+     *
+     * @return
      */
     public boolean deleted() {
         return getDeleted() != null && getDeleted();
     }
-
-        
 }

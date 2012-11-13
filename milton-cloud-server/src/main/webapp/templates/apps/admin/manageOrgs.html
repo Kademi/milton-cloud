@@ -2,13 +2,18 @@
     <head>
         <title>$view.title</title>
         <link href="manageWebsite.css" rel="stylesheet" type="text/css" />
+        <link href="manageOrgs.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageGroup.js">//</script>
+        <script type="text/javascript" src="manageOrgs.js">//</script>
     </head>
     <body class="manageOrgs">
         <section id="manageWebsite" class="MainContent">
 
             <div class="Left">
                 <a class="SmallBtn Add" onclick="return showAddItem(this)" href="#">Add New Business unit</a>
+                <a class="Btn showUploadCsvModal" style="float: right" href="#">Upload CSV</a>
+                <a class="Btn" style="float: right; margin-right: 10px;" href="orgs.csv">Open CSV</a>
+
                 <div class="Modal">
                     <header>
                         <h3>Add new business unit</h3>
@@ -34,11 +39,13 @@
             </div>
 
             <table class="Summary">
-                #foreach($org in $page.children)
+                #foreach($org in $page.children.ofType.organisation)
                 <tr>
                     <td>
-                        <h5>$org.name</h5>
-                        <p>Stuff goes here</p>
+                        <h5>
+                            $org.displayName
+                        </h5>
+                        <p>ID: $org.organisation.orgId, Name: $org.name, Phone: $!org.organisation.phone</p>
                     </td>
                     <th>
                         <a href="$org.path" class="Btn DeleteOrg">Delete</a>
@@ -49,25 +56,44 @@
 
             </table>
         </section>
-        <script  type="text/javascript">
-            jQuery(function() {
-                $("form.addOrg").forms({
-                    callback: function(resp) {
-                        log("done", resp);
-                        window.location.reload();
-                    }
-                });                
-                $("body").on("click", ".DeleteOrg", function(e, n) {
-                    e.preventDefault();
-                    var node = $(e.target);
-                    var href = node.attr("href");
-                    var name = getFileName(href);
-                    confirmDelete(href, name, function() {
-                        window.location.reload();
-                    });                    
-                });
-                
-            });
-        </script>
+
+        <div id="modalUploadCsv" class="Modal">
+            <header>
+                <h3>Upload Organisations CSV</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <div class='upload'>
+                    <div class="input" id='doUploadCsv'></div>
+                    <br/>
+                    <div class="allowInserts">
+                        <input type="checkbox" id="allowInserts"/>
+                        <label for="allowInserts">Allow inserts</label>
+                    </div>    
+                    <div class="results">
+                        <strong>No. updated:</strong>
+                        <span class="numUpdated">-</span>
+                        <strong>Unmatched:</strong>
+                        <span class="numUnmatched">-</span>
+                        <br/>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>                
+            </div>
+        </div>        
+
+        <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>
     </body>
 </html>

@@ -73,7 +73,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseEntity")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Repository> getRepositories() {

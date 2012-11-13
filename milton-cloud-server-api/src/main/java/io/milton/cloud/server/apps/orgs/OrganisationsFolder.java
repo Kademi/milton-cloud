@@ -87,7 +87,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             AppControl.initApps(availAppIds, c, curUser, now, session);
 
             tx.commit();
-            jsonResult = new JsonResult(true, "Created", c.getName());
+            jsonResult = new JsonResult(true, "Created", c.getName());            
         }
         return null;
     }
@@ -106,7 +106,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         if (method.equals(Request.Method.PROPFIND)) { // force login for webdav browsing
             return _(SpliffySecurityManager.class).getCurrentUser() != null;
         }
-        return true;
+        return super.authorise(request, method, auth);
     }
 
     @Override
@@ -131,6 +131,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
                 OrganisationFolder of = new OrganisationFolder(this, o);
                 children.add(of);
             }
+            children.add( new OrganisationsCsv("orgs.csv", this));
 
             _(ApplicationManager.class).addBrowseablePages(this, children);
         }
