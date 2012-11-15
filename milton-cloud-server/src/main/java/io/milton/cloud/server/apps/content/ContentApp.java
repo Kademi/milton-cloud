@@ -266,6 +266,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (isContentResource(resource)) {
+                //log.info("appliesTo(org): resource=" + resource);
                 ContentResource cr = (ContentResource) resource;
                 return cr.getOrganisation().isWithin(withinOrg);
             }
@@ -283,9 +284,12 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
 
         @Override
         public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
-            if (resource instanceof CommonRepositoryResource) {
+            if (resource instanceof CommonRepositoryResource) {                
                 CommonRepositoryResource cr = (CommonRepositoryResource) resource;
-                return (cr.getRepository() == applicableRepo);
+                boolean  b = (cr.getRepository() == applicableRepo);
+                //log.info("appliesTo(repo): resource=" + resource + " = " + b);
+                //log.info("cr.repo=" + cr.getRepository().getName() + " applica=" + applicableRepo.getName());
+                return b;
             } else {
                 return false;
             }

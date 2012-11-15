@@ -347,6 +347,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         session.save(s);
     }
 
+    /**
+     * Find out if this user is associated with the group in an organisation
+     * which is within the membership group
+     * 
+     * @param groupName
+     * @param org
+     * @return 
+     */
     public boolean isInGroup(String groupName, Organisation org) {
         if (getMemberships() != null) {
             for (GroupMembership m : getMemberships()) {
@@ -359,6 +367,27 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
+    
+    /**
+     * Test if the current user is within a group, where the users membership
+     * organisation is contained within the given parent organsiation
+     * 
+     * @param groupName
+     * @param parentOrg
+     * @return 
+     */
+    public boolean isInChildGroup(String groupName, Organisation parentOrg) {
+        if (getMemberships() != null) {
+            for (GroupMembership m : getMemberships()) {
+                if (m.getGroupEntity().getName().equals(groupName)) {
+                    if( m.getWithinOrg().isWithin(parentOrg)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }    
 
     public boolean hasRole(String roleName, Organisation org) {
         if (getMemberships() != null) {

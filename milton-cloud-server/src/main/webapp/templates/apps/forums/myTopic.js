@@ -16,6 +16,7 @@ function initMyQuestion() {
             log("done post", resp);
             $.tinybox.close();
             addReply($("#postComment form textarea").val());
+            $("#postComment form textarea").val("")
         }
     });
     jQuery("abbr.timeago").timeago();
@@ -51,4 +52,5 @@ function addReply(text) {
     detailsDiv.append(infoP);
     
     answersDiv.append(replyDiv);
+    $("abbr.timeago", infoP).timeago();
 }

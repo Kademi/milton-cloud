@@ -53,10 +53,10 @@ public class SpliffySecurityManager {
         UserResource p = getCurrentPrincipal();
         if (p != null) {
             Profile profile = p.getThisUser();
-            log.info("current user: " + profile);
+            //log.info("current user: " + profile);
             return profile;
         }
-        log.info("no current user");
+        //log.info("no current user");
         return null;
     }
 

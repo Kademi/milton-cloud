@@ -141,6 +141,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
                     jsonResult = JsonResult.fieldError("name", "Please enter a name for the website");
                     return null;
                 }
+                websiteName = websiteName.toLowerCase();
                 if (!websiteName.equals(website.getName())) {
                     Website checkOther = Website.findByName(websiteName, session);
                     if (checkOther != null) {

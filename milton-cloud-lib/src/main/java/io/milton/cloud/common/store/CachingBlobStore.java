@@ -45,12 +45,12 @@ public class CachingBlobStore implements BlobStore {
     }
 
     @Override
-    public byte[] getBlob(String hash) {
-        //System.out.println("Caching blob store: hits=" + hits + " misses=" + misses);
+    public byte[] getBlob(String hash) {        
         byte[] arr = cache.get(hash);
         if( arr == null ) {
             arr = blobStore.getBlob(hash);
             if( arr != null ) {
+                System.out.println("Caching blob store: hits=" + hits + " misses=" + misses);
                 misses++;
                 cache.putIfAbsent(hash, arr);
             }

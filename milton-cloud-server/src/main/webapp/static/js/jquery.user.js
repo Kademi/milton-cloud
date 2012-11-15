@@ -73,8 +73,21 @@ function doLogin(userName, password, config, container) {
     log("doLogin", userName, config.urlSuffix);
     $(config.valiationMessageSelector).hide();
     var data = new Object();
-    data[config.userNameProperty] = userName;
-    data[config.passwordProperty] = password;
+    var userNameProperty;
+    if( config.userNameProperty ) {
+        userNameProperty = config.userNameProperty;
+    } else {
+        userNameProperty = "_loginUserName";
+    }
+    var passwordProperty;
+    if( config.passwordProperty ) {
+        passwordProperty = config.passwordProperty;
+    } else {
+        passwordProperty = "_loginPassword";
+    }
+    
+    data[userNameProperty] = userName;
+    data[passwordProperty] = password;
     $.ajax({
         type: 'POST',
         url: config.urlSuffix,
