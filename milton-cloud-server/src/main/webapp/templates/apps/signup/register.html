@@ -12,7 +12,7 @@
                     $!folder.find($path).getParam("intro")
                     <form method="post" id="registerForm" action="$page.name">
                         <fieldset>
-                            <legend>Your login details</legend>
+                            <legend>Create a new account</legend>
                             <div class="Box02">
                                 <div class="Box02Bottom">
                                     <div class="Box02Middle">
@@ -42,10 +42,10 @@
                                                 </tr>  
                                                 #if( $page.hasOrgs )
                                                 <tr>
-                                                    <td><label class="first" for="orgName">Pharmacy</label></td>
+                                                    <td><label class="first" for="orgName">$page.regoOrgType</label></td>
                                                     <td colspan="3" class="findOrg">
                                                         <input type="hidden" name="orgId" id="orgId" />
-                                                        <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your pharmacy" />
+                                                        <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your $page.regoOrgType" />
                                                     </td>
                                                 </tr>
                                                 #end
@@ -56,6 +56,7 @@
                             </div>
                         </fieldset>
                     </form>
+                    
                     $!folder.find($path).body
                 </div>		
                 <br class="Clear" />
@@ -64,9 +65,9 @@
         </div> 
         <div id="findOrg" class="Modal"> 
             <a href="" class="Close" title="Close">Close</a>
-            <h3 class="Title">Find your pharmacy</h3>
+            <h3 class="Title">Find your $page.regoOrgType</h3>
             <form method="POST" action=".">
-                <input id="orgQuery" type="text" value="" placeholder="Search for your organisation here" />
+                <input id="orgQuery" type="text" value="" placeholder="Search for your $page.regoOrgType here" />
                 <table id="orgSearchResults">
                     <tr>
                         <th>Name</th>

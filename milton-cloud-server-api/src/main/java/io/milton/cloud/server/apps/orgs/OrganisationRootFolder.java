@@ -54,7 +54,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
 
     @Override
     public String getId() {
-        return organisation.getName();
+        return organisation.getOrgId();
     }
 
     
@@ -83,7 +83,7 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
 
     @Override
     public String getEmailAddress() {
-        String fromAddress = "noreply@" + organisation.getName();
+        String fromAddress = "noreply@" + organisation.getOrgId();
         return fromAddress;
     }    
 }

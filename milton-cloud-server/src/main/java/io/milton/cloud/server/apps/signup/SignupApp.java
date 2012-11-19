@@ -224,7 +224,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             if (!Utils.isEmpty(org.getWebsites())) {
                 if (!isNewOrg(org)) {
                     List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
-                    System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getName() + " - " + r.getClass());
+                    System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getOrgId() + " - " + r.getClass());
                     context.put("applications", applications);
                     _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
 

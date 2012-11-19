@@ -83,7 +83,6 @@ public class InitialDataCreator implements LifecycleApplication {
         }
         System.out.println("Create new organisation");
         rootOrg = new Organisation();
-        rootOrg.setName(initialRootOrgName);
         rootOrg.setOrgId(initialRootOrgName);
         rootOrg.setModifiedDate(new Date());
         rootOrg.setCreatedDate(new Date());

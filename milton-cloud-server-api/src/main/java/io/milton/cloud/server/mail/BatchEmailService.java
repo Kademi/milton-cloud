@@ -78,7 +78,7 @@ public class BatchEmailService {
     }
 
     private void append(BaseEntity g, final Set<Profile> profiles) {
-        log.info("append: group: " + g.getName() + " - " + g.getId());
+        log.info("append: group: " + g.getId() + " - " + g.getId());
 
         final VfsVisitor visitor = new AbstractVfsVisitor() {
 

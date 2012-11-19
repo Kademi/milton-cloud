@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
+    private List<OrgType> orgTypes;
 
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
 
@@ -94,7 +95,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Disjunction or = Restrictions.disjunction();
         or.add(Restrictions.ilike("title", s));
         or.add(Restrictions.ilike("orgId", s));
-        or.add(Restrictions.ilike("name", s));
         crit.add(or);
         // TODO: add other properties like address
         Criteria critParentLink = crit.createCriteria("parentOrgLinks");
@@ -131,7 +131,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private String addressLine2;
     private String state;
     private String postcode;
-    private Organisation organisation;
+    private OrgType orgType; // nullable, if present has the type of the org which can be used on signup form
+    private Organisation organisation; // the parent org
     private Boolean deleted;
     private List<Organisation> childOrgs;
     private List<Website> websites;
@@ -143,7 +144,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (getTitle() != null && getTitle().length() > 0) {
             return getTitle();
         }
-        return getName();
+        return getOrgId();
     }
 
     @Column(nullable = false)
@@ -311,6 +312,17 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.parentOrgLinks = parentOrgLinks;
     }
 
+    @ManyToOne
+    public OrgType getOrgType() {
+        return orgType;
+    }
+
+    public void setOrgType(OrgType orgType) {
+        this.orgType = orgType;
+    }
+
+    
+    
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
@@ -339,9 +351,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
-    public Organisation childOrg(String dn) {
+    public Organisation childOrg(String orgId) {
         for (Organisation org : childOrgs()) {
-            if (org.getName().equals(dn)) {
+            if (org.getOrgId().equals(orgId)) {
                 return org;
             }
         }
@@ -389,7 +401,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public Organisation createChildOrg(String orgId, String orgName, Session session) {
         Organisation o = new Organisation();
         o.setOrganisation(this);
-        o.setName(orgName);
         o.setOrgId(orgId);
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
@@ -530,5 +541,45 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      */
     public boolean deleted() {
         return getDeleted() != null && getDeleted();
+    }
+
+    public OrgType orgType(String name, boolean autoCreate, Session session) {
+        OrgType ot = orgType(name);
+        if( ot == null ) {
+            if( autoCreate ) {
+                if( getOrgTypes() == null ) {
+                    setOrgTypes(new ArrayList<OrgType>());
+                }
+                ot = new OrgType();
+                ot.setName(name);
+                ot.setDisplayName(name);
+                ot.setOrganisation(this);
+                getOrgTypes().add(ot);
+                session.save(this);
+                session.save(ot);                
+            }
+        }
+        return ot;
+    }
+
+    public OrgType orgType(String name) {
+        if( getOrgTypes() != null ) {
+            for( OrgType ot : getOrgTypes() ) {
+                if( ot.getName().equals(name)) {
+                    return ot;
+                }
+            }
+        }
+        return null;
+    }
+    
+    
+    @OneToMany(mappedBy = "organisation")
+    public List<OrgType> getOrgTypes() {
+        return orgTypes;
+    }
+
+    public void setOrgTypes(List<OrgType> orgTypes) {
+        this.orgTypes = orgTypes;
     }
 }

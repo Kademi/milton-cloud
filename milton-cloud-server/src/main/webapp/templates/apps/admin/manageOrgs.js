@@ -31,6 +31,7 @@ $(function() {
             $(".results .numUnmatched").text(data.result.data.unmatched.length);
             showUnmatched(data.result.data.unmatched);
             $(".results").show();
+            alert("Upload completed. Please review any unmatched organisations below, or refresh the page to see the updated list of organisations");
         }
     });    
     var uploadForm = $("#doUploadCsv form");

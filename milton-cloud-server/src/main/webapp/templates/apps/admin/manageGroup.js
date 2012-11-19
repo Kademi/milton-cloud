@@ -492,17 +492,43 @@ function initRegoMode() {
         e.preventDefault();
         e.stopPropagation();        
         var target = $(e.target);
-        var modal = $("#modalRegoMode");
-        modal.find("a.Btn").unbind();
-        modal.find("a.Btn").click(function(e) {
-            var regoModeLink = $(e.target);
-            setRegoMode(target, regoModeLink);
-        });
+        var modal = $("#modalRegoMode");        
         $.tinybox.show(modal, {
             overlayClose: false,
             opacity: 0
         });
+        
+        var href = target.closest("div.Group").find("header div > span").text();
+        href = $.URLEncode(href) + "/";
+        modal.find("form").attr("action", href);
+        
+        try {
+            $.ajax({
+                type: 'GET',
+                url: href,
+                dataType: "json",
+                success: function(resp) {
+                    log("got group data", resp);
+                    modal.find("input[name=regoMode][value=" + resp.data.regoMode + "]").attr("checked", true);
+                    modal.find("select[name=orgType] option[value=" + resp.data.orgType + "]").attr("selected", true);
+                    modal.find("select[name=sRootRegoOrg] option[value=" + resp.data.rootRegoOrg + "]").attr("selected", true);
+                },
+                error: function(resp) {
+                    log("error", resp);
+                    alert("err");
+                }
+            });          
+        } catch(e) {
+            log("exception in createJob", e);
+        }                    
     });
+    $("#modalRegoMode form").forms({
+        callback: function(resp) {
+            log("done", resp);
+            $.tinybox.close();
+        }
+    });
+    log("done forms", $("modalRegoMode form"));
 }
 
 function setRegoMode(currentRegoModeLink, selectedRegoModeLink) {
@@ -510,7 +536,7 @@ function setRegoMode(currentRegoModeLink, selectedRegoModeLink) {
     var text = selectedRegoModeLink.text();
     var data = "milton:regoMode=" + val;
     var href = currentRegoModeLink.closest("div.Group").find("header div > span").text();
-    href = $.URLEncode(href);
+    href = $.URLEncode(href) + "/";
     log("setRegoMode: val=", val, "text=", text, "data=", data, "href=", href);
     proppatch(href, data, function() {
         currentRegoModeLink.text(text);

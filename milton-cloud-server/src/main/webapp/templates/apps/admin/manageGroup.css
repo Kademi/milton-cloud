@@ -60,6 +60,7 @@
 }
 #modalRegoMode td {
     vertical-align: top;
+    line-height: 20px;
 }
 #modalRegoMode td.first {
     width: 130px;
@@ -92,3 +93,8 @@ ul.roles li button span {
 ul.appliesTo select {
     display: none;
 }
+
+#modalRegoMode label {
+    font-weight: 800;
+}
+

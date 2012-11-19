@@ -33,6 +33,7 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
+import io.milton.vfs.db.OrgType;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
@@ -180,7 +181,13 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         if (!path.isRoot()) {
             path = path.getParent();
         }
+        String sOrgType = "";
+        if( org.getOrgType() != null ) {
+            sOrgType = org.getOrgType().getName();
+        }
+        
         values.add(org.getOrgId()); // unique ID
+        values.add(sOrgType);
         values.add(path.toString()); // path to org        
         values.add(org.getTitle()); // user friendly name
         values.add(org.getAddress());
@@ -195,7 +202,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         if (org == null || rootOrg == org) {
             return Path.root;
         } else {
-            return toOrgPath(rootOrg, org.getOrganisation()).child(org.getName());
+            return toOrgPath(rootOrg, org.getOrganisation()).child(org.getOrgId());
         }
     }
 
@@ -222,17 +229,18 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
 
         String[] lineParts;
         int line = 0;
+        Organisation rootOrg = getOrganisation();
+        log.info("fromCsv: rootOrg=" + rootOrg.getOrgId());
         while ((lineParts = reader.readNext()) != null) {
             if (lineParts.length > 0) {
                 line++;
-                System.out.println("line: " + line);
                 if (log.isTraceEnabled()) {
                     log.trace("process line: " + line + " : " + Arrays.toString(lineParts));
                 }
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(getOrganisation(), lineList, line, true, session);
+                    doProcess(rootOrg, lineList, line, true, session);
                 }
             }
         }
@@ -257,25 +265,32 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 unmatched.add(lineList);
                 return;
             }
-            log.info("created new record: " + child.getName());
+            log.info("created new record: " + child.getOrgId());
         } else {
-            log.trace("found record to update: " + child.getName());
+            log.trace("found record to update: " + child.getOrgId());
         }
         updateRecord(child, lineList, line, rootOrg, session);
     }
 
     private void updateRecord(Organisation child, List<String> lineList, int line, Organisation rootOrg, Session session) {
         numUpdated++;
-        String sPath = lineList.get(1);
+        String sOrgType = get(lineList, 1);
+        if( sOrgType != null ) {
+            OrgType orgType = rootOrg.orgType(sOrgType, true, session);
+            child.setOrgType(orgType);
+        }
+        
+        String sPath = lineList.get(2);
         Path path = Path.path(sPath);
+                
         checkPath(child, path, rootOrg, session);
-        child.setTitle(get(lineList, 2));
-        //System.out.println("new title: " + child.getTitle() + ", " + numUpdated);
-        child.setAddress(get(lineList, 3));
-        child.setAddressLine2(get(lineList, 4));
-        child.setAddressState(get(lineList, 5));
-        child.setPhone(get(lineList, 6));
-        child.setPostcode(get(lineList, 7));
+        child.setTitle(get(lineList, 3));
+        System.out.println("update org: title=" + child.getTitle() + ", " + numUpdated);
+        child.setAddress(get(lineList, 4));
+        child.setAddressLine2(get(lineList, 5));
+        child.setAddressState(get(lineList, 6));
+        child.setPhone(get(lineList, 7));
+        child.setPostcode(get(lineList, 8));
         session.save(child);
     }
 
@@ -311,6 +326,9 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         String s = lineList.get(i);
         if (s != null) {
             s = s.trim();
+            if( s.length() == 0 ) {
+                s = null;
+            }
         }
         return s;
     }
@@ -342,7 +360,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         Organisation org = rootOrg;
         if (!path.isRoot()) {
             for (String childName : path.getParts()) {
-                System.out.println("  - " + childName);
+                //System.out.println("  - " + childName);
                 Organisation child = org.childOrg(childName);
                 if (child == null) {
                     child = org.createChildOrg(childName, session);

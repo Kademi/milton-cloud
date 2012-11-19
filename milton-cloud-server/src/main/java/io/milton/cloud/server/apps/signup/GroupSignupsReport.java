@@ -57,7 +57,7 @@ public class GroupSignupsReport implements JsonReport{
         if( website != null ) {
             return "Group signups report: " + website.getName();
         } else {
-            return "Group signups report: " + (organisation.getTitle() == null ? organisation.getName() : organisation.getTitle());
+            return "Group signups report: " + (organisation.getTitle() == null ? organisation.getOrgId() : organisation.getTitle());
         }
     }
     

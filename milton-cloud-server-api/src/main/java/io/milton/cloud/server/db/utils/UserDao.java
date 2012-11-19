@@ -53,7 +53,7 @@ public class UserDao {
     }
 
     public List<Profile> search(String q, Organisation org, Session session) {
-        log.info("search: q=" + q + " org=" + org.getName());
+        log.info("search: q=" + q + " org=" + org.getOrgId());
         Criteria crit = session.createCriteria(Profile.class);
 
         Criteria critMembership = crit.createCriteria("memberships");

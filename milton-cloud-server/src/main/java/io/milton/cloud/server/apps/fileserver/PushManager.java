@@ -124,7 +124,7 @@ public class PushManager implements EventListener {
                                 Profile p = securityManager.authenticate(rootFolder.getOrganisation(), auth.getUsername(), auth.getPassword());
                                 if (p == null) {
                                     log.warn("Login failed: " + auth.getWebsite() + " user=" + auth.getUsername() + " pwd:" + auth.getPassword());
-                                    respondLoginFailed(client, auth.getUsername(), rootFolder.getOrganisation().getName());
+                                    respondLoginFailed(client, auth.getUsername(), rootFolder.getOrganisation().getOrgId());
                                 } else {
                                     log.info("handleNotification: auth ok: " + auth.getUsername());
                                     authenticatedClients.put(p.getId(), client);

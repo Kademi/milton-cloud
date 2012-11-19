@@ -87,7 +87,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             AppControl.initApps(availAppIds, c, curUser, now, session);
 
             tx.commit();
-            jsonResult = new JsonResult(true, "Created", c.getName());            
+            jsonResult = new JsonResult(true, "Created", c.getOrgId());            
         }
         return null;
     }

@@ -302,7 +302,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         }
         Group g = getOrganisation().group(sGroup, session);
         if (g == null) {
-            throw new RuntimeException("Cant find group: " + sGroup + " in org: " + getOrganisation().getName());
+            throw new RuntimeException("Cant find group: " + sGroup + " in org: " + getOrganisation().getOrgId());
         }
         return g;
     }

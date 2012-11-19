@@ -101,7 +101,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         Organisation org = getOrganisation();
         Profile user = Profile.findByEmail(email, org, session);
         if( user == null ) {
-            System.out.println("user not found: " + email + "  in " + org.getName());
+            System.out.println("user not found: " + email + "  in " + org.getOrgId());
             return false;
         }
         RootFolder rootFolder = WebUtils.findRootFolder(this);
@@ -116,7 +116,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
                 subject = "Password reset for " + website.getName();
             }
         } else {
-            subject = "Password reset for " + org.getName();
+            subject = "Password reset for " + org.getOrgId();
         }
         String returnUrl = this.getHref();
         Date now = _(CurrentDateService.class).getNow();

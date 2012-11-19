@@ -1,7 +1,5 @@
 package io.milton.vfs.db;
 
-import io.milton.http.exceptions.BadRequestException;
-import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +25,9 @@ import org.slf4j.LoggerFactory;
 @javax.persistence.Entity
 @DiscriminatorValue("U")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(
+uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
 
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
@@ -102,7 +103,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         critSubordinate.add(Restrictions.eq("withinOrg", org));
         List list = crit.list();
         if (list == null || list.isEmpty()) {
-            log.warn("Profile not found: " + name + " in org: " + org.getName());
+            log.warn("Profile not found: " + name + " in org: " + org.getOrgId());
             return null;
         } else {
             return (Profile) list.get(0);
@@ -160,8 +161,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         crit.add(Restrictions.eq("name", name));
         return crit.uniqueResult() == null;
     }
-    private List<Credential> credentials;
-    private List<GroupMembership> memberships; // can belong to groups    
+    private String name;
     private String firstName;
     private String surName;
     private String phone;
@@ -170,7 +170,19 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private String nickName;
     private boolean enabled;
     private boolean rejected;
+    private List<Credential> credentials;
+    private List<GroupMembership> memberships; // can belong to groups    
 
+    @Column(nullable = false)
+    @Index(name = "ids_entity_name")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }    
+    
     @Override
     public void delete(Session session) {
         if (getMemberships() != null) {

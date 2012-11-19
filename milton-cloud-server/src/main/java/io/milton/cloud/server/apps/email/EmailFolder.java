@@ -190,7 +190,7 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
             return true;
         }
         System.out.println("this user: " + r.getThisUser().getName() + " - " + r.getThisUser().getId());
-        System.out.println("baseentity: " + baseEntity.getName() + " - " + baseEntity.getId());
+        System.out.println("baseentity: " + baseEntity.getId() + " - " + baseEntity.getId());
         // Not this user, so check permissions to see if admin
         log.info("not owning user, check sec manager");
         return super.authorise(request, method, auth);

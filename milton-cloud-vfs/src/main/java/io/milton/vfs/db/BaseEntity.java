@@ -32,9 +32,6 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(
-uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})})
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public static BaseEntity find(String name, Session session) {
@@ -45,8 +42,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
 
     
-    private long id;
-    private String name;
+    private long id;    
     private String type;
     private String notes;
     private Date createdDate;
@@ -62,16 +58,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    @Column(nullable = false)
-    @Index(name = "ids_entity_name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseEntity")

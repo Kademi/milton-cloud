@@ -49,7 +49,7 @@ public class WebsiteAccessReport implements JsonReport{
         if( website != null ) {
             return "Web activity report: " + website.getName();
         } else {
-            return "Web activity report: " + (organisation.getTitle() == null ? organisation.getName() : organisation.getTitle());
+            return "Web activity report: " + (organisation.getTitle() == null ? organisation.getOrgId() : organisation.getTitle());
         }
     }
     

@@ -98,14 +98,14 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public String getName() {
-        return organisation.getName();
+        return organisation.getOrgId();
     }
     
     public String getDisplayName() {
         if( organisation.getTitle() != null && organisation.getTitle().length() > 0 ) {
             return organisation.getTitle();
         } else {
-            return organisation.getName();
+            return organisation.getOrgId();
         }
     }
 

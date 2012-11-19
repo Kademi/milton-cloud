@@ -83,6 +83,8 @@ public class Group implements Serializable, VfsAcceptor {
     private List<GroupMembership> groupMemberships; // those entities in this group
     private List<GroupRole> groupRoles;
     private String registrationMode; // whether to allow anyone to join this group    
+    private OrgType regoOrgType; // label to display to users in signup form to selet their organisation
+    private Organisation rootRegoOrg; // root org to select from when users select an org
 
     @Id
     @GeneratedValue
@@ -182,6 +184,28 @@ public class Group implements Serializable, VfsAcceptor {
         this.registrationMode = registrationMode;
     }
 
+    @ManyToOne
+    public OrgType getRegoOrgType() {
+        return regoOrgType;
+    }
+
+    public void setRegoOrgType(OrgType regoOrgType) {
+        this.regoOrgType = regoOrgType;
+    }
+
+    
+
+    @ManyToOne(optional=true)
+    public Organisation getRootRegoOrg() {
+        return rootRegoOrg;
+    }
+
+    public void setRootRegoOrg(Organisation rootRegoOrg) {
+        this.rootRegoOrg = rootRegoOrg;
+    }
+
+    
+    
     /**
      * Add or remove the role to this group. Updates the groupRoles list and
      * also saves the change in the session
@@ -287,5 +311,29 @@ public class Group implements Serializable, VfsAcceptor {
             session.delete(giw);
         }
         session.delete(this);
+    }
+
+    /**
+     * Sets the new org type on this group, updating collections in the old and
+     * new org type objects if they're not null
+     * 
+     * @param newOrgType
+     * @param session 
+     */
+    public void setRegoOrgType(OrgType newOrgType, Session session) {
+        OrgType oldOrgType = getRegoOrgType();
+        if( oldOrgType != null ) {
+            oldOrgType.getGroups().remove(this);
+            session.save(oldOrgType);
+        }
+        
+        setRegoOrgType(newOrgType);
+        
+        if( newOrgType != null ) {
+            if( newOrgType.getGroups() == null ) {
+                newOrgType.setGroups(new ArrayList<Group>());
+            }
+            newOrgType.getGroups().add(this);
+        }
     }
 }

@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.OrgType;
 
 /**
  * Manages registration of a user when signing up to a group
@@ -81,7 +82,11 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
 
             String q = params.get("q");
             if (q != null && q.length() > 0) {
-                searchResults = Organisation.search(q, getOrganisation(), SessionManager.session()); // find the given user in this organisation 
+                Organisation rootSearchOrg = parent.getGroup().getRootRegoOrg();
+                if( rootSearchOrg == null ) {
+                    rootSearchOrg = getOrganisation();
+                }
+                searchResults = Organisation.search(q, rootSearchOrg, SessionManager.session()); // find the given user in this organisation 
             }
 
             _(HtmlTemplater.class).writePage("signup/register", this, params, out);
@@ -274,5 +279,13 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         return searchResults;
     }
     
+    public String getRegoOrgType() {
+        OrgType ot = parent.getGroup().getRegoOrgType();
+        if( ot == null ) {
+            return "Business unit";
+        } else {    
+            return ot.getDisplayName();
+        }
+    }
     
 }

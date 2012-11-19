@@ -16,7 +16,9 @@ package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.server.event.GroupDeletedEvent;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.context.ClassNotInContextException;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -40,7 +42,7 @@ import io.milton.http.Response.Status;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
-import io.milton.http.webdav.PropertySourcePatchSetter; 
+import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyAccess;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
@@ -51,6 +53,7 @@ import io.milton.resource.Resource;
 import io.milton.sync.event.EventUtils;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;
+import java.lang.reflect.InvocationTargetException;
 import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -83,18 +86,18 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             String appliesToType = WebUtils.getParam(parameters, "appliesToType");
             String appliesTo = WebUtils.getParam(parameters, "appliesTo");
             String role = WebUtils.getParam(parameters, "role");
-            if( appliesToType == null ) {
+            if (appliesToType == null) {
                 jsonResult = JsonResult.fieldError("appliesToType", "Please select a appliesToType");
                 return null;
-            } else if( role == null ) {
+            } else if (role == null) {
                 jsonResult = JsonResult.fieldError("role", "Please select a role");
-                return null;                
+                return null;
             }
             GroupRole gr;
             switch (appliesToType) {
                 case "selectRepo":
                     Repository r = getOrganisation().repository(appliesTo);
-                    if( r == null ) {
+                    if (r == null) {
                         jsonResult = JsonResult.fieldError("appliesTo", "Could not locate repository: " + appliesTo);
                         return null;
                     } else {
@@ -103,42 +106,72 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     break;
                 case "selectOrg":
                     Organisation org;
-                    if( getOrganisation().getOrgId().equals(appliesTo)) {
+                    if (getOrganisation().getOrgId().equals(appliesTo)) {
                         org = getOrganisation();
                     } else {
                         org = getOrganisation().childOrg(appliesTo);
                     }
-                    if( org == null ) {
+                    if (org == null) {
                         jsonResult = JsonResult.fieldError("appliesTo", "Could not locate child organistion: " + appliesTo);
                         return null;
                     } else {
                         gr = group.grantRole(org, role, session);
                     }
                     break;
-                default:            
+                default:
                     gr = group.grantRole(role, session);
                     break;
             }
-            if( gr != null ) {
+            if (gr != null) {
                 tx.commit();
                 ManageGroupRolePage grPage = new ManageGroupRolePage(this, gr);
                 jsonResult = new JsonResult(true, "Added role", grPage.getHref());
             } else {
                 jsonResult = new JsonResult(false, "That role already exists");
             }
-        }        
-        
+        } else if (parameters.containsKey("regoMode")) {
+            try {
+                String s = WebUtils.getParam(parameters, "regoMode");
+                group.setRegistrationMode(s);
+                s = WebUtils.getParam(parameters, "orgType");
+                OrgType orgType = null;
+                if( s != null ) {
+                    orgType = getOrganisation().orgType(s);
+                    if( orgType == null ) {
+                        throw new RuntimeException("Couldnt find orgType: " + s);
+                    }
+                    System.out.println("Found org type: " + orgType.getDisplayName());
+                } else {
+                    System.out.println("org type is null");
+                }
+                group.setRegoOrgType(orgType, session); 
+                s = WebUtils.getParam(parameters, "sRootRegoOrg");
+                if( s != null ) {
+                    Organisation org = getOrganisation().childOrg(s);
+                    group.setRootRegoOrg(org);
+                } else {
+                    group.setRootRegoOrg(null);
+                }
+                
+                _(DataBinder.class).populate(group, parameters);
+                session.save(group);
+                tx.commit();
+                jsonResult = new JsonResult(true, "Saved group");
+            } catch (ClassNotInContextException | IllegalAccessException | InvocationTargetException ex) {
+                tx.rollback();
+                jsonResult = new JsonResult(false, ex.getMessage());
+            }
+        }
+
         return null;
     }
 
-    
-    
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
-            if( group.getGroupRoles() != null ) {
-                for( GroupRole gr : group.getGroupRoles()) {
+            if (group.getGroupRoles() != null) {
+                for (GroupRole gr : group.getGroupRoles()) {
                     ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
                     children.add(p);
                 }
@@ -163,11 +196,20 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if( jsonResult != null ) {
-            jsonResult.write(out);
-        } else {
-            _(HtmlTemplater.class).writePage("admin", "admin/manageGroup", this, params, out);
+        if (jsonResult == null) {
+            Map<String, String> map = new HashMap<>();
+            map.put("regoMode", group.getRegistrationMode());
+            String sOrgType = null;
+            if( group.getRegoOrgType() != null ) {
+                sOrgType = group.getRegoOrgType().getName();
+            }
+            map.put("orgType", sOrgType);
+            String sRootRegoOrgId = group.getRootRegoOrg() == null ? "" : group.getRootRegoOrg().getOrgId();
+            map.put("rootRegoOrg", sRootRegoOrgId);
+            jsonResult = new JsonResult(true);
+            jsonResult.setData(map);
         }
+        jsonResult.write(out);
     }
 
     public List<Group> getGroups() {
@@ -283,15 +325,13 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     public void moveTo(CollectionResource rDest, String name) throws ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        
-        if( !(rDest instanceof ManageGroupsFolder)) {
+
+        if (!(rDest instanceof ManageGroupsFolder)) {
             throw new ConflictException("Parent folder must be manage groups folder. Is a: " + rDest.getClass() + " with name: " + rDest.getName());
         }
         group.setName(name);
-        
+
         session.save(group);
         tx.commit();
     }
-    
-    
 }

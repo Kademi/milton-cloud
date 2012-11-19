@@ -103,7 +103,7 @@ public class SpliffySecurityManager {
                     checkOrg = checkOrg.getOrganisation();
                 }
                 if (checkOrg == null) {
-                    log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getName());
+                    log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getOrgId());
                     return null;
                 } else {
                     return user;
@@ -129,7 +129,7 @@ public class SpliffySecurityManager {
                     checkOrg = checkOrg.getOrganisation();
                 }
                 if (checkOrg == null) {
-                    log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getName());
+                    log.warn("Profile " + user.getName() + " exists, but it not subordinate to org: " + org.getOrgId());
                     return null;
                 } else {
                     return user;
@@ -256,12 +256,12 @@ public class SpliffySecurityManager {
                         if (role.appliesTo(resource, checkOrg, g)) {
                             Set<Priviledge> privsToAdd = role.getPriviledges(resource, checkOrg, g);
                             if (log.isTraceEnabled()) {
-                                log.trace("role:" + roleName + " does apply to: " + checkOrg.getName() + ", add privs " + privsToAdd);
+                                log.trace("role:" + roleName + " does apply to: " + checkOrg.getOrgId() + ", add privs " + privsToAdd);
                             }
                             privs.addAll(privsToAdd);
                         } else {
                             if (log.isTraceEnabled()) {
-                                log.trace("role:" + roleName + " does not apply to: " + checkOrg.getName());
+                                log.trace("role:" + roleName + " does not apply to: " + checkOrg.getOrgId());
                             }
                         }
                     }
