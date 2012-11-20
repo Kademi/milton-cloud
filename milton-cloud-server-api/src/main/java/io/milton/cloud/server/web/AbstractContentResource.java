@@ -42,8 +42,6 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
     protected T contentNode;
     protected NodeMeta nodeMeta;
 
-    public abstract String getTitle();
-
     /**
      *
      * @param contentNode - the current item version for this resource
