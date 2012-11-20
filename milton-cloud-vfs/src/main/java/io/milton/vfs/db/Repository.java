@@ -53,6 +53,7 @@ public class Repository implements Serializable {
     private List<Branch> branches;
 
     public Repository() {
+
     }
 
     @Id

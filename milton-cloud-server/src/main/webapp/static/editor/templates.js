@@ -51,10 +51,10 @@ CKEDITOR.addTemplates('default',{
         html:"<div class='keyPoint'><h4>Key learning point</h4><div><p>Type the text here</p></div></div>"
     },
     {
-        title:'Text over image',
+        title:'Text over image2',
         image:'icon_floating_type.gif',
         description:'A resizable box with text floating over an image',
-        html:"<div class='textOverImage' style='position: absolute; width: 221px; height: 218px;'><img src='/static/editor/gear.png' width='221' height='218' class='bgImage'/><div>Text goes here</div></div>"
+        html:"<div class='textOverImage'><img src='/static/editor/gear.png' class='bgImage'/><div>Text goes here</div></div>"
     },
     {
         title:'Striped table',

@@ -49,10 +49,13 @@ function initTheme() {
     initLoginDropDown();
     initDropDownHiding();     
          
-    log("initTheme: run page init functions");
-    for( i=0; i<pageInitFunctions.length; i++) {
+    log("initTheme: run page init functions", pageInitFunctions.length);
+    $.each(pageInitFunctions, function(i, f) {
+        log("run function" + i);
         pageInitFunctions[i]();
-    }
+        log("done run function" , i);
+        
+    });
 
          
     log("finished init-theme");

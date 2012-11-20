@@ -213,6 +213,7 @@ function checkValidPasswords(container) {
     if( p1 ) {
         var passed = validatePassword(p1, {
             length:   [6, Infinity],
+            alpha: 5,
             numeric:  1,
             badWords: ["password"],
             badSequenceLength: 6
@@ -437,8 +438,9 @@ function validatePassword (pw, options) {
         noSequential:      false
     };
 
-    for (var property in options)
+    for (var property in options) {
         o[property] = options[property];
+    }
 
     var	re = {
         lower:   /[a-z]/g,

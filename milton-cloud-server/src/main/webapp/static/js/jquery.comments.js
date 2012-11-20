@@ -119,11 +119,10 @@ function loadComments(page, renderCommentFn, clearContainerFn, aggregated) {
 function processComments(comments, renderCommentFn) {
     if( comments ) {
         comments.sort( dateOrd );
-        for( i=0; i<comments.length; i++ ) {
-            var comment = comments[i];
+        $.each(comments, function(i, comment) {
             var dt = new Date(comment.date);
-            renderCommentFn(comment.user, dt, comment.comment, comment.pageTitle, comment.pagePath); // pageTitle and pagePath are only present for aggregated results
-        }
+            renderCommentFn(comment.user, dt, comment.comment, comment.pageTitle, comment.pagePath); // pageTitle and pagePath are only present for aggregated results            
+        });
     }
     
 }

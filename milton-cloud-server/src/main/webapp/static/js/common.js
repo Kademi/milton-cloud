@@ -84,7 +84,15 @@ $.extend({
  */
 function log() {
     if( typeof(console) != "undefined" ) {
-        console.log(arguments);
+        if (navigator.appName == 'Microsoft Internet Explorer') {
+            var msg = "";
+            for( i=0; i<arguments.length; i++) {
+                msg += JSON.stringify(arguments[i]) + ",";
+            }
+            console.log(msg);
+        } else {
+            console.log(arguments);
+        }
     }
 }
 

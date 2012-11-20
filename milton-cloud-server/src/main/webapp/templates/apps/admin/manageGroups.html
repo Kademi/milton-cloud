@@ -66,9 +66,9 @@
                                     <label for="appliesToOrg">An organistion</label>
                                     <select>
                                         <option value="">-- Select an organisation --</option>
-                                        <option value="$page.organisation.orgId">$page.organisation.name (this organisation)</option>
+                                        <option value="$page.organisation.orgId">$page.organisation.formattedName (this organisation)</option>
                                         #foreach($org in $page.organisation.childOrgs)
-                                        <option value="$org.orgId">$org.name</option>
+                                        <option value="$org.orgId">$org.formattedName</option>
                                         #end
                                     </select>
 

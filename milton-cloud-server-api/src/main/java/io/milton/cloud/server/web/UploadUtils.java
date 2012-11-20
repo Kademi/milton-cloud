@@ -55,7 +55,7 @@ public class UploadUtils {
      * @throws NotAuthorizedException
      * @throws BadRequestException 
      */
-    public static Resource createNew(ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+    public static FileResource createNew(ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         try {
@@ -81,7 +81,7 @@ public class UploadUtils {
      * @throws NotAuthorizedException
      * @throws BadRequestException 
      */
-    public static Resource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+    public static FileResource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         DataSession.DirectoryNode thisNode = col.getDirectoryNode();
         
         if( thisNode.get(newName) != null ) {

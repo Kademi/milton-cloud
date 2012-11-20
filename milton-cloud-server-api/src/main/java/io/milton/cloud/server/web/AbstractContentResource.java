@@ -280,7 +280,13 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
 
     @Override
     public boolean isPublic() {
-        return parent.getBranch().getRepository().isPublicContent();
+        if( parent.getBranch() != null ) {
+            Branch b = parent.getBranch();
+            if( b.getRepository() != null ) {
+                return b.getRepository().isPublicContent();
+            }
+        }
+        return false;
     }
 
     /**

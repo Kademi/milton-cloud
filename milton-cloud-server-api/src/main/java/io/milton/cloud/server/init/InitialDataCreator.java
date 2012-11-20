@@ -165,27 +165,27 @@ public class InitialDataCreator implements LifecycleApplication {
     }
 
     private void initContentAutoLoad() throws Exception {
-        System.out.println("-------- Initial Content Auto load ---------------");
-        String sRootDir = "../sites";
-        File rootDir = new File(sRootDir);
-        if (!rootDir.exists()) {
-            throw new RuntimeException("Fuse autoloader root directory does not exist: " + rootDir.getAbsolutePath());
-        }
-        System.out.println("Autoload source path: " + rootDir.getAbsolutePath());
-
-        File miltonContent = new File(rootDir, "milton");
-        File mymiltonContent = new File(rootDir, "mymilton");
-        File mavenContent = new File(rootDir, "maven");
-
-        System.out.println("Beginning monitor of content dir: " + miltonContent.getAbsolutePath());
-        File dbFile = new File("target/sync-db");
-        boolean localReadonly = true;
-        List<SyncJob> jobs = Arrays.asList(
-                new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
-                new SyncJob(mymiltonContent, "http://127.0.0.1:8080/mymilton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
-                new SyncJob(mavenContent, "http://127.0.0.1:8080/maven/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly) // load the maven repo with some test data
-                );
-        EventManager eventManager = new EventManagerImpl();
-        SyncCommand.start(dbFile, jobs, eventManager);
+//        System.out.println("-------- Initial Content Auto load ---------------");
+//        String sRootDir = "../sites";
+//        File rootDir = new File(sRootDir);
+//        if (!rootDir.exists()) {
+//            throw new RuntimeException("Fuse autoloader root directory does not exist: " + rootDir.getAbsolutePath());
+//        }
+//        System.out.println("Autoload source path: " + rootDir.getAbsolutePath());
+//
+//        File miltonContent = new File(rootDir, "milton");
+//        File mymiltonContent = new File(rootDir, "mymilton");
+//        File mavenContent = new File(rootDir, "maven");
+//
+//        System.out.println("Beginning monitor of content dir: " + miltonContent.getAbsolutePath());
+//        File dbFile = new File("target/sync-db");
+//        boolean localReadonly = true;
+//        List<SyncJob> jobs = Arrays.asList(
+//                new SyncJob(miltonContent, "http://127.0.0.1:8080/milton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
+//                new SyncJob(mymiltonContent, "http://127.0.0.1:8080/mymilton/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly),
+//                new SyncJob(mavenContent, "http://127.0.0.1:8080/maven/" + Branch.TRUNK + "/", "admin", "password8", true, localReadonly) // load the maven repo with some test data
+//                );
+//        EventManager eventManager = new EventManagerImpl();
+//        SyncCommand.start(dbFile, jobs, eventManager);
     }
 }
