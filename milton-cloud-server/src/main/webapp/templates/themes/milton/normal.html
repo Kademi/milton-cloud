@@ -4,7 +4,7 @@
         <link rel="stylesheet" type="text/css" href="/static/common/contentStyles.less" media="screen" />
         <link rel="stylesheet" type="text/css" href="theme.less" media="screen" />
         <link rel="stylesheet" type="text/css" href="themePrint.css" media="print" />        
-
+        <link rel="stylesheet" type="text/css" href="/static/prettify/prettify.css" />
 
         <script type="text/javascript" src="/static/js/jquery-1.7.2.src.js" >//</script>
         <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>
@@ -23,6 +23,8 @@
         <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" >//</script>
         <script type="text/javascript" src="/static/js/jQueryRotate.2.2.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.placeholder.js" >//</script>
+        <script type="text/javascript" src="/static/prettify/prettify.js">//</script>
+        
         #portlets("header")
     </head>
     <body class="normal">
@@ -131,6 +133,9 @@
             jQuery(function($) {
                 themeCssFiles.push("/templates/themes/fuse/theme.less");
                 initTheme();
+                log("do prettyPrint")
+                prettyPrint();
+                log("done prettyPrint")
             });            
         </script>
     </body>    

@@ -3,7 +3,7 @@ var mtype = '';
 var url = '';
 var src = '';
 var selObj;
-var initDone = false;
+var videoInitDone = false;
 
 
 
@@ -70,17 +70,6 @@ CKEDITOR.plugins.add( 'embed_video',
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/js/jquery.milton-upload.js'));        
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/jplayer/x.jplayer.init.js'));        
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/controller.js'));        
-  
-        
-        /*CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/vendor/jquery.ui.widget.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/tmpl.min.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/load-image.min.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/canvas-to-blob.min.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/bootstrap.min.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/bootstrap-image-gallery.min.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/jquery.iframe-transport.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/canvas-to-blob.js'));
-		CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/video/upload/js/jquery.fileupload.js'));*/
  
         var pagePath = getFolderPath(window.location.pathname);
         CKEDITOR.dialog.add( 'videoDialog', function( editor ) {
@@ -98,7 +87,7 @@ CKEDITOR.plugins.add( 'embed_video',
                     [
                     {
                         type : 'html',
-                        html: "<div id='myTree' class='tree'></div><div id='myUploaded'></div><div class='vidEditor' style='position: absolute; top: 85px; left: 250px'><div id='vidContainer' class='jp-video'></div></div>",
+                        html: "<div id='myVidTree' class='tree'></div><div class='myUploaded'></div><div class='vidEditor' style='position: absolute; top: 85px; left: 250px'><div id='vidContainer' class='jp-video'></div></div>",
                         commit: function(data) {
                             log("commit, data=", data);
                         }
@@ -133,17 +122,17 @@ CKEDITOR.plugins.add( 'embed_video',
                     this.element = element;
  
                     this.setupContent( this.element );
-                    if( !initDone ) {
-                        initDone = true;                        
-                        $("#myTree").mtree({
+                    if( !videoInitDone ) {
+                        videoInitDone = true;                        
+                        $("#myVidTree").mtree({
                             basePath: pagePath,
                             pagePath: "",
                             excludedEndPaths: [".mil/"],
                             includeContentTypes: ["video"],
                             onselectFolder: function(n) {
-                                var selectedVideoUrl = $("#myTree").mtree("getSelectedFolderUrl");
+                                var selectedVideoUrl = $("#myVidTree").mtree("getSelectedFolderUrl");
                                 log("onselect: folder=", url);
-                                $("#myUploaded").mupload("setUrl", selectedVideoUrl);
+                                $("#myVidTree").parent().find(".myUploaded").mupload("setUrl", selectedVideoUrl);
                             },
                             onselectFile: function(n, selectedVideoUrl) {
                                 url = selectedVideoUrl;
@@ -153,10 +142,10 @@ CKEDITOR.plugins.add( 'embed_video',
                                 buildJPlayer("360", "640", "jp-video-360p", $(".vidEditor div.jp-video"), 100, url);
                             }
                         });                
-                        $("#myUploaded").mupload({
+                        $("#myVidTree").parent().find(".myUploaded").mupload({
                             oncomplete: function(data, name, href) {
                                 log("oncomplete", data);
-                                $("#myTree").mtree("addFile", name, href);
+                                $("#myVidTree").mtree("addFile", name, href);
                                 url = href;
                                 //playVideo( "#vidContainer .jp-jplayer", href);
                                 //loadJPlayer("360", "640", "jp-video-360p", $(".vidEditor div.jp-video"), 100, href);

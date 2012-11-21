@@ -6,7 +6,7 @@
     var methods = {
         init : function( options ) { 
             var container = this;            
-            log("init this", this.options, this);
+            log("init tree", this.options, this);
             var config = $.extend( {
                 pageUrl : window.location,
                 basePath: window.location,

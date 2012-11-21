@@ -3,7 +3,7 @@ var mtype = '';
 var url = '';
 var src = '';
 var selObj;
-var initDone = false;
+var imageInitDone = false;
 
 
 
@@ -137,9 +137,9 @@ CKEDITOR.plugins.add( 'image2',
                     log("set image source", previewImg, src);
                     previewImg.attr("src", src);
                                         
-                    if( !initDone ) {
+                    if( !imageInitDone ) {
                         log("init not done, lets do it");
-                        initDone = true;
+                        imageInitDone = true;
                                                 
                         $("#imageTree").mtree({
                             basePath: pagePath,

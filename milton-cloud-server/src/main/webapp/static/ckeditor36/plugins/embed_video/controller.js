@@ -1,14 +1,14 @@
 function initPlugin() {
     log("init");
-    $("#myTree").mtree({
+    $("#myVidTree").mtree({
         basePath: "/organisations/3dn",
         excludedEndPaths: [".mil/"],
         includeContentTypes: ["video"],
         onselect: function(n) {
             log("onselect", n);
-            var url = $("#myTree").mtree("getSelectedFolderUrl");
+            var url = $("#myVidTree").mtree("getSelectedFolderUrl");
             log("onselect", url);
-            $("#myUploaded").mupload("setUrl", url);
+            $("#myVidTree").parent.find(".myUploaded").mupload("setUrl", url);
         },
         onselectFile: function(n, url) {
             log("selected file", n, url);
@@ -16,10 +16,10 @@ function initPlugin() {
                         
         }
     });                
-    $("#myUploaded").mupload({
+    $("#myVidTree").parent.find(".myUploaded").mupload({
         oncomplete: function(data, name, href) {
             log("oncomplete2", data, name, href);
-            $("#myTree").mtree("addFile", name, href);
+            $("#myVidTree").mtree("addFile", name, href);
             playVideo( "#vidContainer .jp-jplayer", href);
         }
     });
