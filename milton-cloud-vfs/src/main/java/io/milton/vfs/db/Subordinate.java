@@ -62,6 +62,11 @@ public class Subordinate implements Serializable{
     private Long id;
     private Organisation withinOrg;
     private GroupMembership groupMembership;
+
+    public Subordinate() {
+    }
+    
+    
     
     @Id
     @GeneratedValue

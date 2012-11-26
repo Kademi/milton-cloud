@@ -6,7 +6,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 CKEDITOR.stylesSet.add( 'myStyles',
 [
 
-    { name : 'Code', element : 'pre', attributes : { 'class' : 'prettify' } },
+    { name : 'Code', element : 'pre', attributes : { 'class' : 'prettyprint' } },
     { name : 'Citation'	, element : 'p', attributes : { 'class' : 'citation' } },
     { name : 'Striped table'	, element : 'table', attributes : { 'class' : 'striped' } },
     { name : 'Big heading'	, element : 'h1', attributes : { 'class' : 'really-big' } }

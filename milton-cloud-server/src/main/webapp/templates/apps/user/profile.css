@@ -109,3 +109,6 @@ body.profile .fileupload-buttonbar .progress div {
     padding: 0;
     margin: 0;
 }
+p.confirm {
+    display: none;
+}

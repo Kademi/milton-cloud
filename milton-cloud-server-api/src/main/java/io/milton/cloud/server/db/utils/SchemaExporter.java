@@ -102,50 +102,13 @@ public class SchemaExporter {
      */
     private List<Class> getClasses(String packageName) throws Exception {
         return getClassNamesFromPackage(packageName);
-//        List<Class> classes = new ArrayList<>();
-//        File directory = null;
-//        try {
-//            ClassLoader cld = Thread.currentThread().getContextClassLoader();
-//            if (cld == null) {
-//                throw new ClassNotFoundException("Can't get class loader.");
-//            }
-//            String path = packageName.replace('.', '/');
-//            System.out.println("package path: " + path);
-//            URL resource = cld.getResource(path);
-//            if (resource == null) {
-//                throw new ClassNotFoundException("No resource for " + path);
-//            }
-//            String sFile = resource.getFile();
-//            System.out.println("sfile1: " + sFile);
-//            sFile = sFile.replace("test-classes", "classes");
-//            System.out.println("sfile2: " + sFile);
-//            directory = new File(sFile);
-//            System.out.println("ab path: " + directory.getAbsolutePath());
-//
-//        } catch (NullPointerException x) {
-//            throw new ClassNotFoundException(packageName + " (" + directory
-//                    + ") does not appear to be a valid package");
-//        }
-//
-//        if (directory.exists()) {
-//            String[] files = directory.list();
-//            for (int i = 0; i < files.length; i++) {
-//                if (files[i].endsWith(".class")) {
-//                    classes.add(Class.forName(packageName + '.' + files[i].substring(0, files[i].length() - 6)));
-//                }
-//            }
-//        } else {
-//            throw new ClassNotFoundException(packageName + " is not a valid package. directory does not exist: " + directory.getCanonicalPath());
-//        }
-//        System.out.println("getClasses: " + packageName + " -> " + directory.getAbsolutePath() + " = " + classes.size());
-//        return classes;
     }
 
     public File getOutputDir() {
         return outputDir;
     }
 
-    public List<Class> getClassNamesFromPackage(String packageName) throws IOException, ClassNotFoundException {
+    public static List<Class> getClassNamesFromPackage(String packageName) throws IOException, ClassNotFoundException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL packageURL;
         ArrayList<Class> classes = new ArrayList<>();

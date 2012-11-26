@@ -14,6 +14,8 @@ $(function() {
             window.location.reload();
         });                    
     });
+    initSearchOrgs();
+    initControl();
     $(".showUploadCsvModal").click(function() {
         $.tinybox.show($("#modalUploadCsv"), {
             overlayClose: false,
@@ -58,3 +60,41 @@ function showUnmatched(unmatched) {
     });
     unmatchedTable.show();
 }     
+
+
+function initSearchOrgs() {
+    $("#orgQuery").keyup(function () {
+        typewatch(function () {
+            doSearch();
+        }, 500);
+    });    
+}
+
+function doSearch() {
+    var newUrl = window.location.pathname + "?q=" + $("#orgQuery").attr("value");    
+    $.ajax({
+        type: 'GET',
+        url: newUrl,
+        success: function(data) {
+            log("success", data);
+            window.history.pushState("", document.title, newUrl);
+            var $fragment = $(data).find("#searchResults");
+            log("replace", $("#searchResults"));
+            log("frag", $fragment); 
+            $("#searchResults").replaceWith($fragment);
+            initControl();            
+        },
+        error: function(resp) {
+            alert("err");
+        }
+    });      
+}
+
+function initControl() {
+    $("div.Info a.ShowDialog").click(function(e) {
+        var _this = $(this);
+        var dialog = _this.parent().find("div.Dialog");
+        dialog.toggle(100);
+        e.preventDefault();
+    });
+}

@@ -116,6 +116,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        if( childName.equals("viewDetails")) {
+            return new ViewOrgPage(childName, this);
+        }
         Resource r = _(ApplicationManager.class).getPage(this, childName);
         if (r != null) {
             return r;

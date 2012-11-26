@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.util.ArrayList;
@@ -365,5 +366,20 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
             r = r.getParent();
         }
         return null;
+    }
+    
+    public List<OrganisationFolder> getOrganisations() {
+        List<OrganisationFolder> list = new ArrayList<>();
+        CommonResource r = this;
+        while( r != null ) {
+            if( r instanceof OrganisationFolder ) {
+                OrganisationFolder of = (OrganisationFolder) r;
+                list.add(of);
+            }
+            CommonCollectionResource p = r.getParent();
+            System.out.println("parent of " + r + " is " + p);
+            r = p;
+        }
+        return list;
     }
 }

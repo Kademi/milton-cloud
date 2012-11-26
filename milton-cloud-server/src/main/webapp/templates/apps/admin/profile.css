@@ -7,7 +7,7 @@ body.profile p {
     padding: 5px 0;
 }
 
-body.profile .details form, body.profile .changePassword form, body.profile div.profilePic, div.groups {
+body.profile .details form, body.profile .changePassword form, body.profile div.profilePic, div.groups, .section {
     border: solid lightgray 1px;
     border-radius: 5px;
     padding: 9px 12px 48px;
@@ -173,4 +173,7 @@ div.groups form {
 body.profile #module-Course div.groups .SmallBtn {
     float: right;
     margin: 0;
+}
+p.confirm {
+    display: none;
 }

@@ -117,7 +117,6 @@ function initSettingPanel() {
 // Add controller for business list panel
 function initControl() {
     $("div.Info a.ShowDialog").click(function(e) {
-        log("click show user");
         var _this = $(this);
         var _dialog = _this.parent().find("div.Dialog");
         $("div.Dialog").not(_dialog).addClass("Hidden");

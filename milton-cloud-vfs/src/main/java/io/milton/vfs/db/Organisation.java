@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
-    private List<OrgType> orgTypes;
 
+    private List<OrgType> orgTypes;
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
 
     public static String getDeletedName(String origName) {
@@ -321,8 +321,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgType = orgType;
     }
 
-    
-    
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
@@ -335,6 +333,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             }
             return list;
         }
+    }
+
+    public Website website(String name) {
+        for (Website w : websites()) {
+            if (w.getName().equals(name)) {
+                return w;
+            }
+        }
+        return null;
     }
 
     public List<Organisation> childOrgs() {
@@ -398,10 +405,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return createChildOrg(orgName, orgName, session);
     }
 
-    public Organisation createChildOrg(String orgId, String orgName, Session session) {
+    public Organisation createChildOrg(String orgId, String title, Session session) {
         Organisation o = new Organisation();
         o.setOrganisation(this);
         o.setOrgId(orgId);
+        o.setTitle(title);
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
         if (this.getChildOrgs() == null) {
@@ -545,9 +553,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public OrgType orgType(String name, boolean autoCreate, Session session) {
         OrgType ot = orgType(name);
-        if( ot == null ) {
-            if( autoCreate ) {
-                if( getOrgTypes() == null ) {
+        if (ot == null) {
+            if (autoCreate) {
+                if (getOrgTypes() == null) {
                     setOrgTypes(new ArrayList<OrgType>());
                 }
                 ot = new OrgType();
@@ -556,24 +564,23 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
                 ot.setOrganisation(this);
                 getOrgTypes().add(ot);
                 session.save(this);
-                session.save(ot);                
+                session.save(ot);
             }
         }
         return ot;
     }
 
     public OrgType orgType(String name) {
-        if( getOrgTypes() != null ) {
-            for( OrgType ot : getOrgTypes() ) {
-                if( ot.getName().equals(name)) {
+        if (getOrgTypes() != null) {
+            for (OrgType ot : getOrgTypes()) {
+                if (ot.getName().equals(name)) {
                     return ot;
                 }
             }
         }
         return null;
     }
-    
-    
+
     @OneToMany(mappedBy = "organisation")
     public List<OrgType> getOrgTypes() {
         return orgTypes;
@@ -581,5 +588,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public void setOrgTypes(List<OrgType> orgTypes) {
         this.orgTypes = orgTypes;
+    }
+
+    /**
+     * Get all linked memberships. Uses SessionManager.session
+     * 
+     * @return 
+     */
+    @Transient    
+    public List<GroupMembership> getMembers() {
+        return GroupMembership.find(this, SessionManager.session());
     }
 }

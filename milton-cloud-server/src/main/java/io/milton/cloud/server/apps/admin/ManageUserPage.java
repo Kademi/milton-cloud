@@ -70,7 +70,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageUserPage extends TemplatedHtmlPage implements GetableResource, PostableResource, PutableResource, CommonCollectionResource {
+public class ManageUserPage extends TemplatedHtmlPage implements GetableResource, PostableResource, PutableResource, CommonCollectionResource, ProfileResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageUserPage.class);
     public static final String PROFILE_PIC_CHILD = "pic";
@@ -227,6 +227,13 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         return orgSearchResults;
     }
 
+    @Override
+    public Profile getThisProfile() {
+        return getProfile();
+    }
+
+    
+    
     public Profile getProfile() {
         return profile;
     }

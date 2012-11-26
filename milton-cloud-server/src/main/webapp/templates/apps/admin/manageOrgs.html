@@ -6,10 +6,9 @@
         <script type="text/javascript" src="manageGroup.js">//</script>
         <script type="text/javascript" src="manageOrgs.js">//</script>
     </head>
-    <body class="manageOrgs">
-        <section id="manageWebsite" class="MainContent">
-
-            <div class="Left">
+    <body id="manageOrgs" class="manageOrgs">
+        <section class="MainContent">
+            <header class="ClearFix">
                 <a class="SmallBtn Add" onclick="return showAddItem(this)" href="#">Add New Business unit</a>
                 <a class="Btn showUploadCsvModal" style="float: right" href="#">Upload CSV</a>
                 <a class="Btn" style="float: right; margin-right: 10px;" href="orgs.csv">Open CSV</a>
@@ -35,26 +34,44 @@
                                 </tbody></table>
                         </form>
                     </div>                    
-                </div>
-            </div>
+                </div>               
+            </header>   
 
-            <table class="Summary">
-                #foreach($org in $page.children.ofType.organisation)
-                <tr>
-                    <td>
-                        <h5>
-                            $org.displayName
-                        </h5>
-                        <p>ID: $org.organisation.orgId, Name: $org.name, Phone: $!org.organisation.phone</p>
-                    </td>
-                    <th>
-                        <a href="$org.path" class="Btn DeleteOrg">Delete</a>
-                        <a href="$org.path" class="Btn Cancel EditWebsite">Manage</a>
-                    </th>
-                </tr>
-                #end
-
-            </table>
+            <div class="Info">
+                <header class="ClearFix">
+                    <div class="SearchBox">
+                        <input id="orgQuery" type="text" value="" placeholder="Search for a business unit here" />
+                        <a href="#" class="ClearText"><span class="Hidden">X</span></a>
+                    </div>
+                </header>                
+                <table class="Summary" id="searchResults">
+                    <tr>
+                        <th>Name</th>
+                        <th>Path</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    #foreach($org in $page.searchResults)
+                    <tr>
+                        <td>$formatter.htmlEncode($org.title)</td>
+                        <td>$org.parentPath</td>
+                        <td>$!org.phone</td>
+                        <td>$!org.address</td>
+                        <td>
+                            <div class="Controller">
+                                <a title="Show Dialogue" class="ShowDialog" href="#"><span class="Hidden">Show Dialogue</span></a>
+                                <div class="Dialog Hidden">
+                                    <a class="editOrg" href="$org.href">Edit details</a>
+                                    <a href="${org.href}viewDetails">View users and details</a>
+                                    <a href="${org.href}">Manage organisation</a>
+                                </div>
+                            </div>
+                        </td>                    
+                    </tr>
+                    #end
+                </table>
+            </div>                            
         </section>
 
         <div id="modalUploadCsv" class="Modal">

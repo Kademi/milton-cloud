@@ -133,6 +133,7 @@ nav#nav li a {
     float:right;
     line-height:24px;
     border-radius:3px;
+    margin-left: 15px;
 }
 #header aside h3 {
     background:url(images/arrow-open.png) center right no-repeat;
@@ -790,7 +791,7 @@ select.Medium { width: 100px; }
 #manageUser div.Info header div.Setting > a {
     background: #FFF url(images/icon_setting.png) no-repeat 50% 50%;
 }
-#manageUser div.Info table.Summary td div.Controller a.ShowDialog {
+table.Summary td div.Controller a.ShowDialog {
     background: url(images/icon_dialogue.png) 50% 50% no-repeat;
 }
 #manageCourse div.Course > ul > li aside a.Move, #manageCourse div.Module > ul > li aside a.Move { 
@@ -919,7 +920,7 @@ aside.Hidden:hover {
     position:absolute;
     top:25px;
     left:0;
-    background: url("images/bg-user.png") repeat-x scroll left top transparent;
+    background: #379DD1;
     border: 0px;
     border-radius: 3px;
     z-index:999;
@@ -1268,3 +1269,18 @@ p.validationError {
 .ui-widget-content {
     background-color: white;
 }
+
+table.Summary {
+    width: 100%;
+    font-size: 12px;
+}
+table.Summary th, table.Summary td {
+    height: 33px;
+    line-height: 33px;
+    padding-left: 13px;
+}
+table.Summary th {
+    background-color: #f0f0f0;
+    text-align: left;
+}
+table.Summary td { border-top: 1px solid #dedede; }

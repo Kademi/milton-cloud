@@ -117,20 +117,6 @@
     width: 19px;
     height: 19px;
 }
-#manageUser div.Info table.Summary {
-    width: 100%;
-    font-size: 12px;
-}
-#manageUser div.Info table.Summary th, #manageUser div.Info table.Summary td {
-    height: 33px;
-    line-height: 33px;
-    padding-left: 13px;
-}
-#manageUser div.Info table.Summary th {
-    background-color: #f0f0f0;
-    text-align: left;
-}
-#manageUser div.Info table.Summary td { border-top: 1px solid #dedede; }
 #manageUser div.Info table.Summary td div.Controller {
     float: right;
     padding-right: 8px;

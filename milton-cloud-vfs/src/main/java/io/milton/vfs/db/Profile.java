@@ -3,6 +3,7 @@ package io.milton.vfs.db;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.*;
@@ -128,13 +129,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Criteria critSubordinate = critMembership.createCriteria("subordinates");
         crit.add(Restrictions.eq("email", email));
         critSubordinate.add(Restrictions.eq("withinOrg", org));
-        List list = crit.list();
-        if (list == null || list.isEmpty()) {
-            return null;
-        } else {
-            return (Profile) list.get(0);
-        }
+        return DbUtils.unique(crit);
+    }
 
+    public static Profile findByEmail(String email, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("email", email));
+        return DbUtils.unique(crit);
     }
 
     public static Profile get(long profileId, Session session) {
@@ -181,8 +183,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public void setName(String name) {
         this.name = name;
-    }    
-    
+    }
+
     @Override
     public void delete(Session session) {
         if (getMemberships() != null) {
@@ -298,16 +300,36 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     public GroupMembership membership(Group group) {
-        if( getMemberships() != null ) {
-            for( GroupMembership gm : getMemberships() ) {
-                if( gm.getGroupEntity() == group ) {
+        if (getMemberships() != null) {
+            for (GroupMembership gm : getMemberships()) {
+                if (gm.getGroupEntity() == group) {
                     return gm;
                 }
             }
         }
         return null;
     }
-    
+
+    public void removeMembership(Group group, Session session) {
+        if (getMemberships() != null) {
+            Iterator<GroupMembership> it = getMemberships().iterator();
+            List<GroupMembership> toRemove = new ArrayList<>();
+            while (it.hasNext()) {
+                GroupMembership gm = it.next();
+                if (gm.getGroupEntity() == group) {
+                    System.out.println("found a GM to remove from profile: " + getEmail());
+                    toRemove.add(gm);
+                }
+            }
+            if( !toRemove.isEmpty() ) {
+                for( GroupMembership gm : toRemove ) {
+                    gm.delete(session);
+                }
+                session.flush();
+            }
+        }
+    }
+
     /**
      * Create a GroupMembership linking this profile to the given group, within
      * the given organisation. Is immediately saved
@@ -316,7 +338,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Profile addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
-        if (g.isMember(this, hasGroupInOrg)) {
+        if (g.isMember(this, hasGroupInOrg, session)) {
             return this;
         }
         GroupMembership gm = new GroupMembership();
@@ -356,16 +378,20 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Subordinate s = new Subordinate();
         s.setWithinOrg(subordinateTo);
         s.setGroupMembership(gm);
+        if( gm.getSubordinates() == null ) {
+            gm.setSubordinates(new ArrayList<Subordinate>());
+        }
+        gm.getSubordinates().add(s);
         session.save(s);
     }
 
     /**
      * Find out if this user is associated with the group in an organisation
      * which is within the membership group
-     * 
+     *
      * @param groupName
      * @param org
-     * @return 
+     * @return
      */
     public boolean isInGroup(String groupName, Organisation org) {
         if (getMemberships() != null) {
@@ -379,27 +405,27 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
-    
+
     /**
      * Test if the current user is within a group, where the users membership
      * organisation is contained within the given parent organsiation
-     * 
+     *
      * @param groupName
      * @param parentOrg
-     * @return 
+     * @return
      */
     public boolean isInChildGroup(String groupName, Organisation parentOrg) {
         if (getMemberships() != null) {
             for (GroupMembership m : getMemberships()) {
                 if (m.getGroupEntity().getName().equals(groupName)) {
-                    if( m.getWithinOrg().isWithin(parentOrg)) {
+                    if (m.getWithinOrg().isWithin(parentOrg)) {
                         return true;
                     }
                 }
             }
         }
         return false;
-    }    
+    }
 
     public boolean hasRole(String roleName, Organisation org) {
         if (getMemberships() != null) {

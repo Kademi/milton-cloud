@@ -16,13 +16,16 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Represents that some entity (normally a user) is a member of a group within
@@ -48,6 +51,14 @@ uniqueConstraints = {
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupMembership implements Serializable{
+    
+    public static List<GroupMembership> find(Organisation withinOrg, Session session) {
+        Criteria crit = session.createCriteria(GroupMembership.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("withinOrg", withinOrg));
+        return DbUtils.toList(crit, GroupMembership.class);
+    }    
+    
     private Long id;
     private Organisation withinOrg;
     private Profile member;

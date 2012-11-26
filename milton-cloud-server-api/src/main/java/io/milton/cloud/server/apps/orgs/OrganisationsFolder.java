@@ -21,10 +21,10 @@ import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
-import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -58,11 +58,34 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     private final String name;
     private ResourceList children;
     private JsonResult jsonResult;
+    private List<OrgSearchResult> searchResults;
 
     public OrganisationsFolder(String name, CommonCollectionResource parent, Organisation organisation) {
         this.name = name;
         this.parent = parent;
         this.organisation = organisation;
+    }
+
+    @Override
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            String q = params.get("q");
+            List<Organisation> orgs;
+            if (q != null && q.length() > 0) {
+                orgs = Organisation.search(q, getOrganisation(), SessionManager.session());
+            } else {
+                orgs = getOrganisation().childOrgs();
+            }
+            searchResults = new ArrayList<>();
+            for (Organisation org : orgs) {
+                OrgSearchResult sr = new OrgSearchResult(org);
+                searchResults.add(sr);
+            }
+            MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
+            _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
+        }
     }
 
     @Override
@@ -87,7 +110,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             AppControl.initApps(availAppIds, c, curUser, now, session);
 
             tx.commit();
-            jsonResult = new JsonResult(true, "Created", c.getOrgId());            
+            jsonResult = new JsonResult(true, "Created", c.getOrgId());
         }
         return null;
     }
@@ -131,26 +154,15 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
                 OrganisationFolder of = new OrganisationFolder(this, o);
                 children.add(of);
             }
-            children.add( new OrganisationsCsv("orgs.csv", this));
+            children.add(new OrganisationsCsv("orgs.csv", this));
 
             _(ApplicationManager.class).addBrowseablePages(this, children);
         }
         return children;
     }
 
-    @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if (jsonResult != null) {
-            jsonResult.write(out);
-        } else {
-            MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuOrgs");
-            _(HtmlTemplater.class).writePage("admin", "admin/manageOrgs", this, params, out);
-        }
-    }
-
-    @Override
-    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
-        return super.checkRedirect(request);
+    public List<OrgSearchResult> getSearchResults() {
+        return searchResults;
     }
 
     @Override
@@ -196,5 +208,68 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
+    }
+
+    public String path(Organisation to) {
+        if (to == null || to == getOrganisation()) {
+            return "";
+        } else {
+            String parent = path(to.getOrganisation());
+            String title = to.getTitle();
+            if (title == null || title.length() == 0) {
+                title = to.getOrgId();
+            }
+            return parent + title + "/";
+        }
+    }
+
+    public String getOrgHref(Organisation to) {
+        if (to == null || to == getOrganisation()) {
+            return "";
+        } else {
+            String parent = getOrgHref(to.getOrganisation());
+            return parent + to.getOrgId() + "/organisations/";
+        }
+    }
+
+    public class OrgSearchResult {
+
+        private final Organisation organisation;
+
+        public OrgSearchResult(Organisation organisation) {
+            this.organisation = organisation;
+        }
+
+        public Organisation getOrg() {
+            return organisation;
+        }
+
+        public String getId() {
+            return organisation.getOrgId();
+        }
+        
+        public String getTitle() {
+            if (organisation.getTitle() != null && organisation.getTitle().length() > 0) {
+                return organisation.getTitle();
+            } else {
+                return organisation.getOrgId();
+            }
+        }
+
+        public String getPhone() {
+            return organisation.getPhone();
+        }
+
+        public String getAddress() {
+            return organisation.getAddress();
+        }
+
+        public String getParentPath() {
+            return path(organisation.getOrganisation());
+        }
+
+        public String getHref() {
+            return getOrgHref(organisation.getOrganisation()) + organisation.getOrgId() + "/";
+        }
     }
 }

@@ -2,7 +2,7 @@
     <head>
         <title>$page.title</title>
         <link href="theme.css" rel="stylesheet" type="text/css" />
-        
+
         <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js">//</script>
         <script type="text/javascript" src="/static/js/tinybox-1.2.min.js">//</script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js">//</script>
@@ -37,6 +37,7 @@
                         #end
                     </ul>
                 </nav>
+            
                 <aside class="userBtn">
                     #if( $user )
                     <h3><a href="/manageUsers/$user.userId">Welcome $user.nickName</a></h3>
@@ -47,9 +48,19 @@
                             </li>
                         </ul>
                     </div>                
-
                     #end
                 </aside>
+                
+                <aside class="userBtn">
+                    <h3><a href="$page.closest('organisation').href">$page.organisation.orgId</a></h3>
+                    <div class="dropBox">
+                        <ul class="list requiresuser">
+                            #foreach($org in $page.organisations)
+                            <li><a href="$org.href">$org.displayName</a></li>
+                            #end
+                        </ul>
+                    </div>                
+                </aside>                    
             </header>
             <div id="Panel-section">
                 <!-- the left menu width:210px -->

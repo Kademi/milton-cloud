@@ -38,7 +38,7 @@ import io.milton.principal.CardDavPrincipal;
  *
  * @author brad
  */
-public class UserResource extends AbstractCollectionResource implements CollectionResource, MakeCollectionableResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox, CalDavPrincipal, CardDavPrincipal {
+public class UserResource extends AbstractCollectionResource implements CollectionResource, MakeCollectionableResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox, CalDavPrincipal, CardDavPrincipal, ProfileResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserResource.class);
     private final Profile user;
@@ -313,5 +313,10 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     
     public Long getUserId() {
         return user.getId();
+    }
+
+    @Override
+    public Profile getThisProfile() {
+        return getThisUser();
     }
 }

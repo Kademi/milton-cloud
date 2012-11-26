@@ -1,0 +1,109 @@
+
+/* Table summary with search button */
+.viewOrg div.Info {
+    border: 1px solid #dedede;
+    border-radius: 3px;
+    background: #FFF;
+}
+.viewOrg div.Info > header {
+    background-color: #f0f0f0;
+    padding: 8px;
+}
+.viewOrg div.Info header div.Setting {
+    float: right;
+    position: relative;
+}
+.viewOrg div.Info header div.Setting > a {
+    display: block;
+    width: 28px;
+    height: 24px;
+    border: 1px solid #dedede;
+    border-radius: 2px;
+}
+.viewOrg div.Info header div.Setting div.SettingContent {
+    position: absolute;
+    z-index: 99;
+    border: 1px solid #ababab;
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    background: #FFF;
+    right: 0;
+    top: 27px;
+    padding: 15px 5px 5px 15px;
+    width: 180px;
+}
+.viewOrg div.Info header div.Setting div.SettingContent header select { padding: 3px; min-width: 60px; max-width: 170px; height: 26px; }
+.viewOrg div.Info header div.Setting div.SettingContent ul { width: 175px; }
+.viewOrg div.Info header div.Setting div.SettingContent ul li { margin-top: 7px; }
+.viewOrg div.Info header div.Setting div.SettingContent ul li:last-child {
+    padding-top: 7px;
+    border-top: 1px solid #ababab;
+}
+.viewOrg div.Info header div.Setting div.SettingContent ul li label { font-size: 11px; }
+.viewOrg div.Info header div.Setting div.SettingContent .Btn {
+    float: right;
+    margin-top: 15px;
+}
+/* Search box */
+.viewOrg div.Info header div.SearchBox {
+    position: relative;
+    float: left;
+}
+.viewOrg div.Info header div.SearchBox input {
+    border: 1px solid #d0d0d0;
+    padding: 0 30px 0 10px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+    width: 280px;
+    background-image: linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -o-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -moz-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -ms-linear-gradient(bottom, #FFFFFF 50%, #EDEDED 100%);
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.5, #FFFFFF), color-stop(1, #EDEDED) );
+    font-style: italic;
+}
+.viewOrg div.Info header div.SearchBox input:focus { font-style: normal; }
+.viewOrg div.Info header div.SearchBox a.ClearText {
+    position: absolute;
+    top: 6px;
+    right: 6px;	
+    width: 19px;
+    height: 19px;
+}
+.viewOrg div.Info table.Summary {
+    width: 100%;
+    font-size: 12px;
+}
+.viewOrg div.Info table.Summary th, .viewOrg div.Info table.Summary td {
+    height: 33px;
+    line-height: 33px;
+    padding-left: 13px;
+}
+.viewOrg div.Info table.Summary th {
+    background-color: #f0f0f0;
+    text-align: left;
+}
+.viewOrg div.Info table.Summary td { border-top: 1px solid #dedede; }
+.viewOrg div.Info table.Summary td div.Controller {
+    float: right;
+    padding-right: 8px;
+    position: relative;
+}
+.viewOrg div.Info table.Summary td div.Controller div.Dialog {
+    top: 26px;
+}
+.viewOrg div.Info table.Summary td div.Controller a.ShowDialog {
+    float: left;
+    width: 23px;
+    height: 23px;
+    padding: 1px;
+}
+.viewOrg div.Info table.Summary td div.Controller a.ShowDialog:hover, .viewOrg div.Info table.Summary td div.Controller a.ShowDialog.Active {
+    padding: 0;
+    border: 1px solid #c7c7c7;
+    background-color: #e3e3e3;
+    border-radius: 3px;
+}
+
