@@ -86,7 +86,8 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 if( rootSearchOrg == null ) {
                     rootSearchOrg = getOrganisation();
                 }
-                searchResults = Organisation.search(q, rootSearchOrg, SessionManager.session()); // find the given user in this organisation 
+                OrgType regoOrgType = parent.getGroup().getRegoOrgType();
+                searchResults = Organisation.search(q, rootSearchOrg, regoOrgType, SessionManager.session()); // find the given user in this organisation 
             }
 
             _(HtmlTemplater.class).writePage("signup/register", this, params, out);

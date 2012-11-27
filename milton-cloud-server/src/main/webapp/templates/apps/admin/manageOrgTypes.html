@@ -1,0 +1,82 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Manage Organisation Types</title>
+        <script type="text/javascript" src="manageOrgTypes.js">//</script>
+    </head>
+    <body class="manageModulePages">
+        <br/>
+        <article class="Note">
+            <p>
+                Organisation types represent the different types of businesses, departments, or
+                other business units that your users belong to. This can be used to limit which
+                organisations different types of users can sign up to.
+            </p>
+            <p>
+                For example, if you have a user group "pharmacist" you might only want them
+                to register to organisations of type "pharmacy".
+            </p>
+            <p>You can set the organisation type on your business units either one at a time through the Manage Business Units page,
+                or you can set them when you upload a spread sheet of organisations.</p>
+        </article>
+        <header class="ClearFix">
+            <a href="new" class="SmallBtn Add newOrgType"><span>Add New</span></a>
+        </header>            
+
+        <div class="Info">
+            <table class="Summary" id="orgTypes">
+                <tr>
+                    <th>Code</th>
+                    <th>Display Name</th>
+                    <th>&nbsp;</th>
+                </tr>
+                #if( $page.children.isEmpty() )
+                <tr>
+                    <td colspan="2">No organisation types</td>
+                </tr>
+                #else
+                #foreach($ot in $page.children)
+                <tr>
+                    <td>$ot.name</td>
+                    <td>$formatter.htmlEncode($ot.title)</td>
+                    <td>
+                        <div class="Controller">
+                            <a title="Show Dialogue" class="ShowDialog" href="$ot.name"><span class="Hidden">View options</span></a>
+                            <div class="Dialog Hidden">
+                                <a href="$ot.name" class="editOrgType">Edit details</a>
+                                <a href="$ot.name" class="deleteOrgType">Delete</a>
+                            </div>
+
+                        </div>
+                    </td>                    
+                </tr>
+                #end
+                #end
+            </table>
+        </div>    
+
+        <div class="Modal newOrgType">
+            <header>
+                <h3>New Organisation Type</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>                           
+            <div class="ModalContent">
+                <form method="POST" action="">
+                    <div class="pageMessage"></div>
+                    <div class="inputs">
+                        <label for="newOrgTypeName">Code</label>
+                        <input type="text" name="name" id="newOrgTypeName" class="required" />
+                        <label for="newOrgTypeDisplayName">Display name</label>
+                        <input type="text" name="displayName" id="newOrgTypeDisplayName" class="required" />
+                    </div>
+
+                    <button type="submit" class="Btn" style="float: right">Save</button>
+                </form>
+            </div>
+        </div>       
+        <script type="text/javascript" >
+            jQuery(function() {
+                initManageOrgTypes();                
+            });            
+        </script>            
+    </body>
+</html>

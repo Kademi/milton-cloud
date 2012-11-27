@@ -18,6 +18,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.db.AppControl;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -74,7 +75,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             String q = params.get("q");
             List<Organisation> orgs;
             if (q != null && q.length() > 0) {
-                orgs = Organisation.search(q, getOrganisation(), SessionManager.session());
+                orgs = Organisation.search(q, getOrganisation(), null, SessionManager.session());
             } else {
                 orgs = getOrganisation().childOrgs();
             }
@@ -232,6 +233,11 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         }
     }
 
+    public List<OrgType> getOrgTypes() { 
+        Organisation rootOrg = _(CurrentRootFolderService.class).getRootFolder().getOrganisation();
+        return OrgType.findAllForOrg(rootOrg, SessionManager.session());
+    }
+    
     public class OrgSearchResult {
 
         private final Organisation organisation;
@@ -270,6 +276,14 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
         public String getHref() {
             return getOrgHref(organisation.getOrganisation()) + organisation.getOrgId() + "/";
+        }
+        
+        public String getOrgTypeName() {
+            if( organisation.getOrgType() != null ) {
+                return organisation.getOrgType().getName();
+            } else {
+                return "";
+            }
         }
     }
 }

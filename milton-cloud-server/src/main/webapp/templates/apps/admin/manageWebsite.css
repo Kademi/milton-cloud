@@ -20,10 +20,13 @@
 #manageWebsite table.Summary th {
 	padding: 25px 0;
 }
-#manageWebsite table.Summary td {
+#manageWebsite table.Summary td.first {
 	padding-left: 80px;
 }
-
+#manageWebsite table.Summary td.last {
+	text-align: right;
+        padding-right: 10px;
+}
 #manageWebsite table.Summary th { width: 140px; }
 #manageWebsite table.Summary td h5 {
 	font-size: 18px;

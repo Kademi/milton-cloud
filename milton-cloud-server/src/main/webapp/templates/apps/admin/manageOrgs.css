@@ -145,38 +145,4 @@
     width: 19px;
     height: 19px;
 }
-.manageOrgs div.Info table.Summary {
-    width: 100%;
-    font-size: 12px;
-}
-.manageOrgs div.Info table.Summary th, .manageOrgs div.Info table.Summary td {
-    height: 33px;
-    line-height: 33px;
-    padding-left: 13px;
-}
-.manageOrgs div.Info table.Summary th {
-    background-color: #f0f0f0;
-    text-align: left;
-}
-.manageOrgs div.Info table.Summary td { border-top: 1px solid #dedede; }
-.manageOrgs div.Info table.Summary td div.Controller {
-    float: right;
-    padding-right: 8px;
-    position: relative;
-}
-.manageOrgs div.Info table.Summary td div.Controller div.Dialog {
-    top: 26px;
-}
-.manageOrgs div.Info table.Summary td div.Controller a.ShowDialog {
-    float: left;
-    width: 23px;
-    height: 23px;
-    padding: 1px;
-}
-.manageOrgs div.Info table.Summary td div.Controller a.ShowDialog:hover, .manageOrgs div.Info table.Summary td div.Controller a.ShowDialog.Active {
-    padding: 0;
-    border: 1px solid #c7c7c7;
-    background-color: #e3e3e3;
-    border-radius: 3px;
-}
 

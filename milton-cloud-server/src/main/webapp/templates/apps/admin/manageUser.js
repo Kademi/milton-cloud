@@ -4,7 +4,6 @@ function initManageUsers() {
     initShowSettingBtn();
     initClearTextBtn();	
     initSettingPanel();
-    initControl();
     initTooltip();
     initSearchBusiness();
     initSearchUser();
@@ -112,24 +111,6 @@ function initSettingPanel() {
         _SettingContent.addClass("Hidden");
         e.preventDefault();
     });	
-}
-
-// Add controller for business list panel
-function initControl() {
-    $("div.Info a.ShowDialog").click(function(e) {
-        var _this = $(this);
-        var _dialog = _this.parent().find("div.Dialog");
-        $("div.Dialog").not(_dialog).addClass("Hidden");
-        $("a.ShowDialog").not(_this).removeClass("Active");
-        if(_dialog.hasClass("Hidden")) {
-            _dialog.removeClass("Hidden");
-            _this.addClass("Active");
-        } else {
-            _dialog.addClass("Hidden");
-            _this.removeClass("Active");
-        }
-        e.preventDefault();
-    });
 }
 
 function initTooltip() {

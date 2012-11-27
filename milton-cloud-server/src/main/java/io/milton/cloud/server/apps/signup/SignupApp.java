@@ -195,7 +195,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         } else {
             href = config.get(NEXT_HREF, org);
         }
-        System.out.println("current href: " + href);
         if (href == null) {
             href = "";
         }
@@ -222,12 +221,13 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             CommonResource r = (CommonResource) context.get("page");
             Organisation org = r.getOrganisation();
             if (!Utils.isEmpty(org.getWebsites())) {
-                if (!isNewOrg(org)) {
-                    List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
-                    System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getOrgId() + " - " + r.getClass());
-                    context.put("applications", applications);
-                    _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
 
+                List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
+                System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getOrgId() + " - " + r.getClass());
+                context.put("applications", applications);
+                _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
+                
+                if (!isNewOrg(org)) {
                     writer.append("<div class='report'>\n");
                     writer.append("<h3>Signup activity</h3>\n");
                     writer.append("<div class='signupReport'></div>\n");

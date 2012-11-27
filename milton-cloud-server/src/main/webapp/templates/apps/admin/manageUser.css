@@ -117,26 +117,6 @@
     width: 19px;
     height: 19px;
 }
-#manageUser div.Info table.Summary td div.Controller {
-    float: right;
-    padding-right: 8px;
-    position: relative;
-}
-#manageUser div.Info table.Summary td div.Controller div.Dialog {
-    top: 26px;
-}
-#manageUser div.Info table.Summary td div.Controller a.ShowDialog {
-    float: left;
-    width: 23px;
-    height: 23px;
-    padding: 1px;
-}
-#manageUser div.Info table.Summary td div.Controller a.ShowDialog:hover, #manageUser div.Info table.Summary td div.Controller a.ShowDialog.Active {
-    padding: 0;
-    border: 1px solid #c7c7c7;
-    background-color: #e3e3e3;
-    border-radius: 3px;
-}
 div.newUser div.groups p {
     margin: 10px 0;
 }

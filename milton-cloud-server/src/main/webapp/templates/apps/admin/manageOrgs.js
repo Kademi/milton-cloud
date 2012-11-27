@@ -14,8 +14,19 @@ $(function() {
             window.location.reload();
         });                    
     });
+    $("body").on("click", ".editOrg", function(e, n) {
+        e.preventDefault();
+        var node = $(e.target);
+        var href = node.attr("href");
+        showEditOrg(href);
+    });    
+    $("#editOrgModal form").forms({
+        callback: function(resp) {
+            log("done", resp);
+            //window.location.reload();
+        }        
+    });
     initSearchOrgs();
-    initControl();
     $(".showUploadCsvModal").click(function() {
         $.tinybox.show($("#modalUploadCsv"), {
             overlayClose: false,
@@ -90,11 +101,28 @@ function doSearch() {
     });      
 }
 
-function initControl() {
-    $("div.Info a.ShowDialog").click(function(e) {
-        var _this = $(this);
-        var dialog = _this.parent().find("div.Dialog");
-        dialog.toggle(100);
-        e.preventDefault();
-    });
+function showEditOrg(orgHref) {
+    var modal = $("#editOrgModal");
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });     
+    modal.find("form").attr("action", orgHref);
+    modal.find("input select").val();
+    resetValidation(modal);
+    $.ajax({
+        type: 'GET',
+        url: orgHref,
+        dataType: "json",
+        success: function(resp) {
+            log("success", resp);            
+            for(var key in resp.data) {
+                var val = resp.data[key];
+                modal.find("[name='" + key + "']").val(val);
+            }
+        },
+        error: function(resp) {
+            alert("err");
+        }
+    });     
 }

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.vfs.db.Organisation;
@@ -48,32 +49,58 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource, MakeCollectionableResource {
+public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource, MakeCollectionableResource, PostableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationFolder.class);
     private final CommonCollectionResource parent;
     private final Organisation organisation;
     private ResourceList children;
     private Map<String, String> fakeSettings;
+    private JsonResult jsonResult;
 
     public OrganisationFolder(CommonCollectionResource parent, Organisation organisation) {
         this.parent = parent;
         this.organisation = organisation;
     }
 
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        try {
+            _(DataBinder.class).populate(organisation, parameters);            
+            String s = WebUtils.getParam(parameters, "orgTypeName");
+            OrgType orgType = null;
+            if( s != null ) {
+                orgType = organisation.getOrganisation().orgType(s);
+            }
+            organisation.setOrgType(orgType);
+            System.out.println("set org ttype: " + orgType);
+            session.save(organisation);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } catch (Exception e) {
+            tx.rollback();
+            log.error("ex", e);
+            jsonResult = new JsonResult(false, e.getMessage());
+        }
+        return null;
+    }
+
     /**
-     * Instead of actually deleting, we set the hiddn flag and give it
-     * a name and orgId like originalname-deleted-1234 (where 1234 is the timestamp) 
-     * 
-     * Any contained websites have their domain names set to blank, and their names
-     * modified to prevent conflicting values
-     * 
-     * Any contained org's have their orgId's modified to prevent conflicting values
-     * 
-     * 
+     * Instead of actually deleting, we set the hiddn flag and give it a name
+     * and orgId like originalname-deleted-1234 (where 1234 is the timestamp)
+     *
+     * Any contained websites have their domain names set to blank, and their
+     * names modified to prevent conflicting values
+     *
+     * Any contained org's have their orgId's modified to prevent conflicting
+     * values
+     *
+     *
      * @throws NotAuthorizedException
      * @throws ConflictException
-     * @throws BadRequestException 
+     * @throws BadRequestException
      */
     @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
@@ -100,9 +127,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public String getName() {
         return organisation.getOrgId();
     }
-    
+
     public String getDisplayName() {
-        if( organisation.getTitle() != null && organisation.getTitle().length() > 0 ) {
+        if (organisation.getTitle() != null && organisation.getTitle().length() > 0) {
             return organisation.getTitle();
         } else {
             return organisation.getOrgId();
@@ -116,7 +143,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        if( childName.equals("viewDetails")) {
+        if (childName.equals("viewDetails")) {
             return new ViewOrgPage(childName, this);
         }
         Resource r = _(ApplicationManager.class).getPage(this, childName);
@@ -141,8 +168,35 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        MenuItem.setActiveId("menuDashboard");
-        _(HtmlTemplater.class).writePage("admin", "admin/dashboard", this, params, out);
+        if (jsonResult == null && "application/json".equals(contentType)) {            
+            Map<String,Object> map = new HashMap<>();
+            map.put("title", organisation.getTitle());
+            map.put("address", organisation.getAddress());
+            map.put("addressLine2", organisation.getAddressLine2());
+            map.put("addressState", organisation.getAddressState());
+            map.put("postcode", organisation.getPostcode());
+            map.put("phone", organisation.getPhone());
+            if( organisation.getOrgType() != null ) {
+                map.put("orgTypeName", organisation.getOrgType().getName());
+            }
+            jsonResult = new JsonResult(true);
+            jsonResult.setData(map);
+        }
+
+        if (jsonResult != null) {
+            jsonResult.write(out);
+        } else {
+            MenuItem.setActiveId("menuDashboard");
+            _(HtmlTemplater.class).writePage("admin", "admin/dashboard", this, params, out);
+        }
+    }
+
+    @Override
+    public String getContentType(String accepts) {
+        if (accepts != null && accepts.contains("application/json")) {
+            return "application/json";
+        }
+        return super.getContentType(accepts);
     }
 
     public String getTitle() {
@@ -217,11 +271,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
 
     @Override
     public boolean is(String type) {
-        if( type.equals("organisation")) {
+        if (type.equals("organisation")) {
             return true;
         }
         return super.is(type);
     }
-    
-    
 }

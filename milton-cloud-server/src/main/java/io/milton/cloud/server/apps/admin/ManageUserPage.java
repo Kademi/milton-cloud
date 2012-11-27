@@ -213,7 +213,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         } else {
             String orgSearch = params.get("orgSearch");
             if (orgSearch != null && orgSearch.length() > 0) {
-                orgSearchResults = Organisation.search(orgSearch, getOrganisation(), SessionManager.session()); // find the given user in this organisation 
+                orgSearchResults = Organisation.search(orgSearch, getOrganisation(), null, SessionManager.session()); // find the given user in this organisation 
                 log.info("results: " + orgSearchResults.size());
             } else {
                 orgSearchResults = Collections.EMPTY_LIST;

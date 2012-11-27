@@ -150,6 +150,9 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 parent.getOrCreate("menuGroups", "Manage groups", parentPath.child("groups")).setOrdering(20);
                 Path p = parentOrg.getPath().child("organisations");
                 parent.getOrCreate("menuOrgs", "Manage Business units", p + "/").setOrdering(30);
+                if (parentOrg instanceof OrganisationRootFolder) { // only show this for root admin folder
+                    parent.getOrCreate("menuOrgTypes", "Manage Organisation Types", parentOrg.getPath().child("orgTypes") + "/").setOrdering(30);
+                }
                 break;
             case "menuWebsiteManager":
                 parent.getOrCreate("menuWebsites", "Manage websites", parentPath.child("websites")).setOrdering(10);
@@ -207,6 +210,11 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         if (parent instanceof OrganisationFolder) {
             CommonCollectionResource p = (CommonCollectionResource) parent;
             children.add(new ManageWebsitesFolder("websites", p.getOrganisation(), p));
+        }
+        // Only show orgTypes page for root admin folder
+        if (parent instanceof OrganisationRootFolder) {
+            CommonCollectionResource p = (CommonCollectionResource) parent;
+            children.add(new ManageOrgTypesFolder("orgTypes", p.getOrganisation(), p));
         }
     }
 

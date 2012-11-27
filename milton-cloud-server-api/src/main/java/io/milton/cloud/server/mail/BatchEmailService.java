@@ -19,6 +19,7 @@ package io.milton.cloud.server.mail;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.vfs.db.*;
 import java.util.Date;
 import java.util.HashSet;
@@ -59,10 +60,14 @@ public class BatchEmailService {
         if( j.getEmailItems() == null ) {
             j.setEmailItems(new ArrayList<EmailItem>());
         }
+        String from = j.getFromAddress();
+        if( from == null ) {            
+            from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
+        }
         for (Profile p : profiles) {
             EmailItem i = new EmailItem();
             i.setCreatedDate(now);
-            i.setFromAddress(j.getFromAddress());
+            i.setFromAddress(from);
             i.setHtml(j.getHtml()); // todo: templating
             i.setJob(j);
             i.setRecipient(p);

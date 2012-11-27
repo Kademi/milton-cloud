@@ -248,14 +248,14 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         jsonResult = new JsonResult(true, "Done insert and updates");
     }
 
-    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {
-        log.trace("doProcess: ");
+    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {        
         String orgId = lineList.get(0);
         if (orgId == null || orgId.length() == 0) {
             //throw new RuntimeException("Cant save record with an empty name: column" + pos + " line: " + line);
             unmatched.add(lineList);
             return;
         }
+        log.info("doProcess: orgId=" + orgId);
         Organisation child = Organisation.findByOrgId(orgId, session);
         if (child == null) {
             log.trace("Create child called: " + orgId);
@@ -285,7 +285,6 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 
         checkPath(child, path, rootOrg, session);
         child.setTitle(get(lineList, 3));
-        System.out.println("update org: title=" + child.getTitle() + ", " + numUpdated);
         child.setAddress(get(lineList, 4));
         child.setAddressLine2(get(lineList, 5));
         child.setAddressState(get(lineList, 6));
@@ -357,10 +356,10 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
      * @param path - path to the parent org
      */
     private void checkPath(Organisation childToCheck, Path path, Organisation rootOrg, Session session) {
+        System.out.println("checkPath: " + childToCheck.getOrgId() + " path=" + path);
         Organisation org = rootOrg;
         if (!path.isRoot()) {
             for (String childName : path.getParts()) {
-                //System.out.println("  - " + childName);
                 Organisation child = org.childOrg(childName);
                 if (child == null) {
                     child = org.createChildOrg(childName, session);

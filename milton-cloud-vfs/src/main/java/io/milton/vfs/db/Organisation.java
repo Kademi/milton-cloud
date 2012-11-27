@@ -84,7 +84,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return (Organisation) crit.uniqueResult();
     }
 
-    public static List<Organisation> search(String q, Organisation organisation, Session session) {
+    public static List<Organisation> findByOrgType(OrgType orgType, Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("orgType", orgType));
+        return DbUtils.toList(crit, Organisation.class);
+    }
+
+    public static List<Organisation> search(String q, Organisation organisation, OrgType orgType, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
         Disjunction notDeleted = Restrictions.disjunction();
@@ -96,6 +103,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         or.add(Restrictions.ilike("title", s));
         or.add(Restrictions.ilike("orgId", s));
         crit.add(or);
+        if( orgType != null ) {
+            crit.add(Restrictions.eq("orgType", orgType));
+        }
         // TODO: add other properties like address
         Criteria critParentLink = crit.createCriteria("parentOrgLinks");
         critParentLink.add(Restrictions.eq("owner", organisation));
@@ -551,6 +561,28 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return getDeleted() != null && getDeleted();
     }
 
+    public OrgType createOrgType(String name, Session session) {
+        OrgType existing = orgType(name);
+        if (existing != null) {
+            throw new RuntimeException("An organisation type with that name already exists");
+        }
+        Organisation parent = getOrganisation();
+        while (parent != null) {
+            if (parent.orgType(name) != null) {
+                throw new RuntimeException("An organisation type with that name exists in a parent organisation: " + parent.getOrgId());
+            }
+            parent = parent.getOrganisation();
+        }
+        OrgType ot = new OrgType();
+        ot.setName(name);
+        ot.setDisplayName(name);
+        ot.setOrganisation(this);
+        getOrgTypes().add(ot);
+        session.save(this);
+        session.save(ot);
+        return ot;
+    }
+
     public OrgType orgType(String name, boolean autoCreate, Session session) {
         OrgType ot = orgType(name);
         if (ot == null) {
@@ -592,10 +624,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     /**
      * Get all linked memberships. Uses SessionManager.session
-     * 
-     * @return 
+     *
+     * @return
      */
-    @Transient    
+    @Transient
     public List<GroupMembership> getMembers() {
         return GroupMembership.find(this, SessionManager.session());
     }

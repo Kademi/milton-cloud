@@ -16,6 +16,7 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;
@@ -26,11 +27,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
- * A user group, is a list of users and other groups. Is typically used to
- * convey priviledges to a selected set of users.
- *
- * A group is defined within an organisation and can only convey privs within
- * that organisation, although that could be passed down to child organisations
+ * A type of organisation, which is used to limit what organisations a group is
+ * permitted to signup to. For example, the group "pharmacist" might only
+ * be permitted to signup to organisations of type "pharmacy"
  *
  * @author brad
  */
@@ -39,11 +38,17 @@ import org.hibernate.criterion.Restrictions;
 public class OrgType implements Serializable {
     private List<Group> groups;
 
-    public static OrgType findGroup(Organisation org, String name, Session session) {
+    public static OrgType find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(OrgType.class);
         crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
-        return (OrgType) crit.uniqueResult();
+        return DbUtils.unique(crit);
     }    
+    
+    public static List<OrgType> findAllForOrg(Organisation org, Session session) {
+        Criteria crit = session.createCriteria(OrgType.class);
+        crit.add(Restrictions.eq("organisation", org));
+        return DbUtils.toList(crit, OrgType.class);
+    }       
     
     private long id;
     private String name; // matched on orgs upload spreadsheet
@@ -94,6 +99,21 @@ public class OrgType implements Serializable {
 
     public void setGroups(List<Group> groups) {
         this.groups = groups;
+    }
+
+    /**
+     * Removes this org type from any organisations which are associated with it,
+     * then removed this from the parent org type list and then finally deletes this
+     * 
+     * @param session 
+     */
+    public void delete(Session session) {
+        for( Organisation org : Organisation.findByOrgType(this, session)) {
+            org.setOrgType(null);
+            session.save(org);
+        }
+        getOrganisation().getOrgTypes().remove(this);
+        session.delete(this);
     }
 
     

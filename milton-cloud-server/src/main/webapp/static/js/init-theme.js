@@ -368,6 +368,14 @@ function initPrintLink() {
 }
 
 function initDropDownHiding() {
+    $("a.ShowDialog").click(function(e) {
+        var _this = $(this);
+        var dialog = _this.parent().find("> div");
+        dialog.toggle(100);
+        log("show dialog", dialog, _this);
+        e.preventDefault();
+    });
+    
     // Hide DropDownContent which clicking elsewhere
     $('body').click(function(event) {
         var target = $(event.target);        
@@ -384,6 +392,8 @@ function initDropDownHiding() {
     });
     
 }
+
+
 
 /**
  *  Although this function is defined here in the theme, it should be called
