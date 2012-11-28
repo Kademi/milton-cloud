@@ -23,7 +23,8 @@ $(function() {
     $("#editOrgModal form").forms({
         callback: function(resp) {
             log("done", resp);
-            //window.location.reload();
+            alert("Saved ok. Please refresh to see changes");
+            $.tinybox.close();
         }        
     });
     initSearchOrgs();
@@ -93,7 +94,6 @@ function doSearch() {
             log("replace", $("#searchResults"));
             log("frag", $fragment); 
             $("#searchResults").replaceWith($fragment);
-            initControl();            
         },
         error: function(resp) {
             alert("err");
@@ -108,7 +108,9 @@ function showEditOrg(orgHref) {
         opacity: 0
     });     
     modal.find("form").attr("action", orgHref);
-    modal.find("input select").val();
+    modal.find("input").val("");
+    modal.find("select").val("");
+    log("select", modal.find("select").val());
     resetValidation(modal);
     $.ajax({
         type: 'GET',

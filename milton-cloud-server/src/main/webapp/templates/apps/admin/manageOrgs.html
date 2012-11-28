@@ -45,33 +45,45 @@
                     </div>
                 </header>                
                 <table class="Summary" id="searchResults">
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Path</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                    #foreach($org in $page.searchResults)
-                    <tr>
-                        <td>$formatter.htmlEncode($org.title)</td>
-                        <td>$org.orgTypeName</td>
-                        <td>$org.parentPath</td>
-                        <td>$!org.phone</td>
-                        <td>$!org.address</td>
-                        <td>
-                            <div class="Controller">
-                                <a title="Show Dialogue" class="ShowDialog" href="#"><span class="Hidden">Show Dialogue</span></a>
-                                <div class="Dialog Hidden">
-                                    <a class="editOrg" href="$org.href">Edit details</a>
-                                    <a href="${org.href}viewDetails">View users and details</a>
-                                    <a href="${org.href}">Manage organisation</a>
+                    <colgroup>
+                        <col style="width: 50%"/>
+                        <col style="width: 10%"/>
+                        <col style="width: 10%"/>
+                        <col style="width: 10%"/>
+                        <col style="width: 15%"/>
+                        <col style="width: 5%"/>
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Path</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        #foreach($org in $page.searchResults)
+                        <tr>
+                            <td>$formatter.htmlEncode($org.title)</td>
+                            <td>$org.orgTypeName</td>
+                            <td>$org.parentPath</td>
+                            <td>$!org.phone</td>
+                            <td>$!org.address</td>
+                            <td>
+                                <div class="Controller">
+                                    <a title="Show Dialogue" class="ShowDialog" href="#"><span class="Hidden">Show Dialogue</span></a>
+                                    <div class="Dialog Hidden">
+                                        <a class="editOrg" href="$org.href">Edit details</a>
+                                        <a href="${org.href}viewDetails">View users and details</a>
+                                        <a href="${org.href}">Manage organisation</a>
+                                        <a href="${org.href}organisations">Manage child orgs</a>
+                                        <a class="DeleteOrg" href="${org.href}">Delete this organisation</a>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>                    
-                    </tr>
-                    #end
+                            </td>                    
+                        </tr>
+                        #end
+                    </tbody>
                 </table>
             </div>                            
         </section>

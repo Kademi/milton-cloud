@@ -526,6 +526,7 @@ function initRegoMode() {
         callback: function(resp) {
             log("done", resp);
             $.tinybox.close();
+            window.location.reload();
         }
     });
     log("done forms", $("modalRegoMode form"));

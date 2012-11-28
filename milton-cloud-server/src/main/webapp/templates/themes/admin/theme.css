@@ -238,6 +238,9 @@ nav#nav li a {
     -moz-box-flex: 1;
     box-flex: 1;
 }
+div.content {
+    min-width: 725px; /** this seems to fix jumping of table.Summary **/
+}
 #shadow-left {
     position:absolute;
     top:23px;
@@ -943,6 +946,7 @@ aside.Hidden:hover {
     display: block;
     float: left;
     width: 150px;
+    line-height: 30px;
 }
 .inputs input {
     display: block;
@@ -1285,6 +1289,12 @@ table.Summary th {
 }
 table.Summary td { border-top: 1px solid #dedede; }
 
+table.Summary a {
+    font-size: 12px;
+}
+table.Summary a:hover {
+    text-decoration: underline;
+}
 .verticalFields li {
     margin-bottom: 10px;
 }

@@ -101,10 +101,12 @@ public class FileResource extends AbstractContentResource implements Replaceable
                 if (fileNode == null || fileNode.getHash() == null) {
                     log.info("Cant generate content for file, it has no hash");
                 } else {
-                    if (range == null) {
-                        fileNode.writeContent(out);
-                    } else {
-                        fileNode.writeContent(out, range.getStart(), range.getFinish());
+                    if (fileNode.getHash() != null) {
+                        if (range == null) {
+                            fileNode.writeContent(out);
+                        } else {
+                            fileNode.writeContent(out, range.getStart(), range.getFinish());
+                        }
                     }
                 }
             }
@@ -212,7 +214,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             sendContent(bout, docTypeRange, null, null);
             String s = bout.toString("UTF-8");
             return s.startsWith("<!DOCTYPE");
-        } catch (IOException ex) {
+        } catch (Throwable ex) {
             log.warn("ioexception checking for doc type", ex);
             return false;
         }

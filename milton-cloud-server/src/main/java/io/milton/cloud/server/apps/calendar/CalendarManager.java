@@ -63,6 +63,7 @@ public class CalendarManager {
         c.setModifiedDate(new Date());
         c.setName(newName);
         c.setOwner(owner);
+        c.setCtag(System.currentTimeMillis());
 
         session.save(c);
 

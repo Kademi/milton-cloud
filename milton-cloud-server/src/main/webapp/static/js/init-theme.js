@@ -368,11 +368,12 @@ function initPrintLink() {
 }
 
 function initDropDownHiding() {
-    $("a.ShowDialog").click(function(e) {
+    $(".content").on("click", "a.ShowDialog",function(e) {
+        log("hi111");
         var _this = $(this);
         var dialog = _this.parent().find("> div");
-        dialog.toggle(100);
-        log("show dialog", dialog, _this);
+        log("show dialog", dialog, _this);        
+        dialog.toggle();
         e.preventDefault();
     });
     
@@ -386,7 +387,7 @@ function initDropDownHiding() {
         if( dropdown.length > 0 ) {
             if (!target.closest('div.DropdownContent, Dialog').length) {
                 log("initDropDownHiding-click: hide", target);
-                dropdown.hide(300);
+                dropdown.hide();
             }
         }
     });

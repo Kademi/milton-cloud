@@ -22,7 +22,6 @@ import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
-import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;

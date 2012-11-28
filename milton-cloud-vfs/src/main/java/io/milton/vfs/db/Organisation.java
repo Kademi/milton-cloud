@@ -96,7 +96,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.setCacheable(true);
         Disjunction notDeleted = Restrictions.disjunction();
         notDeleted.add(Restrictions.isNull("deleted"));
-        notDeleted.add(Restrictions.eq("deleted", Boolean.TRUE));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         crit.add(notDeleted);
         String s = q + "%";
         Disjunction or = Restrictions.disjunction();

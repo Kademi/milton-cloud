@@ -22,6 +22,7 @@ function initEditing() {
         var href = node.attr("href");
         showEditForm(href);
     });
+    
     $("body").on("click", "a.deleteOrgType", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -39,7 +40,7 @@ function initEditing() {
         callback: function(resp) {
             log("done new org type", resp);
             $.tinybox.close();
-            //window.location.reload();
+            window.location.reload();
         }
     });   
 }
