@@ -274,10 +274,10 @@
     created programmtically using CacheManager.add(String cacheName)
     -->
     <defaultCache
-            maxElementsInMemory="50000"
+            maxElementsInMemory="90000"
             eternal="false"
-            timeToIdleSeconds="1200"
-            timeToLiveSeconds="1200"
+            timeToIdleSeconds="3600"
+            timeToLiveSeconds="3600"
             overflowToDisk="false"
             maxElementsOnDisk="10000000"
             diskPersistent="false"

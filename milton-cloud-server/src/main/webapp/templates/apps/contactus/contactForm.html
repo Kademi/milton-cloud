@@ -1,14 +1,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>$view.title</title>
+        <title>Contact</title>
         <!-- CSS and JS files injected by ContactUsApp -->
     </head>
     <body class="contactus">
         <div id="content">
             <div class="SubContent">
-                $page.title
+                #set($content = $folder.find("/content/contact.html"))
+                #set($title = "Contact us")
+                #set($title = $content.title)
+                <h1>$title</h1>
                 <form action="$page.name" method="POST" class="contactus">
-                    $!page.intro
+                    $!content.body
                     <fieldset>
                         <legend>Contact us</legend>
 
@@ -34,7 +37,9 @@
                     </fieldset>
                 </form>
                 <div class="thankyou">
-                    $page.thankYouMessage
+                    #set($thankYou = "Thank you for your message, we will reply shortly.")
+                    #set($thankYou = $content.getParam("thankyou"))
+                    $thankYou
                 </div>
             </div>
         </div>

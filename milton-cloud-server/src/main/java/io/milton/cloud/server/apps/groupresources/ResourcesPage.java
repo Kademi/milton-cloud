@@ -96,4 +96,11 @@ public class ResourcesPage extends DirectoryResource<WebsiteRootFolder> {
         }
         return false;
     }
+
+    @Override
+    public boolean isPublic() {
+        return false;
+    }
+    
+    
 }

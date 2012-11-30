@@ -198,9 +198,9 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         RootFolder rf = WebUtils.findRootFolder(this);
         if (rf instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
-            return "<h1>Contact " + wrf.getWebsite().getName() + "</h1>";
+            return "Contact " + wrf.getWebsite().getName();
         } else {
-            return "<h1>Contact</h1>";
+            return "Contact";
         }
     }
 

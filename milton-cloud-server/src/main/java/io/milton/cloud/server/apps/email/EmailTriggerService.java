@@ -56,25 +56,34 @@ public class EmailTriggerService {
         List<BaseEntity> directRecips = new ArrayList<>();
         if (j.getGroupRecipients() != null) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
-                addGroup(gr.getRecipient(), directRecips);
+                Group recipient = gr.getRecipient();
+                if (recipient != null) {
+                    addGroup(gr.getRecipient(), directRecips);
+                } else {
+                    log.warn("Couldnt find recipient for GroupRecipient=" + gr.getId());
+                }
             }
         }
-        
-        if( j.isIncludeUser()) {
-            for( Long entityId : sourceEntities ) {
+
+        if (j.isIncludeUser()) {
+            for (Long entityId : sourceEntities) {
                 BaseEntity source = (BaseEntity) session.get(BaseEntity.class, entityId);
-                directRecips.add(source);
+                if (source != null) {
+                    directRecips.add(source);
+                } else {
+                    log.warn("Couldnt find entity: " + entityId);
+                }
             }
         }
-        
+
         batchEmailService.generateEmailItems(j, directRecips, session);
         session.save(j);
 
     }
-    
+
     private void addGroup(Group g, List<BaseEntity> recipients) {
-        if( g.getGroupMemberships() != null ) {
-            for( GroupMembership gm : g.getGroupMemberships() ) {
+        if (g.getGroupMemberships() != null) {
+            for (GroupMembership gm : g.getGroupMemberships()) {
                 recipients.add(gm.getMember());
             }
         }

@@ -43,7 +43,8 @@ public class BatchEmailService {
      * process
      *
      * @param j
-     * @param directRecipients- recipients directly referenced by the job. This will be expanded to profiles
+     * @param directRecipients- recipients directly referenced by the job. This
+     * will be expanded to profiles
      * @param session
      */
     public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, Session session) {
@@ -53,15 +54,19 @@ public class BatchEmailService {
         }
         Set<Profile> profiles = new HashSet<>();
         for (BaseEntity e : directRecipients) {
-            append(e, profiles);
+            if (e != null) {
+                append(e, profiles);
+            } else {
+                log.warn("Found null recipient, ignoring");
+            }
         }
         log.info("recipients: " + profiles.size());
         Date now = _(CurrentDateService.class).getNow();
-        if( j.getEmailItems() == null ) {
+        if (j.getEmailItems() == null) {
             j.setEmailItems(new ArrayList<EmailItem>());
         }
         String from = j.getFromAddress();
-        if( from == null ) {            
+        if (from == null) {
             from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
         }
         for (Profile p : profiles) {
@@ -86,7 +91,6 @@ public class BatchEmailService {
         log.info("append: group: " + g.getId() + " - " + g.getId());
 
         final VfsVisitor visitor = new AbstractVfsVisitor() {
-
             @Override
             public void visit(Group r) {
                 if (r.getGroupMemberships() != null) {
