@@ -78,7 +78,6 @@ public class DynamicCssApp implements ResourceApplication {
 
     @Override
     public Resource getResource(RootFolder webRoot, String path) throws NotAuthorizedException, BadRequestException {
-        System.out.println("gerResource: " + path);
         if (path.endsWith(".dyn.css")) {
             Path p = Path.path(path);
 

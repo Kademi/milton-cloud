@@ -377,7 +377,6 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
                 list.add(of);
             }
             CommonCollectionResource p = r.getParent();
-            System.out.println("parent of " + r + " is " + p);
             r = p;
         }
         return list;

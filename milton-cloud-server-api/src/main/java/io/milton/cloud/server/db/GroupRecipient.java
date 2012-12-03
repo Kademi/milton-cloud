@@ -17,6 +17,7 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Group;
 import java.io.Serializable;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
@@ -56,6 +57,11 @@ public class GroupRecipient implements Serializable{
 
     public void setRecipient(Group recipient) {
         this.recipient = recipient;
+    }
+
+    public void delete(Session session) {
+        getJob().getGroupRecipients().remove(this);
+        session.delete(this);
     }
 
     

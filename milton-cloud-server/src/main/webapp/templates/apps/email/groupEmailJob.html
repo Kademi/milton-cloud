@@ -12,11 +12,11 @@
                     <a href="">Message</a>
                     <a href="">Recipients</a>
                     <a href="">Send</a>
-                    <a href="">Status</a>
+                    <a href="" class="statusTab">Status</a>
                 </nav>
                 <div class="TabContent">
                     <div class="Content">
-                        <form name="frmDetails" action="$page.name" method="post" class="Details">
+                        <form name="frmDetails" action="." method="post" class="Details">
                             <table>
                                 <tbody>
                                     <tr>
@@ -39,7 +39,11 @@
                                 <tfoot>
                                     <tr>
                                         <td colspan="2">
+                                            #if( $page.status == "Draft" )
                                             <button class="Btn">Save Changes</button>
+                                            #else
+                                            This email has been sent.
+                                            #end
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -53,11 +57,20 @@
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th class="Short">Choose a template</th>
+                                        <th class="Short">
+                                            <!--
+                                            Choose a template
+                                            -->
+                                        </th>
                                         <td>
+                                            <!--
                                             <select name="template" class="Medium">
                                                 <option value="1">PainPod</option>
                                             </select>
+                                            -->
+                                            #if( $page.status == "Draft" )
+                                            <button class="Btn">Save Changes</button>
+                                            #end
                                         </td>
                                     </tr>
                                     <tr>
@@ -66,16 +79,6 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2">
-                                            <!--
-                                            <button class="Btn">Preview</button>
-                                            -->
-                                            <button class="Btn">Save Changes</button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </form>
                     </div>
@@ -83,13 +86,17 @@
                 <div class="TabContent">
                     <div class="Content Recipient">
                         <header class="ClearFix">
+                            #if( $page.status == "Draft" )
                             <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
+                            #end
                         </header>
                         <ul class="GroupList ClearFix">
                             #foreach($g in $page.groupRecipients)
                             <li class="$g.name">
                                 <span>$g.name</span>
+                                #if( $page.status == "Draft" )
                                 <a href="$g.name">Delete</a>
+                                #end
                             </li>
                             #end
                         </ul>
@@ -97,11 +104,17 @@
                 </div>
                 <div class="TabContent">
                     <div class="Content Send">
+                        #if( $page.status == "Draft" )
                         <h4>Before you send be sure to check your email information, message content and recipients.</h4>
-                        <p><button class="Btn preview">PREVIEW YOUR EMAIL</button></p>
+                        <p>
+                            <button class="Btn preview">PREVIEW YOUR EMAIL</button>
+                        </p>
                         <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
                         <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
                         <p><button class="Btn Big Cancel SendEmail send">SEND NOW</button></p>
+                        #else
+                        <h4>Email has been sent, or is sending</h4>
+                        #end
                     </div>
                 </div>
                 <div class="TabContent status">
@@ -167,8 +180,13 @@
         <script type="text/javascript">
             jQuery(function() {
                 initEditEmailPage();
-                $("form").forms();
-                edify($("form.Details"), ["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
+                $("form").forms({
+                    callback: function() {
+                        alert("Saved");
+                    }
+                });
+                //["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]
+                edify($("form.Details"));
             });
         </script>
     </body>

@@ -90,7 +90,7 @@ public class FileServerApp implements LifecycleApplication, MenuApplication, Chi
         Path parentPath = parentOrg.getPath();
         switch (parentId) {
             case "menuDashboard":
-                parent.getOrCreate("menuFileManager", "File manager").setOrdering(40);
+                //parent.getOrCreate("menuFileManager", "File manager").setOrdering(40);
                 break;
             case "menuFileManager":
                 parent.getOrCreate("menuManageRepos", "Manage repositories", parentPath.child("manageRepos")).setOrdering(10);

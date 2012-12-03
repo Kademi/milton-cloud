@@ -1,6 +1,5 @@
 package io.milton.cloud.server.apps.email;
 
-import com.fuselms.apps.learning.rewards.RewardFolder;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.web.AbstractCollectionResource;
@@ -15,6 +14,7 @@ import io.milton.cloud.server.web.NewPageResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
@@ -118,6 +118,8 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         tx.commit();
 
         jsonResult = new JsonResult(true);
+        ManageGroupEmailFolder newFolder = new ManageGroupEmailFolder(null, job, this);
+        jsonResult.setNextHref(newFolder.getHref());
 
         return null;
     }
@@ -127,6 +129,7 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
             _(HtmlTemplater.class).writePage("admin", "email/manageGroupEmail", this, params, out);
         }
     }

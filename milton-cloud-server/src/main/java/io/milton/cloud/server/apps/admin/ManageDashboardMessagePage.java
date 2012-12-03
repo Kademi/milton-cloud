@@ -126,7 +126,7 @@ public class ManageDashboardMessagePage extends AbstractResource implements Geta
     public String getHtml() throws IOException {
         if (_html == null) {
             Properties props = DashboardMessageUtils.messageProps(HttpManager.request(), group, parent.getBranch());
-            if (props.contains("html")) {
+            if (props.containsKey("html")) {
                 _html = props.getProperty("html");
             } else {
                 _html = "";

@@ -64,7 +64,7 @@ function setGroupRecipient(name, isRecip) {
             success: function(data) {
                 log("saved ok", data);
                 if( isRecip ) {
-                    $(".GroupList").append("<li class=" + name + ">" + name + "</li>");
+                    $(".GroupList").append("<li class=" + name + "><span>" + name + "</span><a href='" + name + "'>Delete</a></li>");
                     log("appended to", $(".GroupList"));
                 } else {
                     $(".GroupList li." + name).remove();
@@ -97,10 +97,11 @@ function createJob(form) {
             type: 'POST',
             url: $form.attr("action"),
             data: $form.serialize(),
+            dataType: "json",
             success: function(data) {
                 log("saved ok", data);
                 $.tinybox.close();
-                window.location.reload();
+                window.location.href = data.nextHref;
             },
             error: function(resp) {
                 log("error", resp);
@@ -373,8 +374,9 @@ function sendMailAjax(reallySend) {
                 log("send has been initiated", data);
                 if( reallySend ) {
                     alert("Email sending has been initiated. If there is a large number of users this might take some time. This screen will display progress");
-                    $(".TabContent").hide();
-                    $(".TabContent.status").show();       
+                    $("a.statusTab").click();
+                    $("#manageEmail button").hide();
+                    $(".GroupList a").hide();
                     initStatusPolling();
                 } else {
                     alert("The preview email has been sent to your email address. Please review it");
@@ -399,6 +401,7 @@ function initStatusPolling() {
 function pollStatus() {
     //log("pollStatus");
     if( $("div.status:visible").length == 0 ) {
+        log("status page is not visible, so dont do poll");
         window.setTimeout(pollStatus, 2000);
         return;
     }

@@ -39,15 +39,18 @@
             </article>
 
             <header>
-                <div class="Right"><button class="Btn">Save changes</button><button class="Btn Cancel" type="button">Cancel</button></div>
+                <div class="Right"><button class="Btn">Save changes</button><button class="Btn Cancel" type="button" style="margin-left: 10px;">Cancel</button></div>
             </header>   
-            <select name="position">
+            <label for="messageLocation">Message location: </label>
+            <select name="position" id="messageLocation">
                 <option value="">[Do not display]</option>
                 #foreach($pos in $page.allPositions)
                 $formatter.option($pos, $pos, $page.position)
                 #end
             </select>
+            <span style="font-size: smaller">Select "Do not display" to hide any message</span>
             <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
+            html=$page.html
         </form>
         <script type="text/javascript" >
             jQuery(function() {

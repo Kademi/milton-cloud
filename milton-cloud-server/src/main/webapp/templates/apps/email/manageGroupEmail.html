@@ -20,7 +20,7 @@
                 <ul>
                     #foreach($email in $page.children)
                     <li>
-                        <div class="emailStatus${email.statusCode}">
+                        <div class="emailStatus$!{email.status}">
                             <span class="Date">$formatter.formatDate($email.statusDate)</span>
                             <span class="Name">$formatter.htmlEncode($email.title)</span>
                             <span class="Status">$!email.status</span>
@@ -50,7 +50,7 @@
                 <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
             </header>
             <div class="ModalContent">
-                <form method="POST" action="${page.name}" onsubmit="return createJob(this)">
+                <form method="POST" action="." onsubmit="return createJob(this)">
                     <table>
                         <tr>
                             <th><label for="name">Enter email name</label></th>

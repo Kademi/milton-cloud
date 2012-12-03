@@ -57,6 +57,7 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.resource.DeletableResource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Profile;
@@ -140,6 +141,18 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         }
     }
 
+    @Override
+    protected void initChildren() {
+        super.initChildren();
+        if (job.getGroupRecipients() != null) {
+            for (GroupRecipient gr : job.getGroupRecipients()) {
+                children.add(new GroupRecipientResource(gr));
+            }
+        }
+    }
+
+    
+    
     private JsonResult buildStatus() {
         SendStatus status = new SendStatus();
         status.setStatusCode(getStatusCode());
@@ -186,6 +199,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         return job.getStatusDate();
     }
 
+    @Override
     public String getTitle() {
         String s = job.getTitle();
         if (s == null || s.trim().length() == 0) {
@@ -194,6 +208,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         return s;
     }
 
+    @Override
     public void setTitle(String s) {
         job.setTitle(s);
     }
@@ -552,5 +567,45 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         public void setLastError(String lastError) {
             this.lastError = lastError;
         }
+    }
+    
+    public class GroupRecipientResource extends AbstractResource implements DeletableResource {
+        private final GroupRecipient recipient;
+
+        public GroupRecipientResource(GroupRecipient recipient) {
+            this.recipient = recipient;
+        }
+
+        @Override
+        public CommonCollectionResource getParent() {
+            return ManageGroupEmailFolder.this;
+        }
+
+        @Override
+        public Organisation getOrganisation() {
+            return getParent().getOrganisation();
+        }
+
+        @Override
+        public Priviledge getRequiredPostPriviledge(Request request) {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return recipient.getRecipient().getName();                    
+        }
+
+        @Override
+        public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            
+            recipient.delete(session); 
+            
+            tx.commit();
+        }
+        
+        
     }
 }
