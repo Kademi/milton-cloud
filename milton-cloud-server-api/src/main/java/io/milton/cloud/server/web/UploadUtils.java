@@ -41,9 +41,9 @@ public class UploadUtils {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UploadUtils.class);
 
     /**
-     * Inserts the new node, instantiates a FileResource, does an updateModDate and
-     * calls save on the parent folder, and wraps the lot in a transaction
-     * 
+     * Inserts the new node, instantiates a FileResource, does an updateModDate
+     * and calls save on the parent folder, and wraps the lot in a transaction
+     *
      * @param col
      * @param newName
      * @param inputStream
@@ -53,22 +53,23 @@ public class UploadUtils {
      * @throws IOException
      * @throws ConflictException
      * @throws NotAuthorizedException
-     * @throws BadRequestException 
+     * @throws BadRequestException
      */
     public static FileResource createNew(ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+        log.info("createNew: newName=" + newName);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        try {
-            return createNew(session, col, newName, inputStream, length, contentType);
-        } finally {
-            col.save();
-            tx.commit();
-        }
+
+        FileResource fr = createNew(session, col, newName, inputStream, length, contentType);
+        col.save();
+        tx.commit();
+        return fr;
     }
 
     /**
-     * Inserts the new node, instantiates a FileResource, does an updateModDate.  DOES NOT save parent or start or commit a transaction
-     * 
+     * Inserts the new node, instantiates a FileResource, does an updateModDate.
+     * DOES NOT save parent or start or commit a transaction
+     *
      * @param session
      * @param col
      * @param newName
@@ -79,15 +80,17 @@ public class UploadUtils {
      * @throws IOException
      * @throws ConflictException
      * @throws NotAuthorizedException
-     * @throws BadRequestException 
+     * @throws BadRequestException
      */
     public static FileResource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+        log.info("createNew. get the parent node");
         DataSession.DirectoryNode thisNode = col.getDirectoryNode();
-        
-        if( thisNode.get(newName) != null ) {
+        log.info("createNew. got: " + thisNode.getName());
+
+        if (thisNode.get(newName) != null) {
             throw new BadRequestException(col, "Resource with that name already exists: " + newName);
         }
-        
+
         log.info("createNew file: " + newName);
         DataSession.FileNode newFileNode = thisNode.addFile(newName);
         FileResource fileResource = new FileResource(newFileNode, col);

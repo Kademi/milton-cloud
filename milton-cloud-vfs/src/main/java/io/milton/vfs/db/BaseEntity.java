@@ -119,6 +119,9 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
 
     public Repository createRepository(String name, Profile user, Session session) {
+        if( user == null ) {
+            throw new RuntimeException("Cant create repository with a null user");
+        }
         Repository r = new Repository();                
         Repository.initRepo(r, name, session, user, this);
         return r;

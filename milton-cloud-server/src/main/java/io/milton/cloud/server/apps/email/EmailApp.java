@@ -159,13 +159,6 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if (parent instanceof ManageGroupEmailsFolder) {
-            ManageGroupEmailsFolder faf = (ManageGroupEmailsFolder) parent;
-            if (requestedName.equals("manage")) {
-                MenuItem.setActiveIds("menuTalk", "menuEmails", "menuSendEmail");
-                return new ManageGroupEmailsPage(requestedName, faf.getOrganisation(), faf);
-            }
-        }
         if (parent instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
             if (requestedName.equals("inbox")) {
@@ -208,7 +201,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             case "menuEmails":
                 OrganisationFolder parentOrg = WebUtils.findParentOrg(parent.getResource());
                 if (parentOrg != null) {
-                    parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("groupEmails").child("manage")).setOrdering(10);
+                    parent.getOrCreate("menuSendEmail", "Send and manage emails", parentOrg.getPath().child("groupEmails")).setOrdering(10);
                     parent.getOrCreate("menuAutoEmail", "Manage auto emails", parentOrg.getPath().child("autoEmails")).setOrdering(20);
                 }
                 break;

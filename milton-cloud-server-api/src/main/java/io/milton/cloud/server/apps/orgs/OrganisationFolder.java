@@ -277,3 +277,4 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         return super.is(type);
     }
 }
+

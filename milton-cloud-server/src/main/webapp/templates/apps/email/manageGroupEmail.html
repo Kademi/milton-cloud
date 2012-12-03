@@ -18,7 +18,7 @@
                     </div>
                 </header>		
                 <ul>
-                    #foreach($email in $folder.children)
+                    #foreach($email in $page.children)
                     <li>
                         <div class="emailStatus${email.statusCode}">
                             <span class="Date">$formatter.formatDate($email.statusDate)</span>

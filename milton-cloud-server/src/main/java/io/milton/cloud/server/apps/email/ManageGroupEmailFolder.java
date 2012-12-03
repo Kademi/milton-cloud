@@ -47,7 +47,6 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
-import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
@@ -58,6 +57,7 @@ import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Profile;
 import java.lang.reflect.InvocationTargetException;
@@ -69,14 +69,17 @@ import java.util.Iterator;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class GroupEmailPage extends AbstractResource implements GetableResource, PostableResource, PropertySourcePatchSetter.CommitableResource {
+public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsFolder>  implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(GroupEmailPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailFolder.class);
     private final CommonCollectionResource parent;
     private final GroupEmailJob job;
     private JsonResult jsonResult;
 
-    public GroupEmailPage(GroupEmailJob job, CommonCollectionResource parent) {
+    
+ 
+    public ManageGroupEmailFolder(DataSession.DirectoryNode directoryNode, GroupEmailJob job, ManageGroupEmailsFolder parent) {
+        super(directoryNode, parent);
         this.job = job;
         this.parent = parent;
     }
@@ -253,15 +256,11 @@ public class GroupEmailPage extends AbstractResource implements GetableResource,
     }
 
     @Override
-    public CommonCollectionResource getParent() {
-        return parent;
-    }
-
-    @Override
     public String getName() {
-        return "email-" + job.getId();
+        return job.getName();
     }
 
+    
     @Override
     public Date getModifiedDate() {
         return null;

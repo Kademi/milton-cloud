@@ -83,11 +83,14 @@
                 <div class="TabContent">
                     <div class="Content Recipient">
                         <header class="ClearFix">
-                            <button class="SmallBtn Add AddGroup"><span>Add/remove groups</span></button>
+                            <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
                         </header>
                         <ul class="GroupList ClearFix">
                             #foreach($g in $page.groupRecipients)
-                            <li class="$g.name">$g.name</li>
+                            <li class="$g.name">
+                                <span>$g.name</span>
+                                <a href="$g.name">Delete</a>
+                            </li>
                             #end
                         </ul>
                     </div>

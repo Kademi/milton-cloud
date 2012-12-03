@@ -49,6 +49,7 @@ import io.milton.http.Request;
 import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.data.DataSession;
+import io.milton.vfs.data.DataSession.DataNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
 import java.net.URI;
@@ -119,6 +120,11 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     protected void initChildren() {
         ApplicationManager am = _(ApplicationManager.class);
         children = am.toResources(this, directoryNode);
+        if (directoryNode != null) {
+            log.info("initChildren: " + getName() + " children=" + children.size() + " - " + directoryNode.size());
+        } else {
+            log.warn("Cant load children, directory node is null: " + getHref());
+        }
         am.addBrowseablePages(this, children);
     }
 
@@ -236,6 +242,19 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
 
     @Override
     public DirectoryNode getDirectoryNode() {
+        if (directoryNode == null) {
+            log.info("dir node is null, so create: " + getName());
+            DataNode existing = parent.getDirectoryNode().get(getName());
+            if (existing == null) {
+                directoryNode = parent.getDirectoryNode().addDirectory(getName());
+            } else {
+                if (existing instanceof DirectoryNode) {
+                    directoryNode = (DirectoryNode) existing;
+                } else {
+                    throw new RuntimeException("Found a node which is not a directory: " + getHref());
+                }
+            }
+        }
         return directoryNode;
     }
 

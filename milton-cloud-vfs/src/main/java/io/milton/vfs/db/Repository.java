@@ -10,6 +10,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A repository
@@ -26,6 +28,8 @@ uniqueConstraints = {
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Repository implements Serializable {
 
+    private static final Logger log = LoggerFactory.getLogger(Repository.class);
+    
     public static void initRepo(Repository r, String name, Session session, Profile user, BaseEntity owner) throws HibernateException {
         r.setBaseEntity(owner);
         if( owner.getRepositories() == null ) {
@@ -185,6 +189,9 @@ public class Repository implements Serializable {
      * @return
      */
     public Branch createBranch(String name, Profile user, Session session) {
+        if( user == null ) {
+            throw new RuntimeException("Cant create branch with null user");
+        }
         Commit head = new Commit();
         head.setCreatedDate(new Date());
         head.setEditor(user);
@@ -242,7 +249,12 @@ public class Repository implements Serializable {
 
     public Branch liveBranch() {
         if (getLiveBranch() != null) {
-            return branch(getLiveBranch());
+            Branch b = branch(getLiveBranch());
+            if( b == null ) {
+                log.warn("Null branch in repo: " + getName());
+                //Thread.dumpStack();
+            }
+            return b;
         } else {
             return null;
         }

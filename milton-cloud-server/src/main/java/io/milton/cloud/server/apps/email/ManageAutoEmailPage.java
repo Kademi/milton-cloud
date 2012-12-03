@@ -71,7 +71,7 @@ import java.util.LinkedHashMap;
 @BeanPropertyResource(value = "milton")
 public class ManageAutoEmailPage extends AbstractResource implements GetableResource, PostableResource, PropertySourcePatchSetter.CommitableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(GroupEmailPage.class);
+    private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailFolder.class);
     private final CommonCollectionResource parent;
     private final EmailTrigger job;
     private JsonResult jsonResult;

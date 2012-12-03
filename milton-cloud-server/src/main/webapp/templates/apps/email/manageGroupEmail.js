@@ -7,6 +7,7 @@ function initManageEmail() {
 }
 
 function initEditEmailPage() {
+    initRemoveRecipientGroup();        
     addGroupBtn();
     eventForModal();
     initGroupCheckbox();
@@ -22,6 +23,24 @@ function initEditEmailPage() {
         previewMail();
     });
 }
+
+function initRemoveRecipientGroup() {
+    log("initRemoveRecipientGroup");
+    $("ul.GroupList").on("click", "li a", function(e) {
+        log("click", this);
+        e.preventDefault();
+        e.stopPropagation();
+        if( confirm("Are you sure you want to remove this role?")) {
+            var a = $(e.target);
+            log("do it", a);
+            var href = a.attr("href");
+            deleteFile(href, function() {
+                a.closest("li").remove();
+            });
+        }
+    });    
+}
+
 
 function initGroupCheckbox() {
     $("#modalGroup input[type=checkbox]").click(function() {

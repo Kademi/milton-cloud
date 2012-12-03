@@ -219,3 +219,16 @@
 #manageEmail .TabContent.status.status_c strong.status.status_c {
     display: inline;
 }
+ul.GroupList li a {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-indent: -9999px;
+    margin-left: 10px;
+}
+ul.GroupList li:hover a {
+     background-image: url(/templates/themes/admin/images/btn_delete_small.png);
+     background-position: right center;
+     background-repeat: no-repeat;
+     cursor: pointer;
+}

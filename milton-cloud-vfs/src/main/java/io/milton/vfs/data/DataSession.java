@@ -210,6 +210,7 @@ public class DataSession {
         protected String loadedHash; // holds the hash value from when the node was loaded
         protected Boolean dirty;
 
+        
         /**
          * Copy just creates the same type of item with the same hash
          *
@@ -306,8 +307,13 @@ public class DataSession {
             }
             dirty = Boolean.TRUE;
             if (parent != null) {
+                log.info("setDirty: " + parent.hashCode() + " - " + parent.getName());
                 parent.setDirty();
             }
+        }
+        
+        public Boolean isDirty() {
+            return dirty;
         }
 
         /**
