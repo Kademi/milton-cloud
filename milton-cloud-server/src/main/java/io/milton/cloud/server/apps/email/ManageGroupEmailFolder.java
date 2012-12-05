@@ -73,10 +73,7 @@ import java.util.Iterator;
 public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsFolder>  implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailFolder.class);
-    private final CommonCollectionResource parent;
     private final GroupEmailJob job;
-    private JsonResult jsonResult;
-
     
  
     public ManageGroupEmailFolder(DataSession.DirectoryNode directoryNode, GroupEmailJob job, ManageGroupEmailsFolder parent) {
@@ -123,6 +120,17 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         return null;
     }
 
+    @Override
+    public void doDelete() {
+        Session session = SessionManager.session();
+        job.delete(session);
+        super.doDelete(); 
+    }
+
+    
+
+    
+    
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;

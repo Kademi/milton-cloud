@@ -135,4 +135,5 @@ public class GroupEmailJob extends BaseEmailJob {
         session.save(this);
 
     }
+
 }

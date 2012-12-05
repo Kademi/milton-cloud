@@ -50,7 +50,7 @@ public class SubscriptionEventTriggerType implements EmailTriggerType {
         List<Option> list = new ArrayList<>();
         if (o.getWebsites() != null) {
             for (Website g : o.getWebsites()) {
-                Option.add(list, g.getId(), g.getDomainName());
+                Option.add(list, g.getId(), g.getName() );
             }
         }
         return list;

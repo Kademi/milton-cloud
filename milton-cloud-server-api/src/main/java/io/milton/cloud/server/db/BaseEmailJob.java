@@ -14,13 +14,14 @@
  */
 package io.milton.cloud.server.db;
 
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
@@ -52,6 +53,15 @@ public abstract class BaseEmailJob  implements Serializable{
     private String fromAddress;
     private String html;
 
+    public void delete(Session session) {
+        if( groupRecipients != null ) {
+            for( GroupRecipient gr : groupRecipients ) {
+                session.delete(gr);
+            }
+            groupRecipients.clear();
+        }
+        session.delete(this);
+    }    
     
     @Id
     @GeneratedValue    

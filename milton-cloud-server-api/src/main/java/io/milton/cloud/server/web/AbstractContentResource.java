@@ -124,7 +124,9 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
      * or commit
      */
     public void doDelete() {
-        contentNode.delete();
+        if( contentNode != null ) { // allowed to be null for subclasses which have optional content node
+            contentNode.delete();
+        }
         parent.onRemovedChild(this);
 
     }

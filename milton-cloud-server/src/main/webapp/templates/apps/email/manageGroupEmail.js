@@ -4,6 +4,7 @@ function initManageEmail() {
     initList();
     initSortableButton();
     checkCookie();
+    initAddJob();
 }
 
 function initEditEmailPage() {
@@ -30,7 +31,7 @@ function initRemoveRecipientGroup() {
         log("click", this);
         e.preventDefault();
         e.stopPropagation();
-        if( confirm("Are you sure you want to remove this role?")) {
+        if( confirm("Are you sure you want to remove this group from the recipient list?")) {
             var a = $(e.target);
             log("do it", a);
             var href = a.attr("href");
@@ -89,29 +90,16 @@ function showAddJob() {
     });    
 }
 
-function createJob(form) {
-    var $form = $(form);
-    log("createJob", $form);
-    try {
-        $.ajax({
-            type: 'POST',
-            url: $form.attr("action"),
-            data: $form.serialize(),
-            dataType: "json",
-            success: function(data) {
-                log("saved ok", data);
-                $.tinybox.close();
-                window.location.href = data.nextHref;
-            },
-            error: function(resp) {
-                log("error", resp);
-                alert("err");
-            }
-        });          
-    } catch(e) {
-        log("exception in createJob", e);
-    }    
-    return false;
+function initAddJob() {
+    log("initAddJob", $("#moduleCreateJob form"));
+    $("#modalCreateJob form").forms({
+        callback: function(data) {
+            log("saved ok", data);
+            $.tinybox.close();
+            window.location.href = data.nextHref;
+            
+        }
+    });
 }
 
 function checkCookie() {
@@ -145,8 +133,14 @@ function initController() {
     //Bind event for Delete email
     $("body").on("click", "a.DeleteEmail", function(e) {
         e.preventDefault();
-        $(this).parent().parent().parent().remove();
-        stripList();
+        var a = $(e.target);
+        log("do it", a);
+        var href = a.attr("href");
+        var name = getFileName(href);
+        confirmDelete(href, name, function() {
+            a.closest("li").remove();
+            stripList();
+        });
     });
 }
 
@@ -293,20 +287,7 @@ function addGroupBtn() {
 
 function showModal(group) {	
     var _modal = $("#modalGroup");
-    log("showModal", _modal, group);
-    _modal.find("input[type=checkbox]").attr("checked", false)
-			
-    if(group) {
-        var _groupList = _modal.find("ul.ListItem li");
-		
-        for(var i = 0; i < group.length; i++) {
-            _groupList
-            .filter("[data-group=" + group[i] + "]")
-            .find("input[type=checkbox]")
-            .check(true);
-        }
-    }
-	
+    log("showModal", _modal, group);	
     $.tinybox.show(_modal, {
         overlayClose: false,
         opacity: 0
@@ -377,6 +358,7 @@ function sendMailAjax(reallySend) {
                     $("a.statusTab").click();
                     $("#manageEmail button").hide();
                     $(".GroupList a").hide();
+                    $(".Content.Send").html("<h4>Email has been sent, or is sending</h4>");
                     initStatusPolling();
                 } else {
                     alert("The preview email has been sent to your email address. Please review it");
@@ -401,7 +383,7 @@ function initStatusPolling() {
 function pollStatus() {
     //log("pollStatus");
     if( $("div.status:visible").length == 0 ) {
-        log("status page is not visible, so dont do poll");
+        //log("status page is not visible, so dont do poll");
         window.setTimeout(pollStatus, 2000);
         return;
     }

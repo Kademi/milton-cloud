@@ -803,8 +803,10 @@ public class Formatter {
         return calc(list).filter(mvelExpr);
     }
 
-    public String checkbox(String name, Object oChecked) {
-        return checkbox(null, name, oChecked, "true");
+    public String checkbox(String name, Object oChecked) {          
+        String s = checkbox(null, name, oChecked, "true");
+        System.out.println("checkbox: " + name + " - " + oChecked + " = " + s);
+        return s;
     }
 
     public String checkbox(String id, String name, Object oChecked) {

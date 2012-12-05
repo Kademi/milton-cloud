@@ -23,42 +23,34 @@ import io.milton.cloud.server.mail.EmailTriggerType;
 import io.milton.cloud.server.mail.Option;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.BaseEntity;
-import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
-import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
-import io.milton.http.Response.Status;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.http.values.ValueAndType;
-import io.milton.http.webdav.PropFindResponse.NameAndError;
-import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
-import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.resource.DeletableResource;
+import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.Organisation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,18 +61,23 @@ import java.util.LinkedHashMap;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class ManageAutoEmailPage extends AbstractResource implements GetableResource, PostableResource, PropertySourcePatchSetter.CommitableResource {
+public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFolder> implements GetableResource, PostableResource, DeletableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailFolder.class);
-    private final CommonCollectionResource parent;
     private final EmailTrigger job;
-    private JsonResult jsonResult;
-    
     private List<EmailTriggerType> triggerTypes;
 
-    public ManageAutoEmailPage(EmailTrigger job, CommonCollectionResource parent) {
+    public ManageAutoEmailFolder(DataSession.DirectoryNode directoryNode, EmailTrigger job, ManageAutoEmailsFolder parent) {
+        super(directoryNode, parent);
         this.job = job;
         this.parent = parent;
+    }
+
+    @Override
+    public void doDelete() {
+        Session session = SessionManager.session();
+        job.delete(session);
+        super.doDelete();
     }
 
     @Override
@@ -114,8 +111,18 @@ public class ManageAutoEmailPage extends AbstractResource implements GetableReso
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
-    }        
-    
+    }
+
+    @Override
+    protected void initChildren() {
+        super.initChildren();
+        if (job.getGroupRecipients() != null) {
+            for (GroupRecipient gr : job.getGroupRecipients()) {
+                children.add(new GroupRecipientResource(gr));
+            }
+        }
+    }
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult != null) {
@@ -130,10 +137,12 @@ public class ManageAutoEmailPage extends AbstractResource implements GetableReso
         return job;
     }
 
+    @Override
     public String getTitle() {
         return job.getTitle();
     }
 
+    @Override
     public void setTitle(String s) {
         job.setTitle(s);
     }
@@ -167,64 +176,16 @@ public class ManageAutoEmailPage extends AbstractResource implements GetableReso
     }
 
     @Override
-    public boolean isDir() {
-        return false;
-    }
-
-    @Override
-    public CommonCollectionResource getParent() {
-        return parent;
-    }
-
-    @Override
     public String getName() {
         return job.getName();
     }
 
     @Override
-    public Date getModifiedDate() {
-        return null;
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return null;
-    }
-
-    @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
-        return null;
-    }
-
-    @Override
-    public Long getMaxAgeSeconds(Auth auth) {
-        return null;
-    }
-
-    @Override
-    public Long getContentLength() {
-        return null;
-    }
-
-    @Override
-    public Organisation getOrganisation() {
-        return parent.getOrganisation();
-    }
-
-    @Override
     public boolean is(String type) {
-        if (type.equals("manageRewards")) {
+        if (type.equals("manageAutoEmail")) {
             return true;
         }
         return super.is(type);
-    }
-
-    @Override
-    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) throws BadRequestException, NotAuthorizedException {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        session.save(job);
-        tx.commit();
     }
 
     public List<Group> getGroupRecipients() {
@@ -285,55 +246,53 @@ public class ManageAutoEmailPage extends AbstractResource implements GetableReso
         job.getGroupRecipients().add(gr);
 
     }
-    
-    public Map<String,Map<String,List<Option>>> getEmailTriggerTypes() {
-        if( triggerTypes == null ) {
+
+    public Map<String, Map<String, List<Option>>> getEmailTriggerTypes() {
+        if (triggerTypes == null) {
             triggerTypes = _(ApplicationManager.class).getEmailTriggerTypes();
         }
-        Map<String,Map<String,List<Option>>> map = new LinkedHashMap<>();
-        for( EmailTriggerType t : triggerTypes ) {
-            System.out.println("Trigger type: " + t.getEventId());
+        Map<String, Map<String, List<Option>>> map = new LinkedHashMap<>();
+        for (EmailTriggerType t : triggerTypes) {
             map.put(t.getEventId(), toOptions(t));
         }
-        System.out.println("map size: " + map.size());
         return map;
     }
-    
-    public String triggerOptionLabel(String eventId, String optionCode ) {
-        for(EmailTriggerType t : triggerTypes) {
-            if( t.getEventId().equals(eventId)) {
+
+    public String triggerOptionLabel(String eventId, String optionCode) {
+        for (EmailTriggerType t : triggerTypes) {
+            if (t.getEventId().equals(eventId)) {
                 return t.label(optionCode);
             }
         }
         return null;
     }
-    
-    public Map<String,List<Option>> toOptions(EmailTriggerType type) {
-        Map<String,List<Option>> map = new LinkedHashMap<>();
+
+    public Map<String, List<Option>> toOptions(EmailTriggerType type) {
+        Map<String, List<Option>> map = new LinkedHashMap<>();
         List<Option> options1 = type.options1(getOrganisation());
-        if(options1 != null ) {
+        if (options1 != null) {
             map.put("triggerCondition1", options1);
         }
         List<Option> options2 = type.options2(getOrganisation());
-        if(options2 != null ) {
+        if (options2 != null) {
             map.put("triggerCondition2", options2);
         }
         List<Option> options3 = type.options3(getOrganisation());
-        if(options3 != null ) {
+        if (options3 != null) {
             map.put("triggerCondition3", options3);
         }
         List<Option> options4 = type.options4(getOrganisation());
-        if(options4 != null ) {
+        if (options4 != null) {
             map.put("triggerCondition4", options4);
         }
         List<Option> options5 = type.options5(getOrganisation());
-        if(options5 != null ) {
+        if (options5 != null) {
             map.put("triggerCondition5", options5);
         }
         System.out.println("options map suze: " + map.size() + " for " + type.getEventId());
         return map;
     }
-    
+
     public String triggerOptionValue(String optCode) {
         switch (optCode) {
             case "triggerCondition1":
@@ -346,8 +305,47 @@ public class ManageAutoEmailPage extends AbstractResource implements GetableReso
                 return getTrigger().getTriggerCondition4();
             case "triggerCondition5":
                 return getTrigger().getTriggerCondition5();
-                
+
         }
         return null;
+    }
+
+    public class GroupRecipientResource extends AbstractResource implements DeletableResource {
+
+        private final GroupRecipient recipient;
+
+        public GroupRecipientResource(GroupRecipient recipient) {
+            this.recipient = recipient;
+        }
+
+        @Override
+        public CommonCollectionResource getParent() {
+            return ManageAutoEmailFolder.this;
+        }
+
+        @Override
+        public Organisation getOrganisation() {
+            return getParent().getOrganisation();
+        }
+
+        @Override
+        public Priviledge getRequiredPostPriviledge(Request request) {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return recipient.getRecipient().getName();
+        }
+
+        @Override
+        public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+
+            recipient.delete(session);
+
+            tx.commit();
+        }
     }
 }

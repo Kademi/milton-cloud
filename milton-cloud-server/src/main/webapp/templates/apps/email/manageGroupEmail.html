@@ -29,7 +29,7 @@
                                 <a class="Edit EditEmail" title="Edit" href="$email.name">
                                     <span class="Hidden">Edit</span>
                                 </a>
-                                <a class="Delete DeleteEmail" title="Delete" href="">
+                                <a class="Delete DeleteEmail" title="Delete" href="$email.name">
                                     <span class="Hidden">Delete</span>
                                 </a>                                
                                 #else
@@ -50,11 +50,12 @@
                 <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
             </header>
             <div class="ModalContent">
-                <form method="POST" action="." onsubmit="return createJob(this)">
+                <form method="POST" action=".">
+                    <div class="pageMessage">.</div>
                     <table>
                         <tr>
                             <th><label for="name">Enter email name</label></th>
-                            <td><input type="text" name="name" id="name" value="" placeholder="A name for the email job" /></td>
+                            <td><input type="text" name="name" class="required simpleChars" id="name" value="" placeholder="A name for the email job" /></td>
                         </tr>
                         <tr>
                             <td colspan="2" class="BtnBar">

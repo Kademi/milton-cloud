@@ -417,6 +417,10 @@ function initComments(pageUrl) {
         $("#comments").toggle(100, function() {
             if(!oldCommentsHidden) {
                 $(".hideBtn a").text("Show comments");
+                $(".hideBtn a").addClass("ishidden");
+            } else {
+                $(".hideBtn a").text("Hide comments");
+                $(".hideBtn a").removeClass("ishidden");
             }
         });
         return false;
@@ -428,7 +432,7 @@ function initComments(pageUrl) {
     if( commentsHidden == "true" ) {
         $("#comments").hide();
         $(".hideBtn a").text("Show comments");
-        log("hiding comments")
+        $(".hideBtn a").addClass("ishidden");
     }
     
     

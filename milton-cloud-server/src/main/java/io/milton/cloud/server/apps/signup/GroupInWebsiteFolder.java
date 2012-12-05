@@ -99,5 +99,5 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
     
     public Website getWebsite() {
         return giw.getWebsite();
-    }
+    }    
 }

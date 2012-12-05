@@ -113,6 +113,7 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             initChildren();
+            System.out.println("loaded childrenfor: " + getName() + " - " + children.size() + " - " + getClass());
         }
         return children;
     }

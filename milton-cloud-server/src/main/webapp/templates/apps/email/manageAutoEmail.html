@@ -15,7 +15,7 @@
                 </nav>
                 <div class="TabContent">
                     <div class="Content">
-                        <form name="frmDetails" action="$page.name" method="post" class="Details">
+                        <form name="frmDetails" action="." method="post" class="Details">
                             <table>
                                 <tbody>
                                     <tr>
@@ -48,7 +48,7 @@
                 </div>	
                 <div class="TabContent">
                     <div class="Content">
-                        <form name="frmDetails" action="" method="post" class="Details">
+                        <form name="frmDetails" action="." method="post" class="Details">
                             <table>
                                 <tbody>
                                     <tr>
@@ -123,7 +123,7 @@
                 <div class="TabContent">
                     <div class="Content Send">
                         #set($mapOfTriggerTypes = $page.emailTriggerTypes)                        
-                        <form name="frmTriggers" action="$page.name" method="post" class="Details triggers">
+                        <form name="frmTriggers" action="." method="post" class="Details triggers">
                             <table>
                                 <tbody>
                                     <tr>
@@ -196,7 +196,11 @@
         <script type="text/javascript">
             jQuery(function() {
                 initEditEmailPage();
-                $("form").forms();
+                $("form").forms({
+                    callback: function() {
+                        alert("Saved");
+                    }                    
+                });
                 edify($("form.Details"), ["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
                 $("#eventId").change(function() {
                     showAppropriateTriggerOptions();

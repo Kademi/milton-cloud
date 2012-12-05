@@ -138,7 +138,7 @@ public class ManageDashboardMessagePage extends AbstractResource implements Geta
     public String getPosition() throws IOException {
         if( _position == null ) {
             Properties props = DashboardMessageUtils.messageProps(HttpManager.request(), group, parent.getBranch());
-            if (props.contains("position")) {
+            if (props.containsKey("position")) {
                 _position = props.getProperty("position");
             } else {
                 _position = "";

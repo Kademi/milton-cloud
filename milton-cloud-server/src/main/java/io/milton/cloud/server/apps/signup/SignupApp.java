@@ -116,7 +116,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         if (parent instanceof GroupInWebsiteFolder) {
             GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
             if (requestedName.equals(signupPageName)) {
-                return new GroupRegistrationPage(requestedName, wrf, this);
+                if( Group.REGO_MODE_CLOSED.equals(wrf.getGroup().getRegistrationMode()) ) {
+                    log.warn("Attempt to access CLOSED rego page for group: " + wrf.getGroup().getName());                    
+                } else {
+                    return new GroupRegistrationPage(requestedName, wrf, this);
+                }
             }
         }
         if (parent instanceof OrganisationFolder) {

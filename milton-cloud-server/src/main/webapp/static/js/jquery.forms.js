@@ -7,6 +7,7 @@
  *  Takes a config object with the following properties:
  *  - callback(resp, form): called after successful processing with the response
  *  object and the form
+ *  - validate(form) - return true if the form is valid
  * 
  */
 
@@ -21,6 +22,9 @@
             error: function() {
                 
             },
+            validate: function(form) {
+                return true;
+            },
             valiationMessageSelector: ".pageMessage",
             validationFailedMessage : "Some inputs are not valid."
         }, options);  
@@ -32,9 +36,13 @@
             e.preventDefault();
             e.stopPropagation();
             var form = $(this);     
-            form.trigger("submitForm");
-            log("form submit", form, "to" , form.attr("action"));
             resetValidation(container);
+            if( !config.validate(form) ) {
+                log("validate method returned false");
+                return false;
+            }
+            form.trigger("submitForm");
+            log("form submit", form, "to" , form.attr("action"));            
             if( checkRequiredFields(form) ) {
                 postForm(form, config.valiationMessageSelector, config.validationFailedMessage, config.callback);
             } else {
@@ -213,13 +221,13 @@ function checkValidPasswords(container) {
     if( p1 ) {
         var passed = validatePassword(p1, {
             length:   [6, Infinity],
-            alpha: 5,
+            alpha: 1,
             numeric:  1,
-            badWords: ["password"],
+            badWords: [],
             badSequenceLength: 6
         });        
         if( !passed ) {
-            showValidation(target, "Your password must be at least 6 characters, it must contain numbers and letters and must not contain the word 'password'", container);
+            showValidation(target, "Your password must be at least 6 characters and it must contain numbers and letters", container);
             return false;
         } else {
             return checkPasswordsMatch(container);

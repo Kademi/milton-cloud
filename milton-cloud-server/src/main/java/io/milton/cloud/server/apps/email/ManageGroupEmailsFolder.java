@@ -109,7 +109,7 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         Transaction tx = session.beginTransaction();
         GroupEmailJob job = new GroupEmailJob();
         job.setTitle(nameToCreate);
-        String nm = NewPageResource.findAutoCollectionName(nameToCreate, parent, parameters);
+        String nm = NewPageResource.findAutoCollectionName(nameToCreate, this, parameters);
         job.setName(nm);
         job.setOrganisation(org);
         Date now = _(CurrentDateService.class).getNow();

@@ -36,6 +36,7 @@ body.profile form h4 {
 body.profile input {
     width: 70%;
     margin-right: 0;
+    margin-bottom: 5px;
 }
 div.input {
     background-color: #F0F0F0;
