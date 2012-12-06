@@ -121,6 +121,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         props.setProperty(ConfigurationMBean.PARAM_HOSTNAME, hostName);
         aspirinConfiguration = new Configuration(props);
         batchEmailService = new BatchEmailService();
+        config.getContext().put(batchEmailService);
         groupEmailService = new GroupEmailService(batchEmailService);
         config.getContext().put(groupEmailService);
         securityManager = resourceFactory.getSecurityManager();
@@ -350,6 +351,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         log.info("enqueueTrigger: " + trigger.getName() + " - " + event.getEventId());
         List<Long> sourceIds = new ArrayList<>();
         for (BaseEntity entity : event.getSourceEntities()) {
+            System.out.println("adding source entity: " + entity.getClass() + " - " + entity.getId());
             sourceIds.add(entity.getId());
         }
         EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);

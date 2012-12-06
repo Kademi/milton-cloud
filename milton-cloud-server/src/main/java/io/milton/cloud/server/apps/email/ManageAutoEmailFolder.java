@@ -51,6 +51,7 @@ import io.milton.resource.DeletableResource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -96,6 +97,13 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
         }
 
         try {
+            Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
+            Website themeSite = null;
+            if (themeSiteId != null) {
+                themeSite = Website.get(session, themeSiteId);
+            }
+            job.setThemeSite(themeSite);
+
             _(DataBinder.class).populate(job, parameters);
             job.checkNulls();
         } catch (IllegalAccessException | InvocationTargetException ex) {
@@ -106,6 +114,14 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
 
         jsonResult = new JsonResult(true);
         return null;
+    }
+
+    public Long getThemeSiteId() {
+        if (job.getThemeSite() == null) {
+            return null;
+        } else {
+            return job.getThemeSite().getId();
+        }
     }
 
     @Override

@@ -21,7 +21,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  */
 @javax.persistence.Entity
 @Table(name = "BRANCH", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"repository","name"})}// unique names within a repository
+    @UniqueConstraint(columnNames = {"repository", "name"})}// unique names within a repository
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Branch implements Serializable, VfsAcceptor {
@@ -30,6 +30,11 @@ public class Branch implements Serializable, VfsAcceptor {
      * Special branch which always exists on a repository
      */
     public static String TRUNK = "version1";
+
+    public static Branch get(Long branchId, Session session) {
+        return (Branch)session.get(Branch.class, branchId);
+    }
+    
     private long id;
     private String name;
     private Long version;
@@ -158,7 +163,7 @@ public class Branch implements Serializable, VfsAcceptor {
     public Branch copy(String newName, Date now, Session session) {
         return copy(repository, newName, now, session);
     }
-    
+
     /**
      * Creates and saves a copy of this branch with the new name
      *
@@ -177,12 +182,12 @@ public class Branch implements Serializable, VfsAcceptor {
         b.setRepository(repo);
         b.setHead(head);
         session.save(b);
-                
-        if( repo.getBranches() == null ) {
+
+        if (repo.getBranches() == null) {
             repo.setBranches(new ArrayList<Branch>());
         }
         repo.getBranches().add(b);
-        
+
         return b;
     }
 }

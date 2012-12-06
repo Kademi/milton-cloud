@@ -6,6 +6,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
+import io.milton.cloud.server.DataSessionManager;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.LessParameterParser;
 import io.milton.cloud.server.db.AppControl;
@@ -64,7 +65,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         if (branch != null) {
             this.commit = branch.getHead();
         }
-        this.dataSession = new DataSession(branch, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
+        this.dataSession = _(DataSessionManager.class).get(branch);
     }
 
     public BranchFolder(String name, CommonCollectionResource parent, Commit commit) {

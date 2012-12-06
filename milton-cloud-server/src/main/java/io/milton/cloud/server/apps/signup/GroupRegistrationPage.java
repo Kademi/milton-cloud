@@ -182,13 +182,14 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             } else {
                 // add directly to group
                 System.out.println("group is open, so signup directly");
-                p.addToGroup(group, org, session);                
+                p.addToGroup(group, org, session);    
+                _(SignupApp.class).onNewMembership(p.membership(group), wrf);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
                 result = "created";                        
             }
 
 
-            //_(SignupApp.class).onNewProfile(u, parent.getGroup(),  rf);
+            
 
             tx.commit();
                         

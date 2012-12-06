@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.init.InitHelper;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
@@ -30,6 +31,8 @@ import io.milton.context.Executable2;
 import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
 import io.milton.vfs.db.utils.SessionManager;
+import org.hashsplit4j.api.BlobStore;
+import org.hashsplit4j.api.HashStore;
 
 /**
  * wired into app config, this is started and stopped from spring and takes care
@@ -85,10 +88,15 @@ public class ApplicationStarter implements InitListener, Service{
         CurrentRootFolderService currentRootFolderService = rootContext.get(CurrentRootFolderService.class);
         SessionManager sessionManager = resourceFactory.getSessionManager();        
         PdfGenerator pdfGenerator = new PdfGenerator();
+        BlobStore blobStore = rootContext.get(BlobStore.class);
+        HashStore hashStore = rootContext.get(HashStore.class);
+        CurrentDateService currentDateService = rootContext.get(CurrentDateService.class);
+        DataSessionManager dataSessionManager = new DataSessionManager(blobStore, hashStore, currentDateService);
+        InitHelper initHelper = new InitHelper(securityManager.getPasswordManager(), applicationManager);
         rootContext.put(pdfGenerator);
         rootContext.put(b.getCookieAuthenticationHandler()); // Needed for admin to redirect to website
-        rootContext.put(b.getFormAuthenticationHandler()); // Needed for ajax login
-        InitHelper initHelper = new InitHelper(securityManager.getPasswordManager(), applicationManager);
+        rootContext.put(b.getFormAuthenticationHandler()); // Needed for ajax login        
         rootContext.put(initHelper);
+        rootContext.put(dataSessionManager);
     }
 }

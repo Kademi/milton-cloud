@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.apps.signup.SignupApp;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import java.io.IOException;
@@ -358,6 +359,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
         }
         profile.addToGroup(group, subOrg, session);
+        _(SignupApp.class).onNewMembership(profile.membership(group), null);
         SignupLog.logSignup(null, getOrganisation(), profile, subOrg, group, SessionManager.session());
         return true;
     }

@@ -20,6 +20,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.PasswordReset;
+import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.RootFolder;
@@ -124,7 +125,6 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         log.info("created reset token: " + passwordReset.getToken());
         
         String emailHtml = createEmailHtml();
-        
         
         
         EmailItem emailItem = new EmailItem();

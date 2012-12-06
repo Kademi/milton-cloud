@@ -78,7 +78,7 @@ public class ClassPathTemplateHtmlPage extends TemplateHtmlPage{
     }
 
     @Override
-    boolean isValid() {
+    public boolean isValid() {
         return true;
     }
 }

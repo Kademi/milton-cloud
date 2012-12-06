@@ -54,9 +54,14 @@
                                     <tr>
                                         <th class="Short">Choose a template</th>
                                         <td>
-                                            <select name="template" class="Medium">
-                                                <option value="1">PainPod</option>
+                                            <select name="themeSiteId" class="Medium">
+                                                $formatter.option("", "[No template]", $page.themeSiteId)
+                                                #foreach($website in $page.organisation.websites)
+                                                    $formatter.option($website.id, $website.name, $page.themeSiteId)
+                                                #end
                                             </select>
+                                            
+                                            <button class="Btn">Save Changes</button>
                                         </td>
                                     </tr>
                                     <tr>
@@ -65,16 +70,6 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2">
-                                            <!--
-                                            <button class="Btn">Preview</button>
-                                            -->
-                                            <button class="Btn">Save Changes</button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </form>
                     </div>

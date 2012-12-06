@@ -24,6 +24,8 @@ import org.hibernate.Session;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.Profile;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class EmailTriggerService {
      * Usually the profile id of a user
      * @param session
      */
-    public void send(long jobId, List<Long> sourceEntities, Session session) {
+    public void send(long jobId, List<Long> sourceEntities, Session session) throws IOException {
         EmailTrigger j = (EmailTrigger) session.get(EmailTrigger.class, jobId);
         if (j == null) {
             log.warn("Job not found: " + jobId);
@@ -67,7 +69,7 @@ public class EmailTriggerService {
 
         if (j.isIncludeUser()) {
             for (Long entityId : sourceEntities) {
-                BaseEntity source = (BaseEntity) session.get(BaseEntity.class, entityId);
+                Profile source = Profile.get(entityId, session);
                 if (source != null) {
                     directRecips.add(source);
                 } else {

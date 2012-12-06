@@ -22,6 +22,7 @@ import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailSendAttempt;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
+import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.queue.AsynchProcessor;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,21 +62,22 @@ import io.milton.resource.DeletableResource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import org.hibernate.HibernateException;
 
 /**
  *
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsFolder>  implements GetableResource, PostableResource {
+public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsFolder> implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailFolder.class);
     private final GroupEmailJob job;
-    
- 
+
     public ManageGroupEmailFolder(DataSession.DirectoryNode directoryNode, GroupEmailJob job, ManageGroupEmailsFolder parent) {
         super(directoryNode, parent);
         this.job = job;
@@ -89,7 +91,14 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
 
         if (parameters.containsKey("sendMail")) {
             boolean reallySend = WebUtils.getParamAsBool(parameters, "reallySend");
-            startSendJob(session, reallySend);
+            try {
+                startSendJob(session, reallySend);
+            } catch (HibernateException | IOException ex) {
+                log.error("exeption sending emails", ex);
+                tx.rollback();
+                jsonResult = new JsonResult(false, ex.getMessage());
+                return null;
+            }
             tx.commit();
             if (reallySend) {
                 SendMailProcessable processable = new SendMailProcessable(job.getId());
@@ -109,6 +118,12 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             }
 
             try {
+                Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
+                Website themeSite = null;
+                if (themeSiteId != null) {
+                    themeSite = Website.get(session, themeSiteId);
+                }
+                job.setThemeSite(themeSite);
                 _(DataBinder.class).populate(job, parameters);
             } catch (IllegalAccessException | InvocationTargetException ex) {
                 throw new RuntimeException(ex);
@@ -124,13 +139,9 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
     public void doDelete() {
         Session session = SessionManager.session();
         job.delete(session);
-        super.doDelete(); 
+        super.doDelete();
     }
 
-    
-
-    
-    
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
@@ -159,8 +170,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         }
     }
 
-    
-    
     private JsonResult buildStatus() {
         SendStatus status = new SendStatus();
         status.setStatusCode(getStatusCode());
@@ -201,6 +210,14 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
 
     public GroupEmailJob getJob() {
         return job;
+    }
+
+    public Long getThemeSiteId() {
+        if (job.getThemeSite() == null) {
+            return null;
+        } else {
+            return job.getThemeSite().getId();
+        }
     }
 
     public Date getStatusDate() {
@@ -283,7 +300,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         return job.getName();
     }
 
-    
     @Override
     public Date getModifiedDate() {
         return null;
@@ -394,7 +410,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
 
     }
 
-    private void startSendJob(Session session, boolean reallySend) {
+    private void startSendJob(Session session, boolean reallySend) throws HibernateException, IOException {
         Date now = _(CurrentDateService.class).getNow();
         if (reallySend) {
             log.info("Sending real email");
@@ -405,18 +421,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             log.info("Sending preview email");
             //just send to current user immediately
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-            EmailItem i = new EmailItem();
-            i.setCreatedDate(now);
-            i.setFromAddress(job.getFromAddress());
-            i.setHtml(job.getHtml()); // todo: templating
-            i.setJob(null);
-            i.setRecipient(p);
-            i.setRecipientAddress(p.getEmail());
-            i.setReplyToAddress(job.getFromAddress()); // todo: make this something more robust in terms of SPF?
-            i.setSendStatusDate(now);
-            i.setSubject(job.getSubject());
-            session.save(i);
-
+            _(BatchEmailService.class).sendSingleEmail(job, p, session);
         }
     }
 
@@ -576,8 +581,9 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             this.lastError = lastError;
         }
     }
-    
+
     public class GroupRecipientResource extends AbstractResource implements DeletableResource {
+
         private final GroupRecipient recipient;
 
         public GroupRecipientResource(GroupRecipient recipient) {
@@ -601,19 +607,17 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
 
         @Override
         public String getName() {
-            return recipient.getRecipient().getName();                    
+            return recipient.getRecipient().getName();
         }
 
         @Override
         public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
-            
-            recipient.delete(session); 
-            
+
+            recipient.delete(session);
+
             tx.commit();
         }
-        
-        
     }
 }

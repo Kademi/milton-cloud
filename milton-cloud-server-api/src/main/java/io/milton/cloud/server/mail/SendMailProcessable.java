@@ -17,9 +17,11 @@ package io.milton.cloud.server.mail;
 import static io.milton.context.RequestContext._;
 
 import io.milton.cloud.server.queue.Processable;
+import io.milton.context.ClassNotInContextException;
 import io.milton.context.Context;
 import java.io.Serializable;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.IOException;
 
 /**
  * TODO: this needs to be a static class, but currently needs a reference to
@@ -36,7 +38,11 @@ public class SendMailProcessable implements Serializable, Processable {
 
     @Override
     public void doProcess(Context context) {
-        _(GroupEmailService.class).send(jobId, SessionManager.session());
+        try {
+            _(GroupEmailService.class).send(jobId, SessionManager.session());
+        } catch (ClassNotInContextException | IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override

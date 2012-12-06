@@ -58,16 +58,15 @@
                                 <tbody>
                                     <tr>
                                         <th class="Short">
-                                            <!--
                                             Choose a template
-                                            -->
                                         </th>
                                         <td>
-                                            <!--
-                                            <select name="template" class="Medium">
-                                                <option value="1">PainPod</option>
+                                            <select name="themeSiteId" class="Medium">
+                                                $formatter.option("", "[No template]", $page.themeSiteId)
+                                                #foreach($website in $page.organisation.websites)
+                                                    $formatter.option($website.id, $website.name, $page.themeSiteId)
+                                                #end
                                             </select>
-                                            -->
                                             #if( $page.status == "Draft" )
                                             <button class="Btn">Save Changes</button>
                                             #end

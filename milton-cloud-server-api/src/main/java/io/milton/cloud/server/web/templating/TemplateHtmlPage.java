@@ -16,7 +16,10 @@
  */
 package io.milton.cloud.server.web.templating;
 
-import java.io.InputStream;
+import io.milton.cloud.server.web.AbstractResource;
+import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.http.Request;
+import io.milton.vfs.db.Organisation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +27,7 @@ import java.util.List;
  *
  * @author brad
  */
-public abstract class TemplateHtmlPage implements HtmlPage{
+public abstract class TemplateHtmlPage extends AbstractResource implements HtmlPage{
     private final List<String> bodyClasses;
     private final List<WebResource> webResources;
     private final String id;
@@ -32,14 +35,14 @@ public abstract class TemplateHtmlPage implements HtmlPage{
     private String title;
     private String template;
     
-    abstract long getTimestamp();
+    public abstract long getTimestamp();
     
     /**
      * Check if the resource has changed
      * 
      * @return 
      */
-    abstract boolean isValid();
+    public abstract boolean isValid();
     
     public TemplateHtmlPage(String id) {
         this.id = id;
@@ -80,4 +83,25 @@ public abstract class TemplateHtmlPage implements HtmlPage{
     public String getId() {
         return id;
     }    
+    
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return null;
+    }
+
+    @Override
+    public CommonCollectionResource getParent() {
+        return null;
+    }
+
+    @Override
+    public Organisation getOrganisation() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return id;
+    }
+        
 }

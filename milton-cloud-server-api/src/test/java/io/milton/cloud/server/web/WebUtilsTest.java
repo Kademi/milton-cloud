@@ -35,7 +35,7 @@ public class WebUtilsTest {
         messy += "<link rel='template' href='learner/modulePage' />";
         messy += "<body><ol><li><input type='text'></li></ol></body></html>";
         InputStream in = new ByteArrayInputStream(messy.getBytes("UTF-8"));
-        String clean = WebUtils.tidyHtml(in);
+        String clean = WebUtils.tidyHtml(in); 
         System.out.println("clean: " + clean);
         assertTrue(clean.contains("/>"));
         assertTrue(clean.contains("learner/modulePage"));

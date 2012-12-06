@@ -16,6 +16,7 @@ package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ public abstract class BaseEmailJob  implements Serializable{
     private long id;
     private String type;
     private Organisation organisation;
+    private Website themeSite; // if present, the email will use the email template from the website's live theme
     private String name;
     private String title;
     private String notes;
@@ -147,6 +149,17 @@ public abstract class BaseEmailJob  implements Serializable{
         this.emailItems = emailItems;
     }
 
+    @ManyToOne
+    public Website getThemeSite() {
+        return themeSite;
+    }
+
+    public void setThemeSite(Website themeSite) {
+        this.themeSite = themeSite;
+    }
+
+    
+    
     public String getHtml() {
         return html;
     }

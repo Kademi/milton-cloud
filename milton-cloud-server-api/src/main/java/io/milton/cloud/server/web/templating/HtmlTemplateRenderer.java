@@ -109,7 +109,9 @@ public class HtmlTemplateRenderer {
 
         List<WebResource> webResources = deDupe(themeTemplateTemplateMeta.getWebResources(), bodyTemplateMeta.getWebResources(), pageWebResources);
         printWebResources(webResources, themeName, themePath, pw);
-        if (!themeTemplateTemplateMeta.getId().endsWith("/plain.html")) { // don't render the header for plain pages, these might be used as PDF input
+        
+        // HACK: need something where templates want to include the portlet, not where they have hard coded exclusions
+        if (!themeTemplate.getName().contains("plain") && !themeTemplate.getName().contains("email")) { // don't render the header for plain pages, these might be used as PDF input or emails
             applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel, pw);
         }
         pw.write("</head>\n");

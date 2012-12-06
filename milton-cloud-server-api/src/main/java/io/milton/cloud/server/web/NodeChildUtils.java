@@ -14,8 +14,6 @@
  */
 package io.milton.cloud.server.web;
 
-import io.milton.common.ContentTypeUtils;
-import io.milton.common.FileUtils;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -114,4 +112,27 @@ public class NodeChildUtils {
         }
         return false;
     }    
+
+    public static Path getPath(DataNode dataNode) {
+        if( dataNode == null || dataNode.getParent() == null || dataNode.getName() == null ) {
+            return Path.root;
+        }
+        Path p = getPath(dataNode.getParent());
+        return p.child(dataNode.getName());
+    }
+
+    public static DataSession.DataNode find(DataSession dataSession, Path path) {
+        if( path == null || path.isRoot()) {
+            return dataSession.getRootDataNode();
+        }
+        DataSession.DataNode parent = find(dataSession, path.getParent());
+        if( parent == null ) {
+            return null;
+        } else if( parent instanceof DataSession.DirectoryNode) {
+            DirectoryNode dir = (DirectoryNode)parent;
+            return dir.get(path.getName());
+        } else {
+            return null;
+        }
+    }
 }

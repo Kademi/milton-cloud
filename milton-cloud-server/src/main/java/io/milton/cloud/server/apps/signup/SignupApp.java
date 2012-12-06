@@ -152,7 +152,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
     private StateProcess buildProcess() {
         StateProcessBuilder b = new StateProcessBuilder("userSubscription", "start");
-        b.from("start").transition("started").to("active").when(new TrueRule()).then(signupEvent(SubscriptionEvent.SubscriptionAction.ACCEPTED));;
+        b.from("start").transition("started").to("active").when(new TrueRule()).then(signupEvent(SubscriptionEvent.SubscriptionAction.ACCEPTED));
         // TODO: more stuff here eventually
         return b.getProcess();
     }
@@ -296,8 +296,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 website = wrf.getWebsite();
             }
             try {
-
                 SubscriptionEvent e = new SubscriptionEvent(gm, website, action);
+                log.info("Firing " + e);
                 eventManager.fireEvent(e);
             } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
                 throw new RuntimeException(ex);

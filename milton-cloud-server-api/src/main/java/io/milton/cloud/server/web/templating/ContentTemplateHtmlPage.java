@@ -16,10 +16,11 @@
  */
 package io.milton.cloud.server.web.templating;
 
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.DataSessionManager;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.NodeChildUtils;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -29,6 +30,10 @@ import java.util.Objects;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.Resource;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.data.DataSession.FileNode;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * Provides access to a template stored in the content repository
@@ -38,56 +43,56 @@ import io.milton.resource.Resource;
 public class ContentTemplateHtmlPage extends TemplateHtmlPage {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ContentTemplateHtmlPage.class);
-    
     private final byte[] data;
     private final String loadedHash;
-    private String websiteName;
+    private final Long branchId;
     private final Path path;
 
-    public ContentTemplateHtmlPage(FileResource fr, String websiteName) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        super(fr.getHref());
+    public ContentTemplateHtmlPage(DataSession.FileNode fileNode, Branch branch) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        super("fileNode:" + fileNode.getHash());
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        fr.sendContent(bout, null, null, "text/html");
+        fileNode.writeContent(bout);
         data = bout.toByteArray();
-        loadedHash = fr.getHash();
-        this.websiteName = websiteName;
-        this.path = fr.getPath();
+        loadedHash = fileNode.getHash();
+        this.branchId = branch.getId();
+        this.path = NodeChildUtils.getPath(fileNode);
     }
 
     @Override
     public long getTimestamp() {
-        FileResource fr = getCurrentFileResource();
-        if (fr == null) {
+        DataSession.FileNode node = getCurrentFileResource();
+        if (node == null) {
             return -1;
         } else {
-            return fr.getHash().hashCode();
+            return node.getHash().hashCode();
         }
     }
+    
+    @Override
+    public boolean isValid() {
+        if (loadedHash == null) {
+            throw new RuntimeException("loadedHash is null");
+        }
+        DataSession.FileNode node = getCurrentFileResource();
+        if (node == null) {
+            return false;
+        } else {
+            return loadedHash.equals(node.getHash());
+        }
+    }    
 
     @Override
     public String getSource() {
         return "fileRes-" + getHash();
     }
 
-    public FileResource getCurrentFileResource() {
-        CurrentRootFolderService currentRootFolderService = _(CurrentRootFolderService.class);
-        WebsiteRootFolder wrf = (WebsiteRootFolder) currentRootFolderService.getRootFolder(websiteName);
-        if (wrf == null) {
-            log.info("no website root folder");
+    public DataSession.FileNode getCurrentFileResource() {
+        DataSession dataSession = _(DataSessionManager.class).get(branchId);
+        DataSession.DataNode dataNode = NodeChildUtils.find(dataSession, path);
+        if (dataNode instanceof DataSession.FileNode) {
+            return (FileNode) dataNode;
+        } else {
             return null;
-        }
-        try {
-            Resource r = NodeChildUtils.find(path, wrf);
-            if( r == null ) {
-                System.out.println("did not find: " + path + " in " + wrf.getName());
-            }
-            FileResource fr = NodeChildUtils.toFileResource(r);
-            if( fr == null ) {
-                System.out.println("couldnt find fr from r: " + path + " => " + r.getClass() + " - " + r.getName());
-            }
-            return fr;
-        } catch (NotAuthorizedException | BadRequestException ex) {
-            throw new RuntimeException(ex);
         }
     }
 
@@ -117,17 +122,5 @@ public class ContentTemplateHtmlPage extends TemplateHtmlPage {
         int h = 3;
         h = 67 * h + Objects.hashCode(h);
         return h;
-    }
-
-    @Override
-    boolean isValid() {
-        if( loadedHash == null ) {
-            throw new RuntimeException("loadedHash is null");
-        }
-        FileResource r = getCurrentFileResource();
-        if( r == null ) {
-            throw new RuntimeException("no current resource");
-        }
-        return loadedHash.equals(r.getHash());
     }
 }

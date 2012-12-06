@@ -291,10 +291,17 @@ public class WebUtils {
             Tidy tidy = new Tidy(); // obtain a new Tidy instance
             tidy.setXHTML(true);
             tidy.setDropEmptyParas(true);
-            tidy.setDropProprietaryAttributes(true);
+            tidy.setDropProprietaryAttributes(false);
             tidy.setDocType(null);
             tidy.setIndentContent(true);
             tidy.setSmartIndent(true);
+            
+            tidy.setInputEncoding("UTF-8");
+            tidy.setOutputEncoding("UTF-8");
+            
+            System.out.println("input encoding: " + tidy.getInputEncoding());
+            System.out.println("output encoding: " + tidy.getOutputEncoding());
+            
             tidy.setDocType("omit");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             tidy.parse(in, bout); // run tidy, providing an input and output stream

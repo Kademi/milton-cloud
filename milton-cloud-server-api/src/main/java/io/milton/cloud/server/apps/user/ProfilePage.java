@@ -16,7 +16,7 @@
  */
 package io.milton.cloud.server.apps.user;
 
-import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.DataSessionManager;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
@@ -145,7 +145,8 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
         HashStore hashStore = _(HashStore.class);
         BlobStore blobStore = _(BlobStore.class);
-        DataSession dataSession = new DataSession(b, SessionManager.session(), hashStore, blobStore, _(CurrentDateService.class));
+        
+        DataSession dataSession = _(DataSessionManager.class).get(b);
         DirectoryNode dir = dataSession.getRootDataNode();
 
         log.info("process file: " + newName + " size: " + length);

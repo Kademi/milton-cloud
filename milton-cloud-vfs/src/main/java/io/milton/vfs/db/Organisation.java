@@ -631,4 +631,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public List<GroupMembership> getMembers() {
         return GroupMembership.find(this, SessionManager.session());
     }
+    
+    @Transient
+    public String getTitleOrId() {
+        if( title != null ) {
+            return title;
+        }
+        return getOrgId();
+    }
 }

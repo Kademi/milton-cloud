@@ -14,14 +14,11 @@
  */
 package io.milton.cloud.server.apps.user;
 
-import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.DataSessionManager;
 import io.milton.http.Request;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
-import io.milton.vfs.db.utils.SessionManager;
-import org.hashsplit4j.api.BlobStore;
-import org.hashsplit4j.api.HashStore;
 
 import static io.milton.context.RequestContext._;
 import java.io.ByteArrayInputStream;
@@ -84,12 +81,6 @@ public class DashboardMessageUtils {
     }
 
     public static DataSession dataSession(Request request, Group group, Branch b) {
-        String key = "_dashmsg_session_" + group.getId() + "_" + b.getId();
-        DataSession _dataSession = (DataSession) request.getAttributes().get(key);
-        if (_dataSession == null) {
-            _dataSession = new DataSession(b, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
-            request.getAttributes().put(key, _dataSession);
-        }
-        return _dataSession;
+        return _(DataSessionManager.class).get(b);
     }
 }

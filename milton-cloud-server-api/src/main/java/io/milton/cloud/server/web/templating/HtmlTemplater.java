@@ -176,7 +176,7 @@ public class HtmlTemplater {
         String themeTemplateName = findThemeTemplateName(bodyTemplateMeta);
         String themeTemplatePath; // if the given themeTemplateName is an absolute path then use it as is, other prefix with themePath
         if (themeTemplateName.startsWith("/")) {
-            themeTemplatePath = themeTemplateName;
+            themeTemplatePath = themeTemplateName; 
         } else {
             themeTemplatePath = themePath + themeTemplateName;
         }
@@ -492,7 +492,8 @@ public class HtmlTemplater {
         }
 
         private TemplateHtmlPage loadContentMeta(FileResource fr, String websiteName, Path webPath) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr, websiteName);
+            BranchFolder branchFolder = (BranchFolder) fr.closest("branch");
+            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr.getFileNode(), branchFolder.getBranch());
             try {
                 templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
             } catch (XMLStreamException ex) {

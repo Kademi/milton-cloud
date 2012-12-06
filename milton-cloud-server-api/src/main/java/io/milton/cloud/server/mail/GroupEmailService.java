@@ -27,6 +27,7 @@ import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Transaction;
@@ -47,7 +48,7 @@ public class GroupEmailService {
     
     
     
-    public void send(long jobId, Session session) {
+    public void send(long jobId, Session session) throws IOException {
         GroupEmailJob j = (GroupEmailJob) session.get(GroupEmailJob.class, jobId);
         if (j == null) {
             log.warn("Job not found: " + jobId);
@@ -68,7 +69,7 @@ public class GroupEmailService {
      * @param j
      * @param session 
      */
-    private void generateEmailItems(GroupEmailJob j, Session session) {
+    private void generateEmailItems(GroupEmailJob j, Session session) throws IOException {
         List<BaseEntity> directRecips = new ArrayList<>();
         if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty() ) {
             for (GroupRecipient gr : j.getGroupRecipients()) {

@@ -79,6 +79,11 @@ public class Website extends Repository implements VfsAcceptor {
         crit.add(Restrictions.eq("name", name));
         return DbUtils.unique(crit);
     }
+
+    public static Website get(Session session, Long themeSiteId) {
+        return (Website) session.get(Website.class, themeSiteId);
+    }
+    
     private Organisation organisation; // will generally be same as baseEntity on underlying repo
     private String domainName; // identifies the resource to webdav. This is the DNS name, eg www.bradsite.com
     private Website aliasTo; // if not null, this website is really just an alias for that one
