@@ -93,7 +93,6 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        System.out.println("EmailFolder: child: " + childName);
         Long id = Long.parseLong(childName);
         EmailItem item = (EmailItem) SessionManager.session().get(EmailItem.class, id);
         if (item != null) {
@@ -105,7 +104,6 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        System.out.println("getchildren - " + baseEntity);
         if (children == null) {
             children = new ResourceList();
             _(ApplicationManager.class).addBrowseablePages(this, children);
@@ -189,8 +187,6 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         if (r.getThisUser() == getEntity()) {
             return true;
         }
-        System.out.println("this user: " + r.getThisUser().getName() + " - " + r.getThisUser().getId());
-        System.out.println("baseentity: " + baseEntity.getId() + " - " + baseEntity.getId());
         // Not this user, so check permissions to see if admin
         log.info("not owning user, check sec manager");
         return super.authorise(request, method, auth);

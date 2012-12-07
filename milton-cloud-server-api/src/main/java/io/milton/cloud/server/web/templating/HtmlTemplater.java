@@ -33,6 +33,8 @@ import io.milton.cloud.server.web.*;
 import io.milton.context.RequestContext;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
+import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -76,8 +78,8 @@ public class HtmlTemplater {
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", new HtmlTemplateLoaderResourceLoader());
         engine.setProperty("userdirective", VelocityContentDirective.class.getName() + "," + PortletsDirective.class.getName() + "," + RenderAppSettingsDirective.class.getName());
-        
-        
+
+
 
         templateParser = new HtmlTemplateParser();
         templateRenderer = new HtmlTemplateRenderer(applicationManager, formatter);
@@ -150,37 +152,38 @@ public class HtmlTemplater {
         RequestContext.getCurrent().put(rootFolder);
         if (theme.equals("custom")) {
             RequestContext.getCurrent().put("isCustom", Boolean.TRUE); // can't pass params to velocity template loader, so have to workaround
-        }        
+        }
         String themePath; // path that contains the theme templates Eg /templates/themes/admin/ or /content/theme/
         if (theme.equals("custom")) {
+            //Need to resolve theme to distinct identifier - ie if custom then the branch
             themePath = "/theme/";
         } else {
             themePath = "/templates/themes/" + theme + "/";
-        }        
-        
-        UserResource user = securityManager.getCurrentPrincipal();        
+        }
+
+        UserResource user = securityManager.getCurrentPrincipal();
         if (!templatePath.startsWith("/")) {
-            if( templatePath.startsWith("theme/")) {
+            if (templatePath.startsWith("theme/")) {
                 templatePath = templatePath.replace("theme/", themePath); // Eg change theme/page to /content/theme/page
             } else {
                 templatePath = "/templates/apps/" + templatePath; // Eg change admin/manageUsers to /templates/apps/admin/manageUsers
             }
         }
-        if( !templatePath.endsWith(".html")) {
+        if (!templatePath.endsWith(".html")) {
             templatePath = templatePath + ".html";
         }
 
         Template bodyTemplate = getTemplate(templatePath);
-        TemplateHtmlPage bodyTemplateMeta = cachedTemplateMetaData.get(templatePath);
+        TemplateHtmlPage bodyTemplateMeta = getCachedTemplateMetaData(templatePath);
 
         String themeTemplateName = findThemeTemplateName(bodyTemplateMeta);
         String themeTemplatePath; // if the given themeTemplateName is an absolute path then use it as is, other prefix with themePath
         if (themeTemplateName.startsWith("/")) {
-            themeTemplatePath = themeTemplateName; 
+            themeTemplatePath = themeTemplateName;
         } else {
             themeTemplatePath = themePath + themeTemplateName;
         }
-        if( !themeTemplatePath.endsWith(".html")) {
+        if (!themeTemplatePath.endsWith(".html")) {
             themeTemplatePath += ".html"; // this class only does html templates
         }
 
@@ -188,7 +191,7 @@ public class HtmlTemplater {
         if (themeTemplate == null) {
             throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);
         }
-        TemplateHtmlPage themeTemplateTemplateMeta = cachedTemplateMetaData.get(themeTemplatePath);
+        TemplateHtmlPage themeTemplateTemplateMeta = getCachedTemplateMetaData(themeTemplatePath);
         if (themeTemplateTemplateMeta == null) {
             throw new RuntimeException("Couldnt find meta for template: " + themeTemplatePath);
         }
@@ -216,20 +219,20 @@ public class HtmlTemplater {
         }
         return theme;
     }
-    
+
     public String findThemePath(CommonResource r) {
         boolean isPublic = r.isPublic();
         String theme = findTheme(r, isPublic);
         return findThemePath(theme);
     }
-    
+
     public String findThemePath(String theme) {
         String themePath; // path that contains the theme templates Eg /templates/themes/admin/ or /content/theme/
         if (theme.equals("custom")) {
             themePath = "/theme/";
         } else {
             themePath = "/templates/themes/" + theme + "/";
-        }             
+        }
         return themePath;
     }
 
@@ -276,6 +279,28 @@ public class HtmlTemplater {
         }
         return engine.getTemplate(templatePath);
     }
+
+    private TemplateHtmlPage getCachedTemplateMetaData(String templatePath) {
+        return getTemplateCache(HttpManager.request()).get(templatePath);
+    }
+
+    private void clearCachedTemplateMetaData(String path) {
+        getTemplateCache(HttpManager.request()).remove(path);
+    }
+
+    private void putCachedTemplateMetaData(String path, TemplateHtmlPage meta) {
+        getTemplateCache(HttpManager.request()).put(path, meta);
+    }
+    
+    private Map<String,TemplateHtmlPage> getTemplateCache(Request request) {
+        Map<String,TemplateHtmlPage> map = (Map<String,TemplateHtmlPage>) request.getAttributes().get("templateCache");
+        if( map == null ) {
+            map = new HashMap<String,TemplateHtmlPage>();
+            request.getAttributes().put("templateCache", map);
+        }
+        return map;
+    }
+
 
     public class HtmlTemplateLoaderResourceLoader extends ResourceLoader {
 
@@ -342,8 +367,6 @@ public class HtmlTemplater {
     public VelocityEngine getEngine() {
         return engine;
     }
-    
-    
 
     public class HtmlTemplateLoader {
 
@@ -355,10 +378,10 @@ public class HtmlTemplater {
         public TemplateHtmlPage findTemplateSource(String path) throws IOException {
             log.trace("findTemplateSource: " + path);
 
-            TemplateHtmlPage meta = cachedTemplateMetaData.get(path);
+            TemplateHtmlPage meta = getCachedTemplateMetaData(path);
             if (meta != null) {
                 if (!meta.isValid()) {
-                    cachedTemplateMetaData.remove(path);
+                    clearCachedTemplateMetaData(path);
                     meta = null;
                 } else {
                     log.trace("cache hit: " + meta.getSource() + " - " + meta.getClass());
@@ -382,9 +405,9 @@ public class HtmlTemplater {
                     Resource r = NodeChildUtils.find(p, wrf);
                     FileResource fr = NodeChildUtils.toFileResource(r);
                     if (fr == null) {
-                        if( !"VM_global_library.vm".equals(path )) {
+                        if (!"VM_global_library.vm".equals(path)) {
                             log.info("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getDomainName());
-                        }                        
+                        }
                     } else {
                         meta = loadContentMeta(fr, wrf.getWebsite().getDomainName(), webPath);
                     }
@@ -450,7 +473,7 @@ public class HtmlTemplater {
             if (meta != null) {
                 tm = System.currentTimeMillis() - tm;
                 log.info("cache miss: " + meta.getSource() + " - " + meta.getClass() + " parsed in " + tm + "ms");
-                cachedTemplateMetaData.put(path, meta);
+                putCachedTemplateMetaData(path, meta);
             } else {
                 log.warn("Failed to find: " + path);
             }

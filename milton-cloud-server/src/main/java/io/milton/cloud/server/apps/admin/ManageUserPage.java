@@ -131,12 +131,10 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                 tx.commit();
                 jsonResult = new JsonResult(true);
                 if (isNew) {
-                    System.out.println("parent path: " + parent.getPath() + " for " + parent.getClass());
                     String newHref = parent.getPath().child(profile.getId() + "").toString();
                     jsonResult.setNextHref(newHref);
                 }
             } catch (Exception ex) {
-                System.out.println("ex: " + ex + " - " + profile);
                 log.error("exception: " + profile.getId(), ex);
                 jsonResult = new JsonResult(false, ex.getMessage());
             }

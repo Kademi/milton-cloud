@@ -295,13 +295,6 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
         getOrCreateDirNode(true);
         log.info("is dirty? " + dataSession.getRootDataNode().isDirty());
         dataSession.save(currentUser);
-
-        System.out.println("----------------------------------");
-        System.out.println("branch head ID: " + getBranch().getHead().getId());
-        System.out.println("branch head hash: " + getBranch().getHead().getItemHash());
-        System.out.println("last hash: " + lastHash);
-        System.out.println("Last head id: " + lastId);
-        System.out.println("----------------------------------");
     }
 
     @Override
@@ -343,7 +336,6 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
 
     public Branch branch(boolean autocreate) {
         if (_branch == null) {
-            System.out.println("get or create branch");
             _branch = getAutoEmailBranch(getOrganisation(), autocreate);
         }
         return _branch;
@@ -355,7 +347,6 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
             if (rewardsBranch != null) {
                 dataSession = new DataSession(rewardsBranch, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
                 dirNode = (DataSession.DirectoryNode) dataSession.getRootDataNode();
-                System.out.println("------------- init data session -------------- " + dataSession.hashCode());
             }
         }
         return dirNode;

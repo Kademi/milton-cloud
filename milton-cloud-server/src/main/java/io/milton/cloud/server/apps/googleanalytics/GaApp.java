@@ -132,7 +132,6 @@ public class GaApp implements PortletApplication, SettingsApplication{
     @Override
     public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {        
         String newAcc = parameters.get("gaAccNum");
-        System.out.println("GaApp: proces form: " + newAcc);
         if( websiteBranch != null ) {
             config.set("gaAccountNumber", websiteBranch, newAcc);
         } else {

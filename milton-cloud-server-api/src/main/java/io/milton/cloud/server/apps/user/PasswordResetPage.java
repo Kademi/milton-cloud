@@ -102,7 +102,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         Organisation org = getOrganisation();
         Profile user = Profile.findByEmail(email, org, session);
         if( user == null ) {
-            System.out.println("user not found: " + email + "  in " + org.getOrgId());
+            log.info("user not found: " + email + "  in " + org.getOrgId());
             return false;
         }
         RootFolder rootFolder = WebUtils.findRootFolder(this);
@@ -125,12 +125,14 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         log.info("created reset token: " + passwordReset.getToken());
         
         String emailHtml = createEmailHtml();
-        
+        System.out.println("email html:");
+        System.out.println(emailHtml);
+        System.out.println("------");
         
         EmailItem emailItem = new EmailItem();
         emailItem.setCreatedDate(now);
-        emailItem.setFromAddress(fromAddress); // TODO: perhaps delegate to RootFolder?
-        emailItem.setReplyToAddress(fromAddress); // TODO: perhaps delegate to RootFolder?
+        emailItem.setFromAddress(fromAddress);
+        emailItem.setReplyToAddress(fromAddress);
         emailItem.setHtml(emailHtml);
         emailItem.setRecipient(user);
         emailItem.setRecipientAddress(email);

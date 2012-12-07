@@ -55,7 +55,7 @@ public class MediaInfoRunner {
     }
 
     public MediaInfo parseOutput(String output) throws IOException {
-        if( output == null ) {
+        if (output == null) {
             return null;
         }
         StringReader sr = new StringReader(output);
@@ -129,34 +129,38 @@ public class MediaInfoRunner {
      * @return
      */
     public Date parseDate(String value) {
-        String[] arr = value.split(" ");
-        String sTimezone = arr[0];
-        String sDate = arr[1];
-        String sTime = arr[2];
-        arr = sDate.split("-");
-        int year = Integer.parseInt(arr[0]);
-        int month = Integer.parseInt(arr[1]);
-        int day = Integer.parseInt(arr[2]);
-        arr = sTime.split(":");
-        int hour = Integer.parseInt(arr[0]);
-        int minute = Integer.parseInt(arr[1]);
-        int second = Integer.parseInt(arr[2]);
+        try {
+            String[] arr = value.split(" ");
+            String sTimezone = arr[0];
+            String sDate = arr[1];
+            String sTime = arr[2];
+            arr = sDate.split("-");
+            int year = Integer.parseInt(arr[0]);
+            int month = Integer.parseInt(arr[1]);
+            int day = Integer.parseInt(arr[2]);
+            arr = sTime.split(":");
+            int hour = Integer.parseInt(arr[0]);
+            int minute = Integer.parseInt(arr[1]);
+            int second = Integer.parseInt(arr[2]);
 
-        Calendar cal = Calendar.getInstance();
-        TimeZone tz = TimeZone.getTimeZone(sTimezone);
-        System.out.println("tx: " + tz);
-        cal.setTimeZone(tz);
+            Calendar cal = Calendar.getInstance();
+            TimeZone tz = TimeZone.getTimeZone(sTimezone);
+            cal.setTimeZone(tz);
 
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month - 1);
-        cal.set(Calendar.DAY_OF_MONTH, day);
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, minute);
-        cal.set(Calendar.SECOND, second);
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.MONTH, month - 1);
+            cal.set(Calendar.DAY_OF_MONTH, day);
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.MINUTE, minute);
+            cal.set(Calendar.SECOND, second);
 
-        System.out.println("cal: " + cal.getTime() + " - " + DateUtils.formatDate(cal));
-        System.out.println("long: " + cal.getTimeInMillis());
-        return cal.getTime();
+            System.out.println("cal: " + cal.getTime() + " - " + DateUtils.formatDate(cal));
+            System.out.println("long: " + cal.getTimeInMillis());
+            return cal.getTime();
+        } catch (Exception e) {
+            log.warn("Exception parsing date: " + value, e);
+            return null;
+        }
     }
 
     public Integer parsePixels(String value) {

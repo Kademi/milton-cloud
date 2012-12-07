@@ -168,6 +168,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         pp.setProcessVersion(1);
 
         ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);
+        context.addAttribute("organisation", rf.getOrganisation());
         if (rf instanceof WebsiteRootFolder) {
             RootFolder wrf = rf;
             context.addAttribute("website", wrf);
@@ -209,7 +210,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
     @Override
     public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
-        System.out.println("save settings");
         String signupNextHref = parameters.get("signupNextHref");
         if (websiteBranch != null) {
             config.set(NEXT_HREF, websiteBranch, signupNextHref);
@@ -227,7 +227,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             if (!Utils.isEmpty(org.getWebsites())) {
 
                 List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
-                System.out.println("apps: " + applications.size() + " for org: " + r.getOrganisation().getId() + " - " + r.getOrganisation().getOrgId() + " - " + r.getClass());
                 context.put("applications", applications);
                 _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
                 
@@ -290,13 +289,14 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         public void process(ProcessContext context) {
             MembershipProcess pi = (MembershipProcess) context.getProcessInstance();
             GroupMembership gm = pi.getMembership();
+            Organisation org = (Organisation) context.getAttribute("organisation");
             WebsiteRootFolder wrf = (WebsiteRootFolder) context.getAttribute("website");
             Website website = null;
             if (wrf != null) {
                 website = wrf.getWebsite();
             }
             try {
-                SubscriptionEvent e = new SubscriptionEvent(gm, website, action);
+                SubscriptionEvent e = new SubscriptionEvent(gm, website, org, action);
                 log.info("Firing " + e);
                 eventManager.fireEvent(e);
             } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {

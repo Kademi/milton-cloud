@@ -82,7 +82,6 @@ public class ReportPage extends TemplatedHtmlPage {
             return null;
         }
         Date dt = ReportingApp.sdf().parse(s);
-        System.out.println("parseDate: " + s + " -->> " + dt);
         return dt;
     }
 }

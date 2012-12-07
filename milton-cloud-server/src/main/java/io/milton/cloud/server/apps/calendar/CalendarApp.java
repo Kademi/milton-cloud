@@ -32,6 +32,7 @@ import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.hibernate.HibernateException;
@@ -96,12 +97,21 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
     }
 
     private void addCalendar(String name, Profile u, Session session) throws HibernateException {
-        Calendar cal = new Calendar();
+        
+        Calendar cal = u.calendar(name);
+        if( cal != null ) {
+            return ;
+        }
+        if( u.getCalendars() == null ) {
+            u.setCalendars(new ArrayList<Calendar>());
+        }
+        cal = new Calendar();
         cal.setOwner(u);
         cal.setCreatedDate(new Date());
         cal.setCtag(System.currentTimeMillis());
         cal.setModifiedDate(new Date());
         cal.setName(name);
+        u.getCalendars().add(cal);
         session.save(cal);
     }
 }

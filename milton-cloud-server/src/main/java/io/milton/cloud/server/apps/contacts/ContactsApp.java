@@ -149,11 +149,16 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
     }
 
     private void addAddressBook(String name, Profile u, Session session) throws HibernateException {
+        AddressBook existing = u.addressBook(name); 
+        if( existing != null ) {
+            return ;
+        }
         AddressBook addressBook = new AddressBook();
         addressBook.setName(name);
         addressBook.setTitle(name);
         addressBook.setBaseEntity(u);
         addressBook.setCreatedDate(new Date());
+        Repository.initRepo(addressBook, name, session, u, u);
         session.save(addressBook);
     }
 

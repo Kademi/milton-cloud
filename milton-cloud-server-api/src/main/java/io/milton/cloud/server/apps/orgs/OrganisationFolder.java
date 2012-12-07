@@ -75,7 +75,6 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
                 orgType = organisation.getOrganisation().orgType(s);
             }
             organisation.setOrgType(orgType);
-            System.out.println("set org ttype: " + orgType);
             session.save(organisation);
             tx.commit();
             jsonResult = new JsonResult(true);

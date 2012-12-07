@@ -467,4 +467,31 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return name;
     }
+    
+    public Calendar calendar(String name) {
+        System.out.println("calendar: " + name);
+        if( getCalendars() == null ) {
+            System.out.println("null calendars");
+            return null;
+        }
+        for(Calendar c : getCalendars()) {
+            System.out.println("check cal: " + c.getName() + " --- " + name);
+            if( c.getName().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public AddressBook addressBook(String name) {
+        if( getAddressBooks() != null) {
+            for( AddressBook a : getAddressBooks() ) {
+                if( a.getName().equals(name)) {
+                    return a;
+                }
+            }
+                
+        }
+        return null;
+    }
 }

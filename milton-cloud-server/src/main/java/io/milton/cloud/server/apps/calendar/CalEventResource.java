@@ -72,7 +72,6 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
 
     @Override
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
-        System.out.println("replaceContent: " + getName());
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             IOUtils.copy(in, bout);

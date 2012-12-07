@@ -202,7 +202,6 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
     }
 
     private void log(Request request, Response response, long duration) {
-        System.out.println("adding to queue: " + queue.size());
         String host = request.getHostHeader();
         if (host == null) {
             host = "";

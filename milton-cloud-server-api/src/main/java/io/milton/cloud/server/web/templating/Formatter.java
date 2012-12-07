@@ -14,6 +14,7 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.JsonWriter;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.WebUtils;
@@ -23,9 +24,11 @@ import io.milton.common.Utils;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * Handy functions exposes to rendering logic for formatting.
@@ -62,6 +65,8 @@ public class Formatter {
             return new SimpleDateFormat("dd/MM/yyyy HH:mm");
         }
     };
+    
+    
     private final CurrentDateService currentDateService;
 
     public Formatter(CurrentDateService currentDateService) {
@@ -805,7 +810,6 @@ public class Formatter {
 
     public String checkbox(String name, Object oChecked) {          
         String s = checkbox(null, name, oChecked, "true");
-        System.out.println("checkbox: " + name + " - " + oChecked + " = " + s);
         return s;
     }
 
@@ -975,5 +979,14 @@ public class Formatter {
         cal.setTime(now);
         cal.add(Calendar.DAY_OF_YEAR, days);
         return cal.getTime();
+    }
+    
+    public String getDomainName(Website w) {
+        if( w.getDomainName() != null ) {
+            return w.getDomainName();
+        } else {
+            String d = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+            return d + getPortString();
+        }
     }
 }

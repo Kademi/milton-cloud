@@ -37,6 +37,7 @@ function initRemoveRecipientGroup() {
             var href = a.attr("href");
             deleteFile(href, function() {
                 a.closest("li").remove();
+                $("#modalGroup input[type=checkbox][name=" + href + "]").removeAttr("checked");
             });
         }
     });    

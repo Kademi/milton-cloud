@@ -351,7 +351,6 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         log.info("enqueueTrigger: " + trigger.getName() + " - " + event.getEventId());
         List<Long> sourceIds = new ArrayList<>();
         for (BaseEntity entity : event.getSourceEntities()) {
-            System.out.println("adding source entity: " + entity.getClass() + " - " + entity.getId());
             sourceIds.add(entity.getId());
         }
         EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);

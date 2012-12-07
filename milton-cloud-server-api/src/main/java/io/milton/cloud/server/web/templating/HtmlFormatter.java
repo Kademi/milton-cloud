@@ -53,9 +53,6 @@ public class HtmlFormatter {
         }
         body.writeText("\n");
         if (r.getBody() != null) {
-            System.out.println("write body...");
-            System.out.println(r.getBody());
-            System.out.println("----");
             body.writeText(r.getBody());
         }
         body.close(true);

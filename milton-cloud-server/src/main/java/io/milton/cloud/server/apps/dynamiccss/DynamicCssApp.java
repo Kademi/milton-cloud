@@ -101,12 +101,9 @@ public class DynamicCssApp implements ResourceApplication {
             String host = HttpManager.request().getHostHeader();
             for (String s : paths) {
                 s = s.replace(HtmlTemplateRenderer.COMBINED_RESOURCE_SEPERATOR, "/"); // HtmlTemplater changes path characters to avoid changing relative path
-                System.out.println("Look for: " + s + " in " + webRoot.getClass());
                 Resource rBase = resourceFactory.getResource(host, s);
                 if (rBase != null) {
-                    System.out.println("got one");
                     if (rBase instanceof GetableResource) {
-                        System.out.println("adding");
                         GetableResource fr = (GetableResource) rBase;
                         resources.add(fr);
                     } else {

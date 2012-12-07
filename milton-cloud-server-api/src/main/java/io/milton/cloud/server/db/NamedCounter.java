@@ -72,7 +72,6 @@ public class NamedCounter implements Serializable {
         NamedCounter c = findOrCreate(name, session);
         c.setCounter(c.getCounter()+1);
         session.save(c);
-        System.out.println("saved counter: " + c.getCounter());
         return c.getCounter();
     }
     

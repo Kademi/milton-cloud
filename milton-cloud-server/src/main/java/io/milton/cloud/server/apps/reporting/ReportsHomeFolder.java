@@ -89,7 +89,6 @@ public class ReportsHomeFolder extends AbstractCollectionResource implements Get
                     ReportingApplication rapp = (ReportingApplication) app;
                     for( JsonReport rep : rapp.getReports(getOrganisation(), null)) {
                         String title = rep.getTitle(getOrganisation(), null);
-                        System.out.println("title: " + title + " from report: " + rep.getClass());
                         ReportPage p = new ReportPage("org-" + rep.getReportId(), this, title, rep, null);
                         children.add(p);
                     }

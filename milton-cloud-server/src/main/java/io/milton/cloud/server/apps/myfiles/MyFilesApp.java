@@ -102,12 +102,11 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
     }
 
     private void addRepo(String title, String name, Profile u, Session session) throws HibernateException {
-        Repository r1 = new Repository();
-        r1.setBaseEntity(u);
-        r1.setCreatedDate(new Date());
-        r1.setName(name);
-        r1.setTitle(title);
-        session.save(r1);
+        Repository r1 = u.repository(name);
+        if (r1 == null) {
+            r1 = u.createRepository(name, u, session);
+            session.save(r1);
+        }
     }
 
     @Override

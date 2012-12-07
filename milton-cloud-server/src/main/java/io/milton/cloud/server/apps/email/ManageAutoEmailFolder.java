@@ -232,7 +232,6 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
             GroupRecipient gr = it.next();
             Group g = gr.getRecipient();
             if (g.getName().equals(groupName)) {
-                System.out.println("removed: " + groupName);
                 it.remove();
                 session.delete(gr);
             }
@@ -245,7 +244,6 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
         }
         for (GroupRecipient gr : job.getGroupRecipients()) {
             if (gr.getRecipient().getName().equals(groupName)) {
-                System.out.println("already in");
                 return;
             }
         }
@@ -305,7 +303,6 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
         if (options5 != null) {
             map.put("triggerCondition5", options5);
         }
-        System.out.println("options map suze: " + map.size() + " for " + type.getEventId());
         return map;
     }
 

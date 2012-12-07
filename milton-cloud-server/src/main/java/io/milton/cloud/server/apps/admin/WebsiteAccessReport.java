@@ -58,7 +58,6 @@ public class WebsiteAccessReport implements JsonReport{
 
     @Override
     public GraphData runReport(Organisation org, Website website, Date start, Date finish, JsonResult jsonResult) {
-        System.out.println("runReport: " + start + " - " + finish);
         Session session = SessionManager.session();
         Criteria crit = session.createCriteria(AccessLog.class)
                 .setProjection(Projections.projectionList()

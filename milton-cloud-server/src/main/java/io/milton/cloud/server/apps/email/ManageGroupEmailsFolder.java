@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author brad
  */
 public class ManageGroupEmailsFolder extends AbstractCollectionResource implements GetableResource, PostableResource, ContentDirectoryResource {
+
     private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailsFolder.class);
     private final String name;
     private final CommonCollectionResource parent;
@@ -76,10 +77,10 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         }
         if (groupEmailsRepo != null) {
             Branch b = groupEmailsRepo.liveBranch();
-            if( b == null ) {
+            if (b == null) {
                 log.warn("branch is null. autocreate=" + autocreate);
             }
-            if( b == null && autocreate ) {
+            if (b == null && autocreate) {
                 Profile user = _(SpliffySecurityManager.class).getCurrentUser();
                 Session session = SessionManager.session();
                 b = groupEmailsRepo.createBranch(Branch.TRUNK, user, session);
@@ -99,6 +100,10 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         this.name = name;
         this.parent = parent;
         this.org = org;
+    }
+
+    public String getTitle() {
+        return "Send and manage emails";
     }
 
     @Override
@@ -144,7 +149,7 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
                 DirectoryNode emailDirNode = null;
                 if (dirNode != null) {
                     emailDirNode = (DirectoryNode) dirNode.get(f.getName());
-                    if( emailDirNode == null ) {
+                    if (emailDirNode == null) {
                         log.warn("Didnt find group email dir node: " + f.getName() + " in " + dirNode.getName());
                     }
                 }
@@ -281,14 +286,16 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         }
         getOrCreateDirNode(true);
         log.info("is dirty? " + dataSession.getRootDataNode().isDirty());
-        dataSession.save(currentUser);
+        if (dataSession.getRootDataNode().isDirty() != null && dataSession.getRootDataNode().isDirty()) {
+            dataSession.save(currentUser);
 
-        System.out.println("----------------------------------");
-        System.out.println("branch head ID: " + getBranch().getHead().getId());
-        System.out.println("branch head hash: " + getBranch().getHead().getItemHash());
-        System.out.println("last hash: " + lastHash);
-        System.out.println("Last head id: " + lastId);
-        System.out.println("----------------------------------");
+            System.out.println("----------------------------------");
+            System.out.println("branch head ID: " + getBranch().getHead().getId());
+            System.out.println("branch head hash: " + getBranch().getHead().getItemHash());
+            System.out.println("last hash: " + lastHash);
+            System.out.println("Last head id: " + lastId);
+            System.out.println("----------------------------------");
+        }
     }
 
     @Override

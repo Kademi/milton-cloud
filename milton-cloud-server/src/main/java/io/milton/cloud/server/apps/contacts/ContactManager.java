@@ -255,7 +255,6 @@ public class ContactManager {
     public void setSurName(VCard vcard, String surName, Contact contact) {
         vcard.getName().setFamilyName(surName);        
         contact.setSurName(surName);
-        System.out.println("set name on contact and vcard: " + contact.getSurName() + " - " + vcard.getName().getFamilyName());
     }
 
     public void setGivenName(VCard vcard, String givenName, Contact contact) {

@@ -356,7 +356,6 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
      * @param path - path to the parent org
      */
     private void checkPath(Organisation childToCheck, Path path, Organisation rootOrg, Session session) {
-        System.out.println("checkPath: " + childToCheck.getOrgId() + " path=" + path);
         Organisation org = rootOrg;
         if (!path.isRoot()) {
             for (String childName : path.getParts()) {

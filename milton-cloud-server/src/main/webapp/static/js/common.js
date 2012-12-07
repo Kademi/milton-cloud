@@ -6,14 +6,14 @@ function startsWith(str, prefix) {
 }
 
 Date.prototype.formatMMDDYYYY = function(){
-    return this.getMonth() + 
+    return (this.getMonth()+1) + 
     "/" +  this.getDate() +
     "/" +  this.getFullYear();
 }
 
 Date.prototype.formatDDMMYYYY = function(){
     return this.getDate() +
-    "/" +  this.getMonth() + 
+    "/" +  (this.getMonth()+1) + 
     "/" +  this.getFullYear();
 }
 

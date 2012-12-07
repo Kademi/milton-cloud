@@ -52,7 +52,10 @@ function showGraph(graphData, reportContainer) {
                 labels: graphData.labels,
                 hideHover: true,
                 dateFormat: function (x) {
-                    return new Date(x).formatDDMMYYYY();
+                    var dt = new Date(x).formatDDMMYYYY();
+                    //var dt = new Date(x).toString();
+                    //log("formatted date", x, dt, new Date(x).formatDDMMYYYY());
+                    return dt;
                 } // see common.js
             });
         } else {

@@ -45,11 +45,20 @@ public class SubscriptionEvent implements TriggerEvent {
         RE_ACTIVATED
     }
     private final Website website;
+    private final Organisation organisation;
     private final GroupMembership membership;
     private final SubscriptionAction action;
 
-    public SubscriptionEvent(GroupMembership membership, Website website, SubscriptionAction action) {
+    /**
+     * 
+     * @param membership
+     * @param website - nullable
+     * @param org - must not be null
+     * @param action 
+     */
+    public SubscriptionEvent(GroupMembership membership, Website website, Organisation org, SubscriptionAction action) {
         this.website = website;
+        this.organisation = org;
         this.membership = membership;
         this.action = action;
     }
@@ -80,7 +89,7 @@ public class SubscriptionEvent implements TriggerEvent {
 
     @Override
     public Organisation getOrganisation() {
-        return website.getOrganisation();
+        return organisation;
     }
 
     @Override

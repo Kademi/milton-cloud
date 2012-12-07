@@ -143,6 +143,13 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
     }
 
     @Override
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+        super.delete();
+    }
+
+    
+    
+    @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
     }
@@ -379,7 +386,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             GroupRecipient gr = it.next();
             Group g = gr.getRecipient();
             if (g.getName().equals(groupName)) {
-                System.out.println("removed: " + groupName);
                 it.remove();
                 session.delete(gr);
             }
@@ -392,7 +398,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         }
         for (GroupRecipient gr : job.getGroupRecipients()) {
             if (gr.getRecipient().getName().equals(groupName)) {
-                System.out.println("already in");
                 return;
             }
         }

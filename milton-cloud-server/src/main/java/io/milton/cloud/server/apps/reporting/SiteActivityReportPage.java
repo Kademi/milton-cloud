@@ -69,10 +69,8 @@ public class SiteActivityReportPage extends TemplatedHtmlPage {
         try {
             String sStart = params.get("startDate");
             start = parseDate(sStart);
-            System.out.println("start: " + start);
             String sFinish = params.get("finishDate");
             finish = parseDate(sFinish);
-            System.out.println("finish: " + finish);
         } catch (ParseException parseException) {
             JsonResult jsonResult = new JsonResult(false,"Invalid date: " + parseException.getMessage());
             jsonResult.write(out);

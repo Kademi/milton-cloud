@@ -23,8 +23,6 @@ import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
-import io.milton.cloud.server.web.templating.HtmlTemplater;
-import io.milton.cloud.server.web.templating.TextTemplater;
 import io.milton.vfs.db.*;
 import java.util.Date;
 import java.util.HashSet;
@@ -137,7 +135,6 @@ public class BatchEmailService {
                 };
 
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                System.out.println(" have theme, do html templating");
                 try {
                     page.sendContent(bout, null, params, null);
                 } catch (IOException | NotAuthorizedException | BadRequestException | NotFoundException ex) {
@@ -147,10 +144,9 @@ public class BatchEmailService {
             }
         }
 
-        System.out.println(" no theme, cant do templating");
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        //_(TextTemplater.class).writePage("theme/emailBase", htmlPage, params, bout);
-        return bout.toString("UTF-8");
+        log.info(" no theme, cant do templating");
+        String bodyHtml = TemplateRuntime.eval(j.getHtml(), this).toString();
+        return bodyHtml;
     }
 
     private String generateTextFromHtml(String html) {
@@ -178,13 +174,8 @@ public class BatchEmailService {
 
         // Templating requires a HtmlPage to represent the template        
         String html = generateHtml(j, recipientProfile);
-        System.out.println("HTML -----");
-        System.out.println(html);
-        System.out.println("----------");
         i.setHtml(html);
         String text = generateTextFromHtml(html);
-        System.out.println(text);
-        System.out.println("XXXXX");
         i.setText(text);
         i.setJob(j);
         i.setRecipient(recipientProfile);

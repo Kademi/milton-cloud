@@ -54,7 +54,6 @@ public class DataBinder {
             if( k.endsWith("_checkbox")) {
                 String propName = k.replace(Formatter.CHECKBOX_SUFFIX, "");
                 if( !properties.containsKey(propName)) {
-                    System.out.println("adding prop: " + propName);
                     properties.put(propName, "");
                 }
             }

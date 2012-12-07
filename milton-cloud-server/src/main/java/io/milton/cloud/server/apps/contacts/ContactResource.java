@@ -80,7 +80,6 @@ public class ContactResource extends io.milton.cloud.server.web.FileResource imp
             UploadUtils.setContent(this, bin);
             getParent().save();
             session.save(contact);
-            System.out.println("surname: " + contact.getSurName());
             jsonResult = new JsonResult(true);
             tx.commit();
         } catch (IOException ex) {

@@ -140,9 +140,8 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     if( orgType == null ) {
                         throw new RuntimeException("Couldnt find orgType: " + s);
                     }
-                    System.out.println("Found org type: " + orgType.getDisplayName());
                 } else {
-                    System.out.println("org type is null");
+                    //System.out.println("org type is null");
                 }
                 group.setRegoOrgType(orgType, session); 
                 s = WebUtils.getParam(parameters, "sRootRegoOrg");
