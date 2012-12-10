@@ -67,6 +67,9 @@ public class GroupEmailJob extends BaseEmailJob {
     
     private String status;
     private Date statusDate;
+    private Boolean passwordReset;
+    private String passwordResetLinkText;
+    
 
     public GroupEmailJob() {
     }
@@ -95,7 +98,32 @@ public class GroupEmailJob extends BaseEmailJob {
     public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
     }
+    
+    /**
+     * If true, sending this email will generate a password reset token for each user
+     * 
+     * @return 
+     */
+    @Column
+    public Boolean isPasswordReset() {
+        return passwordReset;
+    }
+    
+    public void setPasswordReset(Boolean b) {
+        this.passwordReset = b;
+    }
 
+    @Column
+    public String getPasswordResetLinkText() {
+        return passwordResetLinkText;
+    }
+
+    public void setPasswordResetLinkText(String passwordResetLinkText) {
+        this.passwordResetLinkText = passwordResetLinkText;
+    }
+
+    
+    
     public boolean readyToSend() {
         return STATUS_READY_TO_SEND.equals(getStatus());
     }
@@ -136,4 +164,5 @@ public class GroupEmailJob extends BaseEmailJob {
 
     }
 
+    
 }

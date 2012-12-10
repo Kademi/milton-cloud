@@ -62,16 +62,18 @@ public class BatchEmailService {
     public BatchEmailService() {
     }
 
+
     /**
      * Generate EmailItem records to send. These will be sent by a seperate
      * process
-     *
+     * 
      * @param j
-     * @param directRecipients- recipients directly referenced by the job. This
-     * will be expanded to profiles
+     * @param directRecipients
+     * @param callback - may be null, otherwise is called just prior to generating the email content
      * @param session
+     * @throws IOException 
      */
-    public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, Session session) throws IOException {
+    public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
         if (j.getGroupRecipients() == null && directRecipients.isEmpty()) {
             log.warn("No recipients!! For job: " + j.getId());
             return;
@@ -89,7 +91,7 @@ public class BatchEmailService {
             j.setEmailItems(new ArrayList<EmailItem>());
         }
         for (Profile p : profiles) {
-            sendSingleEmail(j, p, session);
+            sendSingleEmail(j, p, callback, session);
         }
         session.save(j);
     }
@@ -115,38 +117,30 @@ public class BatchEmailService {
         g.accept(visitor);
     }
 
-    private String generateHtml(final BaseEmailJob j, final Profile p) throws IOException {
-        Website themeSite = j.getThemeSite();
-
-        Map<String, String> params = new HashMap<>();
-
-        if (themeSite != null) {
-            Branch b = themeSite.liveBranch();
-            if (b != null) {
-                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), j.getThemeSite(), b);
-                TemplatedHtmlPage page = new TemplatedHtmlPage("email", websiteRootFolder, "email/genericEmail", "Email") {
-                    @Override
-                    protected Map<String, Object> buildModel(Map<String, String> params) {
-                        Map<String, Object> map = super.buildModel(params);
-                        String bodyHtml = TemplateRuntime.eval(j.getHtml(), this).toString();
-                        map.put("bodyHtml", bodyHtml);
-                        return map;
-                    }
-                };
-
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                try {
-                    page.sendContent(bout, null, params, null);
-                } catch (IOException | NotAuthorizedException | BadRequestException | NotFoundException ex) {
-                    throw new RuntimeException(ex);
-                }
-                return bout.toString("UTF-8");
-            }
+    public void sendSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
+        String from = j.getFromAddress();
+        if (from == null) {
+            from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
         }
+        Date now = _(CurrentDateService.class).getNow();
+        EmailItem i = new EmailItem();
+        i.setCreatedDate(now);
+        i.setFromAddress(from);
+        i.setReplyToAddress(from); // todo: make this something more robust in terms of SPF?        
 
-        log.info(" no theme, cant do templating");
-        String bodyHtml = TemplateRuntime.eval(j.getHtml(), this).toString();
-        return bodyHtml;
+        // Templating requires a HtmlPage to represent the template        
+        String html = generateHtml(j, recipientProfile, callback);
+        i.setHtml(html);
+        String text = generateTextFromHtml(html);
+        i.setText(text);
+        i.setJob(j);
+        i.setRecipient(recipientProfile);
+        i.setRecipientAddress(recipientProfile.getEmail());
+        i.setSendStatusDate(now);
+        i.setSubject(j.getSubject());
+        j.getEmailItems().add(i);
+        session.save(i);
+        log.info("Created email item: " + i.getId() + " to " + recipientProfile.getEmail());
     }
 
     private String generateTextFromHtml(String html) {
@@ -160,31 +154,54 @@ public class BatchEmailService {
             return null;
         }
     }
-
-    public void sendSingleEmail(BaseEmailJob j, Profile recipientProfile, Session session) throws HibernateException, IOException {
-        String from = j.getFromAddress();
-        if (from == null) {
-            from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
+    
+    
+    private String generateHtml(final BaseEmailJob j, final Profile p, BatchEmailCallback callback) throws IOException {
+        Map localVars = new HashMap();
+        localVars.put("profile", p);
+        
+        Website themeSite = j.getThemeSite();
+        if (themeSite != null) {
+            Branch b = themeSite.liveBranch();
+            if (b != null) {
+                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), j.getThemeSite(), b);
+                localVars.put("website", websiteRootFolder);
+            }
         }
-        Date now = _(CurrentDateService.class).getNow();
-        EmailItem i = new EmailItem();
-        i.setCreatedDate(now);
-        i.setFromAddress(from);
-        i.setReplyToAddress(from); // todo: make this something more robust in terms of SPF?        
 
-        // Templating requires a HtmlPage to represent the template        
-        String html = generateHtml(j, recipientProfile);
-        i.setHtml(html);
-        String text = generateTextFromHtml(html);
-        i.setText(text);
-        i.setJob(j);
-        i.setRecipient(recipientProfile);
-        i.setRecipientAddress(recipientProfile.getEmail());
-        i.setSendStatusDate(now);
-        i.setSubject(j.getSubject());
-        j.getEmailItems().add(i);
-        session.save(i);
-        log.info("Created email item: " + i.getId() + " to " + recipientProfile.getEmail());
+        String template = j.getHtml() == null ? "" : j.getHtml();
+        if (callback != null) {
+            template = callback.beforeSend(p, template, localVars);
+        }
+               
+        final String bodyHtml = TemplateRuntime.eval(template, localVars).toString();
+        
+        Map<String, String> params = new HashMap<>();
+
+        if (themeSite != null) {
+            Branch b = themeSite.liveBranch();
+            if (b != null) {
+                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), j.getThemeSite(), b);
+                TemplatedHtmlPage page = new TemplatedHtmlPage("email", websiteRootFolder, "email/genericEmail", "Email") {
+                    @Override
+                    protected Map<String, Object> buildModel(Map<String, String> params) {
+                        Map<String, Object> map = super.buildModel(params);                        
+                        map.put("bodyHtml", bodyHtml);
+                        return map;
+                    }
+                };
+
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                try {
+                    page.sendContent(bout, null, params, null);
+                } catch (IOException | NotAuthorizedException | BadRequestException | NotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+                return bout.toString("UTF-8");
+            }
+        } 
+        log.info(" no theme, cant do templating");
+        return bodyHtml;        
     }
 
     private final class Processor {

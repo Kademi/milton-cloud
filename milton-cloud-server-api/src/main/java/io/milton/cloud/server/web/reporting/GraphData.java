@@ -29,6 +29,11 @@ public class GraphData {
     private String[] ykeys;
     private String[] labels;
 
+    private String itemsTitle; // the title displayed on the page for the items section
+    private List items;
+    private String[] itemFields;
+    
+    
     public List getData() {
         return data;
     }
@@ -36,6 +41,45 @@ public class GraphData {
     public void setData(List data) {
         this.data = data;
     }
+
+    public String getItemsTitle() {
+        return itemsTitle;
+    }
+
+    public void setItemsTitle(String itemsTitle) {
+        this.itemsTitle = itemsTitle;
+    }
+
+    
+    
+    
+    /**
+     * When a report returns a list of items (eg top 10 urls) this will have
+     * the field names
+     * 
+     * @return 
+     */
+    public String[] getItemFields() {
+        return itemFields;
+    }
+
+    public void setItemFields(String[] itemFields) {
+        this.itemFields = itemFields;
+    }
+
+    /**
+     * For reports which want to display a list of items (eg top 10 URLS's)
+     * under the graph, set the items here
+     * 
+     * @return 
+     */
+    public List getItems() {
+        return items;
+    }
+
+    public void setItems(List items) {
+        this.items = items;
+    }        
 
     public String[] getLabels() {
         return labels;

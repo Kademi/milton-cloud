@@ -20,7 +20,7 @@
 	background-image: -ms-linear-gradient(bottom, rgb(240,240,240) 0%, rgb(255,255,255) 100%);
 	background-image: -webkit-gradient(  linear,  left bottom,  left top,  color-stop(0, rgb(240,240,240)),  color-stop(1, rgb(255,255,255))  );
 }
-.reportsPage table.Summary td, #manageWebsite table.Summary th {
+.reportsPage table.Summary td, .reportsPage table.Summary th {
 	border: solid #dadada;
 	border-width: 1px 0;
 	vertical-align: central;
@@ -39,4 +39,8 @@
 	margin-bottom: 4px;
 }
 .reportsPage table.Summary td p { font-size: 13px; }
+
+.reportsPage #items table {
+    width: 100%;
+}
 

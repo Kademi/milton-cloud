@@ -16,10 +16,12 @@
  */
 package io.milton.cloud.server.mail;
 
-import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
+import io.milton.cloud.server.db.PasswordReset;
 import java.util.Date;
 import org.hibernate.Session;
 
@@ -27,9 +29,13 @@ import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 
 /**
@@ -39,15 +45,12 @@ import org.hibernate.Transaction;
 public class GroupEmailService {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GroupEmailService.class);
-
     private final BatchEmailService batchEmailService;
 
     public GroupEmailService(BatchEmailService batchEmailService) {
         this.batchEmailService = batchEmailService;
     }
-    
-    
-    
+
     public void send(long jobId, Session session) throws IOException {
         GroupEmailJob j = (GroupEmailJob) session.get(GroupEmailJob.class, jobId);
         if (j == null) {
@@ -63,41 +66,77 @@ public class GroupEmailService {
         }
     }
 
+    public void sendPreview(GroupEmailJob j, Profile recipientProfile, Session session) throws HibernateException, IOException {
+        if (j.getThemeSite() == null) {
+            throw new RuntimeException("Cant send password reset group email because no theme has been selected");
+        }
+        
+        BatchEmailCallback callback = getCallback(j, session);
+        batchEmailService.sendSingleEmail(j, recipientProfile, callback, session);
+    }
+
     /**
-     * Generate EmailItem records to send. These will be sent by a seperate process
-     * 
+     * Generate EmailItem records to send. These will be sent by a seperate
+     * process
+     *
      * @param j
-     * @param session 
+     * @param session
      */
-    private void generateEmailItems(GroupEmailJob j, Session session) throws IOException {
+    private void generateEmailItems(final GroupEmailJob j, final Session session) throws IOException {
+        if (j.getThemeSite() == null) {
+            throw new RuntimeException("Cant send password reset group email because no theme has been selected");
+        }
         List<BaseEntity> directRecips = new ArrayList<>();
-        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty() ) {
+        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty()) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
                 addGroup(gr.getRecipient(), directRecips);
             }
         } else {
             log.warn("No group recipients for job: " + j.getId());
-        }  
-        batchEmailService.generateEmailItems(j, directRecips, session);
-        
-        if( directRecips.isEmpty()) {
+        }
+
+        final Date now = _(CurrentDateService.class).getNow();
+        BatchEmailCallback callback = getCallback(j, session);
+
+        batchEmailService.generateEmailItems(j, directRecips, callback, session);
+
+        if (directRecips.isEmpty()) {
             j.setStatus(GroupEmailJob.STATUS_COMPLETED);
         } else {
             j.setStatus(GroupEmailJob.STATUS_IN_PROGRESS);
         }
-        Date now = _(CurrentDateService.class).getNow();        
         j.setStatusDate(now);
         session.save(j);
-        
     }
-    
+
+    private BatchEmailCallback getCallback(final GroupEmailJob j, final Session session) {
+        BatchEmailCallback callback = null;
+        if (j.isPasswordReset() != null && j.isPasswordReset()) {
+            callback = new BatchEmailCallback() {
+                @Override
+                public String beforeSend(Profile p, String template, Map templateVars) {
+                    Website website = j.getThemeSite();
+                    String returnUrl = UserApp.getPasswordResetHref(website);
+                    final Date now = _(CurrentDateService.class).getNow();
+                    PasswordReset passwordReset = PasswordReset.create(p, now, returnUrl, website, session);
+                    templateVars.put("passwordReset", passwordReset);
+                    String resetHref = returnUrl + "?token=" + passwordReset.getToken();
+                    String linkText = j.getPasswordResetLinkText() == null ? "Please click here to reset your password" : j.getPasswordResetLinkText();
+                    String passwordResetLinkTemplate = "<a href='" + resetHref + "'>" + linkText + "</a>";
+                    return template + passwordResetLinkTemplate;
+                }
+            };
+        }
+        return callback;
+    }
+
     private void addGroup(Group g, List<BaseEntity> recipients) {
-        if( g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty() ) {
-            for( GroupMembership gm : g.getGroupMemberships() ) {
+        if (g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty()) {
+            for (GroupMembership gm : g.getGroupMemberships()) {
                 recipients.add(gm.getMember());
             }
         } else {
             log.warn("No members in recipient group: " + g.getName());
         }
-    }    
+    }
 }

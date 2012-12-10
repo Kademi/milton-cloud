@@ -78,7 +78,7 @@ public class EmailTriggerService {
             }
         }
 
-        batchEmailService.generateEmailItems(j, directRecips, session);
+        batchEmailService.generateEmailItems(j, directRecips, null, session);
         session.save(j);
 
     }

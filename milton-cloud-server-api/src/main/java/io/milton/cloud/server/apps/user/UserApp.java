@@ -19,7 +19,9 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.config.HttpManagerBuilder;
 import io.milton.http.exceptions.BadRequestException;
@@ -35,6 +37,8 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import java.util.List;
 
+import static io.milton.context.RequestContext._;
+
 /**
  *
  * @author brad
@@ -44,6 +48,17 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
 
+    public static String getPasswordResetHref(Website w) {
+        String domainName = w.getDomainName();
+        if( domainName == null ) {
+            domainName = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+        }
+        String s = _(Formatter.class).getPortString();
+        domainName = domainName + s;
+        
+        return "http://" + domainName + "/do-reset?token=$page.passwordReset.token";
+    }    
+    
     public static PrincipalResource findEntity(Profile u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {
         log.info("findEntity");
         Resource r = rootFolder.child(USERS_FOLDER_NAME);
@@ -137,6 +152,8 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
         return null;
     }
 
+
+    
     @Override
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof RootFolder) {

@@ -33,12 +33,13 @@ import java.util.Map;
  *
  * @author brad
  */
-public class ManageWebsiteFolder extends RepositoryFolder {
+public class ManageWebsiteFolder extends RepositoryFolder implements WebsiteResource {
 
     public ManageWebsiteFolder(CommonCollectionResource parent, Repository r) {
         super(parent, r);
     }
     
+    @Override
     public Website getWebsite() {
         return (Website) repo;
     }

@@ -353,7 +353,7 @@ function resetForm($form) {
     });
 }
 
-function edify(container, callback) {
+function edify(container, callback, validateCallback) {
     log("edify", container, callback);
     $("body").removeClass("edifyIsViewMode");
     $("body").addClass("edifyIsEditMode");
@@ -386,7 +386,7 @@ function edify(container, callback) {
             log("edifyForm submit");
             e.preventDefault();
             e.stopPropagation();
-            submitEdifiedForm(callback);
+            submitEdifiedForm(callback, validateCallback);
         });
         log("done hide, now show again");
         container.animate({

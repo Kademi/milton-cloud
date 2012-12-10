@@ -167,8 +167,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         pp.setProcessName(userManagementProcess.getName());
         pp.setProcessVersion(1);
 
-        ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);
-        context.addAttribute("organisation", rf.getOrganisation());
+        ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);        
+        context.addAttribute("organisation", gm.getGroupEntity().getOrganisation());
         if (rf instanceof WebsiteRootFolder) {
             RootFolder wrf = rf;
             context.addAttribute("website", wrf);

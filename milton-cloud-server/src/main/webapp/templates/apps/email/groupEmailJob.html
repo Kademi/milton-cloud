@@ -61,7 +61,7 @@
                                             Choose a template
                                         </th>
                                         <td>
-                                            <select name="themeSiteId" class="Medium">
+                                            <select name="themeSiteId">
                                                 $formatter.option("", "[No template]", $page.themeSiteId)
                                                 #foreach($website in $page.organisation.websites)
                                                     $formatter.option($website.id, $website.name, $page.themeSiteId)
@@ -75,6 +75,17 @@
                                     <tr>
                                         <td colspan="2">
                                             <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            $formatter.checkbox("passwordReset", "passwordReset", $page.job.passwordReset, "true")
+                                            <label for="passwordReset" style="float: none">Password reset</label>
+                                            <div class="passwordResetContainer">
+                                                <p>Please enter the text of the password reset link below:</p>
+                                                <input type="text" value="$!page.job.passwordResetLinkText" name="passwordResetLinkText" style="float: none" />
+                                                <p><i>Eg: Click here to get started!</i></p>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -185,7 +196,7 @@
                     }
                 });
                 //["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]
-                edify($("form.Details"));
+                edify($("form.Details"));                
             });
         </script>
     </body>

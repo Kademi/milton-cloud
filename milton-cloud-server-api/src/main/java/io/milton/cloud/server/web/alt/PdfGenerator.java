@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.transform.SourceLocator;
@@ -25,6 +26,15 @@ public class PdfGenerator {
 
 
     public FileResource convertHtmlToPdf(String href, GetableResource source, ContentDirectoryResource destDir, String destName) throws NotAuthorizedException, BadRequestException, NotFoundException {
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        convertHtmlToPdf(href, source, outContent);        
+        FileResource fr = destDir.getOrCreateFile(destName);
+        ByteArrayInputStream bin = new ByteArrayInputStream(outContent.toByteArray());
+        fr.setContent(bin);
+        return fr;
+    }
+    
+    public void convertHtmlToPdf(String href, GetableResource source, OutputStream out) throws NotAuthorizedException, BadRequestException, NotFoundException {
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         Map<String, String> params = new HashMap<>();
         try {
@@ -58,23 +68,18 @@ public class PdfGenerator {
             throw new RuntimeException(e);
         }
         renderer.layout();
-        outContent = new ByteArrayOutputStream();
         try {
-            renderer.createPDF(outContent);
+            renderer.createPDF(out);
         } catch (Exception ex) {
             throw new RuntimeException("Exception processing: " + href, ex);
         }
         try {
-            outContent.flush();
+            out.flush();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
         
-        FileResource fr = destDir.getOrCreateFile(destName);
-        ByteArrayInputStream bin = new ByteArrayInputStream(outContent.toByteArray());
-        fr.setContent(bin);
-        return fr;
-    }
+    }    
 //
 //
 //	public static void main(String[] args) {

@@ -161,8 +161,10 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public static boolean isUniqueName(String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
         crit.add(Restrictions.eq("name", name));
-        return crit.uniqueResult() == null;
+        Object result = DbUtils.unique(crit);
+        return result == null;
     }
+    
     private String name;
     private String firstName;
     private String surName;

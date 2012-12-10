@@ -1284,7 +1284,6 @@ table.Summary th, table.Summary td {
     padding-left: 13px;
 }
 table.Summary th {
-    background-color: #f0f0f0;
     text-align: left;
 }
 table.Summary td { border-top: 1px solid #dedede; }

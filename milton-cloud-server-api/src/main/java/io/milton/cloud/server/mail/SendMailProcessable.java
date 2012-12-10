@@ -24,8 +24,6 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 
 /**
- * TODO: this needs to be a static class, but currently needs a reference to
- * parent
  *
  */
 public class SendMailProcessable implements Serializable, Processable {

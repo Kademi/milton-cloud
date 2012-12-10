@@ -58,7 +58,7 @@ import java.io.OutputStream;
  *
  * @author brad
  */
-public class WebsiteRootFolder extends BranchFolder implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource {
+public class WebsiteRootFolder extends BranchFolder implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource, WebsiteResource {
 
     private final ApplicationManager applicationManager;
     private final Website website;
@@ -69,6 +69,7 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         this.website = website;
         this.applicationManager = applicationManager;
     }
+    
 
     @Override
     protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -137,6 +138,7 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         return (Organisation) website.getOrganisation();
     }
 
+    @Override
     public Website getWebsite() {
         return website;
     }

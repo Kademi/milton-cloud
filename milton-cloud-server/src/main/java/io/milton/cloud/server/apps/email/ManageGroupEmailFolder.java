@@ -23,6 +23,7 @@ import io.milton.cloud.server.db.EmailSendAttempt;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.mail.BatchEmailService;
+import io.milton.cloud.server.mail.GroupEmailService;
 import io.milton.cloud.server.queue.AsynchProcessor;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -415,6 +416,15 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
 
     }
 
+    /**
+     * If reallySend is set it just sets the status on the job so it can be 
+     * processed asyncronously. Otherwise, it sends a single email to the current user
+     * 
+     * @param session
+     * @param reallySend
+     * @throws HibernateException
+     * @throws IOException 
+     */
     private void startSendJob(Session session, boolean reallySend) throws HibernateException, IOException {
         Date now = _(CurrentDateService.class).getNow();
         if (reallySend) {
@@ -426,7 +436,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             log.info("Sending preview email");
             //just send to current user immediately
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-            _(BatchEmailService.class).sendSingleEmail(job, p, session);
+            _(GroupEmailService.class).sendPreview(job, p, session);
         }
     }
 

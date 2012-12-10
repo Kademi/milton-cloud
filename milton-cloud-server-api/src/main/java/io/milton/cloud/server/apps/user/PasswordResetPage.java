@@ -119,7 +119,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         } else {
             subject = "Password reset for " + org.getOrgId();
         }
-        String returnUrl = this.getHref();
+        String returnUrl = UserApp.getPasswordResetHref(website);
         Date now = _(CurrentDateService.class).getNow();
         passwordReset = PasswordReset.create(user, now, returnUrl, website, session);
         log.info("created reset token: " + passwordReset.getToken());

@@ -29,7 +29,6 @@ public class SubscriptionEvent implements TriggerEvent {
 
     public static final String ID = "subscription";
 
-    
     /**
      * The sorts of things that can happen in a signupevent
      */
@@ -50,11 +49,11 @@ public class SubscriptionEvent implements TriggerEvent {
     private final SubscriptionAction action;
 
     /**
-     * 
+     *
      * @param membership
      * @param website - nullable
      * @param org - must not be null
-     * @param action 
+     * @param action
      */
     public SubscriptionEvent(GroupMembership membership, Website website, Organisation org, SubscriptionAction action) {
         this.website = website;
@@ -70,7 +69,7 @@ public class SubscriptionEvent implements TriggerEvent {
     public GroupMembership getMembership() {
         return membership;
     }
-        
+
     public Website getWebsite() {
         return website;
     }
@@ -80,8 +79,8 @@ public class SubscriptionEvent implements TriggerEvent {
         List<BaseEntity> list = new ArrayList<>();
         list.add(membership.getMember());
         return list;
-    }    
-    
+    }
+
     @Override
     public String getEventId() {
         return ID;
@@ -99,7 +98,11 @@ public class SubscriptionEvent implements TriggerEvent {
 
     @Override
     public String getTriggerItem2() {
-        return website.getId() + "";
+        if (website != null) {
+            return website.getId() + "";
+        } else {
+            return null;
+        }
     }
 
     @Override

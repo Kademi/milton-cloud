@@ -248,7 +248,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         }
         return s;
     }
-    
+          
     public String getLink() {
         return "<a href=\"" + getHref() + "\">" + getName() + "</a>";
     }

@@ -12,6 +12,14 @@ function initEditEmailPage() {
     addGroupBtn();
     eventForModal();
     initGroupCheckbox();
+    
+    checkPasswordResetVisible();
+                
+    jQuery("#passwordReset").change(function() {
+        checkPasswordResetVisible();
+    });
+    
+    
     initStatusPolling();
     $("button.send").click(function(e) {
         e.stopPropagation();
@@ -23,6 +31,22 @@ function initEditEmailPage() {
         e.preventDefault();
         previewMail();
     });
+}
+
+function checkPasswordResetVisible() {
+    log("checkPasswordResetVisible");
+    var cont = $(".passwordResetContainer");
+    var inp = cont.find("input[type=text]");
+    if( $("#passwordReset:checked").length > 0 ) {
+        cont.show(100);
+        inp.addClass("required");
+        if( inp.val() == "" ) {
+            inp.val("Please click here to reset your password");
+        }
+    } else {
+        cont.hide(100);
+        inp.removeClass("required");
+    }                
 }
 
 function initRemoveRecipientGroup() {
@@ -329,6 +353,16 @@ function validateEmail() {
         alert("Please enter a from address for the email");
         return false;
     }
+    // Check that if doing password reset then a theme is selected
+    var sel = $("select[name=themeSiteId]");
+    log("check reset", $("#passwordReset:checked"), sel);
+    if( $("#passwordReset:checked").length > 0 ) {
+        if( sel.val() == "" ) {
+            alert("A theme is required for a password reset email. Please choose a theme on the Message tab");
+            return false;
+        }
+    }                
+    
     return true;
 }
 

@@ -127,7 +127,7 @@ function edifyPage(selector) {
 
 
 
-function submitEdifiedForm(callback) {
+function submitEdifiedForm(callback, validateCallback) {
     var form = $("#edifyForm");
     log("trigger event..");
     form.trigger("submitEdified");
@@ -149,7 +149,15 @@ function submitEdifiedForm(callback) {
     resetValidation(form);
     if( !checkRequiredFields(form)) {
         return false;
-    }        
+    }       
+    
+    if( validateCallback ) {
+        if( !validateCallback(form) ) {
+            log("validation callback reported false");
+            return false;
+        }
+    }
+    
         
     var data = form.serialize();
     log("serialied", data);
