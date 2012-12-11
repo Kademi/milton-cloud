@@ -88,15 +88,17 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
 
     @Override
     public void copyTo(CollectionResource toCollection, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
+        log.info("copyTo: " + toCollection.getName() + " newName=" + newName);
         if (toCollection instanceof ContentDirectoryResource) {
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
 
             ContentDirectoryResource newParent = (ContentDirectoryResource) toCollection;
-            DirectoryNode newDir = newParent.getDirectoryNode().addDirectory(newName);
+            DirectoryNode newDir = newParent.getDirectoryNode();
+            System.out.println("copy: " + contentNode.getClass() + " to : " + newDir.getName());
             contentNode.copy(newDir, newName);
             try {
-                parent.save();
+                newParent.save();
             } catch (IOException ex) {
                 throw new BadRequestException("io ex", ex);
             }

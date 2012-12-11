@@ -95,11 +95,10 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
                 }
             }
         }
-
         return null;
-
     }
 
+    
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         Resource r = _(ApplicationManager.class).getPage(this, childName);

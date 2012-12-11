@@ -226,17 +226,9 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
             if (Utils.isEmpty(org.getWebsites())) {
                 renderDashboardCreateWebsitePortlet(writer, orgFolder);
             } else {
-                if (!isNewOrg(org)) {
-                    renderDashboardReports(writer, orgFolder);
-                }
+                renderDashboardReports(writer, orgFolder);
             }
         }
-    }
-
-    private boolean isNewOrg(Organisation org) {
-        Date now = _(CurrentDateService.class).getNow();
-        Date endGettingStartedDate = _(Formatter.class).addDays(org.getCreatedDate(), 7);
-        return now.before(endGettingStartedDate);
     }
 
     private void renderDashboardReports(Writer writer, OrganisationFolder orgFolder) throws IOException {
@@ -250,7 +242,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         if (orgFolder != null) {
             //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
             String href = orgFolder.getHref() + "reporting/org-websiteAccess";
-            writer.append(" runReport(\"" + range + "\", jQuery('.report .websiteAccess'), \"" + href + "\");\n");
+            writer.append(" runReport(\"" + range + "\", jQuery('.report .websiteAccess'), null, \"" + href + "\");\n");
             writer.append("});\n");
             writer.append("</script>\n");
         }

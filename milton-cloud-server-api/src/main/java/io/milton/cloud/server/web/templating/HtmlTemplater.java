@@ -291,16 +291,25 @@ public class HtmlTemplater {
     private void putCachedTemplateMetaData(String path, TemplateHtmlPage meta) {
         getTemplateCache(HttpManager.request()).put(path, meta);
     }
-    
-    private Map<String,TemplateHtmlPage> getTemplateCache(Request request) {
-        Map<String,TemplateHtmlPage> map = (Map<String,TemplateHtmlPage>) request.getAttributes().get("templateCache");
-        if( map == null ) {
-            map = new HashMap<String,TemplateHtmlPage>();
-            request.getAttributes().put("templateCache", map);
-        }
-        return map;
-    }
 
+    private Map<String, TemplateHtmlPage> getTemplateCache(Request request) {
+        if (request != null) {
+            Map<String, TemplateHtmlPage> map = (Map<String, TemplateHtmlPage>) request.getAttributes().get("templateCache");
+            if (map == null) {
+                map = new HashMap<>();
+                request.getAttributes().put("templateCache", map);
+            }
+            return map;
+        } else {
+            RequestContext ctx = RequestContext.getCurrent();
+            Map<String, TemplateHtmlPage> map = (Map<String, TemplateHtmlPage>) ctx.get("templateCache");
+            if( map == null ) {
+                map = new HashMap<>();
+                ctx.put("templateCache", map);
+            }
+            return map;
+        }
+    }
 
     public class HtmlTemplateLoaderResourceLoader extends ResourceLoader {
 

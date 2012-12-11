@@ -125,8 +125,8 @@ public class BatchEmailService {
         Date now = _(CurrentDateService.class).getNow();
         EmailItem i = new EmailItem();
         i.setCreatedDate(now);
-        i.setFromAddress(from);
-        i.setReplyToAddress(from); // todo: make this something more robust in terms of SPF?        
+        i.setFromAddress(from);        
+        i.setReplyToAddress(j.getFromAddress());
 
         // Templating requires a HtmlPage to represent the template        
         String html = generateHtml(j, recipientProfile, callback);
@@ -137,7 +137,12 @@ public class BatchEmailService {
         i.setRecipient(recipientProfile);
         i.setRecipientAddress(recipientProfile.getEmail());
         i.setSendStatusDate(now);
-        i.setSubject(j.getSubject());
+        String subject = j.getSubject();
+        if( subject == null || subject.trim().length() == 0 ) {
+            subject = "Auto mail from " + j.getOrganisation().getFormattedName();
+        }
+        i.setSubject(subject);
+        
         j.getEmailItems().add(i);
         session.save(i);
         log.info("Created email item: " + i.getId() + " to " + recipientProfile.getEmail());

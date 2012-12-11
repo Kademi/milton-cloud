@@ -45,7 +45,9 @@ function showGraph(graphData, reportContainer, itemsContainer) {
     if( graphData ) {
         reportContainer.removeClass("nodata");
         reportContainer.html("");
-        itemsContainer.html("");
+        if( itemsContainer ) {
+            itemsContainer.html("");
+        }
         if( graphData.data.length > 0 ) {
             Morris.Line({
                 element: reportContainer,
@@ -61,34 +63,36 @@ function showGraph(graphData, reportContainer, itemsContainer) {
                     return dt;
                 } // see common.js
             });
-            if( graphData.itemFields ) {
-                var table = $("<table><thead><tr></tr></thead><tbody><tr></tr></tbody></table>");
-                var trHeader = table.find("thead tr");
-                $.each(graphData.itemFields, function(i, f) {
-                    var td = $("<td>");
-                    td.text(f);
-                    trHeader.append(td);                    
-                });
-
-                if( graphData.items) {
-                    var tbody = table.find("tbody");
-                    $.each(graphData.items, function(i, item) {
-                        var tr = $("<tr>");
-                        log("item", item);
-                        $.each(graphData.itemFields, function(i, f) {
-                            log("field", f);
-                            var td = $("<td>");
-                            td.text(item[f]);
-                            tr.append(td);                    
-                        });
-                        tbody.append(tr);
+            if( itemsContainer ) {
+                if( graphData.itemFields ) {
+                    var table = $("<table><thead><tr></tr></thead><tbody><tr></tr></tbody></table>");
+                    var trHeader = table.find("thead tr");
+                    $.each(graphData.itemFields, function(i, f) {
+                        var td = $("<td>");
+                        td.text(f);
+                        trHeader.append(td);                    
                     });
+
+                    if( graphData.items) {
+                        var tbody = table.find("tbody");
+                        $.each(graphData.items, function(i, item) {
+                            var tr = $("<tr>");
+                            log("item", item);
+                            $.each(graphData.itemFields, function(i, f) {
+                                log("field", f);
+                                var td = $("<td>");
+                                td.text(item[f]);
+                                tr.append(td);                    
+                            });
+                            tbody.append(tr);
+                        });
+                    }
+                    itemsContainer.append(table);
+                } else {
+                    reportContainer.addClass("nodata");
+                    reportContainer.html("<p class='nodata'>No data</p>");
                 }
-                itemsContainer.append(table);
             }
-        } else {
-            reportContainer.addClass("nodata");
-            reportContainer.html("<p class='nodata'>No data</p>");
         }
     }
 }

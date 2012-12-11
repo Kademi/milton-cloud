@@ -49,7 +49,7 @@ import java.util.ArrayList;
 @BeanPropertyResource(value = "milton")
 public class RepositoryFolder extends AbstractCollectionResource implements PropFindableResource, MakeCollectionableResource, GetableResource, DeletableCollectionResource, CommonRepositoryResource, PostableResource {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(RepositoryFolder.class);
     protected final CommonCollectionResource parent;
     protected final Repository repo;
     protected ResourceList children;
@@ -157,9 +157,6 @@ public class RepositoryFolder extends AbstractCollectionResource implements Prop
             }
         }
         String s = super.checkRedirect(request);
-        if( s == null ) {
-            log.warn("NO BRANCH FOR REPOSITORY: " + getHref() + " branches: " + repo.getBranches());
-        }
         return s;
     }
 
