@@ -116,8 +116,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         if (parent instanceof GroupInWebsiteFolder) {
             GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
             if (requestedName.equals(signupPageName)) {
-                if( Group.REGO_MODE_CLOSED.equals(wrf.getGroup().getRegistrationMode()) ) {
-                    log.warn("Attempt to access CLOSED rego page for group: " + wrf.getGroup().getName());                    
+                if (Group.REGO_MODE_CLOSED.equals(wrf.getGroup().getRegistrationMode())) {
+                    log.warn("Attempt to access CLOSED rego page for group: " + wrf.getGroup().getName());
                 } else {
                     return new GroupRegistrationPage(requestedName, wrf, this);
                 }
@@ -167,7 +167,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         pp.setProcessName(userManagementProcess.getName());
         pp.setProcessVersion(1);
 
-        ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);        
+        ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);
         context.addAttribute("organisation", gm.getGroupEntity().getOrganisation());
         if (rf instanceof WebsiteRootFolder) {
             RootFolder wrf = rf;
@@ -229,26 +229,26 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
                 context.put("applications", applications);
                 _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
-                
-                if (!isNewOrg(org)) {
-                    writer.append("<div class='report'>\n");
-                    writer.append("<h3>Signup activity</h3>\n");
-                    writer.append("<div class='signupReport'></div>\n");
-                    writer.append("<script type='text/javascript' >\n");
-                    writer.append("jQuery(function() {\n");
-                    //17/09/2012 - 24/09/2012
-                    String range = ReportingApp.getDashboardDateRange();
-                    OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
-                    if (orgFolder != null) {
-                        //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
-                        String href = orgFolder.getHref() + "reporting/org-groupSignups";
-                        writer.append(" runReport(\"" + range + "\", jQuery('.report .signupReport'), \"" + href + "\");\n");
-                        writer.append("});\n");
-                        writer.append("</script>\n");
-                    }
-                    writer.append("</div>\n");
+
+
+                writer.append("<div class='report'>\n");
+                writer.append("<h3>Signup activity</h3>\n");
+                writer.append("<div class='signupReport'></div>\n");
+                writer.append("<script type='text/javascript' >\n");
+                writer.append("jQuery(function() {\n");
+                //17/09/2012 - 24/09/2012
+                String range = ReportingApp.getDashboardDateRange();
+                OrganisationFolder orgFolder = WebUtils.findParentOrg(r);
+                if (orgFolder != null) {
+                    //http://localhost:8080/organisations/3dn/reporting/org-learningProgress?startDate=Choose+a+date+range&finishDate=
+                    String href = orgFolder.getHref() + "reporting/org-groupSignups";
+                    writer.append(" runReport(\"" + range + "\", jQuery('.report .signupReport'), null, \"" + href + "\");\n");
+                    writer.append("});\n");
+                    writer.append("</script>\n");
                 }
+                writer.append("</div>\n");
             }
+
         }
     }
 

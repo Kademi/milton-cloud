@@ -106,14 +106,15 @@ function initQuizBuilder() {
             // put back original element            
             var newText = inp.val().trim();
             log("focusout", inp, target, "newText", newText);            
-            if( newText.length > 0 ) {
-                target.text(inp.val());
-                target.insertAfter(inp);
-                inp.remove();
-            } else {
-                // remove it
+            target.text(inp.val());
+            
+            // If its a label, and its empty, then remove it
+            if( target.hasClass("LABEL") && newText.length == 0 ) {
                 inp.closest("li").remove();
-            }                                    
+            } else {
+                target.insertAfter(inp);
+                inp.remove();                
+            }
             if( target.is("label")) {
                 ensureOneEmptyRadio(target.closest("ol"));
             }

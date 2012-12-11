@@ -113,10 +113,9 @@ public class GroupSignupsReport implements JsonReport{
         }
         GraphData graphData = new GraphData();
         graphData.setData(dataPoints);
-        String[] labels = {"Signups"};
-        graphData.setLabels(labels);
+        String[] ykeys = new String[groupsInSeries.size()];        
+        graphData.setLabels(ykeys);
         graphData.setXkey("date");
-        String[] ykeys = new String[groupsInSeries.size()];
         groupsInSeries.toArray(ykeys);
         graphData.setYkeys(ykeys);
         log.info("data points: " + dataPoints.size());

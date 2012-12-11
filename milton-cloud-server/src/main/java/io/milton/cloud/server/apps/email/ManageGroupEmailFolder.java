@@ -116,21 +116,23 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
                 } else {
                     removeGroup(groupName);
                 }
-            }
+                tx.commit();
+            } else {
 
-            try {
-                Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
-                Website themeSite = null;
-                if (themeSiteId != null) {
-                    themeSite = Website.get(session, themeSiteId);
+                try {
+                    Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
+                    Website themeSite = null;
+                    if (themeSiteId != null) {
+                        themeSite = Website.get(session, themeSiteId);
+                    }
+                    job.setThemeSite(themeSite);
+                    _(DataBinder.class).populate(job, parameters);
+                } catch (IllegalAccessException | InvocationTargetException ex) {
+                    throw new RuntimeException(ex);
                 }
-                job.setThemeSite(themeSite);
-                _(DataBinder.class).populate(job, parameters);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new RuntimeException(ex);
+                session.save(job);
+                tx.commit();
             }
-            session.save(job);
-            tx.commit();
         }
         jsonResult = new JsonResult(true);
         return null;
@@ -148,8 +150,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         super.delete();
     }
 
-    
-    
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
@@ -417,13 +417,14 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
     }
 
     /**
-     * If reallySend is set it just sets the status on the job so it can be 
-     * processed asyncronously. Otherwise, it sends a single email to the current user
-     * 
+     * If reallySend is set it just sets the status on the job so it can be
+     * processed asyncronously. Otherwise, it sends a single email to the
+     * current user
+     *
      * @param session
      * @param reallySend
      * @throws HibernateException
-     * @throws IOException 
+     * @throws IOException
      */
     private void startSendJob(Session session, boolean reallySend) throws HibernateException, IOException {
         Date now = _(CurrentDateService.class).getNow();
