@@ -535,6 +535,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         fileResource.setHash(s);
     }
 
+    @Override
     public String getLink() {
         return "<a href='" + getHref() + "'>" + getTitle() + "</a>";
     }

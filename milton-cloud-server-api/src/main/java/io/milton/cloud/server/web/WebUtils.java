@@ -18,6 +18,7 @@ package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
@@ -36,6 +37,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.SourceFormatter;
 import org.w3c.tidy.Tidy;
 
 /**
@@ -44,6 +47,8 @@ import org.w3c.tidy.Tidy;
  */
 public class WebUtils {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebUtils.class);
+    
     /**
      * Returns a trimmed, nulled, string value. If present the value is trimmed,
      * and if empty returns null
@@ -286,7 +291,7 @@ public class WebUtils {
         }
     }
 
-    public static String tidyHtml(InputStream in) {
+    public static String tidyHtml2(InputStream in) {
         try {
             Tidy tidy = new Tidy(); // obtain a new Tidy instance
             tidy.setXHTML(true);
@@ -306,8 +311,22 @@ public class WebUtils {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-
     }
+    
+    public static String tidyHtml(String messy) {
+        try {
+            Source source = new Source(messy);
+            source.fullSequentialParse();
+            SourceFormatter sourceFormatter = source.getSourceFormatter();
+            sourceFormatter.setTidyTags(true);
+            sourceFormatter.setCollapseWhiteSpace(true);
+            String tidy = sourceFormatter.toString();
+            return tidy;
+        } catch (Exception e) {
+            log.error("Failed to generate text from HTML", e);
+            return null;
+        }
+    }    
 
     public static Long getParamAsLong(Map<String, String> parameters, String key) {
         String s = getParam(parameters, key);

@@ -293,10 +293,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
             try {
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 _(HtmlTemplateParser.class).update(htmlPage, bout);
-                byte[] arr = bout.toByteArray();
-                ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-                String tidyHtml = WebUtils.tidyHtml(bin);
-                bin = new ByteArrayInputStream(tidyHtml.getBytes("UTF-8"));
+                String tidyHtml = WebUtils.tidyHtml(bout.toString());
+                ByteArrayInputStream bin = new ByteArrayInputStream(tidyHtml.getBytes("UTF-8"));
                 setContent(bin);
             } catch (UnsupportedEncodingException ex) {
                 throw new RuntimeException(ex);

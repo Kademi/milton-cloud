@@ -84,12 +84,23 @@ $.extend({
  */
 function log() {
     if( typeof(console) != "undefined" ) {
-        if (navigator.appName == 'Microsoft Internet Explorer') {
-            var msg = "";
-            for( i=0; i<arguments.length; i++) {
-                msg += JSON.stringify(arguments[i]) + ",";
+        if (navigator.appName == 'Microsoft Internet Explorer' ) {
+            if( typeof(JSON) == "undefined") {
+                if( arguments.length == 1 ) {
+                    console.log(arguments[0]);
+                } else if( arguments.length == 2 ) {
+                    console.log(arguments[0], arguments[1]);
+                } else if( arguments.length > 2 ) {
+                    console.log(arguments[0], arguments[1], arguments[2]);
+                }
+                
+            } else {
+                var msg = "";
+                for( i=0; i<arguments.length; i++) {
+                    msg += JSON.stringify(arguments[i]) + ",";
+                }
+                console.log(msg);
             }
-            console.log(msg);
         } else {
             console.log(arguments);
         }
