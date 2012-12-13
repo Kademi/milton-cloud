@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
+import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -98,12 +99,22 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         notDeleted.add(Restrictions.isNull("deleted"));
         notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         crit.add(notDeleted);
-        String s = q + "%";
-        Disjunction or = Restrictions.disjunction();
-        or.add(Restrictions.ilike("title", s));
-        or.add(Restrictions.ilike("orgId", s));
-        crit.add(or);
-        if( orgType != null ) {
+
+        String[] arr = q.split(" ");
+        Conjunction con = Restrictions.conjunction();
+        for (String queryPart : arr) {
+            Disjunction dis = Restrictions.disjunction();
+            String s = "%" + queryPart + "%";
+            dis.add(Restrictions.ilike("title", s));
+            dis.add(Restrictions.ilike("orgId", s));
+            dis.add(Restrictions.ilike("address", s));
+            dis.add(Restrictions.ilike("addressLine2", s));
+            dis.add(Restrictions.ilike("postcode", s));
+            con.add(dis);
+        }
+        crit.add(con);
+        
+        if (orgType != null) {
             crit.add(Restrictions.eq("orgType", orgType));
         }
         // TODO: add other properties like address
@@ -631,10 +642,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public List<GroupMembership> getMembers() {
         return GroupMembership.find(this, SessionManager.session());
     }
-    
+
     @Transient
     public String getTitleOrId() {
-        if( title != null ) {
+        if (title != null) {
             return title;
         }
         return getOrgId();

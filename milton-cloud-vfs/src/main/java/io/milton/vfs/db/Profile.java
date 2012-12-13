@@ -467,6 +467,12 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         if (getSurName() != null && getSurName().length() > 0) {
             name = name + " " + getSurName();
         }
+        if( name.length() == 0) {
+            name = getNickName();
+        }
+        if( name.length() == 0 ) {
+            name = getName();
+        }
         return name;
     }
     

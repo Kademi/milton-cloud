@@ -22,8 +22,9 @@ import io.milton.common.Path;
 import java.io.*;
 import java.util.Arrays;
 import javax.xml.stream.XMLStreamException;
+import net.htmlparser.jericho.Source;
+import org.apache.commons.io.IOUtils;
 import org.jdom.Attribute;
-import org.jdom.Document;
 import org.jdom.Element;
 
 /**
@@ -46,32 +47,28 @@ public class HtmlTemplateParser {
     public void parse(HtmlPage meta, Path webPath) throws IOException, XMLStreamException {
         log.info("parse: " + meta.getSource() + " - " + meta.getClass() + " accumulated time=" + time + "ms");
         long tm = System.currentTimeMillis();
-        Document doc;
+
+        
         try (InputStream fin = meta.getInputStream()) {
             if (fin != null) {
                 BufferedInputStream bufIn = new BufferedInputStream(fin);
-                doc = JDomUtils.getJDomDocument(bufIn);
-            } else {
-                doc = null;
-            }
-        }
-        if (doc != null) {
-            Element elRoot = doc.getRootElement();
-            if (!elRoot.getName().equals("html")) {
-                throw new RuntimeException("Document is not an html doc");
-            }
-            Element elHead = JDomUtils.getChild(elRoot, "head");
-            parseWebResourcesFromHtml(elHead, meta, webPath);
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                IOUtils.copy(bufIn, bout);
+                String sourceXml = bout.toString("UTF-8");
+                Source source = new Source(sourceXml);
+                net.htmlparser.jericho.Element elHead = source.getFirstElement("head");
+                parseWebResourcesFromHtml(elHead, meta, webPath);
 
-            Element elBody = JDomUtils.getChild(elRoot, "body");
-            if (elBody != null) {
-                String sBodyClasses = elBody.getAttributeValue("class");
-                if (sBodyClasses != null) {
-                    meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
+                net.htmlparser.jericho.Element elBody = source.getFirstElement("body");
+                if (elBody != null) {
+                    String sBodyClasses = elBody.getAttributeValue("class");
+                    if (sBodyClasses != null) {
+                        meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
+                    }
                 }
+                String body = getContent(elBody);
+                meta.setBody(body);
             }
-            String body = JDomUtils.getValueOf(elRoot, "body");
-            meta.setBody(body);
         }
         tm = System.currentTimeMillis() - tm;
         time += tm;
@@ -87,27 +84,29 @@ public class HtmlTemplateParser {
         htmlFormatter.update(r, bout);
     }
 
-    private void parseWebResourcesFromHtml(Element elHead, HtmlPage meta, Path webPath) {
-        for (Element wrTag : JDomUtils.children(elHead)) {
+    private void parseWebResourcesFromHtml(net.htmlparser.jericho.Element elHead, HtmlPage meta, Path webPath) {
+        for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
             if (wrTag.getName().equals("title")) {
-                meta.setTitle(JDomUtils.getValueOf(elHead, "title"));
+                String s = wrTag.getRenderer().toString();                        
+                meta.setTitle(s);
+                System.out.println("title: " + s);
             } else {
                 WebResource wr = new WebResource(webPath);
                 meta.getWebResources().add(wr);
                 wr.setTag(wrTag.getName());
                 String body = getContent(wrTag);
+                System.out.println("web resources body: " + body);
                 wr.setBody(body);
-                for (Object oAtt : wrTag.getAttributes()) {
-                    Attribute att = (Attribute) oAtt;
+                for (net.htmlparser.jericho.Attribute att : wrTag.getAttributes()) {
                     wr.getAtts().put(att.getName(), att.getValue());
                 }
             }
         }
     }
 
-    public String getContent(org.jdom.Element el) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        JDomUtils.transformDocument(out, el);
-        return out.toString().trim();
+    public String getContent(net.htmlparser.jericho.Element el) {
+        return el.getContent().toString().trim();
     }
+    
+    
 }

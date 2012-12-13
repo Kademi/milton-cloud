@@ -28,6 +28,7 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -291,7 +292,7 @@ public class WebUtils {
         }
     }
 
-    public static String tidyHtml2(InputStream in) {
+    public static String tidyHtml(String s) {
         try {
             Tidy tidy = new Tidy(); // obtain a new Tidy instance
             tidy.setXHTML(true);
@@ -300,26 +301,30 @@ public class WebUtils {
             tidy.setDocType(null);
             tidy.setIndentContent(true);
             tidy.setSmartIndent(true);
+            tidy.setTidyMark(false);
+            tidy.setWraplen(500);
             
             tidy.setInputEncoding("UTF-8");
             tidy.setOutputEncoding("UTF-8");
                         
             tidy.setDocType("omit");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            InputStream in = new ByteArrayInputStream(s.getBytes("UTF-8"));
             tidy.parse(in, bout); // run tidy, providing an input and output stream
-            return bout.toString("UTF-8");
+            String out = bout.toString("UTF-8");
+            return out;
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
     }
     
-    public static String tidyHtml(String messy) {
+    public static String tidyHtml2(String messy) {
         try {
             Source source = new Source(messy);
             source.fullSequentialParse();
             SourceFormatter sourceFormatter = source.getSourceFormatter();
-            sourceFormatter.setTidyTags(true);
-            sourceFormatter.setCollapseWhiteSpace(true);
+            //sourceFormatter.setTidyTags(true);
+            //sourceFormatter.setCollapseWhiteSpace(true);
             String tidy = sourceFormatter.toString();
             return tidy;
         } catch (Exception e) {
