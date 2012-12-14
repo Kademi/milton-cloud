@@ -58,7 +58,7 @@ public class DoPasswordResetPage extends TemplatedHtmlPage implements PostableRe
     private JsonResult jsonResult;
 
     public DoPasswordResetPage(String name, CommonCollectionResource parent, CookieAuthenticationHandler cookieAuthenticationHandler) {
-        super(name, parent, "theme/passwordDoReset", "Password reset");
+        super(name, parent, "user/passwordDoReset", "Password reset");
         this.cookieAuthenticationHandler = cookieAuthenticationHandler;
         if( this.cookieAuthenticationHandler == null ) {
             throw new RuntimeException("no cookie auth");

@@ -48,7 +48,7 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
 
-    public static String getPasswordResetHref(Website w) {
+    public static String getPasswordResetBase(Website w) {
         String domainName = w.getDomainName();
         if( domainName == null ) {
             domainName = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
@@ -56,7 +56,11 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
         String s = _(Formatter.class).getPortString();
         domainName = domainName + s;
         
-        return "http://" + domainName + "/do-reset?token=$page.passwordReset.token";
+        return "http://" + domainName + "/do-reset";
+    }        
+    
+    public static String getPasswordResetHref(Website w) {
+        return getPasswordResetBase(w) + "?token=$page.passwordReset.token";
     }    
     
     public static PrincipalResource findEntity(Profile u, RootFolder rootFolder) throws NotAuthorizedException, BadRequestException {

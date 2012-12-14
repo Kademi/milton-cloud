@@ -20,13 +20,11 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.PasswordReset;
-import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.cloud.server.web.WebUtils;
-import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -46,7 +44,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
-import java.io.ByteArrayOutputStream;
 
 /**
  * 
@@ -62,7 +59,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
     private PasswordReset passwordReset;
     
     public PasswordResetPage(String name, CommonCollectionResource parent) {
-        super(name, parent, "theme/passwordReset", "Password reset");
+        super(name, parent, "user/passwordReset", "Password reset");
     }
 
     @Override
@@ -119,36 +116,41 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         } else {
             subject = "Password reset for " + org.getOrgId();
         }
-        String returnUrl = UserApp.getPasswordResetHref(website);
+        String returnUrl = UserApp.getPasswordResetBase(website);
         Date now = _(CurrentDateService.class).getNow();
         passwordReset = PasswordReset.create(user, now, returnUrl, website, session);
+        returnUrl +=  "?token=" + passwordReset.getToken();
         log.info("created reset token: " + passwordReset.getToken());
-        
-        String emailHtml = createEmailHtml();
-        System.out.println("email html:");
-        System.out.println(emailHtml);
-        System.out.println("------");
-        
+                        
         EmailItem emailItem = new EmailItem();
         emailItem.setCreatedDate(now);
         emailItem.setFromAddress(fromAddress);
-        emailItem.setReplyToAddress(fromAddress);
-        emailItem.setHtml(emailHtml);
+        emailItem.setReplyToAddress(fromAddress);        
         emailItem.setRecipient(user);
         emailItem.setRecipientAddress(email);
         emailItem.setSubject(subject);        
         emailItem.setSendStatusDate(now);
+        setEmailContent(emailItem, returnUrl);
+        System.out.println("email html:");
+        System.out.println(emailItem.getHtml());
+        System.out.println("------");
+        
         session.save(emailItem);
         log.info("queue email itemxxxx");
         
         return true;
     }
 
-    private String createEmailHtml() throws IOException {
-        model = buildModel(null);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        _(HtmlTemplater.class).writePage("theme/passwordResetEmail", this, null, out);
-        return out.toString("UTF-8");
+    private void setEmailContent(EmailItem emailItem, String returnUrl) throws IOException {
+        String html = "<h1>Reset your password</h1>\n" + 
+                "<p>Click on the following link to reset your e-learning password - \n" + 
+                "<a href='" + returnUrl + "'>Reset your password</a></p>";
+        emailItem.setHtml(html);
+     
+        String text = "Reset your password\n" + 
+                "Click on the following link to reset your e-learning password - \n" + 
+                returnUrl;
+        emailItem.setText(text);
     }
 
     @Override

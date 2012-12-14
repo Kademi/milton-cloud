@@ -44,4 +44,23 @@ public class HtmlTemplateParserTest {
         assertEquals("//", wrScript.getBody());
         assertTrue(wrParam.getBody().startsWith("<p>Registering as a Professional"));
     }
+    
+    @Test
+    public void testStripCdata() throws Exception {
+        String s = "<![CDATA[\n" +
+                    "2\n" +
+                    "]]>";
+        String s2 = HtmlTemplateParser.stripCDATA(s);
+        assertEquals("2", s2);
+                
+    }
+
+    @Test
+    public void testStripCdata_Nochange() throws Exception {
+        String s = "2";
+        String s2 = HtmlTemplateParser.stripCDATA(s);
+        assertEquals("2", s2);
+                
+    }
+    
 }

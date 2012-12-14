@@ -162,19 +162,22 @@ public class BatchEmailService {
     
     
     private String generateHtml(final BaseEmailJob j, final Profile p, BatchEmailCallback callback) throws IOException {
+        return generateHtml(j.getThemeSite(), j.getHtml(), p, callback);
+    }
+    
+    public String generateHtml(Website themeSite, String html, final Profile p, BatchEmailCallback callback) throws IOException {
         Map localVars = new HashMap();
         localVars.put("profile", p);
         
-        Website themeSite = j.getThemeSite();
         if (themeSite != null) {
             Branch b = themeSite.liveBranch();
             if (b != null) {
-                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), j.getThemeSite(), b);
+                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), themeSite, b);
                 localVars.put("website", websiteRootFolder);
             }
         }
 
-        String template = j.getHtml() == null ? "" : j.getHtml();
+        String template = html == null ? "" : html;
         if (callback != null) {
             template = callback.beforeSend(p, template, localVars);
         }
@@ -186,7 +189,7 @@ public class BatchEmailService {
         if (themeSite != null) {
             Branch b = themeSite.liveBranch();
             if (b != null) {
-                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), j.getThemeSite(), b);
+                WebsiteRootFolder websiteRootFolder = new WebsiteRootFolder(_(ApplicationManager.class), themeSite, b);
                 TemplatedHtmlPage page = new TemplatedHtmlPage("email", websiteRootFolder, "email/genericEmail", "Email") {
                     @Override
                     protected Map<String, Object> buildModel(Map<String, String> params) {

@@ -22,6 +22,7 @@ import io.milton.common.Path;
 import java.io.*;
 import java.util.Arrays;
 import javax.xml.stream.XMLStreamException;
+import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
 import org.jdom.Attribute;
@@ -34,6 +35,8 @@ import org.jdom.Element;
 public class HtmlTemplateParser {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplateParser.class);
+    public static String CDATA_START = "<![CDATA[";
+    public static String CDATA_END = "]]>";
     private static long time;
     private HtmlFormatter htmlFormatter = new HtmlFormatter();
 
@@ -48,7 +51,7 @@ public class HtmlTemplateParser {
         log.info("parse: " + meta.getSource() + " - " + meta.getClass() + " accumulated time=" + time + "ms");
         long tm = System.currentTimeMillis();
 
-        
+
         try (InputStream fin = meta.getInputStream()) {
             if (fin != null) {
                 BufferedInputStream bufIn = new BufferedInputStream(fin);
@@ -85,28 +88,43 @@ public class HtmlTemplateParser {
     }
 
     private void parseWebResourcesFromHtml(net.htmlparser.jericho.Element elHead, HtmlPage meta, Path webPath) {
+        //System.out.println("parseWebResourcesFromHtml");
         for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
+            //System.out.println("tag: " + wrTag.getName());
             if (wrTag.getName().equals("title")) {
-                String s = wrTag.getRenderer().toString();                        
+                String s = wrTag.getRenderer().toString();
                 meta.setTitle(s);
-                System.out.println("title: " + s);
             } else {
-                WebResource wr = new WebResource(webPath);
-                meta.getWebResources().add(wr);
-                wr.setTag(wrTag.getName());
-                String body = getContent(wrTag);
-                System.out.println("web resources body: " + body);
-                wr.setBody(body);
-                for (net.htmlparser.jericho.Attribute att : wrTag.getAttributes()) {
-                    wr.getAtts().put(att.getName(), att.getValue());
+                if (!wrTag.getName().startsWith("!")) {
+                    WebResource wr = new WebResource(webPath);
+                    meta.getWebResources().add(wr);
+                    wr.setTag(wrTag.getName());
+                    String body = getContent(wrTag);
+                    wr.setBody(body);
+                    Attributes atts = wrTag.getAttributes();
+                    if (atts != null) {
+                        for (net.htmlparser.jericho.Attribute att : atts) {
+                            wr.getAtts().put(att.getName(), att.getValue());
+                        }
+                    }
                 }
             }
         }
     }
 
-    public String getContent(net.htmlparser.jericho.Element el) {
-        return el.getContent().toString().trim();
+    public static String getContent(net.htmlparser.jericho.Element el) {
+        String s = el.getContent().toString().trim();
+        s = stripCDATA(s);
+        return s;
     }
-    
-    
+
+    public static String stripCDATA(String s) {
+        if (s.startsWith(CDATA_START)) {
+            s = s.substring(CDATA_START.length());
+        }
+        if (s.endsWith(CDATA_END)) {
+            s = s.substring(0, s.length() - CDATA_END.length());
+        }
+        return s.trim();
+    }
 }
