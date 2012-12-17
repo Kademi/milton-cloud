@@ -39,6 +39,7 @@ import java.util.Properties;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.context.RequestContext;
 import io.milton.mail.MessageFolder;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
@@ -459,16 +460,32 @@ public class ApplicationManager {
     }
 
     private List<DataResourceApplication> getResourceCreators(RootFolder rf) {
-        List<DataResourceApplication> list = (List<DataResourceApplication>) rf.getAttributes().get("resourceCreators");
-        if (list == null) {
-            list = new ArrayList<>();
+        List<DataResourceApplication> list;
+        boolean initList = false;
+        if( rf != null ) {
+            list = (List<DataResourceApplication>) rf.getAttributes().get("resourceCreators");
+            if( list == null ) {
+                initList = true;
+                list = new ArrayList<>();
+                rf.getAttributes().put("resourceCreators", list);
+            }
+        } else {
+            RequestContext ctx = RequestContext.getCurrent();
+            list = (List<DataResourceApplication>) ctx.get("resourceCreators");
+            if( list == null ) {
+                initList = true;
+                list = new ArrayList<>();
+                ctx.put("resourceCreators", list);
+            }
+            
+        }
+        if (initList) {            
             for (Application app : getActiveApps(rf)) {
                 if (app instanceof DataResourceApplication) {
                     DataResourceApplication rc = (DataResourceApplication) app;
                     list.add(rc);
                 }
             }
-            rf.getAttributes().put("resourceCreators", list);
         }
         return list;
     }

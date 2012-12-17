@@ -45,6 +45,8 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
 
     public static List<EmailTrigger> find(Session session, String eventId, Organisation org, String trigger1, String trigger2, String trigger3, String trigger4, String trigger5) {
         Criteria crit = session.createCriteria(EmailTrigger.class);
+        crit.add(Restrictions.eq("organisation", org));
+        crit.add(Restrictions.eq("eventId", eventId));
         if (trigger1 != null) {
             crit.add(Restrictions.or(Restrictions.eq("triggerCondition1", trigger1), Restrictions.isNull("triggerCondition1")));
         } else {

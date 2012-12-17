@@ -116,7 +116,7 @@ public class GroupEmailService {
                 @Override
                 public String beforeSend(Profile p, String template, Map templateVars) {
                     Website website = j.getThemeSite();
-                    String returnUrl = UserApp.getPasswordResetHref(website);
+                    String returnUrl = UserApp.getPasswordResetBase(website);
                     final Date now = _(CurrentDateService.class).getNow();
                     PasswordReset passwordReset = PasswordReset.create(p, now, returnUrl, website, session);
                     templateVars.put("passwordReset", passwordReset);

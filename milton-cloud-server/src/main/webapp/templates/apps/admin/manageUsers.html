@@ -15,6 +15,9 @@
                         <input id="userQuery" type="text" value="" placeholder="Search for user here" />
                         <a href="#" class="ClearText"><span class="Hidden">X</span></a>
                     </div>
+                    <div class="buttons">
+                        <button class="Btn removeUsers">Remove</button>
+                    </div>
                 </header>
                 <table class="Summary" id="userSearchResults">
                     <tr>
@@ -24,6 +27,7 @@
                         <th>Email Address</th>
                         <th>Contact</th>
                         <th>&nbsp;</th>
+                        <th><input type="checkbox" name="toRemoveId" class="users selectAll"/></th>
                     </tr>
                     #foreach($p in $page.searchResults)
                     <tr>
@@ -47,6 +51,7 @@
                                 </div>
                             </div>
                         </td>                    
+                        <td><input type="checkbox" name="toRemoveId" value="$p.id"/></td>
                     </tr>
                     #end
                 </table>

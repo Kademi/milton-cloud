@@ -140,3 +140,7 @@ div.newUser div.groups ul {
     font-size: 12px;
     font-weight: bold;    
 }
+
+#manageUser .Info .buttons {
+    float: right;
+}

@@ -118,15 +118,16 @@ public class BatchEmailService {
     }
 
     public void sendSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
-        String from = j.getFromAddress();
-        if (from == null) {
-            from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
+        String from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
+        String replyTo = j.getFromAddress();
+        if (replyTo == null) {
+            replyTo = from;
         }
         Date now = _(CurrentDateService.class).getNow();
         EmailItem i = new EmailItem();
         i.setCreatedDate(now);
         i.setFromAddress(from);        
-        i.setReplyToAddress(j.getFromAddress());
+        i.setReplyToAddress(replyTo);
 
         // Templating requires a HtmlPage to represent the template        
         String html = generateHtml(j, recipientProfile, callback);

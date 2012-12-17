@@ -113,7 +113,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             con.add(dis);
         }
         crit.add(con);
-        
+
         if (orgType != null) {
             crit.add(Restrictions.eq("orgType", orgType));
         }
@@ -649,5 +649,28 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             return title;
         }
         return getOrgId();
+    }
+
+    /**
+     * Remove all memberships of this profile within this organiosation or
+     * subordinate organisations
+     *
+     * @param profile
+     */
+    public void removeMember(Profile profile, Session session) {
+        log.info("removeMember: profileid=" + profile.getId() + " org=" + getOrgId());
+        List<GroupMembership> toDelete = new ArrayList<>();
+        if (profile.getMemberships() != null) {
+            for (GroupMembership m : profile.getMemberships()) {
+                Organisation memberWithin = m.getWithinOrg();
+                if (memberWithin.isWithin(this)) {
+                    log.info("Remove membership of user: " + profile.getName() + " from org: " + memberWithin.getOrgId());
+                    toDelete.add(m);
+                }
+            }
+        }
+        for (GroupMembership m : toDelete) {            
+            m.delete(session);
+        }
     }
 }

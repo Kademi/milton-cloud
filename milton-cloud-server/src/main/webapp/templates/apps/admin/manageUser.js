@@ -8,6 +8,8 @@ function initManageUsers() {
     initSearchBusiness();
     initSearchUser();
     initOrgSearch();
+    initUsersSelectAll();
+    initRemoveUsers();
 }
 
 function initSearchUser() {
@@ -29,7 +31,6 @@ function doSearch() {
             log("replace", $("#userSearchResults"));
             log("frag", $fragment); 
             $("#userSearchResults").replaceWith($fragment);
-            initControl();            
         },
         error: function(resp) {
             alert("err");
@@ -230,3 +231,54 @@ function doOrgSearch() {
         }
     });      
 }    
+
+function initUsersSelectAll() {
+    $("body").on("click", ".selectAll", function(e) {
+        var node = $(e.target);
+        log("selectall", node, node.is(":checked"));
+        var chkName = node.attr("name");
+        var checked = node.is(":checked");
+        checkBoxes = node.closest("table").find("tbody td input:[type=checkbox]:[name=" + chkName + "]");
+        if( checked ) {
+            checkBoxes.attr("checked", "true");
+        } else {
+            checkBoxes.removeAttr("checked");
+        }
+    });
+}
+
+function initRemoveUsers() {
+    $(".removeUsers").click(function(e) {
+        var node = $(e.target);
+        log("removeUsers", node, node.is(":checked"));
+        var checkBoxes = node.closest(".Info").find("tbody td input:[name=toRemoveId]:checked");
+        if( checkBoxes.length == 0 ) {
+            alert("Please select the users you want to remove by clicking the checkboxs to the right");
+        } else {
+            if( confirm("Are you sure you want to remove " + checkBoxes.length + " users?") ) {
+                doRemoveUsers(checkBoxes);
+            }
+        }
+    });
+}
+
+function doRemoveUsers(checkBoxes) {
+    $.ajax({
+        type: 'POST',
+        data: checkBoxes,
+        dataType: "json",
+        url: "",
+        success: function(data) {
+            log("success", data)
+            if( data.status ) {
+                doSearch();
+                alert("Removed users ok");                
+            } else {
+                alert("There was a problem removing users. Please try again and contact the administrator if you still have problems");
+            }
+        },
+        error: function(resp) {
+            alert("err");
+        }
+    });      
+}
