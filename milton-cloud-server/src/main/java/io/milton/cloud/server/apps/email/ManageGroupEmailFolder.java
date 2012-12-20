@@ -120,12 +120,15 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             } else {
 
                 try {
-                    Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
-                    Website themeSite = null;
-                    if (themeSiteId != null) {
-                        themeSite = Website.get(session, themeSiteId);
+                    // can be omitted, or present but null, or present and not null
+                    if (parameters.containsKey("themeSiteId")) {
+                        Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
+                        Website themeSite = null;
+                        if (themeSiteId != null) {
+                            themeSite = Website.get(session, themeSiteId);
+                        }
+                        job.setThemeSite(themeSite);
                     }
-                    job.setThemeSite(themeSite);
                     _(DataBinder.class).populate(job, parameters);
                 } catch (IllegalAccessException | InvocationTargetException ex) {
                     throw new RuntimeException(ex);

@@ -74,7 +74,7 @@ public class WebsiteAccessReport implements JsonReport{
         List list = crit.list();
         List<ItemCountBean> topUrls = new ArrayList<>();
         graphData.setItems(topUrls);
-        String[] itemFields = {"URL", "count"};
+        String[] itemFields = {"item", "count"};
         graphData.setItemFields(itemFields);
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;

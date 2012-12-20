@@ -202,7 +202,7 @@ public class BatchEmailService {
 
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 try {
-                    page.sendContent(bout, null, params, null);
+                    page.sendContent(bout, null, params, null); 
                 } catch (IOException | NotAuthorizedException | BadRequestException | NotFoundException ex) {
                     throw new RuntimeException(ex);
                 }

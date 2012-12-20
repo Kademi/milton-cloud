@@ -243,6 +243,8 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
         };    
         if( height ) {
             config.height = height;            
+        } else {
+            config.height = "300";
         }
         if( width ) {
             config.width = width;

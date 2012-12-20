@@ -149,3 +149,5 @@ public abstract class AbstactAppsPage extends AbstractResource implements Getabl
         return Priviledge.WRITE_CONTENT;
     }    
 }
+
+

@@ -25,7 +25,7 @@ public class HtmlFormatter {
 
     public void update(HtmlPage r, ByteArrayOutputStream bout) {
         XmlWriter writer = new XmlWriter(bout);
-        writer.setAllowNewlines(true);
+        writer.setAllowNewlines(true); 
         XmlWriter.Element html = writer.begin("html");
         html.writeText("\n");
         XmlWriter.Element head = html.begin("head");

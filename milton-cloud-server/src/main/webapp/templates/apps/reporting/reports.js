@@ -68,7 +68,7 @@ function showGraph(graphData, reportContainer, itemsContainer) {
                     var table = $("<table><thead><tr></tr></thead><tbody><tr></tr></tbody></table>");
                     var trHeader = table.find("thead tr");
                     $.each(graphData.itemFields, function(i, f) {
-                        var td = $("<td>");
+                        var td = $("<th>");
                         td.text(f);
                         trHeader.append(td);                    
                     });

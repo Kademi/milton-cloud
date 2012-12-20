@@ -325,7 +325,7 @@ function getFileName(path) {
     return name;
 }
 
-function getFolderPath(path) {
+function getFolderPath(path) { 
     var pos = path.lastIndexOf("/");
     return path.substring(0, pos);
 }

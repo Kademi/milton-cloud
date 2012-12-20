@@ -83,7 +83,8 @@ public class GroupEmailService {
      * @param session
      */
     private void generateEmailItems(final GroupEmailJob j, final Session session) throws IOException {
-        if (j.getThemeSite() == null) {
+        boolean isPasswordReset = j.isPasswordReset() == null ? false : j.isPasswordReset();
+        if (j.getThemeSite() == null && isPasswordReset ) {
             throw new RuntimeException("Cant send password reset group email because no theme has been selected");
         }
         List<BaseEntity> directRecips = new ArrayList<>();

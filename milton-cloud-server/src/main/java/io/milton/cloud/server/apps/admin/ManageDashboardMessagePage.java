@@ -215,3 +215,4 @@ public class ManageDashboardMessagePage extends AbstractResource implements Geta
         return parent.getOrganisation();
     }
 }
+
