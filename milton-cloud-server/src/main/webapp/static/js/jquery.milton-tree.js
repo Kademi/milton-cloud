@@ -32,7 +32,7 @@
                 }
             
             }, options);  
-            config.hrefMap = new Object();
+            config.hrefMap = new Array();
             config.nodeMap = new Object();
             log("set options on", this);
             this.data("options", config);
@@ -196,9 +196,12 @@ function initTree(tree, config) {
     tree.bind("loaded.jstree", function() {
         log("tree loaded", config.pagePath);
         if( config.pagePath ) {
-            urlParts = config.pagePath.split("/");
-            if( urlParts.length > 0 ) {
-                autoOpen(tree, config, "/", 1, urlParts);
+            var relPagePath = config.pagePath.substring(config.basePath.length, config.pagePath.length);
+            log("relPagePath", relPagePath);
+            urlParts = relPagePath.split("/");
+            if( urlParts.length > 0 ) {                
+                log("do autoopen", config.pagePath, config.basePath, config.hrefMap);                
+                autoOpen(tree, config, "", 0, urlParts);
             }
         }
     });
@@ -222,13 +225,19 @@ function initTree(tree, config) {
                     return "";
                 },
                 "error" : function(data) {
-                    log("error", data);
+                    log("error loading tree data", data);
+                    var obj = $.parseJSON(data.responseText);
+                    log("parsed", obj);
+                    
                 },
                 "success" : function (data) {                    
+                    log("milton-tree: success", data);
                     var newData=new Array();
                     // Add some properties, and drop first result
                     $.each(data, function(key, value) {
+                        log("milton-tree: value=", value);
                         if( value.iscollection || !config.onlyFolders ) {
+                            log("milton-tree: value2");
                             if( key > 0 && isDisplayable(value, config) ) {
                                 value.state = "closed"; // set the initial state
                                 //value.data = value.name; // copy name to required property
@@ -244,9 +253,12 @@ function initTree(tree, config) {
                                     "class" : value.templateName
                                 };
                                 newData[newData.length] = value;
+                            } else {
+                                log("not displaying", key, value);
                             }
                         }
                     });
+                    log("milton-tree: success, returning", newData);
                     return newData;
                 }
             }
@@ -279,6 +291,7 @@ function initTree(tree, config) {
         }
     });
 }
+
 
 function autoOpen(tree, config, loadUrl, part, urlParts) {
     log("autoOpen", loadUrl, part, urlParts);
@@ -341,13 +354,14 @@ function createNodeId(href, config) {
     var newHref = href.replace(config.basePath, "");
     config.nodeMap[newId] = newHref;
     config.hrefMap[newHref] = newId;
+    log("createNodeId", href, config.hrefMap);
     return newId;
 }
 
 function toPropFindUrl(path, config) {
     var url;
     if( path == "") {
-        url = config.basePath + "/";
+        url = config.basePath;
     } else {
         url = config.basePath + path;
     }

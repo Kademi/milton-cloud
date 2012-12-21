@@ -1,0 +1,38 @@
+.miltonImageSelect.Modal {
+    width: auto;
+}
+
+.miltonImageSelect .miltonImageSelectContainer {
+    width: 640px;
+}
+.miltonImageSelect .tree {
+    width: 250px;
+    height: 300px;
+}
+.miltonImageSelect .mtree {
+    border: 1px solid lightgray;
+    min-height: 260px;    
+}
+
+.miltonImageSelect .imageUpload {
+    left: 270px;
+    position: absolute;
+    top: 59px;
+    width: 640px;
+}
+
+.miltonImageSelect .imageContainer {
+    border: 1px solid lightgray;
+    height: 220px;
+    left: 270px;
+    position: absolute;
+    top: 100px;
+    width: 390px;
+}
+
+.miltonImageSelect button {
+    bottom: 10px;
+    position: absolute;
+    right: 10px;
+    width: 100px;    
+}
