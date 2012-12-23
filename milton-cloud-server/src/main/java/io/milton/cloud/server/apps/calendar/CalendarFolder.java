@@ -27,6 +27,7 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.values.SupportedCalendarComponentList;
 
 /**
  *
@@ -154,6 +155,11 @@ public class CalendarFolder extends AbstractCollectionResource implements Calend
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }    
+
+    @Override
+    public SupportedCalendarComponentList getSupportedComponentSet() {
+        return SupportedCalendarComponentList.asList(ComponentType.VEVENT, ComponentType.VTODO);
+    }
     
 
 }

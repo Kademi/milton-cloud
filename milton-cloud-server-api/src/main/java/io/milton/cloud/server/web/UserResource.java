@@ -31,6 +31,7 @@ import javax.mail.internet.MimeMessage;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
+import io.milton.http.values.SupportedCalendarComponentListsSet;
 import io.milton.principal.CalDavPrincipal;
 import io.milton.principal.CardDavPrincipal;
 
@@ -318,5 +319,10 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     @Override
     public Profile getThisProfile() {
         return getThisUser();
+    }
+
+    @Override
+    public SupportedCalendarComponentListsSet getSupportedComponentSets() {
+        return null;
     }
 }
