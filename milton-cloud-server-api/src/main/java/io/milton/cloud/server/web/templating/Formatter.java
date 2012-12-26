@@ -259,7 +259,8 @@ public class Formatter {
         if (dt == null) {
             return "";
         }
-        return DateTimeFormat.mediumDate().print(dt);
+
+        return pad2(dt.getDayOfMonth()) + "/" + pad2(dt.getMonthOfYear()) + "/" + pad(dt.getYear(),4);
     }
 
     public String formatDateLong(Object o) {
