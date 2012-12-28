@@ -117,7 +117,7 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
         t.setEventId(SubscriptionEvent.ID);
         t.setEnabled(false);
         t.setName(nameToCreate);
-        t.setTitle(name);
+        t.setTitle(nameToCreate);
         t.setOrganisation(getOrganisation());
         session.save(t);
 
@@ -294,7 +294,9 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
         }
         getOrCreateDirNode(true);
         log.info("is dirty? " + dataSession.getRootDataNode().isDirty());
-        dataSession.save(currentUser);
+        if( dataSession.getRootDataNode().getHash() != null ) {
+            dataSession.save(currentUser);
+        }
     }
 
     @Override

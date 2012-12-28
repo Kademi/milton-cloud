@@ -15,11 +15,16 @@
 package io.milton.vfs.db;
 
 import io.milton.cloud.process.ProcessInstance;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Base class for entities which represent ProcessInstance's
@@ -31,6 +36,16 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseProcess implements Serializable, ProcessInstance {
+    
+    public static List<BaseProcess> find(String processName, Session session, String ... states) {
+        Criteria crit = session.createCriteria(BaseProcess.class);
+        crit.setCacheable(true);
+        //crit.add(Restrictions.eq("timerEnabled", true));
+        crit.add(Restrictions.in("stateName", states));
+        crit.add(Restrictions.eq("processName", processName));
+        return DbUtils.toList(crit, BaseProcess.class);
+    }    
+    
     private Long id;
     private String type;
     private Date timeEntered;
@@ -56,7 +71,7 @@ public abstract class BaseProcess implements Serializable, ProcessInstance {
     public void setType(String type) {
         this.type = type;
     }    
-    
+       
     @Override
     public void setTimeEntered(Date dateTime) {
         this.timeEntered = dateTime;
@@ -98,6 +113,4 @@ public abstract class BaseProcess implements Serializable, ProcessInstance {
     public void setStateName(String name) {
         this.stateName = name;
     }
-    
-    
 }

@@ -251,7 +251,11 @@ public class DataSession {
         }
 
         public void delete() {
-            parent.getChildren().remove(this);
+            if( parent == null ) {
+                return ;
+            }
+            final List<DataNode> parentsChildren = parent.getChildren();
+            parentsChildren.remove(this);
             parent.checkConsistency(parent);
             setDirty();
         }

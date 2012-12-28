@@ -38,15 +38,18 @@ public class LocalAsynchProcessor implements AsynchProcessor {
         this.queue.add(p);
     }
 
-    public void schedule(final Processable p, long period) {
+    @Override
+    public void schedule(final Processable p, long period) {        
         this.scheduledJobs.add(p);
         TimerTask task = new TimerTask() {
 
             @Override
             public void run() {
+                log.info("running scheduled task: " + p);
                 runProcessable(p);
             }
         };
+        log.info("scheduling job: " + p + " with period: " + period);
         scheduler.scheduleAtFixedRate(task, 1000, period);
     }
 
@@ -61,7 +64,7 @@ public class LocalAsynchProcessor implements AsynchProcessor {
         threadProcessor.start();
 
         log.debug("..starting scheduler");
-        scheduler = new Timer(true);
+        scheduler = new Timer(this.getClass().getCanonicalName(), true);
 
         log.debug("AysnchProcessor started");
     }

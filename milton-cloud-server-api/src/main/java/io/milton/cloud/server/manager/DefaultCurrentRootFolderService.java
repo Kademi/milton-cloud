@@ -191,6 +191,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         return new OrganisationRootFolder(applicationManager, org);
     }
 
+    
     public ApplicationManager getApplicationManager() {
         return applicationManager;
     }

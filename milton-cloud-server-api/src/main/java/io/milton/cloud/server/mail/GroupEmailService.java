@@ -122,6 +122,7 @@ public class GroupEmailService {
                     PasswordReset passwordReset = PasswordReset.create(p, now, returnUrl, website, session);
                     templateVars.put("passwordReset", passwordReset);
                     String resetHref = returnUrl + "?token=" + passwordReset.getToken();
+                    templateVars.put("resetHref", resetHref);
                     String linkText = j.getPasswordResetLinkText() == null ? "Please click here to reset your password" : j.getPasswordResetLinkText();
                     String passwordResetLinkTemplate = "<a href='" + resetHref + "'>" + linkText + "</a>";
                     return template + passwordResetLinkTemplate;

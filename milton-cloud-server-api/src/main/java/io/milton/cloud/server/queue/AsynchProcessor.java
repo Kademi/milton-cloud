@@ -11,4 +11,5 @@ public interface AsynchProcessor extends Service {
 
     void enqueue(Processable p);
 
+    void schedule(final Processable p, long periodMillis);
 }

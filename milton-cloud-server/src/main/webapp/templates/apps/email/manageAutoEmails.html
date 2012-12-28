@@ -16,7 +16,7 @@
                     #foreach($email in $page.children)
                     <li>
                         <div class="emailStatus${email.statusCode}">
-                            <span class="Name">$!email.name</span>
+                            <span class="Name">$!email.title</span>
                             <span class="Status">$!email.status</span>
                             <aside>
                                 <a class="Edit EditEmail" title="Edit" href="$email.name">

@@ -17,6 +17,7 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
@@ -47,32 +48,44 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
         Criteria crit = session.createCriteria(EmailTrigger.class);
         crit.add(Restrictions.eq("organisation", org));
         crit.add(Restrictions.eq("eventId", eventId));
-        if (trigger1 != null) {
-            crit.add(Restrictions.or(Restrictions.eq("triggerCondition1", trigger1), Restrictions.isNull("triggerCondition1")));
-        } else {
-            crit.add(Restrictions.isNull("triggerCondition1"));
+        List<EmailTrigger> rawList = DbUtils.toList(crit, EmailTrigger.class);
+        List<EmailTrigger> finalList = new ArrayList<>();
+        for (EmailTrigger trigger : rawList) {
+            if (matches(trigger, trigger1, trigger2, trigger3, trigger4, trigger5)) {
+                finalList.add(trigger);
+            }
         }
-        if (trigger2 != null) {
-            crit.add(Restrictions.or(Restrictions.eq("triggerCondition2", trigger2), Restrictions.isNull("triggerCondition2")));
-        } else {
-            crit.add(Restrictions.isNull("triggerCondition2"));
+        return finalList;
+    }
+
+    private static boolean matches(EmailTrigger trigger, String trigger1, String trigger2, String trigger3, String trigger4, String trigger5) {
+        if (!matches(trigger.getTriggerCondition1(), trigger1)) {
+            return false;
         }
-        if (trigger3 != null) {
-            crit.add(Restrictions.or(Restrictions.eq("triggerCondition3", trigger3), Restrictions.isNull("triggerCondition3")));
-        } else {
-            crit.add(Restrictions.isNull("triggerCondition3"));
+        if (!matches(trigger.getTriggerCondition2(), trigger2)) {
+            return false;
         }
-        if (trigger4 != null) {
-            crit.add(Restrictions.or(Restrictions.eq("triggerCondition4", trigger4), Restrictions.isNull("triggerCondition4")));
-        } else {
-            crit.add(Restrictions.isNull("triggerCondition4"));
+        if (!matches(trigger.getTriggerCondition3(), trigger3)) {
+            return false;
         }
-        if (trigger5 != null) {
-            crit.add(Restrictions.or(Restrictions.eq("triggerCondition5", trigger5), Restrictions.isNull("triggerCondition5")));
-        } else {
-            crit.add(Restrictions.isNull("triggerCondition5"));
+        if (!matches(trigger.getTriggerCondition4(), trigger4)) {
+            return false;
         }
-        return DbUtils.toList(crit, EmailTrigger.class);
+        if (!matches(trigger.getTriggerCondition5(), trigger5)) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean matches(String triggerCondition, String eventValue) {
+        if (triggerCondition == null) {
+            return true; // null trigger condition means match anything or nothing
+        } else {
+            if (eventValue == null) {
+                return false; // not null trigger condition means match specific value, but no value given
+            }
+        }
+        return eventValue.startsWith(triggerCondition); // the trigger condition can be an initial portion of the value
     }
     private String eventId;
     private String triggerCondition1;
@@ -82,6 +95,9 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     private String triggerCondition5;
     private boolean enabled;
     private boolean includeUser; // whether the email should go to the user associated with the event which fires this trigger
+
+    public EmailTrigger() {
+    }
 
     /**
      * This is the eventId to trigger on. Required
@@ -184,20 +200,19 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
         if (triggerCondition2 != null && triggerCondition2.trim().length() == 0) {
             triggerCondition2 = null;
         }
-        if( triggerCondition3 != null && triggerCondition3.trim().length() == 0 ) {
+        if (triggerCondition3 != null && triggerCondition3.trim().length() == 0) {
             triggerCondition3 = null;
         }
-        if( triggerCondition4 != null && triggerCondition4.trim().length() == 0 ) {
+        if (triggerCondition4 != null && triggerCondition4.trim().length() == 0) {
             triggerCondition4 = null;
         }
-        if( triggerCondition5 != null && triggerCondition5.trim().length() == 0 ) {
+        if (triggerCondition5 != null && triggerCondition5.trim().length() == 0) {
             triggerCondition5 = null;
-        }        
+        }
     }
-    
+
     @Override
     public void accept(EmailJobVisitor visitor) {
         visitor.visit(this);
     }
-    
 }

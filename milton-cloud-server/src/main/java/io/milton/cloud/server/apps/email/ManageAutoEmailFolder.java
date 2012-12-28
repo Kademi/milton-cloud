@@ -155,7 +155,11 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
 
     @Override
     public String getTitle() {
-        return job.getTitle();
+        String s = job.getTitle();
+        if (s == null || s.trim().length() == 0) {
+            s = "Untitled auto email";
+        }
+        return s;
     }
 
     @Override
