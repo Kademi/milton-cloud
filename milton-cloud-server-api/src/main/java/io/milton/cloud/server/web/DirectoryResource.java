@@ -120,7 +120,9 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         ApplicationManager am = _(ApplicationManager.class);
         children = am.toResources(this, directoryNode);
         if (directoryNode != null) {
-            log.info("initChildren: " + getName() + " children=" + children.size() + " - " + directoryNode.size());
+            if( log.isTraceEnabled()) {
+            log.trace("initChildren: " + getName() + " children=" + children.size() + " - " + directoryNode.size());
+            }
         } else {
             log.warn("Cant load children, directory node is null: " + getHref());
         }

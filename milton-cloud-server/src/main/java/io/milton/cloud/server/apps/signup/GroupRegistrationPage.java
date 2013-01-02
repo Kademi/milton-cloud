@@ -181,6 +181,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 result = "pending";
             } else {
                 // add directly to group
+                log.info("Group is open, so create membership immediately");
                 p.addToGroup(group, org, session);    
                 _(SignupApp.class).onNewMembership(p.membership(group), wrf);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());

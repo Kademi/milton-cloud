@@ -14,14 +14,9 @@
  */
 package io.milton.vfs.db;
 
-import io.milton.vfs.db.utils.DbUtils;
 import javax.persistence.DiscriminatorValue;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * This process tracks a user's progress through a program;
@@ -32,14 +27,6 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("P")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class MembershipProcess extends BaseProcess {
-
-    public static MembershipProcess find(GroupMembership membership, String name, Session session) {
-        Criteria crit = session.createCriteria(MembershipProcess.class);
-        crit.setCacheable(true);
-        crit.add(Restrictions.eq("moduleStatus", membership));
-        crit.add(Restrictions.eq("processName", name));
-        return DbUtils.unique(crit);
-    }
     
     private GroupMembership membership;
     

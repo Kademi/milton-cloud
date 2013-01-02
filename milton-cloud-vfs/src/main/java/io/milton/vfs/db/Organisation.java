@@ -161,6 +161,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private List<SubOrg> parentOrgLinks;
 
     @Transient
+    @Override
     public String getFormattedName() {
         if (getTitle() != null && getTitle().length() > 0) {
             return getTitle();

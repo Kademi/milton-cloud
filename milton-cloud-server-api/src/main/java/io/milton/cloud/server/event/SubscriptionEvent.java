@@ -70,6 +70,7 @@ public class SubscriptionEvent implements TriggerEvent {
         return membership;
     }
 
+    @Override
     public Website getWebsite() {
         return website;
     }

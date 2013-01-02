@@ -214,7 +214,7 @@ public class EmailItemQueueStore implements QueueStore {
             // 451 4.7.1 <admin@bradmcevoy.com>: Recipient address rejected: Temporary deferral, try again soon
             String sStatus = qi.getResultInfo();
             Integer status = SmtpUtils.getStatusCode(sStatus);
-            if (status != null && (status >= 200 || status < 300)) {
+            if (status != null && (status >= 200 && status < 300)) {
                 log.info("setting complete email status complete: status code=" + status + " sStatus=" + sStatus);
                 i.setSendStatus("c");
             } else {

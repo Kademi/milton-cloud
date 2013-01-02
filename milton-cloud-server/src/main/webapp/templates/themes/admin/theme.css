@@ -703,13 +703,13 @@ textarea.smaller {
     padding-right: 25px;
     text-align: left;
 }
-.Details table th small, .Details table th a {
+.Details table small, .Details table th a {
     font-style: italic;
     font-weight: normal;
     font-size: 11px;
     display: block;
 }
-.Details table th small { margin-top: 5px; }
+.Details table small { margin-top: 5px; }
 .Details table th a {
     text-decoration: underline;
     color: #77c4e8;

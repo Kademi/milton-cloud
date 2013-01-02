@@ -50,6 +50,9 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     private List<Repository> repositories;    // has repositories
     private List<Calendar> calendars; // has calendars
 
+    @Transient
+    public abstract String getFormattedName();
+    
     @Id
     @GeneratedValue
     public long getId() {

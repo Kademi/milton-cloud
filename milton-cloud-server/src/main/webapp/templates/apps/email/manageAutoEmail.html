@@ -12,6 +12,7 @@
                     <a href="">Message</a>
                     <a href="">Recipients</a>
                     <a href="">Triggers</a>
+                    <a href="">History  </a>
                 </nav>
                 <div class="TabContent">
                     <div class="Content">
@@ -21,6 +22,25 @@
                                     <tr>
                                         <th>Send name</th>
                                         <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Website</th>
+                                        <td>
+                                            <select name="themeSiteId" class="Medium required">
+                                                $formatter.option("", "[Please select]", $page.themeSiteId)
+                                                #foreach($website in $page.organisation.websites)
+                                                $formatter.option($website.id, $website.name, $page.themeSiteId)
+                                                #end
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Enabled</th>
+                                        <td>
+                                            $formatter.checkbox("enabled", $page.enabled)
+                                            <small>This auto email will only be sent if enabled</small>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Notes <small>These notes are for internal purposes only.</small></th>
@@ -52,15 +72,9 @@
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th class="Short">Choose a template</th>
+                                        <th class="Short"></th>
                                         <td>
-                                            <select name="themeSiteId" class="Medium">
-                                                $formatter.option("", "[No template]", $page.themeSiteId)
-                                                #foreach($website in $page.organisation.websites)
-                                                    $formatter.option($website.id, $website.name, $page.themeSiteId)
-                                                #end
-                                            </select>
-                                            
+
                                             <button class="Btn">Save Changes</button>
                                         </td>
                                     </tr>
@@ -160,6 +174,35 @@
                                 </tfoot>
                             </table>
                         </form>                        
+                    </div>
+                </div>
+                <div class="TabContent status">
+                    <div class="Content Send" id="manageEmail">
+                        <article class="Note">
+                            Emails sent by this trigger over the last 7 days.
+                        </article>
+                        <table id="emails">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Recipient</th>
+                                    <th>Address</th>
+                                    <th>Status</th>
+                                    <th>Status Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                #foreach($item in $page.history)
+                                <tr>
+                                    <td>$item.subject</td>
+                                    <td>$item.recipient.formattedName</td>
+                                    <td>$item.recipientAddress</td>
+                                    <td>$item.sendStatus</td>
+                                    <td>$item.sendStatusDate</td>
+                                </tr>
+                                #end
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

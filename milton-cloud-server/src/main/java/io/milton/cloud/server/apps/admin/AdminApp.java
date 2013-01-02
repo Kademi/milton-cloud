@@ -95,6 +95,14 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
+        if (parent instanceof OrganisationRootFolder) {
+            if (requestedName.equals("maint")) {
+                OrganisationRootFolder rf = (OrganisationRootFolder) parent;
+                if( rf.getOrganisation().getOrganisation() == null ) {
+                    return new MaintPage(rf);
+                }
+            }
+        }
         if (parent instanceof OrganisationFolder) {
             OrganisationFolder p = (OrganisationFolder) parent;
             switch (requestedName) {

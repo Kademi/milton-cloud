@@ -105,7 +105,7 @@ public class EncodeUtils {
             } else {
                 // cherry pick some safe non-seq chars
                 if (ch == '(' || ch == ')' || ch == '+' || ch == '-' || ch == '*' || ch == '_') {
-                    sb.append(cr);
+                    sb.append(ch);
                 } else {
                     String chEnc = encodeSingleChar(String.valueOf(ch));
                     if (chEnc != null) {

@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.mail.EmailTriggerType;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -54,6 +56,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -97,12 +100,14 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
         }
 
         try {
-            Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
-            Website themeSite = null;
-            if (themeSiteId != null) {
-                themeSite = Website.get(session, themeSiteId);
+            if (parameters.containsKey("themeSiteId")) {
+                Long themeSiteId = WebUtils.getParamAsLong(parameters, "themeSiteId");
+                Website themeSite = null;
+                if (themeSiteId != null) {
+                    themeSite = Website.get(session, themeSiteId);
+                }
+                job.setThemeSite(themeSite);
             }
-            job.setThemeSite(themeSite);
 
             _(DataBinder.class).populate(job, parameters);
             job.checkNulls();
@@ -114,6 +119,12 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
 
         jsonResult = new JsonResult(true);
         return null;
+    }
+
+    public List<EmailItem> getHistory() {
+        Formatter f = _(Formatter.class);
+        Date from = f.addDays(f.getNow(), -7);
+        return job.history(from, null, true, SessionManager.session());
     }
 
     public Long getThemeSiteId() {
@@ -165,6 +176,10 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
     @Override
     public void setTitle(String s) {
         job.setTitle(s);
+    }
+
+    public boolean getEnabled() {
+        return job.isEnabled();
     }
 
     public String getNotes() {

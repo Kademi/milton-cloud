@@ -1,0 +1,61 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+    </head>
+    <body class="manageApplications appsContainer">
+
+        <h2>Simulate the time</h2>
+        <article class="Note">
+            <p>Please enter the new date/time offset in minutes. This will be added to the actual time when used in system calculations.</p>
+            <br/>
+            <form method="POST" action="maint" class="maintForm" >
+                <input type="text" name="dateOffsetMinutes" value="$!{page.dateOffsetMinutes}" />
+                <button class="Btn">Submit</button>
+            </form>
+
+            <p>Current date/time: <span class="now">$page.currentDateService.now</span> <i>adjusted by offset</i></p>
+
+        </article>
+
+        <p></p>
+        <p></p>        
+
+        <h2>Manually initiate scheduled tasks</h2>
+
+        <article class="Note">
+            <p>Press this button to execute all schedule tasks. These typically include scanning processes for time based triggers.</p>
+            <br/>
+            <form method="POST" action="maint" class="runTasksForm" >
+                <input type="hidden" name="runScheduledTasks" value="true"/>
+                <button class="Btn" type="submit">Run Scheduled Tasks</button>
+            </form>
+            <br/>
+            <h4>Task history</h4>
+            <ul>
+                #foreach($item in $page.scheduledTaskHistory)
+                <li>$item</li>
+                #end
+            </ul>
+        </article>
+
+
+        <script type="text/javascript">
+            $(function() {
+                $("form.maintForm").forms({
+                    callback: function(resp) {
+                        log("resp", resp);
+                        $("span.now").text(resp.data);
+                        alert("Done");
+                    }
+                });
+                $("form.runTasksForm").forms({
+                    callback: function(resp) {
+                        log("resp", resp);
+                        alert("Scheduled tasks are now running");
+                        window.location.reload();
+                    }
+                });                
+            });
+        </script>
+    </body>
+</html>

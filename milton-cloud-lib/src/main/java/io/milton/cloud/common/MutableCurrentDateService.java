@@ -12,7 +12,7 @@ public class MutableCurrentDateService implements CurrentDateService {
     private Date artificalDate = null;
     private Long dateOffset = null;
 
-	@Override
+    @Override
     public Date getNow() {
         if (artificalDate != null) {
             return artificalDate;
@@ -33,10 +33,11 @@ public class MutableCurrentDateService implements CurrentDateService {
         this.artificalDate = artificalDate;
     }
 
-	/**
-	 * Number of milliseconds to offset the actual datetime by
-	 * @return 
-	 */
+    /**
+     * Number of milliseconds to offset the actual datetime by
+     *
+     * @return
+     */
     public Long getDateOffset() {
         return dateOffset;
     }
@@ -44,30 +45,30 @@ public class MutableCurrentDateService implements CurrentDateService {
     public void setDateOffset(Long dateOffset) {
         this.dateOffset = dateOffset;
     }
-	
-	
-	public void addHours(long d) {
-		setDateOffset(1000*60*60 * d);
-	}		
-	/**
-	 * Set the current date offset to 1 day
-	 */
-	public void addDay() {
-		setDateOffset(1000*60*60*24l);
-	}
-	
-	public void addDays(long d) {
-		setDateOffset(1000*60*60*24 * d);
-	}	
-    
-	/**
-	 * Set the current date offset to 1 week
-	 */
-	public void addWeek() {
-		setDateOffset(1000*60*60*24*7l);
-	}	
-	
-	public void addWeeks(long i) {
-		setDateOffset(1000*60*60*24*7 * i);
-	}	
+
+    public void addHours(long d) {
+        setDateOffset(1000 * 60 * 60 * d);
+    }
+
+    /**
+     * Set the current date offset to 1 day
+     */
+    public void addDay() {
+        setDateOffset(1000 * 60 * 60 * 24l);
+    }
+
+    public void addDays(long d) {
+        setDateOffset(1000 * 60 * 60 * 24 * d);
+    }
+
+    /**
+     * Set the current date offset to 1 week
+     */
+    public void addWeek() {
+        setDateOffset(1000 * 60 * 60 * 24 * 7l);
+    }
+
+    public void addWeeks(long i) {
+        setDateOffset(1000 * 60 * 60 * 24 * 7 * i);
+    }
 }

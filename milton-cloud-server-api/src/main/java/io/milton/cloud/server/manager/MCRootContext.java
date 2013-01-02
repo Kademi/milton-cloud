@@ -16,6 +16,7 @@ package io.milton.cloud.server.manager;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.common.DefaultCurrentDateService;
+import io.milton.cloud.common.MutableCurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
@@ -57,7 +58,7 @@ public class MCRootContext extends RootContext {
         applicationManager.setRootContext(this);
         templateParser = new HtmlTemplateParser();
         this.textTemplater = new TextTemplater(securityManager, servletContext);
-        currentDateService = new DefaultCurrentDateService(); // todo: make pluggable to support testing
+        currentDateService = new MutableCurrentDateService(); // todo: make pluggable to support testing
         Formatter formatter = new Formatter(currentDateService);
         put(formatter);
         this.htmlTemplater = new HtmlTemplater(applicationManager, formatter, securityManager, servletContext);

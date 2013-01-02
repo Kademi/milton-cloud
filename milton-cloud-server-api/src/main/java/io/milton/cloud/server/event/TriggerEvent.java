@@ -19,6 +19,7 @@ package io.milton.cloud.server.event;
 import io.milton.event.Event;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import java.util.List;
 
 /**
@@ -46,6 +47,13 @@ public interface TriggerEvent extends Event {
      * @return 
      */
     Organisation getOrganisation();
+    
+    /**
+     * The website which is the logical owner of the source of the event
+     * 
+     * @return 
+     */
+    Website getWebsite();
     
     /**
      * Returns the entities which caused the event. This will usually be a single

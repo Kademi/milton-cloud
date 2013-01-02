@@ -108,6 +108,25 @@ public class EmailItem implements Serializable {
         crit.add(Restrictions.eq("sendStatus", "p"));
         return DbUtils.toList(crit, EmailItem.class);
     }
+
+    public static List<EmailItem> findByJobAndDate(BaseEmailJob job, Date from, Date to, boolean orderReverseDate, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be "p" = in progress
+        crit.add(Restrictions.eq("job", job));
+        if( from != null ) {
+            crit.add(Restrictions.gt("createdDate", from));
+        }
+        if( to != null ) {
+            crit.add(Restrictions.le("createdDate", to));
+        }
+        if( orderReverseDate ) {
+            crit.addOrder(Order.desc("createdDate"));
+        } else {
+            crit.addOrder(Order.asc("createdDate"));
+        }
+        return DbUtils.toList(crit, EmailItem.class);        
+    }
+    
     private List<EmailSendAttempt> emailSendAttempts;
     private long id;
     private BaseEmailJob job; // optional, might be linked to a job

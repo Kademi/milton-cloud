@@ -459,6 +459,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     @Transient
+    @Override
     public String getFormattedName() {
         String name = "";
         if (getFirstName() != null && getFirstName().length() > 0) {

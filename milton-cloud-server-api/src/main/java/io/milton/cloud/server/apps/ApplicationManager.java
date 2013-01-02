@@ -102,7 +102,7 @@ public class ApplicationManager {
 
     public List<Application> getActiveApps(RootFolder rootFolder) {
         if (rootFolder == null) {
-            log.warn("No root folder, all apps are active");
+            log.trace("No root folder, all apps are active");
             return apps;
         } else {
             String attName = "activeApps_" + rootFolder.getId();

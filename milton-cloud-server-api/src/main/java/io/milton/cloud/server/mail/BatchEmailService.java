@@ -51,6 +51,7 @@ import net.htmlparser.jericho.Tag;
 import org.hibernate.HibernateException;
 import org.mvel2.templates.TemplateRuntime;
 
+
 /**
  *
  * @author brad
@@ -118,7 +119,7 @@ public class BatchEmailService {
     }
 
     public void sendSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
-        String from = "sys@" + _(CurrentRootFolderService.class).getPrimaryDomain();
+        String from = j.getOrganisation().getOrgId() + "@" + _(CurrentRootFolderService.class).getPrimaryDomain();
         String replyTo = j.getFromAddress();
         if (replyTo == null) {
             replyTo = from;

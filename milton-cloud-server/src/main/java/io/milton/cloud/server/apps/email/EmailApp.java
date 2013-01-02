@@ -341,8 +341,9 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private void checkTriggers(TriggerEvent event) {
         log.info("checkTriggers");
         Session session = SessionManager.session();
-        List<EmailTrigger> triggers = EmailTrigger.find(session, event.getEventId(), event.getOrganisation(), event.getTriggerItem1(), event.getTriggerItem2(), event.getTriggerItem3(), event.getTriggerItem4(), event.getTriggerItem5());
+        List<EmailTrigger> triggers = EmailTrigger.find(session, event.getEventId(), event.getWebsite(), event.getTriggerItem1(), event.getTriggerItem2(), event.getTriggerItem3(), event.getTriggerItem4(), event.getTriggerItem5());
         for (EmailTrigger trigger : triggers) {
+            log.info("found activated trigger: " + trigger.getEventId());
             enqueueTrigger(trigger, event);
         }
     }
@@ -391,3 +392,4 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         }
     }
 }
+

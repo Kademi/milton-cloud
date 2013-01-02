@@ -15,15 +15,19 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This table defines the conditions which will trigger automatic emails. Where
@@ -38,21 +42,32 @@ import org.hibernate.criterion.Restrictions;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class EmailTrigger extends BaseEmailJob implements Serializable {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailTrigger.class);
+    
     public static List<EmailTrigger> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(EmailTrigger.class);
         crit.add(Restrictions.eq("organisation", org));
         return DbUtils.toList(crit, EmailTrigger.class);
     }
 
-    public static List<EmailTrigger> find(Session session, String eventId, Organisation org, String trigger1, String trigger2, String trigger3, String trigger4, String trigger5) {
+    public static List<EmailTrigger> find(Session session, String eventId, Website website, String trigger1, String trigger2, String trigger3, String trigger4, String trigger5) {
+        log.info("find triggers: " + eventId);
         Criteria crit = session.createCriteria(EmailTrigger.class);
-        crit.add(Restrictions.eq("organisation", org));
+        crit.add(Restrictions.eq("themeSite", website));
         crit.add(Restrictions.eq("eventId", eventId));
         List<EmailTrigger> rawList = DbUtils.toList(crit, EmailTrigger.class);
+        log.info("triggers raw: " + rawList.size());
         List<EmailTrigger> finalList = new ArrayList<>();
         for (EmailTrigger trigger : rawList) {
-            if (matches(trigger, trigger1, trigger2, trigger3, trigger4, trigger5)) {
-                finalList.add(trigger);
+            if (trigger.isEnabled()) {
+                if (matches(trigger, trigger1, trigger2, trigger3, trigger4, trigger5)) {
+                    log.info("Found matching trigger", trigger.eventId);
+                    finalList.add(trigger);
+                } else {
+                    log.info("trigger does not match this event: " + trigger1 + ", " + trigger2 + ", " + trigger3);
+                }
+            } else {
+                log.info("trigger not enabled");
             }
         }
         return finalList;
@@ -78,15 +93,21 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     }
 
     private static boolean matches(String triggerCondition, String eventValue) {
-        if (triggerCondition == null) {
+        System.out.println("matches: " + triggerCondition + " - " + eventValue);
+        if (triggerCondition == null) {            
+            System.out.println("  - yes");
             return true; // null trigger condition means match anything or nothing
         } else {
             if (eventValue == null) {
+                System.out.println("  - no, event value is null");
                 return false; // not null trigger condition means match specific value, but no value given
             }
         }
-        return eventValue.startsWith(triggerCondition); // the trigger condition can be an initial portion of the value
+        boolean  b = eventValue.startsWith(triggerCondition); // the trigger condition can be an initial portion of the value
+        System.out.println("  - " + b + " " + eventValue + " starts with " + triggerCondition);
+        return b;
     }
+    
     private String eventId;
     private String triggerCondition1;
     private String triggerCondition2;
@@ -214,5 +235,9 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     @Override
     public void accept(EmailJobVisitor visitor) {
         visitor.visit(this);
+    }
+    
+    public List<EmailItem> history(Date from, Date to, boolean reverseOrder, Session session) {
+        return EmailItem.findByJobAndDate(this, from, to,reverseOrder, session);
     }
 }

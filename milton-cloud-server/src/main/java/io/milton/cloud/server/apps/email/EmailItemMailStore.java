@@ -15,11 +15,14 @@
 package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.mail.StandardMessageFactory;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.Date;
 import java.util.List;
 import javax.mail.internet.MimeMessage;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.AspirinInternal;
 import org.masukomi.aspirin.core.store.mail.MailStore;
 
@@ -27,8 +30,9 @@ import org.masukomi.aspirin.core.store.mail.MailStore;
  *
  * @author brad
  */
-public class EmailItemMailStore implements MailStore{
+public class EmailItemMailStore implements MailStore {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailItemMailStore.class);
     private final SessionManager sessionManager;
     private final StandardMessageFactory standardMessageFactory;
     private AspirinInternal aspirinInternal;
@@ -37,19 +41,28 @@ public class EmailItemMailStore implements MailStore{
         this.sessionManager = sessionManager;
         this.standardMessageFactory = standardMessageFactory;
     }
-        
-    
+
     @Override
     public MimeMessage get(String mailid) {
         Session session = sessionManager.open();
         try {
             Long id = Long.parseLong(mailid);
             EmailItem i = (EmailItem) session.get(EmailItem.class, id);
-            if( i == null ) {
+            if (i == null) {
                 return null;
             }
-            MimeMessage msg = toMimeMessage(i);
-            return msg;
+            try {
+                MimeMessage msg = toMimeMessage(i);
+                return msg;
+            } catch (Throwable e) {
+                log.error("Failed to retrieve message: " + mailid + " marking message as failed", e);
+                Transaction tx = session.beginTransaction();
+                i.setSendStatus("f");
+                i.setSendStatusDate(new Date());
+                session.save(i);
+                tx.commit();
+                return null;
+            }
         } finally {
             sessionManager.close();
         }
@@ -62,7 +75,6 @@ public class EmailItemMailStore implements MailStore{
 
     @Override
     public void init() {
-        
     }
 
     @Override
@@ -89,7 +101,4 @@ public class EmailItemMailStore implements MailStore{
     public void setAspirinInternal(AspirinInternal aspirinInternal) {
         this.aspirinInternal = aspirinInternal;
     }
-    
-    
-    
 }
