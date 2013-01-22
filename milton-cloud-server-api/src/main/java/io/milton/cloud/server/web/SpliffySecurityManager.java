@@ -62,7 +62,6 @@ public class SpliffySecurityManager {
 
     public UserResource getCurrentPrincipal() {
         if (HttpManager.request() == null) {
-            log.warn("XXXXX   No current request  XXXXX");
             return null;
         }
         Auth auth = HttpManager.request().getAuthorization();
@@ -70,17 +69,21 @@ public class SpliffySecurityManager {
             //log.warn("no auth object");
             return null;
         }
-        UserResource ur = (UserResource) auth.getTag();
-        if (ur == null) {
-            log.warn("Got auth object but null tag");
+        if (auth.getTag() instanceof UserResource) {
+            UserResource ur = (UserResource) auth.getTag();
+            if (ur == null) {
+                log.warn("Got auth object but null tag");
+            }
+
+            return ur;
         }
-        return ur;
+        return null;
     }
-    
+
     public void setCurrentPrincipal(UserResource p) {
         log.info("setCurrentPrincipal: " + p);
         Auth auth = HttpManager.request().getAuthorization();
-        if( auth == null ) {
+        if (auth == null) {
             auth = new Auth(p.getName(), p);
             HttpManager.request().setAuthorization(auth);
         } else {
@@ -185,26 +188,26 @@ public class SpliffySecurityManager {
     }
 
     public Set<Group> getGroups(Profile p, Website website) {
-        if( p == null ) {
+        if (p == null) {
             return null;
         }
         Set<Group> set = new HashSet<>();
-        if( p.getMemberships() != null ) {
-            for( GroupMembership gm : p.getMemberships() ) {
-                if(website.hasGroup(gm.getGroupEntity(), SessionManager.session())) {
+        if (p.getMemberships() != null) {
+            for (GroupMembership gm : p.getMemberships()) {
+                if (website.hasGroup(gm.getGroupEntity(), SessionManager.session())) {
                     set.add(gm.getGroupEntity());
                 }
             }
         }
         return set;
     }
-    
+
     public Set<AccessControlledResource.Priviledge> getPriviledges(Profile curUser, CommonResource resource) {
         Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
         if (resource.isPublic()) {
             privs.add(Priviledge.READ);
         }
-        
+
         if (curUser != null) {
             // If the resource is a content resource and the current user is the direct owner of the repository, then grant R/W
             if (resource instanceof PersonalResource) {

@@ -31,6 +31,7 @@ form.contactus textarea {
     display: block;
     width: 65%;
     margin-top: 20px;
+    min-height: 100px;
 }
 
 form.contactus button {

@@ -20,6 +20,9 @@ package io.milton.cloud.server.apps.email;
  */
 public class SmtpUtils {
     public static Integer getStatusCode(String s) {
+        if( s == null ) {
+            return null;
+        }
         int i = s.indexOf(" ");
         if( i > 0 ) {
             s = s.substring(0, i);

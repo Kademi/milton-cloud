@@ -43,6 +43,7 @@ import java.util.Map;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
+import io.milton.http.values.AddressDataTypeList;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
@@ -146,7 +147,9 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
 
     @Override
     public List<Pair<String, String>> getSupportedAddressData() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        AddressDataTypeList supportedAddresses = new AddressDataTypeList();
+        supportedAddresses.add(new Pair<String, String>("text/vcard", "3.0"));
+        return supportedAddresses;
     }
 
     @Override
