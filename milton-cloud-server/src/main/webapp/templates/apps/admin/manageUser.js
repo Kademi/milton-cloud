@@ -10,7 +10,64 @@ function initManageUsers() {
     initOrgSearch();
     initUsersSelectAll();
     initRemoveUsers();
+    initUploadUsers();
 }
+
+function initUploadUsers() {
+    $(".showUploadCsvModal").click(function() {
+        $.tinybox.show($("#modalUploadCsv"), {
+            overlayClose: false,
+            opacity: 0
+        });                       
+    });   
+
+    $(".showMatchOrgsModal").click(function() {
+        $.tinybox.show($("#modalMatchOrgsCsv"), {
+            overlayClose: false,
+            opacity: 0
+        });                       
+    });   
+
+    $("#doUploadCsv").mupload({
+        buttonText: "Upload spreadsheet",
+        url: "users.csv",
+        useJsonPut: false,
+        oncomplete: function(data, name, href) {
+            log("oncomplete:", data.result.data, name, href);
+            $(".results .numUpdated").text(data.result.data.numUpdated);
+            $(".results .numUnmatched").text(data.result.data.unmatched.length);
+            showUnmatched(data.result.data.unmatched);
+            $(".results").show();
+            alert("Upload completed. Please review any unmatched members below, or refresh the page to see the updated list of members");
+        }
+    });    
+    
+    var uploadForm = $("#doUploadCsv form");
+    $("#allowInserts").click(function(e) {
+        log("click", e.target);
+        if( $(e.target).is(":checked")) {
+            uploadForm.attr("action", "users.csv?insertMode=true");
+        } else {
+            uploadForm.attr("action", "users.csv");
+        }        
+    });    
+}
+
+function showUnmatched(unmatched) {
+    var unmatchedTable = $(".results table");
+    var tbody = unmatchedTable.find("tbody");
+    tbody.html("");
+    $.each(unmatched, function(i, row) {
+        log("unmatched", row);
+        var tr = $("<tr>");
+        $.each(row, function(ii, field) {
+            tr.append("<td>" + field + "</td>");
+        });        
+        tbody.append(tr);
+    });
+    unmatchedTable.show();
+}     
+
 
 function initSearchUser() {
     $("#userQuery").keyup(function () {

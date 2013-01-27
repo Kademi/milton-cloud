@@ -144,3 +144,40 @@ div.newUser div.groups ul {
 #manageUser .Info .buttons {
     float: right;
 }
+
+div.uploadCsv {
+    width: 190px;
+}
+#doUploadCsv span {
+    left: 33px;
+    position: absolute;
+}
+.upload {
+    position: relative;
+}
+.allowInserts {
+    position: absolute;
+    left: 200px;
+    top: 5px;
+}
+.results {
+    display: none;
+}
+
+#modalUploadCsv .results td {
+    line-height: normal;
+    padding: 3px 6px;
+}
+#modalUploadCsv .results td:first-child {
+    padding-left: 0;
+}
+#modalUploadCsv .results td:last-child {
+    padding-right: 0;
+}
+div.tools {
+    float: right;
+    width: 200px;
+}
+div.tools a.ShowDialog {
+    float: right;
+}

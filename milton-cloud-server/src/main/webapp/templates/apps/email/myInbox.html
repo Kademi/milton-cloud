@@ -2,6 +2,7 @@
     <head>
         <title>Notifications</title>
         <link href="myInbox.css" rel="stylesheet" type="text/css" media="screen" />
+        <script type="text/javascript" src="myInbox.js">//</script>
     </head>
     <body class="myInbox">
         <div class="bar">
@@ -20,8 +21,8 @@
 
                     #foreach($msg in $messages)
                         #set($activeClass = $formatter.ifEqual("active","",$msg,$targetPage))
-                <div class="$activeClass">
-                    <a class="close" href="#">delete</a>                    
+                <div class="$activeClass message">
+                    <a class="close" href="$msg.href">delete</a>                    
                     <abbr title="$formatter.formatDateISO8601($msg.date)" class="info timeago">$msg.date</abbr>
                     <h3><a href="$msg.href">$msg.fromStr</a></h3>
                     <p>$msg.subject</p>
@@ -60,25 +61,6 @@
             jQuery(document).ready(function(){
                 initMessage($markRead, "");
             });
-            function initMessage(markRead, page) {
-                jQuery("abbr.timeago").timeago();
-                if(!markRead) {
-                    return;
-                }
-                log("mark read");
-                jQuery.ajax({
-                    type: 'POST',
-                    url: page,
-                    data: "read=true",
-                    success: function(resp) {
-                        log("set read status", resp);
-                    },
-                    error: function(resp) {
-                        log("Failed to set read flag", resp);
-
-                    }
-                });                
-            }
         </script>          
     </body>
 </html>

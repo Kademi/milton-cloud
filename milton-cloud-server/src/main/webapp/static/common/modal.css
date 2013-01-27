@@ -1,7 +1,7 @@
 /* Modal */
 .Hidden { display: none; }
 div.Modal {
-    width: 470px;
+    width: 670px;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
     -moz-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
     -webkit-box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
@@ -56,9 +56,16 @@ div.Modal div.ModalContent table th {
     font-size: 12px;
     width: 130px;
 }
-div.Modal div.ModalContent table th, div.Modal div.ModalContent table td {
-    padding-bottom: 10px;
-    line-height: 30px;
+div.Modal div.ModalContent .results table td {
+    padding-bottom: 1px;
+    padding-top: 1px;
+    padding-left: 3px;
+    padding-right: 3px;
+    line-height: none;
+    border: solid 1px #DDD;
+}
+div.Modal div.ModalContent table th, div.Modal div.ModalContent table td     {
+    
 }
 div.Modal div.ModalContent table td textarea {
     height: 170px;

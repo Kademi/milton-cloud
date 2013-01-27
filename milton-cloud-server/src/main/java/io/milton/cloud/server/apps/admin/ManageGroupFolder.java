@@ -168,13 +168,14 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = new ResourceList();
+            children = new ResourceList();            
             if (group.getGroupRoles() != null) {
                 for (GroupRole gr : group.getGroupRoles()) {
                     ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
                     children.add(p);
                 }
             }
+            children.add(new ManageGroupMembersPage(this, "members"));
         }
         return children;
     }

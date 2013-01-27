@@ -52,7 +52,10 @@ import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.ConflictException;
+import io.milton.resource.DeletableCollectionResource;
+import io.milton.resource.DeletableResource;
 import io.milton.resource.PostableResource;
+import io.milton.vfs.db.Profile;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -61,7 +64,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class EmailItemFolder extends AbstractCollectionResource implements GetableResource, MessageResource, StandardMessage, PostableResource {
+public class EmailItemFolder extends AbstractCollectionResource implements GetableResource, MessageResource, StandardMessage, PostableResource, DeletableResource, DeletableCollectionResource {
 
     private final EmailFolder parent;
     private final EmailItem emailItem;
@@ -101,14 +104,19 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
     
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        if( parent.getBaseEntity() == null ) {
-            return true; // null entity on parent means this is a resource for the current user, whoever that is
-        }
+//        if( parent.getBaseEntity() == null ) {
+//            return true; // null entity on parent means this is a resource for the current user, whoever that is
+//        }
         if( auth != null && auth.getTag() != null ) {
             UserResource u = (UserResource) auth.getTag();
-            if( u.getThisUser() == parent.getBaseEntity()) {
+            Profile currentUser = u.getThisProfile();
+            if( currentUser == emailItem.getRecipient() ) {
                 return true;
             }
+            if( currentUser == emailItem.getSender() ) {
+                return true;
+            }
+            
         }
         return super.authorise(request, method, auth);
     }
@@ -391,5 +399,19 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
     
     public boolean isRead() {
         return emailItem.isReadStatus();
+    }
+
+    @Override
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        emailItem.setHidden(Boolean.TRUE); // soft delete
+        session.save(emailItem); 
+        tx.commit();               
+    }
+
+    @Override
+    public boolean isLockedOutRecursive(Request request) {
+        return false;
     }
 }

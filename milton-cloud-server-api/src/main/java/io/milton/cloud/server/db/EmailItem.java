@@ -82,6 +82,9 @@ public class EmailItem implements Serializable {
         Criteria crit = session.createCriteria(EmailItem.class);
         crit.add(Restrictions.eq("recipient", p));
         crit.add(Restrictions.eq("readStatus", false));
+        crit.add(
+                Restrictions.or(Restrictions.eq("hidden", false), Restrictions.isNull("hidden"))
+        );
         crit.setProjection(Projections.rowCount());
         List results = crit.list();
         if (results == null) {
@@ -152,6 +155,7 @@ public class EmailItem implements Serializable {
     private String toList;
     private String ccList;
     private String bccList;
+    private Boolean hidden; // do not show on user's inbox page
 
     public EmailItem() {
     }
@@ -414,5 +418,21 @@ public class EmailItem implements Serializable {
 
     public void setEmailTrigger(EmailTrigger emailTrigger) {
         this.emailTrigger = emailTrigger;
+    }
+
+    @Column
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
+    }
+    
+    public boolean hidden() {
+        if( getHidden() == null ) {
+            return false;
+        }
+        return getHidden().booleanValue();
     }
 }

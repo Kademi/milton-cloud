@@ -794,9 +794,6 @@ select.Medium { width: 100px; }
 #manageUser div.Info header div.Setting > a {
     background: #FFF url(images/icon_setting.png) no-repeat 50% 50%;
 }
-table.Summary td div.Controller a.ShowDialog {
-    background: url(images/icon_dialogue.png) 50% 50% no-repeat;
-}
 #manageCourse div.Course > ul > li aside a.Move, #manageCourse div.Module > ul > li aside a.Move { 
     background-image: url(images/icon_move_white.png); cursor: move; 
 }
@@ -1309,20 +1306,20 @@ table.Summary td div.Controller {
     padding-right: 8px;
     position: relative;
 }
-table.Summary td div.Controller div.Dialog {
+div.Controller div.Dialog {
     top: 26px;
 }
-table.Summary td div.Controller a.ShowDialog {
+div.Controller a.ShowDialog {
     float: left;
     width: 23px;
     height: 23px;
     padding: 1px;
     padding: 0;
     border: 1px solid transparent;
-    border-radius: 3px;
-    
+    border-radius: 3px;    
+    background: url(images/icon_dialogue.png) 50% 50% no-repeat;
 }
-table.Summary td div.Controller a.ShowDialog:hover, #manageUser div.Info table.Summary td div.Controller a.ShowDialog.Active {
+div.Controller a.ShowDialog:hover, div.Controller a.ShowDialog.Active {
     background-color: #e3e3e3;
     border-color: #c7c7c7;
 }

@@ -90,7 +90,7 @@ public class GroupEmailService {
         List<BaseEntity> directRecips = new ArrayList<>();
         if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty()) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
-                addGroup(gr.getRecipient(), directRecips);
+                addGroup(gr.getRecipient(), directRecips, isPasswordReset);
             }
         } else {
             log.warn("No group recipients for job: " + j.getId());
@@ -132,10 +132,14 @@ public class GroupEmailService {
         return callback;
     }
 
-    private void addGroup(Group g, List<BaseEntity> recipients) {
+    private void addGroup(Group g, List<BaseEntity> recipients, boolean isPasswordReset) {
         if (g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty()) {
             for (GroupMembership gm : g.getGroupMemberships()) {
-                recipients.add(gm.getMember());
+                // if its a password reset, only send it to those accounts which do not have a password
+                // thats because this is used to welcome user's who have been loaded into the system but who need to create a password
+                if( !isPasswordReset || gm.getMember().getPasswordCredentialDate() == null) {
+                    recipients.add(gm.getMember());
+                }
             }
         } else {
             log.warn("No members in recipient group: " + g.getName());

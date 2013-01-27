@@ -8,6 +8,16 @@
         <section id="manageUser" class="MainContent">
             <header class="ClearFix">
                 <a href="new" class="SmallBtn Add newUser"><span>Add New User</span></a>
+                <div class="tools Controller">
+                    <a class="ShowDialog"><span class="Hidden">Tools</span></a>
+                    <div class="Dialog Hidden">
+                        <a class="showUploadCsvModal" href="#">Upload Users CSV</a>
+                        <a href="users.csv" >Open Users CSV</a>                                
+                        <a class="showMatchOrgsModal" href="#" >Match orgs</a>
+                        #portlets("manageUsersTools")
+                    </div>
+                </div>
+
             </header>            
             <div class="Info">
                 <header class="ClearFix">
@@ -117,10 +127,70 @@
             </div>
         </div>
 
+        <div id="modalUploadCsv" class="Modal">
+            <header>
+                <h3>Upload Organisations CSV</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <div class='upload'>
+                    <div class="input uploadCsv" id='doUploadCsv'></div>
+                    <br/>
+                    <div class="allowInserts">
+                        <input type="checkbox" id="allowInserts"/>
+                        <label for="allowInserts">Allow inserts</label>
+                    </div>    
+                    <div class="results">
+                        <strong>No. updated:</strong>
+                        <span class="numUpdated">-</span>
+                        <strong>Unmatched:</strong>
+                        <span class="numUnmatched">-</span>
+                        <br/>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>                
+            </div>
+        </div>         
+
+        <div id="modalMatchOrgsCsv" class="Modal">
+            <header>
+                <h3>Match organisations CSV</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <div class='upload'>
+                    <p>Use this form to location organisation ID's for the organisation titles in your users spreadsheet</p>
+                    <p>Upload your users spreadsheet and the system will attempt to locate existing organisations, and return an updated spreadsheet</p>
+                    <p><b>This will not make any change your server data.</b></p>
+                    <form method="POST" action="matchOrgs.csv" enctype="multipart/form-data">
+                        <input type="file" name="usersCsv"/>
+                        <button class="Btn" type="submit">Upload</button>
+                    </form>
+                </div>                
+            </div>
+        </div> 
+
+        <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>
+        
+        
         <script type="text/javascript" >
             jQuery(function() {
                 initManageUsers();                
             });            
         </script>        
+        
+        #portlets("manageUsersBottom")        
     </body>
 </html>

@@ -197,7 +197,6 @@ function initGroupDialog() {
         });	        
     });
 	
-    // Bind event for Edit forum
     $("body").on("click", "a.RenameGroup", function(e) {
         e.preventDefault();
 		
@@ -208,6 +207,12 @@ function initGroupDialog() {
             group: _selectedForum.attr("data-group")
         });
     });
+    
+    $("body").on("click", "a.ViewGroupMembers", function(e) {
+        e.preventDefault();		
+        var groupName = $(this).parent().parent().find("> span").text();
+	window.location.href = groupName +"/members";
+    });    
 }
 
 

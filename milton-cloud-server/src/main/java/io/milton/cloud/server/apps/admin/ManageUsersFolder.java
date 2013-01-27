@@ -16,7 +16,10 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.orgs.OrganisationsCsv;
+import io.milton.cloud.server.apps.orgs.OrganisationsMatchHelperCsv;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -47,6 +50,7 @@ import io.milton.http.Request;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
 import java.util.Collections;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -63,6 +67,7 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     private JsonResult jsonResult;
     private List<Profile> searchResults;
     private List<Organisation> orgSearchResults;
+    private ResourceList children;
     
     public ManageUsersFolder(String name, Organisation organisation, CommonCollectionResource parent) {
         this.organisation = organisation;
@@ -75,16 +80,31 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     }
     
     @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {        
+        Resource r = NodeChildUtils.childOf(getChildren(), childName);
+        if( r != null ) {
+            return r;
+        }
         if (childName.equals("new")) {
             return new ManageUserPage(childName, null, this);
+        } else if( childName.equals("matchOrgs.csv")) {
+            return new OrganisationsMatchHelperCsv("matchOrgs.csv", this);
         }
-        Long profileId = Long.parseLong(childName);
-        Profile p = (Profile) SessionManager.session().get(Profile.class, profileId);
-        if (p == null) {
-            return null;
+    
+        
+        try {
+            Long profileId = Long.parseLong(childName);
+            Profile p = (Profile) SessionManager.session().get(Profile.class, profileId);
+            if (p == null) {
+                return null;
+            }
+            return new ManageUserPage(p.getName(), p, this);
+        } catch (NumberFormatException numberFormatException) {
+            // not found
+        } catch (HibernateException hibernateException) {
+            throw new RuntimeException(hibernateException);
         }
-        return new ManageUserPage(p.getName(), p, this);
+        return null;
     }
     
     @Override
@@ -204,7 +224,11 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
     
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (children == null) {
+            children = new ResourceList();
+            children.add(new ManageUsersCsv("users.csv", this));
+        }
+        return children;
     }
     
     public List<Organisation> getOrgSearchResults() {

@@ -130,6 +130,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
         emailItem.setRecipientAddress(email);
         emailItem.setSubject(subject);        
         emailItem.setSendStatusDate(now);
+        emailItem.setReadStatus(true); // set readStatus to true so doesnt appear as an unread message
         setEmailContent(emailItem, returnUrl);
         System.out.println("email html:");
         System.out.println(emailItem.getHtml());

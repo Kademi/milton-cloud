@@ -1,0 +1,79 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Manage Groups</title>
+        <link href="manageGroup.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body class="manageModulePages">
+        <!-- Content goes here - NO HEADER/BANNER/MENU! -->
+        <section id="manageGroup" class="MainContent">
+            <div style="float: right">
+                <span>Showing: </span>
+                <span class="count">$page.members.size()</span>
+                <span> users </span>
+                <select id="showUserSelect" >
+                    <option>[Filter]</option>
+                    <option value="withPassword">Only those with a password</option>
+                    <option value="noPassword">Those without a password</option>
+                </select>
+            </div>
+            <table class="Summary members">
+                <thead>
+                    <tr>
+                        <th>Nickname</th>
+                        <th>First name</th>
+                        <th>Surname</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Password set</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    #foreach($member in $page.members)
+                    #set($pwdDate = $member.thisUser.passwordCredentialDate)
+                    #set($rowClass = "")
+                    #if( $pwdDate )
+                    #set($rowClass = "withPassword")
+                    #else
+                    #set($rowClass = "noPassword")
+                    #end
+                    <tr class="$rowClass">
+                        <td>$!member.thisUser.nickName</td>
+                        <td>$!member.thisUser.firstName</td>
+                        <td>$!member.thisUser.surName</td>
+                        <td>$!member.thisUser.phone</td>
+                        <td>$!member.thisUser.email</td>
+                        #if( $pwdDate )
+                        <td class="withPassword">                                        
+                            <abbr title="$formatter.formatDateISO8601($pwdDate)" class="info timeago">$!pwdDate</abbr>                    
+                        </td>
+                        #end
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        </section>
+        <script type="text/javascript">       
+            jQuery(document).ready(function(){
+                jQuery("abbr.timeago").timeago();
+                jQuery("#showUserSelect").val("").change(function() {
+                    var type = $(this).val();
+                    log("change", type);
+                    if( type == "noPassword") {
+                        log("1");
+                        $("table.members tbody tr").hide();
+                        $("table.members tbody tr.noPassword").show();                        
+                    } else if(type == "withPassword") {
+                        log("2");
+                        $("table.members tbody tr").hide();
+                        $("table.members tbody tr.withPassword").show();
+                    } else {
+                        log("3");
+                        $("table.members tbody tr").show();                        
+                    }
+                    $("span.count").text($("table.members tbody tr:visible").length);
+                });
+                
+            });
+        </script>  
+    </body>
+</html>

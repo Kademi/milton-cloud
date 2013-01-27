@@ -66,6 +66,26 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     }
 
     @Override
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
+        String s = super.checkRedirect(request);
+        if( s != null ) {
+            return s;
+        }
+        if( request.getMethod().equals(Method.GET)) {
+            List<? extends Resource> list = getChildren();
+            if( !list.isEmpty()) {
+                Resource first = list.get(0);
+                String url = request.getAbsolutePath() + first.getName();
+                System.out.println("redirect: " + url);
+                return url;
+            }
+        }
+        return null;
+    }
+
+    
+    
+    @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         MenuItem.setActiveId("menuNotifications");
         _(HtmlTemplater.class).writePage("email/myInbox", this, params, out);
@@ -75,8 +95,6 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         return baseEntity;
     }
 
-    
-    
     public EmailFolder getInbox() {
         return this;
     }
@@ -109,8 +127,10 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
             _(ApplicationManager.class).addBrowseablePages(this, children);
             List<EmailItem> items = EmailItem.findByRecipient(getEntity(), SessionManager.session());
             for (EmailItem item : items) {
-                EmailItemFolder f = new EmailItemFolder(this, item);
-                children.add(f);
+                if (!item.hidden()) {
+                    EmailItemFolder f = new EmailItemFolder(this, item);
+                    children.add(f);
+                }
             }
         }
         return children;
@@ -191,10 +211,9 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         log.info("not owning user, check sec manager");
         return super.authorise(request, method, auth);
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
-    }        
-    
+    }
 }

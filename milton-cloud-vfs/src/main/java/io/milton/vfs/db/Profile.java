@@ -121,6 +121,15 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         return DbUtils.toList(crit, Profile.class);
     }
 
+    /**
+     * Find a profile by email address, but only looking within the given organisation
+     * or subordinate orgs
+     * 
+     * @param email
+     * @param org
+     * @param session
+     * @return 
+     */
     public static Profile findByEmail(String email, Organisation org, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.setCacheable(true);
@@ -500,6 +509,18 @@ public class Profile extends BaseEntity implements VfsAcceptor {
                 }
             }
                 
+        }
+        return null;
+    }
+    
+    @Transient
+    public Date getPasswordCredentialDate() {
+        if( getCredentials() != null ) {
+            for( Credential c : getCredentials() ) {
+                if( c instanceof PasswordCredential) {
+                    return c.getCreatedDate();
+                }
+            }
         }
         return null;
     }

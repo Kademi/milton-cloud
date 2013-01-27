@@ -322,6 +322,7 @@ function getFileName(path) {
         var pos = name.lastIndexOf("#");
         name = name.substring(0, pos);
     }
+    path = path.replaceAll(" ", "%20"); // safari bug. path is returned encoded from window.location.pathname
     return name;
 }
 
