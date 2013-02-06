@@ -194,7 +194,7 @@
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache-core</artifactId>
-            <version>2.5.4</version>
+            <version>2.6.3</version>
         </dependency>
         <!-- For connection pooling, see http://jolbox.com/index.html?page=http://jolbox.com/benchmarks.html  -->
         <dependency>
@@ -306,7 +306,7 @@
                                     <!--
                                     <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
                                     -->
-                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp</value>
+                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>
@@ -376,7 +376,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
-                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader,com.fuselms.apps.orgcreator.OrgCreatorApp</value>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader,com.fuselms.apps.orgcreator.OrgCreatorApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>

@@ -49,6 +49,7 @@ import java.io.Writer;
 import org.apache.velocity.context.Context;
 
 import static io.milton.context.RequestContext._;
+import io.milton.context.RootContext;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
@@ -67,6 +68,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.config.Configuration;
@@ -94,6 +96,9 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private EventManager eventManager;
     private AsynchProcessor asynchProcessor;
     private EmailTriggerService emailTriggerService;
+    private HashStore hashStore;
+    private RootContext rootContext;
+    private SessionManager sessionManager;
     private int smtpPort = 2525;
 
     @Override
@@ -115,7 +120,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         smtpPort = config.getInt("smtp.port");
         
-        
+        this.rootContext = config.getContext();     
+        this.sessionManager = resourceFactory.getSessionManager();
         Properties props = new Properties();
         String hostName = config.getContext().get(CurrentRootFolderService.class).getPrimaryDomain();
         props.setProperty(ConfigurationMBean.PARAM_HOSTNAME, hostName);
@@ -129,7 +135,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         this.currentDateService = config.getContext().get(CurrentDateService.class);
         queueStore = new EmailItemQueueStore(resourceFactory.getSessionManager(), aspirinConfiguration, listenerManager, currentDateService);
         StandardMessageFactory smf = new StandardMessageFactoryImpl();
-        mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf);
+        this.hashStore = config.getContext().get(HashStore.class);
+        mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf, hashStore, rootContext);
         mailFilter = new MCMailFilter(resourceFactory.getSessionManager(), config.getContext());
         emailTriggerService = new EmailTriggerService(batchEmailService);
         config.getContext().put(emailTriggerService);
@@ -272,7 +279,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             EmailItem i = new EmailItem();
             i.setRecipient(p);
             i.setRecipientAddress(p.getEmail());
-            EmailItemStandardMessage sm = new EmailItemStandardMessage(i);
+            EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore, rootContext, sessionManager);
             StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
             parser.toStandardMessage(mm, sm);
             session.save(i);

@@ -67,6 +67,7 @@ public class AppSetting implements Serializable {
         this.name = name;
     }
 
+    @Column(length=500)
     public String getPropValue() {
         return propValue;
     }

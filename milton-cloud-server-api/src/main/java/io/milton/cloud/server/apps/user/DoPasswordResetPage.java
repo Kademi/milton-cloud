@@ -107,7 +107,7 @@ public class DoPasswordResetPage extends TemplatedHtmlPage implements PostableRe
     private boolean isExpired(PasswordReset passwordReset) {
         Date now = _(CurrentDateService.class).getNow();
         long hours = _(Formatter.class).durationHours(passwordReset.getCreatedDate(), now);
-        return hours > 24;
+        return hours > 24 * 7 * 4; // 1 month
     }
 
     private void doReset(String newPassword, PasswordReset reset, Session session) throws NotAuthorizedException, BadRequestException {

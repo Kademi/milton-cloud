@@ -14,6 +14,7 @@
  * urlSuffix: is appended to the current page url to make the url to POST the login request to. Default /.ajax
  * afterLoginUrl: the page to redirect to after login. Default index.html.  3 possibilities 
  *      null = do a location.reload()
+ *      "none" - literal value "none" means no redirect
  *      "something" or "" = a relative path, will be avaluated relative to the user's url (returned in cookie)
  *      "/dashboard" = an absolute path, will be used exactly as given
  *  logoutSelector
@@ -22,6 +23,7 @@
  *  loginFailedMessage
  *  userNameProperty: property name to use in sending request to server
  *  passwordProperty
+ *  loginCallback: called after successful login
  * 
  */
 
@@ -37,7 +39,10 @@
             requiredFieldsMessage: "Please enter your credentials.",
             loginFailedMessage: "Sorry, those login details were not recognised.",
             userNameProperty: "_loginUserName",
-            passwordProperty: "_loginPassword"
+            passwordProperty: "_loginPassword",
+            loginCallback: function() {
+                
+            }
         }, options);  
   
         $(config.logoutSelector).click(function() {
@@ -98,6 +103,9 @@ function doLogin(userName, password, config, container) {
             log("login success", resp)
             initUser();                
             if( resp.status ) {
+                if( config.loginCallback) {
+                    config.loginCallback();
+                }
                 if( config.afterLoginUrl == null) {
                     // If not url in config then use the next href in the response, if given, else reload current page
                     if( resp.nextHref ) {
@@ -111,10 +119,14 @@ function doLogin(userName, password, config, container) {
                     //return;
                     window.location = config.afterLoginUrl;
                 } else {
-                    // if config has a relative path, then evaluate it relative to the user's own url in response
-                    log("redirect to2: " + userUrl + config.afterLoginUrl);
-                    //return;
-                    window.location = userUrl + config.afterLoginUrl;
+                    if( config.afterLoginUrl == "none") {
+                        log("Not doing redirect because afterLoginUrl=='none'");
+                    } else {
+                        // if config has a relative path, then evaluate it relative to the user's own url in response
+                        log("redirect to2: " + userUrl + config.afterLoginUrl);
+                        //return;
+                        window.location = userUrl + config.afterLoginUrl;
+                    }
                 }
             } else {
                 // null userurl, so login was not successful
@@ -224,4 +236,49 @@ function dropHost(s) {
     s = s.substr(pos);
     return s;
 }
+
+function showRegisterOrLoginModal(callbackOnLoggedIn) {
+    var modal = $("#registerOrLoginModal");
+    if( modal.length == 0 ) {
+        modal = $("<div id='registerOrLoginModal' class='Modal' style='min-height: 300px'><a href='#' class='Close' title='Close'>Close</a><div class='modalContent'>");
+        $("body").append(modal);
+    }
+    log("showRegisterOrLoginModal");
+    $.getScript("/templates/apps/signup/register.js", function() {
+        $.ajax({
+            type: 'GET',
+            url: "/registerOrLogin",
+            dataType: "html",
+            success: function(resp) {
+                var page = $(resp);
+                var r = page.find(".registerOrLoginCont");                        
+                log("content", page, "r", r);
+                modal.find(".modalContent").html(r);
+                log("modal", modal);
+                $("td.loginCont").user({
+                    afterLoginUrl: "none",
+                    loginCallback: function() {
+                        log("logged in ok, process callback");
+                        callbackOnLoggedIn();
+                        $.tinybox.close();
+                    }
+                });
+                initRegisterForms("none", function() {
+                    log("registered and logged in ok, process callback");
+                    callbackOnLoggedIn();
+                    $.tinybox.close();                    
+                });
+            },
+            error: function(resp) {
+                log('There was a problem logging you out', resp);
+            }
+        });     
+        
+    });
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });     
+}
+        
 /** End jquery.login.js */

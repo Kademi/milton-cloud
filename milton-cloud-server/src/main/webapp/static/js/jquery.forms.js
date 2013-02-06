@@ -159,6 +159,9 @@ function checkRequiredFields(container) {
         if( !checkHrefs(container) ) {
             isOk = false;
         }
+        if( !checkNumbers(container) ) {
+            isOk = false;
+        }
         
         if( !checkValueLength($("#firstName", container), 1, 15, "First name" ) ) {
             isOk = false;
@@ -268,7 +271,7 @@ function checkValidEmailAddress(container) {
 function checkSimpleChars(container) {
     var target = $(".simpleChars", container); // either with id of email, or with class email
     var isOk = true;
-    var pattern = new RegExp("^[a-zA-Z0-9_\.]+$");
+    var pattern = new RegExp("^[a-zA-Z0-9_\.\-]+$");
     target.each(function(i, n) {
         var node = $(n);
         var val = node.val();
@@ -281,6 +284,26 @@ function checkSimpleChars(container) {
         }
     });
     return isOk;
+}
+
+function checkNumbers(container) {
+    var target = $(".numeric", container); // either with id of email, or with class email
+    log("checkNumbers", target);
+    var isOk = true;
+    target.each(function(i, n) {
+        var node = $(n);
+        var val = node.val();
+        log("checkNumeric", val);
+        if(val.length > 0 ) {
+            if( !isNumber(val) ) {
+                showValidation(node, "Please enter a number", container);
+                isOk = false;
+            } else {
+                log("  isok");
+            }
+        }
+    });
+    return isOk;    
 }
 
 function checkHrefs(container) {
@@ -371,6 +394,7 @@ function checkNumeric(target) {
         return true;
     }
 }
+
 
 function checkTrue(target, message, container) {
     var n = $("#" + target + ":checked").val();

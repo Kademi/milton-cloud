@@ -18,13 +18,13 @@ import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -50,8 +50,6 @@ public class EmailItem implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(EmailItem.class);
 
     /**
-     * Get emauils to send. TODO: currently only gets those never tried, should
-     * also get those queued for retry
      *
      * @param session
      * @return
@@ -130,8 +128,9 @@ public class EmailItem implements Serializable {
         return DbUtils.toList(crit, EmailItem.class);        
     }
     
-    private List<EmailSendAttempt> emailSendAttempts;
     private long id;
+    private List<EmailSendAttempt> emailSendAttempts;    
+    private List<EmailAttachment> attachments;
     private BaseEmailJob job; // optional, might be linked to a job
     private EmailTrigger emailTrigger;
     private Profile sender; // optional, the user account which sent the email if originated internally
@@ -171,6 +170,17 @@ public class EmailItem implements Serializable {
         this.id = id;
     }
 
+    @OneToMany(mappedBy = "emailItem")
+    public List<EmailAttachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<EmailAttachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    
+    
     /**
      * Optional reference to the job which caused this to be sent
      * @return 
@@ -434,5 +444,19 @@ public class EmailItem implements Serializable {
             return false;
         }
         return getHidden().booleanValue();
+    }
+    
+    public void addAttachment(String fileName, String hash, String contentType, String disposition, Session session) {
+        EmailAttachment att = new EmailAttachment();
+        att.setEmailItem(this);
+        if( getAttachments() == null ) {
+            setAttachments(new ArrayList<EmailAttachment>());
+        }
+        getAttachments().add(att);
+        att.setContentType(contentType);
+        att.setDisposition(disposition);
+        att.setFileHash(hash);
+        att.setFileName(fileName);
+        session.save(att);
     }
 }

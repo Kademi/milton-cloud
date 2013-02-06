@@ -332,8 +332,8 @@ section.MainContent > header:after {
     font-size:12px;
     color:#333333
 }
-/* ------ I help  ----*/
-article.Note {
+
+.Note {
     border:solid 1px #dedede;
     border-radius:3px;
     -webkit-border-radius:3px;
@@ -1298,6 +1298,10 @@ table.Summary a:hover {
 .verticalFields label {
     display: inline-block;
     width: 100px;
+}
+.verticalFields span {
+    font-size: 11px;
+    font-style: italic;
 }
 
 

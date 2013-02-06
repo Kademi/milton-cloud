@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.templating;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -70,13 +71,30 @@ public class DataBinderTest {
         dataBinder.populate(bean, map);
         assertNull(bean.getDate1());
     }      
+    
+    @Test
+    public void testPopulate_StringToBigDecimal() throws Exception {
+        map.put("bd", "1.3");
+        dataBinder.populate(bean, map);
+        assertEquals(new BigDecimal("1.3"), bean.getBd());
+    }        
         
     
     public class MyBean {
         private String s1;
         private int i1;
         private Date date1;
+        private BigDecimal bd;
 
+        public BigDecimal getBd() {
+            return bd;
+        }
+
+        public void setBd(BigDecimal bd) {
+            this.bd = bd;
+        }
+
+        
 
         public int getI1() {
             return i1;

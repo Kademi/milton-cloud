@@ -68,7 +68,7 @@ public class MyForumsFolder extends AbstractCollectionResource implements Getabl
             children = new ResourceList();
             List<Forum> forums = Forum.findByWebsite(website, SessionManager.session());
             for (Forum f : forums) {
-                MyForumFolder faf = new MyForumFolder(f, parent);
+                MyForumFolder faf = new MyForumFolder(f, this);
                 children.add(faf);
             }
         }

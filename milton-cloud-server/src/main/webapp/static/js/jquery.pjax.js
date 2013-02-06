@@ -197,6 +197,7 @@
 
             // Invoke their success handler if they gave us one.
             success.apply(this, arguments)
+            $(document).trigger('pjaxComplete');
         }
 
         // Cancel the current request if we're already pjaxing

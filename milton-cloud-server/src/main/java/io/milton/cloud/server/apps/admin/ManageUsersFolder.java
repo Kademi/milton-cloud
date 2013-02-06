@@ -32,6 +32,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -58,7 +59,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageUsersFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class ManageUsersFolder extends AbstractCollectionResource implements GetableResource, PostableResource, TitledPage {
     
     private static final Logger log = LoggerFactory.getLogger(ManageUsersFolder.class);
     private final String name;
@@ -75,6 +76,7 @@ public class ManageUsersFolder extends AbstractCollectionResource implements Get
         this.name = name;
     }
     
+    @Override
     public String getTitle() {
         return "Manage users";
     }

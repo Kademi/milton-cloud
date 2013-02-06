@@ -29,6 +29,7 @@
                 </thead>
                 <tbody>
                     #foreach($member in $page.members)
+                    #set($pwdDate = null)
                     #set($pwdDate = $member.thisUser.passwordCredentialDate)
                     #set($rowClass = "")
                     #if( $pwdDate )
@@ -42,11 +43,11 @@
                         <td>$!member.thisUser.surName</td>
                         <td>$!member.thisUser.phone</td>
                         <td>$!member.thisUser.email</td>
-                        #if( $pwdDate )
-                        <td class="withPassword">                                        
+                        <td>
+                        #if( $pwdDate )                            
                             <abbr title="$formatter.formatDateISO8601($pwdDate)" class="info timeago">$!pwdDate</abbr>                    
+                        #end                            
                         </td>
-                        #end
                     </tr>
                     #end
                 </tbody>

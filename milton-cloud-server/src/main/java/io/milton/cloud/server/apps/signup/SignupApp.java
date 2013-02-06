@@ -129,6 +129,13 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 return new ProcessPendingPage("pendingApps", orgFolder, this);
             }
         }
+        if (parent instanceof WebsiteRootFolder) {
+            if (requestedName.equals("registerOrLogin")) {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+                return new RegisterOrLoginPage(wrf, requestedName);
+            }
+
+        }
         return null;
     }
 
@@ -305,4 +312,10 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
         }
     }
+
+    public String getSignupPageName() {
+        return signupPageName;
+    }
+    
+    
 }

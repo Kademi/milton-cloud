@@ -17,12 +17,14 @@
 package io.milton.cloud.server.web.templating;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean2;
+import org.apache.commons.beanutils.converters.BigDecimalConverter;
 import org.apache.commons.beanutils.converters.DateTimeConverter;
 
 /**
@@ -40,6 +42,9 @@ public class DataBinder {
         DateTimeConverter dtConverter = new NullSafeDateTimeConverter();
         dtConverter.setPatterns(dateFormats);
         convertUtilsBean.register(dtConverter, Date.class);
+        
+        BigDecimalConverter bdConverter = new BigDecimalConverter(null);
+        convertUtilsBean.register(bdConverter, BigDecimal.class);
 
         bub = new BeanUtilsBean(convertUtilsBean);
     }

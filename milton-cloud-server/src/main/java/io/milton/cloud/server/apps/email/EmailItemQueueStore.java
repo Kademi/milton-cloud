@@ -135,7 +135,7 @@ public class EmailItemQueueStore implements QueueStore {
                 Date now = currentDateService.getNow();
                 List<EmailItem> items = EmailItem.findToSend(now, session);
                 if (items == null || items.isEmpty()) {
-                    log.info("Nothing to sendxxx");
+                    log.info("Nothing more to send");
                     return null;
                 }
                 log.info("Loaded queue size: " + items.size());

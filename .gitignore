@@ -19,3 +19,5 @@
 /milton-cloud-blobby/target/
 /.idea
 *.iml
+/milton-cloud-server/src/test/resources/milton.license.properties
+/milton-cloud-server/src/test/resources/milton.license.sig

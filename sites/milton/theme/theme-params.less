@@ -1,3 +1,7 @@
+@frameworkToolsColor: #FFF;
+@frameworkToolsInverseColor: #414141;
+@frameworkHighlightColor: #FFF;
+@frameworkHighlightInverseColor: #FF9531;
 @text1: #464646;
 @text2: #464646;
 @hero1: #0093DD;
@@ -7,28 +11,31 @@
 @borderRadius: 5px;
 @listIndent: 40px;
 
-body li {
-    margin: 0 0 0 20px;
-    padding:0 0 5px 0;    
+.nav ul li a.nav-menuDashboard {
+	display: none;
+}
+
+body .header h1.logo {
+   background-image: url("/theme/mio-logo-small.png");
+    background-position: left center;
+    background-repeat: no-repeat;
+    float: left;
+    height: 70px;
+    padding-left: 100px;
+    width: 300px;
+}
+
+.contentForm {
+	min-height: 450px;
+}
+
+.downloads .contentForm {
+	min-height: inherit;
 }
 
 body div.header {
-    min-height: 95px;
+	min-height: 90px;
 }
-
-body ul {
-    margin-left: 20px;
-}
-
-h1.logo {
-    background-image: url(/theme/mio-logo-small.png);
-    background-repeat: no-repeat;
-    background-position: 0 50%;
-    position: absolute;
-    height: 70px;
-}
-
-body h1.logo a {
-    margin-left: 110px;
-    margin-top: 10px;
+.nav ul li a.nav-menuMyRewards {
+	display: none;
 }

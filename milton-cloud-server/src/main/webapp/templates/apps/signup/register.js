@@ -13,6 +13,11 @@ function initRegister(afterRegisterHref) {
         lastTabIndex = i+2;
     });
     form.find("button[type=submit]").attr("tabindex", lastTabIndex);
+    initRegisterForms(afterRegisterHref);
+}
+
+function initRegisterForms(afterRegisterHref, callback) {
+    log("initRegisterForms", jQuery("#registerForm"));
     jQuery("#registerForm").forms({
         validationFailedMessage: "Please enter your details below.",
         callback: function(resp, form) {
@@ -24,7 +29,8 @@ function initRegister(afterRegisterHref) {
                 var password = form.find("input[name=password]").val();
                 doLogin(userName, password, {
                     afterLoginUrl: afterRegisterHref,
-                    urlSuffix: "/.dologin"
+                    urlSuffix: "/.dologin",
+                    loginCallback: callback
                 }, this);
             }
         }

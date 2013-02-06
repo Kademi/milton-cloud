@@ -1,0 +1,8 @@
+webcam client --> server
+
+server (xuggler) 	--> webm --> buffer webm
+					--> mp4, etc	--> buffer mp4, etc
+					
+browser opens appropriate url:	
+	chrome=http://localhost/webm (webm)
+	chrome=http://localhost/mp4

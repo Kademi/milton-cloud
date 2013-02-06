@@ -16,11 +16,13 @@ package io.milton.cloud.server.apps.email;
 
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.mail.BatchEmailService;
+import io.milton.context.RootContext;
 import io.milton.mail.StandardMessageFactory;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
 import javax.mail.internet.MimeMessage;
+import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.AspirinInternal;
@@ -35,11 +37,15 @@ public class EmailItemMailStore implements MailStore {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailItemMailStore.class);
     private final SessionManager sessionManager;
     private final StandardMessageFactory standardMessageFactory;
+    private final HashStore hashStore;
+    private final RootContext rootContext;
     private AspirinInternal aspirinInternal;
 
-    public EmailItemMailStore(SessionManager sessionManager, StandardMessageFactory standardMessageFactory) {
+    public EmailItemMailStore(SessionManager sessionManager, StandardMessageFactory standardMessageFactory, HashStore hashStore, RootContext rootContext) {
         this.sessionManager = sessionManager;
         this.standardMessageFactory = standardMessageFactory;
+        this.hashStore = hashStore;
+        this.rootContext = rootContext;
     }
 
     @Override
@@ -88,9 +94,11 @@ public class EmailItemMailStore implements MailStore {
     }
 
     private MimeMessage toMimeMessage(EmailItem i) {
-        EmailItemStandardMessage sm = new EmailItemStandardMessage(i);
+        EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore, rootContext, sessionManager);
         MimeMessage mm = aspirinInternal.createNewMimeMessage();
+        System.out.println("EmailItemMailStore - toMimeMessage - atts=" + sm.getAttachments().size() + " - " + standardMessageFactory.getClass());
         standardMessageFactory.toMimeMessage(sm, mm);
+        System.out.println("EmailItemMailStore - toMimeMessage - done");
         return mm;
     }
 
