@@ -8,7 +8,7 @@ function initManageUsers() {
     initSearchBusiness();
     initSearchUser();
     initOrgSearch();
-    initUsersSelectAll();
+    initSelectAll();
     initRemoveUsers();
     initUploadUsers();
 }
@@ -288,21 +288,6 @@ function doOrgSearch() {
         }
     });      
 }    
-
-function initUsersSelectAll() {
-    $("body").on("click", ".selectAll", function(e) {
-        var node = $(e.target);
-        log("selectall", node, node.is(":checked"));
-        var chkName = node.attr("name");
-        var checked = node.is(":checked");
-        checkBoxes = node.closest("table").find("tbody td input:[type=checkbox]:[name=" + chkName + "]");
-        if( checked ) {
-            checkBoxes.attr("checked", "true");
-        } else {
-            checkBoxes.removeAttr("checked");
-        }
-    });
-}
 
 function initRemoveUsers() {
     $(".removeUsers").click(function(e) {

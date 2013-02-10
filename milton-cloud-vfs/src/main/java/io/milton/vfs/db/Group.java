@@ -336,4 +336,9 @@ public class Group implements Serializable, VfsAcceptor {
             newOrgType.getGroups().add(this);
         }
     }
+
+    @Transient
+    public long getNumMembers() {
+        return GroupMembership.count(this, SessionManager.session());
+    }
 }

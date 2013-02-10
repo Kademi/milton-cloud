@@ -9,6 +9,7 @@ function initManageGroup() {
     initRegoMode();
     initRemoveRole();
     initAddRole();
+    initCopyMembers();
 }
 
 var currentGroupDiv;
@@ -211,7 +212,7 @@ function initGroupDialog() {
     $("body").on("click", "a.ViewGroupMembers", function(e) {
         e.preventDefault();		
         var groupName = $(this).parent().parent().find("> span").text();
-	window.location.href = groupName +"/members";
+        window.location.href = groupName +"/members";
     });    
 }
 
@@ -547,4 +548,33 @@ function setRegoMode(currentRegoModeLink, selectedRegoModeLink) {
     proppatch(href, data, function() {
         currentRegoModeLink.text(text);
     });
+}
+
+function initCopyMembers() {
+    $("body").on("click", ".CopyMembers", function(e) {
+        log("click", e.target);
+        e.preventDefault();
+        e.stopPropagation();        
+        
+        var modal = $("#modalCopyMembers");
+        var target = $(e.target);
+        var href = target.closest("div.Group").find("header div > span").text();
+        modal.find("span").text(href);
+        href = $.URLEncode(href) + "/";
+        modal.find("form").attr("action", href);
+                
+        $.tinybox.show(modal, {
+            overlayClose: false,
+            opacity: 0
+        });
+    });
+    
+    $("#modalCopyMembers form").forms({
+        callback: function(resp) {
+            log("done", resp);
+            $.tinybox.close();
+            alert("Copied members");
+            window.location.reload();
+        }
+    });    
 }

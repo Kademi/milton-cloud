@@ -344,6 +344,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     /**
      * Create a GroupMembership linking this profile to the given group, within
      * the given organisation. Is immediately saved
+     * 
+     * First checks to see if the profile already has that membership. If so
+     * no changes are made
      *
      * @param g
      * @return

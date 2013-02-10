@@ -55,8 +55,12 @@
     top: 15px;
     right: -185px;
 }
-#manageGroup a.regoMode {
+#manageGroup a.regoMode, a.numMembers {
     float: right;
+    margin-left: 20px;
+}
+#manageGroup a.regoMode:hover, a.numMembers:hover {
+    text-decoration: underline;
 }
 #modalRegoMode td {
     vertical-align: top;

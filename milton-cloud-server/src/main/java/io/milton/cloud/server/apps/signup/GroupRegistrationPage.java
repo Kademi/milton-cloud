@@ -83,7 +83,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             String q = params.get("q");
             if (q != null && q.length() > 0) {
                 Organisation rootSearchOrg = parent.getGroup().getRootRegoOrg();
-                if( rootSearchOrg == null ) {
+                if (rootSearchOrg == null) {
                     rootSearchOrg = getOrganisation();
                 }
                 OrgType regoOrgType = parent.getGroup().getRegoOrgType();
@@ -102,14 +102,14 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         Transaction tx = session.beginTransaction();
         try {
             Organisation org = parent.getOrganisation();
-            if( parameters.containsKey("orgId")) {
+            if (parameters.containsKey("orgId")) {
                 String orgId = parameters.get("orgId");
                 org = Organisation.findByOrgId(orgId, session);
-                if( org == null ) {
+                if (org == null) {
                     jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
                     return null;
                 }
-                if( !org.isWithin(getOrganisation())) {
+                if (!org.isWithin(getOrganisation())) {
                     throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
                 }
             }
@@ -127,11 +127,15 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             Profile p = Profile.find(email, session);
             if (p != null) {
                 // Check password matches
-                if (_(PasswordManager.class).verifyPassword(p, password)) {
-                    // Passwords match, all good
-                } else {
-                    jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address. If this is your account please enter the existing password");
-                    return null;
+                if (p.getCredentials() != null && p.getCredentials().isEmpty()) {
+                    if (_(PasswordManager.class).verifyPassword(p, password)) {
+                        // Passwords match, all good
+                    } else {
+                        jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address. If this is your account please enter the existing password");
+                        return null;
+                    }
+                } else{
+                    log.info("Found an account with no password, so permit");
                 }
             } else {
                 // Not existing, create a new profile
@@ -182,17 +186,17 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             } else {
                 // add directly to group
                 log.info("Group is open, so create membership immediately");
-                p.addToGroup(group, org, session);    
+                p.addToGroup(group, org, session);
                 _(SignupApp.class).onNewMembership(p.membership(group), wrf);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
-                result = "created";                        
+                result = "created";
             }
 
 
-            
+
 
             tx.commit();
-                        
+
             String nextHref = app.getNextHref(p, wrf.getBranch());
             String userPath = "/users/" + p.getName(); // todo: encoding
             log.info("Created user: " + userPath);
@@ -208,7 +212,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         List<Organisation> childOrgs = getOrganisation().getChildOrgs();
         return childOrgs != null && !childOrgs.isEmpty();
     }
-    
+
     @Override
     public String getContentType(String accepts) {
         if (jsonResult != null) {
@@ -280,14 +284,13 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public List<Organisation> getSearchResults() {
         return searchResults;
     }
-    
+
     public String getRegoOrgType() {
         OrgType ot = parent.getGroup().getRegoOrgType();
-        if( ot == null ) {
+        if (ot == null) {
             return "Business unit";
-        } else {    
+        } else {
             return ot.getDisplayName();
         }
     }
-    
 }

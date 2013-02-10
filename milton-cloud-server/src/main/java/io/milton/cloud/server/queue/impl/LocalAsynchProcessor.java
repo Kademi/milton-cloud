@@ -54,7 +54,7 @@ public class LocalAsynchProcessor implements AsynchProcessor {
             }
         };
         log.info("scheduling job: " + p + " with period: " + period);
-        scheduler.scheduleAtFixedRate(task, 1000, period);
+        scheduler.scheduleAtFixedRate(task, 60000, period);
     }
 
     @Override

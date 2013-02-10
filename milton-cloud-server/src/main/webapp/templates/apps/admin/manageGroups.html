@@ -14,6 +14,7 @@
             <div class="Group">
                 <header class="ClearFix">
                     <div class="ShowDialog"><span>$group.name</span></div>
+                    <a class="numMembers" href="$group.name/members">$group.numMembers Members</a>
                     <a href="#" class="regoMode">Registration: $group.regoModeText</a>
                 </header>
                 <div class="ContentGroup ClearFix">
@@ -96,6 +97,7 @@
                     <a href="" class="RenameGroup">Rename this group</a>
                     <a href="" class="Delete DeleteGroup">Delete this group</a>
                     <a href="" class="ViewGroupMembers">View members</a>
+                    <a href="" class="CopyMembers">Copy members from other group</a>
                 </div>
             </div>
             <div id="modalListController">
@@ -177,6 +179,37 @@
             </div>
 
         </div>
+
+        <div id="modalCopyMembers" class="Modal">
+            <header>
+                <h3>Copy Members To: <span>.</span></h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <form method="POST" action="">
+                    <div class="BtnBar">
+                        <button class="Btn">Copy Members</button>
+                        <div style="clear: both"></div>
+                    </div>
+                    <p>Use this form to copy the members from the group below into <span>.</span><br/><br/></p>
+                    <table>
+                        <tr>
+                            <td><label for="selectSourceGroup"><b>Group</b></label></td>
+                            <td>
+                                <select name="sourceGroup">
+                                    <option value="">[None]</option>
+                                    #foreach($group in $page.organisation.groups)
+                                    <option value="$group.name">$group.name</option>
+                                    #end
+                                </select> 
+                                <p>Select the group to copy members from.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+
+        </div>        
 
         <script type="text/javascript" >
             jQuery(function() {

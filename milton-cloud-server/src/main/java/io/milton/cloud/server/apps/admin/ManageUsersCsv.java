@@ -94,8 +94,10 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                     log.info("No unmatched entries, so commit");
                     tx.commit();
                 } else {
-                    log.info("Found unmatched entries: " + unmatched.size() + " - rollback");
-                    tx.rollback();
+                    //log.info("Found unmatched entries: " + unmatched.size() + " - rollback");
+                    //tx.rollback();
+                    log.info("Found unmatched entries: " + unmatched.size() + " - commit the good ones");
+                    tx.commit();
                 }
                 
             } catch (Exception ex) {

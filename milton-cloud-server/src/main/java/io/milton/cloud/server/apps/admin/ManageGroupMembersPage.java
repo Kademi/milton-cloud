@@ -38,16 +38,23 @@ import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.FileItem;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.resource.PostableResource;
 import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Resource which represents a group role attached to a group
  *
  * @author brad
  */
-public class ManageGroupMembersPage extends AbstractResource implements GetableResource {
+public class ManageGroupMembersPage extends AbstractResource implements GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupMembersPage.class);
     private final ManageGroupFolder parent;
@@ -60,6 +67,27 @@ public class ManageGroupMembersPage extends AbstractResource implements GetableR
         this.name = name;
     }
 
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        if (parameters.containsKey("toRemoveId")) {
+            String toRemoveIds = parameters.get("toRemoveId");
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            for (String sMemberId : toRemoveIds.split(",")) {
+                if (sMemberId.length() > 0) {
+                    long profileId = Long.parseLong(sMemberId);
+                    Profile p = Profile.get(profileId, session);
+                    if( p != null ) {
+                        p.removeMembership(parent.getGroup(), session);
+                    }
+                }
+            }
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        }
+        return null;
+    }    
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult != null) {

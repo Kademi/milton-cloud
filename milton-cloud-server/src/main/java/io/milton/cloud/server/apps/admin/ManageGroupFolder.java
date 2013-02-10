@@ -135,23 +135,23 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                 group.setRegistrationMode(s);
                 s = WebUtils.getParam(parameters, "orgType");
                 OrgType orgType = null;
-                if( s != null ) {
+                if (s != null) {
                     orgType = getOrganisation().orgType(s);
-                    if( orgType == null ) {
+                    if (orgType == null) {
                         throw new RuntimeException("Couldnt find orgType: " + s);
                     }
                 } else {
                     //System.out.println("org type is null");
                 }
-                group.setRegoOrgType(orgType, session); 
+                group.setRegoOrgType(orgType, session);
                 s = WebUtils.getParam(parameters, "sRootRegoOrg");
-                if( s != null ) {
+                if (s != null) {
                     Organisation org = getOrganisation().childOrg(s);
                     group.setRootRegoOrg(org);
                 } else {
                     group.setRootRegoOrg(null);
                 }
-                
+
                 _(DataBinder.class).populate(group, parameters);
                 session.save(group);
                 tx.commit();
@@ -159,6 +159,28 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             } catch (ClassNotInContextException | IllegalAccessException | InvocationTargetException ex) {
                 tx.rollback();
                 jsonResult = new JsonResult(false, ex.getMessage());
+            }
+        } else if (parameters.containsKey("sourceGroup")) {
+            String sSourceGroup = WebUtils.getParam(parameters, "sourceGroup");
+            Group sourceGroup = getOrganisation().group(sSourceGroup, session);
+            if (sourceGroup == null) {
+                jsonResult = new JsonResult(false, "Couldnt find group: " + sSourceGroup);
+            } else {
+                if (sourceGroup == group) {
+                    jsonResult = new JsonResult(false, "The source group is the same as the destination group");
+                } else {
+                    int count = 0;
+                    if (sourceGroup.getGroupMemberships() != null) {
+                        for (GroupMembership m : sourceGroup.getGroupMemberships()) {
+                            count++;
+                            m.getMember().addToGroup(group, m.getWithinOrg(), session);
+                        }
+                    }
+                    session.save(group);
+                    tx.commit();
+                    jsonResult = new JsonResult(true, "Added members: " + count);
+
+                }
             }
         }
 
@@ -168,7 +190,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            children = new ResourceList();            
+            children = new ResourceList();
             if (group.getGroupRoles() != null) {
                 for (GroupRole gr : group.getGroupRoles()) {
                     ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
@@ -200,7 +222,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             Map<String, String> map = new HashMap<>();
             map.put("regoMode", group.getRegistrationMode());
             String sOrgType = null;
-            if( group.getRegoOrgType() != null ) {
+            if (group.getRegoOrgType() != null) {
                 sOrgType = group.getRegoOrgType().getName();
             }
             map.put("orgType", sOrgType);
@@ -333,5 +355,9 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
 
         session.save(group);
         tx.commit();
+    }
+    
+    public long getNumMembers() {
+        return group.getNumMembers();
     }
 }

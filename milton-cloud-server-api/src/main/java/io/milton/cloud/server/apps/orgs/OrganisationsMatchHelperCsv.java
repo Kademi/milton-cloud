@@ -224,19 +224,26 @@ public class OrganisationsMatchHelperCsv extends AbstractResource implements Get
             }
         }
         
-        if (orgs.isEmpty()) {
-            return "Couldnt find organisation";
+        if (orgs.isEmpty()) {            
+            lineList.remove(0);
+            lineList.add(0, "unk001"); // TODO: make parameter
+            return "Couldnt find: " + orgIdOrTitle;
         } else if (orgs.size() == 1) {
             Organisation found = orgs.get(0);
             lineList.remove(0);
             lineList.add(0, found.getOrgId());
             return "Found: " + found.getTitle();
         } else {
+            // select the first one as default
+            Organisation found = orgs.get(0);
+            lineList.remove(0);
+            lineList.add(0, found.getOrgId());
+            
             String matches = "";
             for (Organisation org : orgs) {
                 matches += org.getTitle() + " - " + org.getOrgId() + "\n";
             }
-            return "Found more then one potential match:\n" + matches;
+            return "Found more then one potential match for" + orgIdOrTitle + "\n" + matches;
         }
     }
 }

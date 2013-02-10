@@ -97,7 +97,7 @@ public class PasswordResetPage extends TemplatedHtmlPage implements PostableReso
 
     private boolean createReset(String email, Session session) throws IOException {
         Organisation org = getOrganisation();
-        Profile user = Profile.findByEmail(email, org, session);
+        Profile user = Profile.findByEmail(email, session);
         if( user == null ) {
             log.info("user not found: " + email + "  in " + org.getOrgId());
             return false;

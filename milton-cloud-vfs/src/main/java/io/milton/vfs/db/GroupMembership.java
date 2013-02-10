@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -52,12 +53,39 @@ uniqueConstraints = {
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupMembership implements Serializable{
     
+    public static GroupMembership get(long membershipId, Session session) {
+        return (GroupMembership) session.get(GroupMembership.class, membershipId);
+    }    
+    
     public static List<GroupMembership> find(Organisation withinOrg, Session session) {
         Criteria crit = session.createCriteria(GroupMembership.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("withinOrg", withinOrg));
         return DbUtils.toList(crit, GroupMembership.class);
     }    
+    
+    public static long count(Group group, Session session) {
+        Criteria crit = session.createCriteria(GroupMembership.class);
+        crit.setCacheable(true)
+                .setProjection(Projections.projectionList()
+                .add(Projections.rowCount()));        
+        crit.add(Restrictions.eq("groupEntity", group));
+        List list = crit.list();
+        if (list == null || list.isEmpty()) {
+            return 0;
+        } else {
+            Object o = list.get(0);
+            if (o instanceof Long) {
+                return (long) o;
+            } else if (o instanceof Integer) {
+                Integer i = (Integer) o;
+                return i.longValue();
+            } else {
+                throw new RuntimeException("Unknown type: " + o.getClass());
+            }
+        }
+
+    }       
     
     private Long id;
     private Organisation withinOrg;
