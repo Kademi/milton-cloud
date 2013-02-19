@@ -157,6 +157,7 @@
                 <ref local="applicationStarter" />
             </list>
         </property>
+        <property name="buffering" value="never"/>
         <property name="mainResourceFactory" ref="resource.factory" /> 
         <property name="eventManager" ref="event.manager" />
         <property name="filters">

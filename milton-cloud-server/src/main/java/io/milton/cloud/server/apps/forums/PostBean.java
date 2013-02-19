@@ -19,7 +19,10 @@ import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.db.PostVisitor;
 import io.milton.cloud.server.db.Post;
 import io.milton.cloud.server.db.Comment;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.ProfileBean;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -32,7 +35,11 @@ public class PostBean {
         b.setNotes(p.getNotes());
         b.setDate(p.getPostDate().getTime());
         b.setUser(ProfileBean.toBean(p.getPoster()));
-        
+        String web = p.getWebsite().getDomainName();
+        if( web == null ) {
+            web = p.getWebsite().getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+        }
+        b.setContentDomain(web);
         PostVisitor visitor = new PostVisitor() {
 
             @Override
@@ -61,9 +68,20 @@ public class PostBean {
     private ProfileBean user;
     private String notes;
     private String contentTitle;
+    private String contentDomain;
     private String contentHref;
     private long date;
 
+    public String getContentDomain() {
+        return contentDomain;
+    }
+
+    public void setContentDomain(String contentDomain) {
+        this.contentDomain = contentDomain;
+    }
+
+    
+    
     public String getContentHref() {
         return contentHref;
     }

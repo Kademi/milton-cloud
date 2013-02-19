@@ -9,32 +9,9 @@
     <body id="manageOrgs" class="manageOrgs">
         <section class="MainContent">
             <header class="ClearFix">
-                <a class="SmallBtn Add" onclick="return showAddItem(this)" href="#">Add New Business unit</a>
+                <a class="SmallBtn Add org" href="#">Add New Business unit</a>
                 <a class="Btn showUploadCsvModal" style="float: right" href="#">Upload CSV</a>
-                <a class="Btn" style="float: right; margin-right: 10px;" href="orgs.csv">Open CSV</a>
-
-                <div class="Modal">
-                    <header>
-                        <h3>Add new business unit</h3>
-                        <a title="Close" href="#" class="Close"><span class="Hidden">Close</span></a>
-                    </header>
-
-                    <div class="ModalContent">
-                        <form class="addOrg" method="POST" action=".">
-                            <table>
-                                <tbody><tr>
-                                        <th><label for="newTitle">Enter business unit name</label></th>
-                                        <td><input type="text" class="required" placeholder="Enter a name for the business unit to create" id="newTitle" name="newTitle"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="BtnBar" colspan="2">
-                                            <button class="Btn">Save changes</button>
-                                        </td>
-                                    </tr>
-                                </tbody></table>
-                        </form>
-                    </div>                    
-                </div>               
+                <a class="Btn" style="float: right; margin-right: 10px;" href="orgs.csv">Open CSV</a>                             
             </header>   
 
             <div class="Info">
@@ -131,6 +108,11 @@
             <div class="ModalContent">
                 <form method="post" action="" style="position: relative; padding-bottom: 30px">
                     <ul class="verticalFields">
+                        <li>
+                            <label for="orgTitle">ID</label>
+                            <input type="text" name="orgId" id="orgId" class="required" />
+                        </li>
+                        
                         <li>
                             <label for="orgTitle">Name</label>
                             <input type="text" name="title" id="orgTitle" class="required" />

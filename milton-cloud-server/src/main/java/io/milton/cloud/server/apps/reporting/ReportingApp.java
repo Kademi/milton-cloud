@@ -239,11 +239,12 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
             // add js resources to header, so that any page that displays reports has what it needs
             if (PortletApplication.PORTLET_SECTION_HEADER.equals(portletSection)) {
                 if (currentUser != null) { // don't bother if no one logged in
-                    writer.append("<script src='/static/js/raphael-2.0.2.min.js'>//</script>\n");
+                    writer.append("<script src='/static/js/raphael-2.1.0.min.js'>//</script>\n");
                     writer.append("<script src='/static/js/morris.js'>//</script>\n");
                     writer.append("<script type='text/javascript' src='/static/js/jquery-ui-1.8.20.custom.min.js'>//</script>\n");
                     writer.append("<script type='text/javascript' src='/static/daterange/daterangepicker.jQuery.js'>//</script>\n");
                     writer.append("<script type='text/javascript' src='/templates/apps/reporting/reports.js'>//</script>\n");
+                    writer.append("<link rel='stylesheet' href='/static/js/morris.css' type='text/css' />\n");
                     writer.append("<link rel='stylesheet' href='/static/daterange/ui.daterangepicker.css' type='text/css' />\n");
                     writer.append("<link rel='stylesheet' href='/static/common/jquery-ui-1.8.11.custom.css' type='text/css' title='ui-theme' />\n");
                     writer.append("<link href='/templates/apps/reporting/reports.css' rel='stylesheet' type='text/css' />\n");

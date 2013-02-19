@@ -20,8 +20,10 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.context.ClassNotInContextException;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -43,6 +45,7 @@ import io.milton.http.FileItem;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
+import java.lang.reflect.InvocationTargetException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -76,7 +79,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             if (q != null && q.length() > 0) {
                 orgs = Organisation.search(q, getOrganisation(), null, SessionManager.session());
             } else {
-                orgs = getOrganisation().childOrgs();
+                orgs = listOrgs(100);
             }
             searchResults = new ArrayList<>();
             for (Organisation org : orgs) {
@@ -90,13 +93,14 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        String newTitle = parameters.get("newTitle");
-        if (newTitle != null) {
-            log.info("processForm: newTitle: " + newTitle);
-            Session session = SessionManager.session();
-            Transaction tx = session.beginTransaction();
-            String newName = NewPageResource.findAutoCollectionName(newTitle, this.getParent(), parameters);
-            Organisation c = getOrganisation().createChildOrg(newName, session);
+        log.info("processForm");
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        try {
+            String newOrgId = parameters.get("orgId");
+            Organisation c = getOrganisation().createChildOrg(newOrgId, session);
+
+            _(DataBinder.class).populate(c, parameters);
             session.save(c);
 
             Date now = _(CurrentDateService.class).getNow();
@@ -111,7 +115,13 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
 
             tx.commit();
             jsonResult = new JsonResult(true, "Created", c.getOrgId());
+        } catch (ClassNotInContextException | IllegalAccessException | InvocationTargetException e) {
+            tx.rollback();
+            log.warn("exception creating new org", e);
+            jsonResult = new JsonResult(false, "Exception: " + e);
+            return null;
         }
+
         return null;
     }
 
@@ -232,11 +242,32 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         }
     }
 
-    public List<OrgType> getOrgTypes() { 
+    public List<OrgType> getOrgTypes() {
         Organisation rootOrg = _(CurrentRootFolderService.class).getRootFolder().getOrganisation();
         return OrgType.findAllForOrg(rootOrg, SessionManager.session());
     }
+
+    private List<Organisation> listOrgs(int limit) {
+        List<Organisation> list = new ArrayList<>();
+        listOrgs(limit, organisation, list);
+        return list;
+    }
     
+    private void listOrgs(int limit, Organisation parent, List<Organisation> list) {
+        for( Organisation org : parent.childOrgs()) {
+            list.add(org);
+            if( list.size() > limit) {
+                return ;
+            }
+        }
+        for( Organisation org : parent.childOrgs()) {
+            listOrgs(limit, org, list);
+            if( list.size() > limit) {
+                return ;
+            }
+        }        
+    }
+
     public class OrgSearchResult {
 
         private final Organisation organisation;
@@ -252,7 +283,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         public String getId() {
             return organisation.getOrgId();
         }
-        
+
         public String getTitle() {
             if (organisation.getTitle() != null && organisation.getTitle().length() > 0) {
                 return organisation.getTitle();
@@ -276,9 +307,9 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         public String getHref() {
             return getOrgHref(organisation.getOrganisation()) + organisation.getOrgId() + "/";
         }
-        
+
         public String getOrgTypeName() {
-            if( organisation.getOrgType() != null ) {
+            if (organisation.getOrgType() != null) {
                 return organisation.getOrgType().getName();
             } else {
                 return "";

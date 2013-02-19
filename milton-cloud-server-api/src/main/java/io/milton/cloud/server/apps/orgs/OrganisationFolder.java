@@ -169,6 +169,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult == null && "application/json".equals(contentType)) {            
             Map<String,Object> map = new HashMap<>();
+            map.put("orgId", organisation.getOrgId());
             map.put("title", organisation.getTitle());
             map.put("address", organisation.getAddress());
             map.put("addressLine2", organisation.getAddressLine2());

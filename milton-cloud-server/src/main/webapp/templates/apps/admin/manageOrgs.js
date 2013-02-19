@@ -1,10 +1,4 @@
-$(function() {
-    $("form.addOrg").forms({
-        callback: function(resp) {
-            log("done", resp);
-            window.location.reload();
-        }
-    });                
+$(function() {             
     $("body").on("click", ".DeleteOrg", function(e, n) {
         e.preventDefault();
         var node = $(e.target);
@@ -57,6 +51,9 @@ $(function() {
             uploadForm.attr("action", "orgs.csv");
         }        
     });
+    $("a.Add.org").click(function() {
+        showEditOrg(null);
+    });
 });
 function showUnmatched(unmatched) {
     var unmatchedTable = $(".results table");
@@ -107,24 +104,30 @@ function showEditOrg(orgHref) {
         overlayClose: false,
         opacity: 0
     });     
-    modal.find("form").attr("action", orgHref);
+    if( orgHref ) {
+        modal.find("form").attr("action", orgHref);
+    } else {
+        modal.find("form").attr("action", window.location.pathname + "?newOrg");
+    }
     modal.find("input").val("");
     modal.find("select").val("");
     log("select", modal.find("select").val());
     resetValidation(modal);
-    $.ajax({
-        type: 'GET',
-        url: orgHref,
-        dataType: "json",
-        success: function(resp) {
-            log("success", resp);            
-            for(var key in resp.data) {
-                var val = resp.data[key];
-                modal.find("[name='" + key + "']").val(val);
+    if( orgHref ) {
+        $.ajax({
+            type: 'GET',
+            url: orgHref,
+            dataType: "json",
+            success: function(resp) {
+                log("success", resp);            
+                for(var key in resp.data) {
+                    var val = resp.data[key];
+                    modal.find("[name='" + key + "']").val(val);
+                }
+            },
+            error: function(resp) {
+                alert("err");
             }
-        },
-        error: function(resp) {
-            alert("err");
-        }
-    });     
+        });     
+    }
 }

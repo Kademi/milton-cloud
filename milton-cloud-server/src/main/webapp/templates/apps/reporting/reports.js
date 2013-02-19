@@ -49,20 +49,11 @@ function showGraph(graphData, reportContainer, itemsContainer) {
             itemsContainer.html("");
         }
         if( graphData.data.length > 0 ) {
-            Morris.Line({
-                element: reportContainer,
-                data: graphData.data,
-                xkey: graphData.xkey,
-                ykeys: graphData.ykeys,
-                labels: graphData.labels,
-                hideHover: true,
-                dateFormat: function (x) {
-                    var dt = new Date(x).formatDDMMYYYY();
-                    //var dt = new Date(x).toString();
-                    //log("formatted date", x, dt, new Date(x).formatDDMMYYYY());
-                    return dt;
-                } // see common.js
-            });
+            if( graphData.graphType == "Line") {
+                showLine(reportContainer, graphData);
+            } else if( graphData.graphType == "Bar") {
+                showBar(reportContainer, graphData);
+            }
             if( itemsContainer ) {
                 if( graphData.itemFields ) {
                     var table = $("<table><thead><tr></tr></thead><tbody><tr></tr></tbody></table>");
@@ -95,4 +86,32 @@ function showGraph(graphData, reportContainer, itemsContainer) {
             }
         }
     }
+}
+
+function showLine(reportContainer, graphData) {
+    Morris.Line({
+        element: reportContainer,
+        data: graphData.data,
+        xkey: graphData.xkey,
+        ykeys: graphData.ykeys,
+        labels: graphData.labels,
+        hideHover: true,
+        dateFormat: function (x) {
+            var dt = new Date(x).formatDDMMYYYY();
+            //var dt = new Date(x).toString();
+            //log("formatted date", x, dt, new Date(x).formatDDMMYYYY());
+            return dt;
+        } // see common.js
+    });    
+}
+
+function showBar(reportContainer, graphData) {
+    Morris.Bar({
+        element: reportContainer,
+        data: graphData.data,
+        xkey: graphData.xkey,
+        ykeys: graphData.ykeys,
+        labels: graphData.labels
+    });
+    
 }

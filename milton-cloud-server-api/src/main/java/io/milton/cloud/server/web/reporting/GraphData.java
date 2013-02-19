@@ -24,6 +24,7 @@ import java.util.List;
  * @author brad
  */
 public class GraphData {
+    private String graphType = "Line";
     private List data;
     private String xkey;
     private String[] ykeys;
@@ -50,7 +51,13 @@ public class GraphData {
         this.itemsTitle = itemsTitle;
     }
 
-    
+    public String getGraphType() {
+        return graphType;
+    }
+
+    public void setGraphType(String graphType) {
+        this.graphType = graphType;
+    }       
     
     
     /**

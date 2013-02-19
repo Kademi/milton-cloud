@@ -1279,6 +1279,8 @@ table.Summary th, table.Summary td {
     height: 33px;
     line-height: 33px;
     padding-left: 13px;
+    padding-bottom: 3px;
+    padding-top: 3px;    
 }
 table.Summary th {
     text-align: left;

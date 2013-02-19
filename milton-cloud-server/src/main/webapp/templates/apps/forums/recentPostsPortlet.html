@@ -36,7 +36,7 @@
                 for( i=0; i<comments.length; i++ ) {
                     var comment = comments[i];
                     var dt = new Date(comment.date);
-                    displayPost(comment.user, dt, comment.notes, comment.contentTitle, comment.contentHref); // pageTitle and pagePath are only present for aggregated results
+                    displayPost(comment.user, dt, comment.notes, comment.contentTitle, "http://" + comment.contentDomain + comment.contentHref); // pageTitle and pagePath are only present for aggregated results
                 }
                 jQuery(".barList abbr").timeago();
             } else {
@@ -56,7 +56,7 @@
         } else {
             li.append("<a class='profilePic' href='" + user.href + "'><img src='/templates/apps/user/profile.png' alt='' /></a>");
         }
-        li.append("<a class='user' href='" + user.href + "'>" + user.name + "</a> posted in <a class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
+        li.append("<a class='user' href='" + user.href + "'>" + user.name + "</a> posted in <a target='_blank' class='module' href='" + pagePath + "'><span>" + pageTitle + "</span></a>");
         var formattedDate = date.toISOString();
         var commentHtml = "<div class='post'>";    
         commentHtml += "<p>" + comment + "</p>";

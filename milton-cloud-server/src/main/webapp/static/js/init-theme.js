@@ -7,6 +7,8 @@
  *  application to get the toolbars you want
  */
 
+CKEDITOR_BASEPATH = "/static/ckeditor36/";
+
 // Templates should push a page init function into this array. It will then be run after outer template init functions
 var pageInitFunctions = new Array();
 // Templates should push theme css files into this array, so they will be included in the editor
