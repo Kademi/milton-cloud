@@ -2,7 +2,7 @@ function initRegister(afterRegisterHref) {
     log("init labels")
     var form = $("#registerForm");
     var lastTabIndex = 0;
-    jQuery("#registerForm label").each(function(i, n) {
+    jQuery("#registerForm label.collapse").each(function(i, n) {
         var label = jQuery(n);
         var title = label.text();
         var input = form.find("#" + label.attr("for"));

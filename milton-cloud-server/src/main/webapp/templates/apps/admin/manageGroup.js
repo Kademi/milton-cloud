@@ -10,6 +10,7 @@ function initManageGroup() {
     initRemoveRole();
     initAddRole();
     initCopyMembers();
+    initOptInGroups();
 }
 
 var currentGroupDiv;
@@ -28,17 +29,17 @@ function showPermissionModal(source) {
 
 
 function initAddRole() {
-    var appliesTo = $("ul.appliesTo");
-    appliesTo.find("input")
-    .removeAttr("checked")
-    .click(function() {
+    $("body").on("click", "ul.appliesTo input", function(e) {
+        var inp = $(e.target);
+        var appliesTo = inp.closest("ul.appliesTo");
         appliesTo.find("select").hide();
         appliesTo.find("input[type=radio]:checked").closest("li").find("select").show();
     });
     
-    $("div.roles button.Add").click(function(e) {
+    $("body").on("click", "div.roles button.Add", function(e) {
         e.preventDefault();
         var roleLi = $(e.target).closest("li");
+        var appliesTo = $("ul.appliesTo");
         var appliesToType = appliesTo.find("input:checked");
         
         if( appliesToType.length == 0 ) {
@@ -115,7 +116,7 @@ function addRoleToGroup(groupHref,roleName,appliesToType, appliesTo, callback) {
 }
 
 function initRemoveRole() {
-    $("ul.PermissionList").on("click", "li a", function(e) {
+    $("body").on("click", "ul.PermissionList li a", function(e) {
         log("click", this);
         e.preventDefault();
         e.stopPropagation();
@@ -131,7 +132,7 @@ function initRemoveRole() {
 }
 
 function initPermissionCheckboxes() {
-    $(".roles input[type=checkbox]").click(function() {
+    $("body").on("click", ".roles input[type=checkbox]", function(e) {
         var $chk = $(this);
         log("checkbox click", $chk, $chk.is(":checked"));
         var isRecip = $chk.is(":checked");
@@ -493,49 +494,36 @@ function eventForModal() {
 }
 
 function initRegoMode() {
-    $("a.regoMode").click(function(e) {
+    $("body").on("click","a.regoMode", function(e) {
         log("click", e.target);
         e.preventDefault();
         e.stopPropagation();        
-        var target = $(e.target);
-        var modal = $("#modalRegoMode");        
-        $.tinybox.show(modal, {
-            overlayClose: false,
-            opacity: 0
-        });
-        
+        var target = $(e.target);        
         var href = target.closest("div.Group").find("header div > span").text();
         href = $.URLEncode(href) + "/";
-        modal.find("form").attr("action", href);
-        
-        try {
-            $.ajax({
-                type: 'GET',
-                url: href,
-                dataType: "json",
-                success: function(resp) {
-                    log("got group data", resp);
-                    modal.find("input[name=regoMode][value=" + resp.data.regoMode + "]").attr("checked", true);
-                    modal.find("select[name=orgType] option[value=" + resp.data.orgType + "]").attr("selected", true);
-                    modal.find("select[name=sRootRegoOrg] option[value=" + resp.data.rootRegoOrg + "]").attr("selected", true);
-                },
-                error: function(resp) {
-                    log("error", resp);
-                    alert("err");
+        var modal = $("#modalRegoMode");
+        modal.load(href + " #modalRegoCont", function() {
+            initOptInGroups();
+            $("#modalRegoMode form").forms({
+                callback: function(resp) {
+                    log("done", resp);
+                    $.tinybox.close();
+                    //window.location.reload();
+                    $("div.content").load(window.location.pathname + " div.content > *", function() {
+                        $(document).trigger("onload");
+                    });
                 }
-            });          
-        } catch(e) {
-            log("exception in createJob", e);
-        }                    
+            });
+            log("done forms", modal);
+            
+            $.tinybox.show(modal, {
+                overlayClose: false,
+                opacity: 0
+            });
+            log("showed modal");
+        });
+
     });
-    $("#modalRegoMode form").forms({
-        callback: function(resp) {
-            log("done", resp);
-            $.tinybox.close();
-            window.location.reload();
-        }
-    });
-    log("done forms", $("modalRegoMode form"));
 }
 
 function setRegoMode(currentRegoModeLink, selectedRegoModeLink) {
@@ -577,4 +565,21 @@ function initCopyMembers() {
             window.location.reload();
         }
     });    
+}
+
+function initOptInGroups() {
+    $(".optins input[type=checkbox]").click(function(e) {
+        updateOptIn( $(e.target) );
+    }).each(function(i,n) {
+        updateOptIn( $(n) );
+    });
+}
+
+function updateOptIn(chk) {
+    if( chk.is(":checked")){
+        chk.closest("li").addClass("checked");
+    } else {
+        chk.closest("li").removeClass("checked");
+    }   
+
 }

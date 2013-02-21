@@ -51,6 +51,9 @@ h2 {
     margin-top: 20px;
     width: 100%;            
 }
+.ModalContent h2 {
+    margin-top: 0px;
+}
 h3 { font-size:15px; }
 h4 { 
     font-size:13px;     

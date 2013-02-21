@@ -28,24 +28,36 @@
                                             </colgroup>
                                             <tbody>
                                                 <tr>
-                                                    <td><label class="first" for="email">Email</label></td>
+                                                    <td><label class="first collapse" for="email">Email</label></td>
                                                     <td><input class="required" type="text" name="email" id="email" placeholder="Your email address" /></td>
-                                                    <td><label class="last" for="nickName">Nickname</label></td>
+                                                    <td><label class="last collapse" for="nickName">Nickname</label></td>
                                                     <td><input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" /></td>
                                                     <td rowspan="3"><button class="Register" type="submit" ><span>Register</span></button></td>
                                                 </tr>
                                                 <tr>
-                                                    <td><label class="first" for="password">Password</label></td>
+                                                    <td><label class="first collapse" for="password">Password</label></td>
                                                     <td><input class="required" type="password" name="password" id="password" placeholder="Your preferred password" /></td>
-                                                    <td><label class="last" for="confirmPassword">Confirm</label></td>
+                                                    <td><label class="last collapse" for="confirmPassword">Confirm</label></td>
                                                     <td><input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" /></td>                                                
                                                 </tr>  
                                                 #if( $page.hasOrgs )
                                                 <tr>
-                                                    <td><label class="first" for="orgName">$page.regoOrgType</label></td>
+                                                    <td><label class="first collapse" for="orgName">$page.regoOrgType</label></td>
                                                     <td colspan="3" class="findOrg">
                                                         <input type="hidden" name="orgId" id="orgId" />
                                                         <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your $page.regoOrgType" />
+                                                    </td>
+                                                </tr>
+                                                #end
+                                                #if( $page.hasOptins() )
+                                                <tr>
+                                                    <td></td>
+                                                    <td colspan="3" style="text-align: left">
+                                                        #foreach($optin in $page.optins)
+                                                        <input type="checkbox" name="optins" value="$optin.optinGroup.name" id="optins_${optin.optinGroup.name}" />
+                                                        <label for="optins_${optin.optinGroup.name}">$optin.message</label>
+                                                        #end
+                                                        <br/>
                                                     </td>
                                                 </tr>
                                                 #end
@@ -56,7 +68,7 @@
                             </div>
                         </fieldset>
                     </form>
-                    
+
                     $!folder.find($path).body
                 </div>		
                 <br class="Clear" />

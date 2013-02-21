@@ -95,7 +95,6 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
 
             ContentDirectoryResource newParent = (ContentDirectoryResource) toCollection;
             DirectoryNode newDir = newParent.getDirectoryNode();
-            System.out.println("copy: " + contentNode.getClass() + " to : " + newDir.getName());
             contentNode.copy(newDir, newName);
             try {
                 newParent.save();
@@ -107,6 +106,7 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
             throw new ConflictException(this, "Can't copy to collection of type: " + toCollection.getClass());
         }
     }
+    
 
     @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {

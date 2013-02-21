@@ -1,0 +1,102 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Manage Groups</title>
+    </head>
+    <body>
+        
+        <div id="modalRegoCont" >
+            <header>
+                <h3>Registration Mode</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <form method="POST" action="$page.href">
+                    <div class="BtnBar">
+                        <button class="Btn">Save</button>
+                        <div style="clear: both"></div>
+                    </div>
+                    <h2>Is this group open to the public?</h2>
+                    <table class="regoMode">
+                        <tr>
+                            <td style="width: 100px">
+                                $formatter.radioEq("regoModeOpen", "regoMode",$page.group.registrationMode  ,"o")
+                                <label for="regoModeOpen">Open</label>
+                            </td>
+                            <td>Allows any member of the public to register and their membership is immediately active</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                $formatter.radioEq("regoModeAdmin", "regoMode",$page.group.registrationMode  ,"a")
+                                <label for="regoModeAdmin">Approval</label>
+                            </td>
+                            <td>Allows any member of the public to register but the membership is initially inactive until reviewed by an administrator</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                $formatter.radioEq("regoModeClosed", "regoMode",$page.group.registrationMode  ,"c")
+                                <label for="regoModeClosed">Closed</label>
+                            </td>
+                            <td>External registration is not available. Instead administrators create accounts as required</td>
+                        </tr>
+                    </table>
+                    
+                    <br/>
+                    <h2>What organisations can users join?</h2>
+                    <table>
+                        <tr>
+                            <td style="width: 150px"><label for="selectOrgLabel">Organisation Type</label></td>
+                            <td>
+                                <select name="orgType">
+                                    <option value="">[Any]</option>
+                                    #foreach($ot in $page.organisation.orgTypes)
+                                    $formatter.option($ot.name, $ot.displayName, $page.group.regoOrgType)
+                                    #end
+                                </select> 
+                                <p>Select which type of organisation to allow users to register to.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="rootOrg">Select from</label></td>
+                            <td>
+                                <select name="sRootRegoOrg">
+                                    <option value="">$page.organisation.formattedName (this organisation)</option>
+                                    #foreach($org in $page.organisation.childOrgs())
+                                    $formatter.option($org.orgId, $org.formattedName, $page.group.rootRegoOrg)
+                                    #end
+                                </select>                            
+                                <p>Enter the business unit which users will search within for thier organisation. Eg asia, or asia/southeast</p>                                                    
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <br/>
+                    <h2>Can users opt-in to other mailing lists?</h2>
+                    
+                    <ul class="optins">
+                        #foreach($group in $page.organisation.groups)
+                            #if( $group == $page.group )
+                            #else
+                        <li>
+                            #set($groupId = "optin" + $group.name)
+                            #set($optin = "")
+                            #set($optin = $page.optin($group))
+                            $formatter.checkbox($groupId, "optinGroup", $formatter.isNotNull($optin), $group.name)
+                            <label for="$groupId">$group.name</label>
+                            <input type="text" name="${groupId}_Desc" placeholder="Invitation message to users" value="$!optin.message" />
+                        </li>
+                            #end
+                        #end
+                    </ul>
+                </form>
+            </div>
+
+        </div>
+
+
+        <script type="text/javascript" >
+            jQuery(function() {
+                initManageGroup();
+            });
+        </script>        
+    </body>
+</html>

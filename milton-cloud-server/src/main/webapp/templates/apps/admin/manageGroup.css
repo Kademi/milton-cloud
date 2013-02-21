@@ -101,4 +101,28 @@ ul.appliesTo select {
 #modalRegoMode label {
     font-weight: 800;
 }
+table.regoMode label {
+    padding-left: 5px;
+}
 
+.optins li {
+    float: left;
+    margin-right: 10px;
+    background: none repeat scroll 0 0 #EDEDED;
+    border: 1px solid #DADADA;
+    border-radius: 3px 3px 3px 3px;
+    min-height: 24px;
+    line-height: 25px;
+    margin-right: 10px;
+    margin-top: 3px;
+    padding: 4px 10px;    
+}
+
+.optins input[type=text] {
+    display: none;
+    width: 150px;
+}
+
+.optins .checked input[type=text] {
+    display: block;
+}

@@ -838,6 +838,11 @@ public class Formatter {
         return sb.toString();
     }
 
+    public String radioEq(String id, String name, String currentValue, String value) {
+        boolean isSet = (currentValue != null && currentValue.equals(value));
+        return radio(id, name, isSet, value);
+    }
+    
     public String radio(String id, String name, Object oChecked, String value) {
         Boolean checked = toBool(oChecked);
         if (checked == null) {
@@ -989,5 +994,13 @@ public class Formatter {
             String d = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
             return d + getPortString();
         }
+    }
+    
+    public boolean isNotNull(Object o) {
+        return o != null && !o.equals("");
+    }
+    
+    public boolean isNull(Object o) {
+        return o == null || o.equals("");
     }
 }

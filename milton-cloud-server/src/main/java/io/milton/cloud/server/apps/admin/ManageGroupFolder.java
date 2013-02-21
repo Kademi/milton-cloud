@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.db.OptIn;
 import io.milton.cloud.server.event.GroupDeletedEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
@@ -140,8 +141,6 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     if (orgType == null) {
                         throw new RuntimeException("Couldnt find orgType: " + s);
                     }
-                } else {
-                    //System.out.println("org type is null");
                 }
                 group.setRegoOrgType(orgType, session);
                 s = WebUtils.getParam(parameters, "sRootRegoOrg");
@@ -150,6 +149,38 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     group.setRootRegoOrg(org);
                 } else {
                     group.setRootRegoOrg(null);
+                }
+
+                // update opt-ins
+                String sOptinGroups = WebUtils.getParam(parameters, "optinGroup");
+                List<OptIn> toRemove = OptIn.findForGroup(group, session);
+                if (sOptinGroups != null) {
+                    for (String groupName : sOptinGroups.split(",")) {
+                        groupName = groupName.trim();
+                        if (groupName.length() > 0) {
+                            Group optinGroup = getOrganisation().group(groupName, session);
+                            if (optinGroup == null || optinGroup == group) {
+                                // ignore
+                            } else {
+                                OptIn o = OptIn.findOptin(toRemove, optinGroup);
+                                if (o == null) {
+                                    o = OptIn.create(group, optinGroup);
+                                } else {
+          
+                                    toRemove.remove(o); // found it, so remove it from list. We will delete whats left
+                                }
+                                String desc = WebUtils.getParam(parameters, "optin" + groupName + "_Desc");
+                                if (desc == null) {
+                                    desc = "Would you like to receive communications for " + groupName;
+                                }
+                                o.setMessage(desc);
+                                session.save(o);
+                            }
+                        }
+                    }
+                }
+                for (OptIn o : toRemove) {
+                    session.delete(o);
                 }
 
                 _(DataBinder.class).populate(group, parameters);
@@ -187,6 +218,10 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         return null;
     }
 
+    public List<OptIn> getOptins() {
+        return OptIn.findForGroup(group, SessionManager.session());
+    }
+
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
@@ -219,19 +254,21 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult == null) {
-            Map<String, String> map = new HashMap<>();
-            map.put("regoMode", group.getRegistrationMode());
-            String sOrgType = null;
-            if (group.getRegoOrgType() != null) {
-                sOrgType = group.getRegoOrgType().getName();
-            }
-            map.put("orgType", sOrgType);
-            String sRootRegoOrgId = group.getRootRegoOrg() == null ? "" : group.getRootRegoOrg().getOrgId();
-            map.put("rootRegoOrg", sRootRegoOrgId);
-            jsonResult = new JsonResult(true);
-            jsonResult.setData(map);
+            _(HtmlTemplater.class).writePage("admin", "admin/manageGroupRegoMode", this, params, out);
+//            Map<String, String> map = new HashMap<>();
+//            map.put("regoMode", group.getRegistrationMode());
+//            String sOrgType = null;
+//            if (group.getRegoOrgType() != null) {
+//                sOrgType = group.getRegoOrgType().getName();
+//            }
+//            map.put("orgType", sOrgType);
+//            String sRootRegoOrgId = group.getRootRegoOrg() == null ? "" : group.getRootRegoOrg().getOrgId();
+//            map.put("rootRegoOrg", sRootRegoOrgId);
+//            jsonResult = new JsonResult(true);
+//            jsonResult.setData(map);
+        } else {
+            jsonResult.write(out);
         }
-        jsonResult.write(out);
     }
 
     public List<Group> getGroups() {
@@ -356,8 +393,13 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         session.save(group);
         tx.commit();
     }
-    
+
     public long getNumMembers() {
         return group.getNumMembers();
+    }
+
+    public OptIn optin(Group optinGroup) {
+        List<OptIn> list = OptIn.findForGroup(group, SessionManager.session());
+        return OptIn.findOptin(list, optinGroup);
     }
 }

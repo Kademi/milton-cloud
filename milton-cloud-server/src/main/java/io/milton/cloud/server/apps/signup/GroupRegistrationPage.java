@@ -18,6 +18,7 @@ package io.milton.cloud.server.apps.signup;
 
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.GroupMembershipApplication;
+import io.milton.cloud.server.db.OptIn;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.*;
@@ -65,6 +66,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     private final SignupApp app;
     private JsonResult jsonResult;
     private List<Organisation> searchResults;
+    private List<OptIn> optIns;
 
     public GroupRegistrationPage(String name, GroupInWebsiteFolder parent, SignupApp app) {
         this.parent = parent;
@@ -134,7 +136,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                         jsonResult = JsonResult.fieldError("password", "An existing user account was found with that email address. If this is your account please enter the existing password");
                         return null;
                     }
-                } else{
+                } else {
                     log.info("Found an account with no password, so permit");
                 }
             } else {
@@ -192,7 +194,22 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 result = "created";
             }
 
-
+            // Now process any optins
+            String sOptins = WebUtils.getParam(parameters, "optins");
+            if (sOptins != null) {
+                List<OptIn> optins = OptIn.findForGroup(group, session);
+                for (String s : sOptins.split(",")) {
+                    Group optInGroup = getOrganisation().group(s, session);
+                    if (optInGroup != null) {
+                        OptIn o = OptIn.findOptin(optins, optInGroup);
+                        if (o != null) {
+                            p.addToGroup(optInGroup, org, session);
+                            _(SignupApp.class).onNewMembership(p.membership(optInGroup), wrf);
+                            SignupLog.logSignup(wrf.getWebsite(), p, org, optInGroup, SessionManager.session());
+                        }
+                    }
+                }
+            }
 
 
             tx.commit();
@@ -292,5 +309,16 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         } else {
             return ot.getDisplayName();
         }
+    }
+
+    public List<OptIn> getOptins() {
+        if (optIns == null) {
+            optIns = OptIn.findForGroup(parent.getGroup(), SessionManager.session());
+        }
+        return optIns;
+    }
+
+    public boolean hasOptins() {
+        return !getOptins().isEmpty();
     }
 }

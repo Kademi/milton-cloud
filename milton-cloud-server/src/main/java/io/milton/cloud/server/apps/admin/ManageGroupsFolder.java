@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -47,7 +48,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageGroupsFolder extends AbstractResource implements GetableResource, MakeCollectionableResource, CommonCollectionResource {
+public class ManageGroupsFolder extends AbstractResource implements GetableResource, MakeCollectionableResource, CommonCollectionResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupsFolder.class);
     private final String name;
@@ -130,6 +131,7 @@ public class ManageGroupsFolder extends AbstractResource implements GetableResou
         return names;
     }
 
+    @Override
     public String getTitle() {
         return "Manage groups";
     }
@@ -190,10 +192,5 @@ public class ManageGroupsFolder extends AbstractResource implements GetableResou
             return true;
         }
         return super.is(type);
-    }
-
-    private Group findGroup(String groupName) {
-        Group g = Group.findByOrgAndName(organisation, groupName, SessionManager.session());
-        return g;
     }
 }

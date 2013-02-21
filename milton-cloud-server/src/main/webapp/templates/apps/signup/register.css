@@ -1,6 +1,6 @@
 
 
-#registerForm label {
+#registerForm label.collapse {
     background-color: #499ABF;
     border-radius: 1.3125em;
     color: white;
