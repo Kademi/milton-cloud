@@ -19,6 +19,7 @@ import io.milton.cloud.server.apps.website.AppsPageHelper;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -46,7 +47,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageAppsPage extends AbstactAppsPage implements GetableResource, PostableResource {
+public class ManageAppsPage extends AbstactAppsPage implements GetableResource, PostableResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageAppsPage.class);
 
@@ -54,6 +55,7 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
         super(name, organisation, parent, null);
     }
 
+    @Override
     public String getTitle() {
         return "Manage applications: " + organisation.getOrgId();
     }

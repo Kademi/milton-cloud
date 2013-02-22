@@ -29,6 +29,7 @@ import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -63,7 +64,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageWebsiteBranchFolder extends BranchFolder implements GetableResource, PostableResource, AppsPage {
+public class ManageWebsiteBranchFolder extends BranchFolder implements GetableResource, PostableResource, AppsPage, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageWebsiteBranchFolder.class);
     private Website website;

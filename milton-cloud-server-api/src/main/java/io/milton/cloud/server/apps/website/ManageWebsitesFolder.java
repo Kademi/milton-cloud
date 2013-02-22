@@ -24,6 +24,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.context.ClassNotInContextException;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
@@ -56,7 +57,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageWebsitesFolder extends AbstractCollectionResource implements GetableResource, PostableResource {
+public class ManageWebsitesFolder extends AbstractCollectionResource implements GetableResource, PostableResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageWebsitesFolder.class);
     private final String name;
@@ -71,8 +72,9 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
         this.name = name;
     }
 
+    @Override
     public String getTitle() {
-        return "Manage websites";
+        return "Manage websites: " + getOrganisation().getOrgId();
     }
 
     @Override

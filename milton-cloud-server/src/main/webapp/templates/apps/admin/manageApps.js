@@ -2,9 +2,8 @@ $(function() {
     initApps();
 });
 function initApps() {
-    log("initApps");
-    $("td.CheckBoxWrapper input:checked").closest("tr").addClass("enabled");
-    $("table.apps").on("change", ".CheckBoxWrapper input", function() {
+    log("initApps");    
+    $("div.appsContainer").on("change", ".CheckBoxWrapper input", function() {
         log("changed", this);
         $chk = $(this);
         if($chk.is(":checked")) {                        
@@ -17,7 +16,7 @@ function initApps() {
             });
         }
     });
-    $("button.settings").click(function(e) {
+    $("div.appsContainer").on("click", "button.settings", function(e) {
         e.preventDefault();
         var modal = $("#settings_" + $(this).attr("rel"));
         log("show", $(this), $(this).attr("rel"), modal);
@@ -25,16 +24,25 @@ function initApps() {
             overlayClose: false,
             opacity: 0
         });
-    });     
+    });    
+    initSettingsForms();
+}
+
+function initSettingsForms() {
+    $("td.CheckBoxWrapper input:checked").closest("tr").addClass("enabled");
     $(".settings form").forms({
         callback: function(resp) {
             log("done save", resp);
             $.tinybox.close();
-            window.location.reload();
+            //window.location.reload();
+            $("div.appsContainer").load(window.location.pathname + " div.appsContainer > *", function() {
+                initSettingsForms();    
+            });            
         }
-    });
+    });   
     
 }
+
 function setEnabled(appId, isEnabled, success) {
     $.ajax({
         type: 'POST',

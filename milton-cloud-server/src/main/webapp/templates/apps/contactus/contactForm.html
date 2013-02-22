@@ -16,19 +16,19 @@
                         <legend>Contact us</legend>
 
                         <label for="firstName">First name</label>
-                        <input type="text" name="firstName" id="firstName" class="required" placeholder="Enter your first name" />
+                        <input type="text" name="firstName" id="firstName" class="required" placeholder="Enter your first name" value="$!user.thisUser.firstName" />
 
                         <label for="surName">Surname</label>
-                        <input type="text" name="surName" id="surName" placeholder="Enter your surname" />
+                        <input type="text" name="surName" id="surName" placeholder="Enter your surname" value="$!user.surName" />
 
                         <label for="firstName">Email</label>
-                        <input type="email" name="email" id="email" class="required" placeholder="Enter your email address" />
+                        <input type="email" name="email" id="email" class="required" placeholder="Enter your email address" value="$user.thisUser.email" />
 
                         <label for="company">Company</label>
                         <input type="text" name="company" id="company" class="" placeholder="Enter your company name" />
 
                         <label for="phone">Phone</label>
-                        <input type="text" name="phone" id="phone" class="" placeholder="Enter your best contact number" />
+                        <input type="text" name="phone" id="phone" class="" placeholder="Enter your best contact number" value="$!user.thisUser.phone" />
 
                         <textarea placeholder="Tell us how we can help" name="message"></textarea>
 

@@ -510,7 +510,7 @@ function initRegoMode() {
                     $.tinybox.close();
                     //window.location.reload();
                     $("div.content").load(window.location.pathname + " div.content > *", function() {
-                        $(document).trigger("onload");
+                        
                     });
                 }
             });
