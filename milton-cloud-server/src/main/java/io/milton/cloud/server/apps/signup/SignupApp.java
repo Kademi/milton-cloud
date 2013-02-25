@@ -127,6 +127,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
             if (requestedName.equals("pendingApps")) {
                 return new ProcessPendingPage("pendingApps", orgFolder, this);
+            } else if( requestedName.equals("signupSearch")) {
+                return new SignupsSearchPage(orgFolder, requestedName);
             }
         }
         if (parent instanceof WebsiteRootFolder) {
@@ -134,7 +136,6 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
                 return new RegisterOrLoginPage(wrf, requestedName);
             }
-
         }
         return null;
     }
@@ -233,6 +234,14 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             Organisation org = r.getOrganisation();
             if (!Utils.isEmpty(org.getWebsites())) {
 
+                // Generate recent signups link
+                Date minus7Days = _(Formatter.class).addDays(_(Formatter.class).getNow(), -14);
+                long count = SignupLog.countOfSignups(org, minus7Days, null);
+                writer.append("<div class='alert'>\n");
+                writer.append("<h3>Signups in last 14 days: <a href='signupSearch'><strong>" + count + "</strong></a><a class='Btn' href='signupSearch'>review</a></h3>\n");
+                writer.append("</div>\n");
+                
+                
                 List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
                 context.put("applications", applications);
                 _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);

@@ -21,6 +21,7 @@ import io.milton.cloud.server.db.Post;
 import io.milton.cloud.server.db.Comment;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.ProfileBean;
+import io.milton.cloud.server.web.templating.Formatter;
 
 import static io.milton.context.RequestContext._;
 
@@ -39,6 +40,7 @@ public class PostBean {
         if( web == null ) {
             web = p.getWebsite().getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
         }
+        web = web + _(Formatter.class).getPortString();
         b.setContentDomain(web);
         PostVisitor visitor = new PostVisitor() {
 

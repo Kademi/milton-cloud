@@ -105,7 +105,11 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
     
 
     public String getTitle() {
-        return "Manage forums: " + website.getDomainName();
+        String w = website.getName();
+        if( website.getDomainName() != null  ) {
+            w = website.getDomainName();
+        }
+        return "Manage forums: " + w;
     }
 
     public List<Website> getWebsites() {

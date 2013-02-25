@@ -14,19 +14,29 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.vfs.db.Group;
-import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+
+import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.utils.DbUtils;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
 
 /**
  * Records a user signing up to a group
@@ -36,6 +46,45 @@ import org.hibernate.Session;
 @javax.persistence.Entity
 public class SignupLog {
 
+    public static long countOfSignups(Organisation org, Date start, Date finish) {
+        Session session = SessionManager.session();
+        Formatter f = _(Formatter.class);
+        Criteria crit = session.createCriteria(SignupLog.class)
+                .setProjection(Projections.projectionList()                
+                .add(Projections.rowCount()));
+        if (start != null) {
+            crit.add(Restrictions.ge("reqDate", start));
+        }
+        if (finish != null) {
+            crit.add(Restrictions.le("reqDate", finish));
+        }
+        if( org != null ) {
+            crit.add(Restrictions.eq("organisation", org));
+        }        
+        List list = crit.list();
+        for (Object oRow : list) {
+            return (long) oRow;
+        }
+        return 0;        
+    }
+    
+    public static List<SignupLog> find(Organisation org, Date start, Date finish) {
+        Session session = SessionManager.session();
+        Formatter f = _(Formatter.class);
+        Criteria crit = session.createCriteria(SignupLog.class);
+        if (start != null) {
+            crit.add(Restrictions.ge("reqDate", start));
+        }
+        if (finish != null) {
+            crit.add(Restrictions.le("reqDate", finish));
+        }
+        if( org != null ) {
+            crit.add(Restrictions.eq("organisation", org));
+        }
+        crit.addOrder(Order.desc("reqDate"));
+        return DbUtils.toList(crit, SignupLog.class);
+    }    
+    
     public static void logSignup(Website website, Profile p, Organisation withinOrg, Group group, Session session) {
         logSignup(website, website.getOrganisation(), p, withinOrg, group, session);
     }

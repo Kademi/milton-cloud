@@ -1052,6 +1052,17 @@ body.dashboard .gettingStarted p {
     margin: 10px 0 10px;
 }
 
+body.dashboard .alert {
+    margin-bottom: 20px;
+    border: solid lightgray 1px;
+    border-radius: 5px;
+    padding: 10px;
+    margin-right: 45px;    
+}
+body.dashboard .alert strong {
+    font-size: 15px;
+    padding-right: 15px;
+}
 body.dashboard .report {
     width: 43%;
     height: 200px;
@@ -1279,8 +1290,7 @@ table.Summary {
     font-size: 12px;
 }
 table.Summary th, table.Summary td {
-    height: 33px;
-    line-height: 33px;
+    line-height: 20px;
     padding-left: 13px;
     padding-bottom: 3px;
     padding-top: 3px;    

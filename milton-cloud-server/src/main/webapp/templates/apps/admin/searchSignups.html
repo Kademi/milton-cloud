@@ -1,0 +1,117 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Recent Signups</title>
+        <link href="manageGroup.css" rel="stylesheet" type="text/css" />
+        <link href="manageGroupMembers.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body class="manageModulePages">
+        <!-- Content goes here - NO HEADER/BANNER/MENU! -->
+        <section id="manageGroup" class="MainContent">
+            <header class="ClearFix">
+                <div class="buttons">                    
+                    <select style="float: right; margin-left: 10px" name="group" id="groupSelect">
+                        <option value="">[Group to add to]</option>
+                        #foreach($group in $page.organisation.groups)
+                        <option value="$group.name">$group.name</option>
+                        #end
+                    </select>
+                    <button style="float: right" class="Btn addUsers">Add to group</button>
+                    <div>
+                        <span>Showing: </span>
+                        <span class="count">$page.profiles.size()</span>
+                        <span> users </span>
+                        <select id="showUserSelect" >
+                            <option value="">[Filter]</option>
+                            <option value="singleGroup">Only those in one group</option>
+                            <option value="multiGroup">Those in more then one group</option>
+                        </select>
+                    </div>                    
+                </div>
+            </header>            
+            <table class="Summary members">
+                <thead>
+                    <tr>
+                        <th>Nickname</th>
+                        <th>Email</th>
+                        <th>Groups</th>
+                        <th><input type="checkbox" name="toAddId" class="users selectAll"/></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    #foreach($member in $page.profiles)
+                    #set($rowClass="multiGroup")
+                    #if($member.memberships.size() == 1 ) 
+                    #set($rowClass="singleGroup")
+                    #end
+                    <tr class="$rowClass">
+                        <td>$member.nickName</td>
+                        <td>$member.email</td>
+                        <td>
+                            <ul class="GroupList ClearFix">
+                                #foreach($m in $member.memberships)
+                                <li><a href="groups/${m.groupEntity.name}/members">$m.groupEntity.name</a> in $m.withinOrg.titleOrId</li>                                
+                                #end
+                            </ul>
+                        </td>
+                        <td><input type="checkbox" name="toAddId" value="$member.id"/></td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        </section>
+        <script type="text/javascript">       
+            jQuery(document).ready(function(){
+                jQuery("#showUserSelect").val("").change(function() {
+                    var type = $(this).val();
+                    if( type.length > 0 ) {
+                        $("table.members tbody tr").hide();
+                        $("table.members tbody tr." + type).show();                                                
+                    } else {
+                        $("table.members tbody tr").show();
+                        
+                    }
+                    $("span.count").text($("table.members tbody tr:visible").length);
+                });
+                initSelectAll();
+                initAddUsersToGroup();
+            });
+            
+            function initAddUsersToGroup() {
+                $(".addUsers").click(function(e) {
+                    var node = $(e.target);
+                    log("addUsers", node, node.is(":checked"));
+                    var checkBoxes = node.closest(".MainContent").find("tbody td input:[name=toAddId]:checked");
+                    if( checkBoxes.length == 0 ) {
+                        alert("Please select the users you want to remove by clicking the checkboxs to the right");
+                    } else {
+                        var groupName = $("#groupSelect").val();
+                        if( confirm("Are you sure you want to add " + checkBoxes.length + " users to group " + groupName + "?") ) {
+                            doAddUsers(checkBoxes, groupName);
+                        }
+                    }
+                });
+            }        
+            
+            function doAddUsers(checkBoxes, groupName) {
+                $.ajax({
+                    type: 'POST',
+                    data: checkBoxes,
+                    dataType: "json",
+                    url: "?group=" + groupName,
+                    success: function(data) {
+                        log("success", data)
+                        if( data.status ) {
+                            alert("Added members ok");                
+                            window.location.reload();
+                        } else {
+                            alert("There was a problem adding users. Please try again and contact the administrator if you still have problems");
+                        }
+                    },
+                    error: function(resp) {
+                        alert("An error occured. Please try again");
+                    }
+                });      
+            }            
+        </script>  
+    </body>
+</html>

@@ -97,6 +97,9 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
     }
     
     public String getTitle() {
+        if( forum.getTitle() == null ) {
+            return forum.getName();
+        }
         return forum.getTitle();
     }
 

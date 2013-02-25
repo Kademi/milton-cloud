@@ -63,11 +63,8 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
     
     public static String toHref(ForumPost r) {
         Forum forum = r.getForum();
-        Website website = forum.getWebsite();
-        String sPort = _(Formatter.class).getPortString();
         String path = "/community/" + forum.getName() + "/" + r.getName();
-        String url = "http://" + website.getDomainName() + sPort + path;
-        return url;
+        return path;
     }
 
     private Date modDate = new Date();

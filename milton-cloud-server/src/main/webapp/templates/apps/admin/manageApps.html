@@ -20,25 +20,27 @@
         </article>        
         #end
 
-        <table class="apps">            
-            #foreach($app in $apps )
-            <tr>
-                <td class="CheckBoxWrapper">
-                    $formatter.checkbox("chk_${app.appId}", $app.appId, $app.enabled, $app.appId)
-                    <label for="chk_${app.appId}"></label>
-                </td>
-                <td>
-                    <h5>$page.getTitle($app.appId)</h5>
-                    <p>$page.getSummary($app.appId)</p>
-                </td>
-                <td>
-                    #if( $page.hasSettings($app) )
-                    <button class="settings" rel="$app.appId">Manage</button>
-                    #end
-                </td>
-            </tr>
-            #end
-        </table>            
+        <div class="appsContainer">
+            <table class="apps">            
+                #foreach($app in $apps )
+                <tr>
+                    <td class="CheckBoxWrapper">
+                        $formatter.checkbox("chk_${app.appId}", $app.appId, $app.enabled, $app.appId)
+                        <label for="chk_${app.appId}"></label>
+                    </td>
+                    <td>
+                        <h5>$page.getTitle($app.appId)</h5>
+                        <p>$page.getSummary($app.appId)</p>
+                    </td>
+                    <td>
+                        #if( $page.hasSettings($app) )
+                        <button class="settings" rel="$app.appId">Manage</button>
+                        #end
+                    </td>
+                </tr>
+                #end
+            </table>            
+        </div>
 
         #foreach($app in $page.apps )
         #if( $page.hasSettings($app) )

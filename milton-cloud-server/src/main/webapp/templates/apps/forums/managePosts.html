@@ -15,9 +15,9 @@
             <div class="Post Comment ClearFix">
                 <header>
                     #if( $post.forumTitle )
-                    <strong>Forum:</strong> <a href="">$post.forumTitle</a> > <strong>Topic:</strong> <a href="$post.contentHref">$post.topicTitle</a>
+                    <strong>Forum:</strong> <a target="_blank" href="http://${post.contentDomain}$post.contentHref?${page.cookieAuthParams}">$post.forumTitle</a>
                     #else
-                    <a href="$post.contentHref">$post.contentTitle</a>
+                    <strong>Page:</strong> <a target="_blank" href="http://${post.contentDomain}$post.contentHref?${page.cookieAuthParams}">$post.contentTitle</a>
                     #end
                 </header>		
                 <aside>

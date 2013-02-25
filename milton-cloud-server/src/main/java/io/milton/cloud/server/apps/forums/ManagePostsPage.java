@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.forums;
 
 import io.milton.cloud.server.db.*;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -41,7 +43,9 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
 import io.milton.http.Request;
+import io.milton.http.http11.auth.CookieAuthenticationHandler;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import org.hibernate.Session;
@@ -173,12 +177,27 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
         return super.is(type);
     }
 
+    public String getCookieAuthParams() {
+        CookieAuthenticationHandler cookieAuth = _(CookieAuthenticationHandler.class);
+        String url = cookieAuth.getCookieNameUserUrl() + "=" + cookieAuth.getUserUrlFromRequest(HttpManager.request());
+        url += "&";
+        url += cookieAuth.getCookieNameUserUrlHash() + "=" + cookieAuth.getHashFromRequest(HttpManager.request());
+        return url;        
+    }
+    
     private RecentPostBean toBean(Post p) {
         final RecentPostBean b = new RecentPostBean();
         b.setId(p.getId());
         b.setNotes(p.getNotes());
         b.setDate(p.getPostDate());
         b.setUser(ProfileBean.toBean(p.getPoster()));
+        String web = p.getWebsite().getDomainName();
+        if( web == null ) {
+            web = p.getWebsite().getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+        }
+        web = web + _(Formatter.class).getPortString();
+        b.setContentDomain(web);
+
 
         PostVisitor visitor = new PostVisitor() {
 
@@ -214,6 +233,7 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
         private ProfileBean user;
         private String notes;
         private String forumTitle;
+        private String contentDomain;
         private String contentTitle;
         private String contentHref;
         private Date date;
@@ -235,6 +255,14 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
             this.forumTitle = forumTitle;
         }
 
+        public String getContentDomain() {
+            return contentDomain;
+        }
+
+        public void setContentDomain(String contentDomain) {
+            this.contentDomain = contentDomain;
+        }       
+        
         public String getContentHref() {
             return contentHref;
         }
