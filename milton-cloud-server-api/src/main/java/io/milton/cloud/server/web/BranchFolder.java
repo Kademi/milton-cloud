@@ -572,6 +572,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         List<String> list = new ArrayList<>(); // TODO: HACK!
         list.add("fuse");
         list.add("milton");
+        list.add("bootstrap");
         list.add("custom");
         return list;
     }

@@ -33,6 +33,7 @@ public class ResourceList extends ArrayList<CommonResource> {
     private static final long serialVersionUID = 1L;
     private final Map<String, CommonResource> map = new HashMap<>();
 
+    
     public ResourceList() {
     }
 
