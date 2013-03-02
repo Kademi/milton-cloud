@@ -1,0 +1,45 @@
+.modulePage .banner .nav, .modulePage .banner .btn-group {
+    display: none;
+}
+    
+.modulePage a.backToMyLearning, .modulePage a.print {
+    position: absolute;    
+    top: -80px;
+    font-size: 13px;    
+    z-index: 10000;    
+}
+
+.modulePage a.backToMyLearning {
+    right: 0px;
+    background: url("images/arrow1.gif") no-repeat scroll 0 1px transparent;
+    padding-left: 20px;
+}
+
+.modulePage a.print {
+    right: 160px;
+    background: url("/templates/themes/images/icon_print.png") no-repeat scroll 0 1px transparent;
+    height: 16px;
+    width: 18px;
+    display: inline-block;
+}
+
+.modulePage a.print span{
+    display: none;
+}
+
+.panelBox iframe {
+    width: 100% !important;
+}
+
+
+.modulePage .panelBox ol ol {
+    list-style-type: none;
+    margin-left: -6px;    
+}
+
+body.edifyIsEditMode div.pages {
+    display: none;
+}
+.panelBox {
+    position: relative;
+}

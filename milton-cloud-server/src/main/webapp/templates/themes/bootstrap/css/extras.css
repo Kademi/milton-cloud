@@ -1,0 +1,41 @@
+.clr {
+    clear: both;
+}
+.navbar-fixed-top ul.nav-tabs {
+    border-bottom: none;
+    margin-top: 40px;    
+}
+.banner {
+    position: relative;
+}
+.banner .btn-group {
+    position: absolute; right: 0; top: 10px
+}
+.main-content {
+    margin-top: 20px;
+}
+
+.content-header {
+    border-bottom-width: 0;
+}
+.content-header, .content-no-header {
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px 6px 0 0;
+}
+
+.content-header .header-inner, .content-no-header .no-header-inner {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #E8E8E8;
+    border-radius: 5px 5px 0 0;
+    min-height: 20px;
+    padding: 12px;
+}
+
+.content-header h3 {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 20px;
+    margin: 0;
+    padding: 0;
+}

@@ -108,8 +108,8 @@ public class HtmlTemplateRenderer {
         }
 
         List<WebResource> webResources = deDupe(themeTemplateTemplateMeta.getWebResources(), bodyTemplateMeta.getWebResources(), pageWebResources);
-        printWebResources(webResources, themeName, themePath, pw);
-        
+        printHeaderWebResources(webResources, themeName, themePath, pw);
+
         // HACK: need something where templates want to include the portlet, not where they have hard coded exclusions
         if (!themeTemplate.getName().contains("plain") && !themeTemplate.getName().contains("email")) { // don't render the header for plain pages, these might be used as PDF input or emails
             applicationManager.renderPortlets(PortletApplication.PORTLET_SECTION_HEADER, profile, rootFolder, datamodel, pw);
@@ -131,7 +131,7 @@ public class HtmlTemplateRenderer {
         VelocityContentDirective.setContentTemplate(contentTemplate, datamodel);
         themeTemplate.merge(datamodel, pw);
         VelocityContentDirective.setContentTemplate(null, datamodel);
-
+        printBottomWebResources(webResources, themeName, pw);
         pw.write("</body>\n");
         pw.write("</html>");
         pw.flush();
@@ -175,7 +175,8 @@ public class HtmlTemplateRenderer {
         }
     }
 
-    private void printWebResources(List<WebResource> webResources, String themeName, String themePath, PrintWriter pw) {
+    private void printHeaderWebResources(List<WebResource> webResources, String themeName, String themePath, PrintWriter pw) {
+        pw.println();
         Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();
         for (WebResource wr : webResources) {
             if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel"))) {
@@ -194,8 +195,11 @@ public class HtmlTemplateRenderer {
                     pw.write(html + "\n");
                 }
             } else {
-                String html = wr.toHtml(themeName);
-                pw.write(html + "\n");
+                // script tags with the bottom attribute should be at bottom, not in header
+                if (!wr.getTag().equals("script") || !wr.getAtts().containsKey("bottom")) {
+                    String html = wr.toHtml(themeName);
+                    pw.write(html + "\n");
+                }
             }
         }
 
@@ -216,6 +220,18 @@ public class HtmlTemplateRenderer {
             link += cssName + EXT_COMPILE_LESS + "' />";
             pw.println(link);
         }
+        pw.println();
+    }
+
+    private void printBottomWebResources(List<WebResource> webResources, String themeName, PrintWriter pw) {
+        pw.println();
+        for (WebResource wr : webResources) {
+            if (wr.getTag().equals("script") && wr.getAtts().containsKey("bottom") ) {
+                String html = wr.toHtml(themeName);
+                pw.write(html + "\n");
+            }
+        }
+        pw.println();
     }
 
     public class BodyRenderer {

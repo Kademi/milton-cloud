@@ -66,6 +66,7 @@ public class HtmlTemplateParser {
                 if (elBody != null) {
                     String sBodyClasses = elBody.getAttributeValue("class");
                     if (sBodyClasses != null) {
+                        meta.getBodyClasses().clear();
                         meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
                     }
                 }
@@ -89,6 +90,7 @@ public class HtmlTemplateParser {
 
     private void parseWebResourcesFromHtml(net.htmlparser.jericho.Element elHead, HtmlPage meta, Path webPath) {
         //System.out.println("parseWebResourcesFromHtml");
+        meta.getWebResources().clear();
         for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
             //System.out.println("tag: " + wrTag.getName());
             if (wrTag.getName().equals("title")) {

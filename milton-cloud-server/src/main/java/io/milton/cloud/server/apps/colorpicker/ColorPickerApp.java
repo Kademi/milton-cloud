@@ -34,7 +34,7 @@ public class ColorPickerApp implements PortletApplication {
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        if( PortletApplication.PORTLET_SECTION_HEADER.equals(portletSection) ) {
+        if( PortletApplication.PORTLET_SECTION_END_OF_PAGE.equals(portletSection) ) {
             if (currentUser != null) { // don't bother if no one logged in
                 writer.append("<script type='text/javascript' src='/templates/apps/colorpicker/jquery-miniColors/jquery.miniColors.js'>//</script>\n");
                 writer.append("<script type='text/javascript' src='/templates/apps/colorpicker/init-colorpicker.js'>//</script>\n");

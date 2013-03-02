@@ -35,6 +35,8 @@ public interface PortletApplication extends Application{
      */
     public static final String PORTLET_SECTION_HEADER = "header";
     
+    public static final String PORTLET_SECTION_END_OF_PAGE = "endOfPage";
+    
     /**
      * Inside the navigation section
      */

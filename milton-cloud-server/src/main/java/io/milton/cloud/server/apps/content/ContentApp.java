@@ -129,7 +129,7 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (rootFolder instanceof WebsiteRootFolder) {
-            if (portletSection.equals("header")) {
+            if (portletSection.equals("endOfPage")) {
                 // Inject resources to permit inline editing
                 if (currentUser != null) { // but don't bother if no one logged in
                     writer.append("<script type='text/javascript' src='/static/inline-edit/inline-edit.js'>//</script>\n");

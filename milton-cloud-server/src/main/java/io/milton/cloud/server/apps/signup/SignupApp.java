@@ -28,6 +28,8 @@ import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.reporting.ReportingApp;
+import io.milton.cloud.server.apps.user.DashboardPage;
+import io.milton.cloud.server.apps.user.UserDashboardApp;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.GroupMembershipApplication;
@@ -114,13 +116,15 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     @Override
     public Resource getPage(Resource parent, String requestedName) {
         if (parent instanceof GroupInWebsiteFolder) {
-            GroupInWebsiteFolder wrf = (GroupInWebsiteFolder) parent;
+            GroupInWebsiteFolder giwf = (GroupInWebsiteFolder) parent;
             if (requestedName.equals(signupPageName)) {
-                if (Group.REGO_MODE_CLOSED.equals(wrf.getGroup().getRegistrationMode())) {
-                    log.warn("Attempt to access CLOSED rego page for group: " + wrf.getGroup().getName());
+                if (Group.REGO_MODE_CLOSED.equals(giwf.getGroup().getRegistrationMode())) {
+                    log.warn("Attempt to access CLOSED rego page for group: " + giwf.getGroup().getName());
                 } else {
-                    return new GroupRegistrationPage(requestedName, wrf, this);
+                    return new GroupRegistrationPage(requestedName, giwf, this);
                 }
+            } else if( requestedName.equals("dash")) {
+                return new DashboardPage(requestedName, giwf);
             }
         }
         if (parent instanceof OrganisationFolder) {

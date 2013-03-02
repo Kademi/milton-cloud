@@ -17,9 +17,9 @@
 package io.milton.cloud.server.web.templating;
 
 import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.resource.Resource;
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.Template;
@@ -30,8 +30,13 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.WebUtils;
-import java.net.MalformedURLException;
+import io.milton.common.Path;
 import javax.servlet.ServletContext;
+
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.resource.GetableResource;
+import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 
 /**
  * Templater for flat text files, such as css. Will locate templates in either
@@ -42,43 +47,23 @@ import javax.servlet.ServletContext;
 public class TextTemplater implements Templater {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TextTemplater.class);
-    private List<File> roots;
-    private final SimpleTemplateLoader templateLoader;
+    private final SpliffyResourceFactory resourceFactory;
+    private final ThemeAwareResourceLoader templateLoader;
     private final VelocityEngine engine;
     private final SpliffySecurityManager securityManager;
-    private final ServletContext servletContext;
+    private final long loadedTime = System.currentTimeMillis();
 
-    public TextTemplater(SpliffySecurityManager securityManager, ServletContext servletContext) {
+    public TextTemplater(SpliffySecurityManager securityManager, SpliffyResourceFactory resourceFactory) {
+        this.resourceFactory = resourceFactory;
         this.securityManager = securityManager;
-        this.servletContext = servletContext;
-        templateLoader = new SimpleTemplateLoader();
+        templateLoader = new ThemeAwareResourceLoader();
         java.util.Properties p = new java.util.Properties();
         p.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
         engine = new VelocityEngine(p);
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", templateLoader);
-
-        roots = new ArrayList<>();
-        File fWebappRoot = new File(servletContext.getRealPath("/"));
-        roots.add(fWebappRoot);
-        log.info("Using webapp root dir: " + fWebappRoot.getAbsolutePath());
-
-
-        String extraRoots = System.getProperty(HtmlTemplater.ROOTS_SYS_PROP_NAME);
-        if (extraRoots != null && !extraRoots.isEmpty()) {
-            String[] arr = extraRoots.split(",");
-            for (String s : arr) {
-                File root = new File(s);
-                if (!root.exists()) {
-                    throw new RuntimeException("Root template dir specified in system property does not exist: " + root.getAbsolutePath() + " from property value: " + extraRoots);
-                }
-                roots.add(root);
-            }
-        }
-    }
-    
-    public TemplateSource getTemplateSource(String path) {
-        return templateLoader.findTemplateSource(path);
+        engine.setProperty("mine.resource.loader.cache", "true");
+        engine.setProperty("mine.resource.loader.modificationCheckInterval", "5");
     }
 
     @Override
@@ -86,8 +71,10 @@ public class TextTemplater implements Templater {
         if (!templatePath.startsWith("/")) {
             templatePath = "/templates/apps/" + templatePath;
         }
-        Template template = engine.getTemplate(templatePath);
         RootFolder rootFolder = WebUtils.findRootFolder(aThis);
+        templatePath = rootFolder.getDomainName() + ":" + templatePath;
+        Template template = engine.getTemplate(templatePath);
+
         Context datamodel = new VelocityContext();
         datamodel.put("rootFolder", rootFolder);
         datamodel.put("page", aThis);
@@ -105,6 +92,7 @@ public class TextTemplater implements Templater {
         if (!templatePath.startsWith("/")) {
             templatePath = "/templates/apps/" + templatePath;
         }
+        templatePath = rootFolder.getDomainName() + ":" + templatePath;
         Template template = engine.getTemplate(templatePath);
         Context datamodel = new VelocityContext(context);
         datamodel.put("rootFolder", rootFolder);
@@ -117,126 +105,82 @@ public class TextTemplater implements Templater {
         writer.flush();
     }
 
-    public List<File> getTemplateFileRoots() {
-        return roots;
-    }
-
-    public void setTemplateFileRoots(List<File> roots) {
-        this.roots = roots;
-    }
-
     public VelocityEngine getEngine() {
         return engine;
     }
-    
-    
 
-    class SimpleTemplateLoader extends org.apache.velocity.runtime.resource.loader.ResourceLoader {
+    public class ThemeAwareResourceLoader extends ResourceLoader {
 
         @Override
-        public void init(ExtendedProperties ep) {
+        public void init(ExtendedProperties configuration) {
         }
 
         @Override
-        public InputStream getResourceStream(String path) throws ResourceNotFoundException {
-            log.info("SimpleTemplateLoader: getResourceStream: " + path);
-            TemplateSource source = findTemplateSource(path);
-            if (source != null) {
-                try {
-                    return source.getInputStream();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            } else {
-                throw new ResourceNotFoundException("Not found: " + path);
+        public synchronized InputStream getResourceStream(String source) throws ResourceNotFoundException {
+            if (TextTemplater.log.isTraceEnabled()) {
+                TextTemplater.log.trace("getResourceStream( " + source + ")");
             }
+            GetableResource r = getResource(source);
+            if (r == null) {
+                return null;
+            }
+
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            try {
+                r.sendContent(bout, null, null, null);
+            } catch (Throwable e) {
+                throw new RuntimeException("Couldnt parse: " + r.getClass(), e);
+            }
+            byte[] bytes = bout.toByteArray();
+            return new ByteArrayInputStream(bytes);
         }
 
         @Override
         public boolean isSourceModified(org.apache.velocity.runtime.resource.Resource resource) {
-            return getLastModified(resource) != resource.getLastModified();
+            if (TextTemplater.log.isTraceEnabled()) {
+                TextTemplater.log.info("isSourceModified( " + resource.getName() + ")");
+            }
+            long lastMod = getLastModified(resource);
+            return lastMod != resource.getLastModified();
         }
 
         @Override
         public long getLastModified(org.apache.velocity.runtime.resource.Resource resource) {
-            TemplateSource source = findTemplateSource(resource.getName());
-            if (source != null) {
-                return source.getTimestamp();
+            Resource r = getResource(resource.getName());
+            if (r == null) {
+                return loadedTime;
             } else {
-                throw new RuntimeException("Not found: " + resource.getName());
-            }
-
-        }
-
-        public TemplateSource findTemplateSource(String path) {
-            log.info("findTemplateSource: " + path);
-
-            if (roots != null) {
-                for (File root : roots) {
-                    File templateFile = new File(root, path);
-                    if (templateFile.exists()) {
-                        return new FileTemplateSource(templateFile);
+                Date dt = r.getModifiedDate();
+                if (dt == null) {
+                    if (TextTemplater.log.isTraceEnabled()) {
+                        TextTemplater.log.trace("getLastModified( " + resource.getName() + ") = default (mod date is null)");
                     }
+                    return loadedTime;
+                } else {
+                    if (TextTemplater.log.isTraceEnabled()) {
+                        TextTemplater.log.trace("getLastModified( " + resource.getName() + ") = " + dt.getTime());
+                    }
+                    return dt.getTime();
                 }
             }
-            URL resource;
-            if (path.startsWith("/")) {                
-                try {
-                    resource = servletContext.getResource(path);
-                } catch (MalformedURLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                if (resource != null) {
-                    return new ClassPathTemplateSource(resource);
-                }
+        }
+
+        public GetableResource getResource(String source) {
+            if (!source.contains(":")) {
+                return null;
             }
-
-            resource = this.getClass().getResource(path);
-            if (resource != null) {
-                return new ClassPathTemplateSource(resource);
+            try {
+                log.info("getResource source: " + source);
+                String[] arr = source.split(":");
+                Resource r = resourceFactory.findResource(arr[0], Path.path(arr[1]));
+                if (r instanceof GetableResource) {
+                    return (GetableResource) r;
+                } else {
+                    return null;
+                }
+            } catch (NotAuthorizedException | BadRequestException e) {
+                throw new RuntimeException(e);
             }
-            return null;
-        }
-    }
-
-    private class ClassPathTemplateSource implements TemplateSource {
-
-        final URL resource;
-        final long timestamp;
-
-        public ClassPathTemplateSource(URL resource) {
-            this.resource = resource;
-            this.timestamp = System.currentTimeMillis();
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return resource.openStream();
-        }
-
-        @Override
-        public long getTimestamp() {
-            return timestamp;
-        }
-    }
-
-    private class FileTemplateSource implements TemplateSource {
-
-        final File file;
-
-        public FileTemplateSource(File file) {
-            this.file = file;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            FileInputStream in = new FileInputStream(file);
-            return in;
-        }
-
-        @Override
-        public long getTimestamp() {
-            return file.lastModified();
         }
     }
 }

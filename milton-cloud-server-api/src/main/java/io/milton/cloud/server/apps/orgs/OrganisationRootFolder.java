@@ -20,6 +20,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
 import io.milton.http.exceptions.BadRequestException;
@@ -55,6 +56,11 @@ public class OrganisationRootFolder extends OrganisationFolder implements RootFo
     @Override
     public String getId() {
         return organisation.getOrgId();
+    }
+
+    @Override
+    public String getDomainName() {
+        return "admin." + organisation.getOrgId() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
     }
 
     

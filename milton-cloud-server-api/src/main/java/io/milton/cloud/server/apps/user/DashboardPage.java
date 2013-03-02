@@ -60,7 +60,7 @@ public class DashboardPage extends TemplatedHtmlPage {
 
     public DashboardPage(String name, CommonCollectionResource parent) {
         super(name, parent, "user/dashboard", "Dashboard");
-        setForceLogin(true);
+//        setForceLogin(true);
     }
 
     @Override
@@ -81,19 +81,20 @@ public class DashboardPage extends TemplatedHtmlPage {
         WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
 
-        for (Group g : _(SpliffySecurityManager.class).getGroups(p, wrf.getWebsite())) {
-            Properties props = DashboardMessageUtils.messageProps(HttpManager.request(), g, wrf.getBranch());
-            String html = props.getProperty("html");
-            String position = props.getProperty("position");
-            if (position != null && html != null && html.length() > 0) {
-                if (position.equals("bottom")) {
-                    bottomMessages.add(html);
-                } else {
-                    topMessages.add(html);
+        if (p != null) {
+            for (Group g : _(SpliffySecurityManager.class).getGroups(p, wrf.getWebsite())) {
+                Properties props = DashboardMessageUtils.messageProps(HttpManager.request(), g, wrf.getBranch());
+                String html = props.getProperty("html");
+                String position = props.getProperty("position");
+                if (position != null && html != null && html.length() > 0) {
+                    if (position.equals("bottom")) {
+                        bottomMessages.add(html);
+                    } else {
+                        topMessages.add(html);
+                    }
                 }
             }
         }
-
     }
 
     public List<String> getTopMessages() {

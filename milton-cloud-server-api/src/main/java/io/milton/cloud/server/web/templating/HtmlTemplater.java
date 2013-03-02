@@ -23,7 +23,6 @@ import io.milton.resource.Resource;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -32,13 +31,10 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
 import io.milton.context.RequestContext;
 
-import static io.milton.context.RequestContext._;
 import io.milton.http.HttpManager;
-import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.exceptions.NotFoundException;
-import javax.servlet.ServletContext;
+import io.milton.resource.GetableResource;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -56,51 +52,31 @@ public class HtmlTemplater {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HtmlTemplater.class);
     public static final String ROOTS_SYS_PROP_NAME = "template.file.roots";
-    private List<File> roots;
-    private final ServletContext servletContext;
+    private final SpliffyResourceFactory resourceFactory;
     private final VelocityEngine engine;
     private final SpliffySecurityManager securityManager;
-    private final HtmlTemplateLoader templateLoader;
     private final HtmlTemplateParser templateParser;
     private final HtmlTemplateRenderer templateRenderer;
-    private final Map<String, TemplateHtmlPage> cachedTemplateMetaData = new HashMap<>();
+    private final Map<String, GetableResourcePathTemplateHtmlPage> cachedTemplateMetaData = new HashMap<>();
     private String defaultPublicTheme = "fuse";
     private String defaultAdminTheme = "admin";
     private Path webRoot = Path.path("/");
+    private final long loadedTime = System.currentTimeMillis();
 
-    public HtmlTemplater(ApplicationManager applicationManager, Formatter formatter, SpliffySecurityManager securityManager, ServletContext servletContext) {
-        this.servletContext = servletContext;
+    public HtmlTemplater(SpliffyResourceFactory resourceFactory, ApplicationManager applicationManager, Formatter formatter, SpliffySecurityManager securityManager) {
+        this.resourceFactory = resourceFactory;
         this.securityManager = securityManager;
-        templateLoader = new HtmlTemplateLoader();
         java.util.Properties p = new java.util.Properties();
         p.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
         engine = new VelocityEngine(p);
         engine.setProperty("resource.loader", "mine");
         engine.setProperty("mine.resource.loader.instance", new HtmlTemplateLoaderResourceLoader());
+        engine.setProperty("mine.resource.loader.cache", "true");
+        engine.setProperty("mine.resource.loader.modificationCheckInterval", "5");
         engine.setProperty("userdirective", VelocityContentDirective.class.getName() + "," + PortletsDirective.class.getName() + "," + RenderAppSettingsDirective.class.getName());
-
-
 
         templateParser = new HtmlTemplateParser();
         templateRenderer = new HtmlTemplateRenderer(applicationManager, formatter);
-
-        roots = new ArrayList<>();
-        File fWebappRoot = new File(servletContext.getRealPath("/"));
-        roots.add(fWebappRoot);
-        log.info("Using webapp root dir: " + fWebappRoot.getAbsolutePath());
-
-        String extraRoots = System.getProperty(ROOTS_SYS_PROP_NAME);
-        if (extraRoots != null && !extraRoots.isEmpty()) {
-            String[] arr = extraRoots.split(",");
-            for (String s : arr) {
-                File root = new File(s);
-                if (!root.exists()) {
-                    throw new RuntimeException("Root template dir specified in system property does not exist: " + root.getAbsolutePath() + " from property value: " + extraRoots);
-                }
-                roots.add(root);
-                log.info("Using file template root: " + root.getAbsolutePath());
-            }
-        }
     }
 
     /**
@@ -164,29 +140,31 @@ public class HtmlTemplater {
         UserResource user = securityManager.getCurrentPrincipal();
         if (!templatePath.startsWith("/")) {
             if (templatePath.startsWith("theme/")) {
-                templatePath = templatePath.replace("theme/", themePath); // Eg change theme/page to /content/theme/page
+                templatePath = "/" + templatePath;
             } else {
-                templatePath = "/templates/apps/" + templatePath; // Eg change admin/manageUsers to /templates/apps/admin/manageUsers
+                templatePath = "/theme/apps/" + templatePath; // Eg change admin/manageUsers to /theme/apps/admin/manageUsers
             }
         }
+
         if (!templatePath.endsWith(".html")) {
             templatePath = templatePath + ".html";
         }
-
         Template bodyTemplate = getTemplate(templatePath);
         TemplateHtmlPage bodyTemplateMeta = getCachedTemplateMetaData(templatePath);
+        if (bodyTemplateMeta == null) {
+            throw new RuntimeException("Didnt find cached meta, which is weird because i did find the template that it comes from. Maybe check cache key format");
+        }
 
         String themeTemplateName = findThemeTemplateName(bodyTemplateMeta);
         String themeTemplatePath; // if the given themeTemplateName is an absolute path then use it as is, other prefix with themePath
         if (themeTemplateName.startsWith("/")) {
             themeTemplatePath = themeTemplateName;
         } else {
-            themeTemplatePath = themePath + themeTemplateName;
+            themeTemplatePath = "/theme/" + themeTemplateName;
         }
         if (!themeTemplatePath.endsWith(".html")) {
             themeTemplatePath += ".html"; // this class only does html templates
         }
-
         Template themeTemplate = getTemplate(themeTemplatePath);
         if (themeTemplate == null) {
             throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);
@@ -237,6 +215,13 @@ public class HtmlTemplater {
     }
 
     private String findThemeTemplateName(TemplateHtmlPage bodyTemplateMeta) {
+        if (bodyTemplateMeta == null) {
+            throw new NullPointerException("bodyTemplateMeta is null");
+        }
+        if (bodyTemplateMeta.getWebResources() == null) {
+            throw new NullPointerException("bodyTemplateMeta.getWebResources() is null");
+        }
+
         for (WebResource wr : bodyTemplateMeta.getWebResources()) {
             if (wr.getTag().equals("link")) {
                 String rel = wr.getAtts().get("rel");
@@ -265,14 +250,6 @@ public class HtmlTemplater {
         this.webRoot = Path.path(webRoot);
     }
 
-    public List<File> getTemplateFileRoots() {
-        return roots;
-    }
-
-    public void setTemplateFileRoots(List<File> roots) {
-        this.roots = roots;
-    }
-
     private Template getTemplate(String templatePath) {
         if (templatePath == null) {
             throw new RuntimeException("templatePath is null");
@@ -281,34 +258,29 @@ public class HtmlTemplater {
     }
 
     private TemplateHtmlPage getCachedTemplateMetaData(String templatePath) {
-        return getTemplateCache(HttpManager.request()).get(templatePath);
+        String host = HttpManager.request().getHostHeader();
+        String cacheKey = GetableResourcePathTemplateHtmlPage.getId(host, templatePath);
+        return cachedTemplateMetaData.get(cacheKey);
     }
 
-    private void clearCachedTemplateMetaData(String path) {
-        getTemplateCache(HttpManager.request()).remove(path);
-    }
-
-    private void putCachedTemplateMetaData(String path, TemplateHtmlPage meta) {
-        getTemplateCache(HttpManager.request()).put(path, meta);
-    }
-
-    private Map<String, TemplateHtmlPage> getTemplateCache(Request request) {
-        if (request != null) {
-            Map<String, TemplateHtmlPage> map = (Map<String, TemplateHtmlPage>) request.getAttributes().get("templateCache");
-            if (map == null) {
-                map = new HashMap<>();
-                request.getAttributes().put("templateCache", map);
+    public GetableResourcePathTemplateHtmlPage getResource(String source) {
+        String host = HttpManager.request().getHostHeader();
+        String id = GetableResourcePathTemplateHtmlPage.getId(host, source);
+        GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(id);
+        synchronized (this) {
+            if (meta == null) {
+                try {
+                    Resource r = resourceFactory.findResource(host, Path.path(source));
+                    if (r instanceof GetableResource) {
+                        meta = new GetableResourcePathTemplateHtmlPage(host, source, loadedTime, templateParser);
+                        cachedTemplateMetaData.put(id, meta);
+                    }
+                } catch (NotAuthorizedException | BadRequestException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            return map;
-        } else {
-            RequestContext ctx = RequestContext.getCurrent();
-            Map<String, TemplateHtmlPage> map = (Map<String, TemplateHtmlPage>) ctx.get("templateCache");
-            if( map == null ) {
-                map = new HashMap<>();
-                ctx.put("templateCache", map);
-            }
-            return map;
         }
+        return meta;
     }
 
     public class HtmlTemplateLoaderResourceLoader extends ResourceLoader {
@@ -318,42 +290,42 @@ public class HtmlTemplater {
         }
 
         @Override
-        public InputStream getResourceStream(String source) throws ResourceNotFoundException {
-            TemplateHtmlPage meta;
-            try {
-                meta = templateLoader.findTemplateSource(source);
-            } catch (Exception ex) {
-                System.out.println("Exception loading template");
-                ex.printStackTrace();
-                log.error("exception loading template: " + source, ex);
-                return null;
+        public synchronized InputStream getResourceStream(String source) throws ResourceNotFoundException {
+            if (HtmlTemplater.log.isTraceEnabled()) {
+                HtmlTemplater.log.trace("getResourceStream( " + source + ") ");
             }
-            if (meta == null) {
+            GetableResourcePathTemplateHtmlPage r = getResource(source);
+            if (r == null) {
                 throw new ResourceNotFoundException(source);
             }
-            return new ByteArrayInputStream(meta.getBody().getBytes());
+            try {
+                r.parse();
+                return new ByteArrayInputStream(r.getBody().getBytes("UTF-8"));
+            } catch (IOException | XMLStreamException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
         public boolean isSourceModified(org.apache.velocity.runtime.resource.Resource resource) {
-            TemplateHtmlPage meta;
-            try {
-                meta = templateLoader.findTemplateSource(resource.getName());
-                return meta.getTimestamp() != resource.getLastModified();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            long lastMod = getLastModified(resource);
+            boolean isMod = lastMod != resource.getLastModified();
+            if (HtmlTemplater.log.isTraceEnabled()) {
+                HtmlTemplater.log.trace("isSourceModified( " + resource.getName() + ") = " + isMod);
             }
+            return isMod;
         }
 
         @Override
         public long getLastModified(org.apache.velocity.runtime.resource.Resource resource) {
-            TemplateHtmlPage meta;
-            try {
-                meta = templateLoader.findTemplateSource(resource.getName());
-                return meta.getTimestamp();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            if (HtmlTemplater.log.isTraceEnabled()) {
+                HtmlTemplater.log.trace("getLastModified( " + resource.getName() + ")");
             }
+            GetableResourcePathTemplateHtmlPage r = getResource(resource.getName());
+            if (r == null) {
+                throw new ResourceNotFoundException(resource.getName());
+            }
+            return r.getTimestamp();
         }
     }
 
@@ -375,164 +347,5 @@ public class HtmlTemplater {
 
     public VelocityEngine getEngine() {
         return engine;
-    }
-
-    public class HtmlTemplateLoader {
-
-        /**
-         * We'll look for the template in the website's repository (if using
-         * custom theme), then in the webapp filesystem, then in the regular
-         * filesystem, then finally in the classpath
-         */
-        public TemplateHtmlPage findTemplateSource(String path) throws IOException {
-            log.trace("findTemplateSource: " + path);
-
-            TemplateHtmlPage meta = getCachedTemplateMetaData(path);
-            if (meta != null) {
-                if (!meta.isValid()) {
-                    clearCachedTemplateMetaData(path);
-                    meta = null;
-                } else {
-                    log.trace("cache hit: " + meta.getSource() + " - " + meta.getClass());
-                    return meta;
-                }
-            }
-            long tm = System.currentTimeMillis();
-
-            Boolean isCustom = RequestContext.getCurrent().get("isCustom");
-            if (isCustom == null) {
-                isCustom = false;
-            }
-
-            Path p = Path.path(path);
-            Path webPath = webRoot.add(p).getParent(); // go to parent, because the path is the directory which contains the template            
-            if (isCustom) {
-                // load from website repo
-                RootFolder rootFolder = _(RootFolder.class);
-                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-                try {
-                    Resource r = NodeChildUtils.find(p, wrf);
-                    FileResource fr = NodeChildUtils.toFileResource(r);
-                    if (fr == null) {
-                        if (!"VM_global_library.vm".equals(path)) {
-                            log.info("Couldnt find template: " + path + " in website: " + wrf.getWebsite().getDomainName());
-                        }
-                    } else {
-                        meta = loadContentMeta(fr, wrf.getWebsite().getDomainName(), webPath);
-                    }
-                } catch (NotAuthorizedException | BadRequestException | NotFoundException ex) {
-                    throw new IOException(ex);
-                }
-            }
-
-            if (meta == null && roots != null) {
-                for (File root : roots) {
-                    File templateFile = new File(root, path);
-                    if (!templateFile.exists()) {
-                        log.warn("Template does not exist: " + templateFile.getAbsolutePath());
-                    } else {
-                        log.trace("found file: " + templateFile.getAbsolutePath());
-                        meta = loadFileMeta(templateFile, webPath);
-                        break;
-                    }
-                }
-            }
-
-            // Not in filesystem, try a servlet resource
-            if (meta == null && path.startsWith("/")) {
-                // try to locate a physical file path, so we can detect file changes
-                String realPath = servletContext.getRealPath(path);
-                if (realPath != null) {
-                    File templateFile = new File(realPath);
-                    if (templateFile.exists() && templateFile.isFile()) {
-                        meta = loadFileMeta(templateFile, webPath);
-                    }
-                }
-                // if we couldnt get a real path might be because its a WAR packaged resource, or overlay, so
-                // try to get url.
-                if (meta == null) {
-                    URL resource = servletContext.getResource(path);
-                    if (resource != null) {
-                        meta = loadClassPathMeta(resource, webPath);
-                    }
-                }
-
-//                String localWebPath = servletContext.getRealPath(path);
-//                InputStream r = servletContext.getResourceAsStream(path);
-//                System.out.println("res as str: " + r);
-//                System.out.println("localwebpath: " + localWebPath);
-//                if (localWebPath != null) {
-//                    File templateFile = new File(localWebPath);
-//                    System.out.println("f: " + templateFile.getCanonicalPath() + " - " + templateFile.exists());
-//                    if (templateFile.exists()) {
-//                        log.info("found web resource: " + templateFile.getAbsolutePath());
-//                        meta = loadFileMeta(templateFile, webPath);
-//                    }
-//                }
-            }
-
-            // if not in filesystem, try classpath
-            if (meta == null) {
-                URL resource = this.getClass().getResource(path);
-                if (resource != null) {
-                    meta = loadClassPathMeta(resource, webPath);
-                }
-            }
-
-            if (meta != null) {
-                tm = System.currentTimeMillis() - tm;
-                log.info("cache miss: " + meta.getSource() + " - " + meta.getClass() + " parsed in " + tm + "ms");
-                putCachedTemplateMetaData(path, meta);
-            } else {
-                log.warn("Failed to find: " + path);
-            }
-
-            return meta;
-        }
-
-        public long getLastModified(Object o) {
-            TemplateHtmlPage templateFile = (TemplateHtmlPage) o;
-            return templateFile.getTimestamp();
-        }
-
-        public Reader getReader(Object o, String path) throws IOException {
-            TemplateHtmlPage meta = (TemplateHtmlPage) o;
-            if (meta.getBody() == null) {
-                throw new RuntimeException("No template text for: " + meta.getId());
-            }
-            return new StringReader(meta.getBody());
-        }
-
-        private TemplateHtmlPage loadClassPathMeta(URL resource, Path webPath) throws IOException {
-            ClassPathTemplateHtmlPage meta = new ClassPathTemplateHtmlPage(resource);
-            try {
-                templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
-            } catch (XMLStreamException ex) {
-                throw new IOException(resource.toString(), ex);
-            }
-            return meta;
-        }
-
-        private TemplateHtmlPage loadFileMeta(File templateFile, Path webPath) throws IOException {
-            FileTemplateHtmlPage meta = new FileTemplateHtmlPage(templateFile);
-            try {
-                templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
-            } catch (XMLStreamException ex) {
-                throw new IOException(templateFile.getCanonicalPath(), ex);
-            }
-            return meta;
-        }
-
-        private TemplateHtmlPage loadContentMeta(FileResource fr, String websiteName, Path webPath) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            BranchFolder branchFolder = (BranchFolder) fr.closest("branch");
-            ContentTemplateHtmlPage meta = new ContentTemplateHtmlPage(fr.getFileNode(), branchFolder.getBranch());
-            try {
-                templateParser.parse(meta, webPath); // needs web path to evaluate resource paths in templates
-            } catch (XMLStreamException ex) {
-                throw new IOException(fr.getHref(), ex);
-            }
-            return meta;
-
-        }
     }
 }

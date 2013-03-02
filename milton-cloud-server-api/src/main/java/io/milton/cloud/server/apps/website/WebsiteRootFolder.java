@@ -92,6 +92,13 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     }
 
     @Override
+    public String getDomainName() {
+        return branch.getName() + "." + website.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+    }
+
+    
+    
+    @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
         if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
             return _(SpliffySecurityManager.class).getCurrentUser() != null;

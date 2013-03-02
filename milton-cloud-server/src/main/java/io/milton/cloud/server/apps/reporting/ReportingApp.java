@@ -21,10 +21,8 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.LifecycleApplication;
 import io.milton.cloud.server.apps.MenuApplication;
-import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AccessLog;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
@@ -46,8 +44,6 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -57,7 +53,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
-import io.milton.http.HttpManager;
 import io.milton.vfs.db.Branch;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,7 +61,7 @@ import java.util.Date;
  *
  * @author brad
  */
-public class ReportingApp implements MenuApplication, EventListener, LifecycleApplication, ChildPageApplication, PortletApplication {
+public class ReportingApp implements MenuApplication, EventListener, LifecycleApplication, ChildPageApplication {
 
     private static final Logger log = LoggerFactory.getLogger(ReportingApp.class);
     
@@ -233,25 +228,6 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
 
     }
 
-    @Override
-    public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, org.apache.velocity.context.Context context, Writer writer) throws IOException {
-        if (rootFolder instanceof OrganisationRootFolder) { // only for admin console
-            // add js resources to header, so that any page that displays reports has what it needs
-            if (PortletApplication.PORTLET_SECTION_HEADER.equals(portletSection)) {
-                if (currentUser != null) { // don't bother if no one logged in
-                    writer.append("<script src='/static/js/raphael-2.1.0.min.js'>//</script>\n");
-                    writer.append("<script src='/static/js/morris.js'>//</script>\n");
-                    writer.append("<script type='text/javascript' src='/static/js/jquery-ui-1.8.20.custom.min.js'>//</script>\n");
-                    writer.append("<script type='text/javascript' src='/static/daterange/daterangepicker.jQuery.js'>//</script>\n");
-                    writer.append("<script type='text/javascript' src='/templates/apps/reporting/reports.js'>//</script>\n");
-                    writer.append("<link rel='stylesheet' href='/static/js/morris.css' type='text/css' />\n");
-                    writer.append("<link rel='stylesheet' href='/static/daterange/ui.daterangepicker.css' type='text/css' />\n");
-                    writer.append("<link rel='stylesheet' href='/static/common/jquery-ui-1.8.11.custom.css' type='text/css' title='ui-theme' />\n");
-                    writer.append("<link href='/templates/apps/reporting/reports.css' rel='stylesheet' type='text/css' />\n");
-                }
-            }
-        }
-    }
 
     public class Access {
 

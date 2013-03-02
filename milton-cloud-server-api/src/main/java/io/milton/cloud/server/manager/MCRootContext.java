@@ -57,11 +57,11 @@ public class MCRootContext extends RootContext {
         this.applicationManager = applicationManager;
         applicationManager.setRootContext(this);
         templateParser = new HtmlTemplateParser();
-        this.textTemplater = new TextTemplater(securityManager, servletContext);
+        this.textTemplater = new TextTemplater(securityManager, resourceFactory);
         currentDateService = new MutableCurrentDateService(); // todo: make pluggable to support testing
         Formatter formatter = new Formatter(currentDateService);
         put(formatter);
-        this.htmlTemplater = new HtmlTemplater(applicationManager, formatter, securityManager, servletContext);
+        this.htmlTemplater = new HtmlTemplater(resourceFactory, applicationManager, formatter, securityManager);
         commentService = new CommentService(currentDateService);        
         this.dataBinder = new DataBinder();
         
@@ -70,6 +70,7 @@ public class MCRootContext extends RootContext {
         put(securityManager.getPasswordManager());
         put(resourceFactory);
         put(contentTypeService);
+        put(servletContext);
         
         for( Application a : applicationManager.getApps()) {
             put(a);

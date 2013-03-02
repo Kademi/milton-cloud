@@ -20,6 +20,7 @@ import io.milton.common.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -172,4 +173,42 @@ public class WebResource {
         }
         return p.toString();
     }
+
+
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + Objects.hashCode(this.atts);
+        hash = 79 * hash + Objects.hashCode(this.webPath);
+        hash = 79 * hash + Objects.hashCode(this.tag);
+        hash = 79 * hash + Objects.hashCode(this.body);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final WebResource other = (WebResource) obj;
+        if (!Objects.equals(this.atts, other.atts)) {
+            return false;
+        }
+        if (!Objects.equals(this.webPath, other.webPath)) {
+            return false;
+        }
+        if (!Objects.equals(this.tag, other.tag)) {
+            return false;
+        }
+        if (!Objects.equals(this.body, other.body)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

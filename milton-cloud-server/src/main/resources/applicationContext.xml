@@ -70,6 +70,7 @@
         <!--        
         <constructor-arg ref="lock.manager"/>
         -->        
+        <constructor-arg ref="servletContext"/>
         <constructor-arg ref="dao.user"/>
         <constructor-arg ref="security.manager"/>
         <constructor-arg ref="application.manager"/>        

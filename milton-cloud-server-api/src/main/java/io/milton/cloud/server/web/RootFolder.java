@@ -59,6 +59,13 @@ public interface RootFolder extends CommonCollectionResource {
      * @return 
      */
     String getEmailAddress();
-    
+
+    /**
+     * Get an actual domain name that can be used to locate this RootFolder via
+     * the ResourceFactory
+     * 
+     * @return 
+     */
+    String getDomainName();
 
 }

@@ -19,9 +19,11 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.server.db.utils.UserDao;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.web.sync.DirectoryHashResource;
+import io.milton.common.ContentTypeUtils;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.http.HttpManager;
@@ -31,6 +33,16 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.File;
+import javax.servlet.ServletContext;
+
+import static io.milton.context.RequestContext._;
+import io.milton.servlet.StaticResource;
+import io.milton.servlet.UrlResource;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -42,6 +54,7 @@ import io.milton.vfs.db.utils.SessionManager;
 public class SpliffyResourceFactory implements ResourceFactory {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffyResourceFactory.class);
+    public static final String ROOTS_SYS_PROP_NAME = "template.file.roots"; // same as for HtmlTemplater
 
     public static RootFolder getRootFolder() {
         if (HttpManager.request() != null) {
@@ -56,14 +69,34 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private final EventManager eventManager;
     private final SessionManager sessionManager;
     private final CurrentRootFolderService currentRootFolderService;
+    private List<File> roots; // list of directories in which to look for static resources
+    private final Date loadedDate = new Date();
 
-    public SpliffyResourceFactory(UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
+    public SpliffyResourceFactory(ServletContext servletContext, UserDao userDao, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.userDao = userDao;
         this.securityManager = securityManager;
         this.applicationManager = applicationManager;
         this.eventManager = eventManager;
         this.sessionManager = sessionManager;
         this.currentRootFolderService = currentRootFolderService;
+
+        roots = new ArrayList<>();
+        File fWebappRoot = new File(servletContext.getRealPath("/"));
+        roots.add(fWebappRoot);
+        log.info("Using webapp root dir: " + fWebappRoot.getAbsolutePath());
+
+        String extraRoots = System.getProperty(ROOTS_SYS_PROP_NAME);
+        if (extraRoots != null && !extraRoots.isEmpty()) {
+            String[] arr = extraRoots.split(",");
+            for (String s : arr) {
+                File root = new File(s);
+                if (!root.exists()) {
+                    throw new RuntimeException("Root template dir specified in system property does not exist: " + root.getAbsolutePath() + " from property value: " + extraRoots);
+                }
+                roots.add(root);
+                log.info("Using file template root: " + root.getAbsolutePath());
+            }
+        }
     }
 
     @Override
@@ -82,8 +115,20 @@ public class SpliffyResourceFactory implements ResourceFactory {
                 }
             }
         } else {
-            r = find(host, path);
-            if (r == null && sPath.endsWith(".new")) {
+            r = findResource(host, path);
+        }
+        if (r != null) {
+            log.info("Found a resource: " + r.getClass());
+        } else {
+            log.info("Not found: " + sPath);
+        }
+        return r;
+    }
+
+    public Resource findResource(String host, Path path) throws NotAuthorizedException, BadRequestException {
+        Resource r = find(host, path);
+        if (r == null) {
+            if (path.getName().endsWith(".new")) {
                 // Not found, but a html page is requested. If the parent exists and is a collection
                 // then we'll instantiate a placeholder page which will allow new pages to be created
                 Resource rParent = find(host, path.getParent());
@@ -91,12 +136,12 @@ public class SpliffyResourceFactory implements ResourceFactory {
                     ContentDirectoryResource parentContentDir = (ContentDirectoryResource) rParent;
                     return new NewPageResource(parentContentDir, path.getName());
                 }
+            } else {
+                // if the requested url is in a theme folder, then try to resolve to a static theme resource
+                RootFolder rootFolder = currentRootFolderService.getRootFolder(host);
+                Resource themeResource = findStaticResource(rootFolder, path);
+                r = themeResource;
             }
-        }
-        if (r != null) {
-            log.info("Found a resource: " + r.getClass());
-        } else {
-            log.info("Not found: " + sPath);
         }
         return r;
     }
@@ -112,7 +157,6 @@ public class SpliffyResourceFactory implements ResourceFactory {
         } else {
             Path pPathParent = p.getParent();
             if (pPathParent == null) {
-                System.out.println("Thats odd, got a null parent from: " + p + " root?" + p.isRoot() + " relative?" + p.isRelative());
                 return null;
             }
             Resource rParent = find(host, p.getParent());
@@ -126,7 +170,8 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
                 if (rParent instanceof CollectionResource) {
                     CollectionResource parent = (CollectionResource) rParent;
-                    return parent.child(p.getName());
+                    Resource r = parent.child(p.getName());
+                    return r;
                 } else {
                     return null;
                 }
@@ -172,5 +217,99 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
     public SessionManager getSessionManager() {
         return sessionManager;
+    }
+
+    /**
+     * This is called if no content item could be found under /theme
+     *
+     * We should look first for a resource in the theme folder for the
+     *
+     * @param host
+     * @param sPath
+     * @param path
+     * @return
+     */
+    private Resource findStaticResource(RootFolder rf, Path path) {
+        switch (path.getFirst()) {
+            case "theme":
+                return findStaticThemeResource(rf, path);
+            case "templates":
+                return findStaticTemplateResource(rf, path);
+        }
+        return null;
+    }
+
+    private Resource findStaticThemeResource(RootFolder rf, Path path) {
+        Path relPath = path.getStripFirst();
+        String internalTheme = "admin";
+        if (rf instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
+            internalTheme = wrf.getBranch().getInternalTheme();
+        }
+        //return find(rf, internalTheme, internalTheme);
+        // Check if exists as a file resource (ie unpacked servlet resource) in the theme
+        String staticThemeResPath = "/templates/themes/" + internalTheme + relPath;
+        for (File root : roots) {
+            File file = new File(root, staticThemeResPath);
+            if (!file.exists()) {
+                //log.info("resource does not exist: " + templateFile.getAbsolutePath());
+            } else {
+                if (file.isFile()) {
+                    log.trace("found file: " + file.getAbsolutePath());
+                    //String contentType = ContentTypeUtils.findContentTypes(file.getName());
+                    return new StaticResource(file, null, null);
+                }
+            }
+        }
+
+        // Check if exists as a file resource in apps
+        if (relPath.getFirst().equals("apps")) {
+            String appPath = "templates" + relPath;
+            for (File root : roots) {
+                File file = new File(root, appPath);
+                if (!file.exists()) {
+                    //log.info("resource does not exist: " + templateFile.getAbsolutePath());
+                } else {
+                    if (file.isFile()) {
+                        log.trace("found file: " + file.getAbsolutePath());
+                        //String contentType = ContentTypeUtils.findContentTypes(file.getName());
+                        return new StaticResource(file, null, null);
+                    }
+                }
+            }
+
+        }
+
+        // ok, last chance, look for a classpath resource
+        String cpPath = "/templates" + relPath;
+        URL resource = this.getClass().getResource(cpPath);
+        if (resource != null) {
+            String contentType = ContentTypeUtils.findContentTypes(path.getName());
+            return new UrlResource(path.getName(), resource, contentType, loadedDate);
+        }
+        return null;
+    }
+
+    public Resource findStaticTemplateResource(RootFolder rf, Path path) {
+        for (File root : roots) {
+            File file = new File(root, path.toString());
+            if (!file.exists()) {
+                //log.info("resource does not exist: " + templateFile.getAbsolutePath());
+            } else {
+                if (file.isFile()) {
+                    log.trace("found file: " + file.getAbsolutePath());
+                    //String contentType = ContentTypeUtils.findContentTypes(file.getName());
+                    return new StaticResource(file, null, null);
+                }
+            }
+        }
+
+        // ok, last chance, look for a classpath resource
+        URL resource = this.getClass().getResource(path.toString());
+        if (resource != null) {
+            String contentType = ContentTypeUtils.findContentTypes(path.getName());
+            return new UrlResource(path.getName(), resource, contentType, loadedDate);
+        }
+        return null;
     }
 }

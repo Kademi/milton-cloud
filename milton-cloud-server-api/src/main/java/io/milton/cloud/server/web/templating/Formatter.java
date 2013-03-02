@@ -870,7 +870,7 @@ public class Formatter {
         StringBuilder sb = new StringBuilder("<option");
         appendValue(sb, value);
         if (currentValue != null && currentValue.equals(value)) {
-            sb.append("selected=\"true\"");
+            sb.append(" selected=\"true\"");
         }
         sb.append(">");
         sb.append(text).append("</option>");

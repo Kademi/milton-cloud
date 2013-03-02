@@ -3,6 +3,18 @@
         <title>$view.title</title>
         <link href="manageWebsite.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageWebsite.js">//</script>
+        <script type="text/javascript">
+            jQuery(function() {
+                initManageWebsite();
+                $("form.addOrg").forms({
+                    callback: function(resp) {
+                        log("done", resp);
+                        window.location.reload();
+                    }
+                });                
+                
+            });
+        </script>        
     </head>
     <body>
         <section id="manageWebsite" class="MainContent">
@@ -50,18 +62,6 @@
                 #end
 
             </table>
-        </section>
-        <script type="text/javascript">
-            jQuery(function() {
-                initManageWebsite();
-                $("form.addOrg").forms({
-                    callback: function(resp) {
-                        log("done", resp);
-                        window.location.reload();
-                    }
-                });                
-                
-            });
-        </script>
+        </section>        
     </body>
 </html>

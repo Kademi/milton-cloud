@@ -3,29 +3,45 @@
         <title>$page.title</title>
         <link href="theme.css" rel="stylesheet" type="text/css" />
         <link href="print.css" rel="stylesheet" type="text/css" media="print" />
-
+        <link rel='stylesheet' href='/static/js/morris.css' type='text/css' />
+        <link rel='stylesheet' href='/static/daterange/ui.daterangepicker.css' type='text/css' />
+        <link rel='stylesheet' href='/static/common/jquery-ui-1.8.11.custom.css' type='text/css' title='ui-theme' />
+        <link href='/templates/apps/reporting/reports.css' rel='stylesheet' type='text/css' />
+        
         <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js">//</script>
-        <script type="text/javascript" src="/static/js/tinybox-1.2.min.js">//</script>
-        <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js">//</script>
-        <script type="text/javascript" src="/static/js/jquery.autoresize.js">//</script> 
+        <script type="text/javascript" src="/static/js/tinybox-1.2.min.js" bottom="true">//</script>
+        <script type="text/javascript" src="/static/js/jquery-ui-1.8.20.custom.min.js" bottom="true">//</script>
+        <script type="text/javascript" src="/static/js/jquery.autoresize.js" bottom="true">//</script> 
         <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>        
         <script type="text/javascript" src="/static/js/jquery.forms.js">//</script>        
         <script type="text/javascript" src="/static/js/jquery.user.js">//</script>
         <script type="text/javascript" src="/static/js/common.js">//</script>        
-        <script type="text/javascript" src="/static/js/file.js">//</script>        
-        <script type="text/javascript" src="/static/js/init-theme.js">//</script>
-        <script type="text/javascript" src="/static/js/toolbars.js" >//</script>
-        <script type="text/javascript" src="http://cdn.jsdelivr.net/ckeditor/3.6.3/ckeditor.js" >//</script>
-        <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" >//</script>
-        <script type="text/javascript" src="/static/js/toolbars.js" >//</script>         
+        <script type="text/javascript" src="/static/js/file.js" bottom="true">//</script>        
+        <script type="text/javascript" src="/static/js/toolbars.js" bottom="true">//</script>
+        <script type="text/javascript" src="/static/ckeditor36/ckeditor.js" bottom="true">//</script>
+        <script type="text/javascript" src="/static/ckeditor36/adapters/jquery.js" bottom="true">//</script>
         <script type="text/javascript" src="/static/js/ajaxupload.js" >//</script>         
         <script type="text/javascript" src="/static/js/jQueryRotate.2.2.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.placeholder.js" >//</script>
         <script type="text/javascript" src="/static/js/jquery.timeago.js" >//</script>
-        <script type="text/javascript" src="/templates/themes/admin/setup.js">//</script>
-        <script type="text/javascript" src="/templates/themes/admin/prompt.js">//</script>        
+        <script type="text/javascript" src="/templates/themes/admin/setup.js" bottom="true">//</script>
+        <script type="text/javascript" src="/templates/themes/admin/prompt.js" bottom="true">//</script>
+        <script type="text/javascript" src="/static/js/raphael-2.1.0.min.js" bottom="true">//</script>
+        <script type="text/javascript" src='/static/js/morris.js' bottom="true">//</script>
+        <script type='text/javascript' src='/static/daterange/daterangepicker.jQuery.js'>//</script>
+        <script type='text/javascript' src='/templates/apps/reporting/reports.js'>//</script>
+        <script type="text/javascript" src="/static/js/init-theme.js" bottom="true">//</script>        
+        <script type="text/javascript" bottom="true">
+            $(document).ready(function(){
+                initTheme();
+            });            
+        </script>
     </head>
     <body class="theme admin">
+        <script type="text/javascript">
+            // Templates should push a page init function into this array. It will then be run after outer template init functions
+            var pageInitFunctions = new Array();            
+        </script>        
         <!-- page layout goes here -->
         <div id="wrapper">
             <header id="header">
@@ -38,7 +54,7 @@
                         #end
                     </ul>
                 </nav>
-            
+
                 <aside class="userBtn">
                     #if( $user )
                     <h3><a href="/manageUsers/$user.userId">Welcome $user.nickName</a></h3>
@@ -51,7 +67,7 @@
                     </div>                
                     #end
                 </aside>
-                
+
                 <aside class="userBtn">
                     <h3><a href="$page.closest('organisation').href">$page.organisation.orgId</a></h3>
                     <div class="dropBox">
@@ -113,12 +129,5 @@
             </div>
 
         </div><!-- END WRAPPER -->
-
-
-        <script type="text/javascript" >
-            $(document).ready(function(){
-                initTheme();
-            });            
-        </script>
     </body>
 </html>
