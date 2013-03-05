@@ -418,4 +418,44 @@ public class ResourceList extends ArrayList<CommonResource> {
             }
         }
     }
+    
+    /**
+     * Return the first n resources
+     * 
+     * @param n
+     * @return 
+     */
+    public ResourceList upTo(int n) {
+        ResourceList list = new ResourceList();
+        for( CommonResource r : this ) {
+            list.add(r);
+            if( list.size() >= n) {
+                break;
+            }
+        }
+        return list;
+    }
+    
+    /**
+     * Return the those resources after n. 
+     *      
+     * Eg after(2) will return a list
+     * without the first 2 resources
+     * 
+     * n is 1 indexed. ie after(1) will skip the first, while after(0) will
+     * not skip any
+     * 
+     * @param n
+     * @return 
+     */
+    public ResourceList after(int n) {
+        ResourceList list = new ResourceList();
+        int i =0;
+        for( CommonResource r : this ) {
+            if( i++ >= n) {
+                list.add(r);
+            }
+        }
+        return list;
+    }    
 }

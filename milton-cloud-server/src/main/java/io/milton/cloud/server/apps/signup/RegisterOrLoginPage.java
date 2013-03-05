@@ -34,8 +34,6 @@ import static io.milton.context.RequestContext._;
 import io.milton.http.Request.Method;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
-import io.milton.vfs.db.GroupInWebsite;
-import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
 

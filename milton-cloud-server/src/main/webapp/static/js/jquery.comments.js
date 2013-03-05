@@ -43,7 +43,7 @@
             e.preventDefault();
             e.stopPropagation();
             try {
-                sendNewForumComment(config.pageUrl, $("textarea",this), config.renderCommentFn, config.currentUser);            
+                sendNewForumComment(config.pageUrl, $("textarea",this), config.renderCommentFn, config.currentUser);                            
             } catch(e) {
                 log("exception sending forum comment", e);
             }
@@ -81,6 +81,7 @@ function sendNewForumComment( pageUrl, commentInput, renderComment, currentUser)
         success: function() {
             ajaxLoadingOff();
             commentInput.val('');
+            commentInput.keyup();
             currentDate = new Date();
             renderComment(currentUser, currentDate, comment);
         },

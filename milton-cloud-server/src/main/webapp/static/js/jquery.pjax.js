@@ -133,8 +133,10 @@
                 var $fragment = $data.find(options.fragment)
                 if ( $fragment.length ){
                     data = $fragment.children()
-                }else {
-                    return window.location = options.url
+                } else {
+                    log("no fragment: " + options.fragment, $data.find("body"));
+                    return;
+                    //return window.location = options.url;
                 }
             } else {
                 // If we got no data or an entire web page, go directly

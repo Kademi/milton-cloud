@@ -32,11 +32,11 @@
             
             fileInputContainer.append(fileInput);
             buttonBar.append(fileInputContainer);
-            fileInputContainer.append("<div class='progress' style='position: absolute; left: 0; top: 0; width: 100%; z-index: 3'><div class='bar'></div></div>");
+            fileInputContainer.append("<div class='progress progress-info progress-striped' style='position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0.5; z-index: 3'><div class='bar' style='height: 100%'></div></div>");
             container.append(form);
             var loading = $("<img src='/static/common/loading.gif' style='position: absolute; right: 5px; top: 5px'/>");
             loading.hide();
-            form.append(loading);
+            fileInputContainer.append(loading);
 
             log("init fileupload", fileInput);
             fileInput.fileupload({
@@ -57,9 +57,7 @@
                         }
                     }                    
                     config.oncomplete(data, name, href);
-                    $('.progress').hide(4000, function() {
-                        $('.progress .bar', buttonBar).css('width','0%');
-                    });
+                    $('.progress').hide();
                     loading.hide();
                 },
                 progressall: function (e, data) {  
@@ -67,7 +65,8 @@
                     $('.progress').show();
                     $('.progress .bar', buttonBar).css('width',progress + '%');
                     log("progress", e, data, progress);
-                    loading.show();                    
+                    loading.show();     
+                    log("show loading", loading);
                 }        
             });
             log("done fileupload init");

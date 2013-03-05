@@ -210,6 +210,18 @@ public class FileResource extends AbstractContentResource implements Replaceable
         return htmlPage;
     }
 
+    /**
+     * Attempts to parse no matter what the doctype
+     * 
+     * @return 
+     */
+    public RenderFileResource parseHtml() {
+        if (htmlPage == null) {
+            htmlPage = new RenderFileResource(this);
+        }
+        return htmlPage;
+    }    
+    
     private boolean hasDocType() {
         ByteArrayOutputStream bout = new ByteArrayOutputStream(10);
         try {

@@ -98,7 +98,6 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         return null;
     }
 
-    
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
         Resource r = _(ApplicationManager.class).getPage(this, childName);
@@ -120,8 +119,8 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         ApplicationManager am = _(ApplicationManager.class);
         children = am.toResources(this, directoryNode);
         if (directoryNode != null) {
-            if( log.isTraceEnabled()) {
-            log.trace("initChildren: " + getName() + " children=" + children.size() + " - " + directoryNode.size());
+            if (log.isTraceEnabled()) {
+                log.trace("initChildren: " + getName() + " children=" + children.size() + " - " + directoryNode.size());
             }
         } else {
             log.warn("Cant load children, directory node is null: " + getHref());
@@ -340,12 +339,20 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
             children.add(fr);
         } else if (r instanceof FileResource) {
             FileResource fr = (FileResource) r;
-            rfr = fr.getHtml();
+            if (autocreate) {
+                rfr = fr.parseHtml();
+            } else {
+                rfr = fr.getHtml(); // only get parsed version if file is suitable
+            }
         } else if (r instanceof RenderFileResource) {
             rfr = (RenderFileResource) r;
         } else {
-            return null;
+            rfr = null;
         }
+        if (autocreate && rfr == null) {
+            throw new RuntimeException("Couldnt autocreate new html page. A resource exists of an incompatible type: " + r.getClass() + " name=" + name);
+        }
+
         return rfr;
     }
 

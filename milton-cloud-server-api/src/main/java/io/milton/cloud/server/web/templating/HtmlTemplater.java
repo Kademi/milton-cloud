@@ -149,8 +149,12 @@ public class HtmlTemplater {
         if (!templatePath.endsWith(".html")) {
             templatePath = templatePath + ".html";
         }
+        templatePath = rootFolder.getDomainName() + ":" + templatePath;
         Template bodyTemplate = getTemplate(templatePath);
-        TemplateHtmlPage bodyTemplateMeta = getCachedTemplateMetaData(templatePath);
+        if( bodyTemplate == null ) {
+            throw new RuntimeException("Couldnt find template: " + templatePath);
+        }
+        TemplateHtmlPage bodyTemplateMeta = getTemplateResource(templatePath);
         if (bodyTemplateMeta == null) {
             throw new RuntimeException("Didnt find cached meta, which is weird because i did find the template that it comes from. Maybe check cache key format");
         }
@@ -165,11 +169,12 @@ public class HtmlTemplater {
         if (!themeTemplatePath.endsWith(".html")) {
             themeTemplatePath += ".html"; // this class only does html templates
         }
+        themeTemplatePath = rootFolder.getDomainName() + ":" + themeTemplatePath;
         Template themeTemplate = getTemplate(themeTemplatePath);
         if (themeTemplate == null) {
             throw new RuntimeException("Couldnt find themeTemplate: " + themeTemplatePath);
         }
-        TemplateHtmlPage themeTemplateTemplateMeta = getCachedTemplateMetaData(themeTemplatePath);
+        TemplateHtmlPage themeTemplateTemplateMeta = getTemplateResource(themeTemplatePath);
         if (themeTemplateTemplateMeta == null) {
             throw new RuntimeException("Couldnt find meta for template: " + themeTemplatePath);
         }
@@ -257,23 +262,26 @@ public class HtmlTemplater {
         return engine.getTemplate(templatePath);
     }
 
-    private TemplateHtmlPage getCachedTemplateMetaData(String templatePath) {
-        String host = HttpManager.request().getHostHeader();
-        String cacheKey = GetableResourcePathTemplateHtmlPage.getId(host, templatePath);
-        return cachedTemplateMetaData.get(cacheKey);
-    }
-
-    public GetableResourcePathTemplateHtmlPage getResource(String source) {
-        String host = HttpManager.request().getHostHeader();
-        String id = GetableResourcePathTemplateHtmlPage.getId(host, source);
-        GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(id);
+    public GetableResourcePathTemplateHtmlPage getTemplateResource(String source) {
+        if (!source.contains(":")) {
+            System.out.println("no semicolon: " + source);
+            return null;
+        }
+        GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(source);
         synchronized (this) {
             if (meta == null) {
+                String[] arr = source.split(":");
+                String host = arr[0];
+                String sPath = arr[1];
+
                 try {
-                    Resource r = resourceFactory.findResource(host, Path.path(source));
+                    Resource r = resourceFactory.findResource(host, Path.path(sPath));
                     if (r instanceof GetableResource) {
-                        meta = new GetableResourcePathTemplateHtmlPage(host, source, loadedTime, templateParser);
-                        cachedTemplateMetaData.put(id, meta);
+                        meta = new GetableResourcePathTemplateHtmlPage(host, sPath, loadedTime, templateParser);
+                        System.out.println("put to cache: " + source);
+                        cachedTemplateMetaData.put(source, meta);
+                    } else {
+                        log.warn("Null or incompatible resource: " + r + " for source: " + source);
                     }
                 } catch (NotAuthorizedException | BadRequestException e) {
                     throw new RuntimeException(e);
@@ -294,7 +302,7 @@ public class HtmlTemplater {
             if (HtmlTemplater.log.isTraceEnabled()) {
                 HtmlTemplater.log.trace("getResourceStream( " + source + ") ");
             }
-            GetableResourcePathTemplateHtmlPage r = getResource(source);
+            GetableResourcePathTemplateHtmlPage r = getTemplateResource(source);
             if (r == null) {
                 throw new ResourceNotFoundException(source);
             }
@@ -321,7 +329,7 @@ public class HtmlTemplater {
             if (HtmlTemplater.log.isTraceEnabled()) {
                 HtmlTemplater.log.trace("getLastModified( " + resource.getName() + ")");
             }
-            GetableResourcePathTemplateHtmlPage r = getResource(resource.getName());
+            GetableResourcePathTemplateHtmlPage r = getTemplateResource(resource.getName());
             if (r == null) {
                 throw new ResourceNotFoundException(resource.getName());
             }

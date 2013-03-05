@@ -3,14 +3,14 @@
 }
     
 .modulePage a.backToMyLearning, .modulePage a.print {
-    position: absolute;    
-    top: -80px;
+    position: fixed;    
+    top: 10px;
     font-size: 13px;    
     z-index: 10000;    
 }
 
 .modulePage a.backToMyLearning {
-    right: 0px;
+    right: 20px;
     background: url("images/arrow1.gif") no-repeat scroll 0 1px transparent;
     padding-left: 20px;
 }
@@ -42,4 +42,48 @@ body.edifyIsEditMode div.pages {
 }
 .panelBox {
     position: relative;
+    min-height: 300px;
+}
+.hideBtn {
+    margin: 0 auto;
+    text-align: center;
+    width: 150px;
+    font-size: 85%;
+}
+.commentContainer {
+
+
+    textarea {
+        width: 460px;
+        resize: none;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        min-height: 30px;
+    }
+    .commentControls {
+        display: none;
+    }
+    button {
+        float: right;
+    }
+}
+
+.centerOuter {
+    float: right; 
+    left: -50%; 
+    text-align: left; 
+    position: relative;
+
+    .centerInner {
+        left: 50%; 
+        position: relative;
+    }
+}
+.profile legend {
+    display: none;
+}
+a.disabled {
+    opacity: 0.5;
+    cursor: default;
 }

@@ -25,6 +25,7 @@
             validate: function(form) {
                 return true;
             },
+            confirmMessage: "Saved OK",
             valiationMessageSelector: ".pageMessage",
             validationFailedMessage : "Some inputs are not valid."
         }, options);  
@@ -44,11 +45,11 @@
             form.trigger("submitForm");
             log("form submit", form, "to" , form.attr("action"));            
             if( checkRequiredFields(form) ) {
-                postForm(form, config.valiationMessageSelector, config.validationFailedMessage, config.callback);
+                postForm(form, config.valiationMessageSelector, config.validationFailedMessage, config.callback, config.confirmMessage);
             } else {
-                showValidation(null, config.validationFailedMessage, container);
+                showValidation(null, config.validationFailedMessage, form);
                 //$(config.valiationMessageSelector, container).text(config.validationFailedMessage);
-                $(config.valiationMessageSelector, container).show(100);
+                $(config.valiationMessageSelector, form).show(100);
                 config.error(form);
             }
             return false;
@@ -56,7 +57,7 @@
     };
 })( jQuery );
 
-function postForm(form, valiationMessageSelector, validationFailedMessage, callback) {
+function postForm(form, valiationMessageSelector, validationFailedMessage, callback, confirmMessage) {
     log("postForm", form);
     var serialised = form.serialize();
     form.trigger("preSubmitForm", serialised);
@@ -70,6 +71,9 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
                 ajaxLoadingOff();                            
                 if( resp && resp.status) {
                     log("save success", resp)
+                    if( confirmMessage ) {
+                        showConfirmMessage(form, confirmMessage);
+                    }
                     callback(resp, form)
                 } else {
                     log("status indicates failure", resp)
@@ -104,6 +108,9 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
     }      
 }
 
+function showConfirmMessage(form, confirmMessage) {
+    form.prepend("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>" + confirmMessage + "</div>");    
+}
 
 function showFieldMessages(fieldMessages, container) {
     if( fieldMessages ) {
@@ -117,6 +124,7 @@ function showFieldMessages(fieldMessages, container) {
 }
 
 function resetValidation(container) {
+    $(".control-group", container).removeClass("error");
     $(".validationError", container).remove();    
     $(".pageMessage", container).hide(300);
     $(".pageMessage", container).html("");
@@ -430,7 +438,9 @@ function showMessage(text, container) {
 }
 
 function showErrorField(target) {
+    log("showErrorField", target);
     target.addClass("errorField");
+    target.closest(".control-group").addClass("error");
     if (typeof CKEDITOR != 'undefined') {
         if( CKEDITOR ) {
             log("check for editor1", target);

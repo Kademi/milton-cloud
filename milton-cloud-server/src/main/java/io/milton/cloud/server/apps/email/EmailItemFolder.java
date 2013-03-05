@@ -23,6 +23,7 @@ import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -64,7 +65,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class EmailItemFolder extends AbstractCollectionResource implements GetableResource, MessageResource, StandardMessage, PostableResource, DeletableResource, DeletableCollectionResource {
+public class EmailItemFolder extends AbstractCollectionResource implements GetableResource, MessageResource, StandardMessage, PostableResource, DeletableResource, DeletableCollectionResource, TitledPage {
 
     private final EmailFolder parent;
     private final EmailItem emailItem;
@@ -76,6 +77,13 @@ public class EmailItemFolder extends AbstractCollectionResource implements Getab
         this.emailItem = emailItem;
     }
 
+    @Override
+    public String getTitle() {
+        return "Message: " + emailItem.getSubject();
+    }
+
+    
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if( jsonResult != null ) {

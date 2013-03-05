@@ -23,6 +23,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.common.Path;
 import io.milton.http.Auth;
@@ -35,12 +36,12 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.http11.auth.DigestResponse;
+import io.milton.resource.CollectionResource;
 import io.milton.resource.DigestResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Website;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -51,6 +52,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -94,32 +97,59 @@ public class DynamicCssApp implements ResourceApplication {
 
             Path p = Path.path(path);
             String reqName = p.getName();
-            // Note we ignore the folder, only interested in resource names encoded into resource name
-            String[] paths = reqName.substring(0, reqName.length() - HtmlTemplateRenderer.EXT_COMPILE_LESS.length()).split(","); // need to chop off extension, then split
-            List<GetableResource> resources = new ArrayList<>();
-            List<String> notFound = new ArrayList<>();
-            String host = HttpManager.request().getHostHeader();
-            for (String s : paths) {
-                s = s.replace(HtmlTemplateRenderer.COMBINED_RESOURCE_SEPERATOR, "/"); // HtmlTemplater changes path characters to avoid changing relative path
-                Resource rBase = resourceFactory.getResource(host, s);
-                if (rBase != null) {
-                    if (rBase instanceof GetableResource) {
-                        GetableResource fr = (GetableResource) rBase;
-                        resources.add(fr);
-                    } else {
-                        notFound.add("Not GET'able: " + s);
-                        log.warn(" css resource is not getable: " + s + " - " + rBase.getClass());
-                    }
+            if (!reqName.contains(",")) {
+                String actualResName = reqName.replace(HtmlTemplateRenderer.EXT_COMPILE_LESS, "");
+                String host = HttpManager.request().getHostHeader();
+                Resource rBase = resourceFactory.getResource(host, p.getParent().child(actualResName).toString());
+                if (rBase instanceof GetableResource) {
+                    String parentUrl = "http://" + host + "/" + p.getParent().toString();
+                    return new SingleLessCssResource((GetableResource)rBase,actualResName, parentUrl);
                 } else {
-                    notFound.add("Not found: " + s);
-                    log.warn("CSS resource is not found: " + s + " in host: " + host);
+                    return null;
                 }
-            }
-            if (resources.isEmpty()) {
-                log.warn("No paths found: " + path);
-                return null;
             } else {
-                return new LessCssResource(reqName, resources, notFound);
+                // Note we ignore the folder, only interested in resource names encoded into resource name
+                String[] paths = reqName.substring(0, reqName.length() - HtmlTemplateRenderer.EXT_COMPILE_LESS.length()).split(","); // need to chop off extension, then split
+                List<GetableResource> resources = new ArrayList<>();
+                List<String> notFound = new ArrayList<>();
+                String host = HttpManager.request().getHostHeader();
+                String parentUrl = null;
+                for (String s : paths) {
+                    s = s.replace(HtmlTemplateRenderer.COMBINED_RESOURCE_SEPERATOR, "/"); // HtmlTemplater changes path characters to avoid changing relative path
+                    Resource rBase = resourceFactory.getResource(host, s);
+                    if (rBase != null) {
+                        if (rBase instanceof CollectionResource) {
+                            CollectionResource col = (CollectionResource) rBase;
+                            for (Resource r : col.getChildren()) {
+                                if (r instanceof GetableResource) {
+                                    GetableResource gr = (GetableResource) r;
+                                    if (gr.getName().endsWith(".css") || gr.getName().endsWith(".less")) {                                        
+                                        resources.add(gr);
+                                    }
+                                }
+                            }
+                        } else if (rBase instanceof GetableResource) {
+                            GetableResource fr = (GetableResource) rBase;
+                            if( parentUrl == null ) {
+                                String parentPath = Path.path(s).getParent().toString();
+                                parentUrl = "http://" + host + "/" + parentPath + "/";
+                            }
+                            resources.add(fr);
+                        } else {
+                            notFound.add("Not GET'able: " + s);
+                            log.warn(" css resource is not getable: " + s + " - " + rBase.getClass());
+                        }
+                    } else {
+                        notFound.add("Not found: " + s);
+                        log.warn("CSS resource is not found: " + s + " in host: " + host);
+                    }
+                }
+                if (resources.isEmpty()) {
+                    log.warn("No paths found: " + path);
+                    return null;
+                } else {
+                    return new MultiLessCssResource(resources, notFound, reqName, parentUrl);
+                }
             }
         } else {
             return null;
@@ -142,42 +172,61 @@ public class DynamicCssApp implements ResourceApplication {
         modDate = config.getContext().get(CurrentDateService.class).getNow();
     }
 
-    public class LessCssResource implements GetableResource, DigestResource {
+    public class SingleLessCssResource extends LessCssResource {
+
+        private final GetableResource singleResource;
+        private final String parentUrl;
+
+        public SingleLessCssResource(GetableResource singleResource, String name, String parentUrl) {
+            super(name);
+            this.singleResource = singleResource;
+            this.parentUrl = parentUrl;
+        }
+
+        @Override
+        protected GetableResource getResource() {
+            return singleResource;
+        }
+        
+        @Override
+        public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            // Lets be nice and say if we didnt find something
+            String rawCss = bout.toString("UTF-8");
+            try {
+                String text = engine.compile(rawCss, parentUrl);
+                out.write(text.getBytes("UTF-8"));
+            } catch (LessException ex) {
+                log.warn("LESS compilation exception", ex);
+                sendLessError(rawCss, ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
+                //throw new RuntimeException("Bad LESS from:" + fileResource.getName() + " - " + fileResource.getClass() ,ex);
+            }
+        }        
+    }
+
+
+    public class MultiLessCssResource extends LessCssResource {
 
         private final List<GetableResource> fileResources;
         private final GetableResource mostRecentModResource;
         private final List<String> notFound;
-        private final String name;
+        private final String parentUrl;
 
-        public LessCssResource(String name, List<GetableResource> fileResources, List<String> notFound) {
+        public MultiLessCssResource(List<GetableResource> fileResources, List<String> notFound, String name, String parentUrl) {
+            super(name);
             this.fileResources = fileResources;
+            this.mostRecentModResource = fileResources.get(0);
             this.notFound = notFound;
-            Date mostRecent = null;
-            GetableResource mostRecentRes = null;
-            for (GetableResource r : fileResources) {
-                Date resModDate = r.getModifiedDate();
-                if (resModDate != null) {
-                    if (mostRecent == null || resModDate.after(modDate)) {
-                        mostRecent = resModDate;
-                        mostRecentRes = r;
-                    }
-                }
-            }
-            if (mostRecentRes == null) {
-                mostRecentRes = fileResources.get(0);
-            }
-            this.mostRecentModResource = mostRecentRes;
-            this.name = name;
+            this.parentUrl = parentUrl;
         }
 
         @Override
-        public String getName() {
-            return name;
+        protected GetableResource getResource() {
+            return mostRecentModResource;
         }
 
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             // Lets be nice and say if we didnt find something
             for (String s : notFound) {
@@ -192,14 +241,35 @@ public class DynamicCssApp implements ResourceApplication {
             }
             String rawCss = bout.toString("UTF-8");
             try {
-                String text = engine.compile(rawCss);
+                String text = engine.compile(rawCss, parentUrl);
                 out.write(text.getBytes("UTF-8"));
             } catch (LessException ex) {
                 log.warn("LESS compilation exception", ex);
                 sendLessError(rawCss, ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
                 //throw new RuntimeException("Bad LESS from:" + fileResource.getName() + " - " + fileResource.getClass() ,ex);
             }
+        }
+    }
 
+
+    public abstract class LessCssResource implements GetableResource, DigestResource {
+
+        private final String name;
+
+        protected abstract GetableResource getResource();
+
+        public LessCssResource(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public Date getModifiedDate() {
+            return getResource().getModifiedDate();
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
 
         @Override
@@ -213,23 +283,18 @@ public class DynamicCssApp implements ResourceApplication {
         }
 
         @Override
-        public Date getModifiedDate() {
-            return mostRecentModResource.getModifiedDate();
-        }
-
-        @Override
         public String getContentType(String accepts) {
             return "text/css";
         }
 
         @Override
         public String getUniqueId() {
-            return fileResources.get(0).getUniqueId();
+            return getResource().getUniqueId();
         }
 
         @Override
         public Object authenticate(String user, String password) {
-            return mostRecentModResource.authenticate(user, password);
+            return getResource().authenticate(user, password);
         }
 
         @Override
@@ -239,7 +304,7 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public String getRealm() {
-            return mostRecentModResource.getRealm();
+            return getResource().getRealm();
         }
 
         @Override
@@ -249,26 +314,21 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public Object authenticate(DigestResponse digestRequest) {
-            if (mostRecentModResource instanceof DigestResource) {
-                DigestResource dr = (DigestResource) mostRecentModResource;
-                return dr.authenticate(digestRequest);
-            } else {
-                return null;
-            }
+            return ((DigestResource) getResource()).authenticate(digestRequest);
 
         }
 
         @Override
         public boolean isDigestAllowed() {
-            if (mostRecentModResource instanceof DigestResource) {
-                DigestResource dr = (DigestResource) mostRecentModResource;
-                return dr.isDigestAllowed();
+            if (getResource() instanceof DigestResource) {
+                return ((DigestResource) getResource()).isDigestAllowed();
             } else {
                 return false;
             }
+
         }
 
-        private void sendLessError(String rawCss, int line, int column, List<String> extract, String message, OutputStream out) {
+        protected void sendLessError(String rawCss, int line, int column, List<String> extract, String message, OutputStream out) {
             try {
                 PrintWriter pw = new PrintWriter(out);
                 pw.println("LESS Compile error");

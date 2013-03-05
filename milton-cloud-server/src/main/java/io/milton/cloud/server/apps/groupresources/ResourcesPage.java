@@ -37,6 +37,13 @@ public class ResourcesPage extends DirectoryResource<WebsiteRootFolder> {
     }
 
     @Override
+    public String getTitle() {
+        return "My Resources";
+    }
+
+    
+    
+    @Override
     public void renderPage(OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this)); // For front end
         getTemplater().writePage("groupresources/myResources", this, params, out);

@@ -1342,3 +1342,35 @@ div.Controller a.ShowDialog:hover, div.Controller a.ShowDialog.Active {
     background-color: #e3e3e3;
     border-color: #c7c7c7;
 }
+
+nav.TabNav {
+    padding: 8px 8px 0 8px;    
+}
+
+nav.TabNav a {
+    float: left;
+    height: 33px;
+    line-height: 33px;
+    padding: 0 13px;
+    font-size: 12px;
+    font-weight: bold;
+    border: solid #dedede;
+    border-width: 1px 1px 0 1px;
+    border-radius: 3px 3px 0 0;
+    color: #333;
+    margin-right: 6px;
+}
+nav.TabNav a.Active {
+    color: #FFF;
+    background-color: #44bbe0;
+}
+.TabContent {
+    display: none;
+}
+.pull-right {
+    float: right;
+}
+.pull-right button{
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}

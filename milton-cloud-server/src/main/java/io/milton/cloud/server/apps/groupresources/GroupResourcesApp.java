@@ -68,7 +68,7 @@ public class GroupResourcesApp implements MenuApplication, ChildPageApplication,
                         WebsiteRootFolder wrf = (WebsiteRootFolder) parent.getRootFolder();
                         try {
                             if (wrf.child("resources") != null) {
-                                parent.getOrCreate("menuResources", "Resources", "/resources").setOrdering(30);
+                                parent.getOrCreate("menuResources", "Resources", "/resources/").setOrdering(30);
                             }
                         } catch (NotAuthorizedException | BadRequestException e) {
                             throw new RuntimeException(e);

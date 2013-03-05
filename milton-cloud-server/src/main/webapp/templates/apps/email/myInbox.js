@@ -46,8 +46,7 @@ function initMessage(markRead, page) {
         var href = $(this).find("h3 a").attr("href");
         window.location.href = href;
     });
-    
-    jQuery("abbr.timeago").timeago();
+        
     if(!markRead) {
         return;
     }

@@ -23,6 +23,7 @@ import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
@@ -58,7 +59,7 @@ import io.milton.vfs.db.OrgType;
  *
  * @author brad
  */
-public class GroupRegistrationPage extends AbstractResource implements GetableResource, PostableResource {
+public class GroupRegistrationPage extends AbstractResource implements GetableResource, PostableResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(GroupRegistrationPage.class);
     private final String name;
@@ -320,5 +321,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
 
     public boolean hasOptins() {
         return !getOptins().isEmpty();
+    }
+
+    @Override
+    public String getTitle() {
+        return "Register: " + parent.getName();
     }
 }

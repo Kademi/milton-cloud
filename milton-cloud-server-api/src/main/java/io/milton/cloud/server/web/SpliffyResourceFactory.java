@@ -126,6 +126,13 @@ public class SpliffyResourceFactory implements ResourceFactory {
     }
 
     public Resource findResource(String host, Path path) throws NotAuthorizedException, BadRequestException {
+        if( path.getFirst() != null && path.getFirst().equals("templates")) {
+            RootFolder rootFolder = currentRootFolderService.getRootFolder(host);
+            Resource override = findStaticTemplateResourceOverride(rootFolder, path);
+            if( override != null ) {
+                return override;
+            }
+        }
         Resource r = find(host, path);
         if (r == null) {
             if (path.getName().endsWith(".new")) {
@@ -257,7 +264,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
                 if (file.isFile()) {
                     log.trace("found file: " + file.getAbsolutePath());
                     //String contentType = ContentTypeUtils.findContentTypes(file.getName());
-                    return new StaticResource(file, null, null);
+                    return new StaticResource(file);
                 }
             }
         }
@@ -273,7 +280,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
                     if (file.isFile()) {
                         log.trace("found file: " + file.getAbsolutePath());
                         //String contentType = ContentTypeUtils.findContentTypes(file.getName());
-                        return new StaticResource(file, null, null);
+                        return new StaticResource(file);
                     }
                 }
             }
@@ -290,6 +297,28 @@ public class SpliffyResourceFactory implements ResourceFactory {
         return null;
     }
 
+    /**
+     * Check if there is a theme resource which overrides a template resource
+     * 
+     * @param rf
+     * @param path
+     * @return 
+     */
+    public Resource findStaticTemplateResourceOverride(RootFolder rf, Path path) {
+        Path relPath = path.getStripFirst();
+        String internalTheme = "admin";
+        if (rf instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
+            internalTheme = wrf.getBranch().getInternalTheme();
+        }
+        //return find(rf, internalTheme, internalTheme);
+        // Check if exists as a file resource (ie unpacked servlet resource) in the theme
+        String staticThemeResPath = "/templates/themes/" + internalTheme + relPath;
+        Path p = Path.path(staticThemeResPath);
+        Resource r = findStaticTemplateResource(rf, p);
+        return r;
+    }
+    
     public Resource findStaticTemplateResource(RootFolder rf, Path path) {
         for (File root : roots) {
             File file = new File(root, path.toString());
@@ -299,7 +328,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
                 if (file.isFile()) {
                     log.trace("found file: " + file.getAbsolutePath());
                     //String contentType = ContentTypeUtils.findContentTypes(file.getName());
-                    return new StaticResource(file, null, null);
+                    return new StaticResource(file);
                 }
             }
         }

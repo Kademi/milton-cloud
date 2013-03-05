@@ -25,7 +25,7 @@
         </developer>
     </developers>    
     <properties>
-        <milton.version>2.3.0.6</milton.version>
+        <milton.version>2.4.1.1</milton.version>
         <endrick.version>1.7.8</endrick.version>
         <hashsplit4j.version>2.0.3</hashsplit4j.version>
         <hibernate.version>3.2.6.ga</hibernate.version>
@@ -74,6 +74,12 @@
     </build>
     
     <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>        
         <dependency>
             <scope>test</scope>
             <groupId>org.slf4j</groupId>

@@ -14,7 +14,7 @@ $.extend({
             if(m!=null && m.length>1 && m[1]!=''){
                 o+=m[1];
                 x+=m[1].length;
-            }else{
+            } else {
                 var d=c.charCodeAt(x);
                 var h=d.toString(16);
                 o+='%'+(h.length<2?'0':'')+h.toUpperCase();

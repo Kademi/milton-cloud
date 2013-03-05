@@ -29,7 +29,7 @@ function initTheme() {
     // in this case we want to navigate to the user's dashboard
     $(".header .Login").user({
         
-    });
+        });
     // the login form appears in content when the requested page requires a login
     // so in this case we do not give a post-login url, we will just refresh the current page
     $("#content .Login").user();
@@ -94,6 +94,17 @@ function initModal() {
         opacity: 0
     });
     
+}
+
+function showModal(modal) {
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });      
+}
+
+function closeModal() {
+    $.tinybox.close();
 }
 
 function initHelp () {
@@ -258,29 +269,20 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
 }
 
 
+// Event for tab panel
 function initTabPanel() {
-    var tab_container = $('.TabContainer');
-    log("initTabPanel", tab_container);
-    if(tab_container[0]) {
-        var tab_content = tab_container.find('.TabContent');
-        var tab_nav = tab_container.find('nav a');
+    log("initTabPanel");
+    $("nav.TabNav a").on("click", function(e) {
+        e.preventDefault();
+        log("initTabPanel:click1", this);
+        var href = $(this).attr("href");
+        $(this).addClass("Active").siblings().removeClass("Active");
+	log("content", $content);
+        $(".TabContent").hide().filter("[rel=" + href + "]").show();
+					        
+    });		
 		
-        tab_nav.on('click', function(e) {
-            e.preventDefault();
-			
-            var _this = $(this);
-            var _this_content = tab_content.eq(_this.index());
-			
-            if(!_this.hasClass('Active')) {
-                tab_nav.filter('.Active').removeClass('Active');
-                _this.addClass('Active');
-                tab_content.not(_this_content).addClass('Hidden');
-                _this_content.removeClass('Hidden');
-            }
-        });
-		
-        tab_nav.eq(0).trigger('click');
-    }
+    $("body").find("nav.TabNav a").eq(0).trigger("click");
 }
 
 if(!String.prototype.trim) {
@@ -410,7 +412,7 @@ function initDropDownHiding() {
  *  Eg initComments(window.location.pathname);
  */
 function initComments(pageUrl) {
-//    log("initComments", pageUrl);
+    log("initComments", pageUrl);
     $(".hideBtn").click(function() {
         var oldCommentsHidden = $("#comments:visible").length == 0;
         log("store new comments hidden", oldCommentsHidden);
@@ -438,6 +440,10 @@ function initComments(pageUrl) {
         $(".hideBtn a").addClass("ishidden");
     }
     
+    $("body").on("click", ".commentContainer textarea", function(e) {
+        $(e.target).closest("div").find(".commentControls").show();
+    });    
+    $('.commentContainer textarea').css('overflow', 'hidden').autogrow()
     
     $("#comments").comments({
         currentUser : {
@@ -447,7 +453,7 @@ function initComments(pageUrl) {
         },
         pageUrl: pageUrl,
         renderCommentFn: function(user, date, comment) {
-            log("module.js renderCommentFn", user);
+            log("renderCommentFn", user);
             if( user == null ) {
                 log("no user so dont render");
                 return;

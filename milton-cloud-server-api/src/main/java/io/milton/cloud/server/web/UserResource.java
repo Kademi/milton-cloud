@@ -11,6 +11,7 @@ import java.util.*;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.manager.PasswordManager;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;

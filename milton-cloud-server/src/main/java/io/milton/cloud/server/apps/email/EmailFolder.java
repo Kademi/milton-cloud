@@ -19,6 +19,7 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -51,7 +52,7 @@ import io.milton.http.http11.auth.DigestResponse;
  *
  * @author brad
  */
-public class EmailFolder extends AbstractCollectionResource implements GetableResource, MessageFolder {
+public class EmailFolder extends AbstractCollectionResource implements GetableResource, MessageFolder, TitledPage {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailFolder.class);
     private final CommonCollectionResource parent;
@@ -66,6 +67,13 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
     }
 
     @Override
+    public String getTitle() {
+        return "My Inbox";
+    }
+
+    
+    
+    @Override
     public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
         String s = super.checkRedirect(request);
         if( s != null ) {
@@ -76,13 +84,11 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
             if( !list.isEmpty()) {
                 Resource first = list.get(0);
                 String url = request.getAbsolutePath() + first.getName();
-                System.out.println("redirect: " + url);
                 return url;
             }
         }
         return null;
     }
-
     
     
     @Override

@@ -83,12 +83,6 @@
         </dependency>
  
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.3</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>com.sun.phobos</groupId>
             <artifactId>freemarker</artifactId>
             <version>2.3.12</version>
