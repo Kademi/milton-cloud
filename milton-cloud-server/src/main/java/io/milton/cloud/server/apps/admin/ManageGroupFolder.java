@@ -47,6 +47,7 @@ import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyAccess;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
+import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.MoveableResource;
 import io.milton.resource.PostableResource;
@@ -64,7 +65,7 @@ import org.hibernate.Transaction;
  * @author brad
  */
 @BeanPropertyResource(value = "milton", enableByDefault = false)
-public class ManageGroupFolder extends AbstractResource implements PostableResource, CommonCollectionResource, GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource, MoveableResource {
+public class ManageGroupFolder extends AbstractResource implements PostableResource, CommonCollectionResource, GetableResource, CollectionResource, DeletableResource, PropertySourcePatchSetter.CommitableResource, MoveableResource, DeletableCollectionResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupFolder.class);
     private final Group group;
@@ -401,5 +402,10 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     public OptIn optin(Group optinGroup) {
         List<OptIn> list = OptIn.findForGroup(group, SessionManager.session());
         return OptIn.findOptin(list, optinGroup);
+    }
+
+    @Override
+    public boolean isLockedOutRecursive(Request request) {
+        return false;
     }
 }
