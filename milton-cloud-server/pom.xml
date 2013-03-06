@@ -235,7 +235,9 @@
                             </systemProperties> 
                             <webAppConfig>
                                 <contextPath>/</contextPath>
+                                <!--
                                 <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
+                                -->
                             </webAppConfig>     
 
                             <connectors>
@@ -307,7 +309,7 @@
                                 <systemProperty>
                                     <name>template.file.roots</name>
                                     <value>../../fuse-admin/fuse-app/src/main/resources</value>
-                                </systemProperty>  
+                                </systemProperty>
                             </systemProperties>    
                             <connectors>
                                 <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
@@ -364,7 +366,9 @@
                         <configuration>
                             <webAppConfig>
                                 <contextPath>/</contextPath>
+                                <!--
                                 <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
+                                -->
                             </webAppConfig>     
                             <systemProperties>
                                 <systemProperty>

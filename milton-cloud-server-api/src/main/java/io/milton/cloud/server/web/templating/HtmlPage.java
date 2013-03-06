@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web.templating;
 
+import io.milton.common.Path;
 import java.io.InputStream;
 import java.util.List;
 
@@ -70,5 +71,12 @@ public interface HtmlPage extends  TitledPage{
      * @return 
      */
     String getSource();
+
+    /**
+     * Get the path to this resource
+     * 
+     * @return 
+     */
+    Path getPath();
     
 }

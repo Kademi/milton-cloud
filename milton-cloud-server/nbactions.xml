@@ -107,5 +107,12 @@
             <exec.executable>/home/home/brad/jdk1.7.0_05/bin/java</exec.executable>
             <exec.classpathScope>${classPathScope}</exec.classpathScope>
         </properties>
-    </action>        
+    </action>      
+    <action>
+            <actionName>CUSTOM-install</actionName>
+            <displayName>install</displayName>
+            <goals>
+                <goal>install</goal>
+            </goals>
+        </action>        
 </actions>

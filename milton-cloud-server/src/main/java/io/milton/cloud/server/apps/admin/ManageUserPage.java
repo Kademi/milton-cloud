@@ -19,6 +19,7 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.signup.SignupApp;
 import io.milton.cloud.server.db.SignupLog;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.PasswordManager;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,6 +33,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.alt.AltFormatGenerator;
 import io.milton.cloud.server.web.templating.DataBinder;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
 import io.milton.http.Range;
@@ -44,6 +46,7 @@ import io.milton.resource.PostableResource;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
+import io.milton.http.http11.auth.CookieAuthenticationHandler;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.DigestResource;
@@ -53,12 +56,16 @@ import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Combiner;
 import org.hashsplit4j.api.Fanout;
@@ -87,6 +94,24 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         this.profile = profile;
     }
 
+    @Override
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
+        if( request.getParams() != null && request.getParams().containsKey("loginTo")) {
+            String domainName = request.getParams().get("loginTo");
+            CookieAuthenticationHandler auth = _(CookieAuthenticationHandler.class);
+            String userUrl = "/users/" + profile.getName() + "/";
+            String hash = auth.getUrlSigningHash(userUrl);
+            String redirect = "http://" + domainName + _(Formatter.class).getPortString() + "/dashboard?";
+            redirect += auth.getCookieNameUserUrl() + "=" + userUrl + "&";
+            redirect += auth.getCookieNameUserUrlHash() + "=" + hash;
+            return redirect;
+        }
+            
+        return super.checkRedirect(request);
+    }
+
+    
+    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
@@ -207,6 +232,25 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        if( params.containsKey("availWebsites")) {
+            jsonResult = new JsonResult(true);
+            Set<String> websites = new HashSet<>();
+            jsonResult.setData(websites);
+            Session session = SessionManager.session();
+            if( profile.getMemberships() != null ) {
+                for( GroupMembership m : profile.getMemberships()) {
+                    Group g = m.getGroupEntity();
+                    for( GroupInWebsite giw : GroupInWebsite.findByGroup(g, session) ) {
+                        Website w = giw.getWebsite();
+                        String websiteDomain = w.getDomainName();
+                        if( websiteDomain == null ) {
+                            websiteDomain = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+                        }
+                        websites.add(websiteDomain);
+                    }
+                }
+            }
+        }        
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {

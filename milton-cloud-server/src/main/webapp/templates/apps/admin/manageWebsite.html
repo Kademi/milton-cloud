@@ -9,8 +9,14 @@
     <body class="manageWebsite">
         <section class="MainContent">
             <div class="TabContainer">
-                <nav class="ClearFix"><a href="">Details</a><a href="">Themes</a><a href="">Group Access</a><a href="">Mail server</a><a href="">Apps</a></nav>
-                <div class="TabContent">
+                <nav class="ClearFix TabNav">
+                    <a href="#details">Details</a>
+                    <a href="#themes">Themes</a>
+                    <a href="#groups">Group Access</a>
+                    <a href="#mail">Mail server</a>
+                    <a href="#apps">Apps</a>
+                </nav>
+                <div class="TabContent" rel="#details">
                     <div class="Content">
                         <form name="frmDetails" action="." method="post" class="Details">
                             <div class="pageMessage">.</div>
@@ -54,7 +60,7 @@
                         </form>
                     </div>
                 </div>	
-                <div class="TabContent">
+                <div class="TabContent" rel="#themes">
                     <div class="Content">
                         <form name="frmDetails" action="." method="post" class="Details">
                             <p class="pageMessage"></p>
@@ -83,21 +89,9 @@
                                     <tr>
                                         <th class="Short">Logo</th>
                                         <td colspan="3">
-                                            <textarea class="htmleditor required toolbar-Logo" name="logo" id="logo" rows="4" cols="20">$!page.themeAttributes.logo</textarea>
+                                            <input type="text" class="required toolbar-Logo" name="logo" id="logo" value="$!page.themeAttributes.logo" />
                                         </td>
                                     </tr>                                    
-                                    <tr>
-                                        <th class="Short">Hero colour 1</th>
-                                        <td><input type="text" name="hero1" value="$!page.themeParams.hero1" class="required color" /></td>
-                                        <th class="Short">Text colour 1</th>
-                                        <td><input type="text" name="text1" value="$!page.themeParams.text1" class="required color" /></td>                                        
-                                    </tr>
-                                    <tr>
-                                        <th class="Short">Hero colour 2</th>
-                                        <td><input type="text" name="hero2" value="$!page.themeParams.hero2" class="required color" /></td>
-                                        <th class="Short">Text colour 2</th>
-                                        <td><input type="text" name="text2" value="$!page.themeParams.text2" class="required color" /></td>                                        
-                                    </tr>
                                     <tr>
                                         <th class="Short">Menu</th>
                                         <td colspan="3">
@@ -119,7 +113,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="TabContent">
+                <div class="TabContent" rel="#groups">
                     <div class="Content Recipient">
                         <header class="ClearFix">
                             <button class="SmallBtn Add AddGroup"><span>Add/remove groups</span></button>
@@ -131,7 +125,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="TabContent">
+                <div class="TabContent" rel="#mail">
                     <div class="Content">
                         <form name="frmDetails" action="." method="post" class="Details">
                             <p class="pageMessage"></p>
@@ -162,7 +156,7 @@
                         </form>
                     </div>
                 </div>	
-                <div class="TabContent">
+                <div class="TabContent" rel="#apps">
                     <div class="Content appsContainer">
 
                         <article class="Note">

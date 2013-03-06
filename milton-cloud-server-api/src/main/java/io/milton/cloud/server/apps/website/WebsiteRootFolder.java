@@ -180,4 +180,8 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         }
         return super.is(type);
     }
+    
+    public String getThemeName() {
+        return branch.getInternalTheme();
+    }
 }

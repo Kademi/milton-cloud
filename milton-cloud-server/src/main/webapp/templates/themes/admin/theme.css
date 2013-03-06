@@ -1374,3 +1374,40 @@ nav.TabNav a.Active {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
+
+/** Copied from bootstrap **/
+.alert-success {
+    background-color: #DFF0D8;
+    border-color: #D6E9C6;
+    color: #468847;
+}
+.alert {
+    background-color: #FCF8E3;
+    border: 1px solid #FBEED5;
+    border-radius: 4px 4px 4px 4px;
+    margin-bottom: 20px;
+    padding: 8px 35px 8px 14px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.alert .close {
+    line-height: 20px;
+    position: relative;
+    right: -21px;
+    top: -2px;
+}
+button.close {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    cursor: pointer;
+    padding: 0;
+}
+.close {
+    color: #000000;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 20px;
+    opacity: 0.2;
+    text-shadow: 0 1px 0 #FFFFFF;
+}

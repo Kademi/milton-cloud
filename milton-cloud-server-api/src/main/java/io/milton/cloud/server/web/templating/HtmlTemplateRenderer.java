@@ -33,6 +33,7 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.WebUtils;
+import io.milton.common.Path;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
 
@@ -92,11 +93,10 @@ public class HtmlTemplateRenderer {
         pw.write("<head>\n");
         pw.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"/>\n");
 
-        List<WebResource> pageWebResources = null;
         List<String> pageBodyClasses = null;
+        HtmlPage htmlPage = null;
         if (page instanceof HtmlPage) {
-            HtmlPage htmlPage = (HtmlPage) page;
-            pageWebResources = htmlPage.getWebResources();
+            htmlPage = (HtmlPage) page;
             pageBodyClasses = htmlPage.getBodyClasses();
             BodyRenderer bodyRenderer = new BodyRenderer(htmlPage);
             datamodel.put("body", bodyRenderer);
@@ -107,8 +107,7 @@ public class HtmlTemplateRenderer {
             pw.write("<title>" + titledPage.getTitle() + "</title>");
         }
 
-        List<WebResource> webResources = deDupe(themeTemplateTemplateMeta.getWebResources(), bodyTemplateMeta.getWebResources(), pageWebResources);
-        printHeaderWebResources(webResources, themeName, themePath, pw);
+        printHeaderWebResources(themeName, themePath, pw, themeTemplateTemplateMeta, bodyTemplateMeta, htmlPage);
 
         // HACK: need something where templates want to include the portlet, not where they have hard coded exclusions
         if (!themeTemplate.getName().contains("plain") && !themeTemplate.getName().contains("email")) { // don't render the header for plain pages, these might be used as PDF input or emails
@@ -131,26 +130,10 @@ public class HtmlTemplateRenderer {
         VelocityContentDirective.setContentTemplate(contentTemplate, datamodel);
         themeTemplate.merge(datamodel, pw);
         VelocityContentDirective.setContentTemplate(null, datamodel);
-        printBottomWebResources(webResources, themeName, pw);
+        printBottomWebResources(themeName, themePath, pw, themeTemplateTemplateMeta, bodyTemplateMeta, htmlPage);
         pw.write("</body>\n");
         pw.write("</html>");
         pw.flush();
-    }
-
-    private List<WebResource> deDupe(List<WebResource>... webResourceLists) {
-        Set<WebResource> set = new HashSet<>();
-        List<WebResource> orderedList = new ArrayList<>();
-        for (List<WebResource> list : webResourceLists) {
-            if (list != null) {
-                for (WebResource wr : list) {
-                    if (!set.contains(wr)) {
-                        set.add(wr);
-                        orderedList.add(wr);
-                    }
-                }
-            }
-        }
-        return orderedList;
     }
 
     private List<String> deDupeBodyClasses(List<String>... bodyClassLists) {
@@ -160,7 +143,7 @@ public class HtmlTemplateRenderer {
             if (list != null) {
                 for (String s : list) {
                     System.out.println("body clasS: " + s);
-                    if (!set.contains(s)) {                        
+                    if (!set.contains(s)) {
                         set.add(s);
                         orderedList.add(s);
                     }
@@ -176,30 +159,48 @@ public class HtmlTemplateRenderer {
         }
     }
 
-    private void printHeaderWebResources(List<WebResource> webResources, String themeName, String themePath, PrintWriter pw) {
+    private void printHeaderWebResources(String themeName, String themePath, PrintWriter pw, HtmlPage... pages) {
         pw.println();
-        Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();
-        for (WebResource wr : webResources) {
-            if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel"))) {
-                String media = wr.getAtts().get("media");
-                if (media != null && media.length() > 0) {
-                    List<String> cssFilesForMedia = mapOfCssFilesByMedia.get(media);
-                    if (cssFilesForMedia == null) {
-                        cssFilesForMedia = new ArrayList<>();
-                        mapOfCssFilesByMedia.put(media, cssFilesForMedia);
+        pw.println("<script type=\"text/javascript\">");
+        pw.println("    // Templates should push page init function into this array. It will then be run after outer template init functions. Injected by HtmlTemplateRenderer");
+        pw.println("    var pageInitFunctions = new Array();");
+        pw.println("</script>");
+        pw.println();
+        Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();        
+        for (HtmlPage page : pages) {
+            if (page != null) {
+                List<WebResource> webResources = page.getWebResources();
+                if (webResources != null) {
+                    // webPath is just the path of the directory containing the template
+                    // this allows us to evaluate relative path of resources on the template to absolute paths
+                    Path webPath = page.getPath();
+                    if( !webPath.isRoot() ) {                        
+                        webPath = webPath.getParent();
                     }
-                    String href = wr.getAtts().get("href");
-                    href = wr.adjustRelativePath("href", href, themeName);
-                    cssFilesForMedia.add(href);
-                } else {
-                    String html = wr.toHtml(themeName);
-                    pw.write(html + "\n");
-                }
-            } else {
-                // script tags with the bottom attribute should be at bottom, not in header
-                if (!wr.getTag().equals("script") || !wr.getAtts().containsKey("bottom")) {
-                    String html = wr.toHtml(themeName);
-                    pw.write(html + "\n");
+                    for (WebResource wr : webResources) {
+                        if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel"))) {
+                            String media = wr.getAtts().get("media");
+                            if (media != null && media.length() > 0) {
+                                List<String> cssFilesForMedia = mapOfCssFilesByMedia.get(media);
+                                if (cssFilesForMedia == null) {
+                                    cssFilesForMedia = new ArrayList<>();
+                                    mapOfCssFilesByMedia.put(media, cssFilesForMedia);
+                                }
+                                String href = wr.getAtts().get("href");
+                                href = wr.adjustRelativePath("href", href, themeName, webPath);
+                                cssFilesForMedia.add(href);
+                            } else {
+                                String html = wr.toHtml(themeName, webPath);
+                                pw.write(html + "\n");
+                            }
+                        } else {
+                            // script tags with the bottom attribute should be at bottom, not in header
+                            if (!wr.getTag().equals("script") || !wr.getAtts().containsKey("bottom")) {
+                                String html = wr.toHtml(themeName, webPath);
+                                pw.write(html + "\n");
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -224,12 +225,23 @@ public class HtmlTemplateRenderer {
         pw.println();
     }
 
-    private void printBottomWebResources(List<WebResource> webResources, String themeName, PrintWriter pw) {
+    private void printBottomWebResources(String themeName, String themePath, PrintWriter pw, HtmlPage... pages) {
         pw.println();
-        for (WebResource wr : webResources) {
-            if (wr.getTag().equals("script") && wr.getAtts().containsKey("bottom") ) {
-                String html = wr.toHtml(themeName);
-                pw.write(html + "\n");
+        for (HtmlPage page : pages) {
+            if (page != null) {
+                List<WebResource> webResources = page.getWebResources();
+                if (webResources != null) {
+                    Path webPath = page.getPath();
+                    if( !webPath.isRoot() ) {
+                        webPath = webPath.getParent();
+                    }                    
+                    for (WebResource wr : webResources) {
+                        if (wr.getTag().equals("script") && wr.getAtts().containsKey("bottom")) {
+                            String html = wr.toHtml(themeName, webPath);
+                            pw.write(html + "\n");
+                        }
+                    }
+                }
             }
         }
         pw.println();

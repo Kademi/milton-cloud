@@ -149,6 +149,9 @@ public class SpliffySecurityManager {
     }
 
     public boolean authorise(Request req, Method method, Auth auth, CommonResource resource) {
+        if( log.isTraceEnabled()) {
+            log.trace("authorise: method=" + method + " resource=" + resource);
+        }
         // look through all the user's groups to find one which permites this request
         Profile curUser = null;
         if (auth != null) {
@@ -158,11 +161,15 @@ public class SpliffySecurityManager {
             }
         }
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
+        System.out.println("a1");
         Set<Priviledge> expanded = AclUtils.expand(privs);
         req.getAttributes().put("privs", expanded); // stash them for later, page rendering might be interested
-        AccessControlledResource.Priviledge required = findRequiredPrivs(method, resource, req);
+        AccessControlledResource.Priviledge required = findRequiredPriv(method, resource, req);
         boolean allows;
         if (required == null) {
+            if( log.isTraceEnabled()) {
+                log.trace("allowing access because no privs are request for " + method +  " on resource: " + resource);
+            }
             allows = true;
         } else {
             allows = AclUtils.containsPriviledge(required, privs);
@@ -174,7 +181,9 @@ public class SpliffySecurityManager {
                 }
                 log.info("Required priviledge: " + required + " was not found in assigned priviledge list of size: " + privs.size());
             }
-//        log.info("allows = " + allows + " rsource: " + resource.getClass());
+            if( log.isTraceEnabled()) {
+                log.trace("allows = " + allows + " rsource: " + resource.getClass() + " required=" + required + " found privs=" + privs.size());
+            }
         }
         return allows;
     }
@@ -205,10 +214,16 @@ public class SpliffySecurityManager {
     public Set<AccessControlledResource.Priviledge> getPriviledges(Profile curUser, CommonResource resource) {
         Set<AccessControlledResource.Priviledge> privs = new HashSet<>();
         if (resource.isPublic()) {
+            if( log.isTraceEnabled()) {
+                log.trace("getPriviledges: granting read access because resource is public: " + resource.getClass());
+            }
             privs.add(Priviledge.READ);
         }
 
         if (curUser != null) {
+            if(log.isTraceEnabled()) {
+                log.trace("getPriviledges: get privs for user: " + curUser.getName());
+            }
             // If the resource is a content resource and the current user is the direct owner of the repository, then grant R/W
             if (resource instanceof PersonalResource) {
                 PersonalResource cr = (PersonalResource) resource;
@@ -221,17 +236,20 @@ public class SpliffySecurityManager {
             if (curUser.getMemberships() != null && !curUser.getMemberships().isEmpty()) {
                 for (GroupMembership m : curUser.getMemberships()) {
                     if (log.isTraceEnabled()) {
-                        log.trace("append privs for group membership: " + m.getGroupEntity().getName());
+                        log.trace("getPriviledges: append privs for group membership: " + m.getGroupEntity().getName());
                     }
                     appendPriviledges(m.getGroupEntity(), m.getWithinOrg(), resource, privs);
                 }
             } else {
-                log.trace("user has no group memberships");
+                log.trace("getPriviledges: user has no group memberships");
             }
         } else {
             Organisation org = resource.getOrganisation();
             Group pg = org.group(publicGroup, SessionManager.session());
             if (pg != null) {
+                if( log.isTraceEnabled()) {
+                    log.trace("Found public group, so granting privs from: " + pg.getName());
+                }
                 appendPriviledges(pg, org, resource, privs);
             }
         }
@@ -286,7 +304,7 @@ public class SpliffySecurityManager {
      * @param resource
      * @return
      */
-    private Priviledge findRequiredPrivs(Method method, CommonResource resource, Request request) {
+    private Priviledge findRequiredPriv(Method method, CommonResource resource, Request request) {
         if (method.equals(Method.POST)) {
             Priviledge p = resource.getRequiredPostPriviledge(request);
             if (p == null) {

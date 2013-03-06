@@ -66,7 +66,7 @@ public class UserDashboardApp implements Application, MenuApplication, ChildPage
             switch (requestedName) {
                 case DASHBOARD_NAME:
                     MenuItem.setActiveIds("menuDashboard");
-                    return new DashboardPage(requestedName, wrf);                    
+                    return new DashboardPage(requestedName, wrf, true); // when accessing dashboard for a user, we need a user
             }
         }
         return null;

@@ -16,17 +16,19 @@
  */
 package io.milton.cloud.server.web.templating;
 
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import io.milton.cloud.server.web.RenderFileResource;
-import io.milton.cloud.util.JDomUtils;
 import io.milton.common.Path;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 import javax.xml.stream.XMLStreamException;
 import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
-import org.jdom.Attribute;
-import org.jdom.Element;
 
 /**
  *
@@ -39,6 +41,37 @@ public class HtmlTemplateParser {
     public static String CDATA_END = "]]>";
     private static long time;
     private HtmlFormatter htmlFormatter = new HtmlFormatter();
+    private final ConcurrentMap<String, ParsedResource> cache; // cache of ParsedResources, keyed on hash, for FileResource's
+
+    public HtmlTemplateParser() {
+        cache = new ConcurrentLinkedHashMap.Builder()
+                .maximumWeightedCapacity(1000)
+                .build();
+    }
+
+    public void parse(RenderFileResource meta, Path webPath) throws IOException, XMLStreamException {
+        String hash = meta.getHash();
+        ParsedResource pr = cache.get(hash);
+        if (pr == null) {
+            try (InputStream fin = meta.getInputStream()) {
+                if (fin != null) {
+                    BufferedInputStream bufIn = new BufferedInputStream(fin);
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                    IOUtils.copy(bufIn, bout);
+                    String sourceXml = bout.toString("UTF-8");
+                    pr = new ParsedResource(sourceXml);
+                    cache.put(hash, pr);
+                }
+            }
+        }
+        meta.setBody(pr.body);
+        meta.setTitle(pr.title);
+        meta.getBodyClasses().clear();
+        meta.getBodyClasses().addAll(pr.bodyClasses);
+        meta.getWebResources().clear();
+        meta.getWebResources().addAll(pr.webResources);
+
+    }
 
     /**
      * Parse the file associated with the meta, extracting webresources, body
@@ -51,29 +84,22 @@ public class HtmlTemplateParser {
         log.info("parse: " + meta.getSource() + " - " + meta.getClass() + " accumulated time=" + time + "ms");
         long tm = System.currentTimeMillis();
 
-
         try (InputStream fin = meta.getInputStream()) {
             if (fin != null) {
                 BufferedInputStream bufIn = new BufferedInputStream(fin);
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 IOUtils.copy(bufIn, bout);
                 String sourceXml = bout.toString("UTF-8");
-                Source source = new Source(sourceXml);
-                net.htmlparser.jericho.Element elHead = source.getFirstElement("head");
-                parseWebResourcesFromHtml(elHead, meta, webPath);
-
-                net.htmlparser.jericho.Element elBody = source.getFirstElement("body");
-                if (elBody != null) {
-                    String sBodyClasses = elBody.getAttributeValue("class");
-                    if (sBodyClasses != null) {
-                        meta.getBodyClasses().clear();
-                        meta.getBodyClasses().addAll(Arrays.asList(sBodyClasses.split(" ")));
-                    }
-                }
-                String body = getContent(elBody);
-                meta.setBody(body);
+                ParsedResource pr = new ParsedResource(sourceXml);
+                meta.setBody(pr.body);
+                meta.setTitle(pr.title);
+                meta.getBodyClasses().clear();
+                meta.getBodyClasses().addAll(pr.bodyClasses);
+                meta.getWebResources().clear();
+                meta.getWebResources().addAll(pr.webResources);
             }
         }
+
         tm = System.currentTimeMillis() - tm;
         time += tm;
     }
@@ -86,32 +112,6 @@ public class HtmlTemplateParser {
      */
     public void update(RenderFileResource r, ByteArrayOutputStream bout) {
         htmlFormatter.update(r, bout);
-    }
-
-    private void parseWebResourcesFromHtml(net.htmlparser.jericho.Element elHead, HtmlPage meta, Path webPath) {
-        //System.out.println("parseWebResourcesFromHtml");
-        meta.getWebResources().clear();
-        for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
-            //System.out.println("tag: " + wrTag.getName());
-            if (wrTag.getName().equals("title")) {
-                String s = wrTag.getRenderer().toString();
-                meta.setTitle(s);
-            } else {
-                if (!wrTag.getName().startsWith("!")) {
-                    WebResource wr = new WebResource(webPath);
-                    meta.getWebResources().add(wr);
-                    wr.setTag(wrTag.getName());
-                    String body = getContent(wrTag);
-                    wr.setBody(body);
-                    Attributes atts = wrTag.getAttributes();
-                    if (atts != null) {
-                        for (net.htmlparser.jericho.Attribute att : atts) {
-                            wr.getAtts().put(att.getName(), att.getValue());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public static String getContent(net.htmlparser.jericho.Element el) {
@@ -128,5 +128,57 @@ public class HtmlTemplateParser {
             s = s.substring(0, s.length() - CDATA_END.length());
         }
         return s.trim();
+    }
+
+    public static class ParsedResource {
+
+        final String title;
+        final List<WebResource> webResources;
+        final List<String> bodyClasses;
+        final String body;
+
+        public ParsedResource(String sourceXml) {
+            Source source = new Source(sourceXml);
+            net.htmlparser.jericho.Element elHead = source.getFirstElement("head");
+
+            net.htmlparser.jericho.Element elBody = source.getFirstElement("body");
+            if (elBody != null) {
+                String sBodyClasses = elBody.getAttributeValue("class");
+                if (sBodyClasses != null) {
+                    bodyClasses = Arrays.asList(sBodyClasses.split(" "));
+                } else {
+                    bodyClasses = Collections.EMPTY_LIST;
+                }
+            } else {
+                bodyClasses = Collections.EMPTY_LIST;
+            }
+            this.body = getContent(elBody);
+
+            String title = null;
+            List<WebResource> list = new ArrayList<>();
+            for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
+                //System.out.println("tag: " + wrTag.getName());
+                if (wrTag.getName().equals("title")) {
+                    String s = wrTag.getRenderer().toString();
+                    title = s;
+                } else {
+                    if (!wrTag.getName().startsWith("!")) {
+                        WebResource wr = new WebResource();
+                        list.add(wr);
+                        wr.setTag(wrTag.getName());
+                        String tagBody = getContent(wrTag);
+                        wr.setBody(tagBody);
+                        Attributes atts = wrTag.getAttributes();
+                        if (atts != null) {
+                            for (net.htmlparser.jericho.Attribute att : atts) {
+                                wr.getAtts().put(att.getName(), att.getValue());
+                            }
+                        }
+                    }
+                }
+            }
+            this.title = title;
+            this.webResources = list;
+        }
     }
 }

@@ -157,31 +157,7 @@ function initFontSwitching() {
     if( initialFontSize ) {
         log("set initial font size", initialFontSize)
         $('html').css('font-size', initialFontSize);
-    }
-    
-			
-//    $(".ZoomIn").click(function() {
-//        log("zoomin");
-//        if(defaultFont < 15) {
-//            defaultFont += 1;
-//            $content.css("font-size", defaultFont + "px");
-//            $.cookie("font-size", defaultFont + "px", {
-//                expires: 99999, 
-//                path: "/"
-//            });
-//        }
-//        return false;
-//    });
-//			
-//    $(".ZoomReset").click(function() {
-//        defaultFont = 12;
-//        $content.css("font-size", defaultFont + "px");
-//        $.cookie("font-size", "", {
-//            expires: -1, 
-//            path: "/"
-//        });
-//        return false;
-//    });
+    }   
 }
 
 function saveFontSizeInCookie(fontSize) {    
@@ -273,16 +249,29 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
 function initTabPanel() {
     log("initTabPanel");
     $("nav.TabNav a").on("click", function(e) {
-        e.preventDefault();
+        //e.preventDefault();
         log("initTabPanel:click1", this);
         var href = $(this).attr("href");
         $(this).addClass("Active").siblings().removeClass("Active");
-	log("content", $content);
         $(".TabContent").hide().filter("[rel=" + href + "]").show();
 					        
     });		
-		
-    $("body").find("nav.TabNav a").eq(0).trigger("click");
+    
+    var tabLinks = $("body").find("nav.TabNav a");
+    var url = window.location.href;
+    if( url.contains("#")) {
+        var tabId = url.substring(url.indexOf("#"));
+        log("tabId", tabId);
+        var selectedTab = tabLinks.filter("[href=" + tabId + "]");
+        log("selectedTab", selectedTab);
+        if( selectedTab.length > 0 ) {
+            selectedTab.first().click();
+            return;
+        }
+    }
+    var firstTab = $("body").find("nav.TabNav a").eq(0);
+    log("select first tab", firstTab);
+    firstTab.trigger("click");
 }
 
 if(!String.prototype.trim) {

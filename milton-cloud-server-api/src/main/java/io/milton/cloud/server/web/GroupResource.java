@@ -26,7 +26,7 @@ import io.milton.vfs.db.*;
  *
  * @author brad
  */
-public class GroupResource extends AbstractCollectionResource implements CollectionResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox {
+public class GroupResource extends AbstractCollectionResource implements CollectionResource, PropFindableResource, GetableResource, PrincipalResource, Mailbox, IGroupResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GroupResource.class);
     private final Group group;
@@ -138,6 +138,7 @@ public class GroupResource extends AbstractCollectionResource implements Collect
         _(ApplicationManager.class).storeMail(this, mm);
     }
 
+    @Override
     public Group getGroup() {
         return group;
     }

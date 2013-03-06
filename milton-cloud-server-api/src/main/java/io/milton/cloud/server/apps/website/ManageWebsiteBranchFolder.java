@@ -113,11 +113,11 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             session.save(website);
 
             Map<String, String> themeParams = new HashMap<>();
-
-            themeParams.put("hero1", parameters.get("hero1"));
-            themeParams.put("hero2", parameters.get("hero2"));
-            themeParams.put("text1", parameters.get("text1"));
-            themeParams.put("text2", parameters.get("text2"));
+//
+//            themeParams.put("hero1", parameters.get("hero1"));
+//            themeParams.put("hero2", parameters.get("hero2"));
+//            themeParams.put("text1", parameters.get("text1"));
+//            themeParams.put("text2", parameters.get("text2"));
 
             Map<String, String> themeAtts = new HashMap<>();
 

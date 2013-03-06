@@ -44,16 +44,8 @@ public class WebResource {
     }    
     
     private Map<String, String> atts = new HashMap<>();
-    private final Path webPath;
     private String tag;
     private String body;
-
-    public WebResource(Path webPath) {
-        if (webPath == null) {
-            throw new NullPointerException("webPath is null");
-        }
-        this.webPath = webPath;
-    }
 
     /**
      * Eg <script>, <link>, <meta>
@@ -94,11 +86,11 @@ public class WebResource {
         this.body = body;
     }
 
-    public String toHtml(String themeName) {
+    public String toHtml(String themeName, Path webPath) {
         StringBuilder sb = new StringBuilder();
         sb.append("<").append(tag).append(" ");
         for (Map.Entry<String, String> entry : atts.entrySet()) {
-            String adjustedValue = adjustRelativePath(entry.getKey(), entry.getValue(), themeName);
+            String adjustedValue = adjustRelativePath(entry.getKey(), entry.getValue(), themeName, webPath);
             sb.append(entry.getKey()).append("=\"").append(adjustedValue).append("\" ");
         }
         if (body != null && body.length() > 0) {
@@ -125,27 +117,30 @@ public class WebResource {
     }      
 
     /**
-     * TODO: make use theme, or something...
-     *
      * If the attribute name is src or href, checks the value to see if its
      * relative, and if so return an absolute path, assuming webresource root is
      * /templates
-     *
+
+     * 
+     * @param name
      * @param value
-     * @return
+     * @param themeName
+     * @param webPath - path of the directory containing the template/page
+
+     * @return 
      */
-    public String adjustRelativePath(String name, String value, String themeName) {
+    public String adjustRelativePath(String name, String value, String themeName, Path webPath) {
         if (name.equals("href") || name.equals("src")) {
             if (value != null && value.length() > 0) {
                 if (!value.startsWith("/") && !value.startsWith("http")) {
-                    return evaluateRelativePath(value, themeName);
+                    return evaluateRelativePath(value, themeName, webPath);
                 }
             }
         }
         return value;
     }
 
-    private String evaluateRelativePath(String value, String themeName) {
+    private String evaluateRelativePath(String value, String themeName, Path webPath) {
         Path relative = Path.path(value);
         Path p = webPath;
         for (String relPart : relative.getParts()) {
@@ -180,7 +175,6 @@ public class WebResource {
     public int hashCode() {
         int hash = 5;
         hash = 79 * hash + Objects.hashCode(this.atts);
-        hash = 79 * hash + Objects.hashCode(this.webPath);
         hash = 79 * hash + Objects.hashCode(this.tag);
         hash = 79 * hash + Objects.hashCode(this.body);
         return hash;
@@ -196,9 +190,6 @@ public class WebResource {
         }
         final WebResource other = (WebResource) obj;
         if (!Objects.equals(this.atts, other.atts)) {
-            return false;
-        }
-        if (!Objects.equals(this.webPath, other.webPath)) {
             return false;
         }
         if (!Objects.equals(this.tag, other.tag)) {

@@ -37,7 +37,7 @@ import io.milton.vfs.db.*;
  *
  * @author brad
  */
-public class GroupInWebsiteFolder extends AbstractCollectionResource{
+public class GroupInWebsiteFolder extends AbstractCollectionResource implements IGroupResource{
 
     private final GroupInWebsite giw;
     private final WebsiteRootFolder websiteRootFolder;
@@ -93,6 +93,7 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
         return null;
     }
 
+    @Override
     public Group getGroup() {
         return giw.getUserGroup();
     }
@@ -100,4 +101,14 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource{
     public Website getWebsite() {
         return giw.getWebsite();
     }    
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("group")) {
+            return true;
+        }
+        return super.is(type);
+    }
+    
+    
 }

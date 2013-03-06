@@ -136,4 +136,11 @@ public class GetableResourcePathTemplateHtmlPage extends TemplateHtmlPage {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Path getPath() {
+        return path;
+    }
+    
+    
 }

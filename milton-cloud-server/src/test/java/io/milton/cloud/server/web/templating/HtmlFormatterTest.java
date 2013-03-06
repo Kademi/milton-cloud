@@ -55,7 +55,7 @@ public class HtmlFormatterTest {
     }
 
     private WebResource newScriptTag() {
-        WebResource wr = new WebResource(Path.root);
+        WebResource wr = new WebResource();
         wr.setTag("script");
         wr.getAtts().put("src", "/js/utils.js");
         return wr;
@@ -108,6 +108,11 @@ public class HtmlFormatterTest {
 
         @Override
         public InputStream getInputStream() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Path getPath() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         

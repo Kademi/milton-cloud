@@ -56,8 +56,8 @@
                             <div class="Controller">
                                 <a title="Show Dialogue" class="ShowDialog" href="#"><span class="Hidden">Show Dialogue</span></a>
                                 <div class="Dialog Hidden">
-                                    <a href="$p.id">Edit user details</a>
-                                    <a href="$p.id">View user details</a>
+                                    <a href="$p.id">User details</a>
+                                    <a href="$p.id" class="login-as">Login as this user</a>
                                 </div>
                             </div>
                         </td>                    
@@ -180,6 +180,22 @@
                 </div>                
             </div>
         </div> 
+        
+        <div id="loginAsModal" class="Modal">
+            <header>
+                <h3>Login as User</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <div class='upload'>
+                    <p>Below is the list of websites this user has access to:</p>
+                    <ul class="websites" style="margin-left: 20px;">
+                        <li>Please wait...</li>
+                    </ul>
+                </div>                
+            </div>
+        </div> 
+        
 
         <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
         <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>
@@ -191,6 +207,6 @@
             });            
         </script>        
         
-        #portlets("manageUsersBottom")        
+        #portlets("manageUsersBottom")
     </body>
 </html>

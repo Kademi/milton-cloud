@@ -345,7 +345,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         checkParse();
         WebResource wr = param(name);
         if (wr == null) {
-            wr = new WebResource(Path.root);
+            wr = new WebResource();
             wr.setTag("script");
             wr.getAtts().put("type", "data/parameter");
             wr.getAtts().put("title", name);
@@ -466,7 +466,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
                 }
             }
         }
-        WebResource wrTemplate = new WebResource(Path.root);
+        WebResource wrTemplate = new WebResource();
         wrTemplate.setTag("link");
         wrTemplate.getAtts().put("rel", "template");
         wrTemplate.getAtts().put("href", template);

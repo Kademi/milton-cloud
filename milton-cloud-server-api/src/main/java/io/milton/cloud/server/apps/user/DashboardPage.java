@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.Auth;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import java.util.ArrayList;
 
 /**
@@ -58,11 +61,11 @@ public class DashboardPage extends TemplatedHtmlPage {
     private List<String> topMessages = new ArrayList<>();
     private List<String> bottomMessages = new ArrayList<>();
 
-    public DashboardPage(String name, CommonCollectionResource parent) {
+    public DashboardPage(String name, CommonCollectionResource parent, boolean requireLogin) {
         super(name, parent, "user/dashboard", "Dashboard");
-//        setForceLogin(true);
+        setForceLogin(requireLogin);
     }
-
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         loadDashboardMessages();

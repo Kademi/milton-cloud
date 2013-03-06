@@ -7,10 +7,8 @@
         </goals>
         <properties>
             <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
-
-            <Env.MAVEN_OPTS>-javaagent:C:\Users\brad\.netbeans\7.1.2\jrebel\jrebel.jar</Env.MAVEN_OPTS>
-
-                
+            <org.eclipse.jetty.util.log.DEBUG>true</org.eclipse.jetty.util.log.DEBUG>
+            <Env.MAVEN_OPTS>-javaagent:C:\Users\brad\.netbeans\7.1.2\jrebel\jrebel.jar</Env.MAVEN_OPTS>                
         </properties>
         <activatedProfiles>
             <activatedProfile>run-fuse</activatedProfile>
@@ -25,6 +23,7 @@
             <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
             <jpda.listen>maven</jpda.listen>                
             <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+            <org.eclipse.jetty.util.log.DEBUG>true</org.eclipse.jetty.util.log.DEBUG>
         </properties>
         <activatedProfiles>
             <activatedProfile>run-fuse</activatedProfile>
@@ -37,6 +36,8 @@
         </goals>
         <properties>
             <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+            <org.eclipse.jetty.LEVEL>INFO</org.eclipse.jetty.LEVEL>
+            
                 
         </properties>
     </action>

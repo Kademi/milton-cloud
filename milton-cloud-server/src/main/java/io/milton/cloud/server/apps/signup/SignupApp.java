@@ -124,7 +124,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                     return new GroupRegistrationPage(requestedName, giwf, this);
                 }
             } else if( requestedName.equals("dash")) {
-                return new DashboardPage(requestedName, giwf);
+                boolean openGroup = Group.REGO_MODE_OPEN.equals( giwf.getGroup().getRegistrationMode());
+                return new DashboardPage(requestedName, giwf, !openGroup); // dont require login if group is open. Although will challenge when they try to access a page
             }
         }
         if (parent instanceof OrganisationFolder) {
