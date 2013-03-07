@@ -306,13 +306,13 @@ function addGroupBtn() {
             _group.push(this.getAttribute("data-group"));
         });
 		
-        showModal(_group);
+        showGroupModal(_group);
     });
 }
 
-function showModal(group) {	
+function showGroupModal(group) {	
     var _modal = $("#modalGroup");
-    log("showModal", _modal, group);	
+    log("showGroupModal", _modal, group);	
     $.tinybox.show(_modal, {
         overlayClose: false,
         opacity: 0

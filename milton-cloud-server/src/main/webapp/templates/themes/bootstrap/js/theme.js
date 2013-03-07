@@ -27,7 +27,8 @@ $(function() {
         var href = td.find("a").attr("href");
         log("click", td, href);
         window.location.href = href;
-    });    
+    });
+
 });
 
 /**
@@ -35,7 +36,9 @@ $(function() {
  */
 var lastOpenedModal;
 function showModal(modal) {
+    log("showModal");
     lastOpenedModal = modal;
+    log("showModal", "lastOpenedModal", lastOpenedModal);
     modal.modal();
 }
 function closeModals() {

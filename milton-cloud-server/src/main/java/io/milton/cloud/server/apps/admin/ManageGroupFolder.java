@@ -14,8 +14,10 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.db.OptIn;
 import io.milton.cloud.server.event.GroupDeletedEvent;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
@@ -223,6 +225,8 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         return OptIn.findForGroup(group, SessionManager.session());
     }
 
+    
+    
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
@@ -232,8 +236,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
                     children.add(p);
                 }
-            }
-            children.add(new ManageGroupMembersPage(this, "members"));
+            }            
         }
         return children;
     }
@@ -366,6 +369,9 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+        if( childName.equals("members")) {
+            return new ManageGroupMembersPage(this, childName);
+        }
         return NodeChildUtils.childOf(getChildren(), childName);
     }
 
@@ -407,5 +413,19 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     @Override
     public boolean isLockedOutRecursive(Request request) {
         return false;
+    }
+    
+    public Map<String, String> getSignupPages() {
+        Map<String, String> map = new HashMap<>();
+        for( GroupInWebsite giw : GroupInWebsite.findByGroup(group, SessionManager.session()) ) {
+            Website w = giw.getWebsite();
+            String domainName = w.getDomainName();
+            if( domainName == null ) {
+                domainName = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+            }
+            String url = "http://" + domainName + _(Formatter.class).getPortString() + "/" + group.getName() + "/signup";
+            map.put(domainName, url);
+        }
+        return map;
     }
 }

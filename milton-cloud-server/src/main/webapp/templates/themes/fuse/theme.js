@@ -15,12 +15,30 @@ function initFuseTheme() {
     log("finished initFuseTheme");
 }
 
+
+function showModal(modal) {
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });      
+}
+
+function closeModal() {
+    $.tinybox.close();
+}
+
 function initModal() {
     $("body").on("click", ".Modal a.Close", function(e) {
+        log("close tinybox");
         $.tinybox.close();
         e.preventDefault();
     });
+    $('a.ShowModal').tinybox({
+        overlayClose: false,
+        opacity: 0
+    });    
 }
+
 
 function initHelp () {
     $(".helpIcon").click(function(e) {

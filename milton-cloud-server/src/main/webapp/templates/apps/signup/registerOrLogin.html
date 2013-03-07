@@ -5,74 +5,94 @@
     <body>
         <h1>Register or Login</h1>
         <div class="registerOrLoginCont">
-            <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>        
-            <table class="plain" style="width: 670px; margin: 0 auto">
-                <tr>
-                    <td style="width: 300px; text-align: center">
-                        <h2>Register</h2>
-                    </td>
-                    <td></td>
-                    <td style="width: 300px; text-align: center">
-                        <h2>Login</h2>
-                    </td>                    
-                </tr>
-                <tr>
-                    <td class="registerCont Login">
-                        #set($groupRegoPage = $page.groupRegoPages.get(0))
-                        
-                        <form method="post" id="registerForm" action="$groupRegoPage.href">
-                            <fieldset>
-                                <p class="pageMessage">.</p>
-                                <label for="email">Email</label>
-                                <input type="text" id="email" name="email" value="" class="Textbox" title="Email address" />
-                                <br/>
-                                
-                                <label class="last" for="nickName">Nickname</label>
-                                <input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" />
-                                <br/>
-                                
-                                <label for="password">Password</label>
-                                <input type="password" name="password" id="password" value="" class="Textbox" title="Password" />
-                                <br/>
-                                
-                                <label class="last" for="confirmPassword">Confirm</label>
-                                <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" />
-                                <br/>                                
+            <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>
+            <div class="row-fluid">
+                <div class="span7">
+                    <h4>Create an account</h4>
+                    #set($groupRegoPage = $page.groupRegoPages.get(0))
 
-                                #if( $page.hasOrgs )
-                                    <label class="first" for="orgName">$groupRegoPage.regoOrgType</label>
+                    <form method="post" id="registerForm" action="$groupRegoPage.href" class="form-horizontal form-horizontal-narrower">
+                        <fieldset>
+                            <div class="control-group">
+                                <label for="email" class="control-label">Email</label>
+                                <div class="controls">
+                                    <input type="text" id="email" name="email" value="" class="Textbox" title="Email address" />
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label" for="nickName">Nickname</label>
+                                <div class="controls">
+                                    <input class="required" type="text" name="nickName" id="nickName" placeholder="Your nickname for others to see" />
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="password" class="control-label">Password</label>
+                                <div class="controls">
+                                    <input type="password" name="password" id="password" value="" class="Textbox" title="Password" />
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label" for="confirmPassword">Confirm</label>
+                                <div class="controls">
+                                    <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" />
+                                </div>
+                            </div>
+
+                            #if( $page.hasOrgs )
+                            <div class="control-group">
+                                <label class="control-label" for="orgName">$groupRegoPage.regoOrgType</label>
+                                <div class="controls">
                                     <div class="findOrg">
                                         <input type="hidden" name="orgId" id="orgId" />
                                         <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your $groupRegoPage.regoOrgType" />
                                     </div>
-                                #end
-                                <button class="Register" type="submit" ><span>Register</span></button>
-                            </fieldset>
+                                </div>
+                            </div>
+                            #end
+                            <div class="control-group">
+                                <div class="controls">
+                                    <button class="Register btn btn-success" type="submit" ><span>Register</span></button>
+                                </div>
+                            </div>
+                        </fieldset>
 
-                        </form>
-                        
-                    </td>
-                    <td></td>
-                    <td class="loginCont Login">
-                        <form method="post" action="">
-                            <fieldset>
-                                <p class="pageMessage">.</p>
-                                <label for="email">Email</label>
-                                <input type="text" id="email" name="email" value="" class="Textbox" title="Email address" />
-                                <br/>
-                                <label for="password">Password</label>
-                                <input type="password" name="password" id="password" value="" class="Textbox" title="Password" />
-                                <button type="submit" class="Login Button" ><span>Login</span></button>                                     
-                                <a href="/password-reset" title="Forgotten password" class="Forgot">Forgotten password</a>                                        
-                            </fieldset>
-                        </form>                         
-                    </td>
-                </tr>
-            </table>
+                    </form>
+
+                </div>
+                <div class="span5 loginCont">
+                    <h4>Login</h4>
+                    <form method="post" action="" class="">
+                        <fieldset>
+                            <div class="control-group">
+                                <label for="email" class="control-label">Email</label>
+                                <div class="controls">
+                                    <input type="text" id="email" name="email" value="" class="Textbox" title="Email address" />
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="password" class="control-label">Password</label>
+                                <div class="controls">
+                                    <input type="password" name="password" id="password" value="" class="Textbox" title="Password" />
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <button type="submit" class="Login Button btn btn-primary" ><span>Login</span></button>                                     
+                                <small class="pull-right"><a href="/password-reset" title="Forgotten password" class="Forgot">Forgotten password</a></small>
+                            </div>
+                        </fieldset>
+                    </form>                         
+
+                </div>
+            </div>
         </div>    
-        
-        <div id="findOrg" class="Modal"> 
-            <a href="" class="Close" title="Close">Close</a>
+
+        <div id="findOrg" class="modal hide fade"> 
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h3 class="Title">Find your $groupRegoPage.regoOrgType</h3>
             <form method="POST" action=".">
                 <input id="orgQuery" type="text" value="" placeholder="Search for your $groupRegoPage.regoOrgType here" />
@@ -88,12 +108,13 @@
                 </table>                
             </form>
         </div>   
-        
+
         <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>        
         <script type="text/javascript">
-            $(document).ready(function(){
+            $(document).ready(function() {
                 initRegisterForms("/dashboard");
-            });                        
+                
+            });
         </script>           
     </body>    
 </html> 

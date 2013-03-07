@@ -239,7 +239,7 @@ function dropHost(s) {
 
 function showRegisterOrLoginModal(callbackOnLoggedIn) {
     var modal = $("#registerOrLoginModal");
-    if( modal.length == 0 ) {
+    if( modal.length === 0 ) {
         modal = $("<div id='registerOrLoginModal' class='Modal' style='min-height: 300px'><a href='#' class='Close' title='Close'>Close</a><div class='modalContent'>");
         $("body").append(modal);
     }

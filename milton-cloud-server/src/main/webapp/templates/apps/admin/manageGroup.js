@@ -204,7 +204,7 @@ function initGroupDialog() {
 		
         var _selectedForum = $(this).parents("div.Group");
 		
-        showModal("Group", "Rename group", "Rename", {
+        showGroupModal("Group", "Rename group", "Rename", {
             name: $(this).parent().parent().find("> span").html(),
             group: _selectedForum.attr("data-group")
         });
@@ -271,10 +271,11 @@ function resetModalControl() {
     _modal.find("input[type=checkbox]").check(false);
 }
 
-function showModal(name, title, type, data) {
+function showGroupModal(name, title, type, data) {
     resetModalControl();
 	
     var _modal = $("#modalGroup");
+    log("showGroupModal", _modal);
 	
     _modal.find("header h3").html(title);
     _modal.find("button").html(type==="Save"?"Save changes":type).attr("rel", name);
@@ -328,8 +329,8 @@ function showModal(name, title, type, data) {
 function addGroupButton() {
     $("body").on("click", ".AddGroup", function(e) {
         e.preventDefault();
-		
-        showModal("Group", "Add new group", "Add");
+	log("addGroupButton: click");
+        showGroupModal("Group", "Add new group", "Add");
     });
 }
 

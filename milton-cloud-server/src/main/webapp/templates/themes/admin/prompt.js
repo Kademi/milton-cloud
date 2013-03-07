@@ -64,4 +64,26 @@ function closeMyPrompt() {
     myPromptModal.remove();
 }
 
-/** End theme.js */
+
+function showModal(modal) {
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });      
+}
+
+function closeModal() {
+    $.tinybox.close();
+}
+
+function initModal() {
+    $("body").on("click", ".Modal a.Close", function(e) {
+        log("close tinybox");
+        $.tinybox.close();
+        e.preventDefault();
+    });
+    $('a.ShowModal').tinybox({
+        overlayClose: false,
+        opacity: 0
+    });    
+}

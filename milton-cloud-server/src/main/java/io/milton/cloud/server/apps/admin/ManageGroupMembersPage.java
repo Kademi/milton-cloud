@@ -50,7 +50,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 /**
- * Resource which represents a group role attached to a group
+ * 
  *
  * @author brad
  */

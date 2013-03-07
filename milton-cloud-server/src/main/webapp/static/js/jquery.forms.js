@@ -432,7 +432,12 @@ function showValidation(target, text, container) {
 }
 
 function showMessage(text, container) {
-    var messages = $(".pageMessage",container)
+    var messages = $(".pageMessage, .alert",container)
+    if( messages.length === 0) {
+        messages = $("<div class='pageMessage alert alert-error'><a class='close' data-dismiss='alert' href='#'>&times;</a></div>");
+        container.prepend(messages);
+    }
+    log("showMessage", messages);
     messages.append("<p class='validationError'>" + text + "</p>");
     messages.show(500);
 }
