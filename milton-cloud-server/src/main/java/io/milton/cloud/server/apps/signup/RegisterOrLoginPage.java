@@ -43,10 +43,10 @@ import java.util.List;
  */
 public class RegisterOrLoginPage extends AbstractResource implements GetableResource {
 
-    private WebsiteRootFolder parent;
+    private CommonCollectionResource parent;
     private String name;
 
-    public RegisterOrLoginPage(WebsiteRootFolder parent, String name) {
+    public RegisterOrLoginPage(CommonCollectionResource parent, String name) {
         this.parent = parent;
         this.name = name;
     }
@@ -56,14 +56,30 @@ public class RegisterOrLoginPage extends AbstractResource implements GetableReso
         _(HtmlTemplater.class).writePage("signup/registerOrLogin", this, params, out);
     }
 
+    public GroupRegistrationPage getGroupRegoPage() throws NotAuthorizedException, BadRequestException {
+        SignupApp signupApp = _(SignupApp.class);
+        GroupInWebsiteFolder giwf = (GroupInWebsiteFolder) parent.closest("group");
+        if (giwf != null) {
+            if (giwf.getGroup().getRegistrationMode().equals(Group.REGO_MODE_OPEN)) {
+                GroupRegistrationPage p = new GroupRegistrationPage(signupApp.getSignupPageName(), giwf, signupApp);
+                return p;
+            }
+        }
+        List<GroupRegistrationPage> list = getGroupRegoPages();
+        if( !list.isEmpty()) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     public List<GroupRegistrationPage> getGroupRegoPages() throws NotAuthorizedException, BadRequestException {
         SignupApp signupApp = _(SignupApp.class);
-        
+
         List<GroupRegistrationPage> pages = new ArrayList<>();
         for (Resource r : parent.getChildren()) {
-            if( r instanceof GroupInWebsiteFolder) {
+            if (r instanceof GroupInWebsiteFolder) {
                 GroupInWebsiteFolder giwf = (GroupInWebsiteFolder) r;
-                if( giwf.getGroup().getRegistrationMode().equals(Group.REGO_MODE_OPEN)) {
+                if (giwf.getGroup().getRegistrationMode().equals(Group.REGO_MODE_OPEN)) {
                     GroupRegistrationPage p = new GroupRegistrationPage(signupApp.getSignupPageName(), giwf, signupApp);
                     pages.add(p);
                 }
@@ -75,8 +91,8 @@ public class RegisterOrLoginPage extends AbstractResource implements GetableReso
     public boolean isHasOrgs() {
         List<Organisation> childOrgs = getOrganisation().getChildOrgs();
         return childOrgs != null && !childOrgs.isEmpty();
-    }    
-    
+    }
+
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
         return true;

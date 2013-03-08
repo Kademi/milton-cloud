@@ -36,6 +36,7 @@ import io.milton.cloud.server.db.GroupMembershipApplication;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.event.SubscriptionEvent.SubscriptionAction;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.ResourceList;
@@ -123,8 +124,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 } else {
                     return new GroupRegistrationPage(requestedName, giwf, this);
                 }
-            } else if( requestedName.equals("dash")) {
-                boolean openGroup = Group.REGO_MODE_OPEN.equals( giwf.getGroup().getRegistrationMode());
+            } else if (requestedName.equals("dash")) {
+                boolean openGroup = Group.REGO_MODE_OPEN.equals(giwf.getGroup().getRegistrationMode());
                 return new DashboardPage(requestedName, giwf, !openGroup); // dont require login if group is open. Although will challenge when they try to access a page
             }
         }
@@ -132,16 +133,18 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
             if (requestedName.equals("pendingApps")) {
                 return new ProcessPendingPage("pendingApps", orgFolder, this);
-            } else if( requestedName.equals("signupSearch")) {
+            } else if (requestedName.equals("signupSearch")) {
                 return new SignupsSearchPage(orgFolder, requestedName);
             }
         }
-        if (parent instanceof WebsiteRootFolder) {
+
+        if (parent instanceof CommonCollectionResource) {
             if (requestedName.equals("registerOrLogin")) {
-                WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+                CommonCollectionResource wrf = (CommonCollectionResource) parent;
                 return new RegisterOrLoginPage(wrf, requestedName);
             }
         }
+
         return null;
     }
 
@@ -245,8 +248,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
                 writer.append("<div class='alert'>\n");
                 writer.append("<h3>Signups in last 14 days: <a href='signupSearch'><strong>" + count + "</strong></a><a class='Btn' href='signupSearch'>review</a></h3>\n");
                 writer.append("</div>\n");
-                
-                
+
+
                 List<GroupMembershipApplication> applications = GroupMembershipApplication.findByAdminOrg(r.getOrganisation(), SessionManager.session());
                 context.put("applications", applications);
                 _(TextTemplater.class).writePage("signup/pendingAccountsPortlet.html", currentUser, rootFolder, context, writer);
@@ -330,6 +333,4 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     public String getSignupPageName() {
         return signupPageName;
     }
-    
-    
 }

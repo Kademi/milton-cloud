@@ -271,7 +271,7 @@ function showRegisterOrLoginModal(callbackOnLoggedIn) {
     $.getScript("/templates/apps/signup/register.js", function() {
         $.ajax({
             type: 'GET',
-            url: "/registerOrLogin",
+            url: "registerOrLogin",
             dataType: "html",
             success: function(resp) {
                 var page = $(resp);
@@ -294,7 +294,7 @@ function showRegisterOrLoginModal(callbackOnLoggedIn) {
                 });
             },
             error: function(resp) {
-                log('There was a problem logging you out', resp);
+                modal.find(".modal-body").html("<p>Sorry, there was a problem loading the form. Please refresh the page and try again</p>");
             }
         });
 
