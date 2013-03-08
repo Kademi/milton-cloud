@@ -107,7 +107,9 @@ public class HtmlTemplateRenderer {
             pw.write("<title>" + titledPage.getTitle() + "</title>");
         }
 
-        printHeaderWebResources(themeName, themePath, pw, themeTemplateTemplateMeta, bodyTemplateMeta, htmlPage);
+        String versionId = formatter.getVersionId(rootFolder);
+        
+        printHeaderWebResources(versionId, themeName, themePath, pw, themeTemplateTemplateMeta, bodyTemplateMeta, htmlPage);
 
         // HACK: need something where templates want to include the portlet, not where they have hard coded exclusions
         if (!themeTemplate.getName().contains("plain") && !themeTemplate.getName().contains("email")) { // don't render the header for plain pages, these might be used as PDF input or emails
@@ -159,7 +161,7 @@ public class HtmlTemplateRenderer {
         }
     }
 
-    private void printHeaderWebResources(String themeName, String themePath, PrintWriter pw, HtmlPage... pages) {
+    private void printHeaderWebResources(String versionId, String themeName, String themePath, PrintWriter pw, HtmlPage... pages) {
         pw.println();
         pw.println("<script type=\"text/javascript\">");
         pw.println("    // Templates should push page init function into this array. It will then be run after outer template init functions. Injected by HtmlTemplateRenderer");
@@ -207,7 +209,7 @@ public class HtmlTemplateRenderer {
 
         // Now write out the combined css files as a link to a LESS css file
         // This is so that less files (such as for apps) can use the mixins provided
-        // by the theme
+        // by the theme        
         for (String media : mapOfCssFilesByMedia.keySet()) {
             List<String> paths = mapOfCssFilesByMedia.get(media);
             String link = "<link rel='stylesheet' type='text/css'";
@@ -219,7 +221,7 @@ public class HtmlTemplateRenderer {
             for (String path : paths) {
                 cssName += path.replace("/", COMBINED_RESOURCE_SEPERATOR) + ",";
             }
-            link += cssName + EXT_COMPILE_LESS + "' />";
+            link += cssName + EXT_COMPILE_LESS + "?" + versionId + "' />";
             pw.println(link);
         }
         pw.println();

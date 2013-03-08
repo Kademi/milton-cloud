@@ -109,6 +109,9 @@
                 <ref local="lock.manager"/>                
             </list>
         </constructor-arg>
+        <constructor-arg>
+            <bean class="io.milton.cloud.server.util.MCServerVersionService" />
+        </constructor-arg>
     </bean>       
         
     <!-- This will expose resources on the classpath, required for apps which have css/js files in the jar -->

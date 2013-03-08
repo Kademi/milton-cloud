@@ -26,17 +26,11 @@
     $.fn.pjax = function( container, options ) {
         options = optionsFor(container, options)
         log("fn.pjax", this);
-        return this.click(function(event){
+        return $(document).on('click','a', function(event){
             return handleClick(event, options)
         })
     } 
-    $.fn.pjax2 = function( container, options ) {
-        options = optionsFor(container, options)
-        log("fn.pjax2", this);
-        return this.on("click", options.selector,function(event){
-            return handleClick(event, options)
-        })
-    } 
+
     // Public: pjax on click handler
     //
     // Exported as $.pjax.click.

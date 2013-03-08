@@ -65,7 +65,7 @@ div.Modal div.ModalContent .results table td {
     border: solid 1px #DDD;
 }
 div.Modal div.ModalContent table th, div.Modal div.ModalContent table td     {
-    
+
 }
 div.Modal div.ModalContent table td textarea {
     height: 170px;
@@ -115,3 +115,33 @@ div.Modal div.ModalContent .FuseChkLabel {
     padding: 0;
     margin: 3px 5px 0 0;
 }
+
+
+
+.alert {
+    padding: 8px 35px 8px 14px;
+    margin-bottom: 20px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    background-color: f2dede;
+}
+
+.alert-success {
+    background-color: #dff0d8;
+    border-color: gray;
+    color: #468847;
+}
+
+.alert .close {
+    position: relative;
+    top: -2px;
+    right: -21px;
+    line-height: 20px;
+    color: #000000;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 20px;
+    opacity: 0.2;
+    text-shadow: 0 1px 0 #FFFFFF;
+}  

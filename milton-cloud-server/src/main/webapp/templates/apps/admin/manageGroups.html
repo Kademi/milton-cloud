@@ -35,6 +35,9 @@
                     <h4>Website access</h4>
                     <ul class="ClearFix">
                         #set($signups = $group.signupPages)
+                        #if( $signups.isEmpty() )
+                        <li>This user group does not have access to any websites</li>
+                        #else
                         #foreach($p in $signups.keySet())
                         <li>
                             <a target="_blank" href="http://${p}${formatter.portString}"><b>$p</b></a>
@@ -42,6 +45,7 @@
                                 <a target="_blank" href="$signups.get($p)" class="Btn">Signup page</a>
                             </span>                            
                         </li>
+                        #end
                         #end
                     </ul>	                    
                 </div>

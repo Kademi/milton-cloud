@@ -695,3 +695,27 @@ function pulseBorder(node) {
         }, 5000);        
     });
 }
+
+function showModal(modal) {
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });      
+}
+
+function closeModals() {
+    $.tinybox.close();
+}
+
+function initModal() {
+    $("body").on("click", ".Modal a.Close", function(e) {
+        log("close tinybox");
+        $.tinybox.close();
+        e.preventDefault();
+    });
+    $('a.ShowModal').tinybox({
+        overlayClose: false,
+        opacity: 0
+    });    
+}
+

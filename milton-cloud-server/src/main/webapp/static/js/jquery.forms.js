@@ -92,7 +92,7 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
                     } catch(e) {
                         log("ex", e);
                     }
-                    alert("Sorry, an error occured and the form could not be processed. Please check for validation messages");
+                    //alert("Sorry, an error occured and the form could not be processed. Please check for validation messages");
                 }                            
             },
             error: function(resp) {

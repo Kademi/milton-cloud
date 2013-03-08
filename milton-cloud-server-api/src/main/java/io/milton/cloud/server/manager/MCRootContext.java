@@ -15,13 +15,13 @@
 package io.milton.cloud.server.manager;
 
 import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.common.DefaultCurrentDateService;
 import io.milton.cloud.common.MutableCurrentDateService;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.*;
+import io.milton.cloud.util.ServerVersionService;
 import io.milton.common.ContentTypeService;
 import io.milton.context.RootContext;
 import io.milton.event.EventManager;
@@ -47,9 +47,11 @@ public class MCRootContext extends RootContext {
     private final CurrentDateService currentDateService;
     private final CommentService commentService;
     private final DataBinder dataBinder;
+    private final ServerVersionService serverVersionService;
     
-    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, ContentTypeService contentTypeService, List beans) {
+    public MCRootContext(ServletContext servletContext, SpliffyResourceFactory resourceFactory, HashStore hashStore, BlobStore blobStore, SpliffySecurityManager securityManager, ApplicationManager applicationManager, EventManager eventManager, ContentTypeService contentTypeService, List beans, ServerVersionService serverVersionService) {
         super();
+        this.serverVersionService = serverVersionService;
         this.resourceFactory = resourceFactory;                
         this.hashStore = hashStore;
         this.blobStore = blobStore;        
@@ -59,7 +61,7 @@ public class MCRootContext extends RootContext {
         templateParser = new HtmlTemplateParser();
         this.textTemplater = new TextTemplater(securityManager, resourceFactory);
         currentDateService = new MutableCurrentDateService(); // todo: make pluggable to support testing
-        Formatter formatter = new Formatter(currentDateService);
+        Formatter formatter = new Formatter(currentDateService, serverVersionService);
         put(formatter);
         this.htmlTemplater = new HtmlTemplater(resourceFactory, applicationManager, formatter, securityManager);
         commentService = new CommentService(currentDateService);        

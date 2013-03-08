@@ -14,11 +14,15 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.web.ContentDirectoryResource;
 import io.milton.cloud.server.web.JsonWriter;
 import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.calc.Calc;
+import io.milton.cloud.util.ServerVersionService;
 import io.milton.common.FileUtils;
 import io.milton.common.Utils;
 import io.milton.http.HttpManager;
@@ -29,6 +33,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.vfs.db.Commit;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * Handy functions exposes to rendering logic for formatting.
@@ -38,9 +46,7 @@ import static io.milton.context.RequestContext._;
 public class Formatter {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Formatter.class);
-    
     public static final String CHECKBOX_SUFFIX = "_checkbox";
-    
     public static ThreadLocal<DateFormat> tlSdfUkShort = new ThreadLocal<DateFormat>() {
         @Override
         protected DateFormat initialValue() {
@@ -65,12 +71,12 @@ public class Formatter {
             return new SimpleDateFormat("dd/MM/yyyy HH:mm");
         }
     };
-    
-    
     private final CurrentDateService currentDateService;
+    private final ServerVersionService serverVersionService;
 
-    public Formatter(CurrentDateService currentDateService) {
+    public Formatter(CurrentDateService currentDateService, ServerVersionService serverVersionService) {
         this.currentDateService = currentDateService;
+        this.serverVersionService = serverVersionService;
     }
 
     /**
@@ -260,7 +266,7 @@ public class Formatter {
             return "";
         }
 
-        return pad2(dt.getDayOfMonth()) + "/" + pad2(dt.getMonthOfYear()) + "/" + pad(dt.getYear(),4);
+        return pad2(dt.getDayOfMonth()) + "/" + pad2(dt.getMonthOfYear()) + "/" + pad(dt.getYear(), 4);
     }
 
     public String formatDateLong(Object o) {
@@ -549,9 +555,9 @@ public class Formatter {
         }
         return Utils.decodePath(s);
     }
-    
+
     public String percentEncode(String s) {
-        if( s == null ) {
+        if (s == null) {
             return null;
         }
         return Utils.percentEncode(s);
@@ -809,7 +815,7 @@ public class Formatter {
         return calc(list).filter(mvelExpr);
     }
 
-    public String checkbox(String name, Object oChecked) {          
+    public String checkbox(String name, Object oChecked) {
         String s = checkbox(null, name, oChecked, "true");
         return s;
     }
@@ -817,7 +823,7 @@ public class Formatter {
     public String checkbox(String id, String name, Object oChecked) {
         return checkbox(id, name, oChecked, "true");
     }
-    
+
     public String checkbox(String id, String name, Object oChecked, String value) {
         Boolean checked = toBool(oChecked);
         if (checked == null) {
@@ -834,7 +840,7 @@ public class Formatter {
         if (id != null) {
             sb.append(" id=\"").append(id).append("\"");
         }
-        sb.append(" />");        
+        sb.append(" />");
         return sb.toString();
     }
 
@@ -842,7 +848,7 @@ public class Formatter {
         boolean isSet = (currentValue != null && currentValue.equals(value));
         return radio(id, name, isSet, value);
     }
-    
+
     public String radio(String id, String name, Object oChecked, String value) {
         Boolean checked = toBool(oChecked);
         if (checked == null) {
@@ -887,7 +893,7 @@ public class Formatter {
     private void appendValue(StringBuilder sb, Object value) {
         sb.append(" value=");
         sb.append("\"");
-        if( value != null ) {
+        if (value != null) {
             sb.append(htmlEncode(value.toString()));
         }
         sb.append("\"");
@@ -966,7 +972,7 @@ public class Formatter {
     }
 
     public String toJson(Object val) throws IOException {
-        ByteArrayOutputStream bout= new ByteArrayOutputStream();
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         JsonWriter jsonWriter = new JsonWriter();
         jsonWriter.write(val, bout);
         return bout.toString("UTF-8");
@@ -986,21 +992,40 @@ public class Formatter {
         cal.add(Calendar.DAY_OF_YEAR, days);
         return cal.getTime();
     }
-    
+
     public String getDomainName(Website w) {
-        if( w.getDomainName() != null ) {
+        if (w.getDomainName() != null) {
             return w.getDomainName();
         } else {
             String d = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
             return d + getPortString();
         }
     }
-    
+
     public boolean isNotNull(Object o) {
         return o != null && !o.equals("");
     }
-    
+
     public boolean isNull(Object o) {
         return o == null || o.equals("");
+    }
+
+    public String getVersionId(RootFolder rf) {
+        String id = serverVersionService.getServerVersion();
+        if (rf instanceof WebsiteRootFolder) {
+            try {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
+                Resource themeDir = wrf.child("theme");
+                if (themeDir instanceof ContentDirectoryResource) {
+                    ContentDirectoryResource cdr = (ContentDirectoryResource) themeDir;
+                    id += "_" + cdr.getHash();
+                } else {
+                    id += "_empty";
+                }
+            } catch (NotAuthorizedException | BadRequestException e) {
+                id += "_ex";
+            }
+        }
+        return id;
     }
 }

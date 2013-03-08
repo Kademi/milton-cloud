@@ -266,9 +266,16 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
             if (isContentResource(resource)) {
-                //log.info("appliesTo(org): resource=" + resource);
                 ContentResource cr = (ContentResource) resource;
-                return cr.getOrganisation().isWithin(withinOrg);
+                boolean b = cr.getOrganisation().isWithin(withinOrg);
+                if( log.isTraceEnabled()) {
+                    log.trace("appliesTo(org): is " + cr.getOrganisation().getOrgId()+ "within " + withinOrg.getOrgId() + " = " + b );
+                }
+                return b;
+            } else {
+                if( log.isTraceEnabled()) {
+                    log.trace("appliesTo(org): is not a content resource: " + resource.getClass());
+                }
             }
             return false;
         }
