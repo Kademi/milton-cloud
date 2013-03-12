@@ -223,7 +223,10 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
                 websiteId = wrf.getWebsite().getId();
             }
         }
-        Access a = new Access(orgId, websiteId, h, path, referrerUrl, result, duration, size, method, response.getContentTypeHeader(), from, user);
+        
+        String userAgent = request.getUserAgentHeader();
+        
+        Access a = new Access(orgId, websiteId, h, path, referrerUrl, result, duration, size, method, response.getContentTypeHeader(), from, user, userAgent);
         queue.add(a);
 
     }
@@ -243,8 +246,9 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
         private String contentType;
         private String fromAddress;
         private String user;
+        private String userAgent;
 
-        public Access(Long organisationId, Long websiteId, String host, String url, String referrerUrl, int result, long duration, Long size, String method, String contentType, String fromAddress, String user) {
+        public Access(Long organisationId, Long websiteId, String host, String url, String referrerUrl, int result, long duration, Long size, String method, String contentType, String fromAddress, String user, String userAgent) {
             this.organisationId = organisationId;
             this.websiteId = websiteId;
             this.host = host;
@@ -257,6 +261,7 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
             this.contentType = contentType;
             this.fromAddress = fromAddress;
             this.user = user;
+            this.userAgent = userAgent;
         }
     }
 
@@ -294,7 +299,7 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
                             website = (Website) session.get(Website.class, access.websiteId);
                         }
 
-                        AccessLog.insert(org, website, access.host, access.url, access.referrerUrl, access.result, access.duration, access.size, access.method, access.contentType, access.fromAddress, access.user, session);
+                        AccessLog.insert(org, website, access.host, access.url, access.referrerUrl, access.result, access.duration, access.size, access.method, access.contentType, access.fromAddress, access.user, access.userAgent, session);
                         tx.commit();
                     } catch (Exception ex) {
                         log.error("Exception logging access", ex);

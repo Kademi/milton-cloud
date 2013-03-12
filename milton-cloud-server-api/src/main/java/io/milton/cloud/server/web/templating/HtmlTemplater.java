@@ -91,24 +91,10 @@ public class HtmlTemplater {
      * @throws IOException
      */
     public void writePage(String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        boolean isPublic = false;
-        if (aThis instanceof CommonResource) {
-            CommonResource cr = (CommonResource) aThis;
-            isPublic = cr.isPublic();
-        }
-        String theme = findTheme(aThis, isPublic);
+        String theme = findTheme(aThis);
         writePage(theme, templatePath, aThis, params, out);
     }
 
-    /**
-     * Finds an appropriate theme by looking up the root folder to find if there
-     * is a website, and if so it uses the isPublic flag to decide if to use the
-     * public or internal theme from the website.
-     */
-    public void writePage(boolean isPublic, String templatePath, Resource aThis, Map<String, String> params, OutputStream out) throws IOException {
-        String theme = findTheme(aThis, isPublic);
-        writePage(theme, templatePath, aThis, params, out);
-    }
 
     /**
      * Generate a templated page with the given theme and template. The theme
@@ -182,18 +168,14 @@ public class HtmlTemplater {
         templateRenderer.renderHtml(rootFolder, aThis, params, user, themeTemplate, themeTemplateTemplateMeta, bodyTemplate, bodyTemplateMeta, theme, themePath, out);
     }
 
-    public String findTheme(Resource r, boolean isPublic) {
+    public String findTheme(Resource r) {
         RootFolder rootFolder = WebUtils.findRootFolder(r);
         String theme;
         if (rootFolder instanceof OrganisationRootFolder) {
             theme = defaultAdminTheme;
         } else if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder websiteFolder = (WebsiteRootFolder) rootFolder;
-            if (isPublic) {
-                theme = websiteFolder.getBranch().getPublicTheme();
-            } else {
-                theme = websiteFolder.getBranch().getInternalTheme();
-            }
+            theme = websiteFolder.getBranch().getPublicTheme();
             if (theme == null) {
                 theme = defaultPublicTheme;
             }
@@ -204,8 +186,7 @@ public class HtmlTemplater {
     }
 
     public String findThemePath(CommonResource r) {
-        boolean isPublic = r.isPublic();
-        String theme = findTheme(r, isPublic);
+        String theme = findTheme(r);
         return findThemePath(theme);
     }
 

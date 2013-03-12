@@ -92,6 +92,9 @@ public class HtmlTemplateRenderer {
         pw.write("<html xmlns='http://www.w3.org/1999/xhtml'>\n");
         pw.write("<head>\n");
         pw.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"/>\n");
+        if( contentTemplate.getName().contains(":")) {
+            pw.write("<meta name='templateName' value='" + contentTemplate.getName().split(":")[1] + "'/>\n");
+        }
 
         List<String> pageBodyClasses = null;
         HtmlPage htmlPage = null;

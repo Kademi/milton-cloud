@@ -42,7 +42,6 @@ public class Branch implements Serializable, VfsAcceptor {
     private Commit fromCommit;
     private Repository repository;
     private Date createdDate;
-    private String internalTheme;
     private String publicTheme;
 
     public Branch() {
@@ -54,20 +53,6 @@ public class Branch implements Serializable, VfsAcceptor {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * The internal theme is intended for logged in access
-     *
-     * @return
-     */
-    @Column
-    public String getInternalTheme() {
-        return internalTheme;
-    }
-
-    public void setInternalTheme(String internalTheme) {
-        this.internalTheme = internalTheme;
     }
 
     /**
@@ -176,7 +161,6 @@ public class Branch implements Serializable, VfsAcceptor {
         Branch b = new Branch();
         b.setFromCommit(this.getHead());
         b.setCreatedDate(now);
-        b.setInternalTheme(getInternalTheme());
         b.setName(newName);
         b.setPublicTheme(getPublicTheme());
         b.setRepository(repo);

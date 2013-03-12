@@ -33,7 +33,7 @@ import org.hibernate.Session;
 @javax.persistence.Entity
 public class AccessLog {
 
-    public static void insert(Organisation org, Website website, String host, String url, String referrerUrl, int result, long duration, Long size, String method, String contentType, String fromAddress, String user, Session session) {
+    public static void insert(Organisation org, Website website, String host, String url, String referrerUrl, int result, long duration, Long size, String method, String contentType, String fromAddress, String user, String userAgent, Session session) {
         AccessLog al = new AccessLog();
         al.setOrganisation(org);
         al.setWebsite(website);
@@ -55,6 +55,7 @@ public class AccessLog {
         al.setContentType(contentType);
         al.setReqFrom(fromAddress);
         al.setReqUser(user);
+        al.setUserAgent(userAgent);
         session.save(al);
 
     }
@@ -76,6 +77,7 @@ public class AccessLog {
     private String contentType;
     private String reqFrom;
     private String reqUser;
+    private String userAgent;
 
     public AccessLog() {
     }
@@ -123,6 +125,17 @@ public class AccessLog {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    @Column(length=1024)
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+    
+    
 
     @Column(length=1024)
     public String getReferrer() {

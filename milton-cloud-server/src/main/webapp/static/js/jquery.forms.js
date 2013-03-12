@@ -16,6 +16,7 @@
         log("init forms plugin", this);
         
         var config = $.extend( {
+            postUrl : null, // means to use the form action as url
             callback: function() {
                 
             },
@@ -43,9 +44,9 @@
                 return false;
             }
             form.trigger("submitForm");
-            log("form submit", form, "to" , form.attr("action"));            
+            log("form submit", form);            
             if( checkRequiredFields(form) ) {
-                postForm(form, config.valiationMessageSelector, config.validationFailedMessage, config.callback, config.confirmMessage);
+                postForm(form, config.valiationMessageSelector, config.validationFailedMessage, config.callback, config.confirmMessage, config.postUrl);
             } else {
                 showValidation(null, config.validationFailedMessage, form);
                 //$(config.valiationMessageSelector, container).text(config.validationFailedMessage);
@@ -57,14 +58,18 @@
     };
 })( jQuery );
 
-function postForm(form, valiationMessageSelector, validationFailedMessage, callback, confirmMessage) {
+function postForm(form, valiationMessageSelector, validationFailedMessage, callback, confirmMessage, postUrl) {
     log("postForm", form);
     var serialised = form.serialize();
     form.trigger("preSubmitForm", serialised);
+    var url = form.attr("action");
+    if( postUrl ) {
+        url = postUrl;
+    }
     try {                    
         $.ajax({
             type: 'POST',
-            url: form.attr("action"),
+            url: url,
             data: serialised,
             dataType: "json",
             success: function(resp) {

@@ -4,10 +4,69 @@
         <script type="text/javascript" src="manageWebsite.js">//</script>
         <link href="manageWebsite.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageApps.js">//</script>
+        <script type="text/javascript" src="/static/js/managePublishing.js">//</script>
         <link href="manageApps.css" rel="stylesheet" type="text/css" />
     </head>
     <body class="manageWebsite">
+
         <section class="MainContent">
+            <section class="Control ClearFix">
+                <div class="DropdownControl publishing">
+                    <div class="DropdownWrapper">
+                        #set($currentBranch = $page.closest("branch"))
+                        <span>
+                            <b>Editing version:</b> 
+                            $currentBranch.name
+                            #if( $currentBranch.live )
+                            <strong class="islive">LIVE</strong>
+                            #else
+                            <a href="${currentBranch.href}publish" class="publish">PUBLISH</a>
+                            #end
+
+                        </span> 
+                        <a href="#" class="Control"><span class="Hidden">Change version</span></a>
+                    </div>
+                    <div class="DropdownContent Hidden">
+                        <div class="Content">
+                            <ul class="Program branches">
+                                #foreach($b in $page.closest("branch").parent.children)
+                                <li>
+                                    <a href="#" class="copy"><span>Copy</span></a>
+                                    #if( $b.live )
+                                    <strong class="islive">LIVE</strong>
+                                    #end
+
+                                    <a href="${b.href}">
+                                        $b.name
+                                    </a> 
+                                </li>
+                                #end
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                                
+                
+                <div class="DropdownControl">
+                    <div class="DropdownWrapper">
+                        <span><b>Website:</b> $page.closest("website").name</span> 
+                        <a href="#" class="Control"><span class="Hidden">Change website</span></a>
+                    </div>
+                    <div class="DropdownContent Program Hidden">
+                        <div class="Content ClearFix">
+                            <section rel="program">
+                                <ul class="Program">
+                                    #foreach($w in $page.closest("website").parent.children)
+                                    <li><a href="${w.href}">$w.name</a></li>
+                                    #end
+                                </ul>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                <a target='_blank' href='${page.externalUrl}' class='Btn' style='float: left; margin-left: 0px'>View website</a>
+            </section>    
+
             <div class="TabContainer">
                 <nav class="ClearFix TabNav">
                     <a href="#details">Details</a>
@@ -67,22 +126,12 @@
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th class="Short">Choose a theme for public pages</th>
+                                        <th class="Short">Choose a theme</th>
                                         <td colspan="3">
                                             <select name="publicTheme">                                            
-                                            #foreach($t in $page.themes)
+                                                #foreach($t in $page.themes)
                                                 $formatter.option($t, $t, $page.branch.publicTheme)
-                                            #end
-                                            </select>                                            
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="Short">Choose a theme for logged in pages</th>
-                                        <td colspan="3">
-                                            <select name="internalTheme">                                            
-                                            #foreach($t in $page.themes)
-                                                $formatter.option($t, $t, $page.branch.internalTheme)
-                                            #end
+                                                #end
                                             </select>                                            
                                         </td>
                                     </tr>
@@ -100,7 +149,7 @@
                                             Menu is in the form of address,title. Eg /faq.html,FAQ
                                         </td>
                                     </tr>                                    
-                                    
+
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -241,6 +290,7 @@
         <script type="text/javascript">
             jQuery(function() {
                 initManageWebsite();
+                initPublishingMenu("");
                 initHtmlEditors($(".htmleditor"), "60px", "200px", 'embed_video,modal', 'resize,elementspath');
                 $("form.Details").forms({
                     callback: function() {

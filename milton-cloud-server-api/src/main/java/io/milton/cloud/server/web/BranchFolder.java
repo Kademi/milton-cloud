@@ -64,8 +64,10 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         this.branch = branch;
         if (branch != null) {
             this.commit = branch.getHead();
+            this.dataSession = _(DataSessionManager.class).get(branch);
+        } else {
+            this.dataSession = null;
         }
-        this.dataSession = _(DataSessionManager.class).get(branch);
     }
 
     public BranchFolder(String name, CommonCollectionResource parent, Commit commit) {
@@ -257,7 +259,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         ContentRedirectorPage.select(this);
         WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
         MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
-        getTemplater().writePage(false, "myfiles/directoryIndex", this, params, out);
+        getTemplater().writePage("myfiles/directoryIndex", this, params, out);
     }
 
     @Override
@@ -564,10 +566,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return getBranch().getPublicTheme();
     }
 
-    public String getInternalTheme() {
-        return getBranch().getInternalTheme();
-    }
-
     public List<String> getThemes() {
         List<String> list = new ArrayList<>(); // TODO: HACK!
         list.add("fuse");
@@ -655,7 +653,12 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
         Properties props = new Properties();
         for (Map.Entry<String, String> entry : atts.entrySet()) {
-            props.setProperty(entry.getKey(), entry.getValue());
+            String key = entry.getKey();
+            String val = entry.getValue();
+            if( val == null ) {
+                val = "";
+            }
+            props.setProperty(key, val);
         }
 
         DataSession.DirectoryNode themeDir = (DataSession.DirectoryNode) this.getDirectoryNode().get("theme");

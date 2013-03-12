@@ -182,6 +182,6 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     }
     
     public String getThemeName() {
-        return branch.getInternalTheme();
+        return branch.getPublicTheme();
     }
 }

@@ -251,7 +251,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
         String internalTheme = "admin";
         if (rf instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
-            internalTheme = wrf.getBranch().getInternalTheme();
+            internalTheme = wrf.getBranch().getPublicTheme();
         }
         //return find(rf, internalTheme, internalTheme);
         // Check if exists as a file resource (ie unpacked servlet resource) in the theme
@@ -309,7 +309,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
         String internalTheme = "admin";
         if (rf instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
-            internalTheme = wrf.getBranch().getInternalTheme();
+            internalTheme = wrf.getBranch().getPublicTheme();
         }
         //return find(rf, internalTheme, internalTheme);
         // Check if exists as a file resource (ie unpacked servlet resource) in the theme

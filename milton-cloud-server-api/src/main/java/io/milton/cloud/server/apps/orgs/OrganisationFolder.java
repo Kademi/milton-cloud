@@ -28,6 +28,7 @@ import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.principal.Principal;
@@ -49,7 +50,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource, MakeCollectionableResource, PostableResource {
+public class OrganisationFolder extends AbstractResource implements CommonCollectionResource, GetableResource, PropFindableResource, DeletableCollectionResource, MakeCollectionableResource, PostableResource, TitledPage {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OrganisationFolder.class);
     private final CommonCollectionResource parent;
@@ -199,8 +200,9 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         return super.getContentType(accepts);
     }
 
+    @Override
     public String getTitle() {
-        return "Dashboard";
+        return getOrganisation().getFormattedName() + " Dashboard";
     }
 
     @Override

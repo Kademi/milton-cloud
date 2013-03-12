@@ -122,6 +122,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         } else if (parent instanceof ManageWebsiteBranchFolder) {
             ManageWebsiteBranchFolder bf = (ManageWebsiteBranchFolder) parent;
             if (requestedName.equals("publish")) {
+                MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager");
                 return new PublishBranchPage(requestedName, bf);
             } else if (requestedName.startsWith("_dashboard_")) {
                 String groupName = requestedName.replace("_dashboard_", "");

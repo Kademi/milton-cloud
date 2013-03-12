@@ -58,6 +58,12 @@ function initTheme() {
         
     });
 
+    $(".DropdownWrapper").click(function(e, node) {        
+        log("initDropDown click", e);
+        var div = $(e.target).closest("div.DropdownControl");        
+        log("dropdown", $(".DropdownContent", div));
+        $(".DropdownContent", div).toggle(300);
+    });  
          
     log("finished init-theme");
 } 
@@ -86,11 +92,26 @@ function initLoginDropDown() {
 
 function initHelp () {
     $(".helpIcon").click(function(e) {
-        $.tinybox.show("#modalHelp", {
+        var modal = $("#modalHelp");
+        $.tinybox.show(modal, {
             overlayClose: false,
             opacity: 0
         });
         e.preventDefault();
+        modal.find(".ModalContent").html("Loading help...");
+        log("meta", $(document).find("meta"));
+        var page = $(document).find("meta[name=templateName]").attr("value");
+        // TODO: make this domain configurable
+        //var href = "http://fuselms.loopbackdns.com:8080/docs";
+        var href = "http://www.fuselms.com/docs";
+        href += page;
+        modal.find(".ModalContent").load(href + " #helpContent", function(responseText, textStatus, XMLHttpRequest) {
+            log("finished", textStatus);
+            if( textStatus == "error") {
+                modal.find(".ModalContent").html("Sorry, help content for this page is unavailable");
+            }
+        });
+        
     });	
 }
 

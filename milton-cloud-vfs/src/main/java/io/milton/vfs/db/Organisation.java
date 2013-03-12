@@ -410,7 +410,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
         Branch b = w.createBranch(Branch.TRUNK, user, session);
         b.setPublicTheme(theme);
-        b.setInternalTheme(null);
 
         return w;
     }

@@ -20,16 +20,19 @@ import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.SettingsApplication;
 import io.milton.cloud.server.event.GroupInWebsiteEvent;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.BranchFolder;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ContentRedirectorPage;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.WebUtils;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.RenderAppSettingsDirective;
 import io.milton.cloud.server.web.templating.TitledPage;
+import static io.milton.context.RequestContext._;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -49,7 +52,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.milton.context.RequestContext._;
 import io.milton.event.EventManager;
 import io.milton.sync.event.EventUtils;
 import io.milton.vfs.db.*;
@@ -106,10 +108,8 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
         } else if (parameters.containsKey("publicTheme")) {
             log.info("Update theme info");
             String publicTheme = parameters.get("publicTheme");
-            String internalTheme = parameters.get("internalTheme");
 
             branch.setPublicTheme(publicTheme);
-            branch.setInternalTheme(internalTheme);
             session.save(website);
 
             Map<String, String> themeParams = new HashMap<>();
@@ -323,4 +323,8 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             return "Unknown app: " + appId;
         }
     }
+    
+    public String getExternalUrl() {
+        return "http://" + branch.getName() + "." + getWebsite().getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain() + _(Formatter.class).getPortString() + "/";
+    }    
 }

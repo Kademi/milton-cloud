@@ -168,7 +168,9 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
                 if( website != null ) {
                     // now look for branch
                     Branch b = website.branch(first);
-                    return new WebsiteRootFolder(applicationManager, website, b);
+                    if( b != null ) {
+                        return new WebsiteRootFolder(applicationManager, website, b);
+                    }
                 }
             }
         }

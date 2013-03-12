@@ -19,6 +19,7 @@ function initRegister(afterRegisterHref) {
 function initRegisterForms(afterRegisterHref, callback) {
     log("initRegisterForms", jQuery("#registerForm"));
     jQuery("#registerForm").forms({
+        postUrl: "signup",
         validationFailedMessage: "Please enter your details below.",
         callback: function(resp, form) {
             if( resp.messages && resp.messages[0] == "pending" ) {

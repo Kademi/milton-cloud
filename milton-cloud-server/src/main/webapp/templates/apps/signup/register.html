@@ -10,6 +10,7 @@
                 <div class="MainContent">
                     #set($path = "/content/signup/" + $folder.name + ".html")
                     $!folder.find($path).getParam("intro")
+                    
                     <form method="post" id="registerForm" action="$page.name">
                         <fieldset>
                             <legend>Create a new account</legend>
