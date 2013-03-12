@@ -15,6 +15,7 @@ import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class ManageGroupEmailsFolder extends AbstractCollectionResource implements GetableResource, PostableResource, ContentDirectoryResource {
+public class ManageGroupEmailsFolder extends AbstractCollectionResource implements GetableResource, PostableResource, ContentDirectoryResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailsFolder.class);
     private final String name;

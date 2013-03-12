@@ -9,21 +9,22 @@
             <header class="ClearFix">
                 <a class="SmallBtn Add" href="javascript:showAddJob()"><span>Create group email</span></a>
             </header>
-            <div class="Content">
-                <header>
-                    <div>
-                        <a href="" class="Date SortByDate" rel="asc">Date</a>
-                        <a href="" class="Name SortByName" rel="asc">Name</a>
-                        <a href="" class="Status SortByStatus" rel="asc">Status</a>
-                    </div>
-                </header>		
-                <ul>
+            <div class="Content">	
+                <table style='width: 100%' class='Summary'>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     #foreach($email in $page.children)
-                    <li>
-                        <div class="emailStatus$!{email.status}">
-                            <span class="Date">$formatter.formatDate($email.statusDate)</span>
-                            <span class="Name">$formatter.htmlEncode($email.title)</span>
-                            <span class="Status">$!email.status</span>
+                    <tr class="emailStatus$!{email.status}">
+                        <td class="Date">$formatter.formatDate($email.statusDate)</td>
+                        <td class="Name">$formatter.htmlEncode($email.title)</td>
+                        <td><span class='Status'>$!email.status</span></td>
+                        <td>
                             <aside>
                                 #if($email.status == "Draft" )
                                 <a class="Edit EditEmail" title="Edit" href="$email.name">
@@ -38,10 +39,11 @@
                                 </a>
                                 #end
                             </aside>
-                        </div>
-                    </li>                    
-                    #end              
-                </ul>
+                        </td>
+                    </tr>                    
+                    #end   
+                    </tbody>
+                </table>
             </div>
         </section>
         <div id="modalCreateJob" class="Modal">

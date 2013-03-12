@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import io.milton.cloud.server.web.templating.ChildrenOfTypeMap;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
 
 /**
@@ -33,7 +34,6 @@ public class ResourceList extends ArrayList<CommonResource> {
     private static final long serialVersionUID = 1L;
     private final Map<String, CommonResource> map = new HashMap<>();
 
-    
     public ResourceList() {
     }
 
@@ -92,7 +92,7 @@ public class ResourceList extends ArrayList<CommonResource> {
     public CommonResource get(String name) {
         return map.get(name);
     }
-    
+
     public boolean hasChild(String name) {
         return get(name) != null;
     }
@@ -149,7 +149,6 @@ public class ResourceList extends ArrayList<CommonResource> {
     public ResourceList getSortByModifiedDate() {
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<Resource>() {
-
             @Override
             public int compare(Resource o1, Resource o2) {
                 Date dt1 = o1.getModifiedDate();
@@ -166,7 +165,6 @@ public class ResourceList extends ArrayList<CommonResource> {
     public ResourceList getSortByName() {
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<Resource>() {
-
             @Override
             public int compare(Resource o1, Resource o2) {
                 String n1 = o1.getName();
@@ -311,7 +309,6 @@ public class ResourceList extends ArrayList<CommonResource> {
     public ResourceList sortByField(final String fieldName) {
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<CommonResource>() {
-
             @Override
             public int compare(CommonResource o1, CommonResource o2) {
                 String val1 = null;
@@ -362,7 +359,6 @@ public class ResourceList extends ArrayList<CommonResource> {
     public ResourceList sortByIntField(final String fieldName) {
         ResourceList list = new ResourceList(this);
         Collections.sort(list, new Comparator<CommonResource>() {
-
             @Override
             public int compare(CommonResource o1, CommonResource o2) {
                 String val1 = null;
@@ -418,44 +414,53 @@ public class ResourceList extends ArrayList<CommonResource> {
             }
         }
     }
-    
+
     /**
      * Return the first n resources
-     * 
+     *
      * @param n
-     * @return 
+     * @return
      */
     public ResourceList upTo(int n) {
         ResourceList list = new ResourceList();
-        for( CommonResource r : this ) {
+        for (CommonResource r : this) {
             list.add(r);
-            if( list.size() >= n) {
+            if (list.size() >= n) {
                 break;
             }
         }
         return list;
     }
-    
+
     /**
-     * Return the those resources after n. 
-     *      
-     * Eg after(2) will return a list
-     * without the first 2 resources
-     * 
-     * n is 1 indexed. ie after(1) will skip the first, while after(0) will
-     * not skip any
-     * 
+     * Return the those resources after n.
+     *
+     * Eg after(2) will return a list without the first 2 resources
+     *
+     * n is 1 indexed. ie after(1) will skip the first, while after(0) will not
+     * skip any
+     *
      * @param n
-     * @return 
+     * @return
      */
     public ResourceList after(int n) {
         ResourceList list = new ResourceList();
-        int i =0;
-        for( CommonResource r : this ) {
-            if( i++ >= n) {
+        int i = 0;
+        for (CommonResource r : this) {
+            if (i++ >= n) {
                 list.add(r);
             }
         }
         return list;
-    }    
+    }
+
+    public ResourceList getDirs() {
+        ResourceList list = new ResourceList(this);
+        for (CommonResource cr : this) {
+            if (cr instanceof CollectionResource) {
+                list.add(cr);
+            }
+        }
+        return list;
+    }
 }

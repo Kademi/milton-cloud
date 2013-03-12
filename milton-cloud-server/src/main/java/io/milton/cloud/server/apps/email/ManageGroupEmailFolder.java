@@ -37,6 +37,7 @@ import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
@@ -74,7 +75,7 @@ import org.hibernate.HibernateException;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsFolder> implements GetableResource, PostableResource {
+public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsFolder> implements GetableResource, PostableResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageGroupEmailFolder.class);
     private final GroupEmailJob job;

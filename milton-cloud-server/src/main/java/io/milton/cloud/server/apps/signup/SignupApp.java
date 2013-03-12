@@ -76,6 +76,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
     private static final Logger log = LoggerFactory.getLogger(SignupApp.class);
     public static final String NEXT_HREF = "signup.next.href";
+    public static final String REDIRECT_WEBSITE = "signup.reidrect.website";
     private String signupPageName = "signup";
     private StateProcess userManagementProcess;
     private TimerService timerService;
@@ -221,16 +222,35 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         }
         writer.write("<label for='signupNextHref'>First page after signup</label>");
         writer.write("<input type='text' id='signupNextHref' name='signupNextHref' value='" + href + "' />");
+        writer.write("<br/>");
+        writer.write("<label for='signupNextHref'>Redirect to website</label>");
+        Formatter formatter = _(Formatter.class);
+        String redirWebsite;
+        if (websiteBranch != null) {
+            redirWebsite = config.get(REDIRECT_WEBSITE, websiteBranch);
+        } else {
+            redirWebsite = config.get(REDIRECT_WEBSITE, org);
+        }
+        writer.write("<select name='" + REDIRECT_WEBSITE + "'>\n");
+        writer.write("  <option>[Please select]</option>");        
+        System.out.println("websites: " + org.websites().size());
+        for( Website w : org.websites()) {            
+            writer.write(formatter.option(w.getName(), w.getName(), redirWebsite));
+        }
+        writer.write("</select>");
         writer.flush();
     }
 
     @Override
     public JsonResult processForm(Map<String, String> parameters, Map<String, FileItem> files, Organisation org, Branch websiteBranch) throws BadRequestException, NotAuthorizedException, ConflictException {
         String signupNextHref = parameters.get("signupNextHref");
+        String redirWebsite = parameters.get(REDIRECT_WEBSITE);
         if (websiteBranch != null) {
             config.set(NEXT_HREF, websiteBranch, signupNextHref);
+            config.set(REDIRECT_WEBSITE, websiteBranch, redirWebsite);
         } else {
             config.set(NEXT_HREF, org, signupNextHref);
+            config.set(REDIRECT_WEBSITE, org, redirWebsite);
         }
         return new JsonResult(true);
     }

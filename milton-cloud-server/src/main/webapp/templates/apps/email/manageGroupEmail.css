@@ -40,16 +40,14 @@
     height: 25px;
     line-height: 25px;
 }
-#manageEmail > .Content ul li div span { float: left; }
-#manageEmail > .Content ul li div span.Date { width: 15%; }
-#manageEmail > .Content ul li div span.Name { width: 55%; }
-#manageEmail > .Content ul li div span.Status {
+#manageEmail table.Summary span { float: left; }
+#manageEmail table.Summary span.Status {
     padding-left: 30px;
 }
-#manageEmail > .Content ul li div.emailStatusProgress span.Status { background-position: 0 0; }
-#manageEmail > .Content ul li div.emailStatusCompleted span.Status { background-position: 0 100%; }
-#manageEmail > .Content ul li aside { float: right; }
-#manageEmail > .Content ul li aside a {
+#manageEmail table.Summary .emailStatusProgress span.Status { background-position: 0 0; }
+#manageEmail table.Summary .emailStatusCompleted span.Status { background-position: 0 100%; }
+#manageEmail table.Summary aside { float: right; }
+#manageEmail table.Summary aside a {
     float: left;
     display: block;
     height: 23px;

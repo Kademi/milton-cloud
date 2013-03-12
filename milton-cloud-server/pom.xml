@@ -295,7 +295,7 @@
                                     <!--
                                     <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
                                     -->
-                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp</value>
+                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp,com.fuselms.apps.offsitelogin.OffSiteLoginApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>
@@ -368,7 +368,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>extra.apps</name>
-                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader,com.fuselms.apps.orgcreator.OrgCreatorApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp</value>
+                                    <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.autoload.FuseAutoloader,com.fuselms.apps.orgcreator.OrgCreatorApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp,com.fuselms.apps.offsitelogin.OffSiteLoginApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>

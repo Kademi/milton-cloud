@@ -137,7 +137,7 @@
             if ( options.fragment ) {
                 // If they specified a fragment, look for it in the response
                 // and pull it out.
-                var $fragment = $data.find(options.fragment)
+                var $fragment = $data.find(options.fragment);
                 if ( $fragment.length ){
                     data = $fragment.children()
                 } else {

@@ -6,162 +6,160 @@
     </head>
     <body>
         <section id="manageEmail" class="MainContent">
-            <div class="TabContainer">
-                <nav class="ClearFix">
-                    <a href="">Send information</a>
-                    <a href="">Message</a>
-                    <a href="">Recipients</a>
-                    <a href="">Send</a>
-                    <a href="" class="statusTab">Status</a>
-                </nav>
-                <div class="TabContent">
-                    <div class="Content">
-                        <form name="frmDetails" action="." method="post" class="Details">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>Send name</th>
-                                        <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Notes <small>These notes are for internal purposes only.</small></th>
-                                        <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email subject</th>
-                                        <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
-                                        <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2">
-                                            #if( $page.status == "Draft" )
-                                            <button class="Btn">Save Changes</button>
-                                            #else
-                                            This email has been sent.
-                                            #end
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </form>
-                    </div>
-                </div>	
-                <div class="TabContent">
-                    <div class="Content">
-                        <form name="frmDetails" action="" method="post" class="Details">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th class="Short">
-                                            Choose a template
-                                        </th>
-                                        <td>
-                                            <select name="themeSiteId">
-                                                $formatter.option("", "[No template]", $page.themeSiteId)
-                                                #foreach($website in $page.organisation.websites)
-                                                    $formatter.option($website.id, $website.name, $page.themeSiteId)
-                                                #end
-                                            </select>
-                                            #if( $page.status == "Draft" )
-                                            <button class="Btn">Save Changes</button>
-                                            #end
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">
-                                            <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">
-                                            $formatter.checkbox("passwordReset", "passwordReset", $page.job.passwordReset, "true")
-                                            <label for="passwordReset" style="float: none">Password reset. Only send to users without a password</label>
-                                            <div class="passwordResetContainer">
-                                                <p>Please enter the text of the password reset link below:</p>
-                                                <input type="text" value="$!page.job.passwordResetLinkText" name="passwordResetLinkText" style="float: none" />
-                                                <p><i>Eg: Click here to get started!</i></p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </form>
-                    </div>
-                </div>
-                <div class="TabContent">
-                    <div class="Content Recipient">
-                        <header class="ClearFix">
-                            #if( $page.status == "Draft" )
-                            <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
-                            #end
-                        </header>
-                        <ul class="GroupList ClearFix">
-                            #foreach($g in $page.groupRecipients)
-                            <li class="$g.name">
-                                <span>$g.name</span>
-                                #if( $page.status == "Draft" )
-                                <a href="$g.name">Delete</a>
-                                #end
-                            </li>
-                            #end
-                        </ul>
-                    </div>
-                </div>
-                <div class="TabContent">
-                    <div class="Content Send">
-                        #if( $page.status == "Draft" )
-                        <h4>Before you send be sure to check your email information, message content and recipients.</h4>
-                        <p>
-                            <button class="Btn preview">PREVIEW YOUR EMAIL</button>
-                        </p>
-                        <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
-                        <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
-                        <p><button class="Btn Big Cancel SendEmail send">SEND NOW</button></p>
-                        #else
-                        <h4>Email has been sent, or is sending</h4>
-                        #end
-                    </div>
-                </div>
-                <div class="TabContent status">
-                    <div class="Content NotSent">
-                        <p>Email is not being processed</p>
-                    </div>
-                    
-                    <div class="Content SendProgress">
-                        <p>
-                            <strong class="status status_p">Send in progress</strong>
-                            <strong class="status status_c">Job completed</strong>
-                            <small>You may navigate away from this page.</small>
-                        </p>
-                        <div class="Progress">                            
-                            <div class="Percent"></div>
-                            <div class="stats"></div>
-                        </div>
-                        <br/>
-                        <br/>
-                        <strong>Failed and in progress emails, if any, are shown below</strong>
-                        <table id="emails">
-                            <thead>
-                                <tr>
-                                    <th>Email Address</th>                                    
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                    <th>Attempt</th>
-                                </tr>
-                            </thead>
+
+            <nav class="TabNav ClearFix">
+                <a href="#sendInfo">Send information</a>
+                <a href="#messages">Message</a>
+                <a href="#recips">Recipients</a>
+                <a href="#send">Send</a>
+                <a href="#status" class="statusTab">Status</a>
+            </nav>
+            
+            <div rel='#sendInfo' class="TabContent Content">
+                    <form name="frmDetails" action="." method="post" class="Details">
+                        <table>
                             <tbody>
                                 <tr>
+                                    <th>Send name</th>
+                                    <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Notes <small>These notes are for internal purposes only.</small></th>
+                                    <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
+                                </tr>
+                                <tr>
+                                    <th>Email subject</th>
+                                    <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
+                                    <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2">
+                                        #if( $page.status == "Draft" )
+                                        <button class="Btn">Save Changes</button>
+                                        #else
+                                        This email has been sent.
+                                        #end
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+            </div>	
+            <div rel='#messages' class="TabContent Content">
+                    <form name="frmDetails" action="" method="post" class="Details">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="Short">
+                                        Choose a template
+                                    </th>
+                                    <td>
+                                        <select name="themeSiteId">
+                                            $formatter.option("", "[No template]", $page.themeSiteId)
+                                            #foreach($website in $page.organisation.websites)
+                                            $formatter.option($website.id, $website.name, $page.themeSiteId)
+                                            #end
+                                        </select>
+                                        #if( $page.status == "Draft" )
+                                        <button class="Btn">Save Changes</button>
+                                        #end
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        $formatter.checkbox("passwordReset", "passwordReset", $page.job.passwordReset, "true")
+                                        <label for="passwordReset" style="float: none">Password reset. Only send to users without a password</label>
+                                        <div class="passwordResetContainer">
+                                            <p>Please enter the text of the password reset link below:</p>
+                                            <input type="text" value="$!page.job.passwordResetLinkText" name="passwordResetLinkText" style="float: none" />
+                                            <p><i>Eg: Click here to get started!</i></p>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
+                    </form>
+            </div>
+            <div rel='#recips' class="TabContent Content">
+                <div class="Recipient Content">
+                    <header class="ClearFix">
+                        #if( $page.status == "Draft" )
+                        <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
+                        #end
+                    </header>
+                    <ul class="GroupList ClearFix">
+                        #foreach($g in $page.groupRecipients)
+                        <li class="$g.name">
+                            <span>$g.name</span>
+                            #if( $page.status == "Draft" )
+                            <a href="$g.name">Delete</a>
+                            #end
+                        </li>
+                        #end
+                    </ul>
                 </div>
             </div>
+            <div  rel='#send' class="TabContent Content">
+                <div class="Send Content">
+                    #if( $page.status == "Draft" )
+                    <h4>Before you send be sure to check your email information, message content and recipients.</h4>
+                    <p>
+                        <button class="Btn preview">PREVIEW YOUR EMAIL</button>
+                    </p>
+                    <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
+                    <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
+                    <p><button class="Btn Big Cancel SendEmail send">SEND NOW</button></p>
+                    #else
+                    <h4>Email has been sent, or is sending</h4>
+                    #end
+                </div>
+            </div>
+            
+            <div rel='#status' class="TabContent status Content">
+                <div class="NotSent Content">
+                    <p>Email is not being processed</p>
+                </div>
+
+                <div class="SendProgress Content">
+                    <p>
+                        <strong class="status status_p">Send in progress</strong>
+                        <strong class="status status_c">Job completed</strong>
+                        <small>You may navigate away from this page.</small>
+                    </p>
+                    <div class="Progress">                            
+                        <div class="Percent"></div>
+                        <div class="stats"></div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <strong>Failed and in progress emails, if any, are shown below</strong>
+                    <table id="emails">
+                        <thead>
+                            <tr>
+                                <th>Email Address</th>                                    
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Attempt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </section>
         <div id="modalGroup" class="Modal">
             <header>
@@ -196,7 +194,7 @@
                     }
                 });
                 //["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]
-                edify($("form.Details"));                
+                edify($("form.Details"));
             });
         </script>
     </body>

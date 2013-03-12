@@ -28,6 +28,7 @@ import io.milton.resource.Resource;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.HttpManager;
 import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -37,6 +38,7 @@ import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.vfs.db.Organisation;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 /**
  *
@@ -59,7 +61,7 @@ public class SpliffyContentGenerator implements ContentGenerator {
         try {
             CurrentRootFolderService currentRootFolderService = _(CurrentRootFolderService.class);
             RootFolder rf = currentRootFolderService.getRootFolder(request.getHostHeader());
-            Resource r = new ErrorResource(rf, status.code + "", status.text);
+            Resource r = new ErrorResource(rf, status.code + "", status.text, resource);
             _(HtmlTemplater.class).writePage("error/" + r.getName(), r, null, response.getOutputStream());
         } catch (IOException ex) {
             log.error("Exception sending error page for status: " + status, ex);
@@ -72,13 +74,36 @@ public class SpliffyContentGenerator implements ContentGenerator {
         private final String errorCode;
         private final String errorText;
         private final RootFolder rootFolder;
+        private final Resource resource;
 
-        public ErrorResource(RootFolder rootFolder, String errorCode, String errorText) {
+        public ErrorResource(RootFolder rootFolder, String errorCode, String errorText, Resource resource) {
             this.rootFolder = rootFolder;
             this.errorCode = errorCode;
             this.errorText = errorText;
+            this.resource = resource;
         }
 
+        public String getRequestParams() {
+            Request req = HttpManager.request();
+            if( req == null ||req.getParams() == null || req.getParams().isEmpty()) {
+                return "No params";
+            }
+            StringBuffer sb = new StringBuffer("<ul>");
+            for( Map.Entry<String, String> e : req.getParams().entrySet()) {
+                sb.append("<li class='list'>");
+                sb.append(e.getKey());
+                sb.append("=");
+                sb.append(e.getValue());
+                sb.append("</li>");
+            }
+            sb.append("</ul>");
+            return sb.toString();
+        }
+        
+        public Resource getResource() {
+            return resource;
+        }
+        
         @Override
         public CommonResource closest(String type) {
             return null;

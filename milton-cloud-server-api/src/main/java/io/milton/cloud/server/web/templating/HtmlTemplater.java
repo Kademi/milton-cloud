@@ -266,9 +266,10 @@ public class HtmlTemplater {
         if (!source.contains(":")) {
             System.out.println("no semicolon: " + source);
             return null;
-        }
-        GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(source);
+        }        
         synchronized (this) {
+            GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(source);
+            System.out.println("meta: " + meta + " source=" + source);
             if (meta == null) {
                 String[] arr = source.split(":");
                 String host = arr[0];
@@ -287,8 +288,8 @@ public class HtmlTemplater {
                     throw new RuntimeException(e);
                 }
             }
+            return meta;            
         }
-        return meta;
     }
 
     public class HtmlTemplateLoaderResourceLoader extends ResourceLoader {
@@ -298,7 +299,7 @@ public class HtmlTemplater {
         }
 
         @Override
-        public synchronized InputStream getResourceStream(String source) throws ResourceNotFoundException {
+        public synchronized InputStream getResourceStream(String source) throws ResourceNotFoundException {            
             if (HtmlTemplater.log.isTraceEnabled()) {
                 HtmlTemplater.log.trace("getResourceStream( " + source + ") ");
             }

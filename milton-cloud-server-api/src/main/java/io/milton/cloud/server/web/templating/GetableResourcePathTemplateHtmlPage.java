@@ -43,7 +43,6 @@ public class GetableResourcePathTemplateHtmlPage extends TemplateHtmlPage {
     public static String getId(String host, String path) {
         return "res://" + host + "/" + path;
     }
-    private static final Path webPath = Path.path("/theme");
     private byte[] bytes;
     private final String host;
     private final Path path;
@@ -80,12 +79,15 @@ public class GetableResourcePathTemplateHtmlPage extends TemplateHtmlPage {
 
     public void parse() throws IOException, XMLStreamException {
         GetableResource resource = findResource();
+        if( resource == null ) {
+            throw new NullPointerException("Resource has been deleted: host=" + host + "path=" + path );
+        }
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try {
-            log.warn("parse: " + resource.getClass());
+            log.warn("parse: " + resource);
             resource.sendContent(bout, null, null, null);
         } catch (Throwable e) {
-            throw new RuntimeException("Couldnt parse: " + resource.getClass(), e);
+            throw new RuntimeException("Couldnt parse: " + resource, e);
         }
         bytes = bout.toByteArray();
         templateParser.parse(this, path.getParent());

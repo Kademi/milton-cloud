@@ -13,26 +13,25 @@
                     <br class="Clear" />
                 </div>
                 <div class="commentArea edifyViewMode">            
-                    <div class="hideBtn"><a href="#">Hide comments</a></div>
+                        <div class="hideBtn"><a href="#" class="">Hide comments</a></div>
                     <div id="comments">
                         <div class="fBox">
-                            #if( $user ) 
                             <form action="#" method="post" id="postComment">
                                 <fieldset>
-                                    <table class="plain" style="width: 100%">
-                                        <tr>
-                                            <td style="width: 12.5%"></td>
-                                            <td><textarea id="newComment" class="autoresize" placeholder="Post your comment here" ></textarea></td>
-                                            <td style="width: 100px; vertical-align: bottom"><button class="postBtn" type="submit" value="Post">Post</button></td>
-                                            <td style="width: 12.5%"></td>
-                                        </tr>
-                                    </table>                                                        
+                                    <div class="commentContainer">
+                                        <div class="centerOuter">
+                                            <div class="centerInner">
+
+                                                <textarea class="" rows="1" placeholder="Ask a question, or offer an answer"></textarea>
+                                                <div class="commentControls">
+                                                    <button class="btn" type="submit">Post</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                            
                                 </fieldset>
                             </form>
-                            #else
-                            <p>You must be logged in to post comments. Login from the menu at the top of the page or <a href="/everyone/signup">register</a></p>
-                            #end
-                        </div>               
+                        </div>
                     </div>
                     <br/><br/>
                 </div>                

@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Online training features: marketing, branding and CPD</title>
+        <link href="/theme/theme.css" rel="stylesheet" type="text/css" />
+        <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+        <script src="/static/js/jquery-1.8.1.min.js" type="text/javascript"></script>        
+        <script src="/static/js/jquery.forms.js" type="text/javascript"></script>
+        <script src="/static/js/jquery.user.js" type="text/javascript"></script>
+        <script type="text/javascript" src="/static/js/jquery.cookie.js">//</script>
+        <script src="/static/js/jquery.placeholder.js" type="text/javascript"></script>                        
+        <script src="/static/js/jquery.pjax.js" type="text/javascript"></script>
+        <script src="/static/js/common.js" type="text/javascript"></script>
+        <script src="js/functions.js" type="text/javascript"></script>   
+    </head>
+    <body>
+
+        <!--menu-->
+        <div id="menu">
+            <div class="inner"> 
+                <a href="index.html" class="logo"></a
+                ><!-- login --> 
+                <a href="#" class="login-btn">Login</a>
+                <div id="login-box" style="display:none;">
+                    <div class="login-inner">
+                        <form class="login-form" method="POST" action="/login">
+                            <p id="validationMessage" style="display: none">.</p>
+                            <input name="email" type="text" placeholder="Enter your email address" />
+                            <input name="password" type="password" placeholder="Enter your password" />
+                            <a href="password-reset" class="forget-paswword">Forgotten your password?</a>
+                            <button name="login" type="submit" value="" class="btn-login"></button>
+
+                        </form>
+                    </div>
+                </div>
+                <!-- /login -->
+
+                <ul>
+                    <li><a href="get-fuse.html"><span>Get FuseLMS</span></a></li>
+                    <li class="active"><a href="features.html"><span>Features</span></a></li>
+                    <li><a href="pricing.html"><span>Pricing</span></a></li>
+                    <li><a href="services.html"><span>Services</span></a></li>
+                    <li><a href="effets.html"><span>The Fuse Effect</span></a></li>
+                    <li><a href="contact.html"><span>Contact</span></a></li>
+                </ul>
+            </div>
+        </div>
+        <!--/menu--> 
+
+        <!-- wrapper -->
+        <div id="outer-wrapper" class="banner-3">
+            <div id="wrapper"> 
+
+                <!--header-->
+                <div id="inner-header">
+                    <!--<h1>An <span>explosion</span> of features</h1>
+                    <h5>Control which features your users access by switching them on or off.</h5>-->
+                </div>
+                <!--/header--> 
+
+                <!--content-->
+                <div id="content">
+                    <div class="inner"> 
+
+                        <!-- subnav -->
+                        <div id="subnav">
+                            <ul>
+                                <li class="active"><a href="features.html"><span>Training & Development</span></a></li>
+                                <li><a href="features_mb.html"><span>Marketing & Branding</span></a></li>
+                                <li><a href="features_uf.html"><span>User features</span></a></li>
+
+                            </ul>
+                        </div>
+                        <!-- /subnav -->
+
+                        <h3 class="page-title">Features</h3>
+                        <div class="clear"></div>
+                        <h5 align="center">Write and create structured training programs<br />through a simple and intuitive learning management system.</h5>
+
+                        <!-- feature -->
+                        <div class="feature ft-left"><img src="images/features/program_manager.jpg" width="388" height="189" alt="" />
+                            <h5>Program Manager</h5>
+                            <p>Easily create structured programs with nested courses and modules that will allow you to design tailored learning experiences.</p>
+                        </div>
+                        <!-- /feature --> 
+
+                        <!-- feature -->
+                        <div class="feature ft-right"><img src="images/features/module_editor.jpg" width="388" height="189" alt="" />
+                            <h5>Module Editor</h5>
+                            <p>Design and author your module content with ease using an intuitive page editor loaded with pre-defined styles and widgets.</p>
+                        </div>
+                        <!-- /feature --> 
+
+                        <!-- separator --> 
+                        <span class="sprtr" style="margin-top: 30px;">&nbsp;</span> 
+                        <!-- /separator --> 
+
+                        <!-- feature -->
+                        <div class="feature ft-left"><img src="images/features/versioning.jpg" width="388" height="189" alt="" />
+                            <h5>Versioning</h5>
+                            <p>Never worry about making a mistake!  Version your entire learning website or simply roll back individual changes to your module content.</p>
+                        </div>
+                        <!-- /feature --> 
+
+                        <!-- feature -->
+                        <div class="feature ft-right"><img src="images/features/certificate.jpg" width="388" height="189" alt="" />
+                            <h5>CPD & Certification</h5>
+                            <p>Easily create and allocate CPD training to your courses and design custom certificates that can be automatically awarded.</p>
+                        </div>
+                        <!-- /feature --> 
+
+                        <!-- separator --> 
+                        <span class="sprtr" style="margin-top: 30px;">&nbsp;</span> 
+                        <!-- /separator --> 
+
+                        <!-- features -->
+                        <div id="features">
+                            <div>
+                                <h5>Quiz builder</h5>
+                                <p>Create multiple-choice and input-based quizzes, add hints and insert quizzes anywhere within your module pages.</p>
+                            </div>
+                            <div>
+                                <h5>User management</h5>
+                                <p>Easily search for and manage your enrolled users.  You can register and approve users prior to enrolling them into a training program. 
+                                    Manage users in groups based on role (eg manager, retail assistant) or by business unit (eg region or department)</p>
+                            </div>
+                            <div class="last">
+                                <h5>Video wizard</h5>
+                                <p>Don’t worry about having to encode your videos before uploading. Simply upload one video and FuseLMS will encode it 
+                                    to work across PCs and mobile devices. </p>
+                            </div>
+                            <div>
+                                <h5>Theme manager</h5>
+                                <p>Simply choose a theme, add your logo and choose your colours. Or roll your own theme to perfectly present your brand identity.</p>
+                            </div>
+                            <div>
+                                <h5>Analytics</h5>
+                                <p>A suite of graphed reports will help you measure and track the success of your online training.</p>
+                            </div>
+                            <div class="last">
+                                <h5>Application manager</h5>
+                                <p>FuseLMS has many features, which you can turn on or off with a click of a button.</p>
+                            </div>
+                        </div>
+                        <!-- features -->
+
+                        <div class="try-fuse"> <a href="get-fuse.html" class="try-fuse-btn">Trial FuseLMS for FREE</a> </div>
+                    </div>
+                </div>
+                <!--/content--> 
+
+            </div>
+        </div>
+        <!-- /wrapper --> 
+
+        <!--footer-->
+        <div id="footer">
+            <div class="inner">
+                <div class="footer-links"><a href="about.html">About Fuse LMS</a> <a href="contact.html">Contact</a> <a href="terms.html">Terms &amp; Conditions</a> </div>
+                &copy;FuseLMS Pty Ltd 2012</div>
+        </div>
+        <!--/footer-->
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-30231140-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+
+        </script>
+    </body>
+</html>
