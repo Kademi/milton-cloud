@@ -30,6 +30,9 @@ import java.util.UUID;
 public class NodeMeta {
 
     public static NodeMeta loadForNode(DataNode node) throws IOException {
+        if( node == null ) {
+            return null;
+        }
         DirectoryNode parent = node.getParent();
         if (parent == null) {
             return new NodeMeta(null, null, null, 0);

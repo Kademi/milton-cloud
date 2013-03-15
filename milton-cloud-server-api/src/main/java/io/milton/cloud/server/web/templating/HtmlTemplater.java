@@ -250,7 +250,7 @@ public class HtmlTemplater {
         }        
         synchronized (this) {
             GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(source);
-            System.out.println("meta: " + meta + " source=" + source);
+            //System.out.println("meta: " + meta + " source=" + source);
             if (meta == null) {
                 String[] arr = source.split(":");
                 String host = arr[0];

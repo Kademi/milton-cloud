@@ -143,8 +143,11 @@ function doLogin(userName, password, config, container) {
                     //return;
                     window.location = config.afterLoginUrl;
                 } else {
-                    if (config.afterLoginUrl == "none") {
+                    if (config.afterLoginUrl === "none") {
                         log("Not doing redirect because afterLoginUrl=='none'");
+                    } else if( config.afterLoginUrl === "reload") {
+                        window.location.reload();
+                        
                     } else {
                         // if config has a relative path, then evaluate it relative to the user's own url in response
                         log("redirect to2: " + userUrl + config.afterLoginUrl);

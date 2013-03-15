@@ -73,7 +73,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
             String s = WebUtils.getParam(parameters, "orgTypeName");
             OrgType orgType = null;
             if( s != null ) {
-                orgType = organisation.getOrganisation().orgType(s);
+                orgType = findOrgType(s);
             }
             organisation.setOrgType(orgType);
             session.save(organisation);
@@ -83,6 +83,18 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
             tx.rollback();
             log.error("ex", e);
             jsonResult = new JsonResult(false, e.getMessage());
+        }
+        return null;
+    }
+    
+    public OrgType findOrgType(String name) {
+        Organisation o = organisation;
+        while( o != null ) {
+            OrgType ot = o.orgType(name);
+            if( ot != null ) {
+                return ot;
+            }
+            o = o.getOrganisation();
         }
         return null;
     }

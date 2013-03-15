@@ -17,7 +17,6 @@
 package io.milton.cloud.server.apps.fileserver;
 
 import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
-import io.milton.cloud.server.apps.admin.*;
 import io.milton.cloud.server.web.*;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
@@ -44,11 +43,9 @@ import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
-import java.util.Collections;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 

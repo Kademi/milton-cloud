@@ -13,7 +13,8 @@
  * Config:
  * urlSuffix: is appended to the current page url to make the url to POST the login request to. Default /.ajax
  * afterLoginUrl: the page to redirect to after login. Default index.html.  3 possibilities 
- *      null = do a location.reload()
+ *      null = redirect to nextHref if provided from server, else do a location.reload()
+ *      "reload" - literal value means always do location.reload()
  *      "none" - literal value "none" means no redirect
  *      "something" or "" = a relative path, will be avaluated relative to the user's url (returned in cookie)
  *      "/dashboard" = an absolute path, will be used exactly as given
@@ -106,7 +107,7 @@ function doLogin(userName, password, config, container) {
                 if( config.loginCallback) {
                     config.loginCallback();
                 }
-                if( config.afterLoginUrl == null) {
+                if( config.afterLoginUrl === null) {
                     // If not url in config then use the next href in the response, if given, else reload current page
                     if( resp.nextHref ) {
                         window.location.href = resp.nextHref;
@@ -119,8 +120,10 @@ function doLogin(userName, password, config, container) {
                     //return;
                     window.location = config.afterLoginUrl;
                 } else {
-                    if( config.afterLoginUrl == "none") {
+                    if( config.afterLoginUrl === "none") {
                         log("Not doing redirect because afterLoginUrl=='none'");
+                    } else if( config.afterLoginUrl === "reload") {
+                        window.location.reload();
                     } else {
                         // if config has a relative path, then evaluate it relative to the user's own url in response
                         log("redirect to2: " + userUrl + config.afterLoginUrl);

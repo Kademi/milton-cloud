@@ -43,24 +43,19 @@ import org.hashsplit4j.api.HashStore;
  *
  * @author brad
  */
-public class BranchFolder extends AbstractCollectionResource implements ContentDirectoryResource, PropFindableResource, MakeCollectionableResource, GetableResource, PutableResource, PostableResource, CopyableResource {
+public class BranchFolder extends AbstractBranchFolder implements MakeCollectionableResource, GetableResource, PutableResource, PostableResource, CopyableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
-    protected final CommonCollectionResource parent;
-    protected final String name;
     protected final Branch branch;
-    protected ResourceList children;
     protected Commit commit; // may be null
     protected final DataSession dataSession;
     protected JsonResult jsonResult; // set after completing a POST
     protected NodeMeta nodeMeta;
-    private GetableResource indexPage;
     private Map<String, String> themeParams;
     private Map<String, String> themeAttributes;
 
     public BranchFolder(String name, CommonCollectionResource parent, Branch branch) {
-        this.name = name;
-        this.parent = parent;
+        super(name, parent);
         this.branch = branch;
         if (branch != null) {
             this.commit = branch.getHead();
@@ -71,72 +66,38 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     public BranchFolder(String name, CommonCollectionResource parent, Commit commit) {
-        this.name = name;
-        this.parent = parent;
+        super(name, parent);
         this.branch = null;
         this.commit = commit;
         this.dataSession = new DataSession(commit, SessionManager.session(), _(HashStore.class), _(BlobStore.class), _(CurrentDateService.class));
     }
 
     @Override
+    public NodeMeta getNodeMeta() {
+        return loadNodeMeta();
+    }
+
+    @Override
+    public Branch getBranch(boolean createIfNeeded) {
+        return branch;
+    }
+
+    @Override
+    public DataSession getDataSession(boolean createIfNeeded) {
+        return dataSession;
+    }
+
+    
+    
+    @Override
     public String getUniqueId() {
         if (branch != null) {
-            return "br" + branch.getId();
+            return super.getUniqueId();
         } else {
             return "cm" + commit.getId();
         }
     }
 
-    @Override
-    public void save() throws IOException {
-        if (branch == null) {
-            throw new RuntimeException("Cannot save because the branch is null. this is probably because you're viewing a commit");
-        }
-        String lastHash = null;
-        Long lastId = null;
-        if (branch != null && branch.getHead() != null) {
-            lastId = branch.getHead().getId();
-            lastHash = branch.getHead().getItemHash();
-        }
-
-        Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        if (currentUser == null) {
-            throw new RuntimeException("No current user!");
-        }
-        dataSession.save(currentUser);
-
-        System.out.println("----------------------------------");
-        System.out.println("branch head ID: " + branch.getHead().getId());
-        System.out.println("branch head hash: " + branch.getHead().getItemHash());
-        System.out.println("last hash: " + lastHash);
-        System.out.println("Last head id: " + lastId);
-        System.out.println("----------------------------------");
-    }
-
-    @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        Resource r = _(ApplicationManager.class).getPage(this, childName);
-        if (r != null) {
-            return r;
-        }
-
-        return NodeChildUtils.childOf(getChildren(), childName);
-    }
-
-    @Override
-    public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
-        if (children == null) {
-            ApplicationManager am = _(ApplicationManager.class);
-            children = am.toResources(this, dataSession.getRootDataNode());
-            am.addBrowseablePages(this, children);
-        }
-        return children;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
 
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
@@ -153,37 +114,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return rdr;
     }
 
-    public DirectoryResource createDirectoryResource(String newName, Session session) throws NotAuthorizedException, ConflictException, BadRequestException, IOException {
-        DirectoryNode newNode = dataSession.getRootDataNode().addDirectory(newName);
-        DirectoryResource rdr = new DirectoryResource(newNode, this);
-        onAddedChild(rdr);
-        rdr.updateModDate();
-        save();
-        return rdr;
-    }
-
-    @Override
-    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        return UploadUtils.createNew(this, newName, inputStream, length, contentType);
-    }
-
-    protected void updateModDate() {
-        Date newDate = _(CurrentDateService.class).getNow();
-        loadNodeMeta().setModDate(newDate);
-        if (nodeMeta.getCreatedDate() == null) {
-            nodeMeta.setCreatedDate(newDate);
-        }
-        try {
-            NodeMeta.saveMeta(this.getDirectoryNode(), nodeMeta);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return getBranch().getCreatedDate();
-    }
 
     @Override
     public Date getModifiedDate() {
@@ -298,22 +228,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         return commit;
     }
 
-    @Override
-    public CommonCollectionResource getParent() {
-        return parent;
-    }
 
-    /**
-     * Get all allowed priviledges for all principals on this resource. Note
-     * that a principal might be a user, a group, or a built-in webdav group
-     * such as AUTHENTICATED
-     *
-     * @return
-     */
-    @Override
-    public Map<Principal, List<AccessControlledResource.Priviledge>> getAccessControlList() {
-        return null;
-    }
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
@@ -351,10 +266,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
 
     }
 
-    @Override
-    public Organisation getOrganisation() {
-        return parent.getOrganisation();
-    }
 
     public String getTitle() {
         if (branch != null) {
@@ -369,63 +280,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
     }
 
-    @Override
-    public DirectoryNode getDirectoryNode() {
-        return dataSession.getRootDataNode();
-    }
-
-    @Override
-    public void onAddedChild(AbstractContentResource aThis) {
-        try {
-            getChildren().add(aThis);
-        } catch (NotAuthorizedException | BadRequestException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    public void onRemovedChild(AbstractContentResource aThis) {
-        try {
-            getChildren().remove(aThis);
-        } catch (NotAuthorizedException | BadRequestException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    public boolean is(String type) {
-        if ("branch".equals(type)) {
-            return true;
-        }
-        return super.is(type);
-    }
-
-    public GetableResource getIndex() throws NotAuthorizedException, BadRequestException {
-        if (indexPage == null) {
-            Resource r = child("index.html");
-            if (r == null) {
-                return null;
-            } else if (r instanceof FileResource) {
-                FileResource fr = (FileResource) r;
-                GetableResource p = fr.getHtml();
-                if( p != null ) {
-                    indexPage = p;
-                } else {
-                    indexPage = fr;
-                }
-            } else if (r instanceof RenderFileResource) {
-                indexPage = (RenderFileResource) r;
-            } else {
-                return null;
-            }
-        }
-        return indexPage;
-    }
-
-    @Override
-    public boolean isPublic() {
-        return getBranch().getRepository().isPublicContent();
-    }
 
     @Override
     public Branch getBranch() {
@@ -445,11 +299,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
     }
 
     @Override
-    public Repository getRepository() {
-        return getBranch().getRepository();
-    }
-
-    @Override
     public String getHash() {
         if (branch != null) {
             Commit c = branch.getHead();
@@ -463,11 +312,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
     }
 
-    @Override
-    public void setHash(String s) {
-        this.dataSession.getRootDataNode().setHash(s);
-        children = null;
-    }
 
     @Override
     public Profile getModifiedBy() {
@@ -484,84 +328,6 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         }
     }
 
-    public DataSession getDataSession() {
-        return dataSession;
-    }
-
-    @Override
-    public List<ContentDirectoryResource> getSubFolders() throws NotAuthorizedException, BadRequestException {
-        List<ContentDirectoryResource> list = new ArrayList<>();
-        for (Resource r : getChildren()) {
-            if (r instanceof ContentDirectoryResource) {
-                if (!r.getName().equals(".mil")) {
-                    list.add((ContentDirectoryResource) r);
-                }
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public List<ContentResource> getFiles() throws NotAuthorizedException, BadRequestException {
-        List<ContentResource> list = new ArrayList<>();
-        for (Resource r : getChildren()) {
-            if ((r instanceof ContentResource) && !(r instanceof ContentDirectoryResource)) {
-                if (!r.getName().equals(".mil")) {
-                    list.add((ContentResource) r);
-                }
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public Profile getOwnerProfile() {
-        Branch b = getBranch();
-        BaseEntity be = b.getRepository().getBaseEntity();
-        if (be instanceof Profile) {
-            return (Profile) be;
-        }
-        return null;
-    }
-
-    @Override
-    public FileResource getOrCreateFile(String name) throws NotAuthorizedException, BadRequestException {
-        Resource r = child(name);
-        FileResource fr;
-        if (r == null) {
-            DataSession.FileNode newNode = getDirectoryNode().addFile(name);
-            fr = new FileResource(newNode, this);
-        } else {
-            if (r instanceof FileResource) {
-                fr = (FileResource) r;
-            } else {
-                throw new RuntimeException("Resource exists, but is not a FileResource: " + name + " is a " + r.getClass());
-            }
-        }
-        return fr;
-    }
-
-    @Override
-    public DirectoryResource getOrCreateDirectory(String name, boolean autoCreate) throws NotAuthorizedException, NotAuthorizedException, BadRequestException {
-        Resource r = child(name);
-        DirectoryResource fr;
-        if (r == null) {
-            if (autoCreate) {
-                DataSession.DirectoryNode newNode = getDirectoryNode().addDirectory(name);
-                fr = new DirectoryResource(newNode, this);
-            } else {
-                return null;
-            }
-        } else {
-            if (r instanceof DirectoryResource) {
-                fr = (DirectoryResource) r;
-            } else {
-                throw new RuntimeException("Resource exists, but is not a DirectoryResource: " + name + " is a " + r.getClass());
-            }
-        }
-        return fr;
-    }
-
     public String getPublicTheme() {
         return getBranch().getPublicTheme();
     }
@@ -574,7 +340,7 @@ public class BranchFolder extends AbstractCollectionResource implements ContentD
         list.add("custom");
         return list;
     }
-
+    
     /**
      * Theme params are CSS variables (ie using LESS).
      *

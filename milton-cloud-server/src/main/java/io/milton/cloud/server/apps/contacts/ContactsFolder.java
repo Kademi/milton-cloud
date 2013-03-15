@@ -148,7 +148,7 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
     @Override
     public List<Pair<String, String>> getSupportedAddressData() {
         AddressDataTypeList supportedAddresses = new AddressDataTypeList();
-        supportedAddresses.add(new Pair<String, String>("text/vcard", "3.0"));
+        supportedAddresses.add(new Pair<>("text/vcard", "3.0"));
         return supportedAddresses;
     }
 
