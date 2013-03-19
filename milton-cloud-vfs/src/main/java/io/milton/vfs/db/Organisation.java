@@ -16,7 +16,6 @@
  */
 package io.milton.vfs.db;
 
-import com.fuselms.db.ProductOrder;
 import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
@@ -64,7 +63,6 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
-    private List<ProductOrder> productOrders;
 
     private List<OrgType> orgTypes;
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
@@ -674,14 +672,5 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         for (GroupMembership m : toDelete) {            
             m.delete(session);
         }
-    }
-
-    @OneToMany(mappedBy = "orderedForOrg")
-    public List<ProductOrder> getProductOrders() {
-        return productOrders;
-    }
-
-    public void setProductOrders(List<ProductOrder> productOrders) {
-        this.productOrders = productOrders;
     }
 }

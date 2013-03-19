@@ -16,6 +16,8 @@ package io.milton.cloud.server.manager;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.Comment;
+import io.milton.cloud.server.db.ForumPost;
+import io.milton.cloud.server.db.ForumReply;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommentBean;
 import io.milton.cloud.server.web.ProfileBean;
@@ -29,6 +31,8 @@ import java.util.List;
 import java.util.UUID;
 import org.hibernate.Session;
 
+import org.owasp.validator.html.*;
+
 /**
  *
  * @author brad
@@ -36,11 +40,17 @@ import org.hibernate.Session;
 public class CommentService {
 
     private final CurrentDateService currentDateService;
+    private String policyFile = "/antisamy-slashdot-1.4.4";
 
     public CommentService(CurrentDateService currentDateService) {
         this.currentDateService = currentDateService;
     }
 
+    public ForumReply newComment(ForumPost post, String newComment, ForumPost forumPost, Profile currentUser, Session session) {
+        newComment = cleanComment(newComment);
+        return forumPost.addComment(newComment, currentUser, currentDateService.getNow(), session);
+    }    
+    
     public List<CommentBean> comments(AbstractContentResource r) {
         String contentId = getContentId(r);
         List<Comment> comments = Comment.findByContentId(contentId, SessionManager.session());
@@ -52,11 +62,14 @@ public class CommentService {
         return beans;
     }
 
-    public Comment newComment(AbstractContentResource r, String s, Website website, Profile poster, Session session) {
+    public Comment newComment(AbstractContentResource r, String userComment, Website website, Profile poster, Session session) {
         String contentId = getContentId(r);
         if (contentId == null) {
             throw new RuntimeException("No contentid for: " + r.getPath());
         }
+        userComment = cleanComment(userComment);
+
+
         String title = r.getTitle();
 
         Comment c = new Comment();
@@ -64,11 +77,23 @@ public class CommentService {
         c.setContentTitle(title);
         c.setContentHref(r.getHref());
         c.setPostDate(currentDateService.getNow());
-        c.setNotes(s);
+        c.setNotes(userComment);
         c.setPoster(poster);
         c.setWebsite(website);
         session.save(c);
         return c;
+    }
+    
+    private String cleanComment(String dirtyComment ){
+        try {
+            Policy policy = Policy.getInstance(policyFile);
+            
+            AntiSamy as = new AntiSamy();
+            CleanResults cr = as.scan(dirtyComment, policy);
+            return cr.getCleanHTML();
+        } catch (PolicyException | ScanException e) {
+            throw new RuntimeException(policyFile, e);
+        }
     }
 
     public String getContentId(AbstractContentResource r) {
@@ -76,7 +101,7 @@ public class CommentService {
         Organisation org = r.getOrganisation();
         return org.getOrgId() + ":" + p;
     }
-    
+
     private CommentBean toBean(Comment c) {
         CommentBean b = new CommentBean();
         b.setComment(c.getNotes());
@@ -85,4 +110,13 @@ public class CommentService {
         b.setUser(pb);
         return b;
     }
+
+    public String getPolicyFile() {
+        return policyFile;
+    }
+
+    public void setPolicyFile(String policyFile) {
+        this.policyFile = policyFile;
+    }
+
 }

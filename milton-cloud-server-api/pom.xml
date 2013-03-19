@@ -53,7 +53,12 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>    
+        </dependency>
+        <dependency>
+            <groupId>org.owasp.antisamy</groupId>
+            <artifactId>antisamy</artifactId>
+            <version>1.5.1</version>
+        </dependency>        
         <dependency>
             <groupId>net.htmlparser.jericho</groupId>
             <artifactId>jericho-html</artifactId>
@@ -165,6 +170,10 @@
             <name>codehaus</name>
             <url>http://repository.codehaus.org</url>
         </repository>
-    </repositories>
+        <repository>
+            <id>maven.org</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>      
 </project>
 

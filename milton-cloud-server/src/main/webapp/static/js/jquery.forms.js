@@ -103,7 +103,7 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
             error: function(resp) {
                 ajaxLoadingOff();
                 log("error posting form", form, resp);
-                alert("err " + resp);
+                alert("Sorry, there was an error submitting the form. Please check the form for detailed error messages and try again");
                 $(valiationMessageSelector, form).text(validationFailedMessage);
                 $(valiationMessageSelector, form).show(100);
             }

@@ -3,9 +3,11 @@
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.db.ForumReply;
+import io.milton.cloud.server.manager.CommentService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -23,7 +25,6 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
- import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
 import io.milton.http.Request;
 import io.milton.http.exceptions.ConflictException;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import static io.milton.context.RequestContext._;
  
 /**
  *
@@ -182,7 +184,6 @@ public class MyQuestionFolder extends AbstractCollectionResource implements Geta
 
     private ForumReply createComment(String newComment, Session session) {                
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        Date now = _(CurrentDateService.class).getNow();       
-        return forumPost.addComment(newComment, currentUser, now, session);
+        return _(CommentService.class).newComment(forumPost, newComment, forumPost, currentUser, SessionManager.session());
     }
 }
