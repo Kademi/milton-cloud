@@ -67,9 +67,7 @@ public class CorsApp implements Application, EventListener{
 
     @Override
     public void onEvent(Event e) {
-        System.out.println("cors1: " + e);
         if( e instanceof GetEvent) {
-            System.out.println("cors2: ");
             Request req = HttpManager.request();            
             if( req == null ) {
                 return ;
@@ -78,19 +76,15 @@ public class CorsApp implements Application, EventListener{
             if( origin == null ) {
                 return ; // not relevant
             }            
-            System.out.println("cors3: ");
             GetEvent ge = (GetEvent) e;
             // ok, lets check to see if this app is enabled
             RootFolder rf = WebUtils.findRootFolder(ge.getResource());
             if( rf instanceof WebsiteRootFolder) {
-                System.out.println("cors4: ");
                 WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
                 if( applicationManager.isActive(this, wrf.getBranch())) {
-                    System.out.println("cors5: ");
                     // enabled, so we'll let anyone
                     Response resp = HttpManager.response();
                     if( resp != null ) {
-                        System.out.println("cors6: ");
                         if( log.isTraceEnabled()) {
                             log.trace("permit CORS request from: " + origin);
                         }

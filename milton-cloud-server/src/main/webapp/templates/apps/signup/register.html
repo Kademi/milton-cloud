@@ -10,7 +10,7 @@
                 <div class="MainContent">
                     #set($path = "/content/signup/" + $folder.name + ".html")
                     $!folder.find($path).getParam("intro")
-                    
+
                     <form method="post" id="registerForm" action="$page.name">
                         <fieldset>
                             <legend>Create a new account</legend>
@@ -76,23 +76,24 @@
 
             </div> 
         </div> 
+        
         <div id="findOrg" class="Modal modal hide fade"> 
             <a href="" class="Close" title="Close">Close</a>
             <h3 class="Title">Find your $page.regoOrgType</h3>
-            <form method="POST" action=".">
-                <input id="orgQuery" type="text" value="" placeholder="Search for your $page.regoOrgType here" />
-                <table id="orgSearchResults">
-                    <tr>
-                        <th>Name</th>
-                    </tr>
-                    #foreach($org in $page.searchResults)
-                    <tr>
-                        <td><a href="$org.orgId">$org.title</a></td>
-                    </tr>
-                    #end
-                </table>                
-            </form>
+
+            <input id="orgQuery" type="text" value="" placeholder="Search for your $page.regoOrgType here" />
+            <table id="orgSearchResults">
+                <tr>
+                    <th>Name</th>
+                </tr>
+                #foreach($org in $page.searchResults)
+                <tr>
+                    <td><a href="$org.orgId">$org.title</a></td>
+                </tr>
+                #end
+            </table>                
         </div>   
+        
         <div id="pending" class="Modal modal hide fade"> 
             <a href="" class="Close" title="Close">Close</a>
             <h3 class="Title">Account pending</h3>
@@ -102,10 +103,10 @@
         </div>           
         <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>        
         <script type="text/javascript">
-            $(document).ready(function(){
+            $(document).ready(function() {
                 initRegister("/dashboard");
-            });            
-            
+            });
+
         </script>        
     </body>    
 </html> 

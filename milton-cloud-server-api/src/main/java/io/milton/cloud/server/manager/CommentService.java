@@ -26,6 +26,10 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +44,7 @@ import org.owasp.validator.html.*;
 public class CommentService {
 
     private final CurrentDateService currentDateService;
-    private String policyFile = "/antisamy-slashdot-1.4.4";
+    private String policyFile = "classpath:/antisamy-slashdot-1.4.4.xml";
 
     public CommentService(CurrentDateService currentDateService) {
         this.currentDateService = currentDateService;
@@ -49,8 +53,8 @@ public class CommentService {
     public ForumReply newComment(ForumPost post, String newComment, ForumPost forumPost, Profile currentUser, Session session) {
         newComment = cleanComment(newComment);
         return forumPost.addComment(newComment, currentUser, currentDateService.getNow(), session);
-    }    
-    
+    }
+
     public List<CommentBean> comments(AbstractContentResource r) {
         String contentId = getContentId(r);
         List<Comment> comments = Comment.findByContentId(contentId, SessionManager.session());
@@ -83,11 +87,24 @@ public class CommentService {
         session.save(c);
         return c;
     }
-    
-    private String cleanComment(String dirtyComment ){
+
+    private String cleanComment(String dirtyComment) {
         try {
-            Policy policy = Policy.getInstance(policyFile);
-            
+            Policy policy;
+            if (policyFile.startsWith("classpath:")) {
+                String s = policyFile.replace("classpath:", "");
+                try (InputStream in = getClass().getResourceAsStream(s)) {
+                    if( in == null ) {
+                        throw new RuntimeException("Couldnt find resource: " + s + " from " + getClass().getClassLoader());
+                    }
+                    policy = Policy.getInstance(in);
+                } catch (IOException e) {
+                    throw new RuntimeException(s, e);
+                }
+            } else {
+                policy = Policy.getInstance(policyFile);
+            }
+
             AntiSamy as = new AntiSamy();
             CleanResults cr = as.scan(dirtyComment, policy);
             return cr.getCleanHTML();
@@ -118,5 +135,4 @@ public class CommentService {
     public void setPolicyFile(String policyFile) {
         this.policyFile = policyFile;
     }
-
 }
