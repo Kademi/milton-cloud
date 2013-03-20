@@ -33,7 +33,7 @@ function initTopicController() {
 		
         var _selectedTopic = $(this).parent().parent();
 		
-        showModal("Topic", "Rename", {
+        showForumModal("Topic", "Rename", {
             name: _selectedTopic.find("> span").html(),
             topic: _selectedTopic.attr("data-topic"),
             forum: _selectedTopic.parent().attr("data-forum")
@@ -80,7 +80,7 @@ function initForumDialog() {
 		
         var _selectedForum = $(this).parents("div.Forum");
 		
-        showModal("Forum", "Rename", {
+        showForumModal("Forum", "Rename", {
             name: $(this).parent().parent().find("> span").html(),
             forum: _selectedForum.attr("data-forum")
         }, function() {
@@ -92,7 +92,7 @@ function initForumDialog() {
 function addForumButton() {
     $("body").on("click", "button.AddForum", function(e) {
         e.preventDefault();
-        showModal("Forum", "Add", null, function() {
+        showForumModal("Forum", "Add", null, function() {
             addForum();
         });
     });
@@ -106,7 +106,7 @@ function addTopicButton() {
         var forumLink = selectedForum.find("header div.ShowDialog > a");
         var forumHref = forumLink.attr("href");        
         log("selectedForum", selectedForum);
-        showModal("Topic", "Add", {
+        showForumModal("Topic", "Add", {
             forum: $(this).parent().parent().attr("data-forum")
         }, function() {
             addTopic(forumHref);
@@ -114,7 +114,7 @@ function addTopicButton() {
     });
 }
 
-function showModal(name, type, data, callback) {
+function showForumModal(name, type, data, callback) {
     var _modal = $("#modalForum");
 	
     _modal.find("header h3").html(name + " Details")    

@@ -181,7 +181,11 @@ public abstract class AbstractBranchFolder extends AbstractCollectionResource im
 
     @Override
     public Date getCreateDate() {
-        return getBranch().getCreatedDate();
+        Branch b = getBranch();
+        if( b == null ) {
+            return null;
+        }
+        return b.getCreatedDate();
     }
 
     @Override

@@ -40,20 +40,31 @@
                             </div>                            
 
                             #if( $page.hasOrgs )
+                                #if( $groupRegoPage.regoOrgType )
+                                    #set($orgType = $groupRegoPage.regoOrgType)
+                                #else
+                                    #set($orgType = "Organisation")                                        
+                                #end
+                                
                             <div class="control-group">
-                                <label class="control-label" for="orgName">$page.regoOrgType</label>
+                                <label class="control-label" for="orgName">$orgType</label>
                                 <div class="controls">
                                     <input type="hidden" name="orgId" id="orgId" />
-                                    <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your $page.regoOrgType" />
+                                    <input class="required" type="text" name="orgName" id="orgName" autocomplete="off" placeholder="Choose your $orgType" />
                                 </div>
-                            </div>                               
+                            </div>
                             #end
 
                             #if( $page.hasOptins() )
                             <div class="control-group">
                                 <div class="controls">
-                                    <input type="hidden" name="orgId" id="orgId" />
-                                    <input class="required" readonly="true" type="text" name="orgName" id="orgName" placeholder="Choose your $page.regoOrgType" />
+                                    #foreach($optin in $page.optins)                                    
+                                    <label for="optins_${optin.optinGroup.name}">
+                                        <input type="checkbox" name="optins" value="$optin.optinGroup.name" id="optins_${optin.optinGroup.name}" />
+                                        $optin.message
+                                    </label>
+                                    #end
+                                                        
                                 </div>
                             </div>  
                             #end
@@ -73,36 +84,25 @@
 
             </div> 
         </div> 
-        <div id="findOrg" class="Modal modal hide fade"> 
-            <a href="" class="Close" title="Close">Close</a>
-            <h3 class="Title">Find your $page.regoOrgType</h3>
-            <form method="POST" action=".">
-                <input id="orgQuery" type="text" value="" placeholder="Search for your $page.regoOrgType here" />
-                <table id="orgSearchResults">
-                    <tr>
-                        <th>Name</th>
-                    </tr>
-                    #foreach($org in $page.searchResults)
-                    <tr>
-                        <td><a href="$org.orgId">$org.title</a></td>
-                    </tr>
-                    #end
-                </table>                
-            </form>
-        </div>   
-        <div id="pending" class="Modal modal hide fade"> 
-            <a href="" class="Close" title="Close">Close</a>
-            <h3 class="Title">Account pending</h3>
-            <p>Thank you for your application.</p>
-            <p>An administrator will review your details shortly.</p>
-            <p><a href="/">Click here</a> to return to the home page</p>
-        </div>           
+
+
+        <div id="pending" class="modal hide">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Account pending</h3>
+            </div>
+            <div class="modal-body">
+                <p>Thank you for your application.</p>
+                <p>An administrator will review your details shortly.</p>
+                <p><a href="/">Click here</a> to return to the home page</p>
+            </div>
+        </div>        
+
         <script type="text/javascript" src="/templates/apps/signup/register.js">//</script>        
         <script type="text/javascript">
-            $(document).ready(function(){
+            $(document).ready(function() {
                 initRegister("/dashboard");
-            });            
-            
+            });
         </script>        
     </body>    
 </html> 

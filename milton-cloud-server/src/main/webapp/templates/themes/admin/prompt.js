@@ -45,7 +45,7 @@ function myPrompt(id, url, title, instructions, caption, buttonName, buttonText,
         if( checkRequiredFields(form)) {
             var newName = form.find("input").val();
             if( callback(newName, form) ) {
-                $.tinybox.close();
+                closeModals();
                 myPromptModal.remove();
             }
         }
@@ -64,14 +64,6 @@ function closeMyPrompt() {
     myPromptModal.remove();
 }
 
-
-function showModal(modal) {
-    $.tinybox.show(modal, {
-        overlayClose: false,
-        opacity: 0
-    });      
-}
-
 function closeModal() {
     $.tinybox.close();
 }
@@ -79,7 +71,7 @@ function closeModal() {
 function initModal() {
     $("body").on("click", ".Modal a.Close", function(e) {
         log("close tinybox");
-        $.tinybox.close();
+        closeModals();
         e.preventDefault();
     });
     $('a.ShowModal').tinybox({

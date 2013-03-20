@@ -99,6 +99,12 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         try {
             String newOrgId = parameters.get("orgId");
             Organisation c = getOrganisation().createChildOrg(newOrgId, session);
+            String s = WebUtils.getParam(parameters, "orgTypeName");
+            OrgType orgType = null;
+            if( s != null ) {
+                orgType = findOrgType(s);
+            }
+            organisation.setOrgType(orgType);
 
             _(DataBinder.class).populate(c, parameters);
             session.save(c);
@@ -125,6 +131,18 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         return null;
     }
 
+    public OrgType findOrgType(String name) {
+        Organisation o = organisation;
+        while( o != null ) {
+            OrgType ot = o.orgType(name);
+            if( ot != null ) {
+                return ot;
+            }
+            o = o.getOrganisation();
+        }
+        return null;
+    }    
+    
     public String getTitle() {
         return "Manage business units";
     }

@@ -51,8 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.OrgType;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Manages registration of a user when signing up to a group
@@ -68,6 +71,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     private JsonResult jsonResult;
     private List<Organisation> searchResults;
     private List<OptIn> optIns;
+    private boolean useJson;
 
     public GroupRegistrationPage(String name, GroupInWebsiteFolder parent, SignupApp app) {
         this.parent = parent;
@@ -82,8 +86,14 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             jsonResult.write(out);
         } else {
             log.info("sendContent: render page");
-
+            
             String q = params.get("q");
+            if( q == null ) {
+                q = params.get("jsonQuery");
+                if( q != null  ) {
+                    useJson = true;
+                }
+            }
             if (q != null && q.length() > 0) {
                 Organisation rootSearchOrg = parent.getGroup().getRootRegoOrg();
                 if (rootSearchOrg == null) {
@@ -91,12 +101,68 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 }
                 OrgType regoOrgType = parent.getGroup().getRegoOrgType();
                 searchResults = Organisation.search(q, rootSearchOrg, regoOrgType, SessionManager.session()); // find the given user in this organisation 
+                
             }
 
-            _(HtmlTemplater.class).writePage("signup/register", this, params, out);
+            if( useJson ) {
+                jsonResult = new JsonResult(true);
+                List<OrgData> orgs = new ArrayList<>();
+                for( Organisation org : searchResults) {
+                    OrgData d = new OrgData(org);
+                    orgs.add(d);
+                }
+                jsonResult.setData(orgs);
+                jsonResult.write(out);
+            } else {
+                _(HtmlTemplater.class).writePage("signup/register", this, params, out);
+            }
         }
     }
 
+    public class OrgData {
+        private String orgId;
+        private String title;
+        private String address;
+        private String addressLine2;
+        private String addressState;
+        private String phone;
+
+        public OrgData(Organisation org) {
+            orgId = org.getOrgId();
+            title = org.getTitle();
+            address = org.getAddress();
+            addressLine2 = org.getAddressLine2();
+            addressState = org.getAddressState();
+            phone = org.getPhone();
+        }
+
+        public String getOrgId() {
+            return orgId;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public String getAddressLine2() {
+            return addressLine2;
+        }
+
+        public String getAddressState() {
+            return addressState;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+        
+        
+    }
+    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processForm");
@@ -233,7 +299,12 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
 
     @Override
     public String getContentType(String accepts) {
-        if (jsonResult != null) {
+        Request req = HttpManager.request();
+        boolean isJsonQuery = false;
+        if( req != null && req.getParams() != null && req.getParams().containsKey("jsonQuery") ) {
+            isJsonQuery = true;
+        }
+        if (jsonResult != null || isJsonQuery ) {
             return "application/x-javascript; charset=utf-8";
         }
         return "text/html";
