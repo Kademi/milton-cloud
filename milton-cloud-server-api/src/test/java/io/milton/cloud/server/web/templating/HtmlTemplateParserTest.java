@@ -3,6 +3,8 @@ package io.milton.cloud.server.web.templating;
 import io.milton.common.Path;
 import java.io.InputStream;
 import java.net.URL;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,6 +19,22 @@ import static org.junit.Assert.*;
  * @author brad
  */
 public class HtmlTemplateParserTest {
+    
+    
+    @Test
+    public void testComments() {
+        String html = "<html><head><!-- a comment  --></head><body>hi</body></html>";
+        Source source = new Source(html);
+        net.htmlparser.jericho.Element elHead = source.getFirstElement("head");
+        for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
+            System.out.println(" - name: " + wrTag.getName() + " - " + wrTag.getClass() );
+            Segment seg = wrTag.getContent();
+            System.out.println(" - content: " + seg.getClass() );
+            String s = wrTag.toString();
+            System.out.println(s);
+            System.out.println("");
+        }
+    }
     
     @Test
     public void testParse() throws Exception {

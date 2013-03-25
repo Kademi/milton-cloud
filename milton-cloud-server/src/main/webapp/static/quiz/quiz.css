@@ -59,3 +59,7 @@ ol.quiz li label {
 .viewQuiz ol.quiz li li {
     list-style-type: none;
 }
+
+div.Modal div.ModalContent table td textarea {
+    height: 30px !important;
+}

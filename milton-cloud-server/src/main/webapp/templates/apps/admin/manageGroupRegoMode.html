@@ -49,7 +49,7 @@
                                 <select name="orgType">
                                     <option value="">[Any]</option>
                                     #foreach($ot in $page.organisation.orgTypes)
-                                    $formatter.option($ot.name, $ot.displayName, $page.group.regoOrgType)
+                                    $formatter.option($ot.name, $ot.displayName, $page.group.regoOrgType.name)
                                     #end
                                 </select> 
                                 <p>Select which type of organisation to allow users to register to.</p>
@@ -61,7 +61,7 @@
                                 <select name="sRootRegoOrg">
                                     <option value="">$page.organisation.formattedName (this organisation)</option>
                                     #foreach($org in $page.organisation.childOrgs())
-                                    $formatter.option($org.orgId, $org.formattedName, $page.group.rootRegoOrg)
+                                    $formatter.option($org.orgId, $org.formattedName, $page.group.rootRegoOrg.orgId)
                                     #end
                                 </select>                            
                                 <p>Enter the business unit which users will search within for thier organisation. Eg asia, or asia/southeast</p>                                                    

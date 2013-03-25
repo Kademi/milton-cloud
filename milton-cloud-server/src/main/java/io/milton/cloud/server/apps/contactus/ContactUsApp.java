@@ -87,14 +87,7 @@ public class ContactUsApp implements ChildPageApplication, PortletApplication, S
 
     @Override
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
-        Resource resource = (Resource) context.get("page");
-        if( resource instanceof ContactUsFormPage) {
-            if( portletSection.equals(PortletApplication.PORTLET_SECTION_HEADER)) {
-                // TODO: allow these to be overridden per website
-                writer.append("<script type='text/javascript' src='/templates/apps/contactus/contactus.js'>//</script>\n");
-                writer.append("<link href='/templates/apps/contactus/contactus.css' rel='stylesheet' type='text/css' />\n");                
-            }
-        }
+
     }
 
     @Override

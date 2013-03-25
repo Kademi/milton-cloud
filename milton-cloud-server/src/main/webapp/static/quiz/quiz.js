@@ -167,9 +167,9 @@ function initQuizBuilder() {
     });
     function addQuestion(type) {
         log("add question", type);
-        if( type == "textbox") {
+        if( type === "textbox") {
             addQuestionTextbox();
-        } else if( type == "multi") {
+        } else if( type === "multi") {
             addQuestionMulti();
         }
     }
@@ -178,7 +178,7 @@ function initQuizBuilder() {
         var questions = form.find("ol.quiz");
         log("addQuestionTextbox", questions);
         var li = createQuestionLi(questions);
-        li.append($("<input type='text'/>"));
+        li.append($("<textarea class='wide autoresize' cols='50' rows='1'></textarea>"));
     }
 
     function addQuestionMulti() {

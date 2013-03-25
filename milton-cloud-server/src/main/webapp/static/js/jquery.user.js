@@ -172,7 +172,7 @@ function initUser() {
         userName = userUrl.substr(0, userUrl.length-1); // drop trailing slash
         var pos = userUrl.indexOf("users");
         userName = userName.substring(pos+6);
-        $("#currentuser").attr("href", userUrl);        
+        $("#currentuser").attr("href", userUrl);
         $(".requiresuser").show();
         $(".sansuser").hide();        
         $("a.relativeToUser").each(function(i, node) {

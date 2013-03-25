@@ -39,10 +39,10 @@ public class WebResource {
                     }
                 }
             }
+
         }
         return null;
-    }    
-    
+    }
     private Map<String, String> atts = new HashMap<>();
     private String tag;
     private String body;
@@ -87,47 +87,55 @@ public class WebResource {
     }
 
     public String toHtml(String themeName, Path webPath) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<").append(tag).append(" ");
-        for (Map.Entry<String, String> entry : atts.entrySet()) {
-            String adjustedValue = adjustRelativePath(entry.getKey(), entry.getValue(), themeName, webPath);
-            sb.append(entry.getKey()).append("=\"").append(adjustedValue).append("\" ");
-        }
-        if (body != null && body.length() > 0) {
-            sb.append(">").append(body).append("</").append(tag).append(">");
+        if (tag.length() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<").append(tag).append(" ");
+            for (Map.Entry<String, String> entry : atts.entrySet()) {
+                String adjustedValue = adjustRelativePath(entry.getKey(), entry.getValue(), themeName, webPath);
+                sb.append(entry.getKey()).append("=\"").append(adjustedValue).append("\" ");
+            }
+            if (body != null && body.length() > 0) {
+                sb.append(">").append(body).append("</").append(tag).append(">");
+            } else {
+                sb.append("/>");
+            }
+            return sb.toString();
         } else {
-            sb.append("/>");
+            return body; // is a comment
         }
-        return sb.toString();
     }
-    
+
     public String getRawHtml() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<").append(tag).append(" ");
-        for( Map.Entry<String, String> entry : atts.entrySet()) {
-            String v = entry.getValue();
-            sb.append(entry.getKey()).append("=\"").append(v).append("\" ");
-        }
-        if( body != null && body.length()>0 ) {
-            sb.append(">").append(body).append("</").append(tag).append(">");
+        if (tag.length() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<").append(tag).append(" ");
+            for (Map.Entry<String, String> entry : atts.entrySet()) {
+                String v = entry.getValue();
+                sb.append(entry.getKey()).append("=\"").append(v).append("\" ");
+            }
+            if (body != null && body.length() > 0) {
+                sb.append(">").append(body).append("</").append(tag).append(">");
+            } else {
+                sb.append("/>");
+            }
+            return sb.toString();
         } else {
-            sb.append("/>");
+            return body; // is a comment
         }
-        return sb.toString();
-    }      
+    }
 
     /**
      * If the attribute name is src or href, checks the value to see if its
      * relative, and if so return an absolute path, assuming webresource root is
      * /templates
-
-     * 
+     *
+     *
      * @param name
      * @param value
      * @param themeName
      * @param webPath - path of the directory containing the template/page
-
-     * @return 
+     *
+     * @return
      */
     public String adjustRelativePath(String name, String value, String themeName, Path webPath) {
         if (name.equals("href") || name.equals("src")) {
@@ -169,8 +177,6 @@ public class WebResource {
         return p.toString();
     }
 
-
-
     @Override
     public int hashCode() {
         int hash = 5;
@@ -200,6 +206,4 @@ public class WebResource {
         }
         return true;
     }
-    
-    
 }

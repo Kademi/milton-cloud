@@ -52,3 +52,59 @@ a.disabled {
     opacity: 0.5;
     cursor: default;
 }
+
+ol.quiz {
+    ol {
+        li {
+            margin-top: 10px;
+            input {
+                margin: 0px 10px 0 5px;
+            }
+            label {
+                display: inline;
+            }
+        }
+    }
+}
+
+li.error {
+    color: @errorText;
+    .formFieldState(@errorText, @errorText, @errorBackground);
+}
+
+.pagination {
+    .away-limited-10 {
+        display:none;
+    }
+    .away-limited-10.limit-end {
+        display: inline;
+        :after {
+            content: "..";
+        }
+        span {
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 900px) {
+    .pagination {
+        .away-9, .away-limited-10 {
+            display:none;
+        }
+    }
+}
+@media (max-width: 825px) {
+    .pagination {
+        .away-7, .away-8 {
+            display:none;
+        }
+    }
+}
+@media (max-width: 750px) {
+    .pagination {
+        .away-5, .away-6 {
+            display:none;
+        }
+    }
+}

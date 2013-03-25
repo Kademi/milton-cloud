@@ -219,7 +219,7 @@ public class HtmlTemplateRenderer {
             if (media != null) {
                 link += " media='" + media + "'";
             }
-            link += " href='" + themePath;
+            link += " href='/theme/";
             String cssName = "";
             for (String path : paths) {
                 cssName += path.replace("/", COMBINED_RESOURCE_SEPERATOR) + ",";

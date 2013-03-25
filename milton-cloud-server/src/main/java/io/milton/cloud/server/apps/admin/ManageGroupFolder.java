@@ -135,20 +135,23 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             }
         } else if (parameters.containsKey("regoMode")) {
             try {
-                String s = WebUtils.getParam(parameters, "regoMode");
-                group.setRegistrationMode(s);
-                s = WebUtils.getParam(parameters, "orgType");
+                String sRegoMode = WebUtils.getParam(parameters, "regoMode");
+                group.setRegistrationMode(sRegoMode);
+                String sOrgType = WebUtils.getParam(parameters, "orgType");
                 OrgType orgType = null;
-                if (s != null) {
-                    orgType = getOrganisation().orgType(s);
+                if (sOrgType != null) {
+                    orgType = getOrganisation().orgType(sOrgType);
                     if (orgType == null) {
-                        throw new RuntimeException("Couldnt find orgType: " + s);
+                        throw new RuntimeException("Couldnt find orgType: " + sOrgType);
                     }
+                } else {
+                    System.out.println("no org type");
                 }
                 group.setRegoOrgType(orgType, session);
-                s = WebUtils.getParam(parameters, "sRootRegoOrg");
-                if (s != null) {
-                    Organisation org = getOrganisation().childOrg(s);
+                System.out.println("set ot: " + group.getRegoOrgType());
+                String sRootOrg = WebUtils.getParam(parameters, "sRootRegoOrg");
+                if (sRootOrg != null) {
+                    Organisation org = getOrganisation().childOrg(sRootOrg);
                     group.setRootRegoOrg(org);
                 } else {
                     group.setRootRegoOrg(null);

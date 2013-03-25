@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import javax.xml.stream.XMLStreamException;
 import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
 
@@ -69,7 +71,7 @@ public class HtmlTemplateParser {
         meta.getBodyClasses().clear();
         meta.getBodyClasses().addAll(pr.bodyClasses);
         meta.getWebResources().clear();
-        meta.getWebResources().addAll(pr.webResources);
+        meta.getWebResources().addAll(pr.webResources); 
 
     }
 
@@ -115,7 +117,14 @@ public class HtmlTemplateParser {
     }
 
     public static String getContent(net.htmlparser.jericho.Element el) {
-        String s = el.getContent().toString().trim();
+        if (el == null) {
+            return null;
+        }
+        Segment seg = el.getContent();
+        if (seg == null) {
+            return null;
+        }
+        String s = seg.toString().trim();
         s = stripCDATA(s);
         return s;
     }
@@ -156,22 +165,35 @@ public class HtmlTemplateParser {
 
             String title = null;
             List<WebResource> list = new ArrayList<>();
-            for (net.htmlparser.jericho.Element wrTag : elHead.getChildElements()) {
-                //System.out.println("tag: " + wrTag.getName());
-                if (wrTag.getName().equals("title")) {
-                    String s = wrTag.getRenderer().toString();
-                    title = s;
-                } else {
-                    if (!wrTag.getName().startsWith("!")) {
-                        WebResource wr = new WebResource();
-                        list.add(wr);
-                        wr.setTag(wrTag.getName());
-                        String tagBody = getContent(wrTag);
-                        wr.setBody(tagBody);
-                        Attributes atts = wrTag.getAttributes();
-                        if (atts != null) {
-                            for (net.htmlparser.jericho.Attribute att : atts) {
-                                wr.getAtts().put(att.getName(), att.getValue());
+            if (elHead != null) {
+                List<Element> headElements = elHead.getChildElements();
+                if (headElements != null) {
+                    for (net.htmlparser.jericho.Element wrTag : headElements) {
+                        //System.out.println("tag: " + wrTag.getName());
+                        if (wrTag.getName().equals("title")) {
+                            String s = wrTag.getRenderer().toString();
+                            title = s;
+                        } else {                            
+                            if (!wrTag.getName().startsWith("!")) {
+                                WebResource wr = new WebResource();
+                                list.add(wr);
+                                wr.setTag(wrTag.getName());
+                                String tagBody = getContent(wrTag);
+                                wr.setBody(tagBody);
+                                Attributes atts = wrTag.getAttributes();
+                                if (atts != null) {
+                                    for (net.htmlparser.jericho.Attribute att : atts) {
+                                        wr.getAtts().put(att.getName(), att.getValue());
+                                    }
+                                }
+                            } else {
+                                String comment = getContent(wrTag);
+                                WebResource wr = new WebResource();
+                                list.add(wr);
+                                wr.setTag(""); // indictes comment
+                                wr.setBody(wrTag.toString());
+                                //System.out.println("comment : " + wrTag.getName() + " - " + comment );
+                                
                             }
                         }
                     }

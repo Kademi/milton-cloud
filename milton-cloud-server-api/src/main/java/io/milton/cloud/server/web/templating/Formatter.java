@@ -726,11 +726,22 @@ public class Formatter {
         return currentDateService;
     }
 
-    public String ifEqual(String ifEqual, String ifNoteEqual, Object o1, Object o2) {
+    /**
+     * If o1 is equal to o2, then output the ifEqual parameter, otherwise the ifNoteEqual parameter
+     * 
+     * This is a nullsafe comparison
+     * 
+     * @param ifEqual
+     * @param ifNotEqual
+     * @param o1
+     * @param o2
+     * @return 
+     */
+    public String ifEqual(String ifEqual, String ifNotEqual, Object o1, Object o2) {
         if (o1 == null) {
-            return o2 == null ? ifEqual : ifNoteEqual;
+            return o2 == null ? ifEqual : ifNotEqual;
         } else {
-            return o1.equals(o2) ? ifEqual : ifNoteEqual;
+            return o1.equals(o2) ? ifEqual : ifNotEqual;
         }
     }
 

@@ -19,6 +19,7 @@ package io.milton.cloud.server.web;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.mail.BatchEmailService;
+import io.milton.cloud.server.manager.CommentService;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
@@ -41,6 +42,8 @@ import java.util.Properties;
 import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.SourceFormatter;
 import org.w3c.tidy.Tidy;
+
+import static io.milton.context.RequestContext._;
 
 /**
  *
@@ -67,7 +70,7 @@ public class WebUtils {
         if (s.length() == 0) {
             return null;
         }
-        return s;
+        return _(CommentService.class).cleanInput(s);
     }
 
     public static String getParam(Properties parameters, String key) {

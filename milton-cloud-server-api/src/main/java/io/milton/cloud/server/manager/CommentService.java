@@ -51,7 +51,7 @@ public class CommentService {
     }
 
     public ForumReply newComment(ForumPost post, String newComment, ForumPost forumPost, Profile currentUser, Session session) {
-        newComment = cleanComment(newComment);
+        newComment = cleanInput(newComment);
         return forumPost.addComment(newComment, currentUser, currentDateService.getNow(), session);
     }
 
@@ -71,7 +71,7 @@ public class CommentService {
         if (contentId == null) {
             throw new RuntimeException("No contentid for: " + r.getPath());
         }
-        userComment = cleanComment(userComment);
+        userComment = cleanInput(userComment);
 
 
         String title = r.getTitle();
@@ -88,7 +88,7 @@ public class CommentService {
         return c;
     }
 
-    private String cleanComment(String dirtyComment) {
+    public String cleanInput(String dirtyComment) {
         try {
             Policy policy;
             if (policyFile.startsWith("classpath:")) {
