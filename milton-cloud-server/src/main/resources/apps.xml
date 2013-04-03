@@ -32,6 +32,7 @@
                 <bean class="io.milton.cloud.server.apps.search.SearchApp"/>
                 <bean class="io.milton.cloud.server.apps.fileserver.FileServerApp"/>
                 <bean class="io.milton.cloud.server.apps.cors.CorsApp"/>
+                <bean class="io.milton.cloud.server.apps.scheduler.SchedulerApp"/>
             </list>
         </constructor-arg>
         <constructor-arg ref="current.root.folder.service"/>

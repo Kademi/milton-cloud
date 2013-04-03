@@ -20,5 +20,6 @@ package io.milton.cloud.server.db;
  */
 public interface EmailJobVisitor {
     void visit(EmailTrigger r);    
-    void visit(GroupEmailJob r);      
+    void visit(GroupEmailJob r);
+    void visit(ScheduledEmail r);
 }

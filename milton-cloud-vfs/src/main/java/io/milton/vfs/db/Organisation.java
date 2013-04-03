@@ -561,6 +561,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
                 w.softDelete(session);
             }
         }
+        
+        // TODO: problem with soft deleting is that memberships will still be linked
+        // to parent org via subordinate, so will appear in manage users.
+        // should remove them, but need to check there isnt another membership
+        // from a non-deleted org which implies the subordinate record
     }
 
     /**

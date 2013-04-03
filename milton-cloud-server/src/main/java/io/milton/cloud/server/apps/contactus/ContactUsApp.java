@@ -47,7 +47,7 @@ import static io.milton.context.RequestContext._;
 public class ContactUsApp implements ChildPageApplication, PortletApplication, SettingsApplication{
 
     public static final String CONTACT_US_ID = "contactUs";
-    
+
     private AppConfig config;
     
     @Override

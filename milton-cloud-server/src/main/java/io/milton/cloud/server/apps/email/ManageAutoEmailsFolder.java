@@ -107,8 +107,8 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         // this form post is to create a shell group email job
-        String nameToCreate = parameters.get("name");
-        nameToCreate = NewPageResource.findAutoCollectionName(nameToCreate, this, parameters);
+        String origName = parameters.get("name");
+        String nameToCreate = NewPageResource.findAutoCollectionName(origName, this, parameters);
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         Date now = _(CurrentDateService.class).getNow();
@@ -117,7 +117,7 @@ public class ManageAutoEmailsFolder extends AbstractCollectionResource implement
         t.setEventId(SubscriptionEvent.ID);
         t.setEnabled(false);
         t.setName(nameToCreate);
-        t.setTitle(nameToCreate);
+        t.setTitle(origName);
         t.setOrganisation(getOrganisation());
         session.save(t);
 

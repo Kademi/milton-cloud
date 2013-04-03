@@ -305,7 +305,7 @@ public class WebUtils {
             tidy.setIndentContent(true);
             tidy.setSmartIndent(true);
             tidy.setTidyMark(false);
-            tidy.setWraplen(500);
+            tidy.setWraplen(500);            
             
             tidy.setInputEncoding("UTF-8");
             tidy.setOutputEncoding("UTF-8");

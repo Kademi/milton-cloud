@@ -43,7 +43,7 @@ import static io.milton.context.RequestContext._;
 import java.util.List;
 
 /**
- * Resource which represents a group role attached to a group
+ * 
  *
  * @author brad
  */

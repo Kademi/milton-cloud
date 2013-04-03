@@ -19,6 +19,7 @@ package io.milton.cloud.server.mail;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.db.BaseEmailJob;
+import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.db.PasswordReset;
@@ -87,14 +88,7 @@ public class GroupEmailService {
         if (j.getThemeSite() == null && isPasswordReset ) {
             throw new RuntimeException("Cant send password reset group email because no theme has been selected");
         }
-        List<BaseEntity> directRecips = new ArrayList<>();
-        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty()) {
-            for (GroupRecipient gr : j.getGroupRecipients()) {
-                addGroup(gr.getRecipient(), directRecips, isPasswordReset);
-            }
-        } else {
-            log.warn("No group recipients for job: " + j.getId());
-        }
+        List<BaseEntity> directRecips = getRecipients(j);
 
         final Date now = _(CurrentDateService.class).getNow();
         BatchEmailCallback callback = getCallback(j, session);
@@ -110,12 +104,40 @@ public class GroupEmailService {
         session.save(j);
     }
 
+
+    public List<BaseEntity> getRecipients(final GroupEmailJob j) {
+        boolean isPasswordReset = j.isPasswordReset() == null ? false : j.isPasswordReset();
+        List<BaseEntity> directRecips = new ArrayList<>();
+        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty()) {
+            for (GroupRecipient gr : j.getGroupRecipients()) {
+                addGroup(gr.getRecipient(), directRecips, isPasswordReset);
+            }
+        } else {
+            log.warn("No group recipients for job: " + j.getId());
+        }
+        return directRecips;
+    }
+    
+    private void addGroup(Group g, List<BaseEntity> recipients, boolean isPasswordReset) {
+        if (g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty()) {
+            for (GroupMembership gm : g.getGroupMemberships()) {
+                // if its a password reset, only send it to those accounts which do not have a password
+                // thats because this is used to welcome user's who have been loaded into the system but who need to create a password
+                if( !isPasswordReset || gm.getMember().getPasswordCredentialDate() == null) {
+                    recipients.add(gm.getMember());
+                }
+            }
+        } else {
+            log.warn("No members in recipient group: " + g.getName());
+        }
+    }     
+    
     private BatchEmailCallback getCallback(final GroupEmailJob j, final Session session) {
         BatchEmailCallback callback = null;
         if (j.isPasswordReset() != null && j.isPasswordReset()) {
             callback = new BatchEmailCallback() {
                 @Override
-                public String beforeSend(Profile p, String template, Map templateVars) {
+                public String beforeSend(Profile p, String template, Map templateVars, EmailItem emailItem) {
                     Website website = j.getThemeSite();
                     String returnUrl = UserApp.getPasswordResetBase(website);
                     final Date now = _(CurrentDateService.class).getNow();
@@ -132,17 +154,4 @@ public class GroupEmailService {
         return callback;
     }
 
-    private void addGroup(Group g, List<BaseEntity> recipients, boolean isPasswordReset) {
-        if (g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty()) {
-            for (GroupMembership gm : g.getGroupMemberships()) {
-                // if its a password reset, only send it to those accounts which do not have a password
-                // thats because this is used to welcome user's who have been loaded into the system but who need to create a password
-                if( !isPasswordReset || gm.getMember().getPasswordCredentialDate() == null) {
-                    recipients.add(gm.getMember());
-                }
-            }
-        } else {
-            log.warn("No members in recipient group: " + g.getName());
-        }
-    }
 }

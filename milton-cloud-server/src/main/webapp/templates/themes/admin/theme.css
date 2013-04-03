@@ -1411,3 +1411,30 @@ button.close {
     opacity: 0.2;
     text-shadow: 0 1px 0 #FFFFFF;
 }
+div.Info {
+    border: 1px solid #dedede;
+    border-radius: 3px;
+    background: #FFF;
+}
+div.Info > header {
+    background-color: #f0f0f0;
+    padding: 8px;
+}
+
+table.Summary aside { float: right; }
+table.Summary aside a {
+    float: left;
+    display: block;
+    height: 23px;
+    width: 23px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    margin-right: 4px;
+    border-radius: 2px;
+    padding: 1px;
+}
+li aside a:hover { background-color: #FFF; }
+li.Odd aside a:hover {
+    padding: 0px;
+    border: 1px solid #dedede;
+}

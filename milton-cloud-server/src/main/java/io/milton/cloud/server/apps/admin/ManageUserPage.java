@@ -85,7 +85,6 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
     public static final String PICS_REPO_NAME = "ProfilePics";
     public static final long MAX_SIZE = 10000000l;
     private Profile profile;
-    private JsonResult jsonResult;
     private ResourceList children;
     private List<Organisation> orgSearchResults;
 

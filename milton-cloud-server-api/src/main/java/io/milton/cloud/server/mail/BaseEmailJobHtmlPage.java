@@ -20,13 +20,9 @@ import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
-import io.milton.cloud.server.web.templating.TemplateHtmlPage;
 import io.milton.http.Request;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.vfs.db.Organisation;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.Branch;

@@ -26,13 +26,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
 
 /**
- * Represents a Profile which is a subordinate to an organisation. This is 
- * when the profile has a group membership either directly related to the organisation
- * or to a subordinate organisation
- * 
- * This creates a link between the organisation and group membership which is subordinate
- * to that org
- * 
+ * Represents a Profile which is a subordinate to an organisation. This is when
+ * the profile has a group membership either directly related to the
+ * organisation or to a subordinate organisation
+ *
+ * This creates a link between the organisation and group membership which is
+ * subordinate to that org
+ *
  * Note that the Subordinate record is created for every organisation that the
  * profile is subordinate to, so queries do not need to do recursive lookups
  *
@@ -40,15 +40,16 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Subordinate implements Serializable{
-    
+public class Subordinate implements Serializable {
+
     /**
-    /**
-     * Find a Subordinate (if one exists) between then given org and user profile
-     * 
+     * /**
+     * Find a Subordinate (if one exists) between then given org and user
+     * profile
+     *
      * @param org
      * @param p
-     * @return 
+     * @return
      */
     public static Subordinate find(Organisation org, Profile p, Session session) {
         Criteria c = session.createCriteria(Subordinate.class);
@@ -58,6 +59,15 @@ public class Subordinate implements Serializable{
         c.setCacheable(true);
         return DbUtils.unique(c);
     }
+
+    public static void deleteByOrg(Organisation org, Session session) {
+        Criteria c = session.createCriteria(Subordinate.class);
+        c.add(Restrictions.eq("withinOrg", org));        
+        c.setCacheable(true);
+        for (Subordinate s : DbUtils.toList(c, Subordinate.class)) {
+            session.delete(s);
+        }
+    }
     
     private Long id;
     private Organisation withinOrg;
@@ -65,9 +75,7 @@ public class Subordinate implements Serializable{
 
     public Subordinate() {
     }
-    
-    
-    
+
     @Id
     @GeneratedValue
     public Long getId() {
@@ -78,7 +86,7 @@ public class Subordinate implements Serializable{
         this.id = id;
     }
 
-    @ManyToOne(optional=false)    
+    @ManyToOne(optional = false)
     public Organisation getWithinOrg() {
         return withinOrg;
     }
@@ -87,7 +95,7 @@ public class Subordinate implements Serializable{
         this.withinOrg = withinOrg;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public GroupMembership getGroupMembership() {
         return groupMembership;
     }
@@ -99,9 +107,4 @@ public class Subordinate implements Serializable{
     public void delete(Session session) {
         session.delete(this);
     }
-    
-    
-
-    
-    
 }

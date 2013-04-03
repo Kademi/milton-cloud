@@ -260,6 +260,28 @@ public class Formatter {
         return cal.get(Calendar.DAY_OF_MONTH) + 1;
     }
 
+    public int getHour(Object o) {
+        if (o == null || !(o instanceof Date)) {
+            return 0;
+        }
+        Date dt = (Date) o;
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        return cal.get(Calendar.HOUR_OF_DAY);
+    }
+
+    public int getMinute(Object o) {
+        if (o == null || !(o instanceof Date)) {
+            return 0;
+        }
+        Date dt = (Date) o;
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        return cal.get(Calendar.MINUTE);
+    }
+
     public String formatDate(Object o) {
         DateTime dt = getDateTime(o);
         if (dt == null) {
@@ -727,21 +749,33 @@ public class Formatter {
     }
 
     /**
-     * If o1 is equal to o2, then output the ifEqual parameter, otherwise the ifNoteEqual parameter
-     * 
+     * If o1 is equal to o2, then output the ifEqual parameter, otherwise the
+     * ifNoteEqual parameter
+     *
      * This is a nullsafe comparison
-     * 
+     *
      * @param ifEqual
      * @param ifNotEqual
      * @param o1
      * @param o2
-     * @return 
+     * @return
      */
     public String ifEqual(String ifEqual, String ifNotEqual, Object o1, Object o2) {
+        System.out.println("ifequal: " + o1 + " - " + o2);
         if (o1 == null) {
             return o2 == null ? ifEqual : ifNotEqual;
         } else {
-            return o1.equals(o2) ? ifEqual : ifNotEqual;
+            if ( o2 != null && o1.getClass() == o2.getClass()) {
+                return o1.equals(o2) ? ifEqual : ifNotEqual;
+            } else {
+                String s1 = o1.toString();
+                String s2 = null;
+                if (o2 != null) {
+                    s2 = o2.toString();
+                }
+                System.out.println(" = " + s1.equals(s2));
+                return s1.equals(s2) ? ifEqual : ifNotEqual;
+            }
         }
     }
 
@@ -883,12 +917,12 @@ public class Formatter {
      *
      * @return
      */
-    public String option(Object value, String text, Object currentValue) {
+    public String option(Object value, Object oText, Object currentValue) {
+        System.out.println("option: " + value + " - " + oText + " - " + currentValue);
+        String text = format(oText);
         StringBuilder sb = new StringBuilder("<option");
         appendValue(sb, value);
-        if (currentValue != null && currentValue.equals(value)) {
-            sb.append(" selected=\"true\"");
-        }
+        sb.append(ifEqual(" selected=\"true\"", "", value, currentValue));
         sb.append(">");
         sb.append(text).append("</option>");
         return sb.toString();

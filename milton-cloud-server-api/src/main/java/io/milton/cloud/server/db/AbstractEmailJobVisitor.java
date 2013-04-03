@@ -30,4 +30,10 @@ public abstract class AbstractEmailJobVisitor implements EmailJobVisitor{
         
     }
     
+    @Override
+    public void visit(ScheduledEmail r) {
+        
+    }
+    
+    
 }

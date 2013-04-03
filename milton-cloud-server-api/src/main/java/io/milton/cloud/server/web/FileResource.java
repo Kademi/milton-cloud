@@ -293,19 +293,31 @@ public class FileResource extends AbstractContentResource implements Replaceable
     }
 
     /**
-     * Writes any parsed data in the htmlPage to this file's content
+     * Writes any parsed data in the htmlPage to this file's content. Runs JTidy
+     * (or similar) to ensure html is parseable
      *
      * @throws BadRequestException
      * @throws NotAuthorizedException
      */
     public void doSaveHtml() throws BadRequestException, NotAuthorizedException {
+        doSaveHtml(true);
+    }
+    
+    public void doSaveHtml(boolean runTidy) throws BadRequestException, NotAuthorizedException {
         // htmlPage will only have been set if html content fields have been set, in which
         // case we need to generate and persist html content
         if (htmlPage != null) {
             try {
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 _(HtmlTemplateParser.class).update(htmlPage, bout);
-                String tidyHtml = WebUtils.tidyHtml(bout.toString());
+                String rawHtml = bout.toString();
+                String tidyHtml;
+                if( runTidy ) {
+                    tidyHtml = WebUtils.tidyHtml2(rawHtml);
+                    //String tidyHtml = WebUtils.tidyHtml(rawHtml);
+                } else {
+                    tidyHtml = rawHtml;
+                }
                 ByteArrayInputStream bin = new ByteArrayInputStream(tidyHtml.getBytes("UTF-8"));
                 setContent(bin);
             } catch (UnsupportedEncodingException ex) {
@@ -314,7 +326,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         } else {
             log.warn("No htmlPage, so nothing to save");
         }
-    }
+    }    
 
     @Override
     public Long getMaxAgeSeconds(Auth auth) {

@@ -147,7 +147,6 @@ public class HtmlTemplateRenderer {
         for (List<String> list : bodyClassLists) {
             if (list != null) {
                 for (String s : list) {
-                    System.out.println("body clasS: " + s);
                     if (!set.contains(s)) {
                         set.add(s);
                         orderedList.add(s);

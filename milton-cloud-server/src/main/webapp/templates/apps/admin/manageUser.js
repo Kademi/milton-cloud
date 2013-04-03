@@ -86,8 +86,6 @@ function doSearch() {
         success: function(data) {
             log("success", data)
             var $fragment = $(data).find("#userSearchResults");
-            log("replace", $("#userSearchResults"));
-            log("frag", $fragment); 
             $("#userSearchResults").replaceWith($fragment);
         },
         error: function(resp) {

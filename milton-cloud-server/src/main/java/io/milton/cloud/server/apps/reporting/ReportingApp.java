@@ -65,6 +65,10 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
 
     private static final Logger log = LoggerFactory.getLogger(ReportingApp.class);
     
+    public static String getDateRange(Date from, Date to) {
+        return formatDate(from) + "-" + formatDate(to);
+    }
+    
     public static String getDashboardDateRange() {
         Date now = _(CurrentDateService.class).getNow();
         now = _(Formatter.class).addDays(now, -7);

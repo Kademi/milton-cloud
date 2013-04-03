@@ -17,6 +17,8 @@ package io.milton.cloud.server.apps.signup;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -76,7 +78,8 @@ public class RegisterOrLoginPage extends AbstractResource implements GetableReso
         SignupApp signupApp = _(SignupApp.class);
 
         List<GroupRegistrationPage> pages = new ArrayList<>();
-        for (Resource r : parent.getChildren()) {
+        RootFolder rf = WebUtils.findRootFolder(this);
+        for (Resource r : rf.getChildren()) {
             if (r instanceof GroupInWebsiteFolder) {
                 GroupInWebsiteFolder giwf = (GroupInWebsiteFolder) r;
                 if (giwf.getGroup().getRegistrationMode().equals(Group.REGO_MODE_OPEN)) {

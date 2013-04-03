@@ -44,16 +44,8 @@
 #manageUser > header .Left div.Info table.Summary {
     border-bottom: 1px solid #dedede;
 }
-/* Table summary with search button */
-#manageUser div.Info {
-    border: 1px solid #dedede;
-    border-radius: 3px;
-    background: #FFF;
-}
-#manageUser div.Info > header {
-    background-color: #f0f0f0;
-    padding: 8px;
-}
+
+
 #manageUser div.Info header div.Setting {
     float: right;
     position: relative;

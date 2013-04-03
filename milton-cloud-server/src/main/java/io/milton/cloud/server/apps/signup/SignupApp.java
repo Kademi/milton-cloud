@@ -235,7 +235,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         writer.write("  <option>[Please select]</option>");        
         System.out.println("websites: " + org.websites().size());
         for( Website w : org.websites()) {            
-            writer.write(formatter.option(w.getName(), w.getName(), redirWebsite));
+            writer.write(formatter.option(w.getName(), w.getName(), redirWebsite)); 
         }
         writer.write("</select>");
         writer.flush();

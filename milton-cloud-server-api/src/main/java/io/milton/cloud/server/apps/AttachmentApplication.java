@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 McEvoy Software Ltd.
+ * Copyright 2013 McEvoy Software Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.mail;
+package io.milton.cloud.server.apps;
 
-import io.milton.cloud.server.db.EmailItem;
-import io.milton.vfs.db.Profile;
-import java.util.Map;
+import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.web.CommonResource;
+import java.util.List;
 
 /**
+ * These applications can provide attachments to emails
  *
  * @author brad
  */
-public interface BatchEmailCallback {
-    String beforeSend(Profile p, String template, Map templateVars, EmailItem emailItem);
+public interface AttachmentApplication extends Application{
+    
+    /**
+     * Get the available attachments in the given organisation
+     * 
+     * @param organisation
+     * @return 
+     */
+    List<CommonResource> getAvailableAttachments(OrganisationFolder organisationFolder);
+    
+
 }

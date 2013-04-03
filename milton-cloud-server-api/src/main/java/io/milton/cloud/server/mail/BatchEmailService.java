@@ -21,6 +21,8 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
+import io.milton.cloud.server.db.GroupEmailJob;
+import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.vfs.db.*;
@@ -51,7 +53,6 @@ import net.htmlparser.jericho.Tag;
 import org.hibernate.HibernateException;
 import org.mvel2.templates.TemplateRuntime;
 
-
 /**
  *
  * @author brad
@@ -63,16 +64,16 @@ public class BatchEmailService {
     public BatchEmailService() {
     }
 
-
     /**
      * Generate EmailItem records to send. These will be sent by a seperate
      * process
-     * 
+     *
      * @param j
      * @param directRecipients
-     * @param callback - may be null, otherwise is called just prior to generating the email content
+     * @param callback - may be null, otherwise is called just prior to
+     * generating the email content
      * @param session
-     * @throws IOException 
+     * @throws IOException
      */
     public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
         if (j.getGroupRecipients() == null && directRecipients.isEmpty()) {
@@ -80,11 +81,13 @@ public class BatchEmailService {
             return;
         }
         Set<Profile> profiles = new HashSet<>();
-        for (BaseEntity e : directRecipients) {
-            if (e != null) {
-                append(e, profiles);
-            } else {
-                log.warn("Found null recipient, ignoring");
+        if (directRecipients != null) {
+            for (BaseEntity e : directRecipients) {
+                if (e != null) {
+                    append(e, profiles);
+                } else {
+                    log.warn("Found null recipient, ignoring");
+                }
             }
         }
         log.info("recipients: " + profiles.size());
@@ -127,29 +130,32 @@ public class BatchEmailService {
         Date now = _(CurrentDateService.class).getNow();
         EmailItem i = new EmailItem();
         i.setCreatedDate(now);
-        i.setFromAddress(from);        
+        i.setFromAddress(from);
         i.setReplyToAddress(replyTo);
 
         // Templating requires a HtmlPage to represent the template        
-        String html = generateHtml(j, recipientProfile, callback);
-        i.setHtml(html);
-        String text = generateTextFromHtml(html);
-        i.setText(text);
         i.setJob(j);
         i.setRecipient(recipientProfile);
         i.setRecipientAddress(recipientProfile.getEmail());
         i.setSendStatusDate(now);
         String subject = j.getSubject();
-        if( subject == null || subject.trim().length() == 0 ) {
+        if (subject == null || subject.trim().length() == 0) {
             subject = "Auto mail from " + j.getOrganisation().getFormattedName();
         }
         i.setSubject(subject);
-        
+
         j.getEmailItems().add(i);
         session.save(i);
+        String html = generateHtml(j, recipientProfile, callback, i);
+        i.setHtml(html);
+        String text = generateTextFromHtml(html);
+        i.setText(text);
+        session.save(i);
+        
         log.info("Created email item: " + i.getId() + " to " + recipientProfile.getEmail());
     }
-
+   
+    
     private String generateTextFromHtml(String html) {
         try {
             Source source = new Source(new ByteArrayInputStream(html.getBytes("UTF-8")));
@@ -161,16 +167,15 @@ public class BatchEmailService {
             return null;
         }
     }
-    
-    
-    private String generateHtml(final BaseEmailJob j, final Profile p, BatchEmailCallback callback) throws IOException {
-        return generateHtml(j.getThemeSite(), j.getHtml(), p, callback);
+
+    private String generateHtml(final BaseEmailJob j, final Profile p, BatchEmailCallback callback, EmailItem emailItem) throws IOException {
+        return generateHtml(j.getThemeSite(), j.getHtml(), p, callback, emailItem);
     }
-    
-    public String generateHtml(Website themeSite, String html, final Profile p, BatchEmailCallback callback) throws IOException {
+
+    public String generateHtml(Website themeSite, String html, final Profile p, BatchEmailCallback callback, EmailItem emailItem) throws IOException {
         Map localVars = new HashMap();
         localVars.put("profile", p);
-        
+
         if (themeSite != null) {
             Branch b = themeSite.liveBranch();
             if (b != null) {
@@ -181,11 +186,11 @@ public class BatchEmailService {
 
         String template = html == null ? "" : html;
         if (callback != null) {
-            template = callback.beforeSend(p, template, localVars);
+            template = callback.beforeSend(p, template, localVars, emailItem);
         }
-               
+
         final String bodyHtml = TemplateRuntime.eval(template, localVars).toString();
-        
+
         Map<String, String> params = new HashMap<>();
 
         if (themeSite != null) {
@@ -195,7 +200,7 @@ public class BatchEmailService {
                 TemplatedHtmlPage page = new TemplatedHtmlPage("email", websiteRootFolder, "email/genericEmail", "Email") {
                     @Override
                     protected Map<String, Object> buildModel(Map<String, String> params) {
-                        Map<String, Object> map = super.buildModel(params);                        
+                        Map<String, Object> map = super.buildModel(params);
                         map.put("bodyHtml", bodyHtml);
                         return map;
                     }
@@ -203,15 +208,15 @@ public class BatchEmailService {
 
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 try {
-                    page.sendContent(bout, null, params, null); 
+                    page.sendContent(bout, null, params, null);
                 } catch (IOException | NotAuthorizedException | BadRequestException | NotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
                 return bout.toString("UTF-8");
             }
-        } 
+        }
         log.info(" no theme, cant do templating");
-        return bodyHtml;        
+        return bodyHtml;
     }
 
     private final class Processor {
