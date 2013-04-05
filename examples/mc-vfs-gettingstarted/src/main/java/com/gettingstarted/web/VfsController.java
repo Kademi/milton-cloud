@@ -48,10 +48,7 @@ import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-/**
- *
- * @author brad
- */
+
 @ResourceController
 public class VfsController {
 
@@ -116,8 +113,7 @@ public class VfsController {
         Transaction tx = SessionManager.beginTx();
         DataSession.DirectoryNode newDir = dir.addDirectory(newName);
         getDataSession().save(getUser());
-        SessionManager.commit(tx);
-            
+        SessionManager.commit(tx);            
         return newDir;
     }
     
@@ -154,15 +150,6 @@ public class VfsController {
         return Profile.find("admin", SessionManager.session());
     }
     
-    /**
-     * Required for the name of the root resource
-     *
-     * @return
-     */
-    public String getName() {
-        return "";
-    }
-
     private synchronized void initDb() {
         if( initDone ) {
             return ;

@@ -62,16 +62,17 @@
             <artifactId>milton-cloud-vfs</artifactId>
             <version>${mc.version}</version>
         </dependency>    
-                    
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
-        </dependency>
+
         <dependency>
             <groupId>io.milton</groupId>
             <artifactId>milton-server-ent</artifactId>
             <version>${milton.version}</version> 
+        </dependency>
+                                        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
         </dependency>
 
         <dependency>
