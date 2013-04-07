@@ -2,6 +2,7 @@ package io.milton.vfs.db.utils;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 
 /**
@@ -13,14 +14,26 @@ public class SessionManager {
     private static ThreadLocal<Session> tlSession = new ThreadLocal<>(); 
     
     public static Session session() {
+        //return SessionFactoryUtils.getSession(sessionFactory, false);
         return tlSession.get();
     }    
     
-    private final SessionFactory sessionFactory;
+    public static Transaction beginTx() {
+        return session().beginTransaction();
+    }
+    
+    public static void commit(Transaction tx) {
+        Session s = session();
+        s.flush();
+        tx.commit();
+    }
+        
+    
+    private static SessionFactory sessionFactory;
     
     
-    public SessionManager(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public SessionManager(SessionFactory sf) {
+        sessionFactory = sf;
     }
 
     public Session open() {
@@ -30,7 +43,7 @@ public class SessionManager {
     }
     
     public void close() {
-        Session s = session();
+        Session s = tlSession.get();
         if( s != null ) {
             SessionFactoryUtils.closeSession(s);
         }
