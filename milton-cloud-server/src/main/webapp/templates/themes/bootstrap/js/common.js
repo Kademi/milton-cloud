@@ -60,7 +60,8 @@ function log() {
             } else {
                 var msg = "";
                 for( i=0; i<arguments.length; i++) {
-                    msg += JSON.stringify(arguments[i]) + ",";
+                    msg += arguments[i] + ",";
+                    //msg += JSON.stringify(arguments[i]) + ",";
                 }
                 console.log(msg);
             }

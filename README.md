@@ -4,8 +4,14 @@ Milton-cloud
 Milton Cloud (or MC, formerly called Spliffy) is an extensible personal cloud server product. Suitable for
 small or large ISP scale installations.
 
+Getting in touch:
+ - website: http://cloud.milton.io
+ - github: just comment anywhere in here
+ - mailing list: http://lists.justthe.net/mailman/listinfo/milton-users
+ - contact the author from the website: http://cloud.milton.io/contactus
+
 Features:
- - webdav file server with full version history (just like git, but without explicit commits) 
+ - webdav file server with full version history (internally is just like git, but without explicit commits) 
  - and FTP for the old school types out there
  - file sync (like dropbox) via cross platform client (uses hashsplit4j for efficient delta transfers)
  - contacts, including mobile support via Carddav and desktop support via LDAP
@@ -20,8 +26,15 @@ Features:
  - analytics and reporting
  - externalisable storage, use Amazon S3, Rackspace cloud, etc for storage.
 
+Downloads
+Download from the website here - http://cloud.milton.io/downloads/index.html
+But you might find it easier to get started by running the maven commands
+
 Getting started
-There is currently no binary distribution, but just checkout the source from git and build - its easy
+Easiest way to get started is to build and run from maven, as below. You can also
+drop the WAR into tomcat etc, but then you'll just need to do some configuration to
+get the initial data setup. If you'd really like to skip maven and go direct to tomcat
+let me know.
 
 Prerequisites
  - java 7 JDK (yes, must be version 7!)

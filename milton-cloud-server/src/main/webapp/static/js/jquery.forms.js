@@ -12,6 +12,8 @@
  */
 
 (function( $ ) {
+
+    
     $.fn.forms = function(options) {        
         log("init forms plugin", this);
         
