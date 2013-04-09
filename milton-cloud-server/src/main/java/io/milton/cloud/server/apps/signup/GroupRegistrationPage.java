@@ -173,7 +173,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             Organisation org = parent.getOrganisation();
             if (parameters.containsKey("orgId")) {
                 String orgId = parameters.get("orgId");
-                org = Organisation.findByOrgId(orgId, session);
+                org = getOrganisation().childOrg(orgId, session);
                 if (org == null) {
                     jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
                     return null;

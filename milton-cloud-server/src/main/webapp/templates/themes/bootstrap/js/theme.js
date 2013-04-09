@@ -22,7 +22,7 @@ $(function() {
         e.stopPropagation();
     });
     // init the login form
-    $(".banner .login").user({
+    $(".login").user({
     });
 
     // setup text box resizing

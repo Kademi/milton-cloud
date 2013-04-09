@@ -206,7 +206,7 @@ public class OrganisationsMatchHelperCsv extends AbstractResource implements Get
             return null;
         }
         log.info("doProcess: orgId=" + orgIdOrTitle);
-        Organisation child = Organisation.findByOrgId(orgIdOrTitle, session);
+        Organisation child = Organisation.findByOrgId(rootOrg, orgIdOrTitle, session);
         if (child != null) {
             // exact match on orgId, perfect
             return null;

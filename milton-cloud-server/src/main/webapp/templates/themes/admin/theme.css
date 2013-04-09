@@ -1,7 +1,7 @@
 /** Begin admin/theme.css **/
 @import url("/static/common/modal.css");
 
-html, body, div, span, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, address, code, img, small, strong, dl, dt, dd, ol, ul, li, fieldset, form, label {
+html, body, div, span, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, address, code, img, small, strong, dl, dt, dd, fieldset, form, label {
     vertical-align: baseline;
     background: transparent;
     text-decoration:none;
@@ -25,8 +25,8 @@ a {
     color: #333;
 }
 ol, ul {
-    list-style: none;
-    font-size:12px
+    font-size:12px;
+    margin-left: 20px;        
 }
 table {
     border-collapse: collapse;
@@ -41,7 +41,10 @@ input, select, textarea { font: 13px/1.3em Arial, Helvetica, sans-serif }
 h1, h2, h3, h4, h5, h6 { font-weight:normal }
 /*--- --- DEFAULT CSS ---- */
 p { font-size:12px; }
-a { font-size:11px; }
+a { 
+    font-size:12px; 
+    color: #0099df;
+}
 h1 { font-size:18px; }
 h2 {
     color:#333333;
@@ -176,7 +179,11 @@ nav#nav li a {
     padding-top: 35px;
     margin-bottom: 30px
 }
-.menu ul { font-size: 11px }
+.menu ul { 
+    font-size: 11px;
+    margin: 0;
+    list-style: none;
+}
 .menu li h4 {
     background:url(images/bg_title_nav.png) top left no-repeat;
     width:204px;
@@ -187,6 +194,9 @@ nav#nav li a {
 .menu hr { margin:8px 2px; }
 .menu li { 
     padding-bottom: 0px 
+}
+.menu li a { 
+    font-size: 11px;
 }
 .menu ul li h4 a {
     display: block;
@@ -519,6 +529,7 @@ ul.Program li aside a:hover {
     margin-right: 5px;
     cursor: pointer;
     border: 0 none;
+    color: #333333;
 }
 .SmallBtn.Add { background-image: url(images/btn_add_small.png); }
 .SmallBtn.Delete { background-image: url(images/btn_delete_small.png); }

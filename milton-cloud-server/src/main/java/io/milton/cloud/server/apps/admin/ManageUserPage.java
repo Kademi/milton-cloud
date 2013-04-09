@@ -116,7 +116,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         String sGroup = parameters.get("group");
-        String orgId = parameters.get("orgId"); // to create the membership in
+        Long orgId = WebUtils.getParamAsLong(parameters, "orgId");
 
         if (parameters.containsKey("nickName")) {
             // is create or update
@@ -381,7 +381,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
      * @param sGroup
      * @return
      */
-    private boolean addMembership(String sGroup, String orgId, Session session) {
+    private boolean addMembership(String sGroup, Long orgId, Session session) {
         Group group = getOrganisation().group(sGroup, session);
         if (group == null) {
             jsonResult = JsonResult.fieldError("group", "Sorry, I couldnt find group: " + sGroup);
@@ -391,13 +391,13 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             jsonResult = JsonResult.fieldError("orgId", "Please select an organisation");
             return false;
         }
-        Organisation subOrg = Organisation.findByOrgId(orgId, session);
+        Organisation subOrg = getOrganisation().childOrg(orgId, session); 
         if (subOrg == null) {
             jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
             return false;
         }
         if (!subOrg.isWithin(getOrganisation())) {
-            throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getOrgId());
+            throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getFormattedName());
         }
         profile.addToGroup(group, subOrg, session);
         _(SignupApp.class).onNewMembership(profile.membership(group), null);
@@ -537,7 +537,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
 
         @Override
         public String getName() {
-            return membership.getGroupEntity().getName() + "-" + membership.getWithinOrg().getOrgId();
+            return membership.getGroupEntity().getName() + "-" + membership.getWithinOrg().getId();
         }
 
         @Override

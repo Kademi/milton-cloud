@@ -75,6 +75,20 @@
                 <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
             </header>
             <div class="ModalContent">
+                <p>Instructions for uploading organisations</p>
+                <ol>
+                    <li>Always <a href="orgs.csv">download the spreadsheet</a> and keep it as a backup before making changes</li>
+                    <li>The upload can process about <b>1000 rows per minute</b>, so it can take a while for larger databases</li>
+                    <li>This process <b>never deletes</b> anything</li>
+                    <li>If this is your firt upload use that spreadsheet as a template</li>
+                    <li>Update the spreadsheet. The first column is a unique identifier <b>which allows you to update the spreadsheet</b>. If you
+                    dont provide a unique ID one will be assigned</li>
+                    <li>The second column is the type, which must be one of those defined in the <a href="orgTypes">Manage Organisation Types</a> page. Optional</li>
+                    <li>The third column is the path, which is useful if your organisational structure is a hierarchy. Only use this column if you need to delegate permissions to business units.</li>
+                    <li>By default only rows which an existing organisation on unique ID will be processed, these will be updated in the database from the spreadsheet</li>
+                    <li><b>We recommend you always do a first run with "allow inserts" OFF</b>. You will be shown how many matches were made or not, then you can decide if you want to allow inserts.</b>
+                    <li>If you click "allow inserts" then any organisations in the spreadsheet which do not match existing orgs in the database will be inserted</li>
+                </ol>
                 <div class='upload'>
                     <div class="input" id='doUploadCsv'></div>
                     <br/>

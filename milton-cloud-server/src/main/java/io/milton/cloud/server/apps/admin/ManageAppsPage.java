@@ -57,7 +57,7 @@ public class ManageAppsPage extends AbstactAppsPage implements GetableResource, 
 
     @Override
     public String getTitle() {
-        return "Manage applications: " + organisation.getOrgId();
+        return "Manage applications: " + organisation.getFormattedName();
     }
 
     @Override

@@ -308,7 +308,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         
         
         log.info("doProcess: orgId=" + orgId);
-        Organisation withinOrg = Organisation.findByOrgId(orgId, session);
+        Organisation withinOrg = getOrganisation().childOrg(orgId, session);
         if (withinOrg == null) {
             // Try to find the org
             unmatched.add(lineList);

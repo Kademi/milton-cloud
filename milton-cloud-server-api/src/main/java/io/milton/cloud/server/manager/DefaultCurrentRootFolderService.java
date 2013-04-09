@@ -142,7 +142,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
             // If starts with admin. then look for an organisation, will go to admin console
             if (subdomain.startsWith("admin.")) {
                 String orgName = Utils.stripPrefix(subdomain, "admin.");
-                Organisation org = Organisation.findByOrgId(orgName, session);
+                Organisation org = Organisation.findByAdminDomain(orgName, session);
                 if (org != null) {
                     return new OrganisationRootFolder(applicationManager, org);
                 }

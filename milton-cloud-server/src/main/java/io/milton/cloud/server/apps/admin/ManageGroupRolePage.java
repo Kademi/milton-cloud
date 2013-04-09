@@ -49,7 +49,7 @@ public class ManageGroupRolePage extends AbstractResource implements DeletableRe
         if( groupRole.getRepository() != null ) {
             s += "_r_" + groupRole.getRepository().getName();
         } else if( groupRole.getWithinOrg() != null ) {
-            s += "_o_" + groupRole.getWithinOrg().getOrgId();
+            s += "_o_" + groupRole.getWithinOrg().getId();
         }
         this.name = s;
     }
@@ -59,7 +59,7 @@ public class ManageGroupRolePage extends AbstractResource implements DeletableRe
         if( groupRole.getRepository() != null ) {
             t += ", on " + groupRole.getRepository().getName();
         } else if( groupRole.getWithinOrg() != null ) {
-            t += ", on " + groupRole.getWithinOrg().getOrgId();
+            t += ", on " + groupRole.getWithinOrg().getFormattedName();
         } else {
             t += ", on their own organisation";
         }

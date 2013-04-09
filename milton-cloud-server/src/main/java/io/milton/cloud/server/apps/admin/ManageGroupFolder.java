@@ -110,10 +110,11 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     break;
                 case "selectOrg":
                     Organisation org;
-                    if (getOrganisation().getOrgId().equals(appliesTo)) {
+                    Long appliesToId = Long.parseLong(appliesTo);
+                    if (getOrganisation().getId() == appliesToId) {
                         org = getOrganisation();
                     } else {
-                        org = getOrganisation().childOrg(appliesTo);
+                        org = getOrganisation().childOrg(appliesToId, session);
                     }
                     if (org == null) {
                         jsonResult = JsonResult.fieldError("appliesTo", "Could not locate child organistion: " + appliesTo);
@@ -151,7 +152,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                 System.out.println("set ot: " + group.getRegoOrgType());
                 String sRootOrg = WebUtils.getParam(parameters, "sRootRegoOrg");
                 if (sRootOrg != null) {
-                    Organisation org = getOrganisation().childOrg(sRootOrg);
+                    Organisation org = getOrganisation().childOrg(sRootOrg, session);
                     group.setRootRegoOrg(org);
                 } else {
                     group.setRootRegoOrg(null);
@@ -172,7 +173,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                                 if (o == null) {
                                     o = OptIn.create(group, optinGroup);
                                 } else {
-          
+
                                     toRemove.remove(o); // found it, so remove it from list. We will delete whats left
                                 }
                                 String desc = WebUtils.getParam(parameters, "optin" + groupName + "_Desc");
@@ -228,8 +229,6 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         return OptIn.findForGroup(group, SessionManager.session());
     }
 
-    
-    
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
@@ -239,7 +238,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     ManageGroupRolePage p = new ManageGroupRolePage(this, gr);
                     children.add(p);
                 }
-            }            
+            }
         }
         return children;
     }
@@ -372,7 +371,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-        if( childName.equals("members")) {
+        if (childName.equals("members")) {
             return new ManageGroupMembersPage(this, childName);
         }
         return NodeChildUtils.childOf(getChildren(), childName);
@@ -417,13 +416,13 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
     public boolean isLockedOutRecursive(Request request) {
         return false;
     }
-    
+
     public Map<String, String> getSignupPages() {
         Map<String, String> map = new HashMap<>();
-        for( GroupInWebsite giw : GroupInWebsite.findByGroup(group, SessionManager.session()) ) {
+        for (GroupInWebsite giw : GroupInWebsite.findByGroup(group, SessionManager.session())) {
             Website w = giw.getWebsite();
             String domainName = w.getDomainName();
-            if( domainName == null ) {
+            if (domainName == null) {
                 domainName = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
             }
             String url = "http://" + domainName + _(Formatter.class).getPortString() + "/" + group.getName() + "/signup";

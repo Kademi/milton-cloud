@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 @javax.persistence.Entity
 @Table(name = "ORG_ENTITY", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"orgId"})}// website DNS names must be unique across whole system
+    @UniqueConstraint(columnNames = {"adminDomain"})}// website DNS names must be unique across whole system
 )
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -78,13 +78,35 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return (Organisation) crit.uniqueResult();
     }
 
-    public static Organisation findByOrgId(String orgId, Session session) {
+    /**
+     * Find the given orgId within an administrative org
+     * 
+     * @param adminOrg
+     * @param orgId
+     * @param session
+     * @return 
+     */
+    public static Organisation findByOrgId(Organisation adminOrg, String orgId, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
+        Criteria critSubOrg = crit.createCriteria("parentOrgLinks");
+        
         crit.setCacheable(true);
         crit.add(Restrictions.eq("orgId", orgId));
+        critSubOrg.add(Restrictions.eq("owner", adminOrg));
         return (Organisation) crit.uniqueResult();
+    }    
+    
+    public static Organisation get(Long id, Session session) {
+        return (Organisation) session.get( Organisation.class,  id);
     }
 
+    public static Organisation findByAdminDomain(String adminDomain, Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("adminDomain", adminDomain));
+        return DbUtils.unique(crit);
+    }    
+    
     public static List<Organisation> findByOrgType(OrgType orgType, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
@@ -146,7 +168,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return org;
     }
     private String title;
-    private String orgId; // globally unique; used for web addresses for this organisation
+    private String orgId; // locally unique, ie within the administrative domain
+    private String adminDomain; // globally unique, if not null. Used for admin console address
     private String phone;
     private String address;
     private String addressLine2;
@@ -166,10 +189,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (getTitle() != null && getTitle().length() > 0) {
             return getTitle();
         }
+        if( getAdminDomain() != null ) {
+            return getAdminDomain();
+        }
         return getOrgId();
     }
 
-    @Column(nullable = false)
+    /**
+     * Is required to be unique within its administrative domain, even in the presence
+     * or a nested hierarchy. If not set by the user, will be set to the ID property
+     * 
+     * So it might be null on initial save, but will then be immediately populated
+     * 
+     * @return 
+     */
+    @Column(nullable = true)
     @Index(name = "idx_orgId")
     public String getOrgId() {
         return orgId;
@@ -178,6 +212,23 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
+
+    @Column(nullable = true)
+    @Index(name = "idx_adminDomain")    
+    public String getAdminDomain() {
+        return adminDomain;
+    }
+
+    public void setAdminDomain(String adminDomain) {
+        if( adminDomain != null ) {
+            if( !adminDomain.equals(adminDomain.toLowerCase())) {
+                throw new RuntimeException("Admin domain must be all lower case");
+            }
+        }
+        this.adminDomain = adminDomain;
+    }
+    
+    
 
     @OneToMany(mappedBy = "organisation")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -380,13 +431,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
-    public Organisation childOrg(String orgId) {
-        for (Organisation org : childOrgs()) {
-            if (org.getOrgId().equals(orgId)) {
-                return org;
-            }
-        }
-        return null;
+    public Organisation childOrg(String orgId, Session session) {
+        return findByOrgId(this, orgId, session);
     }
 
     /**
@@ -429,6 +475,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public Organisation createChildOrg(String orgId, String title, Session session) {
         Organisation o = new Organisation();
         o.setOrganisation(this);
+        if( orgId != null ) {
+            orgId = orgId.trim();
+            if( orgId.length() == 0 ) {
+                orgId = null;
+            }
+        }
         o.setOrgId(orgId);
         o.setTitle(title);
         o.setCreatedDate(new Date());
@@ -438,6 +490,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
         this.getChildOrgs().add(o);
         session.save(o);
+        if( o.getOrgId() == null ) {
+            o.setOrgId(o.getId() + "");
+            session.save(o);
+        }
         SubOrg.updateSubOrgs(o, session);
         return o;
     }
@@ -677,5 +733,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         for (GroupMembership m : toDelete) {            
             m.delete(session);
         }
+    }
+
+    public Organisation childOrg(Long orgId, Session session) {
+        Organisation child = get(orgId, session);
+        if( child == null ) {
+            return null;
+        }
+        if( child.isWithin(this)) {
+            return child;
+        }
+        return null;
     }
 }

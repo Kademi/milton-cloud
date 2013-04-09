@@ -36,10 +36,12 @@ import io.milton.resource.PostableResource;
 import io.milton.vfs.db.OrgType;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Map;
 import org.hibernate.Session;
@@ -65,6 +67,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
     private JsonResult jsonResult;
     private List<List<String>> unmatched = new ArrayList<>();
     private int numUpdated;
+    private int currentLine;
 
     public OrganisationsCsv(String name, OrganisationsFolder parent) {
         this.parent = parent;
@@ -90,7 +93,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 log.warn("Exception processing", ex);
                 tx.rollback();
                 jsonResult = new JsonResult(false);
-                jsonResult.setMessages(Arrays.asList("Failed to update"));
+                jsonResult.setMessages(Arrays.asList("Error processing line: " + currentLine + " - " + ex.getMessage()));
             }
         } else {
         }
@@ -106,9 +109,12 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult != null) {
             jsonResult.write(out);
-        } else {
-            try (PrintWriter pw = new PrintWriter(out)) {
+        } else {            
+            try (OutputStreamWriter pw = new OutputStreamWriter(out)) {
                 CSVWriter writer = new CSVWriter(pw);
+                String[] arr = {"OrgID", "OrgType", "Path", "OrgTitle", "Address1", "Address2", "AddressState", "Phone", "Postcode"};
+                writer.writeNext(arr);
+
                 toCsv(parent.getOrganisation(), parent.getOrganisation().childOrgs(), writer);
                 pw.flush();
             }
@@ -165,10 +171,12 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         if (orgs == null) {
             return;
         }
+
+        List<String> values;
+        String[] arr;
         for (Organisation org : orgs) {
-            List<String> values;
             values = buildLineOfValues(rootOrg, org);
-            String[] arr = new String[values.size()];
+            arr = new String[values.size()];
             values.toArray(arr);
             writer.writeNext(arr);
             toCsv(rootOrg, org.childOrgs(), writer);
@@ -182,10 +190,10 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
             path = path.getParent();
         }
         String sOrgType = "";
-        if( org.getOrgType() != null ) {
+        if (org.getOrgType() != null) {
             sOrgType = org.getOrgType().getName();
         }
-        
+
         values.add(org.getOrgId()); // unique ID
         values.add(sOrgType);
         values.add(path.toString()); // path to org        
@@ -228,19 +236,20 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         CSVReader reader = new CSVReader(r);
 
         String[] lineParts;
-        int line = 0;
+        currentLine = 1;
         Organisation rootOrg = getOrganisation();
         log.info("fromCsv: rootOrg=" + rootOrg.getOrgId());
+        reader.readNext(); // skip first row, column headings
         while ((lineParts = reader.readNext()) != null) {
             if (lineParts.length > 0) {
-                line++;
+                currentLine++;
                 if (log.isTraceEnabled()) {
-                    log.trace("process line: " + line + " : " + Arrays.toString(lineParts));
+                    log.trace("process line: " + currentLine + " : " + Arrays.toString(lineParts));
                 }
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(rootOrg, lineList, line, true, session);
+                    doProcess(rootOrg, lineList, currentLine, true, session);
                 }
             }
         }
@@ -248,7 +257,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         jsonResult = new JsonResult(true, "Done insert and updates");
     }
 
-    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {        
+    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {
         String orgId = lineList.get(0);
         if (orgId == null || orgId.length() == 0) {
             //throw new RuntimeException("Cant save record with an empty name: column" + pos + " line: " + line);
@@ -256,7 +265,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
             return;
         }
         log.info("doProcess: orgId=" + orgId);
-        Organisation child = Organisation.findByOrgId(orgId, session);
+        Organisation child = getOrganisation().childOrg(orgId, session);
         if (child == null) {
             log.trace("Create child called: " + orgId);
             if (allowInserts) {
@@ -275,14 +284,14 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
     private void updateRecord(Organisation child, List<String> lineList, int line, Organisation rootOrg, Session session) {
         numUpdated++;
         String sOrgType = get(lineList, 1);
-        if( sOrgType != null ) {
+        if (sOrgType != null) {
             OrgType orgType = rootOrg.orgType(sOrgType, true, session);
             child.setOrgType(orgType);
         }
-        
+
         String sPath = lineList.get(2);
         Path path = Path.path(sPath);
-                
+
         checkPath(child, path, rootOrg, session);
         child.setTitle(get(lineList, 3));
         child.setAddress(get(lineList, 4));
@@ -298,18 +307,19 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         CSVReader reader = new CSVReader(r);
 
         String[] lineParts;
-        int line = 0;
+        currentLine = 1;
+        reader.readNext(); // skip first row, column headings
 
         while ((lineParts = reader.readNext()) != null) {
             if (lineParts.length > 0) {
-                line++;
+                currentLine++;
                 if (log.isTraceEnabled()) {
-                    log.trace("process line: " + line + " : " + Arrays.toString(lineParts));
+                    log.trace("process line: " + currentLine + " : " + Arrays.toString(lineParts));
                 }
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(getOrganisation(), lineList, line, false, session);
+                    doProcess(getOrganisation(), lineList, currentLine, false, session);
                 }
             }
         }
@@ -318,6 +328,13 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
 
     }
 
+    /**
+     *
+     *
+     * @param lineList
+     * @param i - column index, ie starts at zero
+     * @return
+     */
     private String get(List<String> lineList, int i) {
         if (i > lineList.size() - 1) {
             return null;
@@ -325,7 +342,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         String s = lineList.get(i);
         if (s != null) {
             s = s.trim();
-            if( s.length() == 0 ) {
+            if (s.length() == 0) {
                 s = null;
             }
         }
@@ -334,13 +351,13 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
 
     private Organisation createOrg(Organisation rootOrg, Session session, List<String> lineList) {
         String orgId = lineList.get(0);
-        String sPath = lineList.get(1);
+        String sPath = lineList.get(2);
         log.info("Create org: " + sPath);
         Path path = Path.path(sPath);
         path = path.child(orgId);
         Organisation org = rootOrg;
         for (String childName : path.getParts()) {
-            Organisation child = org.childOrg(childName);
+            Organisation child = org.childOrg(childName, session);
             if (child == null) {
                 child = org.createChildOrg(childName, session);
             }
@@ -359,7 +376,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         Organisation org = rootOrg;
         if (!path.isRoot()) {
             for (String childName : path.getParts()) {
-                Organisation child = org.childOrg(childName);
+                Organisation child = org.childOrg(childName, session);
                 if (child == null) {
                     child = org.createChildOrg(childName, session);
                 }
