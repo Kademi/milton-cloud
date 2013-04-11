@@ -20,6 +20,7 @@ import io.milton.common.BufferingOutputStream;
 import io.milton.context.Context;
 import io.milton.context.Executable;
 import io.milton.context.Executable2;
+import static io.milton.context.RequestContext._;
 import io.milton.mail.Attachment;
 import io.milton.mail.InputStreamConsumer;
 import io.milton.mail.MailboxAddress;
@@ -33,13 +34,14 @@ import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Combiner;
 import org.hashsplit4j.api.HashStore;
 
-import static io.milton.context.RequestContext._;
 import io.milton.context.RootContext;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import javax.mail.Part;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.Fanout;
+import org.hashsplit4j.api.Parser;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,28 +56,43 @@ public class EmailItemStandardMessage implements StandardMessage {
     private List<Attachment> attachments = new ArrayList<>();
     private final RootContext rootContext;
     private final HashStore hashStore;
+    private final BlobStore blobStore;
     private final SessionManager sessionManager;
 
-    public EmailItemStandardMessage(EmailItem emailItem, HashStore hashStore, RootContext rootContext, SessionManager sessionManager) {
+    public EmailItemStandardMessage(EmailItem emailItem, HashStore hashStore, BlobStore blobStore, RootContext rootContext, SessionManager sessionManager) {
         this.emailItem = emailItem;
         this.rootContext = rootContext;
         this.hashStore = hashStore;
+        this.blobStore = blobStore;
         this.sessionManager = sessionManager;
         if (emailItem.getAttachments() != null) {
-            System.out.println("EmailItemStandardMessage - attachments - " + emailItem.getAttachments().size());
             for (EmailAttachment att : emailItem.getAttachments()) {
                 Fanout fanout = hashStore.getFileFanout(att.getFileHash());
                 MyAttachment a = new MyAttachment(att, (int) fanout.getActualContentLength());
                 attachments.add(a);
             }
         } else {
-            System.out.println("EmailItemStandardMessage - no attachments");
+            log.trace("EmailItemStandardMessage - no attachments");
         }
     }
 
     @Override
     public void addAttachment(String name, String ct, String contentId, InputStream in) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (emailItem.getAttachments() == null) {
+            emailItem.setAttachments(new ArrayList<EmailAttachment>());
+        }
+
+        Parser parser = new Parser();
+        String fileHash = null;
+        try {
+            fileHash = parser.parse(in, hashStore, blobStore);
+        } catch (IOException ex) {
+            throw new RuntimeException("Exception adding attchment", ex);
+        }
+        Session session = SessionManager.session();
+        //session.save(emailItem); // must be saved before add attachment
+        emailItem.addAttachment(name, fileHash, ct, null, session);
+
     }
 
     @Override
@@ -100,13 +117,12 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public List<Attachment> getAttachments() {
-        System.out.println("EmailItemStandardMessage - getAttachments - " + attachments.size());
         return attachments;
     }
 
     @Override
     public void setFrom(MailboxAddress from) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setFromAddress(from.toPlainAddress());
     }
 
     @Override
@@ -116,12 +132,12 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setReplyTo(MailboxAddress replyTo) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setReplyToAddress(replyTo.toPlainAddress());
     }
 
     @Override
     public void setSubject(String subject) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setSubject(subject);
     }
 
     @Override
@@ -131,7 +147,7 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setHtml(String html) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setHtml(html);
     }
 
     @Override
@@ -141,7 +157,7 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setText(String text) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setText(text);
     }
 
     @Override
@@ -156,32 +172,32 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setDisposition(String disposition) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setDisposition(disposition);
     }
 
     @Override
     public String getDisposition() {
-        return null;
+        return emailItem.getDisposition();
     }
 
     @Override
     public void setEncoding(String encoding) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setEncoding(encoding);
     }
 
     @Override
     public String getEncoding() {
-        return null;
+        return emailItem.getEncoding();
     }
 
     @Override
     public void setContentLanguage(String contentLanguage) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        emailItem.setContentLanguage(contentLanguage);
     }
 
     @Override
     public String getContentLanguage() {
-        return null;
+        return emailItem.getContentLanguage();
     }
 
     @Override
@@ -210,7 +226,16 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setTo(List<MailboxAddress> to) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        StringBuilder sb = null;
+        for (MailboxAddress add : to) {
+            if (sb == null) {
+                sb = new StringBuilder();
+            } else {
+                sb.append(",");
+            }
+            sb.append(add.toPlainAddress());
+        }
+        emailItem.setToList(sb.toString());
     }
 
     @Override
@@ -230,7 +255,16 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setCc(List<MailboxAddress> cc) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        StringBuilder sb = null;
+        for (MailboxAddress add : cc) {
+            if (sb == null) {
+                sb = new StringBuilder();
+            } else {
+                sb.append(",");
+            }
+            sb.append(add.toPlainAddress());
+        }
+        emailItem.setCcList(sb.toString());
     }
 
     @Override
@@ -249,7 +283,16 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setBcc(List<MailboxAddress> bcc) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        StringBuilder sb = null;
+        for (MailboxAddress add : bcc) {
+            if (sb == null) {
+                sb = new StringBuilder();
+            } else {
+                sb.append(",");
+            }
+            sb.append(add.toPlainAddress());
+        }
+        emailItem.setBccList(sb.toString());
     }
 
     @Override
