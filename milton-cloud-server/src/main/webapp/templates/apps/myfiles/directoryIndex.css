@@ -3,40 +3,6 @@ body.directory #fileupload {
     padding: 0;
 }
 
-body.directory .muploadBtn {        
-    cursor: pointer;
-    display: inline-block;
-    text-align: center;
-    vertical-align: middle;                
-    position: relative;    
-    cursor: pointer;
-    width: 200px;   
-    margin-left: 0;
-    padding: 0;
-}
-body.directory .muploadBtn span {
-    position: absolute;
-    top: 0.5em;
-    left: 40px;
-    color: white;
-    text-decoration: none;
-    font-size: 12px;
-}
-body.directory .fileupload-buttonbar .progress {
-    border: 1px solid #51A351;
-    border-radius: 5px 5px 5px 5px;
-    display: none;
-    width: 65%;
-    float: right;
-}
-body.directory .fileupload-buttonbar .progress div {
-    background-color: #51A351;
-    height: 2em;
-    width: 0;
-    padding: 0;
-    margin: 0;
-}
-
 #fileList tbody td:last-child {
     width: 175px;
 }

@@ -22,6 +22,7 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.util.Date;
 import java.util.List;
 import javax.mail.internet.MimeMessage;
+import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -38,13 +39,15 @@ public class EmailItemMailStore implements MailStore {
     private final SessionManager sessionManager;
     private final StandardMessageFactory standardMessageFactory;
     private final HashStore hashStore;
+    private final BlobStore blobStore;
     private final RootContext rootContext;
     private AspirinInternal aspirinInternal;
 
-    public EmailItemMailStore(SessionManager sessionManager, StandardMessageFactory standardMessageFactory, HashStore hashStore, RootContext rootContext) {
+    public EmailItemMailStore(SessionManager sessionManager, StandardMessageFactory standardMessageFactory, HashStore hashStore,BlobStore blobStore,RootContext rootContext) {
         this.sessionManager = sessionManager;
         this.standardMessageFactory = standardMessageFactory;
         this.hashStore = hashStore;
+        this.blobStore = blobStore;
         this.rootContext = rootContext;
     }
 
@@ -94,7 +97,7 @@ public class EmailItemMailStore implements MailStore {
     }
 
     private MimeMessage toMimeMessage(EmailItem i) {
-        EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore, rootContext, sessionManager);
+        EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore, blobStore, rootContext, sessionManager);
         MimeMessage mm = aspirinInternal.createNewMimeMessage();
         System.out.println("EmailItemMailStore - toMimeMessage - atts=" + sm.getAttachments().size() + " - " + standardMessageFactory.getClass());
         standardMessageFactory.toMimeMessage(sm, mm);

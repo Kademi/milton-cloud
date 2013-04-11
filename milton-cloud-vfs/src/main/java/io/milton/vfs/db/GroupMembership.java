@@ -94,6 +94,7 @@ public class GroupMembership implements Serializable{
     private Date createdDate;
     private Date modifiedDate;
     private List<Subordinate> subordinates;
+    private NvSet fields;
 
     public GroupMembership() {
     }
@@ -110,6 +111,15 @@ public class GroupMembership implements Serializable{
         this.id = id;
     }
 
+    @ManyToOne
+    public NvSet getFields() {
+        return fields;
+    }
+
+    public void setFields(NvSet fields) {
+        this.fields = fields;
+    }    
+    
     /**
      * The organisation that the linked user is a member of this group within.
      * 

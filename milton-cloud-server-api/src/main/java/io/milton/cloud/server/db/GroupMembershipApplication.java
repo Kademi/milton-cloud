@@ -15,6 +15,7 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.NvSet;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
@@ -62,6 +63,7 @@ public class GroupMembershipApplication implements Serializable {
     private Group groupEntity;
     private Date createdDate;
     private Date modifiedDate;
+    private NvSet fields;
     
     @Id
     @GeneratedValue
@@ -72,6 +74,17 @@ public class GroupMembershipApplication implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
+
+    @ManyToOne
+    public NvSet getFields() {
+        return fields;
+    }
+
+    public void setFields(NvSet fields) {
+        this.fields = fields;
+    }
+    
+    
 
     @ManyToOne(optional=false)    
     public Organisation getWithinOrg() {

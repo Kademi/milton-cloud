@@ -23,6 +23,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * A NvPair is to allow data capture for entities such as users, groups and organisations
  * 
+ * Every NvPair is associated with a NvSet. The owning entity should have a reference
+ * to the set. NvPairs and sets should be considered immutable, so instead of updating
+ * the value, create a new set with a new NvPair for each item, and then link
+ * the owning entity to the set. Remember to set the previousSetId on the new
+ * set to the previous set to allow navigating old versions
+ * 
  * The definition of what needs to be captured is held elsewhere.
  * 
  * Values are stored in a string representation. Knowledge of the type of the data
@@ -34,7 +40,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NvPair implements Serializable{
     private Long id;
-    private BaseEntity baseEntity;
+    private NvSet nvSet;
     private String name;
     private String propValue;
     
@@ -66,15 +72,19 @@ public class NvPair implements Serializable{
         this.propValue = propValue;
     }
 
-    @ManyToOne
-    public BaseEntity getBaseEntity() {
-        return baseEntity;
+    @ManyToOne(optional = false)
+    public NvSet getNvSet() {
+        return nvSet;
     }
 
-    public void setBaseEntity(BaseEntity baseEntity) {
-        this.baseEntity = baseEntity;
+    public void setNvSet(NvSet nvSet) {
+        this.nvSet = nvSet;
     }
 
+    
+
+    
+    
     public void delete(Session session) {
         session.delete(this);
     }

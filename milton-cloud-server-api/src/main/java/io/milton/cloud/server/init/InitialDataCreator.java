@@ -15,14 +15,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.event.EventManager;
-import io.milton.event.EventManagerImpl;
-import io.milton.sync.SyncCommand;
-import io.milton.sync.SyncJob;
 import io.milton.vfs.db.Branch;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -112,7 +106,8 @@ public class InitialDataCreator implements LifecycleApplication {
             normalUser.createRepository("files", normalUser, session);
         }
 
-        admin.addToGroup(administrators, rootOrg, session).addToGroup(users, rootOrg, session);
+        admin.addToGroup(administrators, rootOrg, session);
+        admin.addToGroup(users, rootOrg, session);
         Website miltonSite = initHelper.checkCreateWebsite(session, rootOrg, "milton", "milton.io", "milton", admin); // can be accessed on milton.[primary_domain] or milton.io        
         System.out.println("milton site: " + miltonSite.getName() + " - " + miltonSite.getId());
 

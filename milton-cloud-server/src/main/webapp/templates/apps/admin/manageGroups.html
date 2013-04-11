@@ -41,9 +41,13 @@
                         #foreach($p in $signups.keySet())
                         <li>
                             <a target="_blank" href="http://${p}${formatter.portString}"><b>$p</b></a>
+                            #if( $group.publicSignup )
                             <span class="pull-right">
                                 <a target="_blank" href="$signups.get($p)" class="Btn">Signup page</a>
-                            </span>                            
+                            </span>                   
+                            #else
+                            <span class="pull-right">No signup page</span>
+                            #end
                         </li>
                         #end
                         #end
@@ -84,9 +88,9 @@
                                     <label for="appliesToOrg">An organistion</label>
                                     <select>
                                         <option value="">-- Select an organisation --</option>
-                                        <option value="$page.organisation.orgId">$page.organisation.formattedName (this organisation)</option>
+                                        <option value="$page.organisation.id">$page.organisation.formattedName (this organisation)</option>
                                         #foreach($org in $page.organisation.childOrgs)
-                                        <option value="$org.orgId">$org.formattedName</option>
+                                        <option value="$org.id">$org.formattedName</option>
                                         #end
                                     </select>
 

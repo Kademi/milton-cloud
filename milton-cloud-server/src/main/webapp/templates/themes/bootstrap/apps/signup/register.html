@@ -37,7 +37,15 @@
                                 <div class="controls">
                                     <input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" />
                                 </div>
+                            </div>
+                            #foreach($field in $page.extraFields)
+                            <div class="control-group">
+                                <label class="control-label" for="confirmPassword">$field.text</label>
+                                <div class="controls">
+                                    $field.html
+                                </div>
                             </div>                            
+                            #end
 
                             #if( $page.hasOrgs )
                                 #if( $groupRegoPage.regoOrgType )

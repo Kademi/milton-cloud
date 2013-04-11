@@ -97,8 +97,10 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         try {
-            String newOrgId = parameters.get("orgId");
-            Organisation c = getOrganisation().createChildOrg(newOrgId, session);
+            String newOrgId = WebUtils.getParam(parameters, "orgId");
+            parameters.remove("orgId"); // so it doesnt data bind
+            Organisation c = getOrganisation().createChildOrg(newOrgId, session);            
+            System.out.println("Create org, with orgId=" + c.getOrgId());
             String s = WebUtils.getParam(parameters, "orgTypeName");
             OrgType orgType = null;
             if( s != null ) {

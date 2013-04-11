@@ -79,8 +79,12 @@ function edifyPage(selector) {
                 var $n = $(n);
                 var s = $n.text();
                 $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
-            });        
-            container.wrap("<form id='edifyForm' action='" + window.location + "' method='POST'></form>");
+            });
+            var formHref = window.location;
+            if( formHref.endsWith("/")) {
+                formHref += "index.html"; // when viewing the index page for a folder on the folder path, be sure to post to the actual page
+            }
+            container.wrap("<form id='edifyForm' action='" + formHref + "' method='POST'></form>");
             var form = $("#edifyForm");
             form.append("<input type='hidden' name='body' value='' />");
             var buttons = $("<div class='buttons'></div>");

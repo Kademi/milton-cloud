@@ -6,9 +6,20 @@
         <script type="text/javascript" src="myfiles.js">//</script>
     </head>    
     <body class="directory">
-        <button class="importFromUrl Btn" style="float: right;">Import from url</button>
-        <div class="input" id='myUploaded'></div>        
-        <table id="fileList" class="bar">
+        <div class="btn-group pull-right">
+            <button class="newFolder Btn btn">
+                <i class="icon-folder-open"></i>
+                New Folder
+            </button>
+            <button class="importFromUrl Btn btn">
+                <i class="icon-fast-forward"></i>                 
+                Import from url
+            </button>         
+        </div>        
+        
+        <div class="input" id='myUploaded' style="width: 100px"></div>        
+        
+        <table id="fileList" class="bar table table-striped vcenter">
             <thead>
                 <tr>
                     <th colspan="2">Files: $page.name</th>

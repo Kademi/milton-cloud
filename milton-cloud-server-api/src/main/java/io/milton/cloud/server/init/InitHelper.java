@@ -247,7 +247,7 @@ public class InitHelper {
     }
 
     public Website createAndPopulateWebsite(Session session, Organisation org, String newName, String newDnsName, Profile curUser, CommonCollectionResource parent) throws IOException {
-        Website website = org.createWebsite(newName, newDnsName, null, curUser, session);
+        Website website = org.createWebsite(newName, newDnsName, "bootstrap", curUser, session);
         Branch websiteBranch = website.liveBranch();
         Repository r = website;
         r.setPublicContent(true); // allow public access

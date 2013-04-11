@@ -233,14 +233,13 @@ public class WebUtils {
             String menuId = null;
             String longestHref = null;
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
-            Website website = wrf.getWebsite();
-            Repository r = website;
             List<Pair<String, String>> menuPairs = getThemeMenu(wrf);
             if (menuPairs != null) {
                 int cnt = 0;
                 for (Pair<String, String> pair : menuPairs) {
                     String id = "menuContent" + cnt++;
                     String href = pair.getObject1();
+                    System.out.println("check " + id + " - " + href);
                     Path p = Path.path(href);
                     if (p.getParent() != null) {
                         String parentHref = p.getParent().toString();

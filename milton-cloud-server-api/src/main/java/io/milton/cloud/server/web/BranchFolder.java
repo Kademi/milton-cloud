@@ -1,25 +1,22 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.common.CurrentDateService;
-import io.milton.resource.AccessControlledResource;
-import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
 import io.milton.cloud.server.DataSessionManager;
-import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.LessParameterParser;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.*;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.*;
 import io.milton.vfs.data.DataSession;
-import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.*;
@@ -28,7 +25,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import static io.milton.context.RequestContext._;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Repository;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,7 +39,7 @@ import org.hashsplit4j.api.HashStore;
  *
  * @author brad
  */
-public class BranchFolder extends AbstractBranchFolder implements MakeCollectionableResource, GetableResource, PutableResource, PostableResource, CopyableResource {
+public class BranchFolder extends AbstractBranchFolder implements MakeCollectionableResource, GetableResource, PutableResource, PostableResource, CopyableResource, TitledPage {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BranchFolder.class);
     protected final Branch branch;
@@ -187,8 +183,13 @@ public class BranchFolder extends AbstractBranchFolder implements MakeCollection
 //        }
         log.trace("sendContent: render template");
         ContentRedirectorPage.select(this);
-        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this));
-        MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+        RootFolder rf = WebUtils.findRootFolder(this);
+        if (rf instanceof WebsiteRootFolder) {
+            WebUtils.setActiveMenu(getHref(), rf); // For front end        
+        } else {
+            MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+        }
+
         getTemplater().writePage("myfiles/directoryIndex", this, params, out);
     }
 

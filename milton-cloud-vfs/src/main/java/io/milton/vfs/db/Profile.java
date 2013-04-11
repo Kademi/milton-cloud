@@ -351,9 +351,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @param g
      * @return
      */
-    public Profile addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
+    public GroupMembership addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
         if (g.isMember(this, hasGroupInOrg, session)) {
-            return this;
+            return membership(g);
         }
         GroupMembership gm = new GroupMembership();
         gm.setCreatedDate(new Date());
@@ -379,7 +379,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         g.getGroupMemberships().add(gm);
 
-        return this;
+        return gm;
     }
 
     /**

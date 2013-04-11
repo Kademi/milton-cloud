@@ -161,8 +161,8 @@ public class SpliffySecurityManager {
             }
         }
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
-        System.out.println("a1");
         Set<Priviledge> expanded = AclUtils.expand(privs);
+        System.out.println("expanded privs: " + expanded);
         req.getAttributes().put("privs", expanded); // stash them for later, page rendering might be interested
         AccessControlledResource.Priviledge required = findRequiredPriv(method, resource, req);
         boolean allows;

@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.db.OptIn;
 import io.milton.cloud.server.event.GroupDeletedEvent;
@@ -86,7 +87,18 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
-        if (parameters.containsKey("role")) {
+        if (parameters.containsKey("addFieldName")) {
+            String addFieldName = WebUtils.getParam(parameters, "addFieldName");
+            String addFieldValue = WebUtils.getParam(parameters, "addFieldValue");
+            addField(addFieldName, addFieldValue, session);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } else if (parameters.containsKey("removeFieldName")) {
+            String addFieldName = WebUtils.getParam(parameters, "removeFieldName");
+            removeField(addFieldName, session);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } else if (parameters.containsKey("role")) {
             String appliesToType = WebUtils.getParam(parameters, "appliesToType");
             String appliesTo = WebUtils.getParam(parameters, "appliesTo");
             String role = WebUtils.getParam(parameters, "role");
@@ -111,14 +123,15 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                 case "selectOrg":
                     Organisation org;
                     Long appliesToId = Long.parseLong(appliesTo);
-                    if (getOrganisation().getId() == appliesToId) {
-                        org = getOrganisation();
-                    } else {
-                        org = getOrganisation().childOrg(appliesToId, session);
-                    }
+                    org = Organisation.get(appliesToId, session);
+
                     if (org == null) {
                         jsonResult = JsonResult.fieldError("appliesTo", "Could not locate child organistion: " + appliesTo);
                         return null;
+                    } else if(!org.isWithin(getOrganisation())) {
+                        jsonResult = JsonResult.fieldError("appliesTo", "Selected organistion is not within parent: " + appliesTo);
+                        return null;
+                        
                     } else {
                         gr = group.grantRole(org, role, session);
                     }
@@ -314,6 +327,15 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         group.setRegistrationMode(s);
     }
 
+    public boolean isPublicSignup() {
+        if (getRegoMode().equals(Group.REGO_MODE_ADMIN_REVIEW)) {
+            return true;
+        } else if (getRegoMode().equals(Group.REGO_MODE_OPEN)) {
+            return true;
+        }
+        return false;
+    }
+    
     public String getRegoModeText() {
         if (getRegoMode().equals(Group.REGO_MODE_ADMIN_REVIEW)) {
             return "Administrator review";
@@ -429,5 +451,52 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             map.put(domainName, url);
         }
         return map;
+    }
+
+    public Map<String, String> getDataCaptureFields() {
+        NvSet nvset = group.getFieldset();
+        Map<String, String> map = new HashMap<>();
+        if (nvset != null) {
+            if (nvset.getNvPairs() != null) {
+                for (NvPair nvp : nvset.getNvPairs()) {
+                    map.put(nvp.getName(), nvp.getPropValue());
+                }
+            }
+        }
+        return map;
+    }
+
+    private void addField(String name, String value, Session session) {
+        Date now = _(CurrentDateService.class).getNow();
+        NvSet nvset = group.getFieldset();
+        if (nvset == null) {
+            nvset = new NvSet();
+            nvset.setCreatedDate(now);
+            nvset.setNvPairs(new HashSet<NvPair>());
+        } else {
+            nvset = nvset.duplicate(now, session);
+        }
+        session.save(nvset);
+        NvPair newPair = nvset.addPair(name, value);
+        session.save(newPair);
+        group.setFieldset(nvset);
+        session.save(group);
+        log.info("addField. added: " + newPair.getId());
+    }
+
+    private void removeField(String name, Session session) {
+        Date now = _(CurrentDateService.class).getNow();
+        NvSet nvset = group.getFieldset();
+        if (nvset == null || nvset.isEmpty()) {
+            return;
+        } else {
+            nvset = nvset.duplicate(now, session);
+        }
+        nvset.removePair(name);
+        session.save(nvset);
+        group.setFieldset(nvset);
+        session.save(group);
+
+        log.info("removeField: removed " + name + " and saved: " + nvset.getId());
     }
 }

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.GroupMembershipApplication;
 import io.milton.cloud.server.db.OptIn;
@@ -53,8 +54,12 @@ import org.slf4j.LoggerFactory;
 import static io.milton.context.RequestContext._;
 import io.milton.http.HttpManager;
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.NvPair;
+import io.milton.vfs.db.NvSet;
 import io.milton.vfs.db.OrgType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -118,50 +123,6 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
         }
     }
-
-    public class OrgData {
-        private String orgId;
-        private String title;
-        private String address;
-        private String addressLine2;
-        private String addressState;
-        private String phone;
-
-        public OrgData(Organisation org) {
-            orgId = org.getOrgId();
-            title = org.getTitle();
-            address = org.getAddress();
-            addressLine2 = org.getAddressLine2();
-            addressState = org.getAddressState();
-            phone = org.getPhone();
-        }
-
-        public String getOrgId() {
-            return orgId;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public String getAddressLine2() {
-            return addressLine2;
-        }
-
-        public String getAddressState() {
-            return addressState;
-        }
-
-        public String getPhone() {
-            return phone;
-        }
-        
-        
-    }
     
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
@@ -183,16 +144,47 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 }
             }
 
-            String password = parameters.get("password");
-            if (password == null || password.trim().length() == 0) {
+            String password = parameters.get("password");            
+            parameters.remove("password");
+            if (password == null || password.length() == 0  ) {
                 jsonResult = JsonResult.fieldError("password", "No password was given");
                 return null;
             }
+            if( password.length() != password.trim().length()) {
+                jsonResult = JsonResult.fieldError("password", "The given password begins or ends with spaces. Please ensure there are no spaces at the beginning or end of your password");
+                return null;
+            }
 
+            // Check that any mandatory extra fields have been provided
+            Group group = parent.getGroup();
+            NvSet fieldset = group.getFieldset();
+            List<ExtraField> extraFields = new ArrayList<>();
+            if( fieldset != null && !fieldset.isEmpty()) {
+                for( NvPair nvp : fieldset.getNvPairs()) {
+                    ExtraField f = ExtraField.parse(nvp.getName(), nvp.getPropValue());
+                    extraFields.add(f);
+                    if( f.isRequired() ) {
+                        String s = WebUtils.getParam(parameters, f.getName());
+                        if( s == null ) {
+                            jsonResult = JsonResult.fieldError(f.getName(), "No value was provided");
+                            return null;
+                        } else {
+                            if( f.getOptions() != null && !f.getOptions().isEmpty()) {
+                                if( !f.getOptions().contains(s)) {
+                                    jsonResult = JsonResult.fieldError(f.getName(), "Please select a valid option");
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
             // Check if the email is already taken. If so, and if the given password matches,
             // then we assume this is an existing Fuse user who is signing up for another
             // group or site
             String email = WebUtils.getParam(parameters, "email");
+            parameters.remove("email");
             Profile p = Profile.find(email, session);
             if (p != null) {
                 // Check password matches
@@ -231,12 +223,19 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 p.setEmail(email);
                 p.setCreatedDate(new Date());
                 p.setModifiedDate(new Date());
+                
+                // optional
+                String phone = WebUtils.getParam(parameters, "phone");
+                p.setPhone(phone);
+                
                 session.save(p);
                 _(SpliffySecurityManager.class).getPasswordManager().setPassword(p, password);
             }
-
-
-            Group group = parent.getGroup();
+            
+            // All good so far, lets store the extra fields (if any given) and then associate
+            // the fieldset with the membership or application
+            NvSet fields = storeExtraFields(extraFields, parameters, session);
+            
             String result;
             WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
             if (!Group.REGO_MODE_OPEN.equals(group.getRegistrationMode())) {
@@ -250,18 +249,21 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 gma.setMember(p);
                 gma.setAdminOrg(getOrganisation());
                 gma.setWithinOrg(org);
+                gma.setFields(fields);
                 session.save(gma);
                 result = "pending";
             } else {
                 // add directly to group
                 log.info("Group is open, so create membership immediately");
-                p.addToGroup(group, org, session);
+                GroupMembership gm = p.addToGroup(group, org, session);
+                gm.setFields(fields);
+                session.save(gm);
                 _(SignupApp.class).onNewMembership(p.membership(group), wrf);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
                 result = "created";
             }
 
-            // Now process any optins
+            // Now process any opt-ins
             String sOptins = WebUtils.getParam(parameters, "optins");
             if (sOptins != null) {
                 List<OptIn> optins = OptIn.findForGroup(group, session);
@@ -364,6 +366,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public boolean isPublic() {
         return true;
     }
+    
+    public Group getGroup() {
+        return parent.getGroup();
+    }
 
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
@@ -397,5 +403,35 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     @Override
     public String getTitle() {
         return "Register: " + parent.getName();
+    }
+    
+    public List<ExtraField> getExtraFields() {
+        NvSet fieldset = getGroup().getFieldset();
+        if( fieldset == null || fieldset.isEmpty() ) {
+            return Collections.EMPTY_LIST;
+        }
+        List<ExtraField> list = new ArrayList<>();
+        for( NvPair nvp : fieldset.getNvPairs()) {
+            list.add( ExtraField.parse(nvp.getName(), nvp.getPropValue()));
+        }
+        return list;
+    }
+
+    private NvSet storeExtraFields(List<ExtraField> extraFields, Map<String, String> parameters, Session session) {
+        if( extraFields == null || extraFields.isEmpty()) {
+            return null;
+        }
+        Date now = _(CurrentDateService.class).getNow();
+        NvSet fields = new NvSet();
+        fields.setCreatedDate(now);
+        session.save(fields);
+        for( ExtraField f : extraFields) {
+            String val = WebUtils.getParam(parameters, f.getName());
+            if( val != null ) {
+                NvPair nvp = fields.addPair(f.getName(), val);
+                session.save(nvp);
+            }
+        }
+        return fields;
     }
 }

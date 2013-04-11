@@ -173,6 +173,7 @@ function showCreateFolder(parentHref, title, text, callback, validatorFn) {
     }    
     myPrompt("createFolder", parentHref, title, text, "Enter a name","newName", "Create", "", "Enter a name to create", function(newName, form) {
         log("create folder", form);
+        var msg = null;
         if( validatorFn ) {
             msg = validatorFn(newName);
         }
@@ -206,7 +207,6 @@ function createFolder(name, parentHref, callback) {
         data: {
             name: encodedName
         },
-        dataType: "json",
         success: function(resp) {
             $("body").trigger("ajaxLoading", {
                 loading: false
@@ -215,10 +215,18 @@ function createFolder(name, parentHref, callback) {
                 callback(name, resp);
             }
         },
-        error: function() {
+        error: function(resp) {
+            log("error", resp);
             $("body").trigger("ajaxLoading", {
                 loading: false
             });
+            if( resp.status == 200 ) {
+                if( callback ) {
+                    callback(name, resp);
+                }
+                return;
+            }
+            
             alert('There was a problem creating the folder');
         }
     });

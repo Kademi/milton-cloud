@@ -128,12 +128,15 @@
                     <ul class="verticalFields">
                         <li>
                             <label for="orgTitle">ID</label>
-                            <input type="text" name="orgId" id="orgId" class="required" />
+                            <input type="text" name="orgId" id="orgId" class="" placeholder="A unique id. To enabled updating from spreadsheet" />
                         </li>
-                        
+                        <li>
+                            <label for="orgTitle">Admin ID</label>
+                            <input type="text" name="adminDomain" id="adminDomain" class="" placeholder="Unique in all of fuse. Used to identify the admin console" />
+                        </li>                        
                         <li>
                             <label for="orgTitle">Name</label>
-                            <input type="text" name="title" id="orgTitle" class="required" />
+                            <input type="text" name="title" id="orgTitle" class="required" placeholder="User friendly name for the organisation" />
                         </li>
                         <li>
                             <label for="orgPostcode">Type</label>

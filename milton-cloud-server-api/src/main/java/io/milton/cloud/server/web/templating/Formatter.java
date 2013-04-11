@@ -761,7 +761,6 @@ public class Formatter {
      * @return
      */
     public String ifEqual(String ifEqual, String ifNotEqual, Object o1, Object o2) {
-        System.out.println("ifequal: " + o1 + " - " + o2);
         if (o1 == null) {
             return o2 == null ? ifEqual : ifNotEqual;
         } else {
@@ -773,7 +772,6 @@ public class Formatter {
                 if (o2 != null) {
                     s2 = o2.toString();
                 }
-                System.out.println(" = " + s1.equals(s2));
                 return s1.equals(s2) ? ifEqual : ifNotEqual;
             }
         }
@@ -918,7 +916,6 @@ public class Formatter {
      * @return
      */
     public String option(Object value, Object oText, Object currentValue) {
-        System.out.println("option: " + value + " - " + oText + " - " + currentValue);
         String text = format(oText);
         StringBuilder sb = new StringBuilder("<option");
         appendValue(sb, value);

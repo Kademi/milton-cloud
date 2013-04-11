@@ -391,6 +391,11 @@ section.MainContent > header:after {
     display: none;
 }
 
+ul.Program {
+    list-style-type: none;
+    margin-left: 0;
+}
+
 ul.Program li {
     height: 19px;
     line-height: 20px;
@@ -1317,6 +1322,10 @@ table.Summary a {
 table.Summary a:hover {
     text-decoration: underline;
 }
+.verticalFields {
+    list-style-type: none;
+    margin-left: 0;
+}
 .verticalFields li {
     margin-bottom: 10px;
 }
@@ -1449,3 +1458,8 @@ li.Odd aside a:hover {
     padding: 0px;
     border: 1px solid #dedede;
 }
+ul.list, ul.ClearFix, ul.ListItem, ul.appliesTo {
+    list-style-type: none;
+    margin-left: 0;
+}
+

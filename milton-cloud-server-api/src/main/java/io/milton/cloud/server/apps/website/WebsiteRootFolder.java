@@ -33,7 +33,9 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 
 import static io.milton.context.RequestContext._;
+import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.resource.PostableResource;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -79,8 +81,8 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         } else {
             super.renderPage(out, params);
         }
-    }
-
+    }    
+    
     @Override
     public String getName() {
         return "";
@@ -103,7 +105,7 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
         if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
             return _(SpliffySecurityManager.class).getCurrentUser() != null;
         }
-        return true;
+        return super.authorise(request, method, auth);
     }
 
     @Override

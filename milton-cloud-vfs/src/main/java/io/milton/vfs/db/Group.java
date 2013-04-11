@@ -48,8 +48,7 @@ public class Group implements Serializable, VfsAcceptor {
         Criteria crit = session.createCriteria(Group.class);
         crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
         return (Group) crit.uniqueResult();
-    }    
-    
+    }
     public static String ADMINISTRATORS = "administrators";
     public static String USERS = "everyone";
     /**
@@ -85,6 +84,7 @@ public class Group implements Serializable, VfsAcceptor {
     private String registrationMode; // whether to allow anyone to join this group    
     private OrgType regoOrgType; // label to display to users in signup form to selet their organisation
     private Organisation rootRegoOrg; // root org to select from when users select an org
+    private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect
 
     @Id
     @GeneratedValue
@@ -106,6 +106,34 @@ public class Group implements Serializable, VfsAcceptor {
         this.createdDate = createdDate;
     }
 
+    /**
+     * An optional reference to the NvSet which hold a list of data capture fields
+     * for this group. The name of each NvPair is the name of the field, and the
+     * value is meta data keywords in the form:
+     * 
+     * required,numeric,options(csv list)
+     * 
+     * Eg1 - for a "how did you hear about us" question
+     * name=howHeard
+     * value=required,options(google,newspaper,friend or colleague)
+     * 
+     * Eg2 - "how many guests will you be bringing?"
+     * name=numGuests
+     * value=required,numeric
+     * 
+     * @return 
+     */
+    @ManyToOne
+    public NvSet getFieldset() {
+        return fieldset;
+    }
+
+    public void setFieldset(NvSet fieldset) {
+        this.fieldset = fieldset;
+    }
+
+    
+    
     @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getModifiedDate() {
@@ -193,9 +221,7 @@ public class Group implements Serializable, VfsAcceptor {
         this.regoOrgType = regoOrgType;
     }
 
-    
-
-    @ManyToOne(optional=true)
+    @ManyToOne(optional = true)
     public Organisation getRootRegoOrg() {
         return rootRegoOrg;
     }
@@ -204,8 +230,6 @@ public class Group implements Serializable, VfsAcceptor {
         this.rootRegoOrg = rootRegoOrg;
     }
 
-    
-    
     /**
      * Add or remove the role to this group. Updates the groupRoles list and
      * also saves the change in the session
@@ -240,7 +264,7 @@ public class Group implements Serializable, VfsAcceptor {
                 } else if (gr.getRepository() != null && gr.getRepository() == repo) {
                     // nothing to do
                     return null;
-                } else if( withinOrg == null && repo == null && gr.getRepository() == null && gr.getWithinOrg() == null) {
+                } else if (withinOrg == null && repo == null && gr.getRepository() == null && gr.getWithinOrg() == null) {
                     return null;
                 }
             }
@@ -316,21 +340,21 @@ public class Group implements Serializable, VfsAcceptor {
     /**
      * Sets the new org type on this group, updating collections in the old and
      * new org type objects if they're not null
-     * 
+     *
      * @param newOrgType
-     * @param session 
+     * @param session
      */
     public void setRegoOrgType(OrgType newOrgType, Session session) {
         OrgType oldOrgType = getRegoOrgType();
-        if( oldOrgType != null ) {
+        if (oldOrgType != null) {
             oldOrgType.getGroups().remove(this);
             session.save(oldOrgType);
         }
-        
+
         setRegoOrgType(newOrgType);
-        
-        if( newOrgType != null ) {
-            if( newOrgType.getGroups() == null ) {
+
+        if (newOrgType != null) {
+            if (newOrgType.getGroups() == null) {
                 newOrgType.setGroups(new ArrayList<Group>());
             }
             newOrgType.getGroups().add(this);

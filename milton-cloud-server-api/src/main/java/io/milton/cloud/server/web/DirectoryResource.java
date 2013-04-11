@@ -17,7 +17,9 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Response.Status;
@@ -62,7 +64,7 @@ import java.net.URISyntaxException;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, PostableResource, DeletableCollectionResource {
+public class DirectoryResource<P extends ContentDirectoryResource> extends AbstractContentResource<DirectoryNode, P> implements ContentDirectoryResource, PutableResource, GetableResource, ParameterisedResource, PostableResource, DeletableCollectionResource, TitledPage {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirectoryResource.class);
     protected DirectoryNode directoryNode;
@@ -184,6 +186,7 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        System.out.println("sendContent");
         if (params.containsKey("importStatus")) {
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
             if (p != null) {
@@ -206,8 +209,12 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     }
 
     public void renderPage(OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        WebUtils.setActiveMenu(getHref(), WebUtils.findRootFolder(this)); // For front end
-        MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+        RootFolder rf = WebUtils.findRootFolder(this);
+        if (rf instanceof WebsiteRootFolder) {
+            WebUtils.setActiveMenu(getHref(), rf); // For front end        
+        } else {
+            MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+        }
         getTemplater().writePage("myfiles/directoryIndex", this, params, out);
 
     }

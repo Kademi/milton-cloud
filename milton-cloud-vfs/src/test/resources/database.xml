@@ -50,7 +50,6 @@
                 <value>io.milton.vfs.db.Website</value>
                 <value>io.milton.vfs.db.Group</value>
                 <value>io.milton.vfs.db.GroupMembership</value>    
-                <value>io.milton.vfs.db.NvPair</value>    
                 <value>io.milton.vfs.db.GroupInWebsite</value>    
                 <value>io.milton.vfs.db.GroupRole</value>    
             </list>

@@ -3,14 +3,14 @@
         <title>Manage Groups</title>
     </head>
     <body>
-        
+
         <div id="modalRegoCont" >
             <header>
                 <h3>Registration Mode</h3>
                 <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
             </header>
             <div class="ModalContent">
-                <form method="POST" action="$page.href">
+                <form method="POST" action="$page.href" class="general">
                     <div class="BtnBar">
                         <button class="Btn">Save</button>
                         <div style="clear: both"></div>
@@ -29,7 +29,7 @@
                                 $formatter.radioEq("regoModeAdmin", "regoMode",$page.group.registrationMode  ,"a")
                                 <label for="regoModeAdmin">Approval</label>
                             </td>
-                            <td>Allows any member of the public to register but the membership is initially inactive until reviewed by an administrator</td>
+                            <td>Memberships are initially inactive until reviewed by an administrator</td>
                         </tr>
                         <tr>
                             <td>
@@ -39,7 +39,7 @@
                             <td>External registration is not available. Instead administrators create accounts as required</td>
                         </tr>
                     </table>
-                    
+
                     <br/>
                     <h2>What organisations can users join?</h2>
                     <table>
@@ -64,18 +64,18 @@
                                     $formatter.option($org.orgId, $org.formattedName, $page.group.rootRegoOrg.orgId)
                                     #end
                                 </select>                            
-                                <p>Enter the business unit which users will search within for thier organisation. Eg asia, or asia/southeast</p>                                                    
+                                <p>Enter the business unit which users will search within for thier organisation</p>
                             </td>
                         </tr>
                     </table>
-                    
-                    <br/>
+
+                    <br />
                     <h2>Can users opt-in to other mailing lists?</h2>
-                    
+
                     <ul class="optins">
                         #foreach($group in $page.organisation.groups)
-                            #if( $group == $page.group )
-                            #else
+                        #if( $group == $page.group )
+                        #else
                         <li>
                             #set($groupId = "optin" + $group.name)
                             #set($optin = "")
@@ -84,19 +84,45 @@
                             <label for="$groupId">$group.name</label>
                             <input type="text" name="${groupId}_Desc" placeholder="Invitation message to users" value="$!optin.message" />
                         </li>
-                            #end
+                        #end
                         #end
                     </ul>
                 </form>
+
+                <div style="clear: both" ></div>
+                <br/>
+
+                <h2>What extra fields do you want to ask new users?</h2>
+                <button type="button" class="SmallBtn Add addField" onclick="$('.addField').toggle()"><span>Add field</span></button>
+                <form class="fields" method="POST" action="$page.href">
+                    <div class=" addField Hidden">
+                        <p>Enter a name for the field and the information about the format of the field</p>
+                        <input type="text" class="required" placeholder="Name for the field" name="addFieldName" style="width: 100px" />
+                        <input type="text" placeholder="Format. Eg required;options(yes,no);text=Would you like..?" name="addFieldValue" style="width: 250px" />
+                        <button type="submit" class="Btn">Add</button>                
+                    </div>
+                    <ul class="fields">
+                        #foreach($field in $page.dataCaptureFields.entrySet())
+                        <li>
+                            <h4>$field.key</h4>
+                            $field.value
+                            <a href="$field.key" class="removeField">Delete</a>
+                        </li>
+                        #end
+                    </ul>
+                </form>
+
+
             </div>
 
         </div>
 
 
         <script type="text/javascript" >
-            jQuery(function() {
-                initManageGroup();
-            });
+                    jQuery(function() {
+
+                        initManageGroup();
+                    });
         </script>        
     </body>
 </html>

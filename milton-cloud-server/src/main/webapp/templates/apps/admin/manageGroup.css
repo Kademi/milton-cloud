@@ -17,12 +17,9 @@
     padding: 4px 10px 4px 10px;
     line-height: 27px;
     height: 25px;
+    list-style-type: none;
 }
-#manageGroup div.Group div.ContentGroup ul li > a {
-    /**
-    float: left;
-    */
-}
+
 #manageGroup div.Group div.ContentGroup ul li form, #manageGroup div.Group div.ContentGroup ul li aside { float: right; }
 #manageGroup div.Group div.ContentGroup ul li aside a {
     float: left;
@@ -74,14 +71,18 @@
     margin-right: 10px;
 }
 
-ul.PermissionList li a {
+ul.fields {
+    clear: both;
+}
+
+ul.PermissionList li a, ul.fields li a {
     display: inline-block;
     width: 20px;
     height: 20px;
     text-indent: -9999px;
     margin-left: 10px;
 }
-ul.PermissionList li:hover a {
+ul.PermissionList li:hover a, ul.fields li:hover a {
      background-image: url(/templates/themes/admin/images/btn_delete_small.png);
      background-position: right center;
      background-repeat: no-repeat;
@@ -105,17 +106,26 @@ table.regoMode label {
     padding-left: 5px;
 }
 
-.optins li {
+.optins {
+    margin-left: 0;
+}
+
+.fields li h4 {
+    margin: 0;
+    padding: 0;
+}
+
+.optins li, .fields li {
     float: left;
     margin-right: 10px;
     background: none repeat scroll 0 0 #EDEDED;
     border: 1px solid #DADADA;
     border-radius: 3px 3px 3px 3px;
     min-height: 24px;
-    line-height: 25px;
     margin-right: 10px;
     margin-top: 3px;
     padding: 4px 10px;    
+    list-style-type: none;
 }
 
 .optins input[type=text] {

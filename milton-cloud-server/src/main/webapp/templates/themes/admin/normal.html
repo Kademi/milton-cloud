@@ -66,11 +66,11 @@
                 </aside>
 
                 <aside class="userBtn">
-                    <h3><a href="$page.closest('organisation').href">$page.organisation.orgId</a></h3>
+                    <h3><a href="$page.closest('organisation').href">$page.organisation.formattedName</a></h3>
                     <div class="dropBox">
                         <ul class="list requiresuser">
                             #foreach($org in $page.organisations)
-                            <li><a href="$org.href">$org.displayName</a></li>
+                            <li><a href="$org.href">$org.title</a></li>
                             #end
                         </ul>
                     </div>                

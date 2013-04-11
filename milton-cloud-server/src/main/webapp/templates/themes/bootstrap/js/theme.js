@@ -65,3 +65,50 @@ function closeModals() {
         lastOpenedModal.modal('hide');
     }
 }
+
+function closeMyPrompt() {
+    closeModals();
+}
+
+function myPrompt(id, url, title, instructions, caption, buttonName, buttonText, inputClass, inputPlaceholder, callback) {
+    var body = $("body")
+    var modal = body.find("div.myprompt");
+    if( modal.length === 0 ) {
+        modal = $("<div class='modal hide fade'><div class='modal-header'><button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button><h3>Modal header</h3></div><form method='POST' class='form-horizontal'><div class='modal-body'><div class='pageMessage'>.</div></div><div class='modal-footer'><a href='#' class='btn'>Close</a><button type='submit' href='#' class='btn btn-primary'>Save changes</button></div></form></div>");
+        modal.attr("id", id);
+        body.append(modal);
+    }
+    modal.find(".modal-header").text(title);
+    var form = modal.find("form");
+    form.attr("action", url);
+    form.find(".modal-body").append("<p class='notes'></p>");
+    form.find(".notes").html(instructions);
+    form.find(".modal-body").append("<div class='control-group'><label class='control-label' for='inputEmail'>label</label><div class='controls'><input type='text' id='inputEmail' placeholder='Email'></div></div>");    
+    
+    var row1 = form.find(".control-group");
+    var inputId = id + "_" + buttonName;
+    row1.find("input").addClass(inputClass);    
+    row1.find("input").attr("name", buttonName).attr("id", inputId).attr("placeholder", inputPlaceholder);    
+    row1.find("label").attr("for", inputId).text(caption);
+    form.find(".btn-primary").text(buttonText);    
+    
+    form.submit(function(e) {
+        log("submit");
+        e.preventDefault();
+        resetValidation(form);
+        if( checkRequiredFields(form)) {
+            var newName = form.find("input").val();
+            if( callback(newName, form) ) {
+                closeModals();
+                modal.remove();
+            }
+        }
+    });    
+    
+    modal.find("a.btn").click(function() {
+        closeModals();
+    });
+    
+    showModal(modal);
+}
+

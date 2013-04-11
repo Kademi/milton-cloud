@@ -62,7 +62,7 @@ function initRegisterForms(afterRegisterHref, callback) {
                 mapOfOrgs = {};
                 orgNames = [];
                 $.each(data.data, function(i, state) {
-                    log("found: ", state, state.title);
+                    //log("found: ", state, state.title);
                     orgNames.push(state.title);
                     mapOfOrgs[state.title] = state;
                 });

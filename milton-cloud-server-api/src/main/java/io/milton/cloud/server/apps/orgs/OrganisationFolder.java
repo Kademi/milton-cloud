@@ -70,6 +70,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         Transaction tx = session.beginTransaction();
         try {
             _(DataBinder.class).populate(organisation, parameters);            
+            System.out.println("admin domain: " + organisation.getAdminDomain());
             String s = WebUtils.getParam(parameters, "orgTypeName");
             OrgType orgType = null;
             if( s != null ) {
@@ -183,6 +184,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         if (jsonResult == null && "application/json".equals(contentType)) {            
             Map<String,Object> map = new HashMap<>();
             map.put("orgId", organisation.getOrgId());
+            map.put("adminDomain", organisation.getAdminDomain() );
             map.put("title", organisation.getTitle());
             map.put("address", organisation.getAddress());
             map.put("addressLine2", organisation.getAddressLine2());
