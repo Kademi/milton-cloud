@@ -167,7 +167,7 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setSize(int size) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
     }
 
     @Override
@@ -207,7 +207,7 @@ public class EmailItemStandardMessage implements StandardMessage {
 
     @Override
     public void setHeaders(Map<String, String> headers) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO: would be nice to store these somewhere. Perhaps convert to a string and store in blobstore
     }
 
     @Override
@@ -235,7 +235,9 @@ public class EmailItemStandardMessage implements StandardMessage {
             }
             sb.append(add.toPlainAddress());
         }
-        emailItem.setToList(sb.toString());
+        if (sb != null) {
+            emailItem.setToList(sb.toString());
+        }
     }
 
     @Override
@@ -264,7 +266,9 @@ public class EmailItemStandardMessage implements StandardMessage {
             }
             sb.append(add.toPlainAddress());
         }
-        emailItem.setCcList(sb.toString());
+        if (sb != null) {
+            emailItem.setCcList(sb.toString());
+        }
     }
 
     @Override
@@ -292,7 +296,9 @@ public class EmailItemStandardMessage implements StandardMessage {
             }
             sb.append(add.toPlainAddress());
         }
-        emailItem.setBccList(sb.toString());
+        if (sb != null) {
+            emailItem.setBccList(sb.toString());
+        }
     }
 
     @Override

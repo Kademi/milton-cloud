@@ -56,7 +56,9 @@ public class UploadUtils {
      * @throws BadRequestException
      */
     public static FileResource createNew(ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        log.info("createNew: newName=" + newName);
+        if( log.isInfoEnabled()) {
+            log.info("createNew: newName=" + newName);
+        }
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
 
@@ -83,21 +85,19 @@ public class UploadUtils {
      * @throws BadRequestException
      */
     public static FileResource createNew(Session session, ContentDirectoryResource col, String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        log.info("createNew. get the parent node");
         DataSession.DirectoryNode thisNode = col.getDirectoryNode();
-        log.info("createNew. got: " + thisNode.getName());
 
         if (thisNode.get(newName) != null) {
             throw new BadRequestException(col, "Resource with that name already exists: " + newName);
         }
 
-        log.info("createNew file: " + newName);
         DataSession.FileNode newFileNode = thisNode.addFile(newName);
         FileResource fileResource = new FileResource(newFileNode, col);
 
         String ct = HttpManager.request().getContentTypeHeader();
         if (ct != null && ct.equals("spliffy/hash")) {
             // read the new hash and set it on this
+            log.trace("createNew: set hash");
             InputStreamReader r = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(r);
             String newHash = br.readLine();
@@ -111,13 +111,12 @@ public class UploadUtils {
             }
             newFileNode.setHash(newHash);
         } else {
-            log.info("createNew: set content");
+            log.trace("createNew: set content");
             // parse data and persist to stores
             newFileNode.setContent(inputStream);
         }
         col.onAddedChild(fileResource);
         fileResource.updateModDate();
-        log.info("added ok");
         return fileResource;
     }
 
@@ -152,7 +151,7 @@ public class UploadUtils {
     }
 
     public static void setContent(FileResource fr, InputStream in) throws BadRequestException {
-        log.info("replaceContent: set content");
+        log.trace("replaceContent: set content");
         try {
             // parse data and persist to stores
             fr.getFileNode().setContent(in);

@@ -66,6 +66,9 @@ public class ManageGroupsFolder extends AbstractResource implements GetableResou
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         log.info("createCollection: " + newName);
+        if( newName.equals("users")) {
+            throw new RuntimeException("Cannot use reserved name 'users'");
+        }
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         Group group = getOrganisation().createGroup(newName);

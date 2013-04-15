@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.server.web.GroupInWebsiteFolder;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.process.*;
 import io.milton.resource.CollectionResource;

@@ -185,19 +185,16 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     if (!j.getDestFile().exists()) {
                         throw new RuntimeException("Job did not create a destination file: " + j.getDestFile().getAbsolutePath());
                     }
-                    System.out.println("use dest file: " + j.getDestFile().getAbsolutePath() + " size: " + j.getDestFile().length());
+                    log.info("use dest file: " + j.getDestFile().getAbsolutePath() + " size: " + j.getDestFile().length());
 
                     FileInputStream fin = new FileInputStream(j.getDestFile());
                     byte[] buf = new byte[1024];
-                    System.out.println("send file...");
                     // Read the file until the job is done, or we run out of bytes
                     int s = fin.read(buf);
-                    System.out.println("send file... " + s);
                     cnt = 0;
                     while (!j.done() || s > 0) {
                         if (s < 0) { // no bytes available, but job is not done, so wait
                             cnt++;
-                            System.out.println("sleep... " + cnt);
                             // if no bytes for 10 seconds then abort
                             if (cnt > 100) {
                                 throw new RuntimeException("Timed out waiting for bytes from job: " + j.getStatus());
@@ -205,7 +202,6 @@ public class AltFormatResourceFactory implements ResourceFactory {
                             doSleep(100);
                         } else {
                             cnt = 0;
-                            System.out.println("write bytes: " + s);
                             bytes += s;
                             out.write(buf, 0, s);
                         }

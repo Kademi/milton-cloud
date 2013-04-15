@@ -57,11 +57,13 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.mail.*;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import javax.mail.MessagingException;
@@ -278,26 +280,36 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             UserResource ur = (UserResource) principal;
             Profile p = ur.getThisUser();
             EmailItem i = new EmailItem();
+            Date now = currentDateService.getNow();
+            i.setCreatedDate(now);
             i.setRecipient(p);
             i.setRecipientAddress(p.getEmail());
+            i.setSendStatusDate(now);            
+            
             EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore,blobStore, rootContext, sessionManager);
             StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
             parser.toStandardMessage(mm, sm);
             session.save(i);
             tx.commit();
-        } else if (principal instanceof GroupResource) {
+        } else if (principal instanceof GroupInWebsiteFolder) {
             if (isAutoReply(mm)) {
                 log.warn("DISCARDING autoreply");
                 return;
             }
             // TODO: Should never accept a group email frmo outside of the group
             // Also, should have config option for groups to only accept emails from admins, or not at all
-            GroupResource gr = (GroupResource) principal;
+            GroupInWebsiteFolder gr = (GroupInWebsiteFolder) principal;
             GroupEmailJob job = new GroupEmailJob();
             job.addGroupRecipient(gr.getGroup());
             job.setGroupRecipients(new ArrayList<GroupRecipient>());
             job.setName("received-" + System.currentTimeMillis()); // HACK HACK - make a nice name from subject and ensure uniqueness
             GroupEmailStandardMessage sm = new GroupEmailStandardMessage(job);
+            
+            if( !isFromMember(sm, gr.getGroup())) {
+                log.warn("Received mail from non-group member, discarding..");
+                return;
+            }
+            
             job.setTitle(job.getSubject());
             job.setStatusDate(currentDateService.getNow());
             session.save(job);
@@ -364,6 +376,23 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         }
         EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);
         asynchProcessor.enqueue(p);
+    }
+
+    private boolean isFromMember(GroupEmailStandardMessage sm, Group group) {
+        if( sm.getFrom() == null ) {
+            log.warn("No from address");
+            return false;
+        }
+        Profile p = Profile.findByEmail(sm.getFrom().toPlainAddress(), SessionManager.session());
+        if( p == null ) {
+            log.warn("Received group email from unknown source: " + sm.getFrom().toPlainAddress());
+            return false;
+        }
+        if( !group.isMember(p)) {
+            log.warn("Not a group member: " + p.getName());
+            return false;
+        }
+        return true;
     }
 
     public static class EmailTriggerProcessable implements Processable, Serializable {

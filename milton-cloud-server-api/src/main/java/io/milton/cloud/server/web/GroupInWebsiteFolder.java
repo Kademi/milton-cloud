@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.signup;
+package io.milton.cloud.server.web;
 
 
 import io.milton.cloud.server.apps.ApplicationManager;
@@ -31,13 +31,17 @@ import java.util.List;
 import java.util.Map;
 
 import static io.milton.context.RequestContext._;
+import io.milton.mail.Mailbox;
+import io.milton.mail.MessageFolder;
+import io.milton.principal.HrefPrincipleId;
 import io.milton.vfs.db.*;
+import javax.mail.internet.MimeMessage;
 
 /**
  *
  * @author brad
  */
-public class GroupInWebsiteFolder extends AbstractCollectionResource implements IGroupResource{
+public class GroupInWebsiteFolder extends AbstractCollectionResource implements IGroupResource, PrincipalResource, Mailbox{
 
     private final GroupInWebsite giw;
     private final WebsiteRootFolder websiteRootFolder;
@@ -109,6 +113,42 @@ public class GroupInWebsiteFolder extends AbstractCollectionResource implements 
         }
         return super.is(type);
     }
-    
+
+    @Override
+    public PrincipleId getIdenitifer() {
+        return new HrefPrincipleId(getHref());
+    }
+
+    @Override
+    public boolean authenticate(String password) {
+        return false;
+    }
+
+    @Override
+    public boolean authenticateMD5(byte[] passwordHash) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public MessageFolder getInbox() {
+        return _(ApplicationManager.class).getInbox(this);
+    }
+
+    @Override
+    public MessageFolder getMailFolder(String name) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isEmailDisabled() {
+        return false;
+    }
+
+    @Override
+    public void storeMail(MimeMessage mm) {
+        _(ApplicationManager.class).storeMail(this, mm);
+    }
+
+
     
 }

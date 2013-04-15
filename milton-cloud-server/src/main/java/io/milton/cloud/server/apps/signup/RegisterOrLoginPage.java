@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.server.web.GroupInWebsiteFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;

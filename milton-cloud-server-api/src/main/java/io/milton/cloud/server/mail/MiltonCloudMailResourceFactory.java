@@ -28,68 +28,75 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.Resource;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import org.hibernate.Session;
 
 /**
  *
  * @author brad
  */
-public class MiltonCloudMailResourceFactory implements MailResourceFactory{
+public class MiltonCloudMailResourceFactory implements MailResourceFactory {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MiltonCloudMailResourceFactory.class);
-    
     private final SpliffyResourceFactory resourceFactory;
-    
 
     public MiltonCloudMailResourceFactory(SpliffyResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
     }
-        
-    
+
     @Override
     public Mailbox getMailbox(MailboxAddress add) {
         log.info("getMailbox: " + add);
         CurrentRootFolderService currentRootFolderService = _(CurrentRootFolderService.class);
         WebsiteRootFolder wrf = (WebsiteRootFolder) currentRootFolderService.getRootFolder(add.domain);
-        if( wrf == null ) {
+        if (wrf == null) {
             log.info("web not found: " + add.domain);
             return null;
         }
         Website w = wrf.getWebsite();
+        Session session = SessionManager.session();
 
         // Now look for a profile which has a admin org that owns the website
         Profile p;
-        if( w.getBaseEntity() instanceof Organisation ) {
+        if (w.getBaseEntity() instanceof Organisation) {
             Organisation org = (Organisation) w.getBaseEntity();
-            p = Profile.find(org, add.user, SessionManager.session());
-        } else if( w.getBaseEntity() instanceof Profile) {
+            p = Profile.find(org, add.user, session);
+        } else if (w.getBaseEntity() instanceof Profile) {
             p = (Profile) w.getBaseEntity();
         } else {
             throw new RuntimeException("Unsupported website owner type");
         }
-        if( p == null ) {
-            log.info("baseentity not found: " + add.user + " in website: " + w.getDomainName());
+        PrincipalResource pr = null;
+        if (p == null) {
+            log.info("baseentity not found: " + add.user + " in website: " + w.getDomainName() + " look for group");
+            if (w.getBaseEntity() instanceof Organisation) {
+                Organisation org = (Organisation) w.getBaseEntity();
+                Group g = org.group(add.user, session);
+                
+            }
             return null;
         } else {
-            PrincipalResource pr;
             try {
                 pr = wrf.findEntity(p);
             } catch (NotAuthorizedException | BadRequestException ex) {
                 throw new RuntimeException(ex);
             }
-            if( pr == null ) {
-                log.warn("Failed to find entity from profile: " + p.getName() + " id: " + p.getId());
-                return null;
-            }
-            if( pr instanceof Mailbox) {
-                return (Mailbox) pr;
-            } else {
-                log.warn("Entity is not a mailbox: " + p.getName() + " id: " + p.getId());
-                return null;
-            }
         }
-        
-    }
-    
+        if (pr == null) {
+            log.warn("Failed to find entity from profile: " + p.getName() + " id: " + p.getId());
+            return null;
+        }
+        if (pr instanceof Mailbox) {
+            return (Mailbox) pr;
+        } else {
+            log.warn("Entity is not a mailbox: " + p.getName() + " id: " + p.getId());
+            return null;
+        }
+
+
+    }    
 }

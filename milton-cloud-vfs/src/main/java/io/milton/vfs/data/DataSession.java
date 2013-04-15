@@ -311,7 +311,9 @@ public class DataSession {
             }
             dirty = Boolean.TRUE;
             if (parent != null) {
-                log.info("setDirty: " + parent.hashCode() + " - " + parent.getName());
+                if( log.isTraceEnabled()) {
+                log.trace("setDirty: " + parent.hashCode() + " - " + parent.getName());
+                }
                 parent.setDirty();
             }
         }

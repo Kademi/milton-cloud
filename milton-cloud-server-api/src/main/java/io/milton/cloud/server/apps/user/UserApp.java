@@ -88,7 +88,7 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
             if (r == null) {
                 log.warn("users folder not found: " + USERS_FOLDER_NAME + " in " + rootFolder.getClass() + " - " + rootFolder.getName() + "  hash: " + rootFolder.hashCode());
             } else {
-                log.warn("users folder not found correct type: " + r.getClass());
+                log.warn("users folder not found, incorrect type: " + r.getClass() + " expected: " + UsersFolder.class);
             }
             return null;
         }        

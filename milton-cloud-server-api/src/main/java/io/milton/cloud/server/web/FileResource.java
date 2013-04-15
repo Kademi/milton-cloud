@@ -47,8 +47,6 @@ import javax.xml.namespace.QName;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Request;
-import io.milton.resource.CollectionResource;
-import io.milton.vfs.data.DataSession;
 import java.util.HashMap;
 
 /**

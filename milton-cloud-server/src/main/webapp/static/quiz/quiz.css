@@ -61,5 +61,5 @@ ol.quiz li label {
 }
 
 div.Modal div.ModalContent table td textarea {
-    height: 30px !important;
+    height: 30px; /** remove important because was interfereing with source view in ck editor */
 }

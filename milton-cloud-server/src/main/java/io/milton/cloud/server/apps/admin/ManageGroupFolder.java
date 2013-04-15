@@ -419,6 +419,9 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         if (!(rDest instanceof ManageGroupsFolder)) {
             throw new ConflictException("Parent folder must be manage groups folder. Is a: " + rDest.getClass() + " with name: " + rDest.getName());
         }
+        if( name.equals("users")) {
+            throw new ConflictException("Cannot rename to reserved word 'users'");
+        }
         group.setName(name);
 
         session.save(group);

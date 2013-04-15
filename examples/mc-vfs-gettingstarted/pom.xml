@@ -11,7 +11,7 @@
     </description>
     <properties>
         <mc.version>1.0.3</mc.version>
-        <milton.version>2.4.2.4</milton.version>
+        <milton.version>2.4.2.6</milton.version>
     </properties>    
     <build>
         <plugins>

@@ -112,8 +112,14 @@ public class DoPasswordResetPage extends TemplatedHtmlPage implements PostableRe
 
     private void doReset(String newPassword, PasswordReset reset, Session session) throws NotAuthorizedException, BadRequestException {
         Profile p = reset.getProfile();
+        if( p == null ) {
+            throw new NullPointerException("No profile is associated with PasswordReset " + reset.getId());
+        }
         _(PasswordManager.class).setPassword(p, newPassword);
         PrincipalResource userRes = UserApp.findEntity(p, (RootFolder)getParent());
+        if( userRes == null ) {
+            throw new NullPointerException("Could not locate a principal from parent " + getParent().getName() );
+        }
         cookieAuthenticationHandler.setLoginCookies(userRes, HttpManager.request());
     }
 }

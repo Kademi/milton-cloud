@@ -34,6 +34,11 @@ public class GroupEmailStandardMessage implements StandardMessage{
         this.job = job;
     }
 
+    public GroupEmailJob getJob() {
+        return job;
+    }
+        
+
     @Override
     public void addAttachment(String name, String ct, String contentId, InputStream in) {
         throw new UnsupportedOperationException("Not supported yet.");

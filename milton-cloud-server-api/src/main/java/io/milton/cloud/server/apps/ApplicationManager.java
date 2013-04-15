@@ -27,7 +27,7 @@ import io.milton.cloud.server.web.ContentDirectoryResource;
 import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.DirectoryResource;
 import io.milton.cloud.server.web.FileResource;
-import io.milton.cloud.server.web.GroupResource;
+import io.milton.cloud.server.web.GroupInWebsiteFolder;
 import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RepositoryFolder;
 import io.milton.cloud.server.web.ResourceList;
@@ -360,7 +360,7 @@ public class ApplicationManager {
 
     }
 
-    public MessageFolder getInbox(GroupResource principal) {
+    public MessageFolder getInbox(GroupInWebsiteFolder principal) {
         for (Application app : getActiveApps()) {
             if (app instanceof EmailApplication) {
                 MessageFolder f = ((EmailApplication) app).getInbox(principal);
