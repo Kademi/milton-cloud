@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 @javax.persistence.Entity
 @Table(
-uniqueConstraints = {
+        uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name", "base_entity"})})
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
@@ -29,18 +29,22 @@ uniqueConstraints = {
 public class Repository implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(Repository.class);
-    
+
     public static void initRepo(Repository r, String name, Session session, Profile user, BaseEntity owner) throws HibernateException {
         r.setBaseEntity(owner);
-        if( owner.getRepositories() == null ) {
-            owner.setRepositories( new ArrayList<Repository>() );
+        if (owner.getRepositories() == null) {
+            owner.setRepositories(new ArrayList<Repository>());
         }
         owner.getRepositories().add(r);
         r.setCreatedDate(new Date());
         r.setName(name);
         r.setTitle(name);
         r.setLiveBranch(Branch.TRUNK);
-        session.save(r);
+        try {
+            session.save(r);
+        } catch (Throwable e) {
+            throw new RuntimeException("Exception saving repo");
+        }
 
         r.createBranch(Branch.TRUNK, user, session);
     }
@@ -57,7 +61,6 @@ public class Repository implements Serializable {
     private List<Branch> branches;
 
     public Repository() {
-
     }
 
     @Id
@@ -189,7 +192,7 @@ public class Repository implements Serializable {
      * @return
      */
     public Branch createBranch(String name, Profile user, Session session) {
-        if( user == null ) {
+        if (user == null) {
             throw new RuntimeException("Cant create branch with null user");
         }
         Commit head = new Commit();
@@ -250,7 +253,7 @@ public class Repository implements Serializable {
     public Branch liveBranch() {
         if (getLiveBranch() != null) {
             Branch b = branch(getLiveBranch());
-            if( b == null ) {
+            if (b == null) {
                 log.warn("Null branch in repo: " + getName());
                 //Thread.dumpStack();
             }

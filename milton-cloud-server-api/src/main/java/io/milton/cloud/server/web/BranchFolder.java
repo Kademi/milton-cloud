@@ -268,6 +268,7 @@ public class BranchFolder extends AbstractBranchFolder implements MakeCollection
     }
 
 
+    @Override
     public String getTitle() {
         if (branch != null) {
             return this.branch.getRepository().getTitle();

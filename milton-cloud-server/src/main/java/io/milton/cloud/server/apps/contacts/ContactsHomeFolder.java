@@ -29,9 +29,11 @@ import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.cloud.server.web.PersonalResource;
+import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -59,12 +61,12 @@ import static io.milton.context.RequestContext._;
  *
  * @author brad
  */
-public class ContactsHomeFolder extends AbstractCollectionResource implements MakeCollectionableResource, GetableResource, PersonalResource {
+public class ContactsHomeFolder extends AbstractCollectionResource implements MakeCollectionableResource, GetableResource, PersonalResource, TitledPage {
 
     private final String name;
     private final UserResource parent;
     private final ContactManager contactManager;
-    private List<ContactsFolder> children;
+    private ResourceList children;
 
     public ContactsHomeFolder(UserResource parent, String name, ContactManager contactManager) {
         this.parent = parent;
@@ -117,7 +119,7 @@ public class ContactsHomeFolder extends AbstractCollectionResource implements Ma
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             List<AddressBook> addressBooks = parent.getThisUser().getAddressBooks();
-            children = new ArrayList<>();
+            children = new ResourceList();
             if (addressBooks != null) {
                 for (AddressBook cal : addressBooks) {
                     Branch branch = cal.getTrunk();
@@ -187,6 +189,11 @@ public class ContactsHomeFolder extends AbstractCollectionResource implements Ma
     @Override
     public Profile getOwnerProfile() {
         return parent.getThisUser();
+    }
+
+    @Override
+    public String getTitle() {
+        return "Contacts";
     }
     
     

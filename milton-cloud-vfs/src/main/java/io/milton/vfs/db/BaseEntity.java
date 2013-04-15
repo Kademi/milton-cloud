@@ -10,7 +10,6 @@ import org.hibernate.Session;
 import java.util.ArrayList;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -40,19 +39,16 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         crit.add(Restrictions.eq("name", name));
         return DbUtils.unique(crit);
     }
-
-    
-    private long id;    
+    private long id;
     private String type;
     private String notes;
     private Date createdDate;
     private Date modifiedDate;
     private List<Repository> repositories;    // has repositories
-    private List<Calendar> calendars; // has calendars
 
     @Transient
     public abstract String getFormattedName();
-    
+
     @Id
     @GeneratedValue
     public long getId() {
@@ -62,7 +58,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     public void setId(long id) {
         this.id = id;
     }
-    
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseEntity")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Repository> getRepositories() {
@@ -93,16 +89,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.modifiedDate = modifiedDate;
     }
 
-    @OneToMany(mappedBy = "owner")
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    public List<Calendar> getCalendars() {
-        return calendars;
-    }
-
-    public void setCalendars(List<Calendar> calendars) {
-        this.calendars = calendars;
-    }
-
     @Column
     public String getType() {
         return type;
@@ -122,10 +108,10 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     }
 
     public Repository createRepository(String name, Profile user, Session session) {
-        if( user == null ) {
+        if (user == null) {
             throw new RuntimeException("Cant create repository with a null user");
         }
-        Repository r = new Repository();                
+        Repository r = new Repository();
         Repository.initRepo(r, name, session, user, this);
         return r;
     }
@@ -139,12 +125,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
             setRepositories(null);
         }
 
-        if (getCalendars() != null) {
-            for (Calendar cal : getCalendars()) {
-                cal.delete(session);
-            }
-            setCalendars(null);
-        }
         session.delete(this);
     }
 
@@ -175,4 +155,52 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         }
         return null;
     }
+
+    @Transient
+    public List<AddressBook> getAddressBooks() {
+        List<AddressBook> list = new ArrayList();
+        if (getRepositories() != null) {
+            for (Repository r : getRepositories()) {
+                if (r instanceof AddressBook) {
+                    AddressBook ab = (AddressBook) r;
+                    list.add(ab);
+                }
+            }
+        }
+        return list;
+    }
+
+    @Transient
+    public List<Calendar> getCalendars() {
+        List<Calendar> list = new ArrayList();
+        if (getRepositories() != null) {
+            for (Repository r : getRepositories()) {
+                if (r instanceof Calendar) {
+                    Calendar ab = (Calendar) r;
+                    list.add(ab);
+                }
+            }
+        }
+        return list;
+    }
+    
+
+    public Calendar calendar(String name) {
+        for (Calendar a : getCalendars()) {
+            if (a.getName().equals(name)) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    public AddressBook addressBook(String name) {
+        for (AddressBook a : getAddressBooks()) {
+            if (a.getName().equals(name)) {
+                return a;
+            }
+        }
+
+        return null;
+    }    
 }

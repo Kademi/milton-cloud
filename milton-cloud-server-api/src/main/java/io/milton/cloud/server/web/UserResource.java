@@ -88,7 +88,7 @@ public class UserResource extends AbstractCollectionResource implements Collecti
 
 
     @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+    public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
             children = new ResourceList();
             if (user.getRepositories() != null) {

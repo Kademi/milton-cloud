@@ -408,6 +408,7 @@ public class ApplicationManager {
     }
 
     public ResourceList toResources(ContentDirectoryResource parent, DataSession.DirectoryNode dir) {
+        System.out.println("toResources: " + parent.getName());
         RootFolder rf = currentRootFolderService.peekRootFolder();
         ResourceList list = new ResourceList();
         if (dir != null) {

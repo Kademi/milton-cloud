@@ -21,16 +21,28 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
+import io.milton.cloud.server.apps.DataResourceApplication;
+import io.milton.cloud.server.apps.MenuApplication;
+import io.milton.cloud.server.apps.contacts.ContactResource;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.MenuItem;
+import static io.milton.context.RequestContext._;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
+import io.milton.resource.Resource;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.CalEvent;
 import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,9 +54,9 @@ import org.hibernate.Session;
  *
  * @author brad
  */
-public class CalendarApp implements Application, EventListener, BrowsableApplication {
+public class CalendarApp implements Application, EventListener, BrowsableApplication, MenuApplication, ChildPageApplication, DataResourceApplication {
 
-    public static final String CALENDAR_HOME_NAME = "cal";
+    public static final String CALENDAR_HOME_NAME = "Calendars";
     private CalendarManager calendarManager;
     private ApplicationManager applicationManager;
 
@@ -84,13 +96,14 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
 
     @Override
     public void onEvent(Event e) {
+        
         if (e instanceof SubscriptionEvent) {
             SubscriptionEvent joinEvent = (SubscriptionEvent) e;
             Group group = joinEvent.getMembership().getGroupEntity();
             List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
             for (GroupInWebsite giw  : giws) {
                 if (applicationManager.isActive(this, giw.getWebsite().liveBranch() )) {
-                    addCalendar("cal", joinEvent.getMembership().getMember(), SessionManager.session());
+                    addCalendar("default", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }
         }
@@ -102,16 +115,60 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
         if( cal != null ) {
             return ;
         }
-        if( u.getCalendars() == null ) {
-            u.setCalendars(new ArrayList<Calendar>());
-        }
         cal = new Calendar();
-        cal.setOwner(u);
+        cal.setBaseEntity(u);
         cal.setCreatedDate(new Date());
-        cal.setCtag(System.currentTimeMillis());
-        cal.setModifiedDate(new Date());
         cal.setName(name);
+        cal.setTitle(name);
+        Repository.initRepo(cal, name, session, u, u);
         u.getCalendars().add(cal);
         session.save(cal);
+        
+    
+    }
+
+    @Override
+    public void appendMenu(MenuItem parent) {
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if (curUser == null) {
+            return;
+        }
+        if (parent.getRootFolder() instanceof WebsiteRootFolder) {
+            switch (parent.getId()) {
+                case "menuRoot":
+                    parent.getOrCreate("menu-mycalendars", "Calendars", "/mycalendars").setOrdering(50);
+                    break;
+            }
+        }
+
+    }
+
+    @Override
+    public Resource getPage(Resource parent, String requestedName) {
+        if( parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            if( requestedName.equals("mycalendars")) {
+                return new MyCalendarsPage(requestedName, wrf);
+            }                
+        } else if( parent instanceof CalendarFolder ) {
+            if( requestedName.equals("new")) {
+                CalendarFolder cal = (CalendarFolder) parent;
+                return new CalEventResource(null, cal, null, calendarManager);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ContentResource instantiateResource(Object dm, CommonCollectionResource parent, RootFolder rf) {
+        if (parent instanceof CalendarFolder) {
+            if (dm instanceof DataSession.FileNode) {
+                DataSession.FileNode fn = (DataSession.FileNode) dm;
+                CalendarFolder calendarFolder = (CalendarFolder) parent;
+                CalEvent c = calendarFolder.getCalendar().event(fn.getName());
+                return new CalEventResource(fn, calendarFolder, c, calendarManager);
+            }
+        }
+        return null;
     }
 }

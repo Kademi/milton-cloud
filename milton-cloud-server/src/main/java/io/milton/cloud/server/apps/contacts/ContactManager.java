@@ -19,10 +19,16 @@ package io.milton.cloud.server.apps.contacts;
 import info.ineighborhood.cardme.engine.VCardEngine;
 import info.ineighborhood.cardme.io.VCardWriter;
 import info.ineighborhood.cardme.vcard.VCard;
+import info.ineighborhood.cardme.vcard.VCardImpl;
 import info.ineighborhood.cardme.vcard.features.EmailFeature;
 import info.ineighborhood.cardme.vcard.features.TelephoneFeature;
+import info.ineighborhood.cardme.vcard.types.BeginType;
 import info.ineighborhood.cardme.vcard.types.EmailType;
+import info.ineighborhood.cardme.vcard.types.EndType;
+import info.ineighborhood.cardme.vcard.types.FormattedNameType;
+import info.ineighborhood.cardme.vcard.types.NameType;
 import info.ineighborhood.cardme.vcard.types.TelephoneType;
+import info.ineighborhood.cardme.vcard.types.UIDType;
 import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Contact;
@@ -134,12 +140,24 @@ public class ContactManager {
         Contact e = new Contact();
         e.setName(newName);
         e.setAddressBook(addressBook);
-        _update(e, icalData);
+        if( icalData != null ) {
+            _update(e, icalData);
+        }
         session.save(e);
         session.save(e.getAddressBook());
         return e;
     }
 
+    public Contact createContact(AddressBook addressBook, String uniqueId, Session session) throws UnsupportedEncodingException {
+        Contact e = new Contact();
+        e.setName(uniqueId);
+        e.setUid(uniqueId);
+        e.setAddressBook(addressBook);
+        session.save(e);
+        session.save(e.getAddressBook());
+        return e;
+    }
+    
     public void update(Contact contact, String data) {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
@@ -153,6 +171,37 @@ public class ContactManager {
         VCardWriter writer = new VCardWriter();
         writer.setVCard(vcard);
         return writer.buildVCardString();
+    }
+    
+    public VCard toVCard(Contact contact) {
+        VCard vcard = new VCardImpl();
+        vcard.setBegin(new BeginType());
+        vcard.setUID(new UIDType(contact.getUid()));
+        if( contact.getSurName() != null || contact.getGivenName() != null ) {
+            vcard.setName(new NameType(contact.getSurName(), contact.getGivenName()));
+        }
+        StringBuilder sbFormattedName = new StringBuilder();
+        if( contact.getGivenName() != null) {
+            sbFormattedName.append(contact.getGivenName());
+        }
+        if( contact.getSurName() != null ) {
+            if( sbFormattedName.length() > 0 ) {
+                sbFormattedName.append(" ");
+            }
+            sbFormattedName.append(contact.getSurName());
+        }
+        if( sbFormattedName.length() == 0) {
+            sbFormattedName.append(contact.getName()); // last resort, use the file name as formatted name
+        }
+        vcard.setFormattedName(new FormattedNameType(sbFormattedName.toString()));
+        if( contact.getTelephonenumber() != null ) {
+            vcard.addTelephoneNumber(new TelephoneType(contact.getTelephonenumber()));
+        }
+        if( contact.getMail() != null ) {
+            vcard.addEmail(new EmailType(contact.getMail()));
+        }
+        vcard.setEnd(new EndType());
+        return vcard;
     }
     
     public VCard parse(String data) {

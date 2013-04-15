@@ -16,15 +16,11 @@
  */
 package io.milton.cloud.server.apps.calendar;
 
-import io.milton.cloud.common.HashCalc;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.CalEvent;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.zip.Adler32;
-import java.util.zip.CheckedOutputStream;
-import java.util.zip.Checksum;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
@@ -35,14 +31,12 @@ import net.fortuna.ical4j.model.parameter.TzId;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-import org.apache.commons.io.output.NullOutputStream;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.utils.SessionManager;
-import java.util.logging.Level;
 
 /**
  *
@@ -53,6 +47,19 @@ public class CalendarManager {
     private static final Logger log = LoggerFactory.getLogger(CalendarManager.class);
     private String defaultColor = "blue";
 
+    public void update(CalEvent event, String data) {
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        try {
+            _update(event, data);
+        } catch (IOException | ParserException ex) {
+            throw new RuntimeException(ex);
+        }
+        session.save(event);
+        session.save(event.getCalendar());
+        tx.commit();
+    }
+
     public Calendar createCalendar(BaseEntity owner, String newName) {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
@@ -60,10 +67,8 @@ public class CalendarManager {
         Calendar c = new Calendar();
         c.setColor(defaultColor);
         c.setCreatedDate(new Date());
-        c.setModifiedDate(new Date());
         c.setName(newName);
-        c.setOwner(owner);
-        c.setCtag(System.currentTimeMillis());
+        c.setBaseEntity(owner); 
 
         session.save(c);
 
@@ -97,8 +102,6 @@ public class CalendarManager {
                 destCalendar.setEvents(new ArrayList<CalEvent>());
             }
             destCalendar.getEvents().add(event);
-            updateCtag(sourceCal);
-            updateCtag(destCalendar);
             session.save(sourceCal);
             session.save(destCalendar);
         }
@@ -125,7 +128,6 @@ public class CalendarManager {
         newEvent.setStartDate(event.getStartDate());
         newEvent.setSummary(event.getSummary());
         newEvent.setTimezone(event.getTimezone());
-        updateCtag(newEvent);
         session.save(newEvent);
 
         tx.commit();
@@ -139,7 +141,7 @@ public class CalendarManager {
         tx.commit();
     }
 
-    public CalEvent createEvent(Calendar calendar, String newName, String icalData, String contentType) throws UnsupportedEncodingException {
+    public CalEvent createEvent(Calendar calendar, String newName, String icalData) throws UnsupportedEncodingException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         CalEvent e = new CalEvent();
@@ -157,10 +159,9 @@ public class CalendarManager {
             throw new RuntimeException(ex);
         }
         _setCalendar(cal4jCalendar, e);
-        updateCtag(e);
         session.save(e);
         tx.commit();
-        
+
         return e;
     }
 
@@ -206,17 +207,8 @@ public class CalendarManager {
 
     }
 
-    public void setCalendar(net.fortuna.ical4j.model.Calendar calendar, CalEvent calEvent) {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        
-        _setCalendar(calendar, calEvent);
-        
-        updateCtag(calEvent);
-        session.save(calEvent);
-        tx.commit();        
-    }
-    
+
+
     private void _setCalendar(net.fortuna.ical4j.model.Calendar calendar, CalEvent calEvent) {
         VEvent ev = event(calendar);
         calEvent.setStartDate(ev.getStartDate().getDate());
@@ -236,54 +228,6 @@ public class CalendarManager {
         return (VEvent) cal.getComponent("VEVENT");
     }
 
-    private void updateCtag(CalEvent event) {
-        OutputStream nulOut = new NullOutputStream();
-        CheckedOutputStream cout = new CheckedOutputStream(nulOut, new Adler32());
-        appendLine(event.getDescription(), cout);
-        appendLine(event.getSummary(), cout);
-        appendLine(event.getTimezone(), cout);
-        appendLine(event.getStartDate(), cout);
-        appendLine(event.getEndDate(), cout);
-        Checksum check = cout.getChecksum();
-        long crc = check.getValue();
-        event.setCtag(crc);
-        updateCtag(event.getCalendar());
-    }
-
-    private void updateCtag(Calendar sourceCal) {
-        OutputStream nulOut = new NullOutputStream();
-        CheckedOutputStream cout = new CheckedOutputStream(nulOut, new Adler32());
-
-        appendLine(sourceCal.getColor(), cout);
-        if (sourceCal.getEvents() != null) {
-            for (CalEvent r : sourceCal.getEvents()) {
-                String name = r.getName();
-                String line = HashCalc.getInstance().toHashableText(name, r.getCtag()+"", "");
-                appendLine(line, cout);
-            }
-        }
-        Checksum check = cout.getChecksum();
-        long crc = check.getValue();
-        sourceCal.setCtag(crc);
-    }
-    
-    private void appendLine(String text, OutputStream out) {
-        try {
-            out.write(text.getBytes());
-            out.write("\n".getBytes());
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-    
-    private void appendLine(Date d, OutputStream out) {
-        try {
-            out.write(d.toString().getBytes());
-            out.write("\n".getBytes());
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }    
 
     public String getDefaultColor() {
         return defaultColor;
@@ -291,5 +235,11 @@ public class CalendarManager {
 
     public void setDefaultColor(String defaultColor) {
         this.defaultColor = defaultColor;
+    }
+
+    private void _update(CalEvent event, String data) throws IOException, ParserException {
+        CalendarBuilder builder = new CalendarBuilder();
+        net.fortuna.ical4j.model.Calendar calendar = builder.build(new ByteArrayInputStream(data.getBytes("UTF-8")));
+        _setCalendar(calendar, event);
     }
 }

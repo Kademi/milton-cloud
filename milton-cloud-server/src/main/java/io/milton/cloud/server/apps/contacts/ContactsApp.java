@@ -21,15 +21,19 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.DataResourceApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.MenuItem;
+import static io.milton.context.RequestContext._;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.resource.CollectionResource;
+import io.milton.resource.Resource;
 import io.milton.vfs.db.AddressBook;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;
@@ -42,7 +46,6 @@ import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
-import static io.milton.context.RequestContext._;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Contact;
@@ -51,9 +54,9 @@ import io.milton.vfs.db.Contact;
  *
  * @author brad
  */
-public class ContactsApp implements Application, EventListener, BrowsableApplication, MenuApplication, DataResourceApplication {
+public class ContactsApp implements Application, EventListener, BrowsableApplication, MenuApplication, DataResourceApplication, ChildPageApplication {
 
-    public static final String ADDRESS_BOOK_HOME_NAME = "abs";
+    public static final String ADDRESS_BOOK_HOME_NAME = "AddressBooks";
     private ContactManager contactManager;
     private ApplicationManager applicationManager;
     private SpliffyResourceFactory resourceFactory;
@@ -142,7 +145,7 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
             for (GroupInWebsite giw : giws) {
                 Branch b = giw.getWebsite().liveBranch();
                 if (applicationManager.isActive(this, b)) {
-                    addAddressBook("contact", joinEvent.getMembership().getMember(), SessionManager.session());
+                    addAddressBook("contacts", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }
         }
@@ -162,25 +165,22 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
         session.save(addressBook);
     }
 
+
     @Override
     public void appendMenu(MenuItem parent) {
         Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
         if (curUser == null) {
             return;
         }
-        switch (parent.getId()) {
-            case "menuRoot":
-                String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
-                for (Repository r : curUser.getRepositories()) {
-                    if (r instanceof AddressBook) {
-                        String repoHref = userHref + ADDRESS_BOOK_HOME_NAME + "/" + r.getName() + "/";
-                        String title = r.getTitle() == null ? r.getName() : r.getTitle();
-                        parent.getOrCreate("menu-mycontacts-" + r.getName(), title, repoHref).setOrdering(50);
-                    }
-                }
-                break;
+        if (parent.getRootFolder() instanceof WebsiteRootFolder) {
+            switch (parent.getId()) {
+                case "menuRoot":
+                    parent.getOrCreate("menu-mycontacts", "Contacts", "/mycontacts").setOrdering(50);
+                    break;
+            }
         }
-    }
+
+    }    
 
     @Override
     public ContentResource instantiateResource(Object dm, CommonCollectionResource parent, RootFolder rf) {
@@ -191,6 +191,17 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
                 Contact c = contactsFolder.getAddressBook().contact(fn.getName());
                 return new ContactResource(fn, contactsFolder, c, contactManager);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Resource getPage(Resource parent, String requestedName) {
+        if( parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            if( requestedName.equals("mycontacts")) {
+                return new MyContactsPage(requestedName, wrf);
+            }                
         }
         return null;
     }

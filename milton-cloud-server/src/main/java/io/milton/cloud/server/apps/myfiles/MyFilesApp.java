@@ -20,8 +20,10 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
+import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
+import io.milton.cloud.server.apps.contacts.MyContactsPage;
 import io.milton.cloud.server.apps.user.UserApp;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
@@ -47,6 +49,7 @@ import org.hibernate.Session;
 
 import static io.milton.context.RequestContext._;
 import io.milton.resource.CollectionResource;
+import io.milton.resource.Resource;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
@@ -56,7 +59,7 @@ import java.io.IOException;
  *
  * @author brad
  */
-public class MyFilesApp implements Application, EventListener, PortletApplication, MenuApplication, BrowsableApplication {
+public class MyFilesApp implements Application, EventListener, PortletApplication, MenuApplication, BrowsableApplication, ChildPageApplication {
 
     private ApplicationManager applicationManager;
 
@@ -125,14 +128,7 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
         if (parent.getRootFolder() instanceof WebsiteRootFolder) {
             switch (parent.getId()) {
                 case "menuRoot":
-                    String userHref = "/" + UserApp.USERS_FOLDER_NAME + "/" + curUser.getName() + "/";
-                    for (Repository r : curUser.getRepositories()) {
-                        if (r.type().equals("R")) { // dont handle specialised repo's like contacts
-                            String repoHref = userHref + r.getName() + "/";
-                            String title = r.getTitle() == null ? r.getName() : r.getTitle();
-                            parent.getOrCreate("menu-myfiles-" + r.getName(), title, repoHref).setOrdering(50);
-                        }
-                    }
+                    parent.getOrCreate("menu-myfiles", "My Files", "/myfiles").setOrdering(50);
                     break;
             }
         }
@@ -145,5 +141,16 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
             UserResource ur = (UserResource) parent;
 
         }
+    }
+
+    @Override
+    public Resource getPage(Resource parent, String requestedName) {
+        if( parent instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
+            if( requestedName.equals("myfiles")) {
+                return new MyFilesPage(requestedName, wrf);
+            }                
+        }
+        return null;
     }
 }

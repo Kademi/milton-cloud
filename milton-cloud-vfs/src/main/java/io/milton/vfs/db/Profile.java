@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("U")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(
-uniqueConstraints = {
+        uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
 
@@ -122,13 +122,13 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Find a profile by email address, but only looking within the given organisation
-     * or subordinate orgs
-     * 
+     * Find a profile by email address, but only looking within the given
+     * organisation or subordinate orgs
+     *
      * @param email
      * @param org
      * @param session
-     * @return 
+     * @return
      */
     public static Profile findByEmail(String email, Organisation org, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
@@ -173,7 +173,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Object result = DbUtils.unique(crit);
         return result == null;
     }
-    
     private String name;
     private String firstName;
     private String surName;
@@ -332,8 +331,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
                     toRemove.add(gm);
                 }
             }
-            if( !toRemove.isEmpty() ) {
-                for( GroupMembership gm : toRemove ) {
+            if (!toRemove.isEmpty()) {
+                for (GroupMembership gm : toRemove) {
                     gm.delete(session);
                 }
                 session.flush();
@@ -344,9 +343,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     /**
      * Create a GroupMembership linking this profile to the given group, within
      * the given organisation. Is immediately saved
-     * 
-     * First checks to see if the profile already has that membership. If so
-     * no changes are made
+     *
+     * First checks to see if the profile already has that membership. If so no
+     * changes are made
      *
      * @param g
      * @return
@@ -392,7 +391,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Subordinate s = new Subordinate();
         s.setWithinOrg(subordinateTo);
         s.setGroupMembership(gm);
-        if( gm.getSubordinates() == null ) {
+        if (gm.getSubordinates() == null) {
             gm.setSubordinates(new ArrayList<Subordinate>());
         }
         gm.getSubordinates().add(s);
@@ -457,20 +456,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     @Transient
-    public List<AddressBook> getAddressBooks() {
-        List<AddressBook> list = new ArrayList();
-        if (getRepositories() != null) {
-            for (Repository r : getRepositories()) {
-                if (r instanceof AddressBook) {
-                    AddressBook ab = (AddressBook) r;
-                    list.add(ab);
-                }
-            }
-        }
-        return list;
-    }
-
-    @Transient
     @Override
     public String getFormattedName() {
         String name = "";
@@ -480,47 +465,20 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         if (getSurName() != null && getSurName().length() > 0) {
             name = name + " " + getSurName();
         }
-        if( name.length() == 0) {
+        if (name.length() == 0) {
             name = getNickName();
         }
-        if( name.length() == 0 ) {
+        if (name.length() == 0) {
             name = getName();
         }
         return name;
     }
-    
-    public Calendar calendar(String name) {
-        System.out.println("calendar: " + name);
-        if( getCalendars() == null ) {
-            System.out.println("null calendars");
-            return null;
-        }
-        for(Calendar c : getCalendars()) {
-            System.out.println("check cal: " + c.getName() + " --- " + name);
-            if( c.getName().equals(name)) {
-                return c;
-            }
-        }
-        return null;
-    }
 
-    public AddressBook addressBook(String name) {
-        if( getAddressBooks() != null) {
-            for( AddressBook a : getAddressBooks() ) {
-                if( a.getName().equals(name)) {
-                    return a;
-                }
-            }
-                
-        }
-        return null;
-    }
-    
     @Transient
     public Date getPasswordCredentialDate() {
-        if( getCredentials() != null ) {
-            for( Credential c : getCredentials() ) {
-                if( c instanceof PasswordCredential) {
+        if (getCredentials() != null) {
+            for (Credential c : getCredentials()) {
+                if (c instanceof PasswordCredential) {
                     return c.getCreatedDate();
                 }
             }

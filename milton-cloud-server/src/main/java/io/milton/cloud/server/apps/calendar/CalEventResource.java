@@ -1,6 +1,13 @@
 package io.milton.cloud.server.apps.calendar;
 
-
+import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.UploadUtils;
+import io.milton.cloud.server.web.templating.DataBinder;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.context.ClassNotInContextException;
+import static io.milton.context.RequestContext._;
+import io.milton.http.FileItem;
+import io.milton.http.Range;
 import java.io.*;
 import java.util.Date;
 import java.util.List;
@@ -8,23 +15,9 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.CalEvent;
-import io.milton.vfs.db.Profile;
-import io.milton.cloud.server.web.AbstractResource;
-import io.milton.cloud.server.web.CommonCollectionResource;
-
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.model.Calendar;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.Transaction;
-import io.milton.vfs.db.Organisation;
-import io.milton.http.Auth;
-import io.milton.http.Range;
-import io.milton.http.Request;
 import io.milton.http.Response.Status;
-import io.milton.principal.Principal;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -33,92 +26,96 @@ import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.property.BeanPropertyResource;
 import io.milton.resource.*;
+import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.Calendar;
 import io.milton.vfs.db.utils.SessionManager;
+import org.hibernate.Session;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.UUID;
 
 /**
  *
  * @author brad
  */
-@BeanPropertyResource(value="spliffy")
-public class CalEventResource extends AbstractResource implements ICalResource, DeletableResource, MoveableResource, CopyableResource, ReplaceableResource, PropertySourcePatchSetter.CommitableResource, GetableResource {
+@BeanPropertyResource(value = "spliffy")
+public class CalEventResource extends io.milton.cloud.server.web.FileResource implements ICalResource, DeletableResource, ReplaceableResource, PropertySourcePatchSetter.CommitableResource, GetableResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(CalEventResource.class);
     private final CalEvent event;
-    private final CalendarFolder parent;
     private final CalendarManager calendarManager;
-
+    private final Calendar calendar;
     private Transaction tx; // for proppatch setting
-    
-    public CalEventResource(CalendarFolder parent, CalEvent event, CalendarManager calendarManager) {
-        
+
+    public CalEventResource(DataSession.FileNode fileNode, CalendarFolder parent, CalEvent event, CalendarManager calendarManager) {
+        super(fileNode, parent);
         this.event = event;
         this.parent = parent;
         this.calendarManager = calendarManager;
+        this.calendar = parent.getCalendar();
     }
 
     @Override
-    public String getUniqueId() {
-        return event.getCtag() + "";
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        Session session = SessionManager.session();
+        tx = SessionManager.beginTx();
+        String newName = UUID.randomUUID().toString() + ".ics";        
+        try {
+            CalEvent newEvent = calendarManager.createEvent(calendar, newName, null);
+            _(DataBinder.class).populate(newEvent, parameters);
+            session.save(newEvent);
+            String icalData = calendarManager.getCalendar(newEvent);
+            ByteArrayInputStream bin = new ByteArrayInputStream(icalData.getBytes("UTF-8"));
+            DataSession.FileNode newFileNode = parent.getDirectoryNode().addFile(newName);
+            newFileNode.setContent(bin);                                    
+            CalEventResource newRes = new CalEventResource(newFileNode, (CalendarFolder) getParent(), newEvent, calendarManager);
+            newRes.save();
+            jsonResult = new JsonResult(true, "Created calendar resource", newRes.getHref());
+            tx.commit();
+
+        } catch (IOException | ClassNotInContextException | IllegalAccessException | InvocationTargetException ex) {
+            log.error("Exception creating event", ex);
+            tx.rollback();
+            jsonResult = new JsonResult(false, "Exception occured: " + ex.getMessage());
+        }
+
+        return null;
     }
 
-    
-    
     @Override
-    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException {
-        writeData(out);
-        out.flush();
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
+        if (params.containsKey("edit")) {
+            _(HtmlTemplater.class).writePage("calendar/editEvent", this, params, out);
+        } else {
+            super.sendContent(out, range, params, contentType); //To change body of generated methods, choose Tools | Templates.
+        }
     }
-
 
     @Override
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
-        try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            IOUtils.copy(in, bout);
-            String data = bout.toString();
-            setiCalData(data);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
+        super.replaceContent(in, length);
+        calendarManager.update(event, getICalData());
     }
-    
+
     @Override
     public String getContentType(String accepts) {
         return "text/calendar";
     }
 
     @Override
+    public boolean is(String type) {
+        if (type.equals("event") || type.equals("calendarResource")) {
+            return true;
+        }
+        return super.is(type);
+    }
+
+    @Override
     public String getICalData() {
         try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            writeData(bout);
-            return bout.toString("UTF-8");
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    public void setiCalData(String iCalData) {
-        ByteArrayInputStream fin = null;
-        try {
-            fin = new ByteArrayInputStream(iCalData.getBytes("UTF-8"));
-            CalendarBuilder builder = new CalendarBuilder();
-            Calendar calendar = builder.build(fin);
-            calendarManager.setCalendar(calendar, event);
-            
-        } catch (IOException | ParserException ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            IOUtils.closeQuietly(fin);
-        }
-    }
-
-    public void writeData(OutputStream out) {
-        try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            String s = calendarManager.getCalendar(event);
-            out.write(s.getBytes());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            sendContent(out, null, null, null);
+            return out.toString("UTF-8");
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -127,10 +124,10 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
     public Date getStartDate() {
         return CalendarUtils.plainDate(event.getStartDate());
     }
-    
+
     public String getStart() {
         return CalendarUtils.formatDate(getStartDate());
-    }    
+    }
 
     public void setStartDate(Date d) {
         checkTx();
@@ -146,15 +143,14 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
         event.setTimezone(s);
     }
 
-
     public Date getEndDate() {
-        return  CalendarUtils.plainDate(event.getEndDate());
+        return CalendarUtils.plainDate(event.getEndDate());
     }
 
     public String getEnd() {
         return CalendarUtils.formatDate(getEndDate());
-    }    
-    
+    }
+
     public void setEndDate(Date d) {
         checkTx();
         event.setEndDate(d);
@@ -179,63 +175,16 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
     }
 
     @Override
-    public String getName() {
-        return event.getName();
-    }
-
-    @Override
-    public Date getModifiedDate() {
-        return event.getModifiedDate();
-    }
-
-    @Override
-    public Date getCreateDate() {
-        return event.getCreatedDate();
-    }
-
-    @Override
-    public boolean isDir() {
-        return false;
-    }
-
-    @Override
-    public CommonCollectionResource getParent() {
-        return parent;
-    }
-
-    @Override
-    public Map<Principal, List<Priviledge>> getAccessControlList() {
-        return null;
-    }
-
-    @Override
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
-        calendarManager.delete(event);
-    }
-
-    @Override
-    public void moveTo(CollectionResource rDest, String name) throws ConflictException, NotAuthorizedException, BadRequestException {
-        if( rDest instanceof CalendarFolder) {
-            CalendarFolder calFolder = (CalendarFolder) rDest;
-            calendarManager.move(event, calFolder.getCalendar(), name);
-        } else {
-            throw new BadRequestException(rDest, "The destination resource is not a calendar");
+        super.delete();
+        if (event != null) {
+            calendarManager.delete(event);
         }
     }
 
     @Override
-    public void copyTo(CollectionResource rDest, String name) throws NotAuthorizedException, BadRequestException, ConflictException {
-        if( rDest instanceof CalendarFolder) {
-            CalendarFolder calFolder = (CalendarFolder) rDest;
-            calendarManager.copy(event, calFolder.getCalendar(), name);
-        } else {
-            throw new BadRequestException(rDest, "The destination resource is not a calendar");
-        }
-    }
-
-    @Override
-    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) {        
-        if( tx == null ) {
+    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Status, List<NameAndError>> errorProps) {
+        if (tx == null) {
             log.warn("doCommit: Transaction not started");
         } else {
             log.trace("doCommit: commiting");
@@ -248,28 +197,8 @@ public class CalEventResource extends AbstractResource implements ICalResource, 
      * Called from setters used by proppatch
      */
     private void checkTx() {
-        if( tx == null ) {
+        if (tx == null) {
             tx = SessionManager.session().beginTransaction();
         }
     }
-
-    @Override
-    public Long getMaxAgeSeconds(Auth auth) {
-        return null;
-    }
-
-    @Override
-    public Long getContentLength() {
-        return null;
-    }
-    
-    @Override
-    public Organisation getOrganisation() {
-        return parent.getOrganisation();
-    }    
-    
-    @Override
-    public Priviledge getRequiredPostPriviledge(Request request) {
-        return null;
-    }     
 }

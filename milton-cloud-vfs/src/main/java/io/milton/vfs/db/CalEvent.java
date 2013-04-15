@@ -32,9 +32,7 @@ public class CalEvent implements Serializable {
     private Long id;
     
     private String name; // the "file" name
-
-    private Long ctag; // unique indentifier for this version
-    
+        
     private Calendar calendar;
     
     private Date createdDate;
@@ -178,16 +176,4 @@ public class CalEvent implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    @Column(nullable=false)
-    public Long getCtag() {
-        return ctag;
-    }
-
-    public void setCtag(Long ctag) {
-        this.ctag = ctag;
-    }
-        
-    
-    
 }

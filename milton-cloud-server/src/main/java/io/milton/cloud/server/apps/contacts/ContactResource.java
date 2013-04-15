@@ -48,9 +48,7 @@ public class ContactResource extends io.milton.cloud.server.web.FileResource imp
 
     private static final Logger log = LoggerFactory.getLogger(CalEventResource.class);
     private Contact contact;
-    private final ContactsFolder parent;
     private final ContactManager contactManager;
-    private Transaction tx; // for proppatch setting
     private VCard vcard;
 
     public ContactResource(FileNode fileNode, ContactsFolder parent, Contact contact, ContactManager contactManager) {
@@ -67,8 +65,8 @@ public class ContactResource extends io.milton.cloud.server.web.FileResource imp
 
         try {
             vcard();
-            if (contact == null) {
-                contact = parent.getAddressBook().add(getName());
+            if (contact == null) {                
+                contact = getParentContactsFolder().getAddressBook().add(getName());
             }
             contactManager.setPhone(vcard, parameters.get("telephonenumber"), contact);
             contactManager.setMail(vcard, parameters.get("mail"), contact);
@@ -88,6 +86,9 @@ public class ContactResource extends io.milton.cloud.server.web.FileResource imp
         return null;
     }
 
+    public ContactsFolder getParentContactsFolder() {
+        return (ContactsFolder) parent;
+    }
     
     @Override
     public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {

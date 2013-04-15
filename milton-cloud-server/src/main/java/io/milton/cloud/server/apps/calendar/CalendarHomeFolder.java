@@ -1,6 +1,6 @@
 package io.milton.cloud.server.apps.calendar;
 
-
+import io.milton.cloud.server.apps.contacts.ContactsFolder;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -14,8 +14,12 @@ import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.NodeChildUtils;
+import io.milton.cloud.server.web.PersonalResource;
+import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.TitledPage;
+import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.principal.Principal;
@@ -28,30 +32,36 @@ import io.milton.resource.GetableResource;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.resource.Resource;
 
-import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.AddressBook;
+import io.milton.vfs.db.Branch;
+import io.milton.vfs.db.utils.SessionManager;
 
 /**
  *
  * @author brad
  */
-public class CalendarHomeFolder extends AbstractCollectionResource implements MakeCollectionableResource, GetableResource {
+public class CalendarHomeFolder extends AbstractCollectionResource implements MakeCollectionableResource, GetableResource, PersonalResource, TitledPage {
 
     private final String name;
     private final UserResource parent;
     private final CalendarManager calendarManager;
     private List<CalendarFolder> children;
 
-    public CalendarHomeFolder(UserResource parent,  String name, CalendarManager calendarManager) {
-        
+    public CalendarHomeFolder(UserResource parent, String name, CalendarManager calendarManager) {
         this.parent = parent;
         this.name = name;
         this.calendarManager = calendarManager;
     }
-    
+
     @Override
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         Calendar calendar = calendarManager.createCalendar(parent.getThisUser(), newName);
-        return new CalendarFolder(this, calendar, calendarManager);
+        Branch branch = calendar.getTrunk();
+        Profile curUser = _(SpliffySecurityManager.class).getCurrentUser();
+        if (branch == null) {
+            branch = calendar.createBranch(Branch.TRUNK, curUser, SessionManager.session());
+        }
+        return new CalendarFolder(newName, this, calendar, branch, calendarManager);
     }
 
     @Override
@@ -86,7 +96,8 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
             children = new ArrayList<>();
             if (calendarList != null) {
                 for (Calendar cal : calendarList) {
-                    CalendarFolder f = new CalendarFolder(this, cal, calendarManager);
+                    Branch branch = cal.getTrunk();
+                    CalendarFolder f = new CalendarFolder(cal.getName(), this, cal, branch, calendarManager);
                     children.add(f);
                 }
             }
@@ -122,5 +133,15 @@ public class CalendarHomeFolder extends AbstractCollectionResource implements Ma
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
+    }
+
+    @Override
+    public Profile getOwnerProfile() {
+        return parent.getThisUser();
+    }
+
+    @Override
+    public String getTitle() {
+        return "Calendars";
     }
 }

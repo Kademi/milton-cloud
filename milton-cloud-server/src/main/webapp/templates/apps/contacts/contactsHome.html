@@ -2,6 +2,7 @@
     <head>
         <title>Directory</title>
         <link href="contacts.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="contacts.js">//</script>
     </head>    
     <body class="contacts">
         <div class="btn-group pull-right">
@@ -9,9 +10,9 @@
                 Add Contact
             </button>
         </div>    
-        
+
         <div class="input" id='myUploaded' style="width: 200px"></div> 
-        
+
         <table id="contacts" class="bar table table-striped vcenter">
             <thead>
                 <tr>
@@ -25,7 +26,14 @@
                 </tr>
             </thead>
             <tbody>                
-                #foreach($contact in $page.children.ofType.vcard)
+                #set($vcards = $page.children.ofType.vcard)
+                #if( $vcards.isEmpty() )
+                <tr>
+                    <td colspan="4">No contacts. Add one using the Add button above, or upload vcard files</td>
+                </tr>
+                    
+                #else
+                #foreach($contact in $vcards)
                 <tr>
                     <td class="left">
                         <a href="$contact.href">$contact.commonName</a>
@@ -35,124 +43,51 @@
                     <td><a href="$contact.href">edit</a></td>
                 </tr>
                 #end
+                #end
             </tbody>
         </table>
 
         <div id="editContact" class="modal hide fade"> 
-            <h3 class="Title">Edit contact</h3>
-            <form method="POST" action="." class="horizontal-form">
-                <ul>
-                    <li>
-                        <label for="givenName">Given name</label>
-                        <input id="givenName" name="givenName" />
-                    </li>
-                    <li>
-                        <label for="surName">Surname</label>
-                        <input id="surName" name="surName" />
-                    </li>
-                    <li>
-                        <label for="telephonenumber">Telephone</label>
-                        <input id="telephonenumber" name="telephonenumber" />
-                    </li>
-                    <li>
-                        <label for="mail">Email</label>
-                        <input id="mail" name="mail" />
-                    </li>
-
-                </ul>
-                <div class="ControllerContainer"> 
-                    <a href="" class="button">Cancel</a> 
-                    <button type="submit" class="Button">Save</button> 
-                    <button class="Button delete">Delete</button> 
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Modal header</h3>
+            </div>            
+            <form method="POST" action="." class="form-horizontal">
+                <div class="modal-body">
+                    <div class="control-group">
+                        <label class="control-label" for="givenName">Given name</label>
+                        <div class="controls">
+                            <input id="givenName" name="givenName" />
+                        </div>
+                    </div>                
+                    <div class="control-group">
+                        <label class="control-label" for="surName">Surname</label>
+                        <div class="controls">
+                            <input id="surName" name="surName" />
+                        </div>
+                    </div>                
+                    <div class="control-group">
+                        <label class="control-label" for="telephonenumber">Telephone</label>
+                        <div class="controls">
+                            <input id="telephonenumber" name="telephonenumber" />
+                        </div>
+                    </div>                
+                    <div class="control-group">
+                        <label class="control-label" for="mail">Email</label>
+                        <div class="controls">
+                            <input id="mail" name="mail" />
+                        </div>
+                    </div>                
                 </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn">Close</a>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>                
             </form>
         </div>        
 
         <script type="text/javascript" src="/static/js/stupidtable.js"></script>
         <script type="text/javascript" src="/static/js/jquery.fileupload.js"></script>
         <script type="text/javascript" src="/static/js/jquery.milton-upload.js"></script>        
-        <script type="text/javascript">
-            jQuery(document).ready(function() {
-                $("#contacts").stupidtable();
-                $("#contacts thead th:first-child").click();
-                $("#myUploaded").mupload({
-                    url: window.location.pathname,
-                    buttonText: "Upload vcard(s)",
-                    useJsonPut: false,
-                    oncomplete: function(data, name, href) {
-                        // reload the file list
-                        log("uploaded ok, now reload file list")
-                        reloadContacts()
-                    }
-                });
-                $("#contacts a").click(function(e) {
-                    e.preventDefault();
-                    showEditContact($(e.target));
-                });
-                $(".newContact").click(function() {
-                    showNewContact();
-                });
-                $("#editContact form").forms({
-                    callback: function(resp) {
-                        log("saved", resp);
-                        closeModals();
-                        reloadContacts();
-                    }
-                });
-                $("#editContact form a.button").click(function(e) {
-                    e.preventDefault();
-                    closeModals();
-                });
-                $("#editContact form button.delete").click(function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    confirmDelete($("#editContact form").attr("action"), $("#givenName").val(), function() {
-                        closeModals();
-                        reloadContacts();
-                    });
-                });
-            });
-            function reloadContacts() {
-                $.get(window.location.pathname, "", function(resp) {
-                    log("got contact list", resp);
-                    var html = $(resp);
-                    $("#contacts").replaceWith(html.find("#contacts"));
-                    $("#contacts").stupidtable();
-                    $("#contacts thead th:first-child").click();
-                    initPseudoClasses();
-                });
-
-            }
-            
-            function showNewContact() {
-                var modal = $("#editContact");
-                modal.find("input").val("");
-                showModal(modal);
-            }
-            
-            function showEditContact(link) {
-                var modal = $("#editContact");
-                $.ajax({
-                    type: 'GET',
-                    url: link.attr("href") + "/_DAV/PROPFIND?fields=ldap:telephonenumber,ldap:mail,ldap:surName,ldap:givenName",
-                    dataType: "json",
-                    success: function(data) {
-                        log("response", data);
-                        $("#givenName").val(data[0].givenName);
-                        $("#surName").val(data[0].surName);
-                        $("#telephonenumber").val(data[0].telephonenumber);
-                        $("#mail").val(data[0].mail);
-                        modal.find("form").attr("action", link.attr("href"));
-                        showModal(modal);
-                    },
-                    error: function(resp) {
-                        log("error", resp);
-                        alert("err");
-                    }
-                });
-
-
-            }
-        </script>  
     </body>
 </html>

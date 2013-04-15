@@ -87,7 +87,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
     }
 
     @Override
-    public final void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException {
         if (jsonResult != null) {
             jsonResult.write(out);
             return;

@@ -16,8 +16,6 @@
  */
 package io.milton.vfs.db;
 
-import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
@@ -30,91 +28,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author brad
  */
 @Entity
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "owner"})}// item names must be unique within a directory
-)
+@DiscriminatorValue("CA")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Calendar implements Serializable {
+public class Calendar extends Repository {
+
     private List<CalEvent> events;
-
-    private Long id;
-    private BaseEntity owner;
-    private String name;
     private String color;
-    private Long ctag;
-    private Date createdDate;
-    private Date modifiedDate;
-
-    @Id
-    @GeneratedValue
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Column(nullable=false)
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @ManyToOne(optional=false)
-    public BaseEntity getOwner() {
-        return owner;
-    }
-
-    public void setOwner(BaseEntity owner) {
-        this.owner = owner;
-    }
-       
-    @Column
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    /**
-     * Identifies the state of this calendar and all of its child resources
-     * 
-     * @return 
-     */
-    @Column(nullable = false)
-    public Long getCtag() {
-        return ctag;
-    }
-
-    public void setCtag(Long ctag) {
-        this.ctag = ctag;
-    }
-
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
+    private String description;
 
     @OneToMany(mappedBy = "calendar")
     public List<CalEvent> getEvents() {
@@ -125,14 +45,56 @@ public class Calendar implements Serializable {
         this.events = events;
     }
 
+    @Column
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    
+
+    @Override
+    public String type() {
+        return "CA";
+    }
+
+    @Override
     public void delete(Session session) {
-        if( getEvents() != null ) {
-            for( CalEvent e : getEvents() ) {
+        if (getEvents() != null) {
+            for (CalEvent e : getEvents()) {
                 session.delete(e);
             }
             setEvents(null);
         }
+        super.delete(session);
     }
-    
-    
+
+    public CalEvent event(String name) {
+        if (getEvents() != null) {
+            for (CalEvent e : getEvents()) {
+                if (e.getName().equals(name)) {
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
+
+    public CalEvent add(String name) {
+        CalEvent c = new CalEvent();
+        c.setCalendar(this);
+        c.setName(name);
+        return c;
+    }
 }

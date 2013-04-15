@@ -26,6 +26,7 @@ import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.NewPageResource;
 import io.milton.cloud.server.web.PersonalResource;
 import io.milton.cloud.server.web.UploadUtils;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.common.InternationalizedString;
 import io.milton.http.Range;
@@ -49,6 +50,7 @@ import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -75,7 +77,29 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        if (!files.isEmpty()) {
+        if( parameters.containsKey("givenName")) {
+            // is a new contact form
+            Session session = SessionManager.session();
+            Transaction tx = SessionManager.beginTx();
+            UUID id = UUID.randomUUID();
+            try {
+                Contact c = contactManager.createContact(addressBook, id.toString() + ".vcf", session);
+                _(DataBinder.class).populate(c, parameters);
+                session.save(c);
+                VCard vcard = contactManager.toVCard(c);
+                String vcardText = contactManager.format(vcard);
+                byte[] arr = vcardText.getBytes("UTF-8");
+                InputStream bin = new ByteArrayInputStream(arr);
+                io.milton.cloud.server.web.FileResource r = UploadUtils.createNew(session, this, c.getName(),bin , (long)arr.length, "text/vcard");
+                save();
+                
+                SessionManager.commit(tx);
+                
+                jsonResult = new JsonResult(true, "Created contact", r.getHref());
+            } catch (IOException | IllegalAccessException | InvocationTargetException ex) {
+                
+            }
+        } else if (!files.isEmpty()) {
             doImport(files);
         }
         return null;
@@ -202,4 +226,14 @@ public class ContactsFolder extends BranchFolder implements AddressBookResource,
             log.info("created card: " + fileResource.getHref());
         }
     }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("addressBook") || type.equals("contacts") ) {
+            return true;
+        }
+        return super.is(type);
+    }
+    
+    
 }

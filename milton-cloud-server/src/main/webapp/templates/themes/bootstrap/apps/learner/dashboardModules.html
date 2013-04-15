@@ -9,7 +9,7 @@
             #set($curPage = $mod.currentPage)
         <li class="span4 $tileClass">
             <div class="thumbnail tile">
-                #if(${mod.thumb})
+                #if(${mod.thumb} and $mod.thumb.length() > 0 )
                 <div style="background-image: url(${mod.thumb}/alt-300-300.png)" class="tile-image">
                     <a href="${mod.href}" class="requiresUser"><span>View</span></a>
                 </div>
