@@ -70,24 +70,30 @@ public class InitialDataCreator implements LifecycleApplication {
         Session session = sessionManager.open();
         Transaction tx = session.beginTransaction();
 
+        boolean alreadyExists = false;
         Organisation rootOrg = Organisation.getRootOrg(session);
         if (rootOrg != null) {
             System.out.println("Root org exists, do nothing");
-            return;
+            alreadyExists = true;
+        } else {
+            System.out.println("Create new organisation");
+            rootOrg = new Organisation();
+            rootOrg.setOrgId(initialRootOrgName);
+            rootOrg.setModifiedDate(new Date());
+            rootOrg.setCreatedDate(new Date());
+            session.save(rootOrg);
         }
-        System.out.println("Create new organisation");
-        rootOrg = new Organisation();
-        rootOrg.setOrgId(initialRootOrgName);
-        rootOrg.setModifiedDate(new Date());
-        rootOrg.setCreatedDate(new Date());
-        session.save(rootOrg);
 
         Profile admin = initHelper.checkCreateUser(adminUserName, adminPassword, session, rootOrg, null);
 
         for (Application app : applicationManager.getApps()) {
             AppControl.setStatus(app.getInstanceId(), rootOrg, true, admin, new Date(), session);
         }
-
+        
+        if( alreadyExists ) {
+            
+            return;
+        }
 
         Group administrators = initHelper.checkCreateGroup(rootOrg, Group.ADMINISTRATORS, 0, session, null, "c");
         administrators.grantRole("Administrator", session);

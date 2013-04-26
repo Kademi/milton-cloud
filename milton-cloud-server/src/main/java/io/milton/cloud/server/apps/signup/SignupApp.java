@@ -180,6 +180,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
     }
 
     public void onNewMembership(GroupMembership gm, RootFolder rf) {
+        long tm = System.currentTimeMillis();
         MembershipProcess pp = new MembershipProcess();
         pp.setMembership(gm);
         pp.setProcessName(userManagementProcess.getName());
@@ -190,9 +191,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         if (rf instanceof WebsiteRootFolder) {
             RootFolder wrf = rf;
             context.addAttribute("website", wrf);
-        }
+        }        
         context.scan();
-        log.info("Final state: " + pp.getStateName());
+        if (log.isDebugEnabled()) {
+            log.debug("Final state: " + pp.getStateName() + " processed in: " + (System.currentTimeMillis() - tm) + "ms");
+        }
     }
 
     /**
@@ -233,10 +236,10 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             redirWebsite = config.get(REDIRECT_WEBSITE, org);
         }
         writer.write("<select name='" + REDIRECT_WEBSITE + "'>\n");
-        writer.write("  <option>[Please select]</option>");        
+        writer.write("  <option>[Please select]</option>");
         System.out.println("websites: " + org.websites().size());
-        for( Website w : org.websites()) {            
-            writer.write(formatter.option(w.getName(), w.getName(), redirWebsite)); 
+        for (Website w : org.websites()) {
+            writer.write(formatter.option(w.getName(), w.getName(), redirWebsite));
         }
         writer.write("</select>");
         writer.flush();
@@ -332,6 +335,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
 
         @Override
         public void process(ProcessContext context) {
+            long tm = System.currentTimeMillis();
             MembershipProcess pi = (MembershipProcess) context.getProcessInstance();
             GroupMembership gm = pi.getMembership();
             Organisation org = (Organisation) context.getAttribute("organisation");
@@ -342,8 +346,10 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             }
             try {
                 SubscriptionEvent e = new SubscriptionEvent(gm, website, org, action);
-                log.info("Firing " + e);
                 eventManager.fireEvent(e);
+                if(log.isDebugEnabled()) {
+                    log.debug("Fired " + e + " Duration=" + (System.currentTimeMillis() - tm) + "ms");
+                }
             } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
                 throw new RuntimeException(ex);
             }

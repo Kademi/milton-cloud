@@ -308,7 +308,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
             try {
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 _(HtmlTemplateParser.class).update(htmlPage, bout);
-                String rawHtml = bout.toString();
+                String rawHtml = bout.toString("UTF-8");
                 String tidyHtml;
                 if( runTidy ) {
                     tidyHtml = WebUtils.tidyHtml2(rawHtml);

@@ -144,6 +144,10 @@ body.profile #module-Course button, body.profile #module-Course .content a.butto
     padding: 1px 20px;
 }
 
+div.groups ul {
+    margin-left: 0;    
+}
+
 div.groups li {
     float: left;
     margin-right: 10px;    
@@ -152,7 +156,8 @@ div.groups li {
     height: 25px;
     line-height: 27px;
     margin-top: 3px;
-    padding: 4px 10px 4px 10px;    
+    padding: 4px 10px 4px 10px;   
+    list-style-type: none;
 }
 div.groups li a {
     display: inline-block;

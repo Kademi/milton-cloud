@@ -100,9 +100,10 @@ public class CalendarApp implements Application, EventListener, BrowsableApplica
         if (e instanceof SubscriptionEvent) {
             SubscriptionEvent joinEvent = (SubscriptionEvent) e;
             Group group = joinEvent.getMembership().getGroupEntity();
-            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
+            List<GroupInWebsite> giws = joinEvent.getGroupInWebsites(group);
             for (GroupInWebsite giw  : giws) {
-                if (applicationManager.isActive(this, giw.getWebsite().liveBranch() )) {
+                Branch b = giw.getWebsite().liveBranch();
+                if (joinEvent.isActive(applicationManager, this, b)) {
                     addCalendar("default", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -53,6 +54,7 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     public static List<EmailTrigger> find(Session session, String eventId, Website website, String trigger1, String trigger2, String trigger3, String trigger4, String trigger5) {
         log.info("find triggers: " + eventId);
         Criteria crit = session.createCriteria(EmailTrigger.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("themeSite", website));
         crit.add(Restrictions.eq("eventId", eventId));
         List<EmailTrigger> rawList = DbUtils.toList(crit, EmailTrigger.class);

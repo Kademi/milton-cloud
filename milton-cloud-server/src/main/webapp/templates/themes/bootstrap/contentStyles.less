@@ -1,3 +1,35 @@
+
+@text1: @textColor;
+@text2: @textColor;
+@hero1: @successText;
+@hero2: @infoText;
+
+/** Mixins */
+.text1 {
+    color: @textColor;
+}
+.text2 {
+    color: @textColor;
+}
+.hero1 {
+    .text-success;
+}
+.hero2 {
+    .text-info;
+}
+html body .bg-text1 {
+    background-color: @successText;
+}
+html body .bg-text2 {
+    background-color: @infoText;
+}
+html body .bg-hero1 {
+    background-color: @infoText
+}
+html body .bg-hero2 {
+    background-color: @infoText;
+}
+
 .activity, .keyPoint {
     position: relative;        
     font-weight: 700;

@@ -33,9 +33,9 @@ public class SessionManager {
     
     
     public SessionManager(SessionFactory sf) {
-        sessionFactory = sf;
+        sessionFactory = sf;        
     }
-
+        
     public Session open() {
         Session session = SessionFactoryUtils.getSession(sessionFactory, true);
         tlSession.set(session);
@@ -50,6 +50,8 @@ public class SessionManager {
         tlSession.remove();
     }
 
-    
+    public org.hibernate.Cache getCache() {
+        return sessionFactory.getCache();
+    }
         
 }

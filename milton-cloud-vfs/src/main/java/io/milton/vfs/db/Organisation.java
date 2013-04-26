@@ -71,12 +71,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return origName + "-deleted-" + System.currentTimeMillis();
     }
 
-    public static Organisation findRoot(Session session) {
-        Criteria crit = session.createCriteria(Organisation.class);
-        crit.setCacheable(true);
-        crit.add(Restrictions.isNull("organisation"));
-        return (Organisation) crit.uniqueResult();
-    }
 
     /**
      * Find the given orgId within an administrative org
@@ -153,8 +147,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
         crit.add(Restrictions.isNull("organisation"));
-        Organisation org = (Organisation) crit.uniqueResult();
-        return org;
+        List<Organisation> list = DbUtils.toList(crit, Organisation.class);
+        if( !list.isEmpty()) {
+            return list.get(0);
+        }
+        return null;
     }
 
     public static Organisation getOrganisation(Organisation organisation, String name, Session session) {
@@ -183,6 +180,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private List<Group> groups;
     private List<SubOrg> parentOrgLinks;
 
+    public Organisation() {
+
+    }
+
+    
+    
     @Transient
     @Override
     public String getFormattedName() {
@@ -748,5 +751,35 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     private void findUniqueOrgId(Organisation o) {
         o.setOrgId(System.currentTimeMillis() + ""); // hack, todo, check for uniqueness within the account
+    }
+    
+    /**
+     * Check if the organisation ID on this org is unique within its administrative domain (ie first
+     * parent org with a non-null adminDomain)
+     * 
+     * @return 
+     */
+    public boolean isOrgIdUniqueWithinAdmin(Session session) {
+        Organisation admin = closestAdminOrg();
+        Organisation withSameOrgId = Organisation.findByOrgId(admin, getOrgId(), session);
+        if( withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Find the closest parent organisation with a non-null admin domain, or
+     * this org if it has a non-null admin domain
+     * 
+     * @return 
+     */
+    public Organisation closestAdminOrg() {
+        Organisation p = this;
+        while( p.getAdminDomain() == null && p.getOrganisation() != null ) {
+            p = p.getOrganisation();
+        }
+        return p;
     }
 }

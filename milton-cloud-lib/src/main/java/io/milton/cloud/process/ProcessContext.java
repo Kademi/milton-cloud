@@ -76,12 +76,16 @@ public class ProcessContext {
         if (state == null) {
             state = process.getStartState();
             token.setStateName(state.getName());
-            log.info("start: current state is: " + token.getStateName());
+            if (log.isDebugEnabled()) {
+                log.debug("start: current state is: " + token.getStateName());
+            }
             didTransition = true;
         }
         for (Transition t : state.getTransitions()) {
             if (evalAndTransition(t, false)) {
-                log.info("transitioned to: " + token.getStateName());
+                if (log.isDebugEnabled()) {
+                    log.debug("transitioned to: " + token.getStateName());
+                }
                 return true;
             }
         }
@@ -135,8 +139,8 @@ public class ProcessContext {
     }
 
     void executeTransition(Transition transition) {
-        if (log.isInfoEnabled()) {
-            log.info("executeTransition(" + process.getName() + ") transitioning from " + transition.getFromState().getName() + " to " + transition.getToState().getName());
+        if (log.isDebugEnabled()) {
+            log.debug("executeTransition(" + process.getName() + ") transitioning from " + transition.getFromState().getName() + " to " + transition.getToState().getName());
         }
         fireOnExit(transition.getFromState());
         transitionTo(transition);
@@ -188,11 +192,18 @@ public class ProcessContext {
      * @param toState
      */
     void transitionTo(Transition transition) {
+        long tm = System.currentTimeMillis();
         State toState = transition.getToState();
         token.setStateName(toState.getName());
         token.setTimeEntered(currentDateService.getNow());
         for (ActionHandler handler : transition.getOnTransitionHandlers()) {
             handler.process(this);
+            if (log.isDebugEnabled()) {
+                log.debug("transitionTo: " + handler + " handler duration=" + (System.currentTimeMillis() - tm) + "ms");
+            }
+        }
+        if(log.isDebugEnabled()) {
+            log.debug("transitionTo: total duration=" + (System.currentTimeMillis() - tm) + "ms");
         }
     }
 

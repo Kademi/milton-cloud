@@ -1,7 +1,7 @@
-#doUploadCsv {
+#doUploadOrgIdCsv, #doUploadCsv {
     width: 190px;
 }
-#doUploadCsv span {
+.muploadBtn span {
     left: 33px;
     position: absolute;
 }

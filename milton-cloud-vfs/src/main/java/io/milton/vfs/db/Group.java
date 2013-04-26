@@ -292,12 +292,17 @@ public class Group implements Serializable, VfsAcceptor {
     }
 
     public boolean isMember(BaseEntity u, Organisation withinOrg, Session session) {
+        GroupMembership gm = getGroupMembership(u, withinOrg, session);
+        return gm != null;
+    }    
+    
+    public GroupMembership getGroupMembership(BaseEntity u, Organisation withinOrg, Session session) {
         Criteria crit = session.createCriteria(GroupMembership.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("member", u));
         crit.add(Restrictions.eq("groupEntity", this));
         crit.add(Restrictions.eq("withinOrg", withinOrg));
-        boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();
-        return b;
+        return DbUtils.unique(crit);
     }
 
     public boolean containsUser(BaseEntity entity, Organisation withinOrg, Session session) {
@@ -312,6 +317,7 @@ public class Group implements Serializable, VfsAcceptor {
      */
     public boolean isMember(BaseEntity entity) {
         Criteria crit = SessionManager.session().createCriteria(GroupMembership.class);
+        crit.setCacheable(true);
         crit.add(Restrictions.eq("member", entity));
         crit.add(Restrictions.eq("groupEntity", this));
         boolean b = !DbUtils.toList(crit, GroupMembership.class).isEmpty();

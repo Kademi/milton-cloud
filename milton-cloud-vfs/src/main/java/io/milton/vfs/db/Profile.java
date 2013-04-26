@@ -351,10 +351,11 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public GroupMembership addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
-        if (g.isMember(this, hasGroupInOrg, session)) {
-            return membership(g);
+        GroupMembership gm = g.getGroupMembership(this, hasGroupInOrg, session);
+        if ( gm != null) {
+            return gm;
         }
-        GroupMembership gm = new GroupMembership();
+        gm = new GroupMembership();
         gm.setCreatedDate(new Date());
         gm.setGroupEntity(g);
         gm.setMember(this);

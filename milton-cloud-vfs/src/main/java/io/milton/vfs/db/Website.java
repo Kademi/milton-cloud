@@ -41,6 +41,8 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("W")
 public class Website extends Repository implements VfsAcceptor {
 
+    public static String REPO_TYPE_WEBSITE = "W"; // discriminator
+    
     /**
      * Attempts to locate a website with the exact name give. Will follow alias
      * links

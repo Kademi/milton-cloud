@@ -19,13 +19,14 @@ package io.milton.cloud.server.apps.dynamiccss;
 import com.asual.lesscss.LessEngine;
 import com.asual.lesscss.LessException;
 import com.asual.lesscss.LessOptions;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.ResourceApplication;
 import io.milton.cloud.server.web.*;
-import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.common.Path;
+import io.milton.common.RangeUtils;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -53,7 +54,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static io.milton.context.RequestContext._;
+import java.io.ByteArrayInputStream;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -65,8 +67,12 @@ public class DynamicCssApp implements ResourceApplication {
     private ResourceFactory resourceFactory;
     private Date modDate;
     private LessEngine engine;
+    private final ConcurrentMap<String, String> cache; // cache of ParsedResources, keyed on hash, for FileResource's
 
     public DynamicCssApp() {
+        cache = new ConcurrentLinkedHashMap.Builder()
+                .maximumWeightedCapacity(1000)
+                .build();
     }
 
     @Override
@@ -103,7 +109,7 @@ public class DynamicCssApp implements ResourceApplication {
                 Resource rBase = resourceFactory.getResource(host, p.getParent().child(actualResName).toString());
                 if (rBase instanceof GetableResource) {
                     String parentUrl = "http://" + host + "/" + p.getParent().toString();
-                    return new SingleLessCssResource((GetableResource)rBase,actualResName, parentUrl);
+                    return new SingleLessCssResource((GetableResource) rBase, actualResName, parentUrl);
                 } else {
                     return null;
                 }
@@ -123,14 +129,14 @@ public class DynamicCssApp implements ResourceApplication {
                             for (Resource r : col.getChildren()) {
                                 if (r instanceof GetableResource) {
                                     GetableResource gr = (GetableResource) r;
-                                    if (gr.getName().endsWith(".css") || gr.getName().endsWith(".less")) {                                        
+                                    if (gr.getName().endsWith(".css") || gr.getName().endsWith(".less")) {
                                         resources.add(gr);
                                     }
                                 }
                             }
                         } else if (rBase instanceof GetableResource) {
                             GetableResource fr = (GetableResource) rBase;
-                            if( parentUrl == null ) {
+                            if (parentUrl == null) {
                                 String parentPath = Path.path(s).getParent().toString();
                                 parentUrl = "http://" + host + "/" + parentPath + "/";
                             }
@@ -187,7 +193,7 @@ public class DynamicCssApp implements ResourceApplication {
         protected GetableResource getResource() {
             return singleResource;
         }
-        
+
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -201,9 +207,8 @@ public class DynamicCssApp implements ResourceApplication {
                 sendLessError(rawCss, ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
                 //throw new RuntimeException("Bad LESS from:" + fileResource.getName() + " - " + fileResource.getClass() ,ex);
             }
-        }        
+        }
     }
-
 
     public class MultiLessCssResource extends LessCssResource {
 
@@ -215,9 +220,25 @@ public class DynamicCssApp implements ResourceApplication {
         public MultiLessCssResource(List<GetableResource> fileResources, List<String> notFound, String name, String parentUrl) {
             super(name);
             this.fileResources = fileResources;
-            this.mostRecentModResource = fileResources.get(0);
             this.notFound = notFound;
             this.parentUrl = parentUrl;
+            GetableResource mr = null;
+            Date mostRecentDate = null;
+            for( GetableResource gr : fileResources) {
+                if( mr == null ) {
+                    mr = gr;
+                    mostRecentDate = gr.getModifiedDate();
+                } else {
+                    Date dt = gr.getModifiedDate();
+                    if( dt != null && mostRecentDate != null ) {
+                        if( dt.after(mostRecentDate)) {
+                            mr = gr;
+                            mostRecentDate = gr.getModifiedDate();
+                        }
+                    }
+                }
+            }
+            this.mostRecentModResource = mr;
         }
 
         @Override
@@ -227,30 +248,37 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            // Lets be nice and say if we didnt find something
-            for (String s : notFound) {
-                String msg = "/** " + s + " */\n";
-                bout.write(msg.getBytes());
+            String cacheKey = getName() + getUniqueId() + getModifiedDate();
+            String lessText = cache.get(cacheKey);
+            if (lessText == null) {
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                // Lets be nice and say if we didnt find something
+                for (String s : notFound) {
+                    String msg = "/** " + s + " */\n";
+                    bout.write(msg.getBytes());
+                }
+                StringBuilder sb = new StringBuilder();
+                for (GetableResource gr : fileResources) {
+                    String header = "/** " + gr.getName() + " */\n";
+                    bout.write(header.getBytes());
+                    gr.sendContent(bout, range, params, contentType);
+                    bout.write("\n".getBytes());
+                }
+                String rawCss = bout.toString("UTF-8");
+                try {
+                    lessText = engine.compile(rawCss, parentUrl);                    
+                    cache.put(cacheKey, lessText);
+                } catch (LessException ex) {
+                    log.warn("LESS compilation exception", ex);
+                    sendLessError(rawCss, ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
+                    return;
+                    //throw new RuntimeException("Bad LESS from:" + fileResource.getName() + " - " + fileResource.getClass() ,ex);
+                }
             }
-            for (GetableResource gr : fileResources) {
-                String header = "/** " + gr.getName() + " */\n";
-                bout.write(header.getBytes());
-                gr.sendContent(bout, range, params, contentType);
-                bout.write("\n".getBytes());
-            }
-            String rawCss = bout.toString("UTF-8");
-            try {
-                String text = engine.compile(rawCss, parentUrl);
-                out.write(text.getBytes("UTF-8"));
-            } catch (LessException ex) {
-                log.warn("LESS compilation exception", ex);
-                sendLessError(rawCss, ex.getLine(), ex.getColumn(), ex.getExtract(), ex.getMessage(), out);
-                //throw new RuntimeException("Bad LESS from:" + fileResource.getName() + " - " + fileResource.getClass() ,ex);
-            }
+            ByteArrayInputStream bin = new ByteArrayInputStream(lessText.getBytes("UTF-8"));
+            RangeUtils.writeRange(bin, range, out);
         }
     }
-
 
     public abstract class LessCssResource implements GetableResource, DigestResource {
 

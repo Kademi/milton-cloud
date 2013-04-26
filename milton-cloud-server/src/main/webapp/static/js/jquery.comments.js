@@ -87,7 +87,7 @@ function sendNewForumComment( pageUrl, commentInput, renderComment, currentUser)
         },
         error: function() {
             ajaxLoadingOff();
-            alert('Sorry, we could process your comment. Please try again later');
+            alert('Sorry, we could not process your comment. Please try again later');
         }
     });
 }

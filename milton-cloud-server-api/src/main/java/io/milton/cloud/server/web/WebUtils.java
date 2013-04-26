@@ -239,7 +239,6 @@ public class WebUtils {
                 for (Pair<String, String> pair : menuPairs) {
                     String id = "menuContent" + cnt++;
                     String href = pair.getObject1();
-                    System.out.println("check " + id + " - " + href);
                     Path p = Path.path(href);
                     if (p.getParent() != null) {
                         String parentHref = p.getParent().toString();

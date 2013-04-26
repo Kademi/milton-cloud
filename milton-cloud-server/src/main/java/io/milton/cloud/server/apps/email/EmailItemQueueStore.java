@@ -24,6 +24,7 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.util.*;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import org.hibernate.Cache;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.config.Configuration;
@@ -125,7 +126,6 @@ public class EmailItemQueueStore implements QueueStore {
 
     @Override
     public synchronized QueueInfo next() {
-        log.info("next: ");
         if (currentQueue != null && currentQueue.isEmpty()) {
             currentQueue = null;
         }
@@ -135,10 +135,20 @@ public class EmailItemQueueStore implements QueueStore {
                 Date now = currentDateService.getNow();
                 List<EmailItem> items = EmailItem.findToSend(now, session);
                 if (items == null || items.isEmpty()) {
-                    log.info("Nothing more to send");
+                    // Convenient place to show memory usage
+                    long free = Runtime.getRuntime().freeMemory();
+                    long total = Runtime.getRuntime().totalMemory();
+                    long max = Runtime.getRuntime().maxMemory();
+                    long used = total - free;
+                    long actualPerc = used * 100 / max;
+                    long maxMb = max / (1024 * 1024);
+                    Cache c = sessionManager.getCache();
+                    
+                    //System.out.println("cache: " + c.getClass());
+                    log.info("next: Nothing more to send. Memory used=" + actualPerc + "%" + " of " + maxMb + "Mb");
                     return null;
                 }
-                log.info("Loaded queue size: " + items.size());
+                log.info("next: Loaded queue size: " + items.size());
                 currentQueue = new ArrayList<>();
                 for (EmailItem i : items) {
                     QueueInfo info = new QueueInfo(aspirinConfiguration, listenerManager);

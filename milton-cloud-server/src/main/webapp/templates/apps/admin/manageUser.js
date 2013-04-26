@@ -36,6 +36,7 @@ function initUploadUsers() {
         oncomplete: function(data, name, href) {
             log("oncomplete:", data.result.data, name, href);
             $(".results .numUpdated").text(data.result.data.numUpdated);
+            $(".results .numInserted").text(data.result.data.numInserted);
             $(".results .numUnmatched").text(data.result.data.unmatched.length);
             showUnmatched(data.result.data.unmatched);
             $(".results").show();

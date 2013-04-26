@@ -19,11 +19,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
-import io.milton.cloud.server.web.WebUtils;
-import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
-import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
@@ -33,10 +30,8 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
-import io.milton.vfs.db.OrgType;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,27 +44,27 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 
 /**
- * Returns a CSV view of the business units in the parent folder
+ * Returns an updateable CSV view of the orgIDs of the business units within
+ * this organisation
  *
  * @author brad
  */
-public class OrganisationsCsv extends AbstractResource implements GetableResource, PostableResource {
+public class OrgIdsCsv extends AbstractResource implements GetableResource, PostableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(OrganisationsCsv.class);
+    private static final Logger log = LoggerFactory.getLogger(OrgIdsCsv.class);
     private final String name;
     private final OrganisationsFolder parent;
     private JsonResult jsonResult;
-    private List<List<String>> unmatched = new ArrayList<>();
+    private List<String> errors = new ArrayList<>();
     private int numUpdated;
     private int currentLine;
 
-    public OrganisationsCsv(String name, OrganisationsFolder parent) {
+    public OrgIdsCsv(String name, OrganisationsFolder parent) {
         this.parent = parent;
         this.name = name;
     }
@@ -82,12 +77,16 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
 
         if (!files.isEmpty()) {
             try {
-                Boolean insertMode = WebUtils.getParamAsBool(parameters, "insertMode");
-                insertMode = (insertMode == null ? false : insertMode);
                 FileItem file = files.values().iterator().next();
-                doUpload(file, insertMode, session);
-                jsonResult.setData(new UploadResult());
-                tx.commit();
+                doUpload(file, session);                
+                if (errors.isEmpty()) {
+                    tx.commit();
+                    jsonResult = new JsonResult(true, "Done updates");                    
+                } else {
+                    tx.rollback();
+                    jsonResult = new JsonResult(true, "Errors detected");
+                }
+                jsonResult.setData(new UploadResult()); // sets return values automatically
 
             } catch (Exception ex) {
                 log.warn("Exception processing", ex);
@@ -112,7 +111,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         } else {
             try (OutputStreamWriter pw = new OutputStreamWriter(out)) {
                 CSVWriter writer = new CSVWriter(pw);
-                String[] arr = {"OrgID", "OrgType", "Path", "OrgTitle", "Address1", "Address2", "AddressState", "Phone", "Postcode"};
+                String[] arr = {"OrgID", "New OrgID", "OrgTitle"};
                 writer.writeNext(arr);
 
                 toCsv(parent.getOrganisation(), parent.getOrganisation().childOrgs(), writer);
@@ -122,7 +121,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
     }
 
     public String getTitle() {
-        return "Business units CSV";
+        return "OrgIDs CSV";
     }
 
     @Override
@@ -185,129 +184,23 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
 
     private List<String> buildLineOfValues(Organisation rootOrg, Organisation org) {
         List<String> values = new ArrayList<>();
-        Path path = toOrgPath(rootOrg, org);
-        if (!path.isRoot()) {
-            path = path.getParent();
-        }
-        String sOrgType = "";
-        if (org.getOrgType() != null) {
-            sOrgType = org.getOrgType().getName();
-        }
-
         values.add(org.getOrgId()); // unique ID
-        values.add(sOrgType);
-        values.add(path.toString()); // path to org        
+        values.add(""); // place holder for new ID
         values.add(org.getTitle()); // user friendly name
-        values.add(org.getAddress());
-        values.add(org.getAddressLine2());
-        values.add(org.getAddressState());
-        values.add(org.getPhone());
-        values.add(org.getPostcode());
         return values;
     }
 
-    private Path toOrgPath(Organisation rootOrg, Organisation org) {
-        if (org == null || rootOrg == org) {
-            return Path.root;
-        } else {
-            return toOrgPath(rootOrg, org.getOrganisation()).child(org.getOrgId());
-        }
-    }
-
-    private void doUpload(FileItem file, Boolean insertMode, Session session) throws IOException {
-        log.info("doUpload: " + insertMode);
+    private void doUpload(FileItem file, Session session) throws IOException {
+        log.info("doUpload");
         InputStream in = null;
         try {
             in = file.getInputStream();
-            Request req = HttpManager.request();
-            if (insertMode) {
-                fromCsv(in, session);
 
-            } else {
-                updateOnlyFromCsv(in, session);
-            }
+            updateOnlyFromCsv(in, session);
+
         } finally {
             IOUtils.closeQuietly(in);
         }
-    }
-
-    public void fromCsv(InputStream in, Session session) throws IOException {
-        InputStreamReader r = new InputStreamReader(in);
-        CSVReader reader = new CSVReader(r);
-
-        String[] lineParts;
-        currentLine = 1;
-        Organisation rootOrg = getOrganisation();
-        long rootOrgId = rootOrg.getId();
-        log.info("fromCsv: rootOrg=" + rootOrg.getOrgId());
-        reader.readNext(); // skip first row, column headings
-        while ((lineParts = reader.readNext()) != null) {
-            if (lineParts.length > 0) {
-                currentLine++;
-                if (log.isTraceEnabled()) {
-                    log.trace("process line: " + currentLine + " : " + Arrays.toString(lineParts));
-                }
-                List<String> lineList = new ArrayList<>();
-                lineList.addAll(Arrays.asList(lineParts));
-                if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(rootOrg, lineList, currentLine, true, session);
-                }
-                if (currentLine % 20 == 0) {
-                    log.info("Flush and clear session");
-                    session.flush();
-                    session.clear();
-                    rootOrg = Organisation.get(rootOrgId, session);
-                }
-            }
-        }
-        // TODO: find all recs not updated and delete them
-        jsonResult = new JsonResult(true, "Done insert and updates");
-    }
-
-    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {
-        String orgId = lineList.get(0);
-        if (orgId == null || orgId.length() == 0) {
-            //throw new RuntimeException("Cant save record with an empty name: column" + pos + " line: " + line);
-            unmatched.add(lineList);
-            return;
-        }
-        log.info("doProcess: orgId=" + orgId);
-        Organisation child = getOrganisation().childOrg(orgId, session);
-        if (child == null) {
-            log.trace("Create child called: " + orgId);
-            if (allowInserts) {
-                child = createOrg(rootOrg, session, lineList);
-                session.flush();
-            } else {
-                unmatched.add(lineList);
-                return;
-            }
-            log.info("created new record: " + child.getOrgId());
-        } else {
-            log.trace("found record to update: " + child.getOrgId());
-        }
-        updateRecord(child, lineList, line, rootOrg, session);
-    }
-
-    private void updateRecord(Organisation child, List<String> lineList, int line, Organisation rootOrg, Session session) {
-        numUpdated++;
-        String sOrgType = get(lineList, 1);
-        if (sOrgType != null) {
-            OrgType orgType = rootOrg.orgType(sOrgType, true, session);
-            child.setOrgType(orgType);
-        }
-
-        String sPath = lineList.get(2);
-        Path path = Path.path(sPath);
-
-        checkPath(child, path, rootOrg, session);
-        child.setTitle(get(lineList, 3));
-        child.setAddress(get(lineList, 4));
-        child.setAddressLine2(get(lineList, 5));
-        child.setAddressState(get(lineList, 6));
-        child.setPhone(get(lineList, 7));
-        child.setPostcode(get(lineList, 8));
-        session.save(child);
     }
 
     private void updateOnlyFromCsv(InputStream in, Session session) throws IOException {
@@ -318,6 +211,8 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         currentLine = 1;
         reader.readNext(); // skip first row, column headings
 
+        List<UpdatedLine> updated = new ArrayList<>();
+
         while ((lineParts = reader.readNext()) != null) {
             if (lineParts.length > 0) {
                 currentLine++;
@@ -327,13 +222,47 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(getOrganisation(), lineList, currentLine, false, session);
+                    doProcess( lineList, currentLine, updated, session);
                 }
             }
         }
-        jsonResult = new JsonResult(true, "Done updates");
-        jsonResult.setData(unmatched);
 
+        for (UpdatedLine updatedLine : updated) {
+            session.save(updatedLine.org);
+        }
+        for (UpdatedLine updatedLine : updated) {
+            if (!updatedLine.org.isOrgIdUniqueWithinAdmin(session)) {
+                errors.add("Duplicate orgId: " + updatedLine.org.getOrgId() + " line " + updatedLine.line);
+            }
+        }
+    }
+
+    private void doProcess(List<String> lineList, int line, List<UpdatedLine> updated, Session session) {
+        String orgId = lineList.get(0);
+        if (orgId == null || orgId.length() == 0) {
+            //throw new RuntimeException("Cant save record with an empty name: column" + pos + " line: " + line);
+            errors.add("Missing orgID not found on line: " + line + " orgId=" + orgId);
+            return;
+        }
+        log.info("doProcess: orgId=" + orgId);
+        Organisation child = getOrganisation().childOrg(orgId, session);
+        if (child == null) {
+            log.trace("Did not find child called: " + orgId);
+            errors.add("Existing orgID not found on line: " + line + " orgId=" + orgId);
+        } else {
+            log.trace("found record to update: " + child.getOrgId());
+            updateRecord(child, lineList, line, updated, session);
+        }
+    }
+
+    private void updateRecord(Organisation child, List<String> lineList, int line, List<UpdatedLine> updated, Session session) {
+        numUpdated++;
+        String newOrgId = get(lineList, 1);
+        if (newOrgId != null) {
+            child.setOrgId(newOrgId);
+            session.save(child);
+            updated.add(new UpdatedLine(child, line));
+        }
     }
 
     /**
@@ -357,64 +286,32 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         return s;
     }
 
-    private Organisation createOrg(Organisation rootOrg, Session session, List<String> lineList) {
-        String orgId = lineList.get(0);
-        String sPath = lineList.get(2);
-        log.info("Create org: " + sPath);
-        Path path = Path.path(sPath);
-        path = path.child(orgId);
-        Organisation org = rootOrg;
-        for (String childName : path.getParts()) {
-            Organisation child = org.childOrg(childName, session);
-            if (child == null) {
-                child = org.createChildOrg(childName, session);
-            }
-            org = child;
-        }
-        return org;
-    }
-
-    /**
-     * Check that the org has the given path, or move it if required
-     *
-     * @param child
-     * @param path - path to the parent org
-     */
-    private void checkPath(Organisation childToCheck, Path path, Organisation rootOrg, Session session) {
-        Organisation org = rootOrg;
-        if (!path.isRoot()) {
-            for (String childName : path.getParts()) {
-                Organisation child = org.childOrg(childName, session);
-                if (child == null) {
-                    child = org.createChildOrg(childName, session);
-                }
-                org = child;
-            }
-        }
-        // The org that we're left with needs to be the parent of childToCheck
-        if (childToCheck.getOrganisation() != org) {
-            log.info("org has moved: " + childToCheck.getOrgId() + " - from: " + childToCheck.getOrganisation().getOrgId() + " to " + org.getOrgId());
-            childToCheck.setOrganisation(org, session);
-        }
-
-    }
-
     public class UploadResult {
 
-        private List<List<String>> unmatched = new ArrayList<>();
+        private List<String> errors;
         private int numUpdated;
 
         public UploadResult() {
-            this.numUpdated = OrganisationsCsv.this.numUpdated;
-            this.unmatched = OrganisationsCsv.this.unmatched;
+            this.numUpdated = OrgIdsCsv.this.numUpdated;
+            this.errors = OrgIdsCsv.this.errors;
         }
 
         public int getNumUpdated() {
             return numUpdated;
         }
 
-        public List<List<String>> getUnmatched() {
-            return unmatched;
+        public List<String> getErrors() {
+            return errors;
         }
+    }
+    
+    public class UpdatedLine {
+        private Organisation org;
+        private int line;
+
+        public UpdatedLine(Organisation org, int line) {
+            this.org = org;
+            this.line = line;
+        }                
     }
 }

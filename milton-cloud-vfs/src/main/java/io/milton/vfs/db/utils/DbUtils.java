@@ -86,6 +86,7 @@ public class DbUtils {
         // TODO: use regex
         nameToUse = nameToUse.toLowerCase().replace("/", "");
         nameToUse = nameToUse.replace("'", "");
+        nameToUse = nameToUse.replace("_", "-"); // underscores are very bad for domain names
         nameToUse = nameToUse.replace("\"", "");
         nameToUse = nameToUse.replace("@", "-");
         nameToUse = nameToUse.replace(" ", "-");

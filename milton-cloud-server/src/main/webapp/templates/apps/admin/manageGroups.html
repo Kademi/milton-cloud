@@ -11,7 +11,7 @@
                 <button class="SmallBtn Add AddGroup"><span>Add New Group</span></button>
             </header>
             #foreach($group in $page.children)
-            <div class="Group">
+            <div class="Group" id="group-${group.group.id}">
                 <header class="ClearFix">
                     <div class="ShowDialog"><span>$group.name</span></div>
                     <a class="numMembers" href="$group.name/members">$group.numMembers Members</a>

@@ -88,6 +88,7 @@ public class SignupsSearchPage extends AbstractResource implements GetableResour
                     Profile p = Profile.get(profileId, session);
                     if( p != null ) {
                         Organisation orgToAddTo = findOrgToAddTo(p);
+                        
                         p.addToGroup(g, orgToAddTo, session);
                     }
                 }

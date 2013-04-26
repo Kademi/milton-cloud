@@ -5,17 +5,19 @@
         <link href="manageOrgs.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="/static/js/jquery.fileupload.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.milton-upload.js">//</script>
-        
+
         <script type="text/javascript" src="manageGroup.js" bottom="true">//</script>
         <script type="text/javascript" src="manageOrgs.js" bottom="true">//</script>
-        
+
     </head>
     <body id="manageOrgs" class="manageOrgs">
         <section class="MainContent">
             <header class="ClearFix">
                 <a class="SmallBtn Add org" href="#">Add New Business unit</a>
                 <a class="Btn showUploadCsvModal" style="float: right" href="#">Upload CSV</a>
-                <a class="Btn" style="float: right; margin-right: 10px;" href="orgs.csv">Open CSV</a>                             
+                <a class="Btn" style="float: right; margin-right: 10px;" href="orgs.csv">Open CSV</a>
+                <a class="Btn" style="float: right; margin-right: 10px;" href="orgIds.csv">Open OrgIDs CSV</a>
+                <a class="Btn showUploadIdCsvModal" style="float: right; margin-right: 10px;" href="orgsId.csv">Upload OrgIDs CSV</a>
             </header>   
 
             <div class="Info">
@@ -82,12 +84,12 @@
                     <li>This process <b>never deletes</b> anything</li>
                     <li>If this is your firt upload use that spreadsheet as a template</li>
                     <li>Update the spreadsheet. The first column is a unique identifier <b>which allows you to update the spreadsheet</b>. If you
-                    dont provide a unique ID one will be assigned</li>
+                        dont provide a unique ID one will be assigned</li>
                     <li>The second column is the type, which must be one of those defined in the <a href="orgTypes">Manage Organisation Types</a> page. Optional</li>
                     <li>The third column is the path, which is useful if your organisational structure is a hierarchy. Only use this column if you need to delegate permissions to business units.</li>
                     <li>By default only rows which an existing organisation on unique ID will be processed, these will be updated in the database from the spreadsheet</li>
                     <li><b>We recommend you always do a first run with "allow inserts" OFF</b>. You will be shown how many matches were made or not, then you can decide if you want to allow inserts.</b>
-                    <li>If you click "allow inserts" then any organisations in the spreadsheet which do not match existing orgs in the database will be inserted</li>
+                        <li>If you click "allow inserts" then any organisations in the spreadsheet which do not match existing orgs in the database will be inserted</li>
                 </ol>
                 <div class='upload'>
                     <div class="input" id='doUploadCsv'></div>
@@ -116,8 +118,54 @@
                         </table>
                     </div>
                 </div>                
-            </div>
+            </div>                        
+        </div>   
+
+        <div id="modalUploadIdsCsv" class="Modal">
+            <header>
+                <h3>Upload Organisation IDs CSV</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <p>Instructions for updating Org IDs</p>
+                <ol>
+                    <li>Always <a href="orgs.csv">download the spreadsheet</a> and keep it as a backup before making changes</li>
+                    <li>Update the 'New OrgId' column in the downloaded spreadsheet</li>
+                    <li>Do not change the first column</li>
+                    <li>The organisation title is not updated when uploading</li>
+                    <li>Rows with a blank new OrgId are ignored</li>
+                    <li>Nothing is ever deleted, so you can choose to only upload changed rows</li>
+                    <li>OrgID's <b>must be unique</b> within your account. Any duplicates will be flagged as errors</li>
+                    <li>If any invalid data is found you will be informed, then just correct your spreadsheet and try again</li>
+                    <li>The server processes about 1000 rows per minute, so larger databases can take a while</li>
+                </ol>
+                <div class='upload'>
+                    <div class="input" id='doUploadOrgIdCsv'></div>
+                    <br/>
+                    <div class="results">
+                        <strong>No. updated:</strong>
+                        <span class="numUpdated">-</span>
+                        <strong>Invalid rows:</strong>
+                        <span class="numErrors">-</span>
+                        <br/>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>                
+            </div>                        
         </div>        
+
+
         <div id="editOrgModal" class="Modal">
             <header>
                 <h3>Edit Organisation</h3>

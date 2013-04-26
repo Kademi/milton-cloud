@@ -185,6 +185,7 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
                 children.add(of);
             }
             children.add(new OrganisationsCsv("orgs.csv", this));
+            children.add(new OrgIdsCsv("orgIds.csv", this));
 
             _(ApplicationManager.class).addBrowseablePages(this, children);
         }

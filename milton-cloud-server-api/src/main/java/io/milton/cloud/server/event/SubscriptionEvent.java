@@ -16,9 +16,14 @@
  */
 package io.milton.cloud.server.event;
 
+import io.milton.cloud.server.apps.Application;
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.vfs.db.*;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fired when a user joins a group
@@ -47,6 +52,7 @@ public class SubscriptionEvent implements TriggerEvent {
     private final Organisation organisation;
     private final GroupMembership membership;
     private final SubscriptionAction action;
+    private final Map<String, Object> attributes = new HashMap<>();
 
     /**
      *
@@ -119,5 +125,39 @@ public class SubscriptionEvent implements TriggerEvent {
     @Override
     public String getTriggerItem5() {
         return null;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * Caches isactive result in this event for performance
+     *
+     * @return
+     */
+    public boolean isActive(ApplicationManager applicationManager, Application app, Branch branch) {
+        List<Application> activeApps = (List<Application>) getAttributes().get("activeApps");
+        if (activeApps == null) {
+            activeApps = applicationManager.findActiveApps(branch);
+            getAttributes().put("activeApps", activeApps);
+        }
+        return applicationManager.isActive(app, activeApps);
+    }
+
+    /**
+     * Locally cached lookup for GroupInWebsite's, to assist with active
+     * determination
+     *
+     * @param group
+     * @return
+     */
+    public List<GroupInWebsite> getGroupInWebsites(Group group) {
+        List<GroupInWebsite> giws = (List<GroupInWebsite>) getAttributes().get("giws");
+        if (giws == null) {
+            giws = GroupInWebsite.findByGroup(group, SessionManager.session());
+            getAttributes().put("giws", giws);
+        }
+        return giws;
     }
 }

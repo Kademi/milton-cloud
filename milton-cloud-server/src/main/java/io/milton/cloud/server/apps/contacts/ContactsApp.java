@@ -141,10 +141,10 @@ public class ContactsApp implements Application, EventListener, BrowsableApplica
         if (e instanceof SubscriptionEvent) {
             SubscriptionEvent joinEvent = (SubscriptionEvent) e;
             Group group = joinEvent.getMembership().getGroupEntity();
-            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
+            List<GroupInWebsite> giws = joinEvent.getGroupInWebsites(group);
             for (GroupInWebsite giw : giws) {
                 Branch b = giw.getWebsite().liveBranch();
-                if (applicationManager.isActive(this, b)) {
+                if (joinEvent.isActive(applicationManager, this, b)) {
                     addAddressBook("contacts", joinEvent.getMembership().getMember(), SessionManager.session());
                 }
             }

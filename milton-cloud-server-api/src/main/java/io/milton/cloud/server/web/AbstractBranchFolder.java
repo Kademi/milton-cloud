@@ -118,7 +118,6 @@ public abstract class AbstractBranchFolder extends AbstractCollectionResource im
     @Override
     public ResourceList getChildren() throws NotAuthorizedException, BadRequestException {
         if (children == null) {
-            System.out.println("getChildren: " + getName());
             ApplicationManager am = _(ApplicationManager.class);
             DataSession dataSession = getDataSession(false);
             if (dataSession != null) {

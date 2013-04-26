@@ -32,6 +32,7 @@ public class UserDao {
 
     public List<Profile> listProfiles(Organisation org, Session sess) {
         Criteria crit = sess.createCriteria(Profile.class);
+        crit.setMaxResults(200);
         Criteria critMembership = crit.createCriteria("memberships");
         Criteria critSubordinate = critMembership.createCriteria("subordinates");
         critSubordinate.add(Restrictions.eq("withinOrg", org));

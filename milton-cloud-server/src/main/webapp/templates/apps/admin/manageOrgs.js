@@ -22,12 +22,21 @@ $(function() {
         }
     });
     initSearchOrgs();
-    $(".showUploadCsvModal").click(function() {
+    $(".showUploadCsvModal").click(function(e) {
+        e.preventDefault();
         $.tinybox.show($("#modalUploadCsv"), {
             overlayClose: false,
             opacity: 0
         });
     });
+    var uploadOrgIdsModal = $("#modalUploadIdsCsv");
+    $(".showUploadIdCsvModal").click(function(e) {
+        e.preventDefault();
+        $.tinybox.show(uploadOrgIdsModal, {
+            overlayClose: false,
+            opacity: 0
+        });
+    });    
 
     $("#doUploadCsv").mupload({
         buttonText: "Upload spreadsheet",
@@ -55,10 +64,45 @@ $(function() {
             uploadForm.attr("action", "orgs.csv");
         }
     });
+    
+    $("#doUploadOrgIdCsv").mupload({
+        buttonText: "Upload OrgIDs spreadsheet",
+        url: "orgIds.csv",
+        useJsonPut: false,
+        oncomplete: function(data, name, href) {
+            log("oncomplete:", data.result, name, href);
+            if (data.result.status) {
+                uploadOrgIdsModal.find(".results .numUpdated").text(data.result.data.numUpdated);
+                uploadOrgIdsModal.find(".results .numErrors").text(data.result.data.errors.length);
+                showErrors(uploadOrgIdsModal, data.result.data.errors);
+                $(".results").show();
+                alert("Upload completed. Please review any unmatched organisations below, or refresh the page to see the updated list of organisations");
+            } else {
+                alert("There was a problem uploading the organisations: " + data.result.messages);
+            }
+        }
+    });    
+    
     $("a.Add.org").click(function() {
         showEditOrg(null);
     });
 });
+
+
+function showErrors(modal, errors) {
+    log("showErrors", errors);
+    var errorTable = modal.find(".results table");
+    var tbody = errorTable.find("tbody");
+    tbody.html("");
+    $.each(errors, function(i, row) {
+        log("error:", row);
+        var tr = $("<tr>");
+        tr.append("<td>" + row + "</td>");
+        tbody.append(tr);
+    });
+    errorTable.show();
+}
+
 function showUnmatched(unmatched) {
     var unmatchedTable = $(".results table");
     var tbody = unmatchedTable.find("tbody");

@@ -30,6 +30,7 @@ public class HtmlFormatter {
         html.writeText("\n");
         XmlWriter.Element head = html.begin("head");
         head.writeText("\n");
+        head.writeText("<meta http-equiv=\"content-type\" content=\"application/xhtml+xml; charset=UTF-8\" />");
         if (r.getTitle() != null) {
             head.begin(null, "title", false).writeText(r.getTitle(), false).close(true);
         }

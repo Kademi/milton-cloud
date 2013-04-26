@@ -72,7 +72,7 @@ public class NameServerApp implements Application, LifecycleApplication {
 
         ss = names.split(",");
         List<String> nameServers = new ArrayList<>();
-        for( String s : ss ) {
+        for (String s : ss) {
             s = s.trim();
             nameServers.add(s);
         }
@@ -82,9 +82,9 @@ public class NameServerApp implements Application, LifecycleApplication {
             sdrf.setDefaultMx(mx);
         }
         System.out.println("default MX: " + sdrf.getDefaultMx());
-        
+
         String primaryDomain = config.getContext().get(CurrentRootFolderService.class).getPrimaryDomain();
-        sdrf.setPrimaryDomain(primaryDomain);        
+        sdrf.setPrimaryDomain(primaryDomain);
 
         log.info("atarting server");
         ns = new JNameServer(sdrf, listen);
@@ -104,18 +104,20 @@ public class NameServerApp implements Application, LifecycleApplication {
 
     @Override
     public void initDefaultProperties(AppConfig config) {
+        try {
+            config.add(LISTEN, "0.0.0.0:53");
+            InetAddress addr = Utils.probeIp();
+            if (addr != null) {
+                config.add(MC_IP, addr.getHostAddress());
+            } else {
+                config.add(MC_IP, "127.0.0.1");
+            }
 
-        config.add(LISTEN, "0.0.0.0:53");
-        InetAddress addr = Utils.probeIp();
-        if (addr != null) {
-            config.add(MC_IP, addr.getHostAddress());
-        } else {
-            config.add(MC_IP, "127.0.0.1");
+            config.add(NAMES, "ns1.localhost, ns2.localhost");
+            config.add(MXNAME, "mx1.localhost");
+        } catch (Throwable e) {
+            log.error("Exception starting DNS app");
         }
-
-        config.add(NAMES, "ns1.localhost, ns2.localhost");
-        config.add(MXNAME, "mx1.localhost");
-
     }
 
     @Override

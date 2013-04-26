@@ -89,10 +89,11 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
         if (e instanceof SubscriptionEvent) {
             SubscriptionEvent joinEvent = (SubscriptionEvent) e;
             Group group = joinEvent.getMembership().getGroupEntity();
-            List<GroupInWebsite> giws = GroupInWebsite.findByGroup(group, SessionManager.session());
+            List<GroupInWebsite> giws = joinEvent.getGroupInWebsites(group);
+
             for (GroupInWebsite giw : giws) {
                 Branch b = giw.getWebsite().liveBranch();
-                if (applicationManager.isActive(this, b)) {
+                if (joinEvent.isActive(applicationManager, this, b)) {
                     Profile u = joinEvent.getMembership().getMember();
                     Session session = SessionManager.session();
                     addRepo("Documents", "docs", u, session);

@@ -334,6 +334,15 @@ public class ApplicationManager {
         }
         return false;
     }
+    
+    public boolean isActive(Application aThis, List<Application> activeApps) {
+        for (Application a : activeApps) {
+            if (a.getInstanceId().equals(aThis.getInstanceId())) {
+                return true;
+            }
+        }
+        return false;        
+    }
 
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, org.apache.velocity.context.Context context, Writer writer) throws IOException {
         for (Application app : getActiveApps(rootFolder)) {
@@ -408,7 +417,6 @@ public class ApplicationManager {
     }
 
     public ResourceList toResources(ContentDirectoryResource parent, DataSession.DirectoryNode dir) {
-        System.out.println("toResources: " + parent.getName());
         RootFolder rf = currentRootFolderService.peekRootFolder();
         ResourceList list = new ResourceList();
         if (dir != null) {

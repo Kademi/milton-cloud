@@ -18,6 +18,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.signup.SignupApp;
+import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
@@ -57,6 +58,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import static io.milton.context.RequestContext._;
+import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
 
 /**
  * Returns a CSV view of the business units in the parent folder
@@ -64,27 +67,30 @@ import static io.milton.context.RequestContext._;
  * @author brad
  */
 public class ManageUsersCsv extends AbstractResource implements GetableResource, PostableResource {
-    
+
     private static final Logger log = LoggerFactory.getLogger(ManageUsersCsv.class);
     private final String name;
     private final ManageUsersFolder parent;
     private JsonResult jsonResult;
     private List<List<String>> unmatched = new ArrayList<>();
     private int numUpdated;
-    
+    private int numInserted;
+    private PasswordManager passwordManager; // lazy looked up
+
     public ManageUsersCsv(String name, ManageUsersFolder parent) {
         this.parent = parent;
         this.name = name;
     }
-    
+
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processForm: " + parameters.size() + " files:" + files.size());
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        
+
         if (!files.isEmpty()) {
             try {
+                session.setFlushMode(FlushMode.MANUAL);
                 Boolean insertMode = WebUtils.getParamAsBool(parameters, "insertMode");
                 insertMode = (insertMode == null ? false : insertMode);
                 FileItem file = files.values().iterator().next();
@@ -99,7 +105,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                     log.info("Found unmatched entries: " + unmatched.size() + " - commit the good ones");
                     tx.commit();
                 }
-                
+
             } catch (Exception ex) {
                 log.warn("Exception processing", ex);
                 tx.rollback();
@@ -111,12 +117,12 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         }
         return null;
     }
-    
+
     @Override
     public AccessControlledResource.Priviledge getRequiredPostPriviledge(Request request) {
         return AccessControlledResource.Priviledge.WRITE_CONTENT;
     }
-    
+
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (jsonResult != null) {
@@ -131,26 +137,26 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
             }
         }
     }
-    
+
     public String getTitle() {
         return "Business units CSV";
     }
-    
+
     @Override
     public CommonCollectionResource getParent() {
         return parent;
     }
-    
+
     @Override
     public String getName() {
         return name;
     }
-    
+
     @Override
     public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
-    
+
     @Override
     public String getContentType(String accepts) {
         if (jsonResult == null) {
@@ -159,17 +165,17 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
             return JsonResult.CONTENT_TYPE;
         }
     }
-    
+
     @Override
     public Long getContentLength() {
         return null;
     }
-    
+
     @Override
     public Organisation getOrganisation() {
         return parent.getOrganisation();
     }
-    
+
     @Override
     public boolean is(String type) {
         if (type.equals("csv")) {
@@ -177,7 +183,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         }
         return super.is(type);
     }
-    
+
     private void toCsv(Organisation rootOrg, CSVWriter writer) {
         List<String> values = new ArrayList<>();
         values.add("MemberOfOrg");
@@ -189,15 +195,15 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         values.add("FirstName");
         values.add("SurName");
         values.add("Phone");
-        
+
         String[] arr = new String[values.size()];
         values.toArray(arr);
         writer.writeNext(arr);
-        
-        
+
+
         _toCsv(rootOrg, writer);
     }
-    
+
     private void _toCsv(Organisation rootOrg, CSVWriter writer) {
         writeUsers(rootOrg, writer);
         if (rootOrg.getChildOrgs() == null) {
@@ -207,7 +213,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
             _toCsv(org, writer);
         }
     }
-    
+
     private void writeUsers(Organisation org, CSVWriter writer) {
         if (org.getMembers() != null) {
             for (GroupMembership m : org.getMembers()) {
@@ -218,31 +224,30 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
             }
         }
     }
-    
-    private void doUpload(FileItem file, Boolean insertMode, Session session) throws IOException {
+
+    private void doUpload(FileItem file, Boolean insertMode, Session session) throws IOException {        
         log.info("doUpload: " + insertMode);
         InputStream in = null;
         try {
             in = file.getInputStream();
             boolean allowinserts = insertMode;
             fromCsv(in, session, allowinserts);
-            
+
         } finally {
             IOUtils.closeQuietly(in);
         }
     }
-    
+
     public void fromCsv(InputStream in, Session session, boolean allowInserts) throws IOException {
         InputStreamReader r = new InputStreamReader(in);
         CSVReader reader = new CSVReader(r);
-        
+
         String[] lineParts;
         int line = 0;
         Organisation rootOrg = getOrganisation();
-        
-        reader.readNext(); // skip headers
+        long rootOrgId = rootOrg.getId();
 
-        log.info("fromCsv: rootOrg=" + rootOrg.getOrgId());
+        reader.readNext(); // skip headers        
         while ((lineParts = reader.readNext()) != null) {
             if (lineParts.length > 0) {
                 line++;
@@ -252,7 +257,16 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
+                    long tm = System.currentTimeMillis();
                     doProcess(rootOrg, lineList, line, allowInserts, session);
+                    tm = System.currentTimeMillis() - tm;
+                    session.flush();
+                    log.info("  fromCsv: line processed in " + tm + "ms");
+                    if (line % 20 == 0) {
+                        log.info("Clear session");                        
+                        session.clear();
+                        rootOrg = Organisation.get(rootOrgId, session);
+                    }
                 }
             }
         }
@@ -262,8 +276,9 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
             jsonResult = new JsonResult(false, "Found " + unmatched.size() + " records. Please review and correct");
         }
     }
-    
+
     private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {
+        long tm = System.currentTimeMillis();
         String orgId = lineList.get(0);
         String groupName = lineList.get(1);
         String userName = lineList.get(2);
@@ -272,42 +287,45 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         String firstName = lineList.get(5);
         String surName = lineList.get(6);
         String phone = lineList.get(7);
-        
+        String newPassword = null;
+        if (lineList.size() >= 8) {
+            newPassword = lineList.get(8);
+        }
+
         if (StringUtils.isBlank(orgId)) {
             lineList.add("blank orgId given for line: " + line);
             unmatched.add(lineList);
             return;
         }
-        
+
         if (StringUtils.isBlank(email)) {
             lineList.add("blank email given for line: " + line);
             unmatched.add(lineList);
             return;
         }
-                
+
         if (StringUtils.isBlank(groupName)) {
             lineList.add("blank groupName given for line: " + line);
             unmatched.add(lineList);
             return;
         }
-        
+
         // sometimes we might have combined firstname+surname in one field, so we split it out
-        if( StringUtils.isBlank(surName)) {
-            if( !StringUtils.isBlank(firstName)) {
-                if( firstName.contains(" ")) {
+        if (StringUtils.isBlank(surName)) {
+            if (!StringUtils.isBlank(firstName)) {
+                if (firstName.contains(" ")) {
                     int pos = firstName.lastIndexOf(" ");
-                    surName = firstName.substring(pos+1);
+                    surName = firstName.substring(pos + 1);
                     firstName = firstName.substring(0, pos);
                 }
             }
         }
-        
+
         if (StringUtils.isBlank(nickName)) {
             nickName = firstName;
         }
-        
-        
-        log.info("doProcess: orgId=" + orgId);
+
+
         Organisation withinOrg = getOrganisation().childOrg(orgId, session);
         if (withinOrg == null) {
             // Try to find the org
@@ -324,10 +342,10 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         if (withinOrg == null) {
             return;
         }
-        
+
         Profile p;
         if (StringUtils.isBlank(userName)) {
-            if( !StringUtils.isBlank(email)) {
+            if (!StringUtils.isBlank(email)) {
                 p = Profile.findByEmail(email, session);
             } else {
                 p = null;
@@ -335,20 +353,22 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         } else {
             p = Profile.find(userName, session);
         }
-        
+
         Date now = _(CurrentDateService.class).getNow();
-        
+
+        boolean isNew = false;
         if (p == null) {
             if (allowInserts) {
                 log.info("Creating user: " + nickName);
                 p = new Profile();
+                isNew = true;
                 if (StringUtils.isBlank(userName)) {
-                    userName = Profile.findAutoName(nickName, session);                    
+                    userName = Profile.findAutoName(nickName, session);
                 }
-                log.info("username: " + userName);
                 p.setName(userName);
                 p.setCreatedDate(now);
                 p.setModifiedDate(now);
+                numInserted++;
             } else {
                 if (StringUtils.isBlank(userName)) {
                     lineList.add("Username is blank, but allow inserts is false. Line: " + line);
@@ -356,7 +376,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                     lineList.add("Couldnt find username " + userName + " . I would insert but allow inserts is false. Line: " + line);
                 }
                 unmatched.add(lineList);
-                return;                
+                return;
             }
         } else {
             numUpdated++;
@@ -366,9 +386,15 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         p.setFirstName(firstName);
         p.setSurName(surName);
         p.setPhone(phone);
-        
+
         session.save(p);
-        
+        if (isNew) {
+            if (newPassword != null) {
+                passwordManager().setPassword(p, newPassword);
+            }
+        }
+
+
         if (p.isInGroup(groupName, withinOrg)) {
             // great, do nothing
         } else {
@@ -379,18 +405,28 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                 return;
             } else {
                 // If user is a member of the same group on another org we should remove that membership
-                if( g.isMember(p) ) {
+                if (g.isMember(p)) {
                     p.removeMembership(g, session);
                 }
                 p.addToGroup(g, withinOrg, session);
+                tm = System.currentTimeMillis();
                 _(SignupApp.class).onNewMembership(p.membership(g), null);
+                session.flush();
+
             }
         }
+    }
+
+    private PasswordManager passwordManager() {
+        if( passwordManager == null ) {
+            passwordManager = _(PasswordManager.class);
+        }
+        return passwordManager;
     }
     
     private List<String> buildLineOfValues(GroupMembership m) {
         List<String> values = new ArrayList<>();
-        
+
         Organisation org = m.getWithinOrg();
         values.add(org.getOrgId()); // org unique ID
         values.add(m.getGroupEntity().getName()); // group member
@@ -402,26 +438,34 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         values.add(p.getFirstName());
         values.add(p.getSurName());
         values.add(p.getPhone());
-        
+
         return values;
     }
-    
+
     public class UploadResult {
-        
+
         private List<List<String>> unmatched = new ArrayList<>();
         private int numUpdated;
-        
+        private int numInserted;
+
         public UploadResult() {
             this.numUpdated = ManageUsersCsv.this.numUpdated;
+            this.numInserted = ManageUsersCsv.this.numInserted;
             this.unmatched = ManageUsersCsv.this.unmatched;
         }
-        
+
         public int getNumUpdated() {
             return numUpdated;
         }
-        
+
         public List<List<String>> getUnmatched() {
             return unmatched;
         }
+
+        public int getNumInserted() {
+            return numInserted;
+        }
+        
+        
     }
 }

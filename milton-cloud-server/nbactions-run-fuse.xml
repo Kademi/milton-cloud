@@ -41,4 +41,22 @@
                 
         </properties>
     </action>
+    <action>
+            <actionName>profile</actionName>
+            <goals>
+                <goal>package</goal>
+            </goals>
+            <properties>
+                <netbeans.deploy.profilemode>true</netbeans.deploy.profilemode>
+                <fuse.home>/home/brad/proj/fuse-admin</fuse.home>
+                <profiler.action>profile</profiler.action>
+                <Env.agentpath>/home/brad/netbeans-7.3/profiler/lib/deployed/jdk16/linux/libprofilerinterface.so</Env.agentpath>
+                
+                
+                
+            </properties>
+            <activatedProfiles>
+                <activatedProfile>run-fuse</activatedProfile>
+            </activatedProfiles>
+        </action>
 </actions>

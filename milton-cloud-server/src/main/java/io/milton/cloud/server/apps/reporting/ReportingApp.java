@@ -205,6 +205,9 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
         if (host == null) {
             host = "";
         }
+        if( host.startsWith(".admin")) {
+            return ;
+        }
         String h = host.replace("test.", "www."); // TODO: nasty little hack. need to bring statsfilter together with statsresourcefactory
         String path = request.getAbsolutePath();
         String referrerUrl = request.getRefererHeader();
