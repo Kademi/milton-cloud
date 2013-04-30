@@ -68,14 +68,18 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
     if( postUrl ) {
         url = postUrl;
     }
-    try {                    
+    try {
+        form.find("button").attr("disabled", "true");
+        form.addClass("ajax-processing");
         $.ajax({
             type: 'POST',
             url: url,
             data: serialised,
             dataType: "json",
             success: function(resp) {
+                form.find("button").removeAttr("disabled");
                 ajaxLoadingOff();                            
+                form.removeClass("ajax-processing");
                 if( resp && resp.status) {
                     log("save success", resp)
                     if( confirmMessage ) {
@@ -104,6 +108,8 @@ function postForm(form, valiationMessageSelector, validationFailedMessage, callb
             },
             error: function(resp) {
                 ajaxLoadingOff();
+                form.removeClass("ajax-processing");
+                form.find("button").removeAttr("disabled");
                 log("error posting form", form, resp);
                 alert("Sorry, there was an error submitting the form. Please check the form for detailed error messages and try again");
                 $(valiationMessageSelector, form).text(validationFailedMessage);

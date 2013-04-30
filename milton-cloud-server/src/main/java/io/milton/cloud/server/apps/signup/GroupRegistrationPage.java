@@ -209,6 +209,9 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                         nickName = null;
                     }
                 }
+                if( nickName == null ) {
+                    nickName = WebUtils.getParam(parameters, "firstName");
+                }
 
                 String newName = WebUtils.getParam(parameters, "name");
                 if (newName == null || newName.trim().length() == 0) {
@@ -228,6 +231,8 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 // optional
                 String phone = WebUtils.getParam(parameters, "phone");
                 p.setPhone(phone);
+                p.setFirstName(WebUtils.getParam(parameters, "firstName"));
+                p.setSurName(WebUtils.getParam(parameters, "surName"));
                 
                 session.save(p);
                 _(SpliffySecurityManager.class).getPasswordManager().setPassword(p, password);

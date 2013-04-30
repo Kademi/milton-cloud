@@ -17,15 +17,22 @@
 package io.milton.vfs.db.utils;
 
 import io.milton.common.FileUtils;
+import io.milton.vfs.db.Organisation;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.Criteria; 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
 public class DbUtils {
+    
+    private static final Logger log = LoggerFactory.getLogger(DbUtils.class);
+    
     /**
      * Just casts the list, and ensures it never returns null.
      * @param <T>
@@ -46,6 +53,15 @@ public class DbUtils {
         List list = crit.list();
         if( list == null || list.isEmpty() ) {
             return null;
+        }
+        if( list.size() > 1 ) {
+            if(log.isInfoEnabled()) {
+                log.info("Multiple items returned from query=" + list.size());
+                for( Object o : list ) {
+                    Serializable id = SessionManager.session().getIdentifier(o);
+                    log.info(" - class=" + o.getClass() + " id=" + id);
+                }
+            }
         }
         T item = (T) list.get(0);
         return item;

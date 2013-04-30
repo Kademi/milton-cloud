@@ -20,9 +20,9 @@ $(document).ready(function() {
         var journalDiv = container.find("div.journal");
         var journalNotes;
         if (journalDiv.length === 0) {
-            journalDiv = $("<div class='journal' style='position: fixed;right: 0;top: 30%;z-index: 1000;'><button class='journal-show' style='height: 64px;width: 64px;background: url(\"/static/inline-edit/edit-icon.png\") repeat scroll 0 0 transparent;'>Journal</button></div>");
+            journalDiv = $("<div class='journal'><button class='journal-show' ><span>Journal</span></button></div>");
             container.append(journalDiv);
-            journalNotes = $("<div style='display:none; min-width: 400px; min-height: 200px; border: solid black 1px' class='journal-notes'></div");
+            journalNotes = $("<div class='journal-notes'></div");
             journalDiv.append(journalNotes);
         } else {
             var journalNotes = journalDiv.find("journal-notes");
@@ -31,6 +31,12 @@ $(document).ready(function() {
             e.preventDefault();
             showJournalNotes(journalNotes, config);
         });
+        // add css
+        if( $("link[href=\"/templates/apps/journal/journal.css\"]").length ===0 ) {
+            var link = $("<link rel='stylesheet' type='text/css' media='screen' href='/templates/apps/journal/journal.css'/>");
+            $("head").append(link);
+            log("added journal css", link);
+        }
     };
 })(jQuery);
 

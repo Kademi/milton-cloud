@@ -164,7 +164,7 @@ body .jp-video .jp-play-bar {
     width:0px;
     height:10px;
     position:relative;
-    z-index: 9999;
+    z-index: 1;
 
     -webkit-border-radius:5px;
     -moz-border-radius:5px;

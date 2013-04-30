@@ -1463,3 +1463,9 @@ ul.list, ul.ClearFix, ul.ListItem, ul.appliesTo {
     margin-left: 0;
 }
 
+.ajax-loader {
+    display: none;
+}
+.ajax-processing .ajax-loader {
+    display: inline;
+}

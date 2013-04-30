@@ -36,6 +36,12 @@ public class Calendar extends Repository {
     private String color;
     private String description;
 
+    @Override
+    @Transient
+    public String getRepoType() {
+        return "CA";
+    }    
+    
     @OneToMany(mappedBy = "calendar")
     public List<CalEvent> getEvents() {
         return events;

@@ -47,6 +47,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.FlushMode;
 
 /**
  * Returns an updateable CSV view of the orgIDs of the business units within
@@ -78,14 +80,16 @@ public class OrgIdsCsv extends AbstractResource implements GetableResource, Post
         if (!files.isEmpty()) {
             try {
                 FileItem file = files.values().iterator().next();
-                doUpload(file, session);                
+                session.setFlushMode(FlushMode.MANUAL);
+                doUpload(file, session);
                 if (errors.isEmpty()) {
-                    tx.commit();
-                    jsonResult = new JsonResult(true, "Done updates");                    
+                    jsonResult = new JsonResult(true, "Done updates");
                 } else {
-                    tx.rollback();
                     jsonResult = new JsonResult(true, "Errors detected");
                 }
+                session.flush();
+                tx.commit();
+
                 jsonResult.setData(new UploadResult()); // sets return values automatically
 
             } catch (Exception ex) {
@@ -211,6 +215,9 @@ public class OrgIdsCsv extends AbstractResource implements GetableResource, Post
         currentLine = 1;
         reader.readNext(); // skip first row, column headings
 
+        Organisation rootOrg = getOrganisation();
+        long rootOrgId = rootOrg.getId();
+
         List<UpdatedLine> updated = new ArrayList<>();
 
         while ((lineParts = reader.readNext()) != null) {
@@ -222,46 +229,50 @@ public class OrgIdsCsv extends AbstractResource implements GetableResource, Post
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess( lineList, currentLine, updated, session);
+                    doProcess(rootOrg, lineList, currentLine, updated, session);
+                }
+                if (currentLine % 20 == 0) {
+                    log.info("flush");
+                    session.flush();
                 }
             }
         }
 
+        log.info("Save updated records, and check for dups: " + updated.size());
         for (UpdatedLine updatedLine : updated) {
+            log.info("Save - id=" + updatedLine.org.getId());
             session.save(updatedLine.org);
         }
+        session.flush();
         for (UpdatedLine updatedLine : updated) {
+            log.info("Check dup - id=" + updatedLine.org.getId());
             if (!updatedLine.org.isOrgIdUniqueWithinAdmin(session)) {
                 errors.add("Duplicate orgId: " + updatedLine.org.getOrgId() + " line " + updatedLine.line);
             }
         }
+        session.flush();
     }
 
-    private void doProcess(List<String> lineList, int line, List<UpdatedLine> updated, Session session) {
+    private void doProcess(Organisation rootOrg, List<String> lineList, int line, List<UpdatedLine> updated, Session session) {
         String orgId = lineList.get(0);
-        if (orgId == null || orgId.length() == 0) {
-            //throw new RuntimeException("Cant save record with an empty name: column" + pos + " line: " + line);
-            errors.add("Missing orgID not found on line: " + line + " orgId=" + orgId);
+        String newOrgId = get(lineList, 1);
+        if (StringUtils.isEmpty(orgId) || StringUtils.isEmpty(newOrgId)) {
             return;
         }
-        log.info("doProcess: orgId=" + orgId);
-        Organisation child = getOrganisation().childOrg(orgId, session);
+
+        Organisation child = rootOrg.childOrg(orgId, session);
         if (child == null) {
             log.trace("Did not find child called: " + orgId);
             errors.add("Existing orgID not found on line: " + line + " orgId=" + orgId);
         } else {
-            log.trace("found record to update: " + child.getOrgId());
-            updateRecord(child, lineList, line, updated, session);
-        }
-    }
-
-    private void updateRecord(Organisation child, List<String> lineList, int line, List<UpdatedLine> updated, Session session) {
-        numUpdated++;
-        String newOrgId = get(lineList, 1);
-        if (newOrgId != null) {
+            log.info("found record to update: " + child.getOrgId() + " ID=" + child.getId());
+            numUpdated++;
+            String oldOrgId = child.getOrgId();
             child.setOrgId(newOrgId);
+            log.info("  - set new orgid= " + newOrgId + "  from " + oldOrgId + "  for id=" + child.getId());
             session.save(child);
-            updated.add(new UpdatedLine(child, line));
+            updated.add(new UpdatedLine(child, line, oldOrgId));
+
         }
     }
 
@@ -304,14 +315,17 @@ public class OrgIdsCsv extends AbstractResource implements GetableResource, Post
             return errors;
         }
     }
-    
+
     public class UpdatedLine {
+
         private Organisation org;
         private int line;
+        private String oldOrgId;
 
-        public UpdatedLine(Organisation org, int line) {
+        public UpdatedLine(Organisation org, int line, String oldOrgId) {
             this.org = org;
             this.line = line;
-        }                
+            this.oldOrgId = oldOrgId;
+        }
     }
 }

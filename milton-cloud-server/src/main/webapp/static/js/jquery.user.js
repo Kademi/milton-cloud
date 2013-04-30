@@ -262,12 +262,14 @@ function showRegisterOrLoginModal(callbackOnLoggedIn) {
                     afterLoginUrl: "none",
                     loginCallback: function() {
                         log("logged in ok, process callback");
+                        $('body').trigger('userLoggedIn', [userUrl, userName]);
                         callbackOnLoggedIn();
                         $.tinybox.close();
                     }
                 });
                 initRegisterForms("none", function() {
                     log("registered and logged in ok, process callback");
+                    $('body').trigger('userLoggedIn', [userUrl, userName]);
                     callbackOnLoggedIn();
                     $.tinybox.close();                    
                 });

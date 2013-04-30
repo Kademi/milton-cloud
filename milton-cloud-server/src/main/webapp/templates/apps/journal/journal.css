@@ -1,0 +1,28 @@
+.journal {
+    position: fixed;
+    right: 0;
+    top: 30%;
+    z-index: 1000;
+}
+
+.journal-show {
+    height: 64px;
+    width: 64px;
+    margin: 0;
+    opacity: 0.3;
+    background: url("/static/images/icon_journal.png") no-repeat scroll center center transparent;
+}
+.journal-show:hover {
+    opacity: 1;
+}
+.journal-show span {
+    visibility: hidden
+}
+.journal-notes {
+    display:none; 
+    min-width: 400px; 
+    min-height: 200px; 
+    border: solid black 1px;
+}
+
+        

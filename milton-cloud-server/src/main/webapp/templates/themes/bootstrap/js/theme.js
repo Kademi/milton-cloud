@@ -104,7 +104,14 @@ function initCleanModals() {
  */
 var lastOpenedModal;
 function showModal(modal) {
-    log("showModal");
+    log("showModal", modal);
+    modal.find(".close-modal").remove(); // added by old fuse theme, need to remove
+    if( !modal.hasClass("modal")) {
+        modal.addClass("modal");
+    }
+    if( modal.find("modal-body").length ===0 ) {
+        modal.wrapInner("<div class='modal-body'></div>");
+    }
     lastOpenedModal = modal;
     log("showModal", "lastOpenedModal", lastOpenedModal);
     modal.modal();

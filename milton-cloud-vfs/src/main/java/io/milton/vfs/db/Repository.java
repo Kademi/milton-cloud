@@ -282,4 +282,15 @@ public class Repository implements Serializable {
             return getDeleted();
         }
     }
+    
+    /**
+     * Overridden by subclasses to return a definite identifier for the type of 
+     * Repository, since we can't use instanceof with Hibernate classes
+     * 
+     * @return 
+     */
+    @Transient
+    public String getRepoType() {
+        return "R";
+    }
 }

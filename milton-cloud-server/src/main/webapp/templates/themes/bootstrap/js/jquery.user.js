@@ -81,15 +81,16 @@
         });
         log("init requiresUser links");        
         // use a body class to ensure is only inited once
-        $("body").not("body.requiresUserDone").addClass("requiresUserDone").on("click", "a.requiresUser", function(e) {
+        $("body").not("body.requiresUserDone").addClass("requiresUserDone").on("click", "a.requiresUser, button.requiresUser", function(e) {
             var target = $(e.target);
             log("check required user", target, userUrl);
             if (userUrl === null || userUrl === "") {
                 e.preventDefault();
                 showRegisterOrLoginModal(function() {
                     //target.click();
-                    log("going to", target.attr("href"));
-                    window.location.href = target.attr("href");
+                    //log("going to", target.attr("href"));
+                    //window.location.href = target.attr("href");
+                    target.trigger("click");
                 });
             }
             log("all good, carry on...");
@@ -290,12 +291,14 @@ function showRegisterOrLoginModal(callbackOnLoggedIn) {
                     loginCallback: function() {
                         closeModals();                        
                         log("logged in ok, process callback", callbackOnLoggedIn);
+                        $('body').trigger('userLoggedIn', [userUrl, userName]);
                         callbackOnLoggedIn();
                     }
                 });
                 initRegisterForms("none", function() {
-                    closeModals();                    
+                    closeModals();                     
                     log("registered and logged in ok, process callback");
+                    $('body').trigger('userLoggedIn', [userUrl, userName]);
                     callbackOnLoggedIn();
                 });
             },

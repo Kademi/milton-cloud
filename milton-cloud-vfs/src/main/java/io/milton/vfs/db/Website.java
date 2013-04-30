@@ -43,6 +43,7 @@ public class Website extends Repository implements VfsAcceptor {
 
     public static String REPO_TYPE_WEBSITE = "W"; // discriminator
     
+    
     /**
      * Attempts to locate a website with the exact name give. Will follow alias
      * links
@@ -92,6 +93,12 @@ public class Website extends Repository implements VfsAcceptor {
     private String redirectTo; // if not null, this website will redirect to that one
     private String mailServer; // if not null, will be used for email sending and generating MX records
 
+    @Override
+    @Transient
+    public String getRepoType() {
+        return REPO_TYPE_WEBSITE;
+    }        
+    
     @Column(length = 255, nullable = true)
     @Index(name = "idx_domain_name")
     public String getDomainName() {

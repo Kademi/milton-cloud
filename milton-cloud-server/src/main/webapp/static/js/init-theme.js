@@ -429,12 +429,20 @@ function initComments(pageUrl) {
     });
     $('.commentContainer textarea').css('overflow', 'hidden').autogrow()
 
+    var currentUser = {
+        name: userName,
+        href: userUrl,
+        photoHref: "/profile/pic"
+    };
+
+    // This is for deferred logins, ie someone logs in after going to a page with comments
+    $('body').on('userLoggedIn', function(event, userUrl, userName) {
+        currentUser.name = userName;
+        currentUser.href = userUrl;
+    });
+
     $("#comments").comments({
-        currentUser: {
-            name: userName,
-            href: userUrl,
-            photoHref: "/profile/pic"
-        },
+        currentUser: currentUser,
         pageUrl: pageUrl,
         renderCommentFn: function(user, date, comment) {
             log("renderCommentFn", user);

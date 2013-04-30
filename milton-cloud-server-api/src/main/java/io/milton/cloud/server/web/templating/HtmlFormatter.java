@@ -31,11 +31,17 @@ public class HtmlFormatter {
         XmlWriter.Element head = html.begin("head");
         head.writeText("\n");
         head.writeText("<meta http-equiv=\"content-type\" content=\"application/xhtml+xml; charset=UTF-8\" />");
+        head.writeText("\n");
         if (r.getTitle() != null) {
             head.begin(null, "title", false).writeText(r.getTitle(), false).close(true);
         }
         for (WebResource wr : r.getWebResources()) {
-            write(writer, wr);
+            String ct = wr.getAtts().get("http-equiv");
+            // meta http-equiv=content-type has already been written, so dont write it again
+            boolean isContentTypeMeta =  wr.getTag().equals("meta") && "content-type".equalsIgnoreCase(ct) ;            
+            if( !isContentTypeMeta){
+                write(writer, wr);
+            }            
         }
         writer.newLine();
         head.close(true);

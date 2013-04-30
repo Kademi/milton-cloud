@@ -39,6 +39,14 @@ public class AddressBook extends Repository {
 
     private List<Contact> contacts;
 
+    @Override
+    @Transient
+    public String getRepoType() {
+        return "AB";
+    }
+
+    
+    
     @OneToMany(mappedBy = "addressBook")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Contact> getContacts() {

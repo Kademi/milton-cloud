@@ -64,8 +64,10 @@ import org.slf4j.LoggerFactory;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
 
-    private List<OrgType> orgTypes;
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
+    
+    private List<OrgType> orgTypes;
+    
 
     public static String getDeletedName(String origName) {
         return origName + "-deleted-" + System.currentTimeMillis();
@@ -87,7 +89,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.setCacheable(true);
         crit.add(Restrictions.eq("orgId", orgId));
         critSubOrg.add(Restrictions.eq("owner", adminOrg));
-        return (Organisation) crit.uniqueResult();
+        return DbUtils.unique(crit);
     }
 
     public static Organisation get(Long id, Session session) {
@@ -437,6 +439,17 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public Organisation childOrg(String orgId, Session session) {
         return findByOrgId(this, orgId, session);
     }
+    
+    public Organisation childOrg(Long orgId, Session session) {
+        Organisation child = get(orgId, session);
+        if (child == null) {
+            return null;
+        }
+        if (child.isWithin(this)) {
+            return child;
+        }
+        return null;
+    }    
 
     /**
      * Create a website for this organisation with the domain name given. Also
@@ -738,16 +751,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
-    public Organisation childOrg(Long orgId, Session session) {
-        Organisation child = get(orgId, session);
-        if (child == null) {
-            return null;
-        }
-        if (child.isWithin(this)) {
-            return child;
-        }
-        return null;
-    }
 
     private void findUniqueOrgId(Organisation o) {
         o.setOrgId(System.currentTimeMillis() + ""); // hack, todo, check for uniqueness within the account
@@ -765,6 +768,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if( withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
             return true;
         } else {
+            log.warn("Found same orgID on record: " + withSameOrgId.getId() + " matching this record " + getId() + " in admin org= " + admin.getAdminDomain() + " id=" + admin.getId());
             return false;
         }
     }
