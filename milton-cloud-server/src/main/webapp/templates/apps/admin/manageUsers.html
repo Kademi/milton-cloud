@@ -90,7 +90,8 @@
                         <h3>Group membership</h3>
                         <p>Please select a group and an organisation to make this user a member of</p>
                         <label for="orgId">Organisation:</label>
-                        <input type="text" class="required" autocomplete="off" name="orgId" id="orgId" value="$page.organisation.orgId" />
+                        <input type="text" class="required" autocomplete="off" name="orgTitle" id="orgTitle" value="$page.organisation.formattedName" />
+                        <input type="hidden" name="orgId" id="orgId" value="$page.organisation.id" />
                         <table id="orgSearchResults">
                             #if( $page.orgSearchResults.isEmpty() ) 
                             <tr>

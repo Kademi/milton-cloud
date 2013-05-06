@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.signup;
+package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.web.templating.Formatter;
 import java.util.ArrayList;
@@ -96,6 +96,7 @@ public class ExtraField {
         } else {
             sb.append("<input");
             sb.append(" name='").append(name).append("'");
+            sb.append(" id='field_").append(name).append("'");
             if( required) {
                 sb.append(" class='required'");
             }

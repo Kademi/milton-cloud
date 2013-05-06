@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.server.web.ExtraField;
 import io.milton.cloud.server.web.GroupInWebsiteFolder;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
@@ -63,7 +64,6 @@ import io.milton.vfs.db.OrgType;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * Manages registration of a user when signing up to a group

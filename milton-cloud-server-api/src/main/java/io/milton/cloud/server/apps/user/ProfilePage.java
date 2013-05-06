@@ -16,12 +16,14 @@
  */
 package io.milton.cloud.server.apps.user;
 
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.DataSessionManager;
 import io.milton.cloud.server.db.OptIn;
 import io.milton.cloud.server.db.OptInLog;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ExtraField;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.cloud.server.web.SpliffySecurityManager;
@@ -58,6 +60,8 @@ import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.NvPair;
+import io.milton.vfs.db.NvSet;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
@@ -112,6 +116,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             tx.commit();
             jsonResult = new JsonResult(true, "Deleted membership");
         } else if (parameters.containsKey("nickName")) {
+            // This is the main form
             try {
                 String oldEmail = p.getEmail();
                 String newEmail = parameters.get("email");
@@ -127,6 +132,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                     }
                 }
                 _(DataBinder.class).populate(p, parameters);
+                storeExtraFields(parameters, p, session);
 
                 session.save(p);
                 tx.commit();
@@ -323,7 +329,83 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                 p.removeMembership(foundGroup, session);
             }
         }
+    }
 
+    /**
+     * Iterate over all groups that this user is a member of and which are
+     * contained within this organisation.
+     *
+     * For each such group build a list of all the extra fields specified for
+     * that group
+     *
+     * If a user is a member of multiple groups which have fields of the same
+     * name, any required field will have preference over any non-required
+     * field. But there is no other ordering or preferece.
+     *
+     * @return
+     */
+    public List<ExtraField> getExtraFields() {
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+        Organisation thisOrg = getOrganisation();
+        Set<String> fieldNames = new HashSet<>();
+        List<ExtraField> list = new ArrayList<>();
+        if (p.getMemberships() != null) {
+            for (GroupMembership gm : p.getMemberships()) {
+                if (gm.getWithinOrg().isWithin(thisOrg)) {
+                    NvSet fieldset = gm.getGroupEntity().getFieldset();
+                    if (fieldset != null) {
+                        for (NvPair nvp : fieldset.getNvPairs()) {
+                            System.out.println("field: " + nvp.getPropValue());
+                            ExtraField field = ExtraField.parse(nvp.getName(), nvp.getPropValue());
+                            if (!fieldNames.contains(field.getName()) || field.isRequired()) {
+                                fieldNames.add(nvp.getName());
+                                list.add(ExtraField.parse(nvp.getName(), nvp.getPropValue()));
+                            }
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        return list;
+    }
+
+    private void storeExtraFields(Map<String, String> parameters, Profile p, Session session) {
+        Date now = _(CurrentDateService.class).getNow();
+        Organisation thisOrg = getOrganisation();
+        if (p.getMemberships() != null) {
+            for (GroupMembership gm : p.getMemberships()) {
+                if (gm.getWithinOrg().isWithin(thisOrg)) {
+                    // Create a new fieldset, then we will compare it with the old one and only
+                    // save it if it is different (ie dirty)
+                    NvSet oldFieldset = gm.getFields();
+                    NvSet newFieldset = NvSet.create(oldFieldset);
+
+                    for (NvPair nvpMeta : gm.getGroupEntity().getFieldMetaData()) {
+                        String val;
+                        if (parameters.containsKey(nvpMeta.getName())) {
+                            ExtraField field = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
+                            val = WebUtils.getParam(parameters, field.getName());                            
+                        } else {
+                            val = oldFieldset.get(nvpMeta.getName());                            
+                        }
+                        newFieldset.addPair(nvpMeta.getName(), val);
+                    }
+                    if (newFieldset.isDirty(oldFieldset)) {
+                        gm.setFields(newFieldset);
+                        gm.setModifiedDate(now);
+                        session.save(newFieldset);
+                        for( NvPair nvp : newFieldset.getNvPairs()) {
+                            session.save(nvp);
+                        }
+                        session.save(gm);
+                        session.flush();
+                    }
+                }
+            }
+        }
     }
 
     public class ProfilePicResource implements GetableResource, DigestResource {

@@ -15,6 +15,9 @@
 package io.milton.vfs.db;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.*;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
@@ -89,5 +92,5 @@ public class NvPair implements Serializable{
         session.delete(this);
     }
     
-    
+
 }

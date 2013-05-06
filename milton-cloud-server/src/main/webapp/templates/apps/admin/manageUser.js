@@ -251,11 +251,12 @@ function initNewUserForm() {
 }
 
 function initOrgSearch() {
-    $("#orgId").on("focus click", function() {
+    log("initOrgSearch");
+    $("#orgTitle").on("focus click", function() {
         $("#orgSearchResults").show();
         log("show", $("#orgSearchResults")  );
     });
-    $("#orgId").keyup(function () {
+    $("#orgTitle").keyup(function () {
         typewatch(function () {
             log("do search");
             doOrgSearch();
@@ -267,6 +268,7 @@ function initOrgSearch() {
         e.stopPropagation();        
         var orgLink = $(e.target);
         $("#orgId").val(orgLink.attr("href"));
+        $("#orgTitle").val(orgLink.text());
         $("#orgSearchResults").hide();
     });
 }

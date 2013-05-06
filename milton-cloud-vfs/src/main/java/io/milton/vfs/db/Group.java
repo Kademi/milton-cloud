@@ -20,8 +20,10 @@ import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -370,5 +372,23 @@ public class Group implements Serializable, VfsAcceptor {
     @Transient
     public long getNumMembers() {
         return GroupMembership.count(this, SessionManager.session());
+    }
+    
+    /**
+     * Null-safe alias for getFieldset().getNvPairs();
+     * 
+     * @return 
+     */
+    @Transient
+    public Set<NvPair> getFieldMetaData() {
+        if( getFieldset() == null ) {
+            return Collections.EMPTY_SET;
+        } else {
+            if( getFieldset().getNvPairs() == null ) {
+                return Collections.EMPTY_SET;
+            } else {
+                return getFieldset().getNvPairs();
+            }
+        }
     }
 }

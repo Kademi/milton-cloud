@@ -12,8 +12,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.signup;
+package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.ExtraField;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
