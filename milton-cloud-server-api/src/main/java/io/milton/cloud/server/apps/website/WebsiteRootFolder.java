@@ -25,6 +25,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import java.util.*;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.user.UserApp;
+import io.milton.cloud.server.manager.CommentService;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.resource.GetableResource;
@@ -32,12 +33,16 @@ import io.milton.resource.PropFindableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 
-import static io.milton.context.RequestContext._;
-import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.resource.PostableResource;
+import io.milton.property.BeanProperty;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static io.milton.context.RequestContext._;
+import io.milton.property.BeanPropertyResource;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Represents the root of a website. A "website" in this context is a product,
@@ -60,6 +65,7 @@ import java.io.OutputStream;
  *
  * @author brad
  */
+@BeanPropertyResource(value = "milton")
 public class WebsiteRootFolder extends BranchFolder implements RootFolder, CommonCollectionResource, GetableResource, PropFindableResource, WebsiteResource {
 
     private final ApplicationManager applicationManager;
@@ -82,7 +88,7 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
             super.renderPage(out, params);
         }
     }    
-    
+        
     @Override
     public String getName() {
         return "";
@@ -102,7 +108,7 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     
     @Override
     public boolean authorise(Request request, Request.Method method, Auth auth) {
-        if (method.equals(Method.PROPFIND)) { // force login for webdav browsing
+        if (request.getMethod().equals(Method.PROPFIND)) { // force login for webdav browsing
             return _(SpliffySecurityManager.class).getCurrentUser() != null;
         }
         return super.authorise(request, method, auth);
@@ -186,4 +192,39 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
     public String getThemeName() {
         return branch.getPublicTheme();
     }
+    
+
+    public List<CommentBean> getComments() {
+        return _(CommentService.class).comments(this);
+    }
+
+    public int getNumComments() {
+        List<CommentBean> list = getComments();
+        if (list == null) {
+            return 0;
+        } else {
+            return list.size();
+        }
+    }
+
+    public void setNewComment(String s) throws NotAuthorizedException {
+        RootFolder rootFolder = WebUtils.findRootFolder(this);
+        if (rootFolder instanceof WebsiteRootFolder) {
+            WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+            Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
+            Transaction tx = SessionManager.beginTx();
+            _(CommentService.class).newComment(this, s, wrf.getWebsite(), currentUser, SessionManager.session()); 
+            tx.commit();
+        }
+    }
+
+    /**
+     * This is just here to make newComment a bean property
+     *
+     * @return
+     */
+    @BeanProperty(writeRole = Priviledge.READ)
+    public String getNewComment() {
+        return null;
+    }    
 }

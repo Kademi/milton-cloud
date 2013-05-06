@@ -60,15 +60,14 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     public static final String ROLE_FORUM_VIEWER = "Forums viewer";
     public static final String ROLE_FORUM_USER = "Forums user";
-    
+
     public static String toHref(ForumPost r) {
         Forum forum = r.getForum();
         String path = "/community/" + forum.getName() + "/" + r.getName();
         return path;
     }
-
     private Date modDate = new Date();
-    
+
     @Override
     public String getInstanceId() {
         return "forums";
@@ -79,34 +78,35 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         return "Forums, topics and questions";
     }
 
-    
-    
     @Override
     public String getSummary(Organisation organisation, Branch websiteBranch) {
         return "Provides forums for end users to ask questions and answer them, and gives administrators functions to manage them";
     }
-    
-    
 
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
-        resourceFactory.getSecurityManager().add(new ForumViewerRole() );
+        resourceFactory.getSecurityManager().add(new ForumViewerRole());
         resourceFactory.getSecurityManager().add(new ForumUserRole());
-        
+
     }
 
     @Override
     public Resource getPage(Resource parent, String requestedName) {
-        if (parent instanceof WebsiteRootFolder) {
-            if (requestedName.equals("_postSearch")) {                
-                WebsiteRootFolder wrf = (WebsiteRootFolder) parent;
-                return new PostSearchResource(requestedName, wrf.getWebsite(), wrf);
+        if (requestedName.equals("_postSearch")) {
+            if (parent instanceof CommonCollectionResource) {
+                CommonCollectionResource col = (CommonCollectionResource) parent;
+                RootFolder rf = WebUtils.findRootFolder(parent);
+                if (rf instanceof WebsiteRootFolder) {
+                    WebsiteRootFolder wrf = (WebsiteRootFolder) rf;
+                    return new PostSearchResource(requestedName, wrf.getWebsite(), col);
+                }
             }
-        } else if( parent instanceof OrganisationFolder) {
+        }
+        if (parent instanceof OrganisationFolder) {
             OrganisationFolder orgFolder = (OrganisationFolder) parent;
-            if( requestedName.equals("managePosts")) {
+            if (requestedName.equals("managePosts")) {
                 return new ManagePostsPage(requestedName, orgFolder.getOrganisation(), orgFolder);
-            } else if( requestedName.equals("_postSearch")) {
+            } else if (requestedName.equals("_postSearch")) {
                 return new PostSearchResource(requestedName, orgFolder.getOrganisation(), orgFolder);
             }
         }
@@ -127,8 +127,8 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     @Override
     public void appendMenu(MenuItem parent) {
-        if( _(SpliffySecurityManager.class).getCurrentUser() == null  ) {
-            return ;
+        if (_(SpliffySecurityManager.class).getCurrentUser() == null) {
+            return;
         }
         switch (parent.getId()) {
             case "menuRoot":
@@ -136,7 +136,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
                     WebsiteRootFolder wrf = (WebsiteRootFolder) parent.getRootFolder();
                     Website website = wrf.getWebsite();
                     List<Forum> forums = Forum.findByWebsite(website, SessionManager.session());
-                    if( !forums.isEmpty()) {
+                    if (!forums.isEmpty()) {
                         parent.getOrCreate("menuCommunity", "Community", "/community").setOrdering(40);
                     }
                 } else {
@@ -175,13 +175,13 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, Context context, Writer writer) throws IOException {
         if (portletSection.equals("dashboardSecondary")) {
             _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
-        } else if( portletSection.equals("adminDashboardSecondary")) {
-            if( rootFolder instanceof OrganisationRootFolder && currentUser != null ) {
+        } else if (portletSection.equals("adminDashboardSecondary")) {
+            if (rootFolder instanceof OrganisationRootFolder && currentUser != null) {
                 _(TextTemplater.class).writePage("forums/recentPostsPortlet.html", currentUser, rootFolder, context, writer);
             }
         }
     }
-    
+
     public class ForumUserRole implements Role {
 
         @Override
@@ -191,23 +191,23 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
-            if( resource instanceof IForumResource ) {
+            if (resource instanceof IForumResource) {
                 IForumResource acr = (IForumResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
-            }            
+            }
             return false;
         }
 
         @Override
-        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {            
+        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE_CONTENT);
         }
-        
+
         @Override
         public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
-            if( resource instanceof CommonRepositoryResource ) {
+            if (resource instanceof CommonRepositoryResource) {
                 CommonRepositoryResource cr = (CommonRepositoryResource) resource;
-                return ( cr.getRepository() == applicableRepo );                                    
+                return (cr.getRepository() == applicableRepo);
             } else {
                 return false;
             }
@@ -216,9 +216,9 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         @Override
         public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE_CONTENT);
-        }        
-    }    
-    
+        }
+    }
+
     public class ForumViewerRole implements Role {
 
         @Override
@@ -228,23 +228,23 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
         @Override
         public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
-            if( resource instanceof IForumResource ) {
+            if (resource instanceof IForumResource) {
                 IForumResource acr = (IForumResource) resource;
                 return acr.getOrganisation().isWithin(withinOrg);
-            }            
+            }
             return false;
         }
 
         @Override
-        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {            
+        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ);
         }
 
         @Override
         public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
-            if( resource instanceof CommonRepositoryResource ) {
+            if (resource instanceof CommonRepositoryResource) {
                 CommonRepositoryResource cr = (CommonRepositoryResource) resource;
-                return ( cr.getRepository() == applicableRepo );                                    
+                return (cr.getRepository() == applicableRepo);
             } else {
                 return false;
             }
@@ -254,7 +254,5 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
         public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
             return AclUtils.asSet(AccessControlledResource.Priviledge.READ);
         }
-        
-        
-    }       
+    }
 }

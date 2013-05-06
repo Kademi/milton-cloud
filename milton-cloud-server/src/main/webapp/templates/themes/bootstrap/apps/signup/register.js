@@ -75,9 +75,6 @@ function initRegisterForms(afterRegisterHref, callback) {
         });
     }
     function showPendingMessage() {
-        jQuery.tinybox.show($("#pending"), {
-            overlayClose: false,
-            opacity: 0
-        });
+        showModal($("#pending"));
     }
 }

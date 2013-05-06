@@ -14,10 +14,13 @@
  */
 package io.milton.cloud.server.apps.forums;
 
+import io.milton.cloud.server.db.Comment;
 import io.milton.cloud.server.db.Post;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ContentDirectoryResource;
 import io.milton.cloud.server.web.JsonWriter;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.Request;
@@ -47,6 +50,7 @@ import org.slf4j.LoggerFactory;
 public class PostSearchResource extends AbstractResource implements GetableResource {
 
     private static final Logger log = LoggerFactory.getLogger(PostSearchResource.class);
+    public static final int DEFAULT_MAX = 100;
     private final String name;
     private final CommonCollectionResource parent;
     private final Website website;
@@ -71,10 +75,26 @@ public class PostSearchResource extends AbstractResource implements GetableResou
         JsonWriter jsonWriter = new JsonWriter();
         List<PostBean> beans = new ArrayList<>();
         List<Post> posts;
+        int limit = DEFAULT_MAX;
+        Integer iLimit = null;
+        try {
+            iLimit = WebUtils.getParamAsInteger(params, "limit");
+            if (iLimit != null) {
+                limit = iLimit.intValue();
+            }
+        } catch (Exception e) {
+            log.warn("Couldnt parse limit parameter, using default", e);
+        }
         if (website != null) {
-            posts = Post.findByWebsite(website, 100, SessionManager.session());
+            if (parent instanceof ContentDirectoryResource) {
+                ContentDirectoryResource cdr = (ContentDirectoryResource) parent;
+                String href = cdr.getHref();
+                posts = Comment.findByWebsitePath(website, href, limit, SessionManager.session());
+            } else {
+                posts = Post.findByWebsite(website, limit, SessionManager.session());
+            }
         } else {
-            posts = Post.findByOrg(org, 100, SessionManager.session());            
+            posts = Post.findByOrg(org, limit, SessionManager.session());
         }
         for (Post p : posts) {
             PostBean b = PostBean.toBean(p);

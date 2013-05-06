@@ -225,7 +225,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         }
     }
 
-    private void doUpload(FileItem file, Boolean insertMode, Session session) throws IOException {        
+    private void doUpload(FileItem file, Boolean insertMode, Session session) throws IOException {
         log.info("doUpload: " + insertMode);
         InputStream in = null;
         try {
@@ -258,12 +258,17 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
                     long tm = System.currentTimeMillis();
-                    doProcess(rootOrg, lineList, line, allowInserts, session);
-                    tm = System.currentTimeMillis() - tm;
-                    session.flush();
-                    log.info("  fromCsv: line processed in " + tm + "ms");
-                    if (line % 20 == 0) {
-                        log.info("Clear session");                        
+                    try {
+                        doProcess(rootOrg, lineList, line, allowInserts, session);
+                        tm = System.currentTimeMillis() - tm;
+                        session.flush();
+                        log.info("  fromCsv: line processed in " + tm + "ms");
+                    } catch (Exception e) {
+                        log.error("Exception processing line: " + line, e);
+                        rootOrg = null;
+                    }
+                    if (line % 20 == 0 || rootOrg == null) {
+                        log.info("Clear session");
                         session.clear();
                         rootOrg = Organisation.get(rootOrgId, session);
                     }
@@ -418,12 +423,12 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
     }
 
     private PasswordManager passwordManager() {
-        if( passwordManager == null ) {
+        if (passwordManager == null) {
             passwordManager = _(PasswordManager.class);
         }
         return passwordManager;
     }
-    
+
     private List<String> buildLineOfValues(GroupMembership m) {
         List<String> values = new ArrayList<>();
 
@@ -465,7 +470,5 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         public int getNumInserted() {
             return numInserted;
         }
-        
-        
     }
 }

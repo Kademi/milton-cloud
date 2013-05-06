@@ -37,36 +37,34 @@ import org.hibernate.criterion.Restrictions;
 @DiscriminatorValue("P")
 @Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public abstract class Post implements Serializable{
-    
+public abstract class Post implements Serializable {
+
     public static List<Post> findByWebsite(Website website, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("website", website));
         crit.addOrder(Order.desc("postDate"));
-        if( limit != null ) {
+        if (limit != null) {
             crit.setMaxResults(limit);
         }
         List<Post> list = DbUtils.toList(crit, Post.class);
         return list;
-    }    
-         
-    
+    }
+
     public static List<Post> findByOrg(Organisation org, Integer limit, Session session) {
         Criteria crit = session.createCriteria(Post.class);
         crit.setCacheable(true);
         Criteria critWebsite = crit.createAlias("website", "w");
         critWebsite.add(Restrictions.eq("w.organisation", org));
         crit.addOrder(Order.desc("postDate"));
-        if( limit != null ) {
+        if (limit != null) {
             crit.setMaxResults(limit);
-        }        
+        }
         List<Post> list = DbUtils.toList(crit, Post.class);
         return list;
-    }       
-    
+    }
+
     public abstract void delete(Session session);
-    
     private long id;
     private Website website;
     private Profile poster;
@@ -74,7 +72,7 @@ public abstract class Post implements Serializable{
     private String notes;
 
     @Id
-    @GeneratedValue    
+    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -84,11 +82,12 @@ public abstract class Post implements Serializable{
     }
 
     /**
-     * Provides fast, de-normalised access to lookup all posts for a given website
-     * 
-     * @return 
+     * Provides fast, de-normalised access to lookup all posts for a given
+     * website
+     *
+     * @return
      */
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Website getWebsite() {
         return website;
     }
@@ -96,10 +95,8 @@ public abstract class Post implements Serializable{
     public void setWebsite(Website website) {
         this.website = website;
     }
-        
 
-
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Profile getPoster() {
         return poster;
     }
@@ -108,9 +105,8 @@ public abstract class Post implements Serializable{
         this.poster = poster;
     }
 
-
-    @Column(nullable=false)
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)    
+    @Column(nullable = false)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getPostDate() {
         return postDate;
     }
@@ -119,7 +115,7 @@ public abstract class Post implements Serializable{
         this.postDate = postDate;
     }
 
-    @Column(nullable=true, length=2048)
+    @Column(nullable = true, length = 2048)
     public String getNotes() {
         return notes;
     }
@@ -131,6 +127,4 @@ public abstract class Post implements Serializable{
     public void accept(PostVisitor visitor) {
         // do nothing, will be overridden
     }
-
-    
 }

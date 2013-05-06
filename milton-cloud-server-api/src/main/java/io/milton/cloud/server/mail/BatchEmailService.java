@@ -122,11 +122,17 @@ public class BatchEmailService {
     }
 
     public void sendSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
-        String from = j.getOrganisation().getOrgId() + "@" + _(CurrentRootFolderService.class).getPrimaryDomain();
-        String replyTo = j.getFromAddress();
-        if (replyTo == null) {
-            replyTo = from;
+        String from = j.getFromAddress();
+        if( from == null ) {
+            from = "@" + _(CurrentRootFolderService.class).getPrimaryDomain();
+            if( j.getOrganisation().getAdminDomain() != null ) {
+                from = j.getOrganisation().getAdminDomain() + from;
+            } else {
+                from = "noreply" + from;
+            }
         }
+        
+        String replyTo = from;
         Date now = _(CurrentDateService.class).getNow();
         EmailItem i = new EmailItem();
         i.setCreatedDate(now);

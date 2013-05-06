@@ -20,6 +20,7 @@ import io.milton.cloud.server.db.ForumPost;
 import io.milton.cloud.server.db.ForumReply;
 import io.milton.cloud.server.web.AbstractContentResource;
 import io.milton.cloud.server.web.CommentBean;
+import io.milton.cloud.server.web.ContentResource;
 import io.milton.cloud.server.web.ProfileBean;
 import io.milton.common.Path;
 import io.milton.vfs.db.Organisation;
@@ -28,11 +29,8 @@ import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.hibernate.Session;
 
 import org.owasp.validator.html.*;
@@ -55,7 +53,7 @@ public class CommentService {
         return forumPost.addComment(newComment, currentUser, currentDateService.getNow(), session);
     }
 
-    public List<CommentBean> comments(AbstractContentResource r) {
+    public List<CommentBean> comments(ContentResource r) {
         String contentId = getContentId(r);
         List<Comment> comments = Comment.findByContentId(contentId, SessionManager.session());
         List<CommentBean> beans = new ArrayList<>();
@@ -66,7 +64,7 @@ public class CommentService {
         return beans;
     }
 
-    public Comment newComment(AbstractContentResource r, String userComment, Website website, Profile poster, Session session) {
+    public Comment newComment(ContentResource r, String userComment, Website website, Profile poster, Session session) {
         String contentId = getContentId(r);
         if (contentId == null) {
             throw new RuntimeException("No contentid for: " + r.getPath());
@@ -75,6 +73,16 @@ public class CommentService {
 
 
         String title = r.getTitle();
+        if( title == null || title.trim().length() == 0 ) {
+            title = r.getName();
+            if( title == null || title.trim().length() == 0 ) {
+                title = website.getDomainName();
+                if( title == null ) {
+                    title = website.getName();
+                }
+            }
+        }
+        
 
         Comment c = new Comment();
         c.setContentId(contentId);
@@ -113,7 +121,7 @@ public class CommentService {
         }
     }
 
-    public String getContentId(AbstractContentResource r) {
+    public String getContentId(ContentResource r) {
         Path p = r.getPath();
         Organisation org = r.getOrganisation();
         return org.getOrgId() + ":" + p;

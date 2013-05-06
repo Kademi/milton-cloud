@@ -21,6 +21,7 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.GroupMembershipApplication;
 import io.milton.cloud.server.db.OptIn;
+import io.milton.cloud.server.db.OptInLog;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.*;
@@ -59,6 +60,7 @@ import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.NvPair;
 import io.milton.vfs.db.NvSet;
 import io.milton.vfs.db.OrgType;
+import io.milton.vfs.db.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -92,11 +94,11 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             jsonResult.write(out);
         } else {
             log.info("sendContent: render page");
-            
+
             String q = params.get("q");
-            if( q == null ) {
+            if (q == null) {
                 q = params.get("jsonQuery");
-                if( q != null  ) {
+                if (q != null) {
                     useJson = true;
                 }
             }
@@ -107,15 +109,17 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 }
                 OrgType regoOrgType = parent.getGroup().getRegoOrgType();
                 searchResults = Organisation.search(q, rootSearchOrg, regoOrgType, SessionManager.session()); // find the given user in this organisation 
-                
+
             }
 
-            if( useJson ) {
+            if (useJson) {
                 jsonResult = new JsonResult(true);
                 List<OrgData> orgs = new ArrayList<>();
-                for( Organisation org : searchResults) {
-                    OrgData d = new OrgData(org);
-                    orgs.add(d);
+                if (searchResults != null) {
+                    for (Organisation org : searchResults) {
+                        OrgData d = new OrgData(org);
+                        orgs.add(d);
+                    }
                 }
                 jsonResult.setData(orgs);
                 jsonResult.write(out);
@@ -124,7 +128,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
         }
     }
-    
+
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processForm");
@@ -145,13 +149,13 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 }
             }
 
-            String password = parameters.get("password");            
+            String password = parameters.get("password");
             parameters.remove("password");
-            if (password == null || password.length() == 0  ) {
+            if (password == null || password.length() == 0) {
                 jsonResult = JsonResult.fieldError("password", "No password was given");
                 return null;
             }
-            if( password.length() != password.trim().length()) {
+            if (password.length() != password.trim().length()) {
                 jsonResult = JsonResult.fieldError("password", "The given password begins or ends with spaces. Please ensure there are no spaces at the beginning or end of your password");
                 return null;
             }
@@ -160,18 +164,18 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             Group group = parent.getGroup();
             NvSet fieldset = group.getFieldset();
             List<ExtraField> extraFields = new ArrayList<>();
-            if( fieldset != null && !fieldset.isEmpty()) {
-                for( NvPair nvp : fieldset.getNvPairs()) {
+            if (fieldset != null && !fieldset.isEmpty()) {
+                for (NvPair nvp : fieldset.getNvPairs()) {
                     ExtraField f = ExtraField.parse(nvp.getName(), nvp.getPropValue());
                     extraFields.add(f);
-                    if( f.isRequired() ) {
+                    if (f.isRequired()) {
                         String s = WebUtils.getParam(parameters, f.getName());
-                        if( s == null ) {
+                        if (s == null) {
                             jsonResult = JsonResult.fieldError(f.getName(), "No value was provided");
                             return null;
                         } else {
-                            if( f.getOptions() != null && !f.getOptions().isEmpty()) {
-                                if( !f.getOptions().contains(s)) {
+                            if (f.getOptions() != null && !f.getOptions().isEmpty()) {
+                                if (!f.getOptions().contains(s)) {
                                     jsonResult = JsonResult.fieldError(f.getName(), "Please select a valid option");
                                     return null;
                                 }
@@ -180,7 +184,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                     }
                 }
             }
-            
+
             // Check if the email is already taken. If so, and if the given password matches,
             // then we assume this is an existing Fuse user who is signing up for another
             // group or site
@@ -209,7 +213,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                         nickName = null;
                     }
                 }
-                if( nickName == null ) {
+                if (nickName == null) {
                     nickName = WebUtils.getParam(parameters, "firstName");
                 }
 
@@ -219,29 +223,38 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                         jsonResult = JsonResult.fieldError("nickName", "Please enter a name or nick name");
                         return null;
                     }
-                    newName = Profile.findUniqueName(nickName, session);
+                    newName = DbUtils.replaceYuckyChars(nickName);
+                } else {
+                    newName = DbUtils.replaceYuckyChars(newName);
                 }
+                newName = Profile.findUniqueName(newName, session);
 
                 p.setName(newName);
                 p.setNickName(nickName);
                 p.setEmail(email);
                 p.setCreatedDate(new Date());
                 p.setModifiedDate(new Date());
-                
+
                 // optional
                 String phone = WebUtils.getParam(parameters, "phone");
                 p.setPhone(phone);
                 p.setFirstName(WebUtils.getParam(parameters, "firstName"));
                 p.setSurName(WebUtils.getParam(parameters, "surName"));
-                
+
                 session.save(p);
                 _(SpliffySecurityManager.class).getPasswordManager().setPassword(p, password);
             }
-            
+
             // All good so far, lets store the extra fields (if any given) and then associate
             // the fieldset with the membership or application
             NvSet fields = storeExtraFields(extraFields, parameters, session);
-            
+
+            String sourceIp = "unknown";
+            if (HttpManager.request() != null) {
+                sourceIp = HttpManager.request().getFromAddress();
+            }
+
+
             String result;
             WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
             if (!Group.REGO_MODE_OPEN.equals(group.getRegistrationMode())) {
@@ -257,6 +270,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 gma.setWithinOrg(org);
                 gma.setFields(fields);
                 session.save(gma);
+                OptInLog.create(p, sourceIp, group, OptInLog.REGISTERED, session);
                 result = "pending";
             } else {
                 // add directly to group
@@ -267,6 +281,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 _(SignupApp.class).onNewMembership(p.membership(group), wrf);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
                 result = "created";
+                OptInLog.create(p, sourceIp, group, OptInLog.REGISTERED, session);
             }
 
             // Now process any opt-ins
@@ -279,6 +294,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                         OptIn o = OptIn.findOptin(optins, optInGroup);
                         if (o != null) {
                             p.addToGroup(optInGroup, org, session);
+                            OptInLog.create(p, sourceIp, optInGroup, OptInLog.SELECT_OPTION, session);
                             _(SignupApp.class).onNewMembership(p.membership(optInGroup), wrf);
                             SignupLog.logSignup(wrf.getWebsite(), p, org, optInGroup, SessionManager.session());
                         }
@@ -309,10 +325,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public String getContentType(String accepts) {
         Request req = HttpManager.request();
         boolean isJsonQuery = false;
-        if( req != null && req.getParams() != null && req.getParams().containsKey("jsonQuery") ) {
+        if (req != null && req.getParams() != null && req.getParams().containsKey("jsonQuery")) {
             isJsonQuery = true;
         }
-        if (jsonResult != null || isJsonQuery ) {
+        if (jsonResult != null || isJsonQuery) {
             return "application/x-javascript; charset=utf-8";
         }
         return "text/html";
@@ -372,7 +388,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public boolean isPublic() {
         return true;
     }
-    
+
     public Group getGroup() {
         return parent.getGroup();
     }
@@ -410,30 +426,30 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
     public String getTitle() {
         return "Register: " + parent.getName();
     }
-    
+
     public List<ExtraField> getExtraFields() {
         NvSet fieldset = getGroup().getFieldset();
-        if( fieldset == null || fieldset.isEmpty() ) {
+        if (fieldset == null || fieldset.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         List<ExtraField> list = new ArrayList<>();
-        for( NvPair nvp : fieldset.getNvPairs()) {
-            list.add( ExtraField.parse(nvp.getName(), nvp.getPropValue()));
+        for (NvPair nvp : fieldset.getNvPairs()) {
+            list.add(ExtraField.parse(nvp.getName(), nvp.getPropValue()));
         }
         return list;
     }
 
     private NvSet storeExtraFields(List<ExtraField> extraFields, Map<String, String> parameters, Session session) {
-        if( extraFields == null || extraFields.isEmpty()) {
+        if (extraFields == null || extraFields.isEmpty()) {
             return null;
         }
         Date now = _(CurrentDateService.class).getNow();
         NvSet fields = new NvSet();
         fields.setCreatedDate(now);
         session.save(fields);
-        for( ExtraField f : extraFields) {
+        for (ExtraField f : extraFields) {
             String val = WebUtils.getParam(parameters, f.getName());
-            if( val != null ) {
+            if (val != null) {
                 NvPair nvp = fields.addPair(f.getName(), val);
                 session.save(nvp);
             }

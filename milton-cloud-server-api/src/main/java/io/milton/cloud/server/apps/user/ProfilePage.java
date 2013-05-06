@@ -17,14 +17,19 @@
 package io.milton.cloud.server.apps.user;
 
 import io.milton.cloud.server.DataSessionManager;
+import io.milton.cloud.server.db.OptIn;
+import io.milton.cloud.server.db.OptInLog;
+import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.NodeChildUtils;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.alt.AltFormatGenerator;
 import io.milton.cloud.server.web.templating.DataBinder;
+import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -36,8 +41,8 @@ import java.util.Map;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
@@ -51,13 +56,20 @@ import io.milton.vfs.data.DataSession;
 import io.milton.vfs.data.DataSession.DirectoryNode;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Repository;
+import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.Combiner;
 import org.hashsplit4j.api.Fanout;
@@ -76,6 +88,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
     public static final String PICS_REPO_NAME = "ProfilePics";
     public static final long MAX_SIZE = 10000000l;
     private JsonResult jsonResult;
+    private Set<OptIn> optIns;
 
     public ProfilePage(String name, CommonCollectionResource parent) {
         super(name, parent, "user/profile", "Profile");
@@ -86,7 +99,19 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        if (parameters.containsKey("nickName")) {
+        if (parameters.containsKey("enableOptin")) {
+            boolean enableOptin = WebUtils.getParamAsBool(parameters, "enableOptin");
+            String optinGroupName = WebUtils.getParam(parameters, "group");
+            setOptin(enableOptin, optinGroupName, session);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Set optin: " + optinGroupName + " = " + enableOptin);
+
+        } else if (parameters.containsKey("removeMembership")) {
+            int membershipId = WebUtils.getParamAsInteger(parameters, "removeMembership");
+            removeMembership(membershipId, session);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Deleted membership");
+        } else if (parameters.containsKey("nickName")) {
             try {
                 String oldEmail = p.getEmail();
                 String newEmail = parameters.get("email");
@@ -145,7 +170,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
         HashStore hashStore = _(HashStore.class);
         BlobStore blobStore = _(BlobStore.class);
-        
+
         DataSession dataSession = _(DataSessionManager.class).get(b);
         DirectoryNode dir = dataSession.getRootDataNode();
 
@@ -212,6 +237,93 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
         return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Get all GroupMembership objects for the current user, which are NOT
+     * Opt-in groups. Opt-ins are managed seperately from groups
+     *
+     * @return
+     */
+    public List<GroupMembership> getMemberships() {
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+        Organisation thisOrg = getOrganisation();
+        List<GroupMembership> list = new ArrayList<>();
+        Set<Group> optinGroups = new HashSet<>();
+        for (OptIn optin : getOptins()) {
+            optinGroups.add(optin.getOptinGroup());
+        }
+        if (p.getMemberships() != null) {
+            for (GroupMembership gm : p.getMemberships()) {
+                if (gm.getWithinOrg().isWithin(thisOrg)) {
+                    // if user has a membership to an optin group we should not show this as a normal membership
+                    if (!optinGroups.contains(gm.getGroupEntity())) {
+                        list.add(gm);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    public Set<OptIn> getOptins() {
+        if (optIns == null) {
+            optIns = new HashSet<>();
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            Organisation thisOrg = getOrganisation();
+            if (p.getMemberships() != null) {
+                for (GroupMembership gm : p.getMemberships()) {
+                    if (gm.getWithinOrg().isWithin(thisOrg)) {
+                        for (OptIn optin : OptIn.findForGroup(gm.getGroupEntity(), SessionManager.session())) {
+                            optIns.add(optin);
+                        }
+                    }
+                }
+            }
+        }
+        return optIns;
+    }
+
+    private void removeMembership(int membershipId, Session session) {
+        GroupMembership found = null;
+        for (GroupMembership gm : getMemberships()) {
+            if (gm.getId() == membershipId) {
+                found = gm;
+                break;
+            }
+        }
+        if (found != null) {
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            p.removeMembership(found.getGroupEntity(), session);
+        }
+    }
+
+    private void setOptin(boolean enableOptin, String optinGroupName, Session session) {
+        Group foundGroup = null;
+        for (OptIn optin : getOptins()) {
+            if (optin.getOptinGroup().getName().equals(optinGroupName)) {
+                foundGroup = optin.getOptinGroup();;
+                break;
+            }
+        }
+        if (foundGroup != null) {
+            Organisation thisOrg = getOrganisation();
+            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            if (enableOptin) {
+                p.addToGroup(foundGroup, thisOrg, session);
+                String sourceIp = "unknown";
+                if (HttpManager.request() != null) {
+                    sourceIp = HttpManager.request().getFromAddress();
+                }
+                OptInLog.create(p, sourceIp, foundGroup, sourceIp, session);
+
+                Website w = WebUtils.getWebsite(this);
+                SignupLog.logSignup(w, p, thisOrg, foundGroup, SessionManager.session());
+            } else {
+                p.removeMembership(foundGroup, session);
+            }
+        }
+
     }
 
     public class ProfilePicResource implements GetableResource, DigestResource {

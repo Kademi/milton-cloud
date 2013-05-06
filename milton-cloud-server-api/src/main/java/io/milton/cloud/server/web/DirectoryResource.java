@@ -186,7 +186,6 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        System.out.println("sendContent");
         if (params.containsKey("importStatus")) {
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
             if (p != null) {

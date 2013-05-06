@@ -192,14 +192,15 @@ public class AvconvConverter implements Closeable {
                     }
                     scale += ",crop=" + prop.maxWidth + ":" + prop.maxHeight;
                 } else {
-                    if (info.getWidth() > info.getHeight()) {
-                        //if (prop.scaleByHeight()) {
-                        System.out.println("by height, scale to fit");
-                        scale += "scale=-1:" + prop.getContrainedHeight();
-                    } else {
-                        System.out.println("by width, scale to fit");
-                        scale += "scale=" + prop.getConstrainedWidth() + ":-1";
-                    }
+                    scale += "scale=" + prop.getConstrainedWidth() + ":" + prop.getContrainedHeight();
+//                    if (info.getWidth() > info.getHeight()) {
+//                        //if (prop.scaleByHeight()) {
+//                        System.out.println("by height, scale to fit");
+//                        scale += "scale=" + prop.getMaxWidth() + ":" + prop.getContrainedHeight();
+//                    } else {
+//                        System.out.println("by width, scale to fit");
+//                        scale += "scale=" + prop.getConstrainedWidth() + ":" + prop.getMaxHeight();
+//                    }
                 }
             }
 
@@ -299,68 +300,5 @@ public class AvconvConverter implements Closeable {
             }
         }
         return false;
-    }
-
-    /**
-     * Eg: Given an image of these dimensions 2592h x 3888w, and lets say we
-     * want that to fit into a bounding box of 52x52..
-     *
-     * First we determine which is the contrained dimension. In this case the
-     * target ratio (width/height) is 1, and the actual ration is 0.666
-     *
-     * Because the actualRatio is less then targetRation we need to constrain
-     * the width, ie we will set the width to 52 and allow the height to be
-     * whatever maintains the actual ration = 52 x 0.666 = 34.6
-     *
-     * Because avconv/ffmpeg will only scale on the smaller of the dimensions,
-     * we must tell it to scale height to 34.6, and allow it to adjust the width
-     *
-     */
-    private class Proportion {
-
-        double targetRatio;
-        double actualRatio;
-        double maxWidth;
-        double maxHeight;
-        double origHeight;
-        double origWidth;
-
-        public Proportion(double width, double height, double maxWidth, double maxHeight) {
-            targetRatio = maxWidth / maxHeight;
-            actualRatio = width / height;
-            origHeight = height;
-            origWidth = width;
-            this.maxHeight = maxHeight;
-            this.maxWidth = maxWidth;
-        }
-
-        public boolean scaleByHeight() {
-            return actualRatio > targetRatio;
-        }
-
-        public boolean scaleByWidth() {
-            return !scaleByHeight();
-        }
-
-        public double getConstrainedWidth() {
-            if (scaleByHeight()) {
-                return maxWidth;
-            } else {
-                return actualRatio * maxHeight;
-            }
-        }
-
-        public double getContrainedHeight() {
-            if (scaleByWidth()) {
-                return maxHeight;
-            } else {
-                return maxWidth / actualRatio;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "orig " + origHeight + "h x" + origWidth + "w -scaleByHeight=" + scaleByHeight() + " -->> " + getContrainedHeight() + "h x " + getConstrainedWidth() + "w";
-        }
     }
 }

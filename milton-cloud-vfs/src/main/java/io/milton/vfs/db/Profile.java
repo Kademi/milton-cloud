@@ -327,7 +327,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             while (it.hasNext()) {
                 GroupMembership gm = it.next();
                 if (gm.getGroupEntity() == group) {
-                    System.out.println("found a GM to remove from profile: " + getEmail());
                     toRemove.add(gm);
                 }
             }
@@ -351,11 +350,18 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public GroupMembership addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
-        GroupMembership gm = g.getGroupMembership(this, hasGroupInOrg, session);
-        if ( gm != null) {
-            return gm;
+        if (getMemberships() != null) {
+            for (GroupMembership gm : getMemberships()) {
+                if( gm.getGroupEntity().getId() == g.getId()) {
+                    // same group
+                    if( gm.getWithinOrg().getId() == hasGroupInOrg.getId()) {
+                        // and same org, so its a duplicate
+                        return gm;
+                    }
+                }
+            }
         }
-        gm = new GroupMembership();
+        GroupMembership gm = new GroupMembership();
         gm.setCreatedDate(new Date());
         gm.setGroupEntity(g);
         gm.setMember(this);
@@ -374,11 +380,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             setMemberships(new ArrayList<GroupMembership>());
         }
         getMemberships().add(gm);
-        if (g.getGroupMemberships() == null) {
-            g.setGroupMemberships(new ArrayList<GroupMembership>());
-        }
-        g.getGroupMemberships().add(gm);
-
         return gm;
     }
 

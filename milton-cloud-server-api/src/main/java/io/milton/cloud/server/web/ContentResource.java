@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.io.IOException;
  *
  * @author brad
  */
-public interface ContentResource extends CommonRepositoryResource, PersonalResource {
+public interface ContentResource extends CommonRepositoryResource, PersonalResource, TitledPage {
     
     /**
      * Get the "fingerprint" of the current version of this resource
@@ -39,6 +40,11 @@ public interface ContentResource extends CommonRepositoryResource, PersonalResou
      */
     void setHash(String s);
 
+    /**
+     * Get the user who most recently modified this resource
+     * 
+     * @return 
+     */
     Profile getModifiedBy();
     
     /**
@@ -54,4 +60,9 @@ public interface ContentResource extends CommonRepositoryResource, PersonalResou
      */
     Branch getBranch();
         
+    /**
+     *  Get the path to this page. Returns an absolute path, but not a fully 
+     * qualified url
+     */
+    String getHref();
 }

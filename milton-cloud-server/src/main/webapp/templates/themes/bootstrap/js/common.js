@@ -266,6 +266,9 @@ function ValidateForm(){
 
 function getFileName(path) {
     var arr = path.split('/');
+    if( arr.length === 1) {
+        return "";
+    }
     var name = arr[arr.length-1];
     if( name == null || name.length == 0 ) { // might be empty if trailing slash
         name = arr[arr.length-2];

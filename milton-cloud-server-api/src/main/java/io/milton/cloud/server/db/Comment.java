@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +43,20 @@ public class Comment extends Post {
         crit.addOrder(Order.asc("postDate")); // hmm, might need a join or something
         return DbUtils.toList(crit, Comment.class);        
     }
+    
+    public static List<Post> findByWebsitePath(Website website, String baseContentPath, Integer limit, Session session) {
+        Criteria crit = session.createCriteria(Post.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("website", website));
+        crit.add(Restrictions.like("contentHref", baseContentPath + "%"));
+        crit.addOrder(Order.desc("postDate"));
+        if (limit != null) {
+            crit.setMaxResults(limit);
+        }
+        List<Post> list = DbUtils.toList(crit, Post.class);
+        return list;
+    }
+    
     
     private String contentId;
     private String contentHref;

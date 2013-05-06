@@ -1,7 +1,6 @@
 package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 
@@ -11,7 +10,6 @@ import java.util.*;
 import org.hibernate.Transaction;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.manager.PasswordManager;
-import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -35,6 +33,8 @@ import io.milton.http.Request.Method;
 import io.milton.http.values.SupportedCalendarComponentListsSet;
 import io.milton.principal.CalDavPrincipal;
 import io.milton.principal.CardDavPrincipal;
+import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
 
 /**
  *
@@ -325,5 +325,28 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     @Override
     public SupportedCalendarComponentListsSet getSupportedComponentSets() {
         return null;
+    }
+    
+    /**
+     * Check if the user has a membershuip in the organisation currently being
+     * accessed, or a child of it, to a group of the given name
+     * 
+     * @param groupName
+     * @return 
+     */
+    public boolean isInGroup(String groupName) {
+        return getThisUser().isInChildGroup(groupName, getOrganisation());
+    }    
+    
+    public boolean isInGroup(Group group) {
+        return getThisUser().isInChildGroup(group.getName(), getOrganisation());
+    }
+    
+    public List<GroupMembership> getMemberships() {
+        if( getThisProfile().getMemberships() == null ) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return getThisProfile().getMemberships();
+        }
     }
 }

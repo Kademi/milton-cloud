@@ -33,7 +33,7 @@ function reloadFileList() {
 
 function initFiles() {
     log("initFiles");
-    $('a.image').each(function(i, n) {
+    $('.lightbox a.image').each(function(i, n) {
         var href = $(n).attr("href");
         $(n).attr("href", href + "/alt-640-360.png");
     });

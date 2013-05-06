@@ -14,31 +14,17 @@
  */
 package io.milton.cloud.server.apps.journal;
 
-import com.fuselms.apps.learning.ProgramsModel;
-import com.fuselms.db.LearnerProcess;
-import com.fuselms.db.ModuleStatus;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.PortletApplication;
-import io.milton.cloud.server.apps.orgs.OrganisationFolder;
-import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.event.SubscriptionEvent;
-import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
-import io.milton.cloud.server.web.ProfileResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
-import io.milton.cloud.server.web.Utils;
-import io.milton.cloud.server.web.WebUtils;
-import io.milton.cloud.server.web.templating.TextTemplater;
-import static io.milton.context.RequestContext._;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
-import io.milton.http.exceptions.BadRequestException;
-import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.resource.Resource;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupInWebsite;

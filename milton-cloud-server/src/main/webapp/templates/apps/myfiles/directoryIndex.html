@@ -17,13 +17,14 @@
             </button>         
         </div>        
         
-        <div class="input" id='myUploaded' style="width: 100px"></div>        
+        <div class="input" id='myUploaded' style="width: 150px"></div>        
         
         <table id="fileList" class="bar table table-striped vcenter">
             <thead>
                 <tr>
                     <th colspan="2">Files: $page.name</th>
                     <th>Modified</th>
+                    <th>Size</th>
                     <th>Tools</th>
                 </tr>
                 <tr class="seperator">
@@ -34,7 +35,9 @@
                 #foreach($f in $page.subFolders)
                 <tr>
                     <td style="width: 70px">
-                        <a href="$f.href"><img  height="48" width="48" alt="" src="/static/icons/folder.png"/></a>
+                        <a href="$f.href">                            
+                            <img  height="48" width="48" alt="" src="/static/icons/folder.png"/>
+                        </a>
                     </td>
                     <td class="left">
                         <a href="$f.href">$f.name</a>
@@ -46,7 +49,11 @@
                 </tr>
                 #end
                 #foreach($f in $page.files)                
-                <tr class="file">
+                    #set($lightBoxClass = "lightbox")
+                    #if( $f.contentLength < 100000 )
+                        #set($lightBoxClass = "")
+                    #end
+                <tr class="file $lightBoxClass">
                     #set($imgClass = $formatter.ifTrue($f.is("image"), "image", "" ) )
                     <td style="width: 70px">
                         <a href="$f.href" class="$imgClass"><img height="48" width="48" alt="" src="/templates/images/img8.gif"/></a>
@@ -55,6 +62,7 @@
                         <a href="$f.href" class="$imgClass">$f.name</a>
                     </td>
                     <td><abbr title="$formatter.formatDateISO8601($!f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
+                    <td>$f.contentLength</td>
                     <td>
                         <a href="$f.href" class="hidden">hidden</a>
                     </td>

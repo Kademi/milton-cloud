@@ -42,6 +42,18 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class OptInLog {
     
+    /**
+     * User has selected to opt-in via an option on registration
+     */
+    public static String SELECT_OPTION = "SELECT OPTIN OPTION";
+    
+    /**
+     * User opted in by registering
+     */
+    public static String REGISTERED = "REGISTERED";
+    
+    
+    
     public static void create(Profile p, String sourceIp, Group optinGroup, String optinAction, Session session) {
         OptInLog o = new OptInLog();
         o.setCreatedDate(new Date());

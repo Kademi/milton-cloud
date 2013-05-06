@@ -67,7 +67,7 @@
                         <span class="icon-bar"></span>
                     </a>                    
                     <a class="brand" href="/">$!page.closest("website").themeAttributes.logo</a>
-                    <div class="nav-collapse collapse">
+                    <div class="nav-collapse collapse">                        
                         <ul class="nav nav-pills pull-right">
                             #foreach($item in $menu.items)
                             <li class="$formatter.ifTrue($item.active, 'active', '')"><a class="nav-${item.id}" href="$item.href" shape="rect">$item.text</a></li>

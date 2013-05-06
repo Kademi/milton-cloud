@@ -86,6 +86,7 @@
             log("check required user", target, userUrl);
             if (userUrl === null || userUrl === "") {
                 e.preventDefault();
+                e.stopPropagation();
                 showRegisterOrLoginModal(function() {
                     //target.click();
                     //log("going to", target.attr("href"));

@@ -34,3 +34,39 @@ body.profile .fileupload-buttonbar .progress div {
 p.confirm {
     display: none;
 }
+ul.memberships {
+    list-style-type: none;
+    margin: 0;
+}
+ul.memberships li {
+    border-bottom: 1px solid #E5E5E5;    
+    padding: 5px 0 0;    
+    position: relative;    
+}
+ul.memberships li:first {
+    padding: 0;        
+}
+ul.memberships a {
+    position: absolute;
+    right: 0;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+}
+ul.memberships a span {
+    visibility: hidden;
+}
+
+form .ajax-loader {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+form {
+    position: relative;
+}
+form.ajax-processing .ajax-loader {
+    display: block;
+    
+}

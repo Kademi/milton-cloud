@@ -3,7 +3,7 @@
         #set($tableTitle = "Current modules")
     #else    
         #set($tableTitle = "$curCourse.title modules")
-        #set($modules = $curCourse.children.ofType.module)
+        #set($modules = $curCourse.children.ofType.module.sortByField("order"))
     #end
 
     <table class="table">
@@ -46,7 +46,7 @@
                 <td class="first">
                     <img src="${mod.thumb}" alt="" />                                    
                 </td>
-                <td class="title"><a href="$mod.href" class="text1">$mod.title</a></td>
+                <td class="title"><a href="$mod.href" class="text1">$mod.title - $mod.startable - $mod.currentLevel - $mod.level</a></td>
                 <td class="">
                     #if($mod.complete)
                     100%
