@@ -389,7 +389,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @param subordinateTo
      * @param gm
      */
-    private void createSubordinate(Organisation subordinateTo, GroupMembership gm, Session session) {
+    public void createSubordinate(Organisation subordinateTo, GroupMembership gm, Session session) {
         Subordinate s = new Subordinate();
         s.setWithinOrg(subordinateTo);
         s.setGroupMembership(gm);

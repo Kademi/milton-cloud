@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.milton.cloud.server.apps.signup;
+package io.milton.cloud.server.web;
 
 import io.milton.vfs.db.Organisation;
 
@@ -21,6 +21,7 @@ import io.milton.vfs.db.Organisation;
  * @author brad
  */
 public class OrgData {
+    private long id;
     private String orgId;
     private String title;
     private String address;
@@ -29,6 +30,7 @@ public class OrgData {
     private String phone;
 
     public OrgData(Organisation org) {
+        id = org.getId();
         orgId = org.getOrgId();
         title = org.getTitle();
         address = org.getAddress();
@@ -37,6 +39,10 @@ public class OrgData {
         phone = org.getPhone();
     }
 
+    public long getId() {
+        return id;
+    }   
+    
     public String getOrgId() {
         return orgId;
     }

@@ -46,7 +46,7 @@ ul.memberships li {
 ul.memberships li:first {
     padding: 0;        
 }
-ul.memberships a {
+ul.memberships a.membership-remove {
     position: absolute;
     right: 0;
     top: 5px;

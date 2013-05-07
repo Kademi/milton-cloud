@@ -26,11 +26,13 @@ import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ExtraField;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.NodeChildUtils;
+import io.milton.cloud.server.web.OrgData;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.alt.AltFormatGenerator;
 import io.milton.cloud.server.web.templating.DataBinder;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import static io.milton.context.RequestContext._;
 import io.milton.http.FileItem;
 import io.milton.http.exceptions.BadRequestException;
@@ -62,6 +64,7 @@ import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
 import io.milton.vfs.db.NvPair;
 import io.milton.vfs.db.NvSet;
+import io.milton.vfs.db.OrgType;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.Website;
@@ -93,6 +96,8 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
     public static final long MAX_SIZE = 10000000l;
     private JsonResult jsonResult;
     private Set<OptIn> optIns;
+    private List<Organisation> orgSearchResults;
+    private boolean doneOrgSearch;
 
     public ProfilePage(String name, CommonCollectionResource parent) {
         super(name, parent, "user/profile", "Profile");
@@ -103,7 +108,11 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        if (parameters.containsKey("enableOptin")) {
+        if (parameters.containsKey("changeMemberOrg")) {
+            updateMembershipOrg(parameters, session);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Updated membership org");
+        } else if (parameters.containsKey("enableOptin")) {
             boolean enableOptin = WebUtils.getParamAsBool(parameters, "enableOptin");
             String optinGroupName = WebUtils.getParam(parameters, "group");
             setOptin(enableOptin, optinGroupName, session);
@@ -204,11 +213,37 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        System.out.println("contentType: " + contentType);
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
-            super.sendContent(out, range, params, contentType);
+            if (params.containsKey("changeMemberOrg")) {
+                if (contentType.equals("application/json")) {
+                    List<OrgData> orgs = new ArrayList<>();
+
+                    for (Organisation org : getOrgSearchResults()) {
+                        OrgData d = new OrgData(org);
+                        orgs.add(d);
+                    }
+                    jsonResult = new JsonResult(true, "Done org search");
+                    jsonResult.setData(orgs);
+                    jsonResult.write(out);
+
+                } else {
+                    _(HtmlTemplater.class).writePage("user/changeOrg", this, params, out);
+                }
+            } else {
+                super.sendContent(out, range, params, contentType);
+            }
         }
+    }
+
+    @Override
+    public String getContentType(String accepts) {
+        if (accepts.contains("application/json") || accepts.contains("text/javascript")) {
+            return "application/json";
+        }
+        return "text/html";
     }
 
     public Profile getProfile() {
@@ -270,6 +305,15 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             }
         }
         return list;
+    }
+
+    public GroupMembership membership(long id) {
+        for (GroupMembership gm : getMemberships()) {
+            if (gm.getId() == id) {
+                return gm;
+            }
+        }
+        return null;
     }
 
     public Set<OptIn> getOptins() {
@@ -387,9 +431,9 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                         String val;
                         if (parameters.containsKey(nvpMeta.getName())) {
                             ExtraField field = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
-                            val = WebUtils.getParam(parameters, field.getName());                            
+                            val = WebUtils.getParam(parameters, field.getName());
                         } else {
-                            val = oldFieldset.get(nvpMeta.getName());                            
+                            val = oldFieldset.get(nvpMeta.getName());
                         }
                         newFieldset.addPair(nvpMeta.getName(), val);
                     }
@@ -397,7 +441,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                         gm.setFields(newFieldset);
                         gm.setModifiedDate(now);
                         session.save(newFieldset);
-                        for( NvPair nvp : newFieldset.getNvPairs()) {
+                        for (NvPair nvp : newFieldset.getNvPairs()) {
                             session.save(nvp);
                         }
                         session.save(gm);
@@ -405,6 +449,56 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                     }
                 }
             }
+        }
+    }
+
+    public List<Organisation> getOrgSearchResults() {
+        if (orgSearchResults != null) {
+            return orgSearchResults;
+        }
+        Map<String, String> params = HttpManager.request().getParams();
+        String q = WebUtils.getParam(params, "orgSearchQuery");
+        int changeMemberOrgId = WebUtils.getParamAsInteger(params, "changeMemberOrg");
+        GroupMembership membership = membership(changeMemberOrgId);
+        if (q != null && q.length() > 0) {
+            doneOrgSearch = true;
+            Organisation rootSearchOrg = getOrganisation();
+            OrgType regoOrgType = membership.getGroupEntity().getRegoOrgType();
+            orgSearchResults = Organisation.search(q, rootSearchOrg, regoOrgType, SessionManager.session());
+        } else {
+            orgSearchResults = Collections.EMPTY_LIST;
+        }
+        return orgSearchResults;
+    }
+
+    public boolean isDoneOrgSearch() {
+        return doneOrgSearch;
+    }
+    
+    
+
+    private void updateMembershipOrg(Map<String, String> params, Session session) {
+        long changeMemberOrgId = WebUtils.getParamAsLong(params, "changeMemberOrg");
+        long newOrgId = WebUtils.getParamAsLong(params, "orgId");
+        GroupMembership membership = membership(changeMemberOrgId);        
+        
+        if( !membership.getGroupEntity().isOpenGroup() ) {
+            throw new RuntimeException("Can only update membership on an open group");
+        }
+        
+        Organisation newOrg = Organisation.get(newOrgId, session);
+        if( newOrg == null ) {
+            throw new RuntimeException("Could not find organisation with ID=" + newOrgId);
+        }
+        if (newOrg.isWithin(getOrganisation())) {
+                        
+            membership.setWithinOrg(newOrg);
+
+            membership.updateSubordinates(session);
+            
+            session.save(membership);
+        } else {
+            throw new RuntimeException("Invalid organisation: " + newOrgId);
         }
     }
 

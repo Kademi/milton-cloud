@@ -391,4 +391,24 @@ public class Group implements Serializable, VfsAcceptor {
             }
         }
     }
+    
+    /**
+     * True if this group has a closed registration mode
+     * 
+     * @return 
+     */
+    @Transient
+    public boolean isClosedGroup() {
+        return getRegistrationMode() != null && getRegistrationMode().equals(REGO_MODE_CLOSED);
+    }
+    
+    /**
+     * True if this group has an open rego mode
+     * 
+     * @return 
+     */
+    @Transient
+    public boolean isOpenGroup() {
+        return getRegistrationMode() != null && getRegistrationMode().equals(REGO_MODE_OPEN);
+    }    
 }
