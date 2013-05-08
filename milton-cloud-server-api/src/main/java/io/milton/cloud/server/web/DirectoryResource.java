@@ -181,12 +181,19 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
 
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+        log.info("createNew: " + newName);
+        if( newName.length() == 0) {
+            throw new BadRequestException("Invalid name, cannot be blank");
+        }
+        if( newName.trim().length() != newName.length()) {
+            throw new BadRequestException("Invalid name, cannot start or end with spaces");
+        }
         return UploadUtils.createNew(this, newName, inputStream, length, contentType);
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if (params.containsKey("importStatus")) {
+        if (params != null && params.containsKey("importStatus")) {
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
             if (p != null) {
                 Importer importer = Importer.getImporter(p, this);

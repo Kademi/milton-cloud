@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a real world entity such as a user or an organisation
@@ -33,6 +35,8 @@ import org.hibernate.criterion.Restrictions;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseEntity.class);
+    
     public static BaseEntity find(String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
         crit.setCacheable(true);
@@ -111,7 +115,13 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         if (user == null) {
             throw new RuntimeException("Cant create repository with a null user");
         }
-        Repository r = new Repository();
+        
+        Repository r = repository(name);
+        if( r != null ) {
+            log.warn("Repository already exists");
+            return r;
+        }
+        r = new Repository();
         Repository.initRepo(r, name, session, user, this);
         return r;
     }

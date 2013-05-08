@@ -85,6 +85,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         appsPageHelper = new AppsPageHelper(applicationManager);
         config.getContext().put(appsPageHelper);
         resourceFactory.getSecurityManager().add(new AdminRole());
+        resourceFactory.getSecurityManager().add(new AdminViewerRole());
         resourceFactory.getSecurityManager().add(new UserAdminRole());
     }
 
@@ -297,6 +298,41 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
             return Collections.singleton(Priviledge.ALL);
         }
     }
+    
+    public class AdminViewerRole implements Role {
+
+        @Override
+        public String getName() {
+            return "AdminiViewer";
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
+            Organisation resourceOrg = resource.getOrganisation();
+            boolean b = resourceOrg.isWithin(withinOrg);
+            return b;
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
+            return Role.READ;
+        }
+
+        @Override
+        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+            if (resource instanceof CommonRepositoryResource) {
+                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+                return (cr.getRepository() == applicableRepo);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+            return Role.READ;
+        }
+    }    
 
     public class UserAdminRole implements Role {
 

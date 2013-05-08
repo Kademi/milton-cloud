@@ -389,4 +389,15 @@ public class FileResource extends AbstractContentResource implements Replaceable
     public Priviledge getRequiredPostPriviledge(Request request) {
         return null;
     }
+    
+    public String getTextContent() {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            fileNode.writeContent(out);
+            return out.toString("UTF-8");
+        } catch (IOException ex) {
+            log.error("Exception", ex);
+            return null;
+        }
+    }
 }

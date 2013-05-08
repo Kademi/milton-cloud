@@ -3,6 +3,10 @@
     right: 0;
     top: 30%;
     z-index: 1000;
+    background: white;
+}
+.journal.active {
+    width: 50%;
 }
 
 .journal-show {
@@ -10,6 +14,7 @@
     width: 64px;
     margin: 0;
     opacity: 0.3;
+    float: right;
     background: url("/static/images/icon_journal.png") no-repeat scroll center center transparent;
 }
 .journal-show:hover {
@@ -22,7 +27,29 @@
     display:none; 
     min-width: 400px; 
     min-height: 200px; 
-    border: solid black 1px;
+    max-height: 300px;
+    border: solid lightgray 1px;
+    overflow-y: scroll;
+    overflow-x: hidden;    
+    padding: 20px;
+}
+.journal textarea {
+    background: #EEE;
+}
+        
+.journal div.active textarea {
+    background: white;
 }
 
-        
+.journal-entry {
+    margin-bottom: 10px;
+}
+.journal .ajax-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+}
+.journal.ajax-processing .ajax-loader {
+    display: block;
+}

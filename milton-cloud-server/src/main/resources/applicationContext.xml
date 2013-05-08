@@ -38,7 +38,15 @@
 
     </bean>
 
+    <bean id="base.current.principal.service" class="io.milton.cloud.server.web.ThreadLocalCurrentPrincipalService"  />
+
+    <bean id="http.current.principal.service" class="io.milton.cloud.server.web.HttpManagerCurrentPrincipalService"  >
+        <constructor-arg ref="base.current.principal.service" />
+    </bean>
+    
+
     <bean id="security.manager" class="io.milton.cloud.server.web.SpliffySecurityManager">
+        <constructor-arg ref="http.current.principal.service" />
         <constructor-arg ref="dao.user" />
         <constructor-arg ref="password.manager" />
     </bean>

@@ -8,7 +8,6 @@ import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.role.Role;
 import io.milton.http.AclUtils;
 import io.milton.http.Auth;
-import io.milton.http.HttpManager;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.http.http11.auth.DigestResponse;
@@ -35,14 +34,16 @@ public class SpliffySecurityManager {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffySecurityManager.class);
     private String realm = "spliffy";
+    private final CurrentPrincipalService currentPrincipalService;
     private final UserDao userDao;
     private final PasswordManager passwordManager;
     private final Map<String, Role> mapOfRoles = new ConcurrentHashMap<>();
     private String publicGroup = "public";
 
-    public SpliffySecurityManager(UserDao userDao, PasswordManager passwordManager) {
+    public SpliffySecurityManager(UserDao userDao, PasswordManager passwordManager, CurrentPrincipalService currentPrincipalService) {
         this.userDao = userDao;
         this.passwordManager = passwordManager;
+        this.currentPrincipalService = currentPrincipalService;
     }
 
     public void add(Role role) {
@@ -61,34 +62,12 @@ public class SpliffySecurityManager {
     }
 
     public UserResource getCurrentPrincipal() {
-        if (HttpManager.request() == null) {
-            return null;
-        }
-        Auth auth = HttpManager.request().getAuthorization();
-        if (auth == null || auth.getTag() == null) {
-            //log.warn("no auth object");
-            return null;
-        }
-        if (auth.getTag() instanceof UserResource) {
-            UserResource ur = (UserResource) auth.getTag();
-            if (ur == null) {
-                log.warn("Got auth object but null tag");
-            }
-
-            return ur;
-        }
-        return null;
+        return currentPrincipalService.getCurrentPrincipal();
     }
 
     public void setCurrentPrincipal(UserResource p) {
         log.info("setCurrentPrincipal: " + p);
-        Auth auth = HttpManager.request().getAuthorization();
-        if (auth == null) {
-            auth = new Auth(p.getName(), p);
-            HttpManager.request().setAuthorization(auth);
-        } else {
-            auth.setTag(p);
-        }
+        currentPrincipalService.setCurrentPrincipal(p);
     }
 
     public Profile authenticate(Organisation org, String userName, String requestPassword) {

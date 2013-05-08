@@ -510,10 +510,11 @@ function showCreateFolder(parentHref, title, text, callback, validatorFn) {
 }
 
 function createFolder(name, parentHref, callback) {
+    log("createFolder: name=", name, "parentHref=", parentHref);
     var encodedName = name; //$.URLEncode(name);
     //    ajaxLoadingOn();
     var url = "_DAV/MKCOL";
-    if (parentHref) {
+    if (parentHref) {        
         var s = parentHref;
         if (!s.endsWith("/")) {
             s += "/";
