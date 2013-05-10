@@ -8,16 +8,9 @@ function initManageForum() {
     addForumButton();
     addTopicButton();
     eventForModal();
-    initWebsiteDropdown();
 }
 
-function initWebsiteDropdown() {
-    $(".DropdownWrapper").click(function(e) {
-        var t = $(e.target);
-        log("click", t);
-        t.closest("div.DropdownControl").find(".DropdownContent").toggle(300);
-    });
-}
+
 
 function initTopicController() {
 	

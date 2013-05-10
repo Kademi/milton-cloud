@@ -130,7 +130,7 @@ public class ManageGroupsFolder extends AbstractResource implements GetableResou
         for( Role r : _(SpliffySecurityManager.class).getGroupRoles() ) {
             names.add(r.getName());
         }
-        
+        Collections.sort(names);
         return names;
     }
 

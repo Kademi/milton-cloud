@@ -1,4 +1,5 @@
 function initManageEmail() {
+    log("initManageEmail");
     stripList();
     initController();
     initList();
@@ -163,7 +164,8 @@ function initController() {
         var href = a.attr("href");
         var name = getFileName(href);
         confirmDelete(href, name, function() {
-            a.closest("li").remove();
+            log("remove", a);
+            a.closest("tr").remove();
             stripList();
         });
     });

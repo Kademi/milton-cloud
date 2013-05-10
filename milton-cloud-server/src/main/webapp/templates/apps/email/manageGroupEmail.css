@@ -2,7 +2,7 @@
     border-bottom: 1px solid #DADADA;
     margin-bottom: 5px;
 }
-#manageEmail > .Content {
+.Content {
     border: 1px solid #DEDEDE;
     border-radius: 5px 5px 5px 5px;
 }
@@ -26,7 +26,10 @@
 #manageEmail > .Content header a.Date { left: 0; }
 #manageEmail > .Content header a.Name { left: 15%; }
 #manageEmail > .Content header a.Status { left: 70%; }
-#manageEmail > .Content ul { padding: 0 4px 4px; }
+#manageEmail > .Content ul { 
+    padding: 0 4px 4px; 
+    margin: 0;
+}
 #manageEmail > .Content ul li {
     border-radius: 3px;
     border: 1px solid #ededed;
@@ -34,6 +37,7 @@
     padding: 4px 3px 4px 8px;
     background: #ededed;
     height: 25px;
+    list-style-type: none;
 }
 #manageEmail > .Content ul li.Odd { background-color: #FFF; }
 #manageEmail > .Content ul li div {
@@ -53,12 +57,12 @@
 }
 #manageEmail .TabContent .Content button.Btn { float: right; margin-left: 10px; }
 
-#manageEmail .TabContent .Content ul.GroupList li span { float: left; }
-#manageEmail .TabContent .Content ul.GroupList li aside {
+ul.GroupList li span { float: left; }
+ul.GroupList li aside {
     float: right;
     padding-left: 5px;
 }
-#manageEmail .TabContent .Content ul.GroupList li aside a {
+ul.GroupList li aside a {
     float: left;
     display: block;
     height: 25px;
@@ -69,7 +73,7 @@
     margin-right: 4px;
     border-radius: 2px;
 }
-#manageEmail .TabContent .Content ul.GroupList li aside a:hover { background-color: #FFF; }
+ul.GroupList li aside a:hover { background-color: #FFF; }
 #manageEmail .TabContent .Content.Send {
     text-align: center;
     padding: 20px;

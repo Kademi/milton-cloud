@@ -90,7 +90,7 @@ function doSearch() {
             $("#userSearchResults").replaceWith($fragment);
         },
         error: function(resp) {
-            alert("err");
+            alert("An error occured doing the user search. Please check your internet connection and try again");
         }
     });      
 }
@@ -286,7 +286,7 @@ function doOrgSearch() {
             log("frag", $fragment);
         },
         error: function(resp) {
-            alert("err");
+            alert("An error occurred searching for organisations");
         }
     });      
 }    
@@ -322,7 +322,7 @@ function doRemoveUsers(checkBoxes) {
             }
         },
         error: function(resp) {
-            alert("err");
+            alert("An error occurred removing users. You might not have permission to do this");
         }
     });      
 }

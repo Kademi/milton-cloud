@@ -556,4 +556,17 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             return super.is(type);
         }
     }
+
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_ACL;
+    }
+
+    @Override
+    public boolean authorise(Request request, Request.Method method, Auth auth) {
+        return _(SpliffySecurityManager.class).authorise(request, method, auth, this);
+    }
+    
+    
+    
 }

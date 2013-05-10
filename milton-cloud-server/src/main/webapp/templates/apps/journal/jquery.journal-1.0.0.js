@@ -32,10 +32,13 @@ $(document).ready(function() {
             var target = $(e.target);
             var cont = target.closest(".journal").find(".journal-notes");
             if (cont.is(":visible")) {
-                cont.hide(100);
-                journalDiv.removeClass("active");
+                //cont.hide(100);
+                journalNotes.animate({width: '0'}, function() {
+                    journalDiv.removeClass("active");
+                });                
             } else {
                 journalDiv.addClass("active");
+                 journalNotes.animate({width: '400'});
                 showJournalNotes(journalNotes, config);                
             }
         });
@@ -54,7 +57,7 @@ var isLoaded = false;
 
 function showJournalNotes(div, config) {
     try {
-        div.show(200);
+        //div.show(200);
         if (isLoaded) {
             return;
         }
@@ -147,7 +150,10 @@ function autoSaveJournals(container, config) {
             newSelected.addClass("active");
             log("container", container.scrollTop());
             log("newSelected top: ", newSelected.scrollTop());
-            container.scrollTop(newSelected.position().top);
+            //container.scrollTop(newSelected.position().top);
+            container.animate({
+                scrollTop: newSelected.position().top
+            }, 1000);
         } catch (e) {
             log("Exception in pjaxComplete", e);
         }
@@ -198,7 +204,7 @@ function saveJournal(textarea, config) {
         success: function(resp) {
             log("saveJournal: success", resp);
             ajaxLoadingOff();
-            journalDiv.removeClass("ajax-processing");
+            removeAjaxProcessing(journalDiv);            
             // todo
         },
         error: function(resp) {
@@ -221,6 +227,12 @@ function saveJournal(textarea, config) {
         }
     });
 
+}
+
+function removeAjaxProcessing(journalDiv) {
+    window.setTimeout(function() {
+        journalDiv.removeClass("ajax-processing");
+    }, 500);
 }
 
 function sortJournalEntries(div) {

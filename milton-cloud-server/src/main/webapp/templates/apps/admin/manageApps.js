@@ -62,7 +62,7 @@ function setEnabled(appId, isEnabled, success) {
         },
         error: function(resp) {
             log("error", resp);
-            alert("err");
+            alert("Could not change application. Please check your internet connection, and that you have permissions");
         }
     });                    
 }

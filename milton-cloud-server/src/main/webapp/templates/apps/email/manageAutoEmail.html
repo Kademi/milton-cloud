@@ -6,90 +6,64 @@
     </head>
     <body>
         <section id="manageEmail" class="MainContent">
-            <div class="TabContainer">
-                <nav class="ClearFix">
-                    <a href="">Send information</a>
-                    <a href="">Message</a>
-                    <a href="">Recipients</a>
-                    <a href="">Triggers</a>
-                    <a href="">History  </a>
+            <form name="frmDetails" action="." method="post" class="MainForm">
+                <button class="Btn" style="float: right">Save Changes</button>
+                <nav class="TabNav ClearFix">
+                    <a href="#sendInfo">Send information</a>
+                    <a href="#message">Message</a>
+                    <a href="#recipients">Recipients</a>
+                    <a href="#triggers">Triggers</a>
+                    <a href="#history">History</a>
                 </nav>
-                <div class="TabContent">
-                    <div class="Content">
-                        <form name="frmDetails" action="." method="post" class="Details">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>Send name</th>
-                                        <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Website</th>
-                                        <td>
-                                            <select name="themeSiteId" class="Medium required">
-                                                $formatter.option("", "[Please select]", $page.themeSiteId)
-                                                #foreach($website in $page.organisation.websites)
-                                                $formatter.option($website.id, $website.name, $page.themeSiteId)
-                                                #end
-                                            </select>
 
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Enabled</th>
-                                        <td>
-                                            $formatter.checkbox("enabled", $page.enabled)
-                                            <small>This auto email will only be sent if enabled</small>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Notes <small>These notes are for internal purposes only.</small></th>
-                                        <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email subject</th>
-                                        <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
-                                        <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2">
-                                            <button class="Btn">Save Changes</button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </form>
-                    </div>
+                <div rel="#sendInfo" class="TabContent Content Details">
+                    <table class="">
+                        <tbody>
+                            <tr>
+                                <th>Send name</th>
+                                <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
+                            </tr>
+                            <tr>
+                                <th>Website</th>
+                                <td>
+                                    <select name="themeSiteId" class="Medium required">
+                                        $formatter.option("", "[Please select]", $page.themeSiteId)
+                                        #foreach($website in $page.organisation.websites)
+                                        $formatter.option($website.id, $website.name, $page.themeSiteId)
+                                        #end
+                                    </select>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Enabled</th>
+                                <td>
+                                    $formatter.checkbox("enabled", $page.enabled)
+                                    <small>This auto email will only be sent if enabled</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Notes <small>These notes are for internal purposes only.</small></th>
+                                <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
+                            </tr>
+                            <tr>
+                                <th>Email subject</th>
+                                <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
+                            </tr>
+                            <tr>
+                                <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
+                                <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>	
-                <div class="TabContent">
-                    <div class="Content">
-                        <form name="frmDetails" action="." method="post" class="Details">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th class="Short"></th>
-                                        <td>
-
-                                            <button class="Btn">Save Changes</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">
-                                            <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </form>
+                <div rel="#message" class="TabContent Content">
+                    <div class="messageContent Details">
+                        <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
                     </div>
                 </div>
-                <div class="TabContent">
-                    <div class="Content Recipient">
+                <div rel="#recipients" class="TabContent Content">
+                    <div class="Recipient Details">
                         <header class="ClearFix">
                             <button class="SmallBtn Add AddGroup"><span>Add/remove groups</span></button>
                         </header>
@@ -116,7 +90,7 @@
                                         log("error", resp);
                                         alert("err");
                                     }
-                                });                                  
+                                });
                             });
                         });
                         function showAppropriateTriggerOptions() {
@@ -124,60 +98,51 @@
                             log("changed", eventId);
                             $(".triggers .trigger").hide();
                             $(".triggers .trigger select").attr("disabled", "true");
-                            $(".triggers ." + eventId).show();                
+                            $(".triggers ." + eventId).show();
                             $(".triggers ." + eventId + " select").attr("disabled", null);
                         }
                     </script>                    
                 </div>
-                <div class="TabContent">
-                    <div class="Content Send">
+                <div rel="#triggers" class="TabContent Content">
+                    <div class="Send Details">
                         #set($mapOfTriggerTypes = $page.emailTriggerTypes)                        
-                        <form name="frmTriggers" action="." method="post" class="Details triggers">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>Event type</th>
-                                        <td>
-                                            <select id="eventId" name="eventId">
-                                                <option value="-">[Choose]</option>
-                                                #foreach($eventId in $mapOfTriggerTypes.keySet())
-                                                $formatter.option($eventId, $eventId, $page.trigger.eventId)
-                                                #end
-                                            </select>
-                                        </td>
-                                    </tr>
+                        <table>
+                            <tbody class="triggers">
+                                <tr>
+                                    <th>Event type</th>
+                                    <td>
+                                        <select id="eventId" name="eventId">
+                                            <option value="-">[Choose]</option>
+                                            #foreach($eventId in $mapOfTriggerTypes.keySet())
+                                            $formatter.option($eventId, $eventId, $page.trigger.eventId)
+                                            #end
+                                        </select>
+                                    </td>
+                                </tr>
 
 
-                                    #foreach($eventId in $mapOfTriggerTypes.keySet())
-                                    #set($triggerType = $mapOfTriggerTypes.get($eventId))
-                                    #foreach($optionCode in $triggerType.keySet())
-                                    <tr class="$eventId trigger">
-                                        <th>$page.triggerOptionLabel($eventId, $optionCode)</th>
-                                        <td>
-                                            <select id="$optionCode" name="$optionCode">
-                                                <option value="">[Choose]</option>
-                                                #foreach($option in $triggerType.get($optionCode))
-                                                $formatter.option($option.code, $option.text, $page.triggerOptionValue($optionCode))
-                                                #end
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    #end                                    
-                                    #end
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2">
-                                            <button class="Btn">Save Changes</button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </form>                        
+                                #foreach($eventId in $mapOfTriggerTypes.keySet())
+                                #set($triggerType = $mapOfTriggerTypes.get($eventId))
+                                #foreach($optionCode in $triggerType.keySet())
+                                <tr class="$eventId trigger">
+                                    <th>$page.triggerOptionLabel($eventId, $optionCode)</th>
+                                    <td>
+                                        <select id="$optionCode" name="$optionCode">
+                                            <option value="">[Choose]</option>
+                                            #foreach($option in $triggerType.get($optionCode))
+                                            $formatter.option($option.code, $option.text, $page.triggerOptionValue($optionCode))
+                                            #end
+                                        </select>
+                                    </td>
+                                </tr>
+                                #end                                    
+                                #end
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="TabContent status">
-                    <div class="Content Send" id="manageEmail">
+                <div rel="#history" class="TabContent Content status">
+                    <div class="Send Details" id="manageEmail">
                         <article class="Note">
                             Emails sent by this trigger over the last 7 days.
                         </article>
@@ -204,8 +169,8 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
+                </div>            
+            </form>
         </section>
         <div id="modalGroup" class="Modal">
             <header>
@@ -234,23 +199,25 @@
         <script type="text/javascript">
             jQuery(function() {
                 initEditEmailPage();
-                $("form").forms({
+                $("form.MainForm").forms({
                     callback: function() {
                         alert("Saved");
-                    }                    
+                    }
                 });
-                edify($("form.Details"), ["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
+                //edify($("div.messageContent"), ["/templates/apps/learner/learning.dyn.css", "/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]);
+                initHtmlEditors();
                 $("#eventId").change(function() {
                     showAppropriateTriggerOptions();
                 });
                 showAppropriateTriggerOptions();
             });
             function showAppropriateTriggerOptions() {
+                log("showAppropriateTriggerOptions");
                 var eventId = $("#eventId").val();
                 log("changed", eventId);
                 $(".triggers .trigger").hide();
                 $(".triggers .trigger select").attr("disabled", "true");
-                $(".triggers ." + eventId).show();                
+                $(".triggers ." + eventId).show();
                 $(".triggers ." + eventId + " select").attr("disabled", null);
             }
         </script>

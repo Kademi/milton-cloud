@@ -91,7 +91,7 @@
                     </form>
             </div>
             <div rel='#recips' class="TabContent Content">
-                <div class="Recipient Content">
+                <div class="Recipient Content Details">
                     <header class="ClearFix">
                         #if( $page.status == "Draft" )
                         <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
@@ -110,7 +110,7 @@
                 </div>
             </div>
             <div  rel='#send' class="TabContent Content">
-                <div class="Send Content">
+                <div class="Send Content Details">
                     #if( $page.status == "Draft" )
                     <h4>Before you send be sure to check your email information, message content and recipients.</h4>
                     <p>
@@ -125,7 +125,7 @@
                 </div>
             </div>
             
-            <div rel='#status' class="TabContent status Content">
+            <div rel='#status' class="TabContent status Content Details">
                 <div class="NotSent Content">
                     <p>Email is not being processed</p>
                 </div>
@@ -194,7 +194,7 @@
                     }
                 });
                 //["/templates/apps/learner/learning.dyn.css","/templates/apps/learner/moduleLayout.dyn.css", "/templates/apps/learner/moduleContent.dyn.css"]
-                edify($("form.Details"));
+                //edify($("form.Details"));
             });
         </script>
     </body>

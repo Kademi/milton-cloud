@@ -2,11 +2,10 @@
     position: fixed;
     right: 0;
     top: 30%;
-    z-index: 1000;
-    background: white;
+    z-index: 1000;    
 }
 .journal.active {
-    width: 50%;
+    
 }
 
 .journal-show {
@@ -25,13 +24,17 @@
 }
 .journal-notes {
     display:none; 
-    min-width: 400px; 
+    width: 0;
     min-height: 200px; 
     max-height: 300px;
     border: solid lightgray 1px;
     overflow-y: scroll;
     overflow-x: hidden;    
     padding: 20px;
+    background: white;
+}
+.journal.active .journal-notes {
+    display: block;
 }
 .journal textarea {
     background: #EEE;
@@ -46,8 +49,8 @@
 }
 .journal .ajax-loader {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 70px;
+    left: 5px;
     display: none;
 }
 .journal.ajax-processing .ajax-loader {

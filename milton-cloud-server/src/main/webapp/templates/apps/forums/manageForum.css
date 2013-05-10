@@ -61,6 +61,10 @@
 #manageForum section.Control {
     margin-top: 15px;
 }
+#manageForum ul.Websites {
+    margin-left: 0;
+    list-style-type: none;
+}
 #manageForum ul.Websites li {
     border: 1px solid #E9E9E9;
     border-radius: 3px 3px 3px 3px;

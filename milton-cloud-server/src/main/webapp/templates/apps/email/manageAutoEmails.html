@@ -7,29 +7,39 @@
     <body>
         <section id="manageEmail" class="MainContent">
             <article class="Note">Here you can create emails that get sent automatically when certain trigger events occur. This
-            is useful for sending emails when a new module is available, or when users complete all modules, etc</article>
+                is useful for sending emails when a new module is available, or when users complete all modules, etc</article>
             <header class="ClearFix">
                 <a class="SmallBtn Add" href="javascript:showAddJob()"><span>Create an auto email trigger</span></a>
             </header>
             <div class="Content">
-                <ul>
-                    #foreach($email in $page.children)
-                    <li>
-                        <div class="emailStatus${email.statusCode}">
-                            <span class="Name">$!email.title</span>
-                            <span class="Status">$!email.status</span>
-                            <aside>
-                                <a class="Edit EditEmail" title="Edit" href="$email.name">
-                                    <span class="Hidden">Edit</span>
-                                </a>
-                                <a class="Delete DeleteEmail" title="Delete" href="$email.name">
-                                    <span class="Hidden">Delete</span>
-                                </a>                                
-                            </aside>
-                        </div>
-                    </li>                    
-                    #end              
-                </ul>
+                <table style='width: 100%' class='Summary'>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        #foreach($email in $page.children)
+                        <tr class="emailStatus$!{email.status}">
+                            <td class="Name">$!email.title</td>
+                            <td class="Status">$!email.status</td>
+                            <td>
+                                <aside>
+                                    <a class="Edit EditEmail" title="Edit" href="$email.name">
+                                        <span class="Hidden">Edit</span>
+                                    </a>
+                                    <a class="Delete DeleteEmail" title="Delete" href="$email.name">
+                                        <span class="Hidden">Delete</span>
+                                    </a>                                
+                                </aside>
+                            </td>
+                        </tr>
+                        #end              
+                    </tbody>
+                </table>
             </div>
         </section>
         <div id="modalCreateJob" class="Modal">

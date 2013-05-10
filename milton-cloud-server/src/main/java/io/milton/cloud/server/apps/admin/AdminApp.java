@@ -303,7 +303,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
 
         @Override
         public String getName() {
-            return "AdminiViewer";
+            return "AdminViewer";
         }
 
         @Override
