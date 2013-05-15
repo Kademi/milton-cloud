@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 McEvoy Software Ltd.
+ * Copyright 2013 McEvoy Software Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,51 +14,51 @@
  */
 package io.milton.cloud.server.web.alt;
 
-import java.util.Date;
-
 /**
  *
  * @author brad
  */
-public class MediaInfo {
-    private Double durationSecs;
-    private Date recordedDate;
-    private Integer width;
-    private Integer height;
+public class Dimension {
 
-    public Double getDurationSecs() {
-        return durationSecs;
+    /**
+     * Parse something like 1280x720
+     * 
+     * @param s
+     * @return 
+     */
+    static Dimension parse(String s) {
+        int i = s.indexOf("x");
+        if( i < 0 ) {
+            return null;            
+        }
+        int w = Integer.parseInt(s.substring(0, i));
+        int h = Integer.parseInt(s.substring(i+1));
+        return new Dimension(h, w);
     }
+    
+    private int height;
+    private int width;
 
-    public void setDurationSecs(Double durationSecs) {
-        this.durationSecs = durationSecs;
-    }
-
-    public Date getRecordedDate() {
-        return recordedDate;
-    }
-
-    public void setRecordedDate(Date recordedDate) {
-        this.recordedDate = recordedDate;
-    }
-
-    public Integer getHeight() {
-        return height;
-    }
-
-    public void setHeight(Integer height) {
+    public Dimension(int height, int width) {
         this.height = height;
-    }
-
-    public Integer getWidth() {
-        return width;
-    }
-
-    public void setWidth(Integer width) {
         this.width = width;
     }
     
     
+    public int getHeight() {
+        return height;
+    }
 
+    public int getWidth() {
+        return width;
+    }
+    
+
+    @Override
+    public String toString() {
+        return width + "x" + height;
+    }
+    
+    
     
 }

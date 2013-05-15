@@ -79,7 +79,7 @@ public class MediaInfoRunner {
         String key = line.substring(0, pos - 1).trim();
         String value = line.substring(pos + 1).trim();
         if ("Duration".equals(key)) {
-            Integer durationSecs = parseDuration(value);
+            Double durationSecs = parseDuration(value);
             info.setDurationSecs(durationSecs);
         } else if ("Encoded date".equals(key)) {
             Date dt = parseDate(value);
@@ -89,7 +89,7 @@ public class MediaInfoRunner {
             info.setWidth(i);
         } else if ("Height".equals(key)) {
             Integer i = parsePixels(value);
-            info.setHeight(i);
+            info.setHeight(i);            
         }
 
     }
@@ -100,12 +100,13 @@ public class MediaInfoRunner {
      * @param value
      * @return
      */
-    public Integer parseDuration(String value) {
+    public Double parseDuration(String value) {
         String[] arr = value.split(" ");
-        int d = 0;
+        double d = 0;
         for (String s : arr) {
             if (s.endsWith("ms")) {
-                // ignore            
+                s = s.replace("ms", "");
+                d += Double.valueOf(s)/1000;
             } else if (s.endsWith("s")) {
                 s = s.substring(0, s.length() - 1);
                 int secs = Integer.parseInt(s);
@@ -154,8 +155,6 @@ public class MediaInfoRunner {
             cal.set(Calendar.MINUTE, minute);
             cal.set(Calendar.SECOND, second);
 
-            System.out.println("cal: " + cal.getTime() + " - " + DateUtils.formatDate(cal));
-            System.out.println("long: " + cal.getTimeInMillis());
             return cal.getTime();
         } catch (Exception e) {
             log.warn("Exception parsing date: " + value, e);

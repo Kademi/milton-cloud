@@ -12,6 +12,8 @@ import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.common.FileUtils;
+import io.milton.common.Utils;
 import io.milton.http.ResourceFactory;
 import org.apache.log4j.Logger;
 
@@ -138,13 +140,14 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         }
     }
     
-    private Resource findGetResource(String hash, Organisation org) {
+    private Resource findGetResource(String fileName, Organisation org) {
+        String hash = FileUtils.stripExtension(fileName);
         Fanout fanout = hashStore.getFileFanout(hash);
         if (fanout == null) {
             log.warn("fanout not found");
             return null;
         } else {
-            return new GetResource(fanout, hash, securityManager, org, blobStore, hashStore);
+            return new GetResource(fileName, fanout, hash, securityManager, org, blobStore, hashStore);
         }
         
     }

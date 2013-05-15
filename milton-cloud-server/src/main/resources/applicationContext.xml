@@ -71,6 +71,7 @@
         <constructor-arg ref="content.type.service" />
         <constructor-arg ref="root.context"/>
         <constructor-arg ref="session.manager"/>
+        <constructor-arg ref="current.root.folder.service"/>
         <property name="enableMetaData" value="${media.metadata}" />
     </bean>
         

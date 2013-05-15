@@ -4,7 +4,7 @@ $(function() {
             log("done");
         }
     });
-    $("#myModal button.btn-primary").click(function(e) {
+    $("#myModal button.btn-save").click(function(e) {
         e.preventDefault();
         e.stopPropagation();
         $(e.target).closest(".modal").find("form").trigger("submit");

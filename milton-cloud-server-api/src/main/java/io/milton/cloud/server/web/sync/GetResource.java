@@ -12,6 +12,8 @@ import java.util.Map;
 import org.hashsplit4j.api.Fanout;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.common.ContentTypeUtils;
+import io.milton.common.DefaultContentTypeService;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.resource.GetableResource;
@@ -25,14 +27,15 @@ import org.hashsplit4j.api.HashStore;
  * @author brad
  */
 public class GetResource extends BaseResource implements GetableResource, HashResource {
-
+    private final String name; // might be just hash, or hash plus an extension
     private final Fanout fanout;
     private final String hash;
     private final BlobStore blobStore;
     private final HashStore hashStore;
 
-    public GetResource(Fanout fanout, String hash, SpliffySecurityManager securityManager, Organisation org, BlobStore blobStore, HashStore hashStore) {
+    public GetResource(String name, Fanout fanout, String hash, SpliffySecurityManager securityManager, Organisation org, BlobStore blobStore, HashStore hashStore) {
         super(securityManager, org);
+        this.name = name;
         this.fanout = fanout;
         this.hash = hash;
         this.blobStore = blobStore;
@@ -46,13 +49,14 @@ public class GetResource extends BaseResource implements GetableResource, HashRe
         
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> map, String string) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        //System.out.println("sendContent: " + this + " length=" + getContentLength());
         Combiner combiner = new Combiner();
         combiner.combine(fanout.getHashes(), hashStore, blobStore, out);
     }
 
     @Override
     public String getName() {
-        return hash;
+        return name;
     }
 
     @Override
@@ -66,8 +70,8 @@ public class GetResource extends BaseResource implements GetableResource, HashRe
     }
 
     @Override
-    public String getContentType(String string) {
-        return null;
+    public String getContentType(String accepts) {
+        return ContentTypeUtils.findAcceptableContentTypeForName(name, accepts);
     }
 
     @Override

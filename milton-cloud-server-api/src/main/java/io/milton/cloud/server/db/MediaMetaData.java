@@ -68,7 +68,7 @@ public class MediaMetaData implements Serializable {
     
     private long id;
     private String sourceHash; // the hash of the file from which the information was derived
-    private Integer durationSecs; // the name of the alt format: eg thumb-120x120.png
+    private Double durationSecs;
     private Date recordedDate;
     private Integer width;
     private Integer height;
@@ -93,11 +93,11 @@ public class MediaMetaData implements Serializable {
     }
 
     @Column
-    public Integer getDurationSecs() {
+    public Double getDurationSecs() {
         return durationSecs;
     }
 
-    public void setDurationSecs(Integer durationSecs) {
+    public void setDurationSecs(Double durationSecs) {
         this.durationSecs = durationSecs;
     }
 

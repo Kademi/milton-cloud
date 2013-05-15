@@ -18,7 +18,11 @@ package io.milton.cloud.server.web.alt;
 
 import io.milton.cloud.common.With;
 import io.milton.cloud.server.db.AltFormat;
+import io.milton.cloud.server.db.HlsPrimary;
+import io.milton.cloud.server.db.HlsProgram;
+import io.milton.cloud.server.db.HlsSegment;
 import io.milton.cloud.server.db.MediaMetaData;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.FileResource;
 import io.milton.common.ContentTypeService;
 import io.milton.common.FileUtils;
@@ -50,23 +54,26 @@ import org.hibernate.Transaction;
 
 /**
  * Listens for PUT events and generates alternative file formats as appropriate
- * 
- * Ubuntu commands to setup native dependencies:
- * sudo apt-get install libav-tools
- * sudo apt-get install mediainfo
- * sudo apt-get install libavcodec-extra-53
+ *
+ * Ubuntu commands to setup native dependencies: sudo apt-get install
+ * libav-tools sudo apt-get install mediainfo sudo apt-get install
+ * libavcodec-extra-53
  *
  * @author brad
  */
 public class AltFormatGenerator implements EventListener {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AltFormatGenerator.class);
+    
+    public static FormatSpec HLS_FORMAT_SPEC = new FormatSpec("video", "m3u8");
+    
     private final RootContext rootContext;
     private final SessionManager sessionManager;
     private final ContentTypeService contentTypeService;
     private final HashStore hashStore;
     private final BlobStore blobStore;
     private final MediaInfoService mediaInfoService;
+    private final CurrentRootFolderService currentRootFolderService;
     private String ffmpeg = "avconv";
     private List<FormatSpec> formats;
     private ExecutorService consumer = new ThreadPoolExecutor(10, 20, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100));
@@ -74,33 +81,38 @@ public class AltFormatGenerator implements EventListener {
     private final FormatSpec profileSpec;
     private boolean enableMetaData;
 
-    public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, RootContext rootContext, SessionManager sessionManager) {
+    public AltFormatGenerator(HashStore hashStore, BlobStore blobStore, EventManager eventManager, ContentTypeService contentTypeService, RootContext rootContext, SessionManager sessionManager, CurrentRootFolderService currentRootFolderService) {
         this.rootContext = rootContext;
+        this.currentRootFolderService = currentRootFolderService;
         this.hashStore = hashStore;
         this.blobStore = blobStore;
         this.contentTypeService = contentTypeService;
         this.sessionManager = sessionManager;
         this.formats = new ArrayList<>();
         this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
-        formats.add(new FormatSpec("image", "png", 150, 150, true, "-f", "mjpeg"));
-        formats.add(new FormatSpec("image", "png", 300, 300, true, "-f", "mjpeg"));
-        formats.add(new FormatSpec("image", "png", 600, 400, true, "-f", "mjpeg"));
-        profileSpec = new FormatSpec("image", "png", 52, 52, true, "-f", "mjpeg");
+        formats.add(new FormatSpec("image", "png", 150, 150, true, "-f", "image2"));
+        formats.add(new FormatSpec("image", "png", 300, 300, true, "-f", "image2"));
+        formats.add(new FormatSpec("image", "png", 600, 400, true, "-f", "image2"));
+        profileSpec = new FormatSpec("image", "png", 52, 52, true, "-f", "image2");
         formats.add(profileSpec);
 
         formats.add(new FormatSpec("video", "flv", 1280, 720, false, "-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "m4v", 1280, 720, false,"-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 1280, 720, false,"-r", "15", "-b:v", "512k"));
-        formats.add(new FormatSpec("video", "webm", 1280, 720, false,"-r", "15", "-b:v", "512k"));
-        
-        formats.add(new FormatSpec("video", "flv", 640, 360, false,"-r", "15", "-b:v", "512k")); // for non-html video
-        formats.add(new FormatSpec("video", "m4v", 640, 360, false,"-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
-        formats.add(new FormatSpec("video", "ogv", 640, 360, false,"-r", "15", "-b:v", "512k"));
-        formats.add(new FormatSpec("video", "webm", 640, 360, false,"-r", "15", "-b:v", "512k"));
-        
+        formats.add(new FormatSpec("video", "m4v", 1280, 720, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 1280, 720, false, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 1280, 720, false, "-r", "15", "-b:v", "512k"));
 
-        formats.add(new FormatSpec("video", "png", 640, 360, false,"-ss", "0", "-vframes", "1", "-f", "mjpeg"));
-        formats.add(new FormatSpec("video", "png", 1280, 720, false,"-ss", "0", "-vframes", "1", "-f", "mjpeg"));
+        formats.add(new FormatSpec("video", "flv", 640, 360, false, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "m4v", 640, 360, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 640, 360, false, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 640, 360, false, "-r", "15", "-b:v", "512k"));
+        // HTTP Live Streaming
+
+        formats.add(HLS_FORMAT_SPEC);
+        //formats.add(new FormatSpec("video", "m3u8", 640, 360, false, "-c:v", "libx264", "-c:a", "libvo_aacenc", "-map", "0", "-bsf", "h264_mp4toannexb", "-flags", "-global_header", "-f", "segment", "-segment_list_size", "99999", "-segment_format", "mpegts"));
+
+        // Video thumbnails
+        formats.add(new FormatSpec("video", "png", 640, 360, false, "-ss", "0", "-vframes", "1", "-f", "image2"));
+        formats.add(new FormatSpec("video", "png", 1280, 720, false, "-ss", "0", "-vframes", "1", "-f", "image2"));
 
         System.out.println("register put event on: " + eventManager);
         eventManager.registerEventListener(this, PutEvent.class);
@@ -157,32 +169,6 @@ public class AltFormatGenerator implements EventListener {
         }
     }
 
-    /**
-     * Returns an existing job if there is one that matches the inputs,
-     * otherwise attempts to create a new job and enqueue it. If it cannot
-     * insert because of capacity constraints it will fail
-     *
-     * @param primaryHash
-     * @param fileName
-     * @param format
-     * @return
-     */
-    public GenerateJob getOrEnqueueJob(String primaryHash, String fileName, FormatSpec format) {
-        for (GenerateJob j : currentJobs) {
-            if (j.primaryFileHash == null ? primaryHash == null : j.primaryFileHash.equals(primaryHash)) {
-                if (format.equals(j.formatSpec)) {
-                    log.info("Found existing job: " + j.formatSpec);
-                    return j;
-                }
-            }
-        }
-        GenerateJob j = new GenerateJob(primaryHash, fileName, format);
-        currentJobs.add(j);
-        log.info("submitted new job");
-        consumer.submit(j);
-        return j;
-    }
-
     public FormatSpec findFormat(String name) {
         for (FormatSpec f : formats) {
             if (f.getName().equals(name)) {
@@ -219,15 +205,15 @@ public class AltFormatGenerator implements EventListener {
 
     /**
      * Generate a profile image (as defined in profileSpec) and return its hash
-     * 
+     *
      * @param primaryFileHash
      * @param primaryFileName
-     * @return 
+     * @return
      */
     public String generateProfileImage(String primaryFileHash, String primaryFileName) throws Exception {
         final Parser parser = new Parser();
-        String ext = FileUtils.getExtension(primaryFileName);        
-        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService);
+        String ext = FileUtils.getExtension(primaryFileName);
+        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, rootContext, sessionManager);
         String altHash = converter.generate(new With<InputStream, String>() {
             @Override
             public String use(InputStream t) throws Exception {
@@ -238,7 +224,206 @@ public class AltFormatGenerator implements EventListener {
         return altHash;
     }
 
-    public class GenerateJob implements Runnable {
+    /**
+     * Returns an existing job if there is one that matches the inputs,
+     * otherwise attempts to create a new job and enqueue it. If it cannot
+     * insert because of capacity constraints it will fail
+     *
+     * @param primaryHash
+     * @param fileName
+     * @param format
+     * @return
+     */
+    public GenerateJob getOrEnqueueJob(String primaryHash, String fileName, FormatSpec format) {
+        for (GenerateJob j : currentJobs) {
+            if (j.getPrimaryFileHash() == null ? primaryHash == null : j.getPrimaryFileHash().equals(primaryHash)) {
+                if (format.equals(j.getFormatSpec())) {
+                    log.info("Found existing job: " + j.getFormatSpec());
+                    return j;
+                }
+            }
+        }
+        GenerateJob j;
+        if( format.type.equals("m3u8")) {
+            j = new HlsGenerateJob(primaryHash, primaryHash, format);
+        } else {
+            j = new VodGenerateJob(primaryHash, fileName, format);
+        }
+        currentJobs.add(j);
+        log.info("submitted new job");
+        consumer.submit(j);
+        return j;
+    }
+
+    public interface GenerateJob extends Runnable {
+
+        String getPrimaryFileHash();
+
+        FormatSpec getFormatSpec();
+
+        String getStatus();
+        
+        boolean done();
+    }
+
+    public class HlsGenerateJob implements GenerateJob, HlsGeneratorListener {
+
+        private static final long serialVersionUID = 1l;
+        private final String primaryFileHash;
+        private final FormatSpec formatSpec;
+        private final String primaryFileName;
+        private final AvconvConverter converter;
+        private boolean jobDone;
+        private String status = "not started";
+        private boolean done;
+        
+
+        public HlsGenerateJob(String primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
+            this.primaryFileHash = primaryFileHash;
+            this.primaryFileName = primaryFileName;
+            this.formatSpec = formatSpec;
+            if (formatSpec == null) {
+                throw new RuntimeException("formatSpec cannot be null");
+            }
+            String ext = FileUtils.getExtension(primaryFileName);
+            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, rootContext, sessionManager);
+        }
+
+        @Override
+        public String getPrimaryFileHash() {
+            return primaryFileHash;
+        }
+
+        @Override
+        public FormatSpec getFormatSpec() {
+            return formatSpec;
+        }
+
+        @Override
+        public void run() {
+            try {
+                status = "generating";
+                sessionManager.open();
+                Transaction tx = SessionManager.beginTx();
+                converter.generateHlsVideo(this, 3);
+                tx.commit();
+                status = "complete";
+            } catch (Exception e) {
+                status = "conversion failed";
+                log.error("Exception", e);
+            } finally {
+                jobDone = true;
+                currentJobs.remove(this);
+                sessionManager.close();
+            }
+        }
+
+        @Override
+        public long onNewPrimary(int targetDuration, int version) {
+            log.info("onNewPrimary: primaryFileHash=" + primaryFileHash);
+            try {
+                sessionManager.open();
+                Transaction tx = SessionManager.beginTx();
+                
+                HlsPrimary p = new HlsPrimary();
+                p.setSourceHash(primaryFileHash);
+                p.setTargetDuration(targetDuration);
+                p.setPrograms(new ArrayList());
+                SessionManager.session().save(p);
+                SessionManager.session().flush();
+                long hlsPrimaryId = p.getId();
+                
+                tx.commit();
+                return hlsPrimaryId;
+            } catch (Throwable e) {
+                log.error("ex", e);
+                throw new RuntimeException(e);
+            } finally {
+                sessionManager.close();
+            }
+        }
+
+        @Override
+        public long onNewProgram(long primaryId, Dimension size, Integer likelyBandwidth) {
+            log.info("onNewProgram: primary=" + primaryId);
+            try {
+                sessionManager.open();
+                Transaction tx = SessionManager.beginTx();
+                
+                HlsPrimary p = HlsPrimary.get(primaryId, SessionManager.session());
+                HlsProgram prog = p.addProgram(size.getWidth(), size.getHeight(), likelyBandwidth);
+                SessionManager.session().save(prog);
+                SessionManager.session().save(p);
+                SessionManager.session().flush();
+                
+                tx.commit();
+                return prog.getId();
+            } catch (Throwable e) {
+                log.error("ex", e);
+                throw new RuntimeException(e);
+            } finally {
+                sessionManager.close();
+            }
+        }
+
+        @Override
+        public void onNewSegment(long progId, int seq, InputStream segmentData, Double duration) {
+            log.info("onNewSegment: progId=" + progId);
+            try {
+                sessionManager.open();
+                Transaction tx = SessionManager.beginTx();
+                
+                HlsProgram prog = HlsProgram.get(progId, SessionManager.session());
+                if( prog == null ) {
+                    throw new RuntimeException("Couldnt find program: " + progId);
+                }
+                Parser parser = new Parser();
+                String segmentHash = parser.parse(segmentData, hashStore, blobStore);
+                HlsSegment seg = prog.addSegment(segmentHash, seq);
+                seg.setDurationSecs(duration);
+                SessionManager.session().save(seg);
+                SessionManager.session().flush();
+                
+                tx.commit();
+
+            } catch (Throwable e) {
+                log.error("ex", e);
+            } finally {
+                sessionManager.close();
+            }
+        }
+
+        @Override
+        public void onComplete(long primaryId) {
+            try {
+                sessionManager.open();
+                Transaction tx = SessionManager.beginTx();
+                
+                HlsPrimary p = HlsPrimary.get(primaryId, SessionManager.session());
+                p.setComplete(true);
+                SessionManager.session().save(p);
+                SessionManager.session().flush();
+                
+                tx.commit();
+            } catch (Throwable e) {
+                log.error("ex", e);
+                throw new RuntimeException(e);
+            } finally {
+                sessionManager.close();
+            }
+        }
+
+        @Override
+        public String getStatus() {
+            return status;
+        }
+        
+        public boolean done() {
+            return done;
+        }
+    }
+
+    public class VodGenerateJob implements GenerateJob {
 
         private static final long serialVersionUID = 1l;
         private final String primaryFileHash;
@@ -248,7 +433,7 @@ public class AltFormatGenerator implements EventListener {
         private boolean jobDone;
         private String status = "not started";
 
-        public GenerateJob(String primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
+        public VodGenerateJob(String primaryFileHash, String primaryFileName, FormatSpec formatSpec) {
             this.primaryFileHash = primaryFileHash;
             this.primaryFileName = primaryFileName;
             this.formatSpec = formatSpec;
@@ -256,18 +441,16 @@ public class AltFormatGenerator implements EventListener {
                 throw new RuntimeException("formatSpec cannot be null");
             }
             String ext = FileUtils.getExtension(primaryFileName);
-            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService);
+            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, rootContext, sessionManager);
         }
 
         public File getDestFile() {
-            return converter.getDest();
+            return converter.getGeneratedOutputFile();
         }
 
         public String getStatus() {
             return status;
         }
-        
-        
 
         @Override
         public void run() {
@@ -338,6 +521,16 @@ public class AltFormatGenerator implements EventListener {
          */
         public boolean done() {
             return jobDone;
+        }
+
+        @Override
+        public String getPrimaryFileHash() {
+            return primaryFileHash;
+        }
+
+        @Override
+        public FormatSpec getFormatSpec() {
+            return formatSpec;
         }
     }
 

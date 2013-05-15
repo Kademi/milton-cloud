@@ -71,7 +71,7 @@ class FilesFolder extends BaseResource implements PutableResource, PostableResou
         Parser parser = new Parser();
         String hash = parser.parse(inputStream, hashStore, blobStore);
         Fanout fanout = hashStore.getFileFanout(hash);
-        return new GetResource(fanout, hash, securityManager, org, blobStore, hashStore);
+        return new GetResource(newName, fanout, hash, securityManager, org, blobStore, hashStore);
     }
 
     @Override

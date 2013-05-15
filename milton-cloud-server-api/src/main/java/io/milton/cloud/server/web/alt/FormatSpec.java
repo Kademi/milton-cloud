@@ -27,7 +27,21 @@ public class FormatSpec {
     final int width;
     final boolean cropToFit;
     private String[] converterArgs;
-
+    
+    /**
+     * For formats where height and width are not relevant, such as m3u8
+     * 
+     * @param inputType
+     * @param type 
+     */
+    public FormatSpec(String inputType, String type) {
+        this.inputType = inputType;
+        this.type = type;
+        height = -1;
+        width = -1;
+        cropToFit = false;
+    }
+    
     public FormatSpec(String inputType, String type, int width, int height, boolean cropToFit, String ... converterArgs) {
         this.inputType = inputType;
         this.type = type;

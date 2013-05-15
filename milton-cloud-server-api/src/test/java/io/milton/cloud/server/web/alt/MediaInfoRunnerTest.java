@@ -66,14 +66,14 @@ public class MediaInfoRunnerTest {
 
     @Test
     public void testParseDuration_Seconds() {
-        Integer i = runner.parseDuration("13s 959ms   ");
-        assertEquals(13, i.intValue());
+        Double i = runner.parseDuration("13s 959ms   ");
+        assertEquals(13.959, i, 0.00001);
     }
     
     @Test
     public void testParseDuration_Minutes() {
-        Integer i = runner.parseDuration("1mn 41s");
-        assertEquals(101, i.intValue());
+        Double i = runner.parseDuration("1mn 41s");
+        assertEquals(101,i, 0.00001);
     }
     
     @Test

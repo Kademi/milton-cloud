@@ -112,15 +112,13 @@ public class ScriptExecutor {
             }
             cmd[param++] = s;
         }
-        for (int i = 0; i < cmd.length; i++) {
-            log.info("cmd: " + i + " = " + cmd[i]);
-        }
+        log.info("cmd= " + formatCommand(cmd));
         Runtime rt = Runtime.getRuntime();
         try {
             Process proc = rt.exec(cmd);
             ScriptExecutor.ScriptOutputReader errorDiscarder = new ScriptExecutor.ScriptOutputReader(proc.getErrorStream());
             ScriptExecutor.ScriptOutputReader output = new ScriptExecutor.ScriptOutputReader(proc.getInputStream());
-            debug("starting process...");            
+            debug("starting process.");            
             errorDiscarder.start();
             output.start();
             debug("...waiting for proc...");
@@ -128,6 +126,7 @@ public class ScriptExecutor {
             debug("...got exit val: " + exitVal);
             if (exitVal != successCode) {
                 log.error("error output: "  + errorDiscarder.toString());
+                log.error("Command=" + formatCommand(cmd));
                 throw new Exception(exitVal + " - " + output.toString());
             }
             debug("...waiting for threads to join...");
@@ -148,6 +147,14 @@ public class ScriptExecutor {
         } finally {
             log.debug("finished exec");
         }
+    }
+
+    private String formatCommand(String[] cmd) {
+        StringBuilder sb = new StringBuilder();
+        for( String s : cmd ) {
+            sb.append(s).append(" ");
+        }
+        return sb.toString();
     }
 
     private abstract static class StreamReader extends Thread {

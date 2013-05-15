@@ -118,9 +118,9 @@ public class SpliffyResourceFactory implements ResourceFactory {
             r = findResource(host, path);
         }
         if (r != null) {
-            log.info("Found a resource: " + r.getClass());
+            log.debug("Found a resource: " + r.getClass());
         } else {
-            log.info("Not found: " + sPath);
+            log.debug("Not found: " + sPath);
         }
         return r;
     }
