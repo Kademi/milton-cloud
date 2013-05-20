@@ -62,7 +62,7 @@ public class HtmlTemplateParser {
                     IOUtils.copy(bufIn, bout);
                     String sourceXml = bout.toString("UTF-8");
                     pr = new ParsedResource(sourceXml);
-                    cache.put(hash, pr);
+                    cache.putIfAbsent(hash, pr);
                 }
             }
         }
@@ -71,10 +71,32 @@ public class HtmlTemplateParser {
         meta.getBodyClasses().clear();
         meta.getBodyClasses().addAll(pr.bodyClasses);
         meta.getWebResources().clear();
-        meta.getWebResources().addAll(pr.webResources); 
+        meta.getWebResources().addAll(pr.webResources);
 
     }
 
+    public ParsedResource parse(InputStream in, String hash) throws IOException, XMLStreamException {
+        ParsedResource pr = cache.get(hash);
+        if (pr == null) {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            IOUtils.copy(in, bout);
+            String sourceXml = bout.toString("UTF-8");
+            pr = new ParsedResource(sourceXml);
+            cache.putIfAbsent(hash, pr);
+        }
+        return pr;
+    }
+
+    public ParsedResource parse(String sourceXml, String hash) throws IOException, XMLStreamException {
+        ParsedResource pr = cache.get(hash);
+        if (pr == null) {
+            pr = new ParsedResource(sourceXml);
+            cache.putIfAbsent(hash, pr);
+        }
+        return pr;
+    }
+    
+    
     /**
      * Parse the file associated with the meta, extracting webresources, body
      * class attributes and the template, and setting that information on the
@@ -137,70 +159,7 @@ public class HtmlTemplateParser {
             s = s.substring(0, s.length() - CDATA_END.length());
         }
         return s.trim();
-    }
 
-    public static class ParsedResource {
 
-        final String title;
-        final List<WebResource> webResources;
-        final List<String> bodyClasses;
-        final String body;
-
-        public ParsedResource(String sourceXml) {
-            Source source = new Source(sourceXml);
-            net.htmlparser.jericho.Element elHead = source.getFirstElement("head");
-
-            net.htmlparser.jericho.Element elBody = source.getFirstElement("body");
-            if (elBody != null) {
-                String sBodyClasses = elBody.getAttributeValue("class");
-                if (sBodyClasses != null) {
-                    bodyClasses = Arrays.asList(sBodyClasses.split(" "));
-                } else {
-                    bodyClasses = Collections.EMPTY_LIST;
-                }
-            } else {
-                bodyClasses = Collections.EMPTY_LIST;
-            }
-            this.body = getContent(elBody);
-
-            String title = null;
-            List<WebResource> list = new ArrayList<>();
-            if (elHead != null) {
-                List<Element> headElements = elHead.getChildElements();
-                if (headElements != null) {
-                    for (net.htmlparser.jericho.Element wrTag : headElements) {
-                        //System.out.println("tag: " + wrTag.getName());
-                        if (wrTag.getName().equals("title")) {
-                            String s = wrTag.getRenderer().toString();
-                            title = s;
-                        } else {                            
-                            if (!wrTag.getName().startsWith("!")) {
-                                WebResource wr = new WebResource();
-                                list.add(wr);
-                                wr.setTag(wrTag.getName());
-                                String tagBody = getContent(wrTag);
-                                wr.setBody(tagBody);
-                                Attributes atts = wrTag.getAttributes();
-                                if (atts != null) {
-                                    for (net.htmlparser.jericho.Attribute att : atts) {
-                                        wr.getAtts().put(att.getName(), att.getValue());
-                                    }
-                                }
-                            } else {
-                                String comment = getContent(wrTag);
-                                WebResource wr = new WebResource();
-                                list.add(wr);
-                                wr.setTag(""); // indictes comment
-                                wr.setBody(wrTag.toString());
-                                //System.out.println("comment : " + wrTag.getName() + " - " + comment );
-                                
-                            }
-                        }
-                    }
-                }
-            }
-            this.title = title;
-            this.webResources = list;
-        }
     }
 }

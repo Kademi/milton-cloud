@@ -143,14 +143,14 @@ public class DataSession {
         String oldHash = rootDataNode.loadedHash;
         recalcHashes(rootDataNode);
         String newHash = rootDataNode.hash;
-        if( newHash == null ) {
+        if (newHash == null) {
             throw new RuntimeException("newHash is null");
         }
 
         if (!newHash.equals(oldHash)) {
             Commit newCommit = new Commit();
             newCommit.setBranch(branch);
-            if( branch.getHead() != null ) {
+            if (branch.getHead() != null) {
                 newCommit.setPreviousCommitId(branch.getHead().getId());
             }
             newCommit.setCreatedDate(currentDateService.getNow());
@@ -210,7 +210,6 @@ public class DataSession {
         protected String loadedHash; // holds the hash value from when the node was loaded
         protected Boolean dirty;
 
-        
         /**
          * Copy just creates the same type of item with the same hash
          *
@@ -251,8 +250,8 @@ public class DataSession {
         }
 
         public void delete() {
-            if( parent == null ) {
-                return ;
+            if (parent == null) {
+                return;
             }
             final List<DataNode> parentsChildren = parent.getChildren();
             parentsChildren.remove(this);
@@ -311,13 +310,13 @@ public class DataSession {
             }
             dirty = Boolean.TRUE;
             if (parent != null) {
-                if( log.isTraceEnabled()) {
-                log.trace("setDirty: " + parent.hashCode() + " - " + parent.getName());
+                if (log.isTraceEnabled()) {
+                    log.trace("setDirty: " + parent.hashCode() + " - " + parent.getName());
                 }
                 parent.setDirty();
             }
         }
-        
+
         public Boolean isDirty() {
             return dirty;
         }
@@ -477,6 +476,12 @@ public class DataSession {
             Parser parser = new Parser();
             String fileHash = parser.parse(in, hashStore, blobStore);
             setHash(fileHash);
+        }
+
+        public byte[] getContent() throws IOException {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            writeContent(bout);
+            return bout.toByteArray();
         }
 
         private Fanout getFanout() {
