@@ -80,7 +80,7 @@ function edifyPage(selector) {
                 var s = $n.text();
                 $n.replaceWith("<input name='" + $n.attr("id") + "' type='text' value='" + s + "' />");
             });
-            var formHref = window.location;
+            var formHref = window.location.pathname;
             if( formHref.endsWith("/")) {
                 formHref += "index.html"; // when viewing the index page for a folder on the folder path, be sure to post to the actual page
             }

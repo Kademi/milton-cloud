@@ -57,6 +57,7 @@ class BlobFolder extends  BaseResource implements PutableResource {
      */
     @Override 
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {        
+        log.info("createNew: " + newName + " size=" + length );
         long tm = System.currentTimeMillis();
         ByteArrayOutputStream bout = new ByteArrayOutputStream(length.intValue());
         long actualBytes = IOUtils.copyLarge(inputStream, bout);
@@ -64,7 +65,7 @@ class BlobFolder extends  BaseResource implements PutableResource {
             throw new RuntimeException("Blob is not of expected length: expected=" + length + " actual=" + actualBytes);
         }
         byte[] bytes = bout.toByteArray();
-        log.info("createNew: " + newName + " size=" + length + " actual bytes=" + bytes.length + " duration=" + (System.currentTimeMillis()-tm));
+        log.info("createNew: " + newName + " actual bytes=" + bytes.length + " duration=" + (System.currentTimeMillis()-tm));
         
         // Verify that the given hash does match the data
         log.info("verify that filename matches hash...");

@@ -5,15 +5,21 @@ function initJPlayer(height, width, cssClass) {
 
 function replaceImagesWithJPlayer(images, height, width, cssClass) {
     images.each(function(i, n) {
-        var img = $(n);
+        var img = $(n);        
+        var src = img.attr("data-video-src");
         var posterUrl = img.attr("src");
-        var src = getFolderPath(posterUrl);        
+        if( src == null ) {            
+            log("replaceImagesWithJPlayer: derive video base path from src", posterUrl);
+            src = getFolderPath(posterUrl);        
+        } else {
+            log("replaceImagesWithJPlayer: Using data-video-src", src);
+        }
         log("item", img, i, src);
-        buildJPlayer(height, width, cssClass, img, i+10, src);
+        buildJPlayer(height, width, cssClass, img, i+10, src, posterUrl);
     });
 }
 
-function buildJPlayer(height, width, cssClass, itemToReplace, count, src) {
+function buildJPlayer(height, width, cssClass, itemToReplace, count, src, posterHref) {
     var div = buildJPlayerContainer(count);
     itemToReplace.replaceWith(div);    
     
@@ -21,11 +27,11 @@ function buildJPlayer(height, width, cssClass, itemToReplace, count, src) {
     var playerDiv = div.find(".jp-jplayer");
     log("player div", playerDiv, "parent div", div);
     if( src ) {
-        loadJPlayer(height, width, cssClass, playerDiv, "jp_container_" + count, src);
+        loadJPlayer(height, width, cssClass, playerDiv, "jp_container_" + count, src, posterHref);
     }
 }
 
-function loadJPlayer(height, width, cssClass, jplayerDiv, containerId, src) {
+function loadJPlayer(height, width, cssClass, jplayerDiv, containerId, src, posterHref) {
     log("loadJPlayer", jplayerDiv, src);
     // We need src to be absolute for flash player
     if( src && !src.startsWith("/")) {
@@ -35,13 +41,21 @@ function loadJPlayer(height, width, cssClass, jplayerDiv, containerId, src) {
     }
 
     var basePath = src + "/alt-640-360.";
+    
+    var poster;
+    if( posterHref ) {
+        poster = posterHref;
+    } else {
+        poster = basePath + "png";
+    }
+    
     jplayerDiv.jPlayer({
         ready: function () {
             log("setMedia", this);
             $(this).jPlayer("setMedia", {
                 m4v: basePath + "m4v",
                 webmv: basePath + "webm",
-                poster: basePath + "png"
+                poster: poster
             });
             log("done set media");
         },

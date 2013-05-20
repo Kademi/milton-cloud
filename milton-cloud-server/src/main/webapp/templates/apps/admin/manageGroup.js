@@ -57,6 +57,8 @@ function initAddRole() {
                 return;
             }
             appliesToText = select.find("option:checked").text();
+        } else {
+            appliesToText = "their own organisation";
         }
 
         log("add role", appliesToTypeVal, appliesToVal);

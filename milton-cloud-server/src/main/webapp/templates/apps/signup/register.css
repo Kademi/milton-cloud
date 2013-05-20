@@ -21,6 +21,14 @@
     line-height: 40px \0;
     width: 225px;
 }
+
+#registerForm select {
+    padding: 10px;
+    width: 245px; 
+    border: 1px solid #D3D3D3;
+    background: white;
+}
+
 #registerForm label.last {
 
 }

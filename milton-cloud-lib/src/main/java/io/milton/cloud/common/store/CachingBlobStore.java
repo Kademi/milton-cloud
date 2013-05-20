@@ -15,8 +15,9 @@
 package io.milton.cloud.common.store;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.hashsplit4j.api.BlobStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A BlobStore which uses a MRU cache to store blobs in memory
@@ -25,14 +26,18 @@ import org.hashsplit4j.api.BlobStore;
  */
 public class CachingBlobStore implements BlobStore {
 
-    private final ConcurrentMap<String, byte[]> cache;
+    private static final Logger log = LoggerFactory.getLogger(CachingBlobStore.class);
+    
+    private final ConcurrentLinkedHashMap<String, byte[]> cache;
     private final BlobStore blobStore;
+    private final int capacity;
     
     private long hits;
     private long misses;
 
     public CachingBlobStore(BlobStore blobStore, int capacity) {
         this.blobStore = blobStore;
+        this.capacity = capacity;
         cache = new ConcurrentLinkedHashMap.Builder()
                 .maximumWeightedCapacity(capacity)
                 .build();
@@ -41,7 +46,13 @@ public class CachingBlobStore implements BlobStore {
     @Override
     public void setBlob(String hash, byte[] bytes) {
         blobStore.setBlob(hash, bytes);
-        cache.putIfAbsent(hash, bytes);
+        // NOTE: seems that items can be added faster then the cache can removed
+        // So check if we're over capacity before adding
+        if( cache.size() < capacity) {
+            cache.putIfAbsent(hash, bytes);
+        } else {
+            log.warn("Cache is over capacity. Capacity=" + capacity + " size=" + cache.size());
+        }
     }
 
     @Override
@@ -52,7 +63,9 @@ public class CachingBlobStore implements BlobStore {
             if( arr != null ) {
                 System.out.println("Caching blob store: hits=" + hits + " misses=" + misses);
                 misses++;
-                cache.putIfAbsent(hash, arr);
+                if( cache.size() < capacity) {
+                    cache.putIfAbsent(hash, arr);
+                }
             }
         } else {
             hits++;
@@ -72,4 +85,10 @@ public class CachingBlobStore implements BlobStore {
         }
         return b;
     }
+
+    public int getCapacity() {
+        return capacity;
+    }
+    
+    
 }

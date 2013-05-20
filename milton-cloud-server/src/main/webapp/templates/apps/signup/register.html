@@ -41,6 +41,16 @@
                                                     <td><label class="last collapse" for="confirmPassword">Confirm</label></td>
                                                     <td><input class="required" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password" /></td>                                                
                                                 </tr>  
+                                                #if( not $page.extraFields.isEmpty() )
+                                                <tr>
+                                                #foreach($field in $page.extraFields)
+                                                    <td><label class="first collapse"  for="field_${field.name}">$field.text</label></td>                                                
+                                                    <td>$field.html</td>
+                                                #end
+                                                </tr>
+                                                #end
+                                                                        
+                                                
                                                 #if( $page.hasOrgs )
                                                 <tr>
                                                     <td><label class="first collapse" for="orgName">$page.regoOrgType</label></td>

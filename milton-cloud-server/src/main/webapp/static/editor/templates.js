@@ -61,6 +61,12 @@ CKEDITOR.addTemplates('default',{
         image:'',
         description:'A table with alternating row colours',
         html:"<table width='100%' class='striped'><thead><tr><th></th><th></th><th></th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>"
+    },
+    {
+        title:'2 Column Page layout',
+        image:'',
+        description:'A page width table with 2 columns',
+        html:"<table width='100%' class='plain page-2cols'><tbody><tr><td width='50%'></td><td></td><td width='50%'></td></tr></tbody></table>"
     }
     ]
 });

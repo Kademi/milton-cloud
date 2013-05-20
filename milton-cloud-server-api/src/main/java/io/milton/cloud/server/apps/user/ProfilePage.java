@@ -74,7 +74,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import org.hashsplit4j.api.BlobStore;
@@ -388,22 +390,31 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
      *
      * @return
      */
-    public List<ExtraField> getExtraFields() {
+    public Map<ExtraField,String> getExtraFields() {
+        System.out.println("getExtraFields");
+        Map<ExtraField,String> mapOfFields = new LinkedHashMap<>();
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         Organisation thisOrg = getOrganisation();
         Set<String> fieldNames = new HashSet<>();
-        List<ExtraField> list = new ArrayList<>();
         if (p.getMemberships() != null) {
             for (GroupMembership gm : p.getMemberships()) {
                 if (gm.getWithinOrg().isWithin(thisOrg)) {
-                    NvSet fieldset = gm.getGroupEntity().getFieldset();
-                    if (fieldset != null) {
-                        for (NvPair nvp : fieldset.getNvPairs()) {
-                            System.out.println("field: " + nvp.getPropValue());
-                            ExtraField field = ExtraField.parse(nvp.getName(), nvp.getPropValue());
-                            if (!fieldNames.contains(field.getName()) || field.isRequired()) {
-                                fieldNames.add(nvp.getName());
-                                list.add(ExtraField.parse(nvp.getName(), nvp.getPropValue()));
+                    NvSet fieldsetMeta = gm.getGroupEntity().getFieldset();
+                    System.out.println("getExtraFields gm=" + gm.getId() + " - " + fieldsetMeta);
+                    if (fieldsetMeta != null) {
+                        NvSet fieldsetValues = gm.getFields();
+                        Map<String, String> mapOfValues = fieldsetValues.toMap();
+                        for (NvPair nvpMeta : fieldsetMeta.getNvPairs()) {
+                            System.out.println("field: " + nvpMeta.getPropValue());
+                            ExtraField fieldMeta = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
+                            if (!fieldNames.contains(fieldMeta.getName()) || fieldMeta.isRequired()) {
+                                fieldNames.add(nvpMeta.getName());
+                                ExtraField xf = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
+                                String value = mapOfValues.get(xf.getName());
+                                if( value == null ) {
+                                    value = ""; // otherwise velocity doesnt set variable
+                                }
+                                mapOfFields.put(xf, value);
                             }
                         }
 
@@ -413,7 +424,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             }
         }
 
-        return list;
+        return mapOfFields;
     }
 
     private void storeExtraFields(Map<String, String> parameters, Profile p, Session session) {

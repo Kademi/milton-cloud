@@ -105,6 +105,17 @@ public class AltFormatGenerator implements EventListener {
         formats.add(new FormatSpec("video", "m4v", 640, 360, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
         formats.add(new FormatSpec("video", "ogv", 640, 360, false, "-r", "15", "-b:v", "512k"));
         formats.add(new FormatSpec("video", "webm", 640, 360, false, "-r", "15", "-b:v", "512k"));
+        
+        formats.add(new FormatSpec("video", "flv", 640, 480, false, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "m4v", 640, 480, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 640, 480, false, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 640, 480, false, "-r", "15", "-b:v", "512k"));
+
+        formats.add(new FormatSpec("video", "flv", 854, 480, false, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "m4v", 854, 480, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 854, 480, false, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 854, 480, false, "-r", "15", "-b:v", "512k"));
+        
         // HTTP Live Streaming
 
         formats.add(HLS_FORMAT_SPEC);
@@ -112,6 +123,8 @@ public class AltFormatGenerator implements EventListener {
 
         // Video thumbnails
         formats.add(new FormatSpec("video", "png", 640, 360, false, "-ss", "0", "-vframes", "1", "-f", "image2"));
+        formats.add(new FormatSpec("video", "png", 640, 480, false, "-ss", "0", "-vframes", "1", "-f", "image2"));
+        formats.add(new FormatSpec("video", "png", 855, 480, false, "-ss", "0", "-vframes", "1", "-f", "image2"));
         formats.add(new FormatSpec("video", "png", 1280, 720, false, "-ss", "0", "-vframes", "1", "-f", "image2"));
 
         System.out.println("register put event on: " + eventManager);

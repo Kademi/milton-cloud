@@ -59,9 +59,13 @@ function initRegisterForms(afterRegisterHref, callback) {
         $.tinybox.close();
     });
     function doOrgSearch() {
+        var q = $("#orgQuery").val();
+        if( q.length < 3 ) {
+            return;
+        }
         $.ajax({
             type: 'GET',
-            url: window.location.pathname + "?q=" + $("#orgQuery").val(),
+            url: window.location.pathname + "?q=" + q,
             success: function(data) {
                 log("success", data)
                 

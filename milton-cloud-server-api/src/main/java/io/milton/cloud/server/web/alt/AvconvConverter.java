@@ -200,21 +200,15 @@ public class AvconvConverter implements Closeable {
                     log.warn("Failed to find dimensions of source file, might not be able to generate thumb");
                     scale = "scale=" + dimension.getWidth() + ":-1"; // only scale on width            
                 } else {
-                    if (format.getWidth() < 100 || dimension.getHeight() < 100 && (info.getHeight() > 2000 || info.getWidth() > 2000)) {
-                        scale = "scale=-1:500,";  // bring down to a reasonable size, avconv fails if trying to downsize by too much (eg 3000 to 40 seems to fail)
-                    } else {
-                        scale = "";
-                    }
-
                     Proportion prop = new Proportion(info.getWidth(), info.getHeight(), dimension.getWidth(), dimension.getHeight());
 
                     if (info.getWidth() > info.getHeight()) {
                         //if (prop.scaleByHeight()) {
                         System.out.println("by height, crop");
-                        scale += "scale=-1:" + prop.maxHeight;
+                        scale = "scale=-1:" + prop.maxHeight;
                     } else {
                         System.out.println("by width, crop");
-                        scale += "scale=" + prop.maxWidth + ":-1";
+                        scale = "scale=" + prop.maxWidth + ":-1";
                     }
                     scale += ",crop=" + prop.maxWidth + ":" + prop.maxHeight;
                 }
@@ -224,38 +218,55 @@ public class AvconvConverter implements Closeable {
                     throw new RuntimeException("Source file does not exist or is not a file: " + source.getAbsolutePath());
                 }
 
-                args.add("-refs"); // just a guess
-                args.add("2");
-                
-                
                 args.add("-vf");
                 args.add(scale);
 
                 args.add("-b:v");
-                args.add( dimension.getTargetVideoBandwidthK() + "k"); // we dont need great audio                
+                args.add( dimension.getTargetVideoBandwidthK() + "k");
+                
+                args.add("-maxrate");
+                args.add( dimension.getTargetVideoBandwidthK() + "k");
+
+                args.add("-bufsize"); // from namrekka - http://www.longtailvideo.com/support/forums/jw-player/video-encoding/33049/hls-skipping-forward-plays-audio-but-not-video
+                args.add( dimension.getTargetVideoBandwidthK() + "k");
                 
                 args.add("-b:a");
-                args.add( dimension.getTargetAudioBandwidthK() + "k"); // we dont need great audio
+                args.add( dimension.getTargetAudioBandwidthK() + "k");
 
                 args.add("-r"); // target framerate
                 args.add("" + dimension.getFrameRate());                                
+
+                args.add("-keyint_min");
+                args.add("" + dimension.getFrameRate());
+                
+                args.add("-refs");
+                args.add("1");
+                
+                args.add("-trellis");
+                args.add("0");                                
                 
                 args.add("-g"); // one key frame every second
                 args.add("" + dimension.getFrameRate());                
+                //-crf 25 -profile:v baseline 
+                //-g 48 -sc_threshold 0 
+                //-flags +cgop -c:a aac -strict -2 -b:a 112k -map 0:v:0 -map 0:a:0 -f ssegment -metadata "service_provider=Some Provider" -metadata "service_name=Some Channel Name" -segment_time 10 -segment_format mpegts "hls_%02d.ts"
                 
+                // disables CABAC, but not sure how important it is
+//                args.add("-coder");
+//                args.add("0");
+                                
                 args.add("-profile:v");
-                args.add("main");
-                
-                args.add("-preset:v");
-                args.add("fast");
-                
+                args.add("baseline");
+                                
                 args.add("-level");
                 args.add("30");
+
                 
                 args.add("-segment_time");
                 args.add(segmentDurationSecs + "");
 
-                String[] hlsArgs = {"-c:v", "libx264", "-c:a", "libvo_aacenc", "-map", "0:0", "-map", "0:1", "-bsf", "h264_mp4toannexb", "-flags", "-global_header", "-f", "segment", "-segment_list_size", "99999", "-segment_format", "mpegts"};
+                // "flags +cgop" ... ?
+                String[] hlsArgs = {"-c:v", "libx264", "-c:a", "libvo_aacenc", "-map", "0:0", "-map", "0:1", "-bsf", "h264_mp4toannexb", "-flags", "+cgop-global_header", "-f", "segment", "-segment_list_size", "99999", "-segment_format", "mpegts"};
                 for (String s : hlsArgs) {
                     args.add(s);
                 }
@@ -516,7 +527,8 @@ public class AvconvConverter implements Closeable {
                 if (programId == null) {
                     Integer likelyBandwith = null;
                     if (secs > 0) {
-                        likelyBandwith = (int) (newSegment.length() / secs);
+                        likelyBandwith = (int) (newSegment.length()*8 / secs);
+                        likelyBandwith = (int) (likelyBandwith * 1.2); // this is meant to be an upper bound, so build in a bit of room to allow for peaks
                     }
                     programId = generatorListener.onNewProgram(primaryId, dimension, likelyBandwith);
                 }

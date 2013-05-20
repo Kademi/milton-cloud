@@ -279,6 +279,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 GroupMembership gm = p.addToGroup(group, org, session);
                 gm.setFields(fields);
                 session.save(gm);
+                log.info("attached NvSet to gm: " + gm.getId());
                 _(SignupApp.class).onNewMembership(p.membership(group), wrf);
                 SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
                 result = "created";
@@ -448,6 +449,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         NvSet fields = new NvSet();
         fields.setCreatedDate(now);
         session.save(fields);
+        log.info("Created NvSet: " + fields.getId());
         for (ExtraField f : extraFields) {
             String val = WebUtils.getParam(parameters, f.getName());
             if (val != null) {

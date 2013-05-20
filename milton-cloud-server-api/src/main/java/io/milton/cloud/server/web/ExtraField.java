@@ -80,17 +80,22 @@ public class ExtraField {
     }
     
     public String getHtml() {
+        return html(null);
+    }
+    
+    public String html(String value) {
         Formatter formatter = _(Formatter.class);
         StringBuilder sb = new StringBuilder();
         if( options != null && !options.isEmpty()) {
-            sb.append("<select");
+            sb.append("<select ");
             sb.append("name='").append(name).append("'");
             if( required) {
                 sb.append(" class='required'");
             }
             sb.append(">");
+            sb.append( formatter.option("", "[Please select]", null) );
             for( String opt : options) {
-                sb.append( formatter.option(opt, opt, null) );
+                sb.append( formatter.option(opt, opt, value) );
             }
             sb.append("</select>");
         } else {
@@ -101,6 +106,10 @@ public class ExtraField {
                 sb.append(" class='required'");
             }
             sb.append(" type='text'");
+            sb.append(" placeholder='").append(text).append("'");
+            if( value != null ) {
+                sb.append(" value='").append(value).append("'");
+            }
             sb.append("/>");
         }
         return sb.toString();
