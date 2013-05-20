@@ -48,7 +48,7 @@ public class CachingBlobStore implements BlobStore {
         blobStore.setBlob(hash, bytes);
         // NOTE: seems that items can be added faster then the cache can removed
         // So check if we're over capacity before adding
-        if( cache.size() < capacity) {
+        if( cache.size() < capacity+20) {
             cache.putIfAbsent(hash, bytes);
         } else {
             log.warn("Cache is over capacity. Capacity=" + capacity + " size=" + cache.size());
@@ -63,7 +63,7 @@ public class CachingBlobStore implements BlobStore {
             if( arr != null ) {
                 System.out.println("Caching blob store: hits=" + hits + " misses=" + misses);
                 misses++;
-                if( cache.size() < capacity) {
+                if( cache.size() < capacity+20) {
                     cache.putIfAbsent(hash, arr);
                 }
             }

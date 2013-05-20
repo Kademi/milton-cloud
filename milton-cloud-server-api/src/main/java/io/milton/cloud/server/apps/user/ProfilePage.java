@@ -74,7 +74,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -93,6 +92,41 @@ import org.hashsplit4j.api.Parser;
 public class ProfilePage extends TemplatedHtmlPage implements PostableResource, PutableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ProfilePage.class);
+    
+    public static Map<ExtraField,String> getExtraFields(Organisation thisOrg) {
+        Map<ExtraField,String> mapOfFields = new LinkedHashMap<>();
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+        Set<String> fieldNames = new HashSet<>();
+        if (p.getMemberships() != null) {
+            for (GroupMembership gm : p.getMemberships()) {
+                if (gm.getWithinOrg().isWithin(thisOrg)) {
+                    NvSet fieldsetMeta = gm.getGroupEntity().getFieldset();
+                    if (fieldsetMeta != null) {
+                        NvSet fieldsetValues = gm.getFields();
+                        Map<String, String> mapOfValues = fieldsetValues.toMap();
+                        for (NvPair nvpMeta : fieldsetMeta.getNvPairs()) {
+                            ExtraField fieldMeta = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
+                            if (!fieldNames.contains(fieldMeta.getName()) || fieldMeta.isRequired()) {
+                                fieldNames.add(nvpMeta.getName());
+                                ExtraField xf = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
+                                String value = mapOfValues.get(xf.getName());
+                                if( value == null ) {
+                                    value = ""; // otherwise velocity doesnt set variable
+                                }
+                                mapOfFields.put(xf, value);
+                            }
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        return mapOfFields;
+    }    
+    
+    
     public static final String PROFILE_PIC_CHILD = "pic";
     public static final String PICS_REPO_NAME = "ProfilePics";
     public static final long MAX_SIZE = 10000000l;
@@ -378,6 +412,11 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
     }
 
     /**
+     * Lazy loaded
+     */
+    private Map<ExtraField,String> extraFields;
+    
+    /**
      * Iterate over all groups that this user is a member of and which are
      * contained within this organisation.
      *
@@ -391,40 +430,10 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
      * @return
      */
     public Map<ExtraField,String> getExtraFields() {
-        System.out.println("getExtraFields");
-        Map<ExtraField,String> mapOfFields = new LinkedHashMap<>();
-        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-        Organisation thisOrg = getOrganisation();
-        Set<String> fieldNames = new HashSet<>();
-        if (p.getMemberships() != null) {
-            for (GroupMembership gm : p.getMemberships()) {
-                if (gm.getWithinOrg().isWithin(thisOrg)) {
-                    NvSet fieldsetMeta = gm.getGroupEntity().getFieldset();
-                    System.out.println("getExtraFields gm=" + gm.getId() + " - " + fieldsetMeta);
-                    if (fieldsetMeta != null) {
-                        NvSet fieldsetValues = gm.getFields();
-                        Map<String, String> mapOfValues = fieldsetValues.toMap();
-                        for (NvPair nvpMeta : fieldsetMeta.getNvPairs()) {
-                            System.out.println("field: " + nvpMeta.getPropValue());
-                            ExtraField fieldMeta = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
-                            if (!fieldNames.contains(fieldMeta.getName()) || fieldMeta.isRequired()) {
-                                fieldNames.add(nvpMeta.getName());
-                                ExtraField xf = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
-                                String value = mapOfValues.get(xf.getName());
-                                if( value == null ) {
-                                    value = ""; // otherwise velocity doesnt set variable
-                                }
-                                mapOfFields.put(xf, value);
-                            }
-                        }
-
-                    }
-
-                }
-            }
+        if( extraFields == null ) {
+            extraFields = getExtraFields(getOrganisation());
         }
-
-        return mapOfFields;
+        return extraFields;
     }
 
     private void storeExtraFields(Map<String, String> parameters, Profile p, Session session) {
