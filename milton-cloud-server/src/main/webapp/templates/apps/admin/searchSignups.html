@@ -4,9 +4,12 @@
         <link href="manageGroup.css" rel="stylesheet" type="text/css" />
         <link href="manageGroupMembers.css" rel="stylesheet" type="text/css" />
     </head>
-    <body class="manageModulePages">
-        <!-- Content goes here - NO HEADER/BANNER/MENU! -->
+    <body class="manageModulePages">        
         <section id="manageGroup" class="MainContent">
+            <article class="Note">Here you can see users who have recently registered. Often you may want to validate new users and if they are
+            valid then add them to a special priviledged group. 
+            <p>Click on a row to see any further details about the user</p>
+            Hint: If you dont want to allow any access to new users until approved then use the 'Administrator review' registration mode.</article>            
             <header class="ClearFix">
                 <div class="buttons">                    
                     <select style="float: right; margin-left: 10px" name="group" id="groupSelect">
@@ -43,17 +46,29 @@
                     #if($member.memberships.size() == 1 ) 
                     #set($rowClass="singleGroup")
                     #end
-                    <tr class="$rowClass">
-                        <td>$member.nickName</td>
+                    <tr class="$rowClass membership">
+                        <td><a href='/manageUsers/$member.id'>$member.nickName</a></td>
                         <td>$member.email</td>
                         <td>
                             <ul class="GroupList ClearFix">
-                                #foreach($m in $member.memberships)
+                                #foreach($m in $member.memberships)                                
                                 <li><a href="groups/${m.groupEntity.name}/members">$m.groupEntity.name</a> in $m.withinOrg.titleOrId</li>                                
                                 #end
                             </ul>
                         </td>
                         <td><input type="checkbox" name="toAddId" value="$member.id"/></td>
+                    </tr>
+                    <tr class="details">
+                        <td></td>
+                        <td colspan="2">
+                            <ul class="GroupList ClearFix">                                
+                                #foreach($m in $member.memberships)
+                                    #foreach($f in $m.fields.nvPairs)
+                                <li>$f.name : $f.propValue</li>
+                                    #end
+                                #end
+                            </ul>                            
+                        </td>
                     </tr>
                     #end
                 </tbody>
@@ -74,6 +89,10 @@
                 });
                 initSelectAll();
                 initAddUsersToGroup();
+                $("tr.membership").click(function(e) {
+                    var tr = $(e.target).closest("tr");
+                    tr.next().toggle(300);
+                });
             });
             
             function initAddUsersToGroup() {

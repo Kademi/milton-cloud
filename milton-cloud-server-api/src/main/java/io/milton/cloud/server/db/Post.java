@@ -64,6 +64,15 @@ public abstract class Post implements Serializable {
         return list;
     }
 
+    public static Post find(Organisation org, Long postId, Session session) {
+        Criteria crit = session.createCriteria(Post.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("id", postId));
+        Criteria critWebsite = crit.createAlias("website", "w");
+        critWebsite.add(Restrictions.eq("w.organisation", org));
+        return DbUtils.unique(crit);
+    }
+
     public abstract void delete(Session session);
     private long id;
     private Website website;

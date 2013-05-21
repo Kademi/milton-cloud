@@ -47,11 +47,17 @@ import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 public class TextTemplater implements Templater {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TextTemplater.class);
+    public static final String INJECTED_PATH = "/injected";
+    private static ThreadLocal<byte[]> tlInjectedTemplate = new ThreadLocal<>();
     private final SpliffyResourceFactory resourceFactory;
     private final ThemeAwareResourceLoader templateLoader;
     private final VelocityEngine engine;
     private final SpliffySecurityManager securityManager;
     private final long loadedTime = System.currentTimeMillis();
+
+    public static void setInjectedTemplate(byte[] bytes) {
+        tlInjectedTemplate.set(bytes);
+    }
 
     public TextTemplater(SpliffySecurityManager securityManager, SpliffyResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
@@ -120,18 +126,23 @@ public class TextTemplater implements Templater {
             if (TextTemplater.log.isTraceEnabled()) {
                 TextTemplater.log.trace("getResourceStream( " + source + ")");
             }
-            GetableResource r = getResource(source);
-            if (r == null) {
-                return null;
-            }
+            byte[] bytes;
+            if (source.endsWith(INJECTED_PATH)) {
+                bytes = tlInjectedTemplate.get();
+            } else {
+                GetableResource r = getResource(source);
+                if (r == null) {
+                    return null;
+                }
 
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            try {
-                r.sendContent(bout, null, null, null);
-            } catch (Throwable e) {
-                throw new RuntimeException("Couldnt parse: " + r.getClass(), e);
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                try {
+                    r.sendContent(bout, null, null, null);
+                } catch (Throwable e) {
+                    throw new RuntimeException("Couldnt parse: " + r.getClass(), e);
+                }
+                bytes = bout.toByteArray();
             }
-            byte[] bytes = bout.toByteArray();
             return new ByteArrayInputStream(bytes);
         }
 

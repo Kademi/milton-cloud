@@ -310,7 +310,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
         if (app != null) {
             return app.getSummary(getOrganisation(), branch);
         } else {
-            return "Unknown app: " + appId;
+            return "Custom app: " + appId;
         }
     }
 
@@ -320,7 +320,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
         if (app != null) {
             return app.getTitle(getOrganisation(), branch);
         } else {
-            return "Unknown app: " + appId;
+            return "Custom app: " + appId;
         }
     }
     

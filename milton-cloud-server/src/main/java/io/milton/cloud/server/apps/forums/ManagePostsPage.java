@@ -45,6 +45,7 @@ import io.milton.resource.PostableResource;
 import static io.milton.context.RequestContext._;
 import io.milton.http.HttpManager;
 import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import io.milton.http.http11.auth.CookieAuthenticationHandler;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManagePostsPage extends AbstractResource implements GetableResource, PostableResource {
+public class ManagePostsPage extends AbstractResource implements GetableResource, PostableResource, IForumResource {
 
     private static final Logger log = LoggerFactory.getLogger(ManagePostsPage.class);
     private final String name;
@@ -91,6 +92,23 @@ public class ManagePostsPage extends AbstractResource implements GetableResource
         }
         return null;
     }
+
+    @Override
+    public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
+        if( request.getMethod().equals(Method.GET)) {
+            Long postId = WebUtils.getParamAsLong(request.getParams(), "gotoPostId");
+            Post post = Post.find(getOrganisation(), postId, SessionManager.session());
+            if( post != null ) {
+                RecentPostBean bean = toBean(post);
+                String url = "http://" + bean.getContentDomain() + bean.getContentHref() + "?" + getCookieAuthParams();
+                System.out.println("redit=" + url);
+                return url;
+            }
+        }
+        return super.checkRedirect(request);
+    }
+    
+    
 
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {

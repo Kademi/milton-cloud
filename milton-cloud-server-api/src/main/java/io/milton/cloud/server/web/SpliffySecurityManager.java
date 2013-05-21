@@ -264,7 +264,7 @@ public class SpliffySecurityManager {
                             privs.addAll(privsToAdd);
                         } else {
                             if (log.isTraceEnabled()) {
-                                log.trace("role:" + roleName + " does not apply to: " + checkOrg.getOrgId() + " - " + role);
+                                log.trace("role:" + roleName + " does not apply to: " + checkOrg.getOrgId() + " - role=" + role + " resource=" + resource);
                             }
                         }
                     }

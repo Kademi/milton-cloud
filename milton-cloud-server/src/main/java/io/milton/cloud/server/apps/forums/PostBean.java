@@ -33,6 +33,7 @@ public class PostBean {
     
     public static PostBean toBean(Post p) {
         final PostBean b = new PostBean();
+        b.setId(p.getId());
         b.setNotes(p.getNotes());
         b.setDate(p.getPostDate().getTime());
         b.setUser(ProfileBean.toBean(p.getPoster()));
@@ -67,6 +68,7 @@ public class PostBean {
         return b;
     }
     
+    private long id;
     private ProfileBean user;
     private String notes;
     private String contentTitle;
@@ -74,6 +76,16 @@ public class PostBean {
     private String contentHref;
     private long date;
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    
+    
     public String getContentDomain() {
         return contentDomain;
     }

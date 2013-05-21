@@ -50,6 +50,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.mail.internet.MimeMessage;
 
@@ -295,11 +296,23 @@ public class ApplicationManager {
     }
 
     public List<Application> findAvailableApps(Organisation org) {
+        List<Application> avail;
         if (org.getOrganisation() == null) {
-            return getApps();
+            avail = getApps();
         } else {
-            return findActiveApps(org.getOrganisation());
+            avail = findActiveApps(org.getOrganisation());
         }
+        avail = new ArrayList<>(avail); // defensive programming
+        List<Repository> repos = org.getRepositories();
+        if( repos != null ) {
+            for( Repository r : repos ) {
+                if( r.getName().startsWith("App-")) {
+                    CustomApp ca = new CustomApp(r);
+                    avail.add(ca);
+                }
+            }
+        }
+        return avail;
     }
 
     public List<Application> findActiveApps(List<Application> available, List<AppControl> appControls) {
@@ -344,11 +357,44 @@ public class ApplicationManager {
         return false;        
     }
 
+    /**
+     * Will compile an ordered list of portlet apps using website theme attributes, ordering-portletname attribute
+     * 
+     * Eg dashboardPrimary would be in theme att: ordering-dashboardPrimary
+     * 
+     * @param portletSection
+     * @param currentUser
+     * @param rootFolder
+     * @param context
+     * @param writer
+     * @throws IOException 
+     */
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, org.apache.velocity.context.Context context, Writer writer) throws IOException {
+        LinkedHashMap<String,PortletApplication> portletApps = new LinkedHashMap<>();
         for (Application app : getActiveApps(rootFolder)) {
             if (app instanceof PortletApplication) {
-                ((PortletApplication) app).renderPortlets(portletSection, currentUser, rootFolder, context, writer);
+                portletApps.put(app.getInstanceId(), (PortletApplication) app);
             }
+        }
+        List<PortletApplication> orderedApps = new ArrayList<>();
+        if( !portletApps.isEmpty()) {
+            // look for reordering            
+            if( rootFolder instanceof WebsiteRootFolder) {
+                WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
+                String ordering = wrf.getThemeAttributes().get("ordering-" + portletSection);
+                if( ordering != null ) {
+                    orderedApps = new ArrayList<>();
+                    for( String appId : ordering.split(",")) {
+                        orderedApps.add( portletApps.get(appId));
+                        portletApps.remove(appId);
+                    }                    
+                }
+            }
+        }
+        orderedApps.addAll(portletApps.values());
+        
+        for( PortletApplication app : orderedApps ) {
+            app.renderPortlets(portletSection, currentUser, rootFolder, context, writer);            
         }
     }
 

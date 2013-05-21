@@ -60,6 +60,7 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
 
     public static final String ROLE_FORUM_VIEWER = "Forums viewer";
     public static final String ROLE_FORUM_USER = "Forums user";
+    public static final String ROLE_FORUM_MANAGER = "Forums manager";
 
     public static String toHref(ForumPost r) {
         Forum forum = r.getForum();
@@ -181,7 +182,44 @@ public class ForumsApp implements MenuApplication, ResourceApplication, PortletA
             }
         }
     }
-
+//
+//    public class ForumManagerRole implements Role {
+//
+//        @Override
+//        public String getName() {
+//            return ROLE_FORUM_MANAGER;
+//        }
+//
+//        @Override
+//        public boolean appliesTo(CommonResource resource, Organisation withinOrg, Group g) {
+//            if (resource instanceof IForumResource) {
+//                IForumResource acr = (IForumResource) resource;
+//                return acr.getOrganisation().isWithin(withinOrg);
+//            }
+//            return false;
+//        }
+//
+//        @Override
+//        public Set<AccessControlledResource.Priviledge> getPriviledges(CommonResource resource, Organisation withinOrg, Group g) {
+//            return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE);
+//        }
+//
+//        @Override
+//        public boolean appliesTo(CommonResource resource, Repository applicableRepo, Group g) {
+//            if (resource instanceof CommonRepositoryResource) {
+//                CommonRepositoryResource cr = (CommonRepositoryResource) resource;
+//                return (cr.getRepository() == applicableRepo);
+//            } else {
+//                return false;
+//            }
+//        }
+//
+//        @Override
+//        public Set<Priviledge> getPriviledges(CommonResource resource, Repository applicableRepo, Group g) {
+//            return AclUtils.asSet(AccessControlledResource.Priviledge.READ, AccessControlledResource.Priviledge.WRITE);
+//        }
+//    }    
+    
     public class ForumUserRole implements Role {
 
         @Override

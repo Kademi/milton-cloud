@@ -92,9 +92,9 @@ import org.hashsplit4j.api.Parser;
 public class ProfilePage extends TemplatedHtmlPage implements PostableResource, PutableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ProfilePage.class);
-    
-    public static Map<ExtraField,String> getExtraFields(Organisation thisOrg) {
-        Map<ExtraField,String> mapOfFields = new LinkedHashMap<>();
+
+    public static Map<ExtraField, String> getExtraFields(Organisation thisOrg) {
+        Map<ExtraField, String> mapOfFields = new LinkedHashMap<>();
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         Set<String> fieldNames = new HashSet<>();
         if (p.getMemberships() != null) {
@@ -103,14 +103,19 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                     NvSet fieldsetMeta = gm.getGroupEntity().getFieldset();
                     if (fieldsetMeta != null) {
                         NvSet fieldsetValues = gm.getFields();
-                        Map<String, String> mapOfValues = fieldsetValues.toMap();
+                        Map<String, String> mapOfValues;
+                        if (fieldsetValues != null) {
+                            mapOfValues = fieldsetValues.toMap();
+                        } else {
+                            mapOfValues = Collections.EMPTY_MAP;
+                        }
                         for (NvPair nvpMeta : fieldsetMeta.getNvPairs()) {
                             ExtraField fieldMeta = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
                             if (!fieldNames.contains(fieldMeta.getName()) || fieldMeta.isRequired()) {
                                 fieldNames.add(nvpMeta.getName());
                                 ExtraField xf = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
                                 String value = mapOfValues.get(xf.getName());
-                                if( value == null ) {
+                                if (value == null) {
                                     value = ""; // otherwise velocity doesnt set variable
                                 }
                                 mapOfFields.put(xf, value);
@@ -124,9 +129,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
 
         return mapOfFields;
-    }    
-    
-    
+    }
     public static final String PROFILE_PIC_CHILD = "pic";
     public static final String PICS_REPO_NAME = "ProfilePics";
     public static final long MAX_SIZE = 10000000l;
@@ -410,12 +413,11 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             }
         }
     }
-
     /**
      * Lazy loaded
      */
-    private Map<ExtraField,String> extraFields;
-    
+    private Map<ExtraField, String> extraFields;
+
     /**
      * Iterate over all groups that this user is a member of and which are
      * contained within this organisation.
@@ -429,8 +431,8 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
      *
      * @return
      */
-    public Map<ExtraField,String> getExtraFields() {
-        if( extraFields == null ) {
+    public Map<ExtraField, String> getExtraFields() {
+        if (extraFields == null) {
             extraFields = getExtraFields(getOrganisation());
         }
         return extraFields;
@@ -494,28 +496,26 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
     public boolean isDoneOrgSearch() {
         return doneOrgSearch;
     }
-    
-    
 
     private void updateMembershipOrg(Map<String, String> params, Session session) {
         long changeMemberOrgId = WebUtils.getParamAsLong(params, "changeMemberOrg");
         long newOrgId = WebUtils.getParamAsLong(params, "orgId");
-        GroupMembership membership = membership(changeMemberOrgId);        
-        
-        if( !membership.getGroupEntity().isOpenGroup() ) {
+        GroupMembership membership = membership(changeMemberOrgId);
+
+        if (!membership.getGroupEntity().isOpenGroup()) {
             throw new RuntimeException("Can only update membership on an open group");
         }
-        
+
         Organisation newOrg = Organisation.get(newOrgId, session);
-        if( newOrg == null ) {
+        if (newOrg == null) {
             throw new RuntimeException("Could not find organisation with ID=" + newOrgId);
         }
         if (newOrg.isWithin(getOrganisation())) {
-                        
+
             membership.setWithinOrg(newOrg);
 
             membership.updateSubordinates(session);
-            
+
             session.save(membership);
         } else {
             throw new RuntimeException("Invalid organisation: " + newOrgId);

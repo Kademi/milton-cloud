@@ -42,15 +42,17 @@
                     #foreach($p in $page.searchResults)
                     <tr>
                         <td>
+                            <a href='$p.id'>
                             #if($p.nickName)
                             $formatter.htmlEncode($p.nickName)
                             #else
                             $p.name
                             #end
+                            </a>
                         </td>
                         <td>$formatter.htmlEncode($p.firstName)</td>
                         <td>$formatter.htmlEncode($p.surName)</td>
-                        <td>$p.email</td>
+                        <td><a href='mailto:$p.email'>$p.email</a></td>
                         <td>$!p.phone</td>
                         <td>
                             <div class="Controller">

@@ -113,3 +113,9 @@ body.profile .fileupload-buttonbar .progress div {
 p.confirm {
     display: none;
 }
+.ajax-loader {
+    display: none;
+}
+form.ajax-processing .ajax-loader {
+    display: block;    
+}

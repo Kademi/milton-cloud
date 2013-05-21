@@ -26,6 +26,16 @@ import org.apache.velocity.context.Context;
  * 
  * See constants in this interface for standard portlet section names, but 
  * templates are free to choose their own names
+ * 
+ * Portlets in a Website can be ordered. To do this add a property to the theme
+ * attributes file (eg /theme/theme-attributes.properties) like this:
+ * 
+ * ordering-dashboardSecondary=App-Test1, Calendars
+ * 
+ * Which would put the App-Test1 portlet first, then Calendars, then any other portlet
+ * in the default order
+ * 
+ * 
  *
  * @author brad
  */

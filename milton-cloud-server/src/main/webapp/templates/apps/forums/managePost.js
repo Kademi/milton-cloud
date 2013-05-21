@@ -30,7 +30,7 @@ function confirmDeletePost(postId, postDiv) {
             },
             error: function(resp) {
                 log("error", resp);
-                alert("err");
+                alert("Sorry, couldnt delete the post. Do you have permissions?");
             }
         });         
     }
@@ -75,7 +75,7 @@ function updatePost(postId, newText, postDiv) {
         },
         error: function(resp) {
             log("error", resp);
-            alert("err");
+            alert("Sorry, couldnt update the post. Do you have permissions?");
         }
     });     
 }
