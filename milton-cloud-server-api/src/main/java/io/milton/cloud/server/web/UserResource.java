@@ -346,7 +346,14 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         if( getThisProfile().getMemberships() == null ) {
             return Collections.EMPTY_LIST;
         } else {
-            return getThisProfile().getMemberships();
+            Organisation thisOrg = getOrganisation();
+            List<GroupMembership> list = new ArrayList<>();
+            for( GroupMembership m : getThisProfile().getMemberships() ) {
+                if( m.getGroupEntity().getOrganisation().isWithin( thisOrg)) {
+                    list.add(m);
+                }
+            }
+            return list;
         }
     }
 }

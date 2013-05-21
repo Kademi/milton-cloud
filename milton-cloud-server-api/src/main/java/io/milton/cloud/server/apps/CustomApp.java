@@ -57,7 +57,9 @@ public class CustomApp implements PortletApplication {
         if( node instanceof DataSession.FileNode) {
             log.info("Found portlet: " + portletSection);
             FileNode templateFile = (FileNode) node;
-            TextTemplater.setInjectedTemplate(templateFile.getContent());
+            byte[] content = templateFile.getContent();
+            System.out.println("content: " + new String(content));
+            TextTemplater.setInjectedTemplate(content);
             _(TextTemplater.class).writePage(TextTemplater.INJECTED_PATH, currentUser, rootFolder, context, writer);
         }
     }

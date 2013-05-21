@@ -151,6 +151,9 @@ public class TextTemplater implements Templater {
             if (TextTemplater.log.isTraceEnabled()) {
                 TextTemplater.log.info("isSourceModified( " + resource.getName() + ")");
             }
+            if (resource.getName().endsWith(INJECTED_PATH)) {
+                return true;
+            }
             long lastMod = getLastModified(resource);
             return lastMod != resource.getLastModified();
         }
