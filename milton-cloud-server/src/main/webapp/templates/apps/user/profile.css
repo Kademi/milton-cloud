@@ -1,20 +1,20 @@
 body.admin div.bar {
     display: none;
 }
-body.profile .details form, body.profile .changePassword form, body.profile div.profilePic {
+body.profile .details form, body.profile .changePassword form, body.profile div.profilePic, div.changeOrg{
     border: solid lightgray 1px;
     border-radius: 5px;
     padding: 0.6em 1.2em 3em;
     position: relative;
     margin-top: 0.6em;
 }
-div.details, div.profilePic {
+div.details, div.profilePic, div.changeOrg {
     width: 47%;
 }
 div.details {
     float: left;
 }    
-div.profilePic {
+div.profilePic, div.changeOrg {
     float: right;
     margin-right: 0;
 }
@@ -118,4 +118,43 @@ p.confirm {
 }
 form.ajax-processing .ajax-loader {
     display: block;    
+}
+#orgTitle {
+    width: 200px;
+}
+#changeMemberOrgForm label {
+    width: 300px;
+    padding-left: 20px;
+}
+.changeOrg a {
+    font-size: 12px;
+}
+.changeOrg a:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: lightgray;
+}
+body ul.memberships li {
+    list-style-type: none;
+    background: none;
+    padding: 0;
+    position: relative;
+}
+.membership-remove {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: block;
+    width: 12px;
+    height: 13px;    
+}
+.icon-remove-circle {
+    background-image: url('/templates/themes/images/cross.gif');
+    background-repeat: no-repeat;
+    display: block;
+    width: 12px;
+    height: 13px;      
+}
+.membership-remove span {
+    visibility: hidden;
 }
