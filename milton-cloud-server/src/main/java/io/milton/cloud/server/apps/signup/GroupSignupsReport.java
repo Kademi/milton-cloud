@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import java.io.OutputStream;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -150,7 +151,7 @@ public class GroupSignupsReport implements JsonReport{
     }
 
     @Override
-    public void writeChartAsPng(Organisation org, Website website, Date start, Date finish, CSVWriter writer) {
+    public void writeChartAsPng(Organisation org, Website website, Date start, Date finish, OutputStream out) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
