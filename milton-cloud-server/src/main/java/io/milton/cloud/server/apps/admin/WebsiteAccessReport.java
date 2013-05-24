@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.server.apps.reporting.ItemCountBean;
 import io.milton.cloud.server.apps.reporting.TimeDataPointBean;
 import io.milton.cloud.server.db.AccessLog;
@@ -33,14 +34,31 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import static io.milton.context.RequestContext._;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import org.hibernate.criterion.Order;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.DateTickUnit;
+import org.jfree.chart.axis.DateTickUnitType;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
-public class WebsiteAccessReport implements JsonReport{
+public class WebsiteAccessReport implements JsonReport {
 
+    private static final Logger log = LoggerFactory.getLogger(WebsiteAccessReport.class);
+    
     @Override
     public String getReportId() {
         return "websiteAccess";
@@ -48,22 +66,19 @@ public class WebsiteAccessReport implements JsonReport{
 
     @Override
     public String getTitle(Organisation organisation, Website website) {
-        if( website != null ) {
+        if (website != null) {
             return "Web activity report: " + website.getName();
         } else {
             return "Web activity report: " + (organisation.getTitle() == null ? organisation.getOrgId() : organisation.getTitle());
         }
     }
-    
-    
-    
 
     @Override
-    public GraphData runReport(Organisation org, Website website, Date start, Date finish, JsonResult jsonResult) {
-        GraphData graphData = new GraphData();
+    public GraphData<TimeDataPointBean> runReport(Organisation org, Website website, Date start, Date finish, JsonResult jsonResult) {
+        GraphData<TimeDataPointBean> graphData = new GraphData();
         Formatter f = _(Formatter.class);
         Session session = SessionManager.session();
-        
+
         // Find top 10 url's
         Criteria crit = createBaseCriteria(session, start, finish, website, org);
         crit.setMaxResults(10);
@@ -83,7 +98,7 @@ public class WebsiteAccessReport implements JsonReport{
             topUrls.add(new ItemCountBean(url, count));
         }
         System.out.println("items: " + graphData.getItems());
-                
+
         // Execute graph query
         crit = createBaseCriteria(session, start, finish, website, org);
         crit.setProjection(Projections.projectionList()
@@ -92,20 +107,21 @@ public class WebsiteAccessReport implements JsonReport{
                 .add(Projections.groupProperty("reqYear"))
                 .add(Projections.groupProperty("reqMonth"))
                 .add(Projections.groupProperty("reqDay")));
-        
-        
+
+
         list = crit.list();
-        List<TimeDataPointBean> dataPoints = new ArrayList<>();        
+        List<TimeDataPointBean> dataPoints = new ArrayList<>();
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
-            Date date = (Date) arr[0];            
+            Date date = (Date) arr[0];
+            date = GraphData.stripTime(date);
             Long count = f.toLong(arr[1]);
             TimeDataPointBean b = new TimeDataPointBean();
             b.setDate(date.getTime());
             b.setValue(count);
             dataPoints.add(b);
         }
-        
+
         graphData.setData(dataPoints);
         String[] labels = {"Hits"};
         graphData.setLabels(labels);
@@ -123,15 +139,71 @@ public class WebsiteAccessReport implements JsonReport{
         if (finish != null) {
             crit.add(Restrictions.le("reqDate", finish));
         }
-        if( website != null ) {
+        if (website != null) {
             crit.add(Restrictions.eq("website", website));
         }
-        if( org != null ) {
+        if (org != null) {
             crit.add(Restrictions.eq("organisation", org));
         }
         crit.add(Restrictions.eq("contentType", "text/html")); // might need to include application/html at some point...
         crit.add(Restrictions.or(Restrictions.eq("resultCode", 200), Restrictions.eq("resultCode", 304)));
         return crit;
     }
-    
+
+    @Override
+    public void runReportCsv(Organisation org, Website website, Date start, Date finish, CSVWriter writer) {
+        JsonResult jsonResult = new JsonResult();
+        GraphData<TimeDataPointBean> graphData = runReport(org, website, start, finish, jsonResult);
+        List<TimeDataPointBean> data = graphData.getData();
+        List<String> line = new ArrayList<>();
+        line.add(graphData.getXkey());
+        for (String s : graphData.getLabels()) {
+            line.add(s);
+        }
+        writer.writeNext(GraphData.toArray(line));
+
+        for (TimeDataPointBean row : data) {
+            line = new ArrayList<>();
+            line.add(GraphData.formatDateValue(row.getDate()));
+            line.add(row.getValue() + "");
+            writer.writeNext(GraphData.toArray(line));
+        }
+
+    }
+
+    @Override
+    public void writeChartAsPng(Organisation org, Website website, Date start, Date finish, OutputStream out) {
+        XYSeries dataSeries = new XYSeries("Hits " + website.getName());
+        
+        JsonResult jsonResult = new JsonResult();
+        GraphData<TimeDataPointBean> graphData = runReport(org, website, start, finish, jsonResult);
+        List<TimeDataPointBean> data = graphData.getData();
+
+        for (TimeDataPointBean row : data) {
+            dataSeries.add(row.getValue(), row.getDate());
+        }        
+        
+        DateAxis dateAxis = new DateAxis("Date");
+
+        DateTickUnit unit = new DateTickUnit(DateTickUnitType.DAY, 1);
+
+        DateFormat chartFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        dateAxis.setDateFormatOverride(chartFormatter);
+
+        dateAxis.setTickUnit(unit);
+
+        NumberAxis valueAxis = new NumberAxis("Hits");
+        XYSeriesCollection xyDataset = new XYSeriesCollection(dataSeries);
+
+        XYPlot plot = new XYPlot(xyDataset, dateAxis, valueAxis, null);
+        JFreeChart chart = new JFreeChart("Hits", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        chart.setBackgroundPaint(java.awt.Color.WHITE);
+        try {
+            ChartUtilities.writeChartAsPNG(out, chart, 600, 400);
+            out.flush();
+        } catch (IOException e) {
+            log.error("Exception rendering chart", e);
+        }
+    }
+
 }

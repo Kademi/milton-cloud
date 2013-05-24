@@ -14,6 +14,8 @@
  */
 package io.milton.cloud.server.web.reporting;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,9 +25,48 @@ import java.util.List;
  *
  * @author brad
  */
-public class GraphData {
+public class GraphData<T> {
+    
+    /**
+     * Since most reports use a day time period, its useful to have a function
+     * to strip away the time component of a date
+     * 
+     * @param date
+     * @return 
+     */
+    public static Date stripTime(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();        
+    }    
+    
+    public static  String[] toArray(List<String> line) {
+        String[] arr = new String[line.size()];
+        line.toArray(arr);
+        return arr;
+    }
+
+    public static  String formatValue(Object x) {
+        if( x == null ) {
+            return "";
+        }
+        return x.toString();
+    }    
+
+    public static String formatDateValue(long date) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }    
+
+    public static String formatDateValue(Object x) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     private String graphType = "Line";
-    private List data;
+    private List<T> data;
     private String xkey;
     private String[] ykeys;
     private String[] labels;
@@ -35,11 +76,11 @@ public class GraphData {
     private String[] itemFields;
     
     
-    public List getData() {
+    public List<T> getData() {
         return data;
     }
 
-    public void setData(List data) {
+    public void setData(List<T> data) {
         this.data = data;
     }
 

@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;
@@ -95,6 +96,7 @@ public class GroupSignupsReport implements JsonReport{
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
             Date date = (Date) arr[0];
+            date = GraphData.stripTime(date);
             Long time = date.getTime();
             Long count = f.toLong(arr[1]);
             Group group = (Group) arr[2];
@@ -120,6 +122,36 @@ public class GroupSignupsReport implements JsonReport{
         graphData.setYkeys(ykeys);
         log.info("data points: " + dataPoints.size());
         return graphData;
+    }
+
+    @Override
+    public void runReportCsv(Organisation org, Website website, Date start, Date finish, CSVWriter writer) {
+        JsonResult jsonResult = new JsonResult();
+        GraphData<Map<String, Object>> graphData = runReport(org, website, start, finish, jsonResult);
+        List<Map<String, Object>> data = graphData.getData();
+        List<String> line = new ArrayList<>();
+        line.add(graphData.getXkey());
+        for( String s : graphData.getLabels()) {
+            line.add(s);
+        }
+        writer.writeNext(GraphData.toArray(line));
+        
+        for( Map<String, Object> row : data ) {
+            line = new ArrayList<>();
+            Object x = row.get(graphData.getXkey());
+            line.add(GraphData.formatDateValue(x));
+            
+            for( String s : graphData.getLabels()) {
+                Object y = row.get(s);
+                line.add(GraphData.formatValue(y));
+            }
+            writer.writeNext(GraphData.toArray(line)); 
+        }
+    }
+
+    @Override
+    public void writeChartAsPng(Organisation org, Website website, Date start, Date finish, CSVWriter writer) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

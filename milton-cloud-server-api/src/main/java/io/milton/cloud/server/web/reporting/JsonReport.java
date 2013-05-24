@@ -14,9 +14,11 @@
  */
 package io.milton.cloud.server.web.reporting;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
+import java.io.OutputStream;
 import java.util.Date;
 
 /**
@@ -54,4 +56,17 @@ public interface JsonReport {
      * @return 
      */
     String getTitle(Organisation organisation, Website website);
+    
+    /**
+     * Run the report, but output in CSV format
+     * 
+     * @param org
+     * @param website
+     * @param start
+     * @param finish
+     * @param writer 
+     */
+    void runReportCsv(Organisation org, Website website, Date start, Date finish, CSVWriter writer);
+    
+    void writeChartAsPng(Organisation org, Website website, Date start, Date finish, OutputStream out);
 }

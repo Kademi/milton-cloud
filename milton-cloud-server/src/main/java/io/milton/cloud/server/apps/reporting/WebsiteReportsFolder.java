@@ -77,8 +77,9 @@ public class WebsiteReportsFolder extends AbstractCollectionResource implements 
                 if( app instanceof ReportingApplication ) {
                     ReportingApplication rapp = (ReportingApplication) app;
                     for( JsonReport r : rapp.getReports(getOrganisation(), website)) {
-                        ReportPage p = new ReportPage(r.getReportId(), this, r.getTitle(getOrganisation(), website), r, website);
-                        children.add(p);
+                        children.add(new ReportPage(r.getReportId(), this, r.getTitle(getOrganisation(), website), r, website));
+                        children.add(new ReportCsvPage(r.getReportId() + ".csv", this, r.getTitle(getOrganisation(), website), r, website));
+                        children.add(new ReportChartPage(r.getReportId() + ".png", this, r.getTitle(getOrganisation(), website), r, website));                       
                     }
                 }
             }
