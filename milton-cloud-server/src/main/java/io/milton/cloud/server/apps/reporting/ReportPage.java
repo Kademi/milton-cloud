@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author brad
  */
-public class ReportPage extends TemplatedHtmlPage {
+public class ReportPage extends TemplatedHtmlPage implements IReportPage {
 
     private final JsonReport jsonReport;
     private final Website website;
@@ -84,4 +84,11 @@ public class ReportPage extends TemplatedHtmlPage {
         Date dt = ReportingApp.sdf().parse(s);
         return dt;
     }
+
+    @Override
+    public boolean isAttachable() {
+        return false;
+    }
+    
+    
 }

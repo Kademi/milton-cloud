@@ -39,12 +39,13 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import org.hibernate.criterion.Order;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.DateTickUnit;
 import org.jfree.chart.axis.DateTickUnitType;
-import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -102,11 +103,12 @@ public class WebsiteAccessReport implements JsonReport {
         // Execute graph query
         crit = createBaseCriteria(session, start, finish, website, org);
         crit.setProjection(Projections.projectionList()
-                .add(Projections.min("reqDate"))
+                .add(Projections.min("reqDate"), "rdate")
                 .add(Projections.rowCount())
                 .add(Projections.groupProperty("reqYear"))
                 .add(Projections.groupProperty("reqMonth"))
                 .add(Projections.groupProperty("reqDay")));
+        crit.addOrder(Order.asc("rdate"));
 
 
         list = crit.list();
@@ -173,31 +175,40 @@ public class WebsiteAccessReport implements JsonReport {
 
     @Override
     public void writeChartAsPng(Organisation org, Website website, Date start, Date finish, OutputStream out) {
-        XYSeries dataSeries = new XYSeries("Hits " + website.getName());
+        String title = "Website hits ";
+        if( website != null ) {
+            title += " " + website.getName();
+        } else {
+            title += " all of " + org.getFormattedName();
+        }
+        XYSeries dataSeries = new XYSeries(title);
         
         JsonResult jsonResult = new JsonResult();
         GraphData<TimeDataPointBean> graphData = runReport(org, website, start, finish, jsonResult);
         List<TimeDataPointBean> data = graphData.getData();
 
         for (TimeDataPointBean row : data) {
-            dataSeries.add(row.getValue(), row.getDate());
+            Date dt = new Date(row.getDate());
+            dataSeries.add(row.getDate(), row.getValue());
         }        
         
-        DateAxis dateAxis = new DateAxis("Date");
 
-        DateTickUnit unit = new DateTickUnit(DateTickUnitType.DAY, 1);
-
-        DateFormat chartFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        dateAxis.setDateFormatOverride(chartFormatter);
-
-        dateAxis.setTickUnit(unit);
-
-        NumberAxis valueAxis = new NumberAxis("Hits");
+        //NumberAxis valueAxis = new NumberAxis("Hits");
         XYSeriesCollection xyDataset = new XYSeriesCollection(dataSeries);
 
-        XYPlot plot = new XYPlot(xyDataset, dateAxis, valueAxis, null);
-        JFreeChart chart = new JFreeChart("Hits", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
-        chart.setBackgroundPaint(java.awt.Color.WHITE);
+        //XYPlot plot = new XYPlot(xyDataset, dateAxis, valueAxis, null);
+        JFreeChart chart = ChartFactory.createXYLineChart(title, "Date","Number of hits", xyDataset, PlotOrientation.VERTICAL, false, false, false);
+        XYPlot plot = chart.getXYPlot();
+
+        DateAxis dateAxis = new DateAxis("Date");
+        DateTickUnit unit = new DateTickUnit(DateTickUnitType.DAY, 1);
+        DateFormat chartFormatter = new SimpleDateFormat("dd/MM/yyyy");
+        dateAxis.setDateFormatOverride(chartFormatter);
+        dateAxis.setTickUnit(unit);
+        
+        plot.setDomainAxis(dateAxis);
+        //JFreeChart chart = new JFreeChart("Hits", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        //chart.setBackgroundPaint(java.awt.Color.WHITE);
         try {
             ChartUtilities.writeChartAsPNG(out, chart, 600, 400);
             out.flush();

@@ -251,7 +251,7 @@ function initNewUserForm() {
 }
 
 function initOrgSearch() {
-    log("initOrgSearch");
+    log("initOrgSearch", $("#orgTitle"));
     $("#orgTitle").on("focus click", function() {
         $("#orgSearchResults").show();
         log("show", $("#orgSearchResults")  );
@@ -270,6 +270,7 @@ function initOrgSearch() {
         $("#orgId").val(orgLink.attr("href"));
         $("#orgTitle").val(orgLink.text());
         $("#orgSearchResults").hide();
+        log("clicked", $("#orgId").val(), $("#orgTitle").val() );
     });
 }
 

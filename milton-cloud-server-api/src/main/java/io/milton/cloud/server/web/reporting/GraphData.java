@@ -14,9 +14,13 @@
  */
 package io.milton.cloud.server.web.reporting;
 
+import io.milton.cloud.server.web.templating.Formatter;
+import io.milton.http.DateUtils;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * Value object for holding the result of a report run via ajax.
@@ -47,6 +51,7 @@ public class GraphData<T> {
     public static  String[] toArray(List<String> line) {
         String[] arr = new String[line.size()];
         line.toArray(arr);
+        System.out.println("toArray: " + line.size());
         return arr;
     }
 
@@ -58,11 +63,15 @@ public class GraphData<T> {
     }    
 
     public static String formatDateValue(long date) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return formatDateValue(new Date(date));
     }    
 
+    public static String formatDateValue(Date date) {
+        return DateUtils.formatDate(date);
+    }    
+        
     public static String formatDateValue(Object x) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return _(Formatter.class).formatDate(x);
     }
     
     private String graphType = "Line";

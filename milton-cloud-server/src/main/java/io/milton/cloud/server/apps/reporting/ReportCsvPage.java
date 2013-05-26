@@ -35,7 +35,7 @@ import java.util.Map;
  *
  * @author brad
  */
-public class ReportCsvPage extends TemplatedHtmlPage {
+public class ReportCsvPage extends TemplatedHtmlPage implements IReportPage {
 
     private final JsonReport jsonReport;
     private final Website website;
@@ -45,7 +45,7 @@ public class ReportCsvPage extends TemplatedHtmlPage {
         this.website = website;
         this.jsonReport = jsonReport;
         setForceLogin(true);
-    }
+    }    
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -55,7 +55,7 @@ public class ReportCsvPage extends TemplatedHtmlPage {
         try {
             String sStart = WebUtils.getParam(params, "startDate");
             start = parseDate(sStart);
-            String sFinish = WebUtils.getParam(params, "finishDate"); 
+            String sFinish = WebUtils.getParam(params, "finishDate");
             finish = parseDate(sFinish);
 
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(out);
@@ -75,4 +75,15 @@ public class ReportCsvPage extends TemplatedHtmlPage {
         Date dt = ReportingApp.sdf().parse(s);
         return dt;
     }
+
+    @Override
+    public String getContentType(String accepts) {
+        return "text/csv";
+    }
+    
+    @Override
+    public boolean isAttachable() {
+        return true;
+    }
+    
 }

@@ -14,7 +14,6 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.cloud.server.web.WebUtils;
@@ -26,7 +25,6 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.vfs.db.Website;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
@@ -35,7 +33,7 @@ import java.util.Map;
  *
  * @author brad
  */
-public class ReportChartPage extends TemplatedHtmlPage {
+public class ReportChartPage extends TemplatedHtmlPage implements IReportPage {
 
     private final JsonReport jsonReport;
     private final Website website;
@@ -72,4 +70,15 @@ public class ReportChartPage extends TemplatedHtmlPage {
         Date dt = ReportingApp.sdf().parse(s);
         return dt;
     }
+
+    @Override
+    public String getContentType(String accepts) {
+        return "image/png";
+    }
+
+    @Override
+    public boolean isAttachable() {
+        return true;
+    }
+       
 }

@@ -50,13 +50,15 @@ import io.milton.vfs.db.Website;
  */
 public class ReportsHomeFolder extends AbstractCollectionResource implements GetableResource {
 
+    public static String HOME_NAME = "reporting";
+    
     private final CommonCollectionResource parent;
     private final String name;
     private final ApplicationManager applicationManager;
     private ResourceList children;
 
-    public ReportsHomeFolder(String name, CommonCollectionResource parent) {
-        this.name = name;
+    public ReportsHomeFolder( CommonCollectionResource parent) {
+        this.name = ReportsHomeFolder.HOME_NAME;
         this.parent = parent;
         applicationManager = _(ApplicationManager.class);
     }
@@ -89,9 +91,9 @@ public class ReportsHomeFolder extends AbstractCollectionResource implements Get
                     ReportingApplication rapp = (ReportingApplication) app;
                     for( JsonReport rep : rapp.getReports(getOrganisation(), null)) {
                         String title = rep.getTitle(getOrganisation(), null);
-                        children.add(new ReportPage("org-" + rep.getReportId(), this, title, rep, null));
-                        children.add(new ReportCsvPage("org-" + rep.getReportId() + ".csv", this, title, rep, null));
-                        children.add(new ReportChartPage("org-" + rep.getReportId() + ".png", this, title, rep, null));
+                        children.add(new ReportPage("org-" + rep.getReportId(), this, title + " Report", rep, null));
+                        children.add(new ReportCsvPage("org-" + rep.getReportId() + ".csv", this, title + " CSV", rep, null));                        
+                        children.add(new ReportChartPage("org-" + rep.getReportId() + ".png", this, title + " Chart", rep, null));
                     }
                 }
             }
