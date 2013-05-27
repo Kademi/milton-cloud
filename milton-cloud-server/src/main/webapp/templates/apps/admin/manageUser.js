@@ -277,7 +277,7 @@ function initOrgSearch() {
 function doOrgSearch() {
     $.ajax({
         type: 'GET',
-        url: window.location.pathname + "?orgSearch=" + $("#orgId").val(),
+        url: window.location.pathname + "?orgSearch=" + $("#orgTitle").val(),
         success: function(data) {
             log("success", data)
                 

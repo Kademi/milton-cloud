@@ -188,7 +188,6 @@ public class WebsiteAccessReport implements JsonReport {
         List<TimeDataPointBean> data = graphData.getData();
 
         for (TimeDataPointBean row : data) {
-            Date dt = new Date(row.getDate());
             dataSeries.add(row.getDate(), row.getValue());
         }        
         

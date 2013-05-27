@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.reporting;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.reporting.GraphData;
 import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -47,7 +48,6 @@ public class ReportPage extends TemplatedHtmlPage implements IReportPage {
         this.jsonReport = jsonReport;
         setForceLogin(true);
     }
-    
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -55,20 +55,27 @@ public class ReportPage extends TemplatedHtmlPage implements IReportPage {
             Date start;
             Date finish;
             try {
-                String sStart = params.get("startDate");
+                // Note that the scheduled app uses fromDate/toDate parameters
+                String sStart = WebUtils.getParam(params, "startDate");
+                if (sStart == null) {
+                    sStart = WebUtils.getParam(params, "fromDate");
+                }
                 start = parseDate(sStart);
-                String sFinish = params.get("finishDate");
+                String sFinish = WebUtils.getParam(params, "finishDate");
+                if (sFinish == null) {
+                    sFinish = WebUtils.getParam(params, "toDate");
+                }
                 finish = parseDate(sFinish);
                 jsonResult = new JsonResult(true);
                 GraphData graphData = jsonReport.runReport(getOrganisation(), website, start, finish, jsonResult);
-                if( jsonResult.isStatus() ) {
+                if (jsonResult.isStatus()) {
                     jsonResult.setData(graphData);
                 }
                 jsonResult.write(out);
             } catch (ParseException parseException) {
                 jsonResult = new JsonResult(false, "Invalid date: " + parseException.getMessage());
                 jsonResult.write(out);
-            }            
+            }
         } else {
             String nm = website == null ? getOrganisation().getTitle() : website.getName();
             MenuItem.setActiveIds("menuReporting", "menuReportingHome", "menuReportsWebsite" + nm);
@@ -76,9 +83,8 @@ public class ReportPage extends TemplatedHtmlPage implements IReportPage {
         }
     }
 
-
     private Date parseDate(String s) throws ParseException {
-        if( s == null || s.trim().length() == 0 ) {
+        if (s == null || s.trim().length() == 0) {
             return null;
         }
         Date dt = ReportingApp.sdf().parse(s);
@@ -89,6 +95,4 @@ public class ReportPage extends TemplatedHtmlPage implements IReportPage {
     public boolean isAttachable() {
         return false;
     }
-    
-    
 }

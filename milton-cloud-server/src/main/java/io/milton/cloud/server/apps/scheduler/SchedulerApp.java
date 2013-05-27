@@ -131,8 +131,8 @@ public class SchedulerApp implements Application, MenuApplication, ChildPageAppl
             @Override
             public String beforeSend(Profile p, String template, Map templateVars, EmailItem emailItem) {
                 // process attachment
-                templateVars.put("fromDate", fromDate);
-                templateVars.put("toDate", toDate);
+                templateVars.put("fromDate", ReportingApp.formatDate(fromDate));
+                templateVars.put("toDate", ReportingApp.formatDate(toDate));
                 String dateRange = ReportingApp.getDateRange(fromDate, toDate);
                 templateVars.put("dateRange", dateRange);
 

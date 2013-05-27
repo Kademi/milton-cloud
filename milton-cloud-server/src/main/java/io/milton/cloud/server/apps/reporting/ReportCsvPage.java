@@ -53,9 +53,16 @@ public class ReportCsvPage extends TemplatedHtmlPage implements IReportPage {
         Date start;
         Date finish;
         try {
+            // Note that the scheduled app uses fromDate/toDate parameters
             String sStart = WebUtils.getParam(params, "startDate");
+            if( sStart == null ) {
+                sStart = WebUtils.getParam(params, "fromDate");                
+            }
             start = parseDate(sStart);
-            String sFinish = WebUtils.getParam(params, "finishDate");
+            String sFinish = WebUtils.getParam(params, "finishDate"); 
+            if( sFinish == null ) {
+                sFinish = WebUtils.getParam(params, "toDate"); 
+            }
             finish = parseDate(sFinish);
 
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(out);

@@ -14,8 +14,6 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
-import com.fuselms.apps.products.ManageOrdersCsv;
-import com.fuselms.apps.products.ManageProductOrdersFolder;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;

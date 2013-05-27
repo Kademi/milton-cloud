@@ -51,9 +51,16 @@ public class ReportChartPage extends TemplatedHtmlPage implements IReportPage {
         Date start;
         Date finish;
         try {
+            // Note that the scheduled app uses fromDate/toDate parameters
             String sStart = WebUtils.getParam(params, "startDate");
+            if( sStart == null ) {
+                sStart = WebUtils.getParam(params, "fromDate");                
+            }
             start = parseDate(sStart);
             String sFinish = WebUtils.getParam(params, "finishDate"); 
+            if( sFinish == null ) {
+                sFinish = WebUtils.getParam(params, "toDate"); 
+            }
             finish = parseDate(sFinish);
 
             jsonReport.writeChartAsPng(getOrganisation(), website, start, finish, out);
