@@ -293,7 +293,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         String surName = lineList.get(6);
         String phone = lineList.get(7);
         String newPassword = null;
-        if (lineList.size() >= 8) {
+        if (lineList.size() >= 9) {
             newPassword = lineList.get(8);
         }
 
