@@ -67,6 +67,15 @@ public interface JsonReport {
      * @param writer 
      */
     void runReportCsv(Organisation org, Website website, Date start, Date finish, CSVWriter writer);
-    
+
+    /**
+     * Output a representation of this report as a chart in a PNG image
+     * 
+     * @param org
+     * @param website
+     * @param start
+     * @param finish
+     * @param out 
+     */
     void writeChartAsPng(Organisation org, Website website, Date start, Date finish, OutputStream out);
 }
