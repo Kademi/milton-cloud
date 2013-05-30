@@ -95,4 +95,14 @@ public class ReportPage extends TemplatedHtmlPage implements IReportPage {
     public boolean isAttachable() {
         return false;
     }
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("page")) {
+            return true;
+        }
+        return super.is(type); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 }

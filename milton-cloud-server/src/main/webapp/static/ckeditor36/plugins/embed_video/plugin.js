@@ -10,21 +10,20 @@ var videoInitDone = false;
 CKEDITOR.plugins.add( 'embed_video',
 {
     init: function( editor ) {
-        log("init embed_video");
+        //log("init embed_video");
         var iconPath = this.path + 'images/icon.png';
         var jsPath = this.path + "video/javascript";
         var basePath = this.path;
  
-        log("vid command");
         editor.addCommand( 'videoDialog', new CKEDITOR.dialogCommand( 'videoDialog' ) );
-        log("done command");
+
  
         editor.ui.addButton( 'Video', {
             label: 'Insert Video',
             command: 'videoDialog',
             icon: iconPath
         } );
-        log("done button", iconPath);
+        //log("done button", iconPath);
  
         if ( editor.contextMenu ) {
             editor.addMenuGroup( 'videoGroup' );
@@ -178,6 +177,5 @@ CKEDITOR.plugins.add( 'embed_video',
                 }
             };
         } );
-        log("done init");
     }
 } );

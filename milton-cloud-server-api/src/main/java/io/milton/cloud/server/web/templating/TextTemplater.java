@@ -88,6 +88,7 @@ public class TextTemplater implements Templater {
         Profile user = securityManager.getCurrentUser();
         if (user != null) {
             datamodel.put("user", user);
+            datamodel.put("userResource", securityManager.getCurrentPrincipal());
         }
         PrintWriter pw = new PrintWriter(out);
         template.merge(datamodel, pw);

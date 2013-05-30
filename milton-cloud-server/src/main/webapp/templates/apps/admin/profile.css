@@ -144,11 +144,13 @@ body.profile #module-Course button, body.profile #module-Course .content a.butto
     padding: 1px 20px;
 }
 
-div.groups ul {
+div.groups ul, ul.compact {
     margin-left: 0;    
 }
-
-div.groups li {
+ul.compact li {
+    min-width: 180px;
+}
+div.groups li, ul.compact li {
     float: left;
     margin-right: 10px;    
     background: none repeat scroll 0 0 #EDEDED;

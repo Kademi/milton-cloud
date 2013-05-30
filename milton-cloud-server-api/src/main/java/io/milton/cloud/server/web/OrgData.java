@@ -28,6 +28,8 @@ public class OrgData {
     private String addressLine2;
     private String addressState;
     private String phone;
+    private String state;
+    private String postcode;
 
     public OrgData(Organisation org) {
         id = org.getId();
@@ -37,6 +39,8 @@ public class OrgData {
         addressLine2 = org.getAddressLine2();
         addressState = org.getAddressState();
         phone = org.getPhone();
+        state = org.getAddressState();
+        postcode = org.getPostcode();
     }
 
     public long getId() {
@@ -66,5 +70,12 @@ public class OrgData {
     public String getPhone() {
         return phone;
     }
-    
+
+    public String getState() {
+        return state;
+    }
+
+    public String getPostcode() {
+        return postcode;
+    }            
 }

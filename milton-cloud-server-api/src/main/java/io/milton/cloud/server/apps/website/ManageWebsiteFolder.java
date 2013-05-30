@@ -65,4 +65,6 @@ public class ManageWebsiteFolder extends RepositoryFolder implements WebsiteReso
     public String getExternalUrl() {
         return "http://" + getWebsite().getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain() + _(Formatter.class).getPortString() + "/";
     }
+    
+
 }

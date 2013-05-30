@@ -16,7 +16,7 @@ package io.milton.cloud.server.apps.admin;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.server.apps.reporting.ItemCountBean;
-import io.milton.cloud.server.apps.reporting.TimeDataPointBean;
+import io.milton.cloud.util.TimeDataPointBean;
 import io.milton.cloud.server.db.AccessLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;
@@ -112,7 +112,7 @@ public class WebsiteAccessReport implements JsonReport {
 
 
         list = crit.list();
-        List<TimeDataPointBean> dataPoints = new ArrayList<>();
+        List<TimeDataPointBean> dataPoints = new ArrayList<>(); 
         for (Object oRow : list) {
             Object[] arr = (Object[]) oRow;
             Date date = (Date) arr[0];

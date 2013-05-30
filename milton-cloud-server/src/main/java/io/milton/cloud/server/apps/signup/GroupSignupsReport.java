@@ -15,7 +15,7 @@
 package io.milton.cloud.server.apps.signup;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import io.milton.cloud.server.apps.reporting.TimeDataPointBean;
+import io.milton.cloud.util.TimeDataPointBean;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;

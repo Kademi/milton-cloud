@@ -10,21 +10,19 @@ var imageInitDone = false;
 CKEDITOR.plugins.add( 'image2',
 {
     init: function( editor ) {
-        log("init image2");
+        //log("init image2");
         var iconPath = this.path + 'images/icon.png';
         var jsPath = this.path + "video/javascript";
         var basePath = this.path;
  
-        log("vid command");
         editor.addCommand( 'imageDialog', new CKEDITOR.dialogCommand( 'imageDialog' ) );
-        log("done command");
  
         editor.ui.addButton( 'Image2', {
             label: 'Insert Image',
             command: 'imageDialog',
             icon: iconPath
         } );
-        log("done button", iconPath);
+        //log("done button", iconPath);
  
         if ( editor.contextMenu ) {
             editor.addMenuGroup( 'imageGroup' );
@@ -196,8 +194,7 @@ CKEDITOR.plugins.add( 'image2',
                     log("commit content", img);
                 }
             };
-        } );
-        log("done init");
+        } );        
     }
 } );
 

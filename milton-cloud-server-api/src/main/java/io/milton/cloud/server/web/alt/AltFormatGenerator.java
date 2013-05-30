@@ -93,6 +93,7 @@ public class AltFormatGenerator implements EventListener {
         formats.add(new FormatSpec("image", "png", 150, 150, true, "-f", "image2"));
         formats.add(new FormatSpec("image", "png", 300, 300, true, "-f", "image2"));
         formats.add(new FormatSpec("image", "png", 600, 400, true, "-f", "image2"));
+        formats.add(new FormatSpec("image", "png", 420, 290, true, "-f", "image2"));
         profileSpec = new FormatSpec("image", "png", 52, 52, true, "-f", "image2");
         formats.add(profileSpec);
 
@@ -115,6 +116,12 @@ public class AltFormatGenerator implements EventListener {
         formats.add(new FormatSpec("video", "m4v", 854, 480, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
         formats.add(new FormatSpec("video", "ogv", 854, 480, false, "-r", "15", "-b:v", "512k"));
         formats.add(new FormatSpec("video", "webm", 854, 480, false, "-r", "15", "-b:v", "512k"));
+
+        formats.add(new FormatSpec("video", "flv", 420, 290, false, "-r", "15", "-b:v", "512k")); // for non-html video
+        formats.add(new FormatSpec("video", "m4v", 420, 290, false, "-c:v", "libx264", "-r", "15", "-b:v", "512k")); // for ipad
+        formats.add(new FormatSpec("video", "ogv", 420, 290, false, "-r", "15", "-b:v", "512k"));
+        formats.add(new FormatSpec("video", "webm", 420, 290, false, "-r", "15", "-b:v", "512k"));
+        
         
         // HTTP Live Streaming
 
