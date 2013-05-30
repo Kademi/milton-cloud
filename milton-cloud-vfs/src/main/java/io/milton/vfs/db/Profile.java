@@ -94,6 +94,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         return DbUtils.unique(crit);
     }
 
+    /**
+     * Find a user who has a membership in the given organisation
+     * 
+     * @param org
+     * @param name
+     * @param session
+     * @return 
+     */
     public static Profile find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.setCacheable(true);
