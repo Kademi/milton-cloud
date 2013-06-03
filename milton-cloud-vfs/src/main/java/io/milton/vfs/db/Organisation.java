@@ -36,6 +36,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("orgType", orgType));
+        crit.addOrder(Order.asc("title"));
         return DbUtils.toList(crit, Organisation.class);
     }
 
@@ -138,6 +140,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         // TODO: add other properties like address
         Criteria critParentLink = crit.createCriteria("parentOrgLinks");
         critParentLink.add(Restrictions.eq("owner", organisation));
+        crit.addOrder(Order.asc("title"));
         return DbUtils.toList(crit, Organisation.class);
     }
 

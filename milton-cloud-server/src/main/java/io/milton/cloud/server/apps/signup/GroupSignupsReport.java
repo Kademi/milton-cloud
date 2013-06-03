@@ -151,7 +151,6 @@ public class GroupSignupsReport implements JsonReport {
         writer.writeNext(GraphData.toArray(line));
 
         for (Map<String, Object> row : data) {
-            System.out.println("row: " + row.size());
             line = new ArrayList<>();
             Object x = row.get(graphData.getXkey());
             line.add(GraphData.formatDateValue(x));

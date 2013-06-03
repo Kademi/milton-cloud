@@ -103,14 +103,18 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                     useJson = true;
                 }
             }
-            if (q != null && q.length() > 0) {
-                Organisation rootSearchOrg = parent.getGroup().getRootRegoOrg();
-                if (rootSearchOrg == null) {
-                    rootSearchOrg = getOrganisation();
-                }
+            if (q != null) {
                 OrgType regoOrgType = parent.getGroup().getRegoOrgType();
-                searchResults = Organisation.search(q, rootSearchOrg, regoOrgType, SessionManager.session()); // find the given user in this organisation 
-
+                Session session = SessionManager.session();
+                if (q.length() > 0) {
+                    Organisation rootSearchOrg = parent.getGroup().getRootRegoOrg();
+                    if (rootSearchOrg == null) {
+                        rootSearchOrg = getOrganisation();
+                    }                    
+                    searchResults = Organisation.search(q, rootSearchOrg, regoOrgType, session); // find the given user in this organisation 
+                } else {
+                    searchResults = Organisation.findByOrgType(regoOrgType, session);
+                }
             }
 
             if (useJson) {

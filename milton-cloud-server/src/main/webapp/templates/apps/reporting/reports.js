@@ -123,6 +123,7 @@ function showLine(reportContainer, graphData) {
         ykeys: graphData.ykeys,
         labels: graphData.labels,
         hideHover: true,
+        xLabels: "day",
         dateFormat: function(x) {
             var dt = new Date(x).formatDDMMYYYY();
             //var dt = new Date(x).toString();
