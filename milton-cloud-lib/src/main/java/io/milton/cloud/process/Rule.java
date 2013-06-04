@@ -6,15 +6,9 @@ import java.io.Serializable;
  *
  * @author brad
  */
-public interface Rule extends Serializable {
+public interface Rule extends Expression<Boolean> {
     
     
-    /**
-     * Evaluate this rule on the given context
-     * 
-     * @param context
-     * @return - true to indicate this rule is satisfied
-     */
-    boolean eval(ProcessContext context);
+
 
 }

@@ -21,8 +21,6 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
-import io.milton.cloud.server.db.GroupEmailJob;
-import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.vfs.db.*;
@@ -60,8 +58,10 @@ import org.mvel2.templates.TemplateRuntime;
 public class BatchEmailService {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BatchEmailService.class);
+    private final FilterScriptEvaluator filterScriptEvaluator;
 
-    public BatchEmailService() {
+    public BatchEmailService(FilterScriptEvaluator filterScriptEvaluator) {
+        this.filterScriptEvaluator = filterScriptEvaluator;
     }
 
     /**
@@ -81,10 +81,11 @@ public class BatchEmailService {
             return;
         }
         Set<Profile> profiles = new HashSet<>();
+        EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
         if (directRecipients != null) {
             for (BaseEntity e : directRecipients) {
                 if (e != null) {
-                    append(e, profiles);
+                    append(j, e, evaluationContext, profiles);
                 } else {
                     log.warn("Found null recipient, ignoring");
                 }
@@ -95,12 +96,12 @@ public class BatchEmailService {
             j.setEmailItems(new ArrayList<EmailItem>());
         }
         for (Profile p : profiles) {
-            sendSingleEmail(j, p, callback, session);
+            enqueueSingleEmail(j, p, callback, session);
         }
         session.save(j);
     }
 
-    private void append(BaseEntity g, final Set<Profile> profiles) {
+    private void append(final BaseEmailJob j, final BaseEntity g, final EvaluationContext evaluationContext, final Set<Profile> profiles) {
         log.info("append: group: " + g.getId() + " - " + g.getId());
 
         final VfsVisitor visitor = new AbstractVfsVisitor() {
@@ -108,30 +109,45 @@ public class BatchEmailService {
             public void visit(Group r) {
                 if (r.getGroupMemberships() != null) {
                     for (GroupMembership m : r.getGroupMemberships()) {
-                        append(m.getMember(), profiles);
+                        append(j, m.getMember(), evaluationContext, profiles);
                     }
                 }
             }
 
             @Override
             public void visit(Profile p) {
-                profiles.add(p);
+                if (checkFilterScript(j, p, evaluationContext)) {
+                    profiles.add(p);
+                }
             }
         };
         g.accept(visitor);
     }
 
-    public void sendSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
+    private boolean checkFilterScript(BaseEmailJob j, Profile p, EvaluationContext evaluationContext) {
+        if (j.getFilterScriptXml() != null && j.getFilterScriptXml().length() > 0) {
+            WebsiteRootFolder wrf = null;
+            if (j.getThemeSite() != null) {
+                ApplicationManager appManager = _(ApplicationManager.class);
+                wrf = new WebsiteRootFolder(appManager, j.getThemeSite(), j.getThemeSite().getTrunk());
+            }
+            return filterScriptEvaluator.checkFilterScript(evaluationContext, p, j.getOrganisation(), wrf);
+        } else {
+            return true;
+        }
+    }
+
+    public void enqueueSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
         String from = j.getFromAddress();
-        if( from == null ) {
+        if (from == null) {
             from = "@" + _(CurrentRootFolderService.class).getPrimaryDomain();
-            if( j.getOrganisation().getAdminDomain() != null ) {
+            if (j.getOrganisation().getAdminDomain() != null) {
                 from = j.getOrganisation().getAdminDomain() + from;
             } else {
                 from = "noreply" + from;
             }
         }
-        
+
         String replyTo = from;
         Date now = _(CurrentDateService.class).getNow();
         EmailItem i = new EmailItem();
@@ -157,11 +173,10 @@ public class BatchEmailService {
         String text = generateTextFromHtml(html);
         i.setText(text);
         session.save(i);
-        
+
         log.info("Created email item: " + i.getId() + " to " + recipientProfile.getEmail());
     }
-   
-    
+
     private String generateTextFromHtml(String html) {
         try {
             Source source = new Source(new ByteArrayInputStream(html.getBytes("UTF-8")));

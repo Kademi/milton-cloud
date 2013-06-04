@@ -54,6 +54,7 @@ public abstract class BaseEmailJob  implements Serializable{
     private String subject;
     private String fromAddress;
     private String html;
+    private String filterScriptXml; // if present will filter out recipients which do not evaluate to true
 
     public void delete(Session session) {
         if( groupRecipients != null ) {
@@ -168,6 +169,16 @@ public abstract class BaseEmailJob  implements Serializable{
         this.html = html;
     }
 
+    @Column
+    public String getFilterScriptXml() {
+        return filterScriptXml;
+    }
+
+    public void setFilterScriptXml(String filterScriptXml) {
+        this.filterScriptXml = filterScriptXml;
+    }
+
+    
     
     /**
      * Adds, but does not save, the group recipient

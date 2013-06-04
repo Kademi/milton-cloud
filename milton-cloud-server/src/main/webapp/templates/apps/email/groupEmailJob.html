@@ -14,81 +14,81 @@
                 <a href="#send">Send</a>
                 <a href="#status" class="statusTab">Status</a>
             </nav>
-            
+
             <div rel='#sendInfo' class="TabContent Content">
-                    <form name="frmDetails" action="." method="post" class="Details">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <th>Send name</th>
-                                    <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
-                                </tr>
-                                <tr>
-                                    <th>Notes <small>These notes are for internal purposes only.</small></th>
-                                    <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
-                                </tr>
-                                <tr>
-                                    <th>Email subject</th>
-                                    <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
-                                </tr>
-                                <tr>
-                                    <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
-                                    <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="2">
-                                        #if( $page.status == "Draft" )
-                                        <button class="Btn">Save Changes</button>
-                                        #else
-                                        This email has been sent.
-                                        #end
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </form>
+                <form name="frmDetails" action="." method="post" class="Details">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th>Send name</th>
+                                <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
+                            </tr>
+                            <tr>
+                                <th>Notes <small>These notes are for internal purposes only.</small></th>
+                                <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
+                            </tr>
+                            <tr>
+                                <th>Email subject</th>
+                                <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
+                            </tr>
+                            <tr>
+                                <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
+                                <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">
+                                    #if( $page.status == "Draft" )
+                                    <button class="Btn">Save Changes</button>
+                                    #else
+                                    This email has been sent.
+                                    #end
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
             </div>	
             <div rel='#messages' class="TabContent Content">
-                    <form name="frmDetails" action="" method="post" class="Details">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <th class="Short">
-                                        Choose a template
-                                    </th>
-                                    <td>
-                                        <select name="themeSiteId">
-                                            $formatter.option("", "[No template]", $page.themeSiteId)
-                                            #foreach($website in $page.organisation.websites)
-                                            $formatter.option($website.id, $website.name, $page.themeSiteId)
-                                            #end
-                                        </select>
-                                        #if( $page.status == "Draft" )
-                                        <button class="Btn">Save Changes</button>
+                <form name="frmDetails" action="" method="post" class="Details">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="Short">
+                                    Choose a template
+                                </th>
+                                <td>
+                                    <select name="themeSiteId">
+                                        $formatter.option("", "[No template]", $page.themeSiteId)
+                                        #foreach($website in $page.organisation.websites)
+                                        $formatter.option($website.id, $website.name, $page.themeSiteId)
                                         #end
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        $formatter.checkbox("passwordReset", "passwordReset", $page.job.passwordReset, "true")
-                                        <label for="passwordReset" style="float: none">Password reset. Only send to users without a password</label>
-                                        <div class="passwordResetContainer">
-                                            <p>Please enter the text of the password reset link below:</p>
-                                            <input type="text" value="$!page.job.passwordResetLinkText" name="passwordResetLinkText" style="float: none" />
-                                            <p><i>Eg: Click here to get started!</i></p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
+                                    </select>
+                                    #if( $page.status == "Draft" )
+                                    <button class="Btn">Save Changes</button>
+                                    #end
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    $formatter.checkbox("passwordReset", "passwordReset", $page.job.passwordReset, "true")
+                                    <label for="passwordReset" style="float: none">Password reset. Only send to users without a password</label>
+                                    <div class="passwordResetContainer">
+                                        <p>Please enter the text of the password reset link below:</p>
+                                        <input type="text" value="$!page.job.passwordResetLinkText" name="passwordResetLinkText" style="float: none" />
+                                        <p><i>Eg: Click here to get started!</i></p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
             </div>
             <div rel='#recips' class="TabContent Content">
                 <div class="Recipient Content Details">
@@ -107,6 +107,10 @@
                         </li>
                         #end
                     </ul>
+                    <header>Advanced</header>
+                    <p>You can enter a XML rules below using <a href='http://mvel.codehaus.org/Language+Guide+for+2.0' target="_blank">MVEL</a> syntax</p>
+                    <textarea style='height: 100px; width: 500px'></textarea>
+                    
                 </div>
             </div>
             <div  rel='#send' class="TabContent Content">
@@ -124,7 +128,7 @@
                     #end
                 </div>
             </div>
-            
+
             <div rel='#status' class="TabContent status Content Details">
                 <div class="NotSent Content">
                     <p>Email is not being processed</p>

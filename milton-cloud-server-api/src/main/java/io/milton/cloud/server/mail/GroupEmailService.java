@@ -73,7 +73,7 @@ public class GroupEmailService {
         }
         
         BatchEmailCallback callback = getCallback(j, session);
-        batchEmailService.sendSingleEmail(j, recipientProfile, callback, session);
+        batchEmailService.enqueueSingleEmail(j, recipientProfile, callback, session);
     }
 
     /**
@@ -121,10 +121,13 @@ public class GroupEmailService {
     private void addGroup(Group g, List<BaseEntity> recipients, boolean isPasswordReset) {
         if (g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty()) {
             for (GroupMembership gm : g.getGroupMemberships()) {
+                Profile p = gm.getMember();
                 // if its a password reset, only send it to those accounts which do not have a password
                 // thats because this is used to welcome user's who have been loaded into the system but who need to create a password
-                if( !isPasswordReset || gm.getMember().getPasswordCredentialDate() == null) {
-                    recipients.add(gm.getMember());
+                if( !isPasswordReset || p.getPasswordCredentialDate() == null) {
+                    // if there is a script execute it to check if to send to this user
+                    
+                    recipients.add(p);
                 }
             }
         } else {

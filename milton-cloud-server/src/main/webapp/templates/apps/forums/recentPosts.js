@@ -13,8 +13,8 @@
                 comments.sort( dateOrd );
                 var cookieAuth = "?miltonUserUrl=" + $.cookie("miltonUserUrl");
                 cookieAuth += "&miltonUserUrlHash=" + $.cookie("miltonUserUrlHash");
-                for( i=0; i<comments.length; i++ ) {
-                    var comment = comments[i];
+                for( ii=0; ii<comments.length; ii++ ) {
+                    var comment = comments[ii];
                     var dt = new Date(comment.date);
                     var url;
                     if( externalAuth ) {

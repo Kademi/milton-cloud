@@ -9,7 +9,7 @@ public class TrueRule extends  AbstractRule {
     }
     
     @Override
-    public boolean eval(ProcessContext context) {
+    public Boolean eval(ProcessContext context) {
         return true;
     }
 
