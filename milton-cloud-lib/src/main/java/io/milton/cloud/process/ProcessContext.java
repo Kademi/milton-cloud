@@ -39,6 +39,15 @@ public class ProcessContext {
         }
     }
 
+    public ProcessContext(CurrentDateService currentDateService) {
+        this.currentDateService = currentDateService;
+        this.token = null;
+        this.timerService = null;
+        this.process = null;
+    }
+    
+    
+
     /**
      * Scan for triggers on the current state. This is recursive, so if a
      * transition occurs it will scan again, and so forth. Because of the

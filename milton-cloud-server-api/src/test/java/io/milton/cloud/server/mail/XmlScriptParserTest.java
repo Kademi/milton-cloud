@@ -91,5 +91,7 @@ public class XmlScriptParserTest {
         assertNotNull(oRule);
         Rule r = (Rule) oRule;
         assertEquals(ComparisonRule.class, r.getClass());
-    }     
+    }   
+    
+
 }

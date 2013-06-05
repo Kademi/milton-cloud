@@ -14,15 +14,33 @@
  */
 package io.milton.cloud.process;
 
+import java.lang.reflect.InvocationTargetException;
+import org.apache.commons.beanutils.PropertyUtils;
+
 /**
  *
  * @author brad
  */
 public class BeanPropertyExpression implements Expression {
 
+    private String beanPath;
+
+    public BeanPropertyExpression(String beanPath) {
+        this.beanPath = beanPath;
+    }
+
     @Override
     public Object eval(ProcessContext context) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Object val = null;
+        try {
+            val = PropertyUtils.getProperty(context, beanPath);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+            throw new RuntimeException(beanPath, ex);
+        }
+        return val;
     }
-    
+
+    public String getBeanPath() {
+        return beanPath;
+    }
 }
