@@ -96,9 +96,9 @@ public class PdfGenerator {
         final MyTextRenderer renderer = new MyTextRenderer();
         try {
             renderer.setDocument(in, href);
-        } catch (SAXException e) {
-            log.error("exception processing page: " + e.getClass(), e);
-            throw new RuntimeException(e);
+//        } catch (SAXException e) {
+//            log.error("exception processing page: " + e.getClass(), e);
+//            throw new RuntimeException(e);
         } catch (XRRuntimeException e) {
             Throwable e2 = e.getCause();
             if (e2 instanceof TransformerException) {

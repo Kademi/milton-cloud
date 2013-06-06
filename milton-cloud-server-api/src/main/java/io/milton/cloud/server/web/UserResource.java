@@ -171,16 +171,6 @@ public class UserResource extends AbstractCollectionResource implements Collecti
     }
 
     @Override
-    public String getScheduleInboxUrl() {
-        return null;
-    }
-
-    @Override
-    public String getScheduleOutboxUrl() {
-        return null;
-    }
-
-    @Override
     public String getDropBoxUrl() {
         return null;
     }
