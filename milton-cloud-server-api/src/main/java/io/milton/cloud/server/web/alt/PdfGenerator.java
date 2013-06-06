@@ -1,7 +1,6 @@
 package io.milton.cloud.server.web.alt;
 
 import io.milton.cloud.server.web.ContentDirectoryResource;
-import io.milton.cloud.server.web.DirectoryResource;
 import io.milton.cloud.server.web.FileResource;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
@@ -24,16 +24,65 @@ public class PdfGenerator {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PdfGenerator.class);
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Generate a PDF from multiple input web pages
+     *
+     * @param href
+     * @param source
+     * @param out
+     * @throws NotAuthorizedException
+     * @throws BadRequestException
+     * @throws NotFoundException
+     */
+    public void convertHtmlToPdf(List<String> hrefs, OutputStream out) throws NotAuthorizedException, BadRequestException, NotFoundException {
+        final MyTextRenderer renderer = new MyTextRenderer();
+        boolean first = true;
+        for (String href : hrefs) {
+            try {
+                renderer.setDocument(href);
+                renderer.layout();
+                if (first) {
+                    first = false;
+                    renderer.createPDF(out, false);
+                } else {
+                    renderer.writeNextDocument();
+                }
+            } catch (XRRuntimeException e) {
+                Throwable e2 = e.getCause();
+                if (e2 instanceof TransformerException) {
+                    TransformerException te = (TransformerException) e2;
+                    log.error(te.getMessageAndLocation());
+                    SourceLocator loc = te.getLocator();
+                    if (loc != null) {
+                        log.error("Error at: " + loc.getLineNumber() + " - " + loc.getLineNumber() + " identifier: " + loc.getPublicId() + "/" + loc.getSystemId(), e2);
+                    } else {
+                        log.error("no locator");
+                    }
+
+                }
+                throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        renderer.finishPDF();
+        try {
+            out.flush();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+    }
 
     public FileResource convertHtmlToPdf(String href, GetableResource source, ContentDirectoryResource destDir, String destName) throws NotAuthorizedException, BadRequestException, NotFoundException {
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        convertHtmlToPdf(href, source, outContent);        
+        convertHtmlToPdf(href, source, outContent);
         FileResource fr = destDir.getOrCreateFile(destName);
         ByteArrayInputStream bin = new ByteArrayInputStream(outContent.toByteArray());
         fr.setContent(bin);
         return fr;
     }
-    
+
     public void convertHtmlToPdf(String href, GetableResource source, OutputStream out) throws NotAuthorizedException, BadRequestException, NotFoundException {
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         Map<String, String> params = new HashMap<>();
@@ -42,9 +91,9 @@ public class PdfGenerator {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        
+
         final InputStream in = new ByteArrayInputStream(outContent.toByteArray());
-        final MyTextRenderer renderer = new MyTextRenderer();        
+        final MyTextRenderer renderer = new MyTextRenderer();
         try {
             renderer.setDocument(in, href);
         } catch (SAXException e) {
@@ -78,8 +127,8 @@ public class PdfGenerator {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        
-    }    
+
+    }
 //
 //
 //	public static void main(String[] args) {

@@ -327,4 +327,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
     public String getExternalUrl() {
         return "http://" + branch.getName() + "." + getWebsite().getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain() + _(Formatter.class).getPortString() + "/";
     }    
+
+    
+    
 }

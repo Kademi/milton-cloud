@@ -240,7 +240,7 @@ function checkDates(container) {
  *  If password is present, checks for validity
  */
 function checkValidPasswords(container) {
-    var target = $("#password, input.password",container);
+    var target = $("#password, input.password",container).not(".allow-dodgy-password");
     var p1 = target.val();
     if( p1 ) {
         var passed = validatePassword(p1, {

@@ -239,7 +239,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
             return Path.root;
         }
     }
-
+    
     public String getHref() {
         Path p = getPath();
         String s = p.toString();
@@ -297,9 +297,8 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
     }
 
     /**
-     * Since a RFR will always output XML we want to use the xhtml content type
-     * where possible. However, many browsers do not support it, so in that case
-     * we want to use text/html
+     * Output text/html UTF8 as default, for a getable resource. Override
+     * in subclasses where necessary
      *
      * see http://www.w3.org/TR/xhtml-media-types/#media-types
      *
@@ -312,9 +311,9 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
                 // can't use it because of CKEditor - http://dev.ckeditor.com/ticket/4576
                 //return "application/xhtml+xml";
 
-                return "text/html";
+                return "text/html; charset=UTF-8";
             } else {
-                return "text/html";
+                return "text/html; charset=UTF-8";
             }
         } else {
             return "";

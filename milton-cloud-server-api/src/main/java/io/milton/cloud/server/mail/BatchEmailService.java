@@ -22,6 +22,7 @@ import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.text.TextFromHtmlService;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.vfs.db.*;
 import java.util.Date;
@@ -33,21 +34,12 @@ import static io.milton.context.RequestContext._;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.HTMLElements;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
-import net.htmlparser.jericho.StartTagType;
-import net.htmlparser.jericho.Tag;
 import org.hibernate.HibernateException;
 import org.mvel2.templates.TemplateRuntime;
 
@@ -59,6 +51,7 @@ public class BatchEmailService {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BatchEmailService.class);
     private final FilterScriptEvaluator filterScriptEvaluator;
+    private final TextFromHtmlService textFromHtmlService = new TextFromHtmlService();
 
     public BatchEmailService(FilterScriptEvaluator filterScriptEvaluator) {
         this.filterScriptEvaluator = filterScriptEvaluator;
@@ -170,23 +163,11 @@ public class BatchEmailService {
         session.save(i);
         String html = generateHtml(j, recipientProfile, callback, i);
         i.setHtml(html);
-        String text = generateTextFromHtml(html);
+        String text = textFromHtmlService.generateTextFromHtml(html);
         i.setText(text);
         session.save(i);
 
         log.info("Created email item: " + i.getId() + " to " + recipientProfile.getEmail());
-    }
-
-    private String generateTextFromHtml(String html) {
-        try {
-            Source source = new Source(new ByteArrayInputStream(html.getBytes("UTF-8")));
-            source.fullSequentialParse();
-            Processor processor = new Processor(source, true);
-            return processor.toString();
-        } catch (Exception e) {
-            log.error("Failed to generate text from HTML", e);
-            return null;
-        }
     }
 
     private String generateHtml(final BaseEmailJob j, final Profile p, BatchEmailCallback callback, EmailItem emailItem) throws IOException {
@@ -240,64 +221,4 @@ public class BatchEmailService {
         return bodyHtml;
     }
 
-    private final class Processor {
-
-        private final Segment rootSegment;
-        private final boolean excludeNonHTMLElements;
-
-        public Processor(final Segment segment, final boolean excludeNonHTMLElements) {
-            this.rootSegment = segment;
-            this.excludeNonHTMLElements = excludeNonHTMLElements;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder(rootSegment.length());
-            boolean blankLine = false;
-            boolean skipTagContent = false;
-            for (Iterator<Segment> nodeIterator = rootSegment.getNodeIterator(); nodeIterator.hasNext();) {
-                Segment segment = nodeIterator.next();
-                if (segment instanceof Tag) {
-                    final Tag tag = (Tag) segment;
-                    if (tag.getTagType().isServerTag()) {
-                        continue;
-                    }
-                    if (tag.getTagType() == StartTagType.NORMAL) {
-                        if (tag.getName().equals(HTMLElementName.A)) {
-                            skipTagContent = true;
-                            Element linkElement = tag.getElement();
-                            String href = linkElement.getAttributeValue("href");
-                            if (href == null) {
-                                continue;
-                            }
-                            // A element can contain other tags so need to extract the text from it:
-                            String label = linkElement.getContent().getTextExtractor().toString();
-                            sb.append(label + " <" + href + '>');
-                            blankLine = false;
-                        } else if (tag.getName().equals(HTMLElementName.TITLE)) {
-                            skipTagContent = true;
-                        } else if (tag.getName().equals(HTMLElementName.BR) || !HTMLElements.getInlineLevelElementNames().contains(tag.getName())) {
-                            skipTagContent = false;
-                            if (!blankLine) {
-                                sb.append("\n");
-                            }
-                            blankLine = true;
-                        }
-                    } else {
-                        skipTagContent = false;
-                    }
-                } else {
-                    if (!skipTagContent) {
-                        String s = segment.toString().trim();
-                        if (s.length() > 0) {
-                            sb.append(s);
-                            blankLine = false;
-                        }
-                    }
-                }
-            }
-            //final String decodedText = CharacterReference.decodeCollapseWhiteSpace(sb);
-            return sb.toString();
-        }
-    }
 }

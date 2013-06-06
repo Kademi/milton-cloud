@@ -20,6 +20,7 @@ import io.milton.cloud.server.init.InitHelper;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.manager.MCRootContext;
+import io.milton.cloud.server.text.TextFromHtmlService;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.cloud.server.web.alt.PdfGenerator;
@@ -93,6 +94,8 @@ public class ApplicationStarter implements InitListener, Service{
         CurrentDateService currentDateService = rootContext.get(CurrentDateService.class);
         DataSessionManager dataSessionManager = new DataSessionManager(blobStore, hashStore, currentDateService);
         InitHelper initHelper = new InitHelper(securityManager.getPasswordManager(), applicationManager);
+        TextFromHtmlService textFromHtmlService = new TextFromHtmlService();
+        rootContext.put(textFromHtmlService);
         rootContext.put(pdfGenerator);
         rootContext.put(b.getCookieAuthenticationHandler()); // Needed for admin to redirect to website
         rootContext.put(b.getFormAuthenticationHandler()); // Needed for ajax login        

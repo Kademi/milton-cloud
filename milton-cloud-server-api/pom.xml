@@ -167,7 +167,13 @@
             <groupId>jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>1.0.13</version>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <artifactId>itext</artifactId>
+            <groupId>com.lowagie</groupId>
+            <type>jar</type>
+            <version>2.1.0</version>
+        </dependency>
     </dependencies>    
     <repositories>
         <repository>

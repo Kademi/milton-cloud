@@ -5,6 +5,7 @@ import io.milton.common.Path;
 import io.milton.http.Request;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.DigestResource;
+import io.milton.resource.Resource;
 
 /**
  * Common interface for all spliffy resources
@@ -48,6 +49,7 @@ public interface CommonResource extends DigestResource{
      */
     Path getPath();
     
+   
     /**
      * Used for theming, is a way for the resource to indicate if it is in a secure
      * or public realm

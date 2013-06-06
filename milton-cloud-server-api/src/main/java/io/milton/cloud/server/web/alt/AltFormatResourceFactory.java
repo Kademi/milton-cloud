@@ -58,7 +58,6 @@ public class AltFormatResourceFactory implements ResourceFactory {
 
     @Override
     public Resource getResource(String host, String sPath) throws NotAuthorizedException, BadRequestException {
-        System.out.println("AltFormat: " + sPath);
         Path p = Path.path(sPath);
         if (p.getName().startsWith("alt-") && p.getName().endsWith(".m3u8") ) {
             Resource r = wrapped.getResource(host, p.getParent().toString());

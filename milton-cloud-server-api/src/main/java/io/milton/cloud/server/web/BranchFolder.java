@@ -471,6 +471,7 @@ public class BranchFolder extends AbstractBranchFolder implements MakeCollection
         return themeAttributes;
     }
 
+    @Override
     public boolean isLive() {
         String sBranch = this.getBranch().getRepository().getLiveBranch();
         if (sBranch == null) {

@@ -33,6 +33,21 @@ import java.util.List;
  */
 public class NodeChildUtils {
 
+    /**
+     * get the relative path to a resource from a specified parent
+     * 
+     * @param from
+     * @param r
+     * @return 
+     */
+    public static Path relativePath(Resource from, CommonResource r) {
+        CommonCollectionResource p = r.getParent();
+        if( p == from ) {
+            return Path.path(r.getName());
+        } else {
+            return relativePath(from, p).child(r.getName());
+        }               
+    }       
 
     public static boolean isHtml(FileResource rfr) {
         String ct = rfr.getUnderlyingContentType();

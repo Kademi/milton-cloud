@@ -31,6 +31,7 @@ import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.reporting.ReportingApp;
 import io.milton.cloud.server.role.Role;
+import io.milton.cloud.server.text.TextFromHtmlService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.MenuItem;
@@ -60,6 +61,8 @@ import org.apache.velocity.context.Context;
  */
 public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication, PortletApplication, DataResourceApplication, BrowsableApplication {
 
+    public static final String ALT_TXT_SUFFIX = ".alt.txt";
+    
     private ApplicationManager applicationManager;
     private List<JsonReport> reports;
     private AppsPageHelper appsPageHelper;
