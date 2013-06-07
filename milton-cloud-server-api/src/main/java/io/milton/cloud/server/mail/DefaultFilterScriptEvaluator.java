@@ -17,8 +17,11 @@ package io.milton.cloud.server.mail;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.process.ProcessContext;
 import io.milton.cloud.process.Rule;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.web.PrincipalResource;
+import io.milton.cloud.server.web.RootFolder;
+import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -41,33 +44,29 @@ public class DefaultFilterScriptEvaluator implements FilterScriptEvaluator {
         this.formatter = formatter;
     }
 
-
-            
-    
     @Override
-    public boolean checkFilterScript(EvaluationContext context, Profile p, Organisation org, WebsiteRootFolder wrf) {
+    public boolean checkFilterScript(EvaluationContext context, Profile p, Organisation org, RootFolder rf) {
         Rule rule = (Rule) context.getCompiledScript();
-        if ( rule == null ) {
+        if (rule == null) {
             scriptParser.parse(context);
             rule = (Rule) context.getCompiledScript();
         }
-        
-        ProcessContext processContext = new ProcessContext(null, null, null, currentDateService);
-        processContext.addAttribute("rootFolder", wrf);
+
+        ProcessContext processContext = new ProcessContext(currentDateService);
+        processContext.addAttribute("rootFolder", rf);
         processContext.addAttribute("profile", p);
         processContext.addAttribute("organisation", org);
-        processContext.addAttribute("website", wrf);
+        processContext.addAttribute("website", rf);
         PrincipalResource userRes = null;
         try {
-            userRes = wrf.findEntity(p);
+            userRes = rf.findEntity(p);
         } catch (NotAuthorizedException | BadRequestException ex) {
             throw new RuntimeException(ex);
         }
-                
+
         processContext.addAttribute("user", userRes);
         processContext.addAttribute("userResource", userRes);
         processContext.addAttribute("formatter", formatter);
         return rule.eval(null);
     }
-    
 }

@@ -53,6 +53,32 @@ public class WebUtils {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebUtils.class);
     
+    public static String getRawParam(Map<String, String> params, String name) {
+        String s = params.get(name);
+        if (s == null) {
+            return null;
+        }
+        s = s.trim();
+        if (s.length() == 0) {
+            return null;
+        }
+        return s;
+    }    
+    
+    /**
+     * Use getCleanedParam for inputs which should be scrubbed of <script> tags
+     * etc, or use getRawParam for non-scrubbed inputs
+     * 
+     * @param params
+     * @param name
+     * @return
+     * @deprecated
+     */
+    @Deprecated
+    public static String getParam(Map<String, String> params, String name) {
+        return getCleanedParam(params, name);
+    }
+    
     /**
      * Returns a trimmed, nulled, string value. If present the value is trimmed,
      * and if empty returns null
@@ -61,14 +87,10 @@ public class WebUtils {
      * @param name
      * @return
      */
-    public static String getParam(Map<String, String> params, String name) {
-        String s = params.get(name);
-        if (s == null) {
-            return null;
-        }
-        s = s.trim();
-        if (s.length() == 0) {
-            return null;
+    public static String getCleanedParam(Map<String, String> params, String name) {
+        String s = getRawParam(params, name);
+        if( s == null ) {
+            return s;
         }
         return _(CommentService.class).cleanInput(s);
     }
@@ -335,7 +357,7 @@ public class WebUtils {
     }    
 
     public static Long getParamAsLong(Map<String, String> parameters, String key) {
-        String s = getParam(parameters, key);
+        String s = getRawParam(parameters, key);
         if (s == null || s.length() == 0) {
             return null;
         }
@@ -347,7 +369,7 @@ public class WebUtils {
     }
 
     public static Integer getParamAsInteger(Map<String, String> parameters, String key) {
-        String s = getParam(parameters, key);
+        String s = getRawParam(parameters, key);
         if (s == null || s.length() == 0) {
             return null;
         }
@@ -360,7 +382,7 @@ public class WebUtils {
     }
 
     public static Boolean getParamAsBool(Map<String, String> parameters, String key) {
-        String s = getParam(parameters, key);
+        String s = getRawParam(parameters, key);
         if (s == null || s.length() == 0) {
             return null;
         }

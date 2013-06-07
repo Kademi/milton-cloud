@@ -18,11 +18,13 @@ package io.milton.cloud.server.mail;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.BaseEmailJob;
 import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.text.TextFromHtmlService;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.TemplatedHtmlPage;
 import io.milton.vfs.db.*;
 import java.util.Date;
@@ -52,9 +54,11 @@ public class BatchEmailService {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BatchEmailService.class);
     private final FilterScriptEvaluator filterScriptEvaluator;
     private final TextFromHtmlService textFromHtmlService = new TextFromHtmlService();
+    private final ApplicationManager applicationManager;
 
-    public BatchEmailService(FilterScriptEvaluator filterScriptEvaluator) {
+    public BatchEmailService(FilterScriptEvaluator filterScriptEvaluator, ApplicationManager applicationManager) {
         this.filterScriptEvaluator = filterScriptEvaluator;
+        this.applicationManager = applicationManager;
     }
 
     /**
@@ -119,12 +123,14 @@ public class BatchEmailService {
 
     private boolean checkFilterScript(BaseEmailJob j, Profile p, EvaluationContext evaluationContext) {
         if (j.getFilterScriptXml() != null && j.getFilterScriptXml().length() > 0) {
-            WebsiteRootFolder wrf = null;
+            RootFolder rf = null;
             if (j.getThemeSite() != null) {
                 ApplicationManager appManager = _(ApplicationManager.class);
-                wrf = new WebsiteRootFolder(appManager, j.getThemeSite(), j.getThemeSite().getTrunk());
+                rf = new WebsiteRootFolder(appManager, j.getThemeSite(), j.getThemeSite().getTrunk());
+            } else {
+                rf = new OrganisationRootFolder(applicationManager, j.getOrganisation());
             }
-            return filterScriptEvaluator.checkFilterScript(evaluationContext, p, j.getOrganisation(), wrf);
+            return filterScriptEvaluator.checkFilterScript(evaluationContext, p, j.getOrganisation(), rf);
         } else {
             return true;
         }

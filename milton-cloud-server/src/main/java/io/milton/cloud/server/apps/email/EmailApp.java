@@ -34,6 +34,7 @@ import io.milton.cloud.server.event.TriggerEvent;
 import io.milton.cloud.server.mail.DefaultFilterScriptEvaluator;
 import io.milton.cloud.server.mail.FilterScriptEvaluator;
 import io.milton.cloud.server.mail.MiltonCloudMailResourceFactory;
+import io.milton.cloud.server.mail.XmlScriptParser;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.queue.AsynchProcessor;
 import io.milton.cloud.server.queue.Processable;
@@ -132,8 +133,10 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         String hostName = config.getContext().get(CurrentRootFolderService.class).getPrimaryDomain();
         props.setProperty(ConfigurationMBean.PARAM_HOSTNAME, hostName);
         aspirinConfiguration = new Configuration(props);
-        filterScriptEvaluator = new DefaultFilterScriptEvaluator(null, currentDateService, config.getContext().get(Formatter.class));
-        batchEmailService = new BatchEmailService(filterScriptEvaluator);
+        XmlScriptParser xmlScriptParser = new XmlScriptParser();
+        config.getContext().put(xmlScriptParser);
+        filterScriptEvaluator = new DefaultFilterScriptEvaluator(xmlScriptParser, currentDateService, config.getContext().get(Formatter.class));
+        batchEmailService = new BatchEmailService(filterScriptEvaluator, resourceFactory.getApplicationManager());
         config.getContext().put(batchEmailService);
         groupEmailService = new GroupEmailService(batchEmailService);
         config.getContext().put(groupEmailService);
@@ -157,7 +160,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         mailServerBuilder.setMailResourceFactory(mailResourceFactory);
         mailServerBuilder.setEnablePop(false);
         mailServerBuilder.setEnableMsa(false);
-        mailServerBuilder.setSmtpPort(smtpPort); // high port for linux. TODO: make configurable        
+        mailServerBuilder.setSmtpPort(smtpPort);
         mailServerBuilder.setMailStore(mailStore);
         mailServerBuilder.setQueueStore(queueStore);
         List<Filter> filters = new ArrayList<>();

@@ -14,11 +14,9 @@
  */
 package io.milton.cloud.server.mail;
 
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.db.BaseEmailJob;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
-import io.milton.vfs.db.Website;
 
 /**
  * Evaluates the script used to determine if events and actions are processed
@@ -26,5 +24,5 @@ import io.milton.vfs.db.Website;
  * @author brad
  */
 public interface FilterScriptEvaluator {
-    boolean checkFilterScript(EvaluationContext context, Profile p, Organisation org, WebsiteRootFolder wrf);
+    boolean checkFilterScript(EvaluationContext context, Profile p, Organisation org, RootFolder wrf);
 }

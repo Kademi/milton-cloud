@@ -23,7 +23,9 @@ import io.milton.cloud.server.db.EmailSendAttempt;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
 import io.milton.cloud.server.mail.BatchEmailService;
+import io.milton.cloud.server.mail.EvaluationContext;
 import io.milton.cloud.server.mail.GroupEmailService;
+import io.milton.cloud.server.mail.XmlScriptParser;
 import io.milton.cloud.server.queue.AsynchProcessor;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -130,6 +132,15 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
                         }
                         job.setThemeSite(themeSite);
                     }
+                    
+                    // if filterScriptXml parse it to check syntax
+                    String s = WebUtils.getRawParam(parameters, "filterScriptXml");
+                    if( s != null ) {
+                        EvaluationContext evalContext = new EvaluationContext(s);
+                        _(XmlScriptParser.class).parse(evalContext);
+                        log.info("parsed ok");
+                    }
+                    
                     _(DataBinder.class).populate(job, parameters);
                 } catch (IllegalAccessException | InvocationTargetException ex) {
                     throw new RuntimeException(ex);

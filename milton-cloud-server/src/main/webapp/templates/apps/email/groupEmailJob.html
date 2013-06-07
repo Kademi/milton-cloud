@@ -5,18 +5,28 @@
         <script type="text/javascript" src="manageGroupEmail.js">//</script>
     </head>
     <body>
-        <section id="manageEmail" class="MainContent">
+        <form name="frmDetails" action="." method="post" class="">
 
-            <nav class="TabNav ClearFix">
-                <a href="#sendInfo">Send information</a>
-                <a href="#messages">Message</a>
-                <a href="#recips">Recipients</a>
-                <a href="#send">Send</a>
-                <a href="#status" class="statusTab">Status</a>
-            </nav>
+            <section id="manageEmail" class="MainContent">
 
-            <div rel='#sendInfo' class="TabContent Content">
-                <form name="frmDetails" action="." method="post" class="Details">
+                <div class="pull-right">
+                    #if( $page.status == "Draft" )
+                    <button class="Btn">Save Changes</button>
+                    #else
+                    This email has been sent.
+                    #end                
+                </div>
+
+                <nav class="TabNav ClearFix">
+                    <a href="#sendInfo">Send information</a>
+                    <a href="#messages">Message</a>
+                    <a href="#recips">Recipients</a>
+                    <a href="#send">Send</a>
+                    <a href="#status" class="statusTab">Status</a>
+                </nav>
+
+                <div rel='#sendInfo' class="TabContent Content Details">
+
                     <table>
                         <tbody>
                             <tr>
@@ -36,22 +46,10 @@
                                 <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
                             </tr>
                         </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="2">
-                                    #if( $page.status == "Draft" )
-                                    <button class="Btn">Save Changes</button>
-                                    #else
-                                    This email has been sent.
-                                    #end
-                                </td>
-                            </tr>
-                        </tfoot>
                     </table>
-                </form>
-            </div>	
-            <div rel='#messages' class="TabContent Content">
-                <form name="frmDetails" action="" method="post" class="Details">
+
+                </div>	
+                <div rel='#messages' class="TabContent Content Details">
                     <table>
                         <tbody>
                             <tr>
@@ -65,9 +63,6 @@
                                         $formatter.option($website.id, $website.name, $page.themeSiteId)
                                         #end
                                     </select>
-                                    #if( $page.status == "Draft" )
-                                    <button class="Btn">Save Changes</button>
-                                    #end
                                 </td>
                             </tr>
                             <tr>
@@ -88,83 +83,83 @@
                             </tr>
                         </tbody>
                     </table>
-                </form>
-            </div>
-            <div rel='#recips' class="TabContent Content">
-                <div class="Recipient Content Details">
-                    <header class="ClearFix">
-                        #if( $page.status == "Draft" )
-                        <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
-                        #end
-                    </header>
-                    <ul class="GroupList ClearFix">
-                        #foreach($g in $page.groupRecipients)
-                        <li class="$g.name">
-                            <span>$g.name</span>
+                </div>
+                <div rel='#recips' class="TabContent Content Details">
+                    <div class="Recipient Content Details">
+                        <header class="ClearFix">
                             #if( $page.status == "Draft" )
-                            <a href="$g.name">Delete</a>
+                            <button class="SmallBtn Add AddGroup"><span>Add groups</span></button>
                             #end
-                        </li>
-                        #end
-                    </ul>
-                    <header>Advanced</header>
-                    <p>You can enter a XML rules below using <a href='http://mvel.codehaus.org/Language+Guide+for+2.0' target="_blank">MVEL</a> syntax</p>
-                    <textarea style='height: 100px; width: 500px'></textarea>
-                    
-                </div>
-            </div>
-            <div  rel='#send' class="TabContent Content">
-                <div class="Send Content Details">
-                    #if( $page.status == "Draft" )
-                    <h4>Before you send be sure to check your email information, message content and recipients.</h4>
-                    <p>
-                        <button class="Btn preview">PREVIEW YOUR EMAIL</button>
-                    </p>
-                    <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
-                    <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
-                    <p><button class="Btn Big Cancel SendEmail send">SEND NOW</button></p>
-                    #else
-                    <h4>Email has been sent, or is sending</h4>
-                    #end
-                </div>
-            </div>
+                        </header>
+                        <ul class="GroupList ClearFix">
+                            #foreach($g in $page.groupRecipients)
+                            <li class="$g.name">
+                                <span>$g.name</span>
+                                #if( $page.status == "Draft" )
+                                <a href="$g.name">Delete</a>
+                                #end
+                            </li>
+                            #end
+                        </ul>
+                        <header>Advanced</header>
+                        <p>You can enter XML rules below</p>
+                        <textarea name="filterScriptXml" style='height: 100px; width: 500px'>$!page.job.filterScriptXml</textarea>
 
-            <div rel='#status' class="TabContent status Content Details">
-                <div class="NotSent Content">
-                    <p>Email is not being processed</p>
-                </div>
-
-                <div class="SendProgress Content">
-                    <p>
-                        <strong class="status status_p">Send in progress</strong>
-                        <strong class="status status_c">Job completed</strong>
-                        <small>You may navigate away from this page.</small>
-                    </p>
-                    <div class="Progress">                            
-                        <div class="Percent"></div>
-                        <div class="stats"></div>
                     </div>
-                    <br/>
-                    <br/>
-                    <strong>Failed and in progress emails, if any, are shown below</strong>
-                    <table id="emails">
-                        <thead>
-                            <tr>
-                                <th>Email Address</th>                                    
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Attempt</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
-            </div>
+                <div  rel='#send' class="TabContent Content Details">
+                    <div class="Send Content Details">
+                        #if( $page.status == "Draft" )
+                        <h4>Before you send be sure to check your email information, message content and recipients.</h4>
+                        <p>
+                            <button class="Btn preview">PREVIEW YOUR EMAIL</button>
+                        </p>
+                        <p>When you are ready click the 'Send Now' button below and the system will start to send out your email.<br />Once the send process starts you can navigate away from this page without affecting your send.</p>				
+                        <p>If you choose to navigate away from this page you can still view the send results by click on the<br />info button from the email list page.</p>
+                        <p><button class="Btn Big Cancel SendEmail send">SEND NOW</button></p>
+                        #else
+                        <h4>Email has been sent, or is sending</h4>
+                        #end
+                    </div>
+                </div>
 
-        </section>
+                <div rel='#status' class="TabContent status Content Details">
+                    <div class="NotSent Content">
+                        <p>Email is not being processed</p>
+                    </div>
+
+                    <div class="SendProgress Content">
+                        <p>
+                            <strong class="status status_p">Send in progress</strong>
+                            <strong class="status status_c">Job completed</strong>
+                            <small>You may navigate away from this page.</small>
+                        </p>
+                        <div class="Progress">                            
+                            <div class="Percent"></div>
+                            <div class="stats"></div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <strong>Failed and in progress emails, if any, are shown below</strong>
+                        <table id="emails">
+                            <thead>
+                                <tr>
+                                    <th>Email Address</th>                                    
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Attempt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </form>
         <div id="modalGroup" class="Modal">
             <header>
                 <h3>Choose groups</h3>

@@ -95,6 +95,7 @@ public class ApplicationStarter implements InitListener, Service{
         DataSessionManager dataSessionManager = new DataSessionManager(blobStore, hashStore, currentDateService);
         InitHelper initHelper = new InitHelper(securityManager.getPasswordManager(), applicationManager);
         TextFromHtmlService textFromHtmlService = new TextFromHtmlService();
+        
         rootContext.put(textFromHtmlService);
         rootContext.put(pdfGenerator);
         rootContext.put(b.getCookieAuthenticationHandler()); // Needed for admin to redirect to website

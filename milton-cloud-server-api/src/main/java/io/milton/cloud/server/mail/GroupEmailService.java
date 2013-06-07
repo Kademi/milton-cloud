@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 
@@ -68,10 +69,12 @@ public class GroupEmailService {
     }
 
     public void sendPreview(GroupEmailJob j, Profile recipientProfile, Session session) throws HibernateException, IOException {
-        if (j.getThemeSite() == null) {
-            throw new RuntimeException("Cant send password reset group email because no theme has been selected");
+        if (StringUtils.isNotBlank(j.getPasswordResetLinkText())) {
+            if (j.getThemeSite() == null) {
+                throw new RuntimeException("Cant send password reset group email because no theme has been selected");
+            }
         }
-        
+
         BatchEmailCallback callback = getCallback(j, session);
         batchEmailService.enqueueSingleEmail(j, recipientProfile, callback, session);
     }
@@ -85,10 +88,13 @@ public class GroupEmailService {
      */
     private void generateEmailItems(final GroupEmailJob j, final Session session) throws IOException {
         boolean isPasswordReset = j.isPasswordReset() == null ? false : j.isPasswordReset();
-        if (j.getThemeSite() == null && isPasswordReset ) {
+        if (j.getThemeSite() == null && isPasswordReset) {
             throw new RuntimeException("Cant send password reset group email because no theme has been selected");
         }
         List<BaseEntity> directRecips = getRecipients(j);
+        if( directRecips.isEmpty()) {
+            throw new RuntimeException("No recipients");
+        }
 
         final Date now = _(CurrentDateService.class).getNow();
         BatchEmailCallback callback = getCallback(j, session);
@@ -104,7 +110,6 @@ public class GroupEmailService {
         session.save(j);
     }
 
-
     public List<BaseEntity> getRecipients(final GroupEmailJob j) {
         boolean isPasswordReset = j.isPasswordReset() == null ? false : j.isPasswordReset();
         List<BaseEntity> directRecips = new ArrayList<>();
@@ -117,24 +122,24 @@ public class GroupEmailService {
         }
         return directRecips;
     }
-    
+
     private void addGroup(Group g, List<BaseEntity> recipients, boolean isPasswordReset) {
         if (g.getGroupMemberships() != null && !g.getGroupMemberships().isEmpty()) {
             for (GroupMembership gm : g.getGroupMemberships()) {
                 Profile p = gm.getMember();
                 // if its a password reset, only send it to those accounts which do not have a password
                 // thats because this is used to welcome user's who have been loaded into the system but who need to create a password
-                if( !isPasswordReset || p.getPasswordCredentialDate() == null) {
+                if (!isPasswordReset || p.getPasswordCredentialDate() == null) {
                     // if there is a script execute it to check if to send to this user
-                    
+
                     recipients.add(p);
                 }
             }
         } else {
             log.warn("No members in recipient group: " + g.getName());
         }
-    }     
-    
+    }
+
     private BatchEmailCallback getCallback(final GroupEmailJob j, final Session session) {
         BatchEmailCallback callback = null;
         if (j.isPasswordReset() != null && j.isPasswordReset()) {
@@ -156,5 +161,4 @@ public class GroupEmailService {
         }
         return callback;
     }
-
 }
