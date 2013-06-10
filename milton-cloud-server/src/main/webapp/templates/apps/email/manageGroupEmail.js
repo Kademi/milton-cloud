@@ -8,19 +8,31 @@ function initManageEmail() {
     initAddJob();
 }
 
+function initShowRecips() {
+    log("initshowrecips", $(".showRecipients button"));
+    $(".showRecipients button").click(function(e) {
+        e.preventDefault();
+        var table = $(e.target).closest("div").find("table");
+        table.show(200);
+        showRecipients(table.find("tbody"));
+    });
+}
+
+
 function initEditEmailPage() {
-    initRemoveRecipientGroup();        
+    initShowRecips();
+    initRemoveRecipientGroup();
     addGroupBtn();
     eventForModal();
     initGroupCheckbox();
-    
+
     checkPasswordResetVisible();
-                
+
     jQuery("#passwordReset").change(function() {
         checkPasswordResetVisible();
     });
-    
-    
+
+
     initStatusPolling();
     $("button.send").click(function(e) {
         e.stopPropagation();
@@ -38,16 +50,16 @@ function checkPasswordResetVisible() {
     log("checkPasswordResetVisible");
     var cont = $(".passwordResetContainer");
     var inp = cont.find("input[type=text]");
-    if( $("#passwordReset:checked").length > 0 ) {
+    if ($("#passwordReset:checked").length > 0) {
         cont.show(100);
         inp.addClass("required");
-        if( inp.val() == "" ) {
+        if (inp.val() == "") {
             inp.val("Please click here to reset your password");
         }
     } else {
         cont.hide(100);
         inp.removeClass("required");
-    }                
+    }
 }
 
 function initRemoveRecipientGroup() {
@@ -56,7 +68,7 @@ function initRemoveRecipientGroup() {
         log("click", this);
         e.preventDefault();
         e.stopPropagation();
-        if( confirm("Are you sure you want to remove this group from the recipient list?")) {
+        if (confirm("Are you sure you want to remove this group from the recipient list?")) {
             var a = $(e.target);
             log("do it", a);
             var href = a.attr("href");
@@ -65,7 +77,7 @@ function initRemoveRecipientGroup() {
                 $("#modalGroup input[type=checkbox][name=" + href + "]").removeAttr("checked");
             });
         }
-    });    
+    });
 }
 
 
@@ -90,7 +102,7 @@ function setGroupRecipient(name, isRecip) {
             },
             success: function(data) {
                 log("saved ok", data);
-                if( isRecip ) {
+                if (isRecip) {
                     $(".GroupList").append("<li class=" + name + "><span>" + name + "</span><a href='" + name + "'>Delete</a></li>");
                     log("appended to", $(".GroupList"));
                 } else {
@@ -102,10 +114,10 @@ function setGroupRecipient(name, isRecip) {
                 log("error", resp);
                 alert("err");
             }
-        });          
-    } catch(e) {
+        });
+    } catch (e) {
         log("exception in createJob", e);
-    }       
+    }
 }
 
 function showAddJob() {
@@ -113,7 +125,7 @@ function showAddJob() {
     $.tinybox.show(_modal, {
         overlayClose: false,
         opacity: 0
-    });    
+    });
 }
 
 function initAddJob() {
@@ -123,34 +135,35 @@ function initAddJob() {
             log("saved ok", data);
             $.tinybox.close();
             window.location.href = data.nextHref;
-            
+
         }
     });
 }
 
 function checkCookie() {
     var _sort_type = $.cookie("email-sort-type");
-    if(_sort_type) {
+    if (_sort_type) {
         _sort_type = _sort_type.split("#");
         var _type = _sort_type[0];
-        var _asc = _sort_type[1] === "asc"?true:false;
+        var _asc = _sort_type[1] === "asc" ? true : false;
         sortBy(_type, _asc);
-		
-        switch(_type) {
+
+        switch (_type) {
             case 'date':
-                $("a.SortByDate").attr("rel", _asc?"desc":"asc");
+                $("a.SortByDate").attr("rel", _asc ? "desc" : "asc");
                 break;
             case 'name':
-                $("a.SortByName").attr("rel", _asc?"desc":"asc");
+                $("a.SortByName").attr("rel", _asc ? "desc" : "asc");
                 break;
             case 'status':
-                $("a.SortByStatus").attr("rel", _asc?"desc":"asc");
+                $("a.SortByStatus").attr("rel", _asc ? "desc" : "asc");
                 break;
-        };
+        }
+        ;
     }
 }
 
-function stripList() {	
+function stripList() {
     $("#manageEmail .Content ul li").removeClass("Odd").filter(":odd").addClass("Odd");
 }
 
@@ -175,57 +188,58 @@ function initList() {
     $("#manageEmail .Content ul li").each(function(i) {
         $(this).attr("rel", i);
     });
-};
+}
+;
 
 function initSortableButton() {
     // Bind event for Status sort button
     $("body").on("click", "a.SortByStatus", function(e) {
         e.preventDefault();
-		
+
         var _this = $(this);
         var _rel = _this.attr("rel");
-		
-        if(_rel === "asc") {
-            sortBy("status", true);			
+
+        if (_rel === "asc") {
+            sortBy("status", true);
             $.cookie("email-sort-type", "status#asc");
             _this.attr("rel", "desc");
-        } else {			
+        } else {
             sortBy("status", false);
             $.cookie("email-sort-type", "status#desc");
             _this.attr("rel", "asc");
         }
     });
-	
+
     // Bind event for Name sort button
     $("body").on("click", "a.SortByName", function(e) {
         e.preventDefault();
-		
+
         var _this = $(this);
         var _rel = _this.attr("rel");
-		
-        if(_rel === "asc") {
-            sortBy("name", true);			
+
+        if (_rel === "asc") {
+            sortBy("name", true);
             $.cookie("email-sort-type", "name#asc");
             _this.attr("rel", "desc");
-        } else {			
+        } else {
             sortBy("name", false);
             $.cookie("email-sort-type", "name#desc");
             _this.attr("rel", "asc");
         }
     });
-	
+
     // Bind event for Date sort button
     $("body").on("click", "a.SortByDate", function(e) {
         e.preventDefault();
-		
+
         var _this = $(this);
         var _rel = _this.attr("rel");
-		
-        if(_rel === "asc") {
-            sortBy("date", true);			
+
+        if (_rel === "asc") {
+            sortBy("date", true);
             $.cookie("email-sort-type", "date#asc");
             _this.attr("rel", "desc");
-        } else {			
+        } else {
             sortBy("date", false);
             $.cookie("email-sort-type", "date#desc");
             _this.attr("rel", "asc");
@@ -236,32 +250,32 @@ function initSortableButton() {
 function sortBy(type, asc) {
     var list = $("#manageEmail .Content ul li");
     var _list = {};
-    var sortObject = function(obj) {		
+    var sortObject = function(obj) {
         var sorted = {},
-        array = [],
-        key,
-        l;
-		
-        for(key in obj) {
-            if(obj.hasOwnProperty(key)) {
+                array = [],
+                key,
+                l;
+
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
                 array.push(key);
             }
         }
-		
-        array.sort();	
-        if(!asc) {
+
+        array.sort();
+        if (!asc) {
             array.reverse();
         }
-		
-        for(key = 0, l = array.length; key < l; key++) {
+
+        for (key = 0, l = array.length; key < l; key++) {
             sorted[array[key]] = obj[array[key]];
         }
         return sorted;
     };
-	
-    switch(type) {
+
+    switch (type) {
         case 'date':
-            for(var i = 0, _item; _item = list[i]; i++) {
+            for (var i = 0, _item; _item = list[i]; i++) {
                 _item = $(_item);
                 var title = _item.find("span.Date").html();
                 var rel = _item.attr("rel");
@@ -269,7 +283,7 @@ function sortBy(type, asc) {
             }
             break;
         case 'name':
-            for(var i = 0, _item; _item = list[i]; i++) {
+            for (var i = 0, _item; _item = list[i]; i++) {
                 _item = $(_item);
                 var title = _item.find("span.Name").html();
                 var rel = _item.attr("rel");
@@ -277,7 +291,7 @@ function sortBy(type, asc) {
             }
             break;
         case 'status':
-            for(var i = 0, _item; _item = list[i]; i++) {
+            for (var i = 0, _item; _item = list[i]; i++) {
                 _item = $(_item);
                 var title = _item.find("span.Status").html();
                 var rel = _item.attr("rel");
@@ -285,15 +299,15 @@ function sortBy(type, asc) {
             }
             break;
     }
-	
+
     _list = sortObject(_list);
-	
+
     var _emailList = $("#manageEmail .Content ul");
     _emailList.html("");
-    for(var i in _list) {
+    for (var i in _list) {
         _emailList.append(_list[i]);
     }
-	
+
     stripList();
 }
 
@@ -301,20 +315,20 @@ function sortBy(type, asc) {
 function addGroupBtn() {
     $('.AddGroup').on('click', function(e) {
         e.preventDefault();
-		
+
         var _group = [];
-		
+
         $("div.Recipient ul.GroupList li").each(function() {
             _group.push(this.getAttribute("data-group"));
         });
-		
+
         showGroupModal(_group);
     });
 }
 
-function showGroupModal(group) {	
+function showGroupModal(group) {
     var _modal = $("#modalGroup");
-    log("showGroupModal", _modal, group);	
+    log("showGroupModal", _modal, group);
     $.tinybox.show(_modal, {
         overlayClose: false,
         opacity: 0
@@ -323,48 +337,48 @@ function showGroupModal(group) {
 
 function eventForModal() {
     var _modal = $("#modalGroup");
-	
+
     // Bind close function to Close button
     _modal.find("a.Close").click(function(e) {
         e.preventDefault();
     });
-	
+
 }
 
 function validateEmail() {
     // Check it has recipients
-    if( $("ul.GroupList li").length == 0  ) {
+    if ($("ul.GroupList li").length == 0) {
         alert("Please enter at least one recipient");
         return false;
     }
     // Check it has a message
     var msg = $("textarea[name=html]").val();
-    if( msg == null || msg.length == 0 ) {
+    if (msg == null || msg.length == 0) {
         alert("Please enter a message to send");
         return false;
     }
     // Check subject
     var subject = $("input[name=subject]").val();
-    if( subject == null || subject.length == 0) {
+    if (subject == null || subject.length == 0) {
         alert("Please enter a subject for the email");
         return false;
     }
     // Check from address    
     var fromAddress = $("input[name=fromAddress]").val();
-    if( fromAddress == null || fromAddress.length == 0) {
+    if (fromAddress == null || fromAddress.length == 0) {
         alert("Please enter a from address for the email");
         return false;
     }
     // Check that if doing password reset then a theme is selected
     var sel = $("select[name=themeSiteId]");
     log("check reset", $("#passwordReset:checked"), sel);
-    if( $("#passwordReset:checked").length > 0 ) {
-        if( sel.val() == "" ) {
+    if ($("#passwordReset:checked").length > 0) {
+        if (sel.val() == "") {
             alert("A theme is required for a password reset email. Please choose a theme on the Message tab");
             return false;
         }
-    }                
-    
+    }
+
     return true;
 }
 
@@ -377,7 +391,7 @@ function previewMail() {
 }
 
 function sendMailAjax(reallySend) {
-    if( !validateEmail() ) {
+    if (!validateEmail()) {
         return;
     }
     try {
@@ -390,7 +404,7 @@ function sendMailAjax(reallySend) {
             },
             success: function(data) {
                 log("send has been initiated", data);
-                if( reallySend ) {
+                if (reallySend) {
                     alert("Email sending has been initiated. If there is a large number of users this might take some time. This screen will display progress");
                     $("a.statusTab").click();
                     $("#manageEmail button").hide();
@@ -405,10 +419,10 @@ function sendMailAjax(reallySend) {
                 log("error", resp);
                 alert("Failed to start the send job. Please refresh the page");
             }
-        });          
-    } catch(e) {
+        });
+    } catch (e) {
         log("exception in createJob", e);
-    }           
+    }
 }
 
 
@@ -419,7 +433,7 @@ function initStatusPolling() {
 
 function pollStatus() {
     //log("pollStatus");
-    if( $("div.status:visible").length == 0 ) {
+    if ($("div.status:visible").length == 0) {
         //log("status page is not visible, so dont do poll");
         window.setTimeout(pollStatus, 2000);
         return;
@@ -432,9 +446,9 @@ function pollStatus() {
             data: {
                 status: "true"
             },
-            success: function(resp) {                
+            success: function(resp) {
                 displayStatus(resp.data);
-                if( resp.data.statusCode != "c") {
+                if (resp.data.statusCode != "c") {
                     window.setTimeout(pollStatus, 2000);
                 } else {
                     log("job status is finished, so don't poll");
@@ -443,35 +457,35 @@ function pollStatus() {
             error: function(resp) {
                 log("error", resp);
             }
-        });          
-    } catch(e) {
+        });
+    } catch (e) {
         log("exception in createJob", e);
-    }          
+    }
 }
 
 function displayStatus(data) {
     log("displayStatus", data);
     var tbody = $("#emails tbody");
-    if( data.statusCode ) {
+    if (data.statusCode) {
         $("div.status > div").hide();
         $("div.status").removeClass("status_c");
         $("div.status").removeClass("status_p");
         $("div.status").addClass("status_" + data.statusCode);
         $("div.status div.SendProgress").show();
-        $("div.status div.Percent").css("width", data.percent +"%");
+        $("div.status div.Percent").css("width", data.percent + "%");
         var txtProgress = data.successful.length + " sent ok, ";
-        
-        if( data.failed ) {
+
+        if (data.failed) {
             txtProgress += data.failed.length + " failed, ";
         }
-        if( data.retrying) {
+        if (data.retrying) {
             txtProgress += data.retrying.length + " retrying, ";
         }
-        if( data.totalToSend ) {
+        if (data.totalToSend) {
             txtProgress += data.totalToSend + " in total to send";
         }
         $("div.status div.stats").text(txtProgress);
-        
+
         $.each(data.successful, function(i, emailId) {
             var tr = tbody.find("#" + emailId);
             log("remove", emailId, tr)
@@ -484,28 +498,60 @@ function displayStatus(data) {
         $("div.status > div").hide();
         $("div.status div.NotSent").show();
         tbody.html("");
-        
-        
+
+
     }
 }
 
 function addRows(list, status, tbody) {
     $.each(list, function(i, e) {
         tr = getOrCreateEmailRow(e, tbody);
-        if( e.lastError ) {
+        if (e.lastError) {
             tr.find("td.status").html("<acronym title='" + e.lastError + "'>" + status + "</acronym>");
         } else {
             tr.find("td.status").text(status);
         }
         tr.find("td.attempt").text(e.retries);
-    });          
+    });
 }
 
 function getOrCreateEmailRow(e, tbody) {
     var tr = tbody.find("#" + e.emailId);
-    if( tr.length == 0 ) {
+    if (tr.length == 0) {
         tr = $("<tr id='" + e.emailId + "'><td>" + e.email + "</td><td>" + e.fullName + "</td><td class='status'></td><td class='attempt'></td></td>");
         tbody.prepend(tr);
     }
     return tr;
+}
+
+function showRecipients(tableBody) {
+    try {
+        $.ajax({
+            type: 'GET',
+            url: window.location.pathname + "?recipients",
+            dataType: "json",
+            success: function(resp) {
+                log("got results", resp.data.length, resp.data);
+                tableBody.html("");
+                if (resp.data.length > 0) {
+                    $.each(resp.data, function(i, profile) {
+                        var tr = $("<tr>").appendTo(tableBody);
+                        $("<td>").html("<a href='/manageUsers/" + profile.userId + "'>" + profile.name + "</a>").appendTo(tr);
+                        $("<td>").text(profile.email).appendTo(tr);
+                        $("<td>").text(profile.firstName).appendTo(tr);
+                        $("<td>").text(profile.surName).appendTo(tr);
+                        log("appended", tr, tableBody);
+                    });
+                } else {
+                    tableBody.html("<tr><td>No recipients</td></tr>");
+                }
+            },
+            error: function(resp) {
+                alert("Sorry, an error occured collecting the recipient list");
+            }
+        });
+    } catch (e) {
+        log("exception in createJob", e);
+    }
+
 }

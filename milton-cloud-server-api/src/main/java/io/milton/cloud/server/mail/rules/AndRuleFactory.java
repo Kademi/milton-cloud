@@ -29,6 +29,11 @@ import org.dom4j.Element;
  */
 public class AndRuleFactory implements ExpressionFactory {
 
+    public AndRuleFactory() {
+    }
+
+    
+    
     @Override
     public Rule create(Element el, Map<String, ExpressionFactory> map) {
         List<Rule> rules = new ArrayList<>();

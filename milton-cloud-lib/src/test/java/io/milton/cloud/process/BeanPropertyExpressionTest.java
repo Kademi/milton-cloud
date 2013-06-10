@@ -29,7 +29,7 @@ public class BeanPropertyExpressionTest {
     @Test
     public void testSomeMethod() {
         BeanPropertyExpression expr = new BeanPropertyExpression("attributes.customer.addresses[1].addressLine1");
-        ProcessContext context = new ProcessContext(null);
+        ProcessContext context = new ProcessContext();
         Customer c = new Customer();
         c.setAddresses(new Address[2]);
         c.getAddresses()[0] = new Address("a line1", "a line2");

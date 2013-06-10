@@ -218,3 +218,7 @@ ul.GroupList li:hover a {
      background-repeat: no-repeat;
      cursor: pointer;
 }
+
+.showRecipients table {
+    display: none;
+}

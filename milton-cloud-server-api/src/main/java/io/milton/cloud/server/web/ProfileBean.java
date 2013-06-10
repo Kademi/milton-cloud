@@ -27,7 +27,7 @@ public class ProfileBean {
         populateBean(p, b);
         return b;
     }
-
+    
     public static void populateBean(Profile p, ProfileBean b) {
         b.setUserId(p.getId());
         b.setHref("/users/" + p.getName() + "/public" );
@@ -69,7 +69,7 @@ public class ProfileBean {
     public void setName(String name) {
         this.name = name;
     }
-
+      
     public String getPhotoHash() {
         return photoHash;
     }

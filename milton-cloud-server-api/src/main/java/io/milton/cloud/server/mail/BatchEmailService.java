@@ -39,6 +39,7 @@ import io.milton.http.exceptions.NotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,21 +74,12 @@ public class BatchEmailService {
      * @throws IOException
      */
     public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
-        if (j.getGroupRecipients() == null && directRecipients.isEmpty()) {
+        Set<Profile> profiles = filterRecipients(j, directRecipients, session);
+        if (profiles.isEmpty()) {
             log.warn("No recipients!! For job: " + j.getId());
             return;
         }
-        Set<Profile> profiles = new HashSet<>();
-        EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
-        if (directRecipients != null) {
-            for (BaseEntity e : directRecipients) {
-                if (e != null) {
-                    append(j, e, evaluationContext, profiles);
-                } else {
-                    log.warn("Found null recipient, ignoring");
-                }
-            }
-        }
+        
         log.info("recipients: " + profiles.size());
         if (j.getEmailItems() == null) {
             j.setEmailItems(new ArrayList<EmailItem>());
@@ -96,6 +88,22 @@ public class BatchEmailService {
             enqueueSingleEmail(j, p, callback, session);
         }
         session.save(j);
+    }
+
+    public Set<Profile> filterRecipients(BaseEmailJob j, List<BaseEntity> directRecipients, Session session) {
+        if (directRecipients.isEmpty()) {
+            return Collections.EMPTY_SET;
+        }
+        Set<Profile> profiles = new HashSet<>();
+        EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
+        for (BaseEntity e : directRecipients) {
+            if (e != null) {
+                append(j, e, evaluationContext, profiles);
+            } else {
+                log.warn("Found null recipient, ignoring");
+            }
+        }
+        return profiles;
     }
 
     private void append(final BaseEmailJob j, final BaseEntity g, final EvaluationContext evaluationContext, final Set<Profile> profiles) {
@@ -226,5 +234,4 @@ public class BatchEmailService {
         log.info(" no theme, cant do templating");
         return bodyHtml;
     }
-
 }

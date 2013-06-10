@@ -16,14 +16,18 @@ package io.milton.cloud.server.mail;
 
 import io.milton.cloud.process.Expression;
 import io.milton.cloud.process.Rule;
+import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.mail.rules.AndRuleFactory;
+import io.milton.cloud.server.mail.rules.AppPropertyRuleFactory;
 import io.milton.cloud.server.mail.rules.ComparisonRuleFactory;
 import io.milton.cloud.server.mail.rules.ConstantExprFactory;
 import io.milton.cloud.server.mail.rules.OrRuleFactory;
 import io.milton.cloud.server.mail.rules.TrueRuleFactory;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -38,6 +42,21 @@ public class XmlScriptParser implements ScriptParser {
 
     private final Map<String, ExpressionFactory> map = new HashMap<>();
 
+    
+                
+    public XmlScriptParser(ApplicationManager applicationManager) {
+        this();
+        add(new AppPropertyRuleFactory(applicationManager));
+    }
+    
+    public XmlScriptParser(List<ExpressionFactory> extraFactories) {
+        this();
+        for( ExpressionFactory ef : extraFactories) {
+            add(ef);
+        }
+        
+    }
+    
     public XmlScriptParser() {
         add(new TrueRuleFactory());
         add(new AndRuleFactory());

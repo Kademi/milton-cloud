@@ -113,7 +113,7 @@ public class RequestContext extends Context implements RemovalCallback {
     @Override
     public void onRemove(Object item) {
         tlContext.set(null);
-        ArrayList<Registration> items = new ArrayList<Registration>(this.itemByClass.values());
+        ArrayList<Registration> items = new ArrayList<>(this.itemByClass.values());
         for (Registration reg : items) {
             reg.remove();
         }

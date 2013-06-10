@@ -133,7 +133,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         String hostName = config.getContext().get(CurrentRootFolderService.class).getPrimaryDomain();
         props.setProperty(ConfigurationMBean.PARAM_HOSTNAME, hostName);
         aspirinConfiguration = new Configuration(props);
-        XmlScriptParser xmlScriptParser = new XmlScriptParser();
+        XmlScriptParser xmlScriptParser = new XmlScriptParser(resourceFactory.getApplicationManager());
         config.getContext().put(xmlScriptParser);
         filterScriptEvaluator = new DefaultFilterScriptEvaluator(xmlScriptParser, currentDateService, config.getContext().get(Formatter.class));
         batchEmailService = new BatchEmailService(filterScriptEvaluator, resourceFactory.getApplicationManager());

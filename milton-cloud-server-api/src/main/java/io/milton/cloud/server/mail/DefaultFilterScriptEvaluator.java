@@ -23,6 +23,7 @@ import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.Formatter;
+import io.milton.context.RequestContext;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.Organisation;
@@ -52,7 +53,8 @@ public class DefaultFilterScriptEvaluator implements FilterScriptEvaluator {
             rule = (Rule) context.getCompiledScript();
         }
 
-        ProcessContext processContext = new ProcessContext(currentDateService);
+        RequestContext rctx = RequestContext.getCurrent();
+        ProcessContext processContext = new ProcessContext(rctx);
         processContext.addAttribute("rootFolder", rf);
         processContext.addAttribute("profile", p);
         processContext.addAttribute("organisation", org);
@@ -67,6 +69,6 @@ public class DefaultFilterScriptEvaluator implements FilterScriptEvaluator {
         processContext.addAttribute("user", userRes);
         processContext.addAttribute("userResource", userRes);
         processContext.addAttribute("formatter", formatter);
-        return rule.eval(null);
+        return rule.eval(processContext);
     }
 }

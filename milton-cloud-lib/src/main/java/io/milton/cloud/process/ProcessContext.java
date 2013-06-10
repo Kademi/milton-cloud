@@ -1,23 +1,50 @@
 package io.milton.cloud.process;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.context.Contextual;
+import io.milton.context.Registration;
+import io.milton.context.RequestContext;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProcessContext {
+public class ProcessContext implements Contextual {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessContext.class);
-    private final ProcessInstance token;
-    private final StateProcess process;
-    private final TimerService timerService;
+    private final RequestContext parent;
     private final CurrentDateService currentDateService;
+    private ProcessInstance token;
+    private StateProcess process;
+    private TimerService timerService;
     /**
      * Fill with use specific data. Eg customer object. Is NOT persisted
      */
     private Map<String, Object> attributes = new HashMap<>();
     public static final int MAX_TRANSITIONS = 10;
+
+    public ProcessContext(RequestContext parent) {
+        this.parent = parent;
+        if (parent != null) {
+            currentDateService = parent.get(CurrentDateService.class);
+        } else {
+            currentDateService = null;
+        }
+    }
+
+    public ProcessContext(CurrentDateService currentDateService) {
+        this.parent = null;
+        this.currentDateService = currentDateService;
+    }
+
+    public ProcessContext() {
+        this.parent = null;
+        this.currentDateService = null;
+    }
+
+    public <T> Registration<T> put(T o) {
+        return parent.put(o, null);
+    }
 
     /**
      *
@@ -26,7 +53,8 @@ public class ProcessContext {
      * @param timerService - only needed if using time dependent states,
      * otherwise can be null
      */
-    public ProcessContext(ProcessInstance token, StateProcess process, TimerService timerService, CurrentDateService currentDateService) {
+    public ProcessContext(RequestContext requestContext, ProcessInstance token, StateProcess process, TimerService timerService, CurrentDateService currentDateService) {
+        this.parent = requestContext;
         this.token = token;
         this.process = process;
         this.timerService = timerService;
@@ -37,16 +65,17 @@ public class ProcessContext {
         if (token == null) {
             throw new NullPointerException("token is null");
         }
+        requestContext.put(token);
+        requestContext.put(process);
+        requestContext.put(timerService);
     }
-
-    public ProcessContext(CurrentDateService currentDateService) {
-        this.currentDateService = currentDateService;
-        this.token = null;
-        this.timerService = null;
-        this.process = null;
-    }
-    
-    
+//
+//    public ProcessContext(CurrentDateService currentDateService) {
+//        this.currentDateService = currentDateService;
+//        this.token = null;
+//        this.timerService = null;
+//        this.process = null;
+//    }
 
     /**
      * Scan for triggers on the current state. This is recursive, so if a
@@ -83,17 +112,17 @@ public class ProcessContext {
         boolean didTransition = false;
         State state = getCurrentState();
         if (state == null) {
-            state = process.getStartState();
-            token.setStateName(state.getName());
+            state = getProcess().getStartState();
+            getProcessInstance().setStateName(state.getName());
             if (log.isDebugEnabled()) {
-                log.debug("start: current state is: " + token.getStateName());
+                log.debug("start: current state is: " + getProcessInstance().getStateName());
             }
             didTransition = true;
         }
         for (Transition t : state.getTransitions()) {
             if (evalAndTransition(t, false)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("transitioned to: " + token.getStateName());
+                    log.debug("transitioned to: " + getProcessInstance().getStateName());
                 }
                 return true;
             }
@@ -102,13 +131,13 @@ public class ProcessContext {
     }
 
     public State getCurrentState() {
-        if (token.getStateName() == null) {
+        if (getProcessInstance().getStateName() == null) {
             System.out.println("statename is null");
             return null;
         }
-        State state = process.getState(token.getStateName());
+        State state = getProcess().getState(getProcessInstance().getStateName());
         if (state == null) {
-            throw new RuntimeException("state not found: " + token.getStateName());
+            throw new RuntimeException("state not found: " + getProcessInstance().getStateName());
         }
         return state;
     }
@@ -149,18 +178,18 @@ public class ProcessContext {
 
     void executeTransition(Transition transition) {
         if (log.isDebugEnabled()) {
-            log.debug("executeTransition(" + process.getName() + ") transitioning from " + transition.getFromState().getName() + " to " + transition.getToState().getName());
+            log.debug("executeTransition(" + getProcess().getName() + ") transitioning from " + transition.getFromState().getName() + " to " + transition.getToState().getName());
         }
         fireOnExit(transition.getFromState());
         transitionTo(transition);
         fireOnEnter(transition.getToState());
         if (transition.getToState().getInterval() != null) {
-            if (timerService != null) {
-                timerService.registerTimer(this);
+            if (getTimerService() != null) {
+                getTimerService().registerTimer(this);
             }
         } else {
-            if (timerService != null) {
-                timerService.unRegisterTimer(this);
+            if (getTimerService() != null) {
+                getTimerService().unRegisterTimer(this);
             }
         }
 
@@ -203,24 +232,47 @@ public class ProcessContext {
     void transitionTo(Transition transition) {
         long tm = System.currentTimeMillis();
         State toState = transition.getToState();
-        token.setStateName(toState.getName());
-        token.setTimeEntered(currentDateService.getNow());
+        getProcessInstance().setStateName(toState.getName());
+        getProcessInstance().setTimeEntered(currentDateService.getNow());
         for (ActionHandler handler : transition.getOnTransitionHandlers()) {
             handler.process(this);
             if (log.isDebugEnabled()) {
                 log.debug("transitionTo: " + handler + " handler duration=" + (System.currentTimeMillis() - tm) + "ms");
             }
         }
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("transitionTo: total duration=" + (System.currentTimeMillis() - tm) + "ms");
         }
     }
 
     public ProcessInstance getProcessInstance() {
+        if (token == null) {
+            token = parent.get(ProcessInstance.class);
+        }
         return token;
     }
 
     public StateProcess getProcess() {
+        if (process == null) {
+            process = parent.get(StateProcess.class);
+        }
         return process;
+    }
+
+    public TimerService getTimerService() {
+        if (timerService == null) {
+            timerService = parent.get(TimerService.class);
+        }
+        return timerService;
+    }
+
+    @Override
+    public <T> T get(String id) {
+        return parent.get(id);
+    }
+
+    @Override
+    public <T> T get(Class<T> c) {
+        return parent.get(c);
     }
 }

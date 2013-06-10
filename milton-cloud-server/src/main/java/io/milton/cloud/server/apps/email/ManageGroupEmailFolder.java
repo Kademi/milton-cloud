@@ -64,12 +64,14 @@ import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.resource.DeletableResource;
 import io.milton.vfs.data.DataSession;
+import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
 import org.hibernate.HibernateException;
 
 /**
@@ -174,6 +176,8 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (params.containsKey("status")) {
             jsonResult = buildStatus();
+        } else if( params.containsKey("recipients")) {
+            jsonResult = buildRecipients();
         }
         if (jsonResult != null) {
             jsonResult.write(out);
@@ -497,6 +501,18 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             b.setLastError(lastAttempt.getStatus());
         }
         return b;
+    }
+
+    private JsonResult buildRecipients() {
+        jsonResult = new JsonResult(true);
+        List<BaseEntity> initialRecips = _(GroupEmailService.class).getRecipients(job);
+        Set<Profile> finalRecips = _(BatchEmailService.class).filterRecipients(job, initialRecips, SessionManager.session());
+        List<ExtProfileBean> beans = new ArrayList<>();
+        jsonResult.setData(beans);
+        for( Profile p : finalRecips ) {
+            beans.add(ExtProfileBean.toBeanExt(p));
+        }
+        return jsonResult;
     }
 
     public class SendStatus {

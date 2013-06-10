@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * This is just to hold the source script, and the compiled version of that script.
+ * 
+ * We dont know what the compiled form might be, so just an object.
  *
  * @author brad
  */
