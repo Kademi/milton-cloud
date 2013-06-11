@@ -4,7 +4,9 @@ import io.milton.cloud.common.CurrentDateService;
 import io.milton.context.Contextual;
 import io.milton.context.Registration;
 import io.milton.context.RequestContext;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ public class ProcessContext implements Contextual {
     private ProcessInstance token;
     private StateProcess process;
     private TimerService timerService;
+
     /**
      * Fill with use specific data. Eg customer object. Is NOT persisted
      */
@@ -98,6 +101,7 @@ public class ProcessContext implements Contextual {
 
     public void addAttribute(String key, Object val) {
         attributes.put(key, val);
+        put(val);
     }
 
     public Object getAttribute(String key) {

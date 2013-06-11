@@ -21,6 +21,7 @@ package io.milton.cloud.process;
 public class ComparisonRule implements Rule {
 
     public enum Operator {
+
         EQUALS,
         LESS_THEN,
         GREATER_THEN
@@ -34,8 +35,7 @@ public class ComparisonRule implements Rule {
         this.leftExpr = leftExpr;
         this.rightExpr = rightExpr;
     }
-    
-    
+
     @Override
     public Boolean eval(ProcessContext context) {
         Object leftVal = leftExpr.eval(context);
@@ -54,9 +54,21 @@ public class ComparisonRule implements Rule {
                 Comparable right = (Comparable) rightVal;
                 return doComparison(left, right);
             } else {
-                String left = leftVal.toString();
-                String right = rightVal.toString();
-                return doComparison(left, right);
+                if (leftVal == null) {
+                    if (rightVal == null) {
+                        return Boolean.TRUE;
+                    } else {
+                        return Boolean.FALSE;
+                    }
+                } else {
+                    if (rightVal == null) {
+                        return Boolean.FALSE;
+                    } else {
+                        String left = leftVal.toString();
+                        String right = rightVal.toString();
+                        return doComparison(left, right);
+                    }
+                }
             }
         }
     }

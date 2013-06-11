@@ -27,7 +27,7 @@ import io.milton.context.Registration;
  */
 public class AppPropertyExpression implements Expression {
 
-    private final Expression parent;
+    private final Expression parent; // this might be, for example, DefaultAppProperty
     private final AppPropertyExpression child;
 
     public AppPropertyExpression(Expression parent, AppPropertyExpression child) {

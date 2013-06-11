@@ -18,7 +18,10 @@ import io.milton.cloud.server.apps.AppConfig;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
+import io.milton.cloud.server.apps.DefaultAppProperty;
+import io.milton.cloud.server.apps.PropertyProviderApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
+import io.milton.cloud.server.apps.user.rules.ListSizeApplicationProperty;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.Formatter;
@@ -38,15 +41,20 @@ import io.milton.vfs.db.Website;
 import java.util.List;
 
 import static io.milton.context.RequestContext._;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
  * @author brad
  */
-public class UserApp implements Application, ChildPageApplication, BrowsableApplication {
+public class UserApp implements Application, ChildPageApplication, BrowsableApplication, PropertyProviderApplication {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(UserApp.class);
     public static String USERS_FOLDER_NAME = "users";
+    private final Map<String, PropertyProviderApplication.ApplicationProperty> mapOfProperties = new ConcurrentHashMap<>();
 
     public static String getPasswordResetBase(Website w) {
         String domainName = w.getDomainName();
@@ -96,6 +104,15 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
     private SpliffySecurityManager securityManager;
     private CookieAuthenticationHandler cookieAuthenticationHandler; // Needed for logging users in on password reset
 
+    public UserApp() {
+        DefaultAppProperty.add(mapOfProperties, "firstName", "First name", Profile.class);   
+        DefaultAppProperty.add(mapOfProperties, "surName", "Surname", Profile.class);   
+        DefaultAppProperty.add(mapOfProperties, "name", "User ID", Profile.class);           
+        DefaultAppProperty.add(mapOfProperties, new ListSizeApplicationProperty());   
+    }
+
+    
+    
     @Override
     public String getInstanceId() {
         return "userApp";
@@ -169,4 +186,13 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
         }
     }
 
+    @Override
+    public Set<ApplicationProperty> getAllProperties() {
+        return new HashSet<>(mapOfProperties.values());        
+    }
+
+    @Override
+    public ApplicationProperty getProperty(String name) {
+        return mapOfProperties.get(name);
+    }    
 }
