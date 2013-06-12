@@ -19,7 +19,6 @@ public class ProcessContext implements Contextual {
     private ProcessInstance token;
     private StateProcess process;
     private TimerService timerService;
-
     /**
      * Fill with use specific data. Eg customer object. Is NOT persisted
      */
@@ -100,8 +99,12 @@ public class ProcessContext implements Contextual {
     }
 
     public void addAttribute(String key, Object val) {
-        attributes.put(key, val);
-        put(val);
+        if (val != null) {
+            attributes.put(key, val);
+            if (parent != null) {
+                put(val);
+            }
+        }
     }
 
     public Object getAttribute(String key) {

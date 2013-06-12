@@ -71,6 +71,7 @@ public class HtmlTemplateRenderer {
             profile = user.getThisUser();
         }
         datamodel.put("userResource", user);
+        datamodel.put("applicationManager", applicationManager);
         MenuItem menu = applicationManager.getRootMenuItem(page, profile, rootFolder);
         datamodel.put("menu", menu);
         datamodel.put("formatter", formatter);

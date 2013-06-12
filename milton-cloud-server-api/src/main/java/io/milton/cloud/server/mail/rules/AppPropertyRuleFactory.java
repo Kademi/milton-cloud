@@ -45,7 +45,7 @@ public class AppPropertyRuleFactory implements ExpressionFactory {
                 PropertyProviderApplication papp = (PropertyProviderApplication) app;
                 PropertyProviderApplication.ApplicationProperty expr = papp.getProperty(propName);
                 if (expr != null) {
-                    AppPropertyExpression child = findChild(el, map);
+                    Expression child = findChild(el, map);
                     return new AppPropertyExpression(expr, child);
                 } else {
                     throw new RuntimeException("Couldnt find property: " + propName + " in app " + appId);
@@ -63,7 +63,7 @@ public class AppPropertyRuleFactory implements ExpressionFactory {
         return "app-prop";
     }
 
-    private AppPropertyExpression findChild(Element parentElement, Map<String, ExpressionFactory> map) {
+    private Expression findChild(Element parentElement, Map<String, ExpressionFactory> map) {
         List elements = parentElement.elements();
         if (elements != null) {
             for (Object o : elements) {
@@ -71,6 +71,7 @@ public class AppPropertyRuleFactory implements ExpressionFactory {
                     Element el = (Element) o;
                     ExpressionFactory fac = map.get(el.getName());
                     Expression rule = fac.create(el, map);
+                    return rule;
                 }
             }
         }

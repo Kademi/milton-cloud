@@ -39,6 +39,7 @@ import java.util.Properties;
 import io.milton.vfs.db.Profile;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.context.RequestContext;
 import io.milton.mail.MessageFolder;
 import io.milton.resource.AccessControlledResource;
@@ -50,6 +51,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.mail.internet.MimeMessage;
@@ -540,6 +542,18 @@ public class ApplicationManager {
                     DataResourceApplication rc = (DataResourceApplication) app;
                     list.add(rc);
                 }
+            }
+        }
+        return list;
+    }
+    
+    public List<PropertyProviderApplication> getPropertyProviderApps(RootFolder rf) {
+        List<PropertyProviderApplication> list = new ArrayList();
+        Iterator<Application> it = getActiveApps(rf).iterator();
+        while( it.hasNext() ) {
+            Application app = it.next();
+            if( app instanceof PropertyProviderApplication ) {
+                list.add((PropertyProviderApplication) app);
             }
         }
         return list;

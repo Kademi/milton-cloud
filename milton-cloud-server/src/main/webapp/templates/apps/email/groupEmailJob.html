@@ -103,17 +103,34 @@
                         </ul>
                         <header>Advanced</header>
                         <p>You can enter XML rules below</p>
-                        <textarea name="filterScriptXml" style='height: 100px; width: 500px'>$!page.job.filterScriptXml</textarea>
+                        <div class="rules-ref">
+                            <ul>
+                                #foreach( $app in $applicationManager.getPropertyProviderApps($rootFolder) )
+                                <li>
+                                    <h3>$app.instanceId</h3>
+                                    <ul>
+                                        #foreach( $expr in $app.allProperties )
+                                        <li>
+                                            <b>$expr.name</b>: 
+                                            $expr.description
+                                        </li>
+                                        #end
+                                    </ul>
+                                </li>
+                                #end
+                            </ul>
+                        </div>
+                        <textarea name="filterScriptXml" style='height: 300px; width: 480px'>$!page.job.filterScriptXml</textarea>
                         <hr/>
-                        <div class="showRecipients">
+                        <div class="showRecipients">                            
                             <button type="button" class="Btn">Show recipients</button>
+                            <div style="clear:both"></div>
+
                             <table>
                                 <thead>
                                     <tr>
                                         <th>User</th>
                                         <th>Email</th>
-                                        <th>First name</th>
-                                        <th>Surname</th>
                                     </tr>
                                 </thead>
                                 <tbody>

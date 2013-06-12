@@ -26,11 +26,11 @@
 #manageEmail > .Content header a.Date { left: 0; }
 #manageEmail > .Content header a.Name { left: 15%; }
 #manageEmail > .Content header a.Status { left: 70%; }
-#manageEmail > .Content ul { 
+#manageEmail > .Content ul.GroupList { 
     padding: 0 4px 4px; 
     margin: 0;
 }
-#manageEmail > .Content ul li {
+#manageEmail > .Content ul.GroupList li {
     border-radius: 3px;
     border: 1px solid #ededed;
     margin-top: 4px;
@@ -221,4 +221,22 @@ ul.GroupList li:hover a {
 
 .showRecipients table {
     display: none;
+}
+.rules-ref {
+    height: 300px;
+    width: 300px;
+    overflow: auto;
+    float: right;    
+}
+.rules-ref > ul {
+    margin-left: 15px;
+}
+.rules-ref > ul ul {
+    margin-left: 5px;
+}
+.rules-ref > ul li li {
+    list-style-type: none;
+}
+.rules-ref > ul h3 {
+    font-weight: bold;
 }
