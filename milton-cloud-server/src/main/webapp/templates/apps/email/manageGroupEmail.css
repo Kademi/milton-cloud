@@ -224,19 +224,26 @@ ul.GroupList li:hover a {
 }
 .rules-ref {
     height: 300px;
-    width: 300px;
+    width: 350px;
     overflow: auto;
     float: right;    
 }
+.rules-ref h2 {
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.rules-ref h3 {
+    font-weight: bold;
+    font-size: 13px;
+}
 .rules-ref > ul {
-    margin-left: 15px;
+    margin-left: 12px;
 }
 .rules-ref > ul ul {
     margin-left: 5px;
 }
 .rules-ref > ul li li {
     list-style-type: none;
-}
-.rules-ref > ul h3 {
-    font-weight: bold;
 }

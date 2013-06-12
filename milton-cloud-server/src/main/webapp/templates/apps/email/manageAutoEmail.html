@@ -74,6 +74,70 @@
                             <li class="$g.name">$g.name</li>
                             #end
                         </ul>
+                        
+<header>Advanced</header>
+                        <p>You can enter XML rules below</p>
+                        <div class="rules-ref">
+                            <h2>Available Rules</h2>
+                            
+                            <ul>
+                                <li>
+                                    <h3>Expression types</h3>
+                                    <ul>
+                                        <li>
+                                            <b>const</b>: Constants, eg <br/>&lt;const type='Integer'&gt;1&lt;/const&gt;
+                                        </li>
+                                        <li>
+                                            <b>comparison</b>: 
+                                            Compare 2 expressions, Eg
+                                            <br/>
+                                            &lt;comparison operator='EQUALS'&gt;<br/>
+&lt;const type='Integer'&gt;1&lt;/const&gt;<br/>
+&lt;const type='Integer'&gt;1&lt;/const&gt;<br/>
+&lt;/comparison&gt;<br/>
+                                        </li>
+                                        <li>
+                                            <b>app-prop</b>: a property from an application. See below for a full list of app-id's and prop-name's. Eg:
+                                            <br/>
+                                            &lt;app-prop app-id='userApp' prop-name='firstName' /&gt;
+                                        </li>
+                                    </ul>                                    
+                                </li>
+                                #foreach( $app in $applicationManager.getPropertyProviderApps($rootFolder) )
+                                <li>
+                                    <h3>$app.instanceId</h3>
+                                    <ul>
+                                        #foreach( $expr in $app.allProperties )
+                                        <li>
+                                            <b>$expr.name</b>: 
+                                            $expr.description
+                                        </li>
+                                        #end
+                                    </ul>
+                                </li>
+                                #end
+                            </ul>
+                        </div>
+                        <textarea name="filterScriptXml" style='height: 300px; width: 400px'>$!page.job.filterScriptXml</textarea>
+                        <hr/>
+                        <div class="showRecipients">                            
+                            <button type="button" class="Btn">Show recipients</button>
+                            <div style="clear:both"></div>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Please wait, this can take a while...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>                        
                     </div>
                     <script type="text/javascript">
                         jQuery(function() {
