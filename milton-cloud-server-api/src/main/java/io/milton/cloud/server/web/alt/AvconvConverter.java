@@ -35,6 +35,9 @@ public class AvconvConverter implements Closeable {
     private final RootContext rootContext;
     private final SessionManager sessionManager;
     private final String videoConverterProcess;
+    
+    // sudo apt-get install ffmpegthumbnailer
+    // ffmpegthumbnailer -i dodgy-convert.mp4 -o out.png
     private final String imageConverterProcess = "convert"; // ImageMagick
     private final String primaryMediaHash;
     private final FormatSpec format;

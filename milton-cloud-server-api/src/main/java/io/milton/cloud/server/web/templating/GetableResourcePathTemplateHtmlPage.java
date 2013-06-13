@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web.templating;
 
+import io.milton.cloud.server.web.FileResource;
 import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.common.Path;
@@ -125,13 +126,15 @@ public class GetableResourcePathTemplateHtmlPage extends TemplateHtmlPage {
             Resource r = _(SpliffyResourceFactory.class).findResource(host, path);
             if (r instanceof RenderFileResource) {
                 RenderFileResource rfr = (RenderFileResource) r;
-                return rfr.getFileResource();
+                FileResource fr = rfr.getFileResource();
+                return fr;
             } else if (r instanceof GetableResource) {
                 GetableResource gr = (GetableResource) r;
                 return gr;
             } else if (r != null) {
                 throw new RuntimeException("Template resource is not getable: " + r.getClass());
             } else {
+                log.warn("findResource: Not found: host=" + host + " - path=" + path);
                 return null;
             }
         } catch (ClassNotInContextException | NotAuthorizedException | BadRequestException e) {
