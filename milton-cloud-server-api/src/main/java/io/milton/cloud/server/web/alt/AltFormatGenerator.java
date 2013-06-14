@@ -90,10 +90,16 @@ public class AltFormatGenerator implements EventListener {
         this.sessionManager = sessionManager;
         this.formats = new ArrayList<>();
         this.mediaInfoService = new MediaInfoService(hashStore, blobStore);
-        formats.add(new FormatSpec("image", "png", 150, 150, true, "-f", "image2"));
-        formats.add(new FormatSpec("image", "png", 300, 300, true, "-f", "image2"));
-        formats.add(new FormatSpec("image", "png", 600, 400, true, "-f", "image2"));
-        formats.add(new FormatSpec("image", "png", 420, 290, true, "-f", "image2"));
+        addThumbSpecs(formats, null, null);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.SECS, 0);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.SECS, 1);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.SECS, 10);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.PERC, 10);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.PERC, 20);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.PERC, 30);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.PERC, 40);
+        addThumbSpecs(formats, FormatSpec.SeekUnit.PERC, 50);
+        
         profileSpec = new FormatSpec("image", "png", 52, 52, true, "-f", "image2");
         formats.add(profileSpec);
 
@@ -191,6 +197,7 @@ public class AltFormatGenerator implements EventListener {
 
     public FormatSpec findFormat(String name) {
         for (FormatSpec f : formats) {
+            System.out.println("findFormat: " + f.getName() + "=" + name);
             if (f.getName().equals(name)) {
                 return f;
             }
@@ -233,7 +240,7 @@ public class AltFormatGenerator implements EventListener {
     public String generateProfileImage(String primaryFileHash, String primaryFileName) throws Exception {
         final Parser parser = new Parser();
         String ext = FileUtils.getExtension(primaryFileName);
-        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, rootContext, sessionManager);
+        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, profileSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, rootContext);
         String altHash = converter.generate(new With<InputStream, String>() {
             @Override
             public String use(InputStream t) throws Exception {
@@ -275,6 +282,13 @@ public class AltFormatGenerator implements EventListener {
         return j;
     }
 
+    private void addThumbSpecs(List<FormatSpec> formats, FormatSpec.SeekUnit seekUnit, Integer seekAmount) {
+        formats.add(new FormatSpec("image", "png", 150, 150, true,seekUnit, seekAmount, "-f", "image2"));
+        formats.add(new FormatSpec("image", "png", 300, 300, true,seekUnit, seekAmount, "-f", "image2"));
+        formats.add(new FormatSpec("image", "png", 600, 400, true,seekUnit, seekAmount, "-f", "image2"));
+        formats.add(new FormatSpec("image", "png", 420, 290, true,seekUnit, seekAmount, "-f", "image2"));
+    }
+
     public interface GenerateJob extends Runnable {
 
         String getPrimaryFileHash();
@@ -306,7 +320,7 @@ public class AltFormatGenerator implements EventListener {
                 throw new RuntimeException("formatSpec cannot be null");
             }
             String ext = FileUtils.getExtension(primaryFileName);
-            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, rootContext, sessionManager);
+            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, rootContext);
         }
 
         @Override
@@ -438,6 +452,7 @@ public class AltFormatGenerator implements EventListener {
             return status;
         }
         
+        @Override
         public boolean done() {
             return done;
         }
@@ -461,13 +476,14 @@ public class AltFormatGenerator implements EventListener {
                 throw new RuntimeException("formatSpec cannot be null");
             }
             String ext = FileUtils.getExtension(primaryFileName);
-            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, rootContext, sessionManager);
+            converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, rootContext);
         }
 
         public File getDestFile() {
             return converter.getGeneratedOutputFile();
         }
 
+        @Override
         public String getStatus() {
             return status;
         }

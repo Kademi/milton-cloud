@@ -17,9 +17,11 @@
 package io.milton.cloud.server.web.templating;
 
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.web.CommonResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.SpliffyResourceFactory;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.cloud.server.web.WebUtils;
 import java.io.IOException;
 import java.io.Writer;
 import org.apache.velocity.context.InternalContextAdapter;
@@ -59,7 +61,11 @@ public class PortletsDirective extends Directive {
             return true;
         }
         Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-        RootFolder rootFolder = SpliffyResourceFactory.getRootFolder();
+        CommonResource page = (CommonResource) context.get("page");
+        RootFolder rootFolder = null;
+        if( page != null ) {
+            rootFolder = WebUtils.findRootFolder(page);
+        }        
         _(ApplicationManager.class).renderPortlets(portletSection, currentUser, rootFolder, context , writer); 
         return true;
     }

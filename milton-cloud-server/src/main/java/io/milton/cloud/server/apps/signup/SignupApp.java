@@ -47,6 +47,7 @@ import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.TextTemplater;
+import io.milton.context.RequestContext;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
 import io.milton.event.EventManager;
@@ -186,7 +187,8 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         pp.setProcessName(userManagementProcess.getName());
         pp.setProcessVersion(1);
 
-        ProcessContext context = new ProcessContext(pp, userManagementProcess, timerService, currentDateService);
+        RequestContext rc = RequestContext.getCurrent();
+        ProcessContext context = new ProcessContext(rc, pp, userManagementProcess, timerService, currentDateService);
         context.addAttribute("organisation", gm.getGroupEntity().getOrganisation());
         if (rf instanceof WebsiteRootFolder) {
             RootFolder wrf = rf;

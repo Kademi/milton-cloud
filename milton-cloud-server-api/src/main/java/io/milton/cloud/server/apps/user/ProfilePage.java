@@ -23,6 +23,7 @@ import io.milton.cloud.server.db.OptInLog;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.CommonCollectionResource;
+import io.milton.cloud.server.web.ExtProfileBean;
 import io.milton.cloud.server.web.ExtraField;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.NodeChildUtils;
@@ -74,6 +75,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -153,7 +155,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             jsonResult = new JsonResult(true, "Updated membership org");
         } else if (parameters.containsKey("enableOptin")) {
             boolean enableOptin = WebUtils.getParamAsBool(parameters, "enableOptin");
-            String optinGroupName = WebUtils.getParam(parameters, "group");
+            String optinGroupName = WebUtils.getRawParam(parameters, "group");
             setOptin(enableOptin, optinGroupName, session);
             tx.commit();
             jsonResult = new JsonResult(true, "Set optin: " + optinGroupName + " = " + enableOptin);
@@ -252,7 +254,6 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        System.out.println("contentType: " + contentType);
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
@@ -272,7 +273,11 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                     _(HtmlTemplater.class).writePage("user/changeOrg", this, params, out);
                 }
             } else {
-                super.sendContent(out, range, params, contentType);
+                if (contentType.equals("application/json")) {
+                    writeProfileJson(out);
+                } else {
+                    super.sendContent(out, range, params, contentType);
+                }
             }
         }
     }
@@ -522,6 +527,50 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
     }
 
+    private void writeProfileJson(OutputStream out) throws IOException {
+        Map map = new HashMap();
+        jsonResult = new JsonResult();
+        jsonResult.setData(map);
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+        map.put("profile", ExtProfileBean.toBeanExt(p));
+        Map<String,OptinBean> optins = new HashMap<>();
+        for( OptIn optin : getOptins()) {
+            Group optinGroup = optin.getOptinGroup();
+            String groupName = optinGroup.getName();
+            p.isInGroup(optin.getAttachedToGroup());
+            boolean sel = p.isInGroup(optinGroup);
+            OptinBean bean = new OptinBean( optin.getMessage(), sel);
+            optins.put(groupName, bean);
+        }
+        map.put("optins",optins);
+        
+        jsonResult.write(out);
+    }
+
+    public class OptinBean {
+        private String message;
+        boolean selected;
+
+        public OptinBean(String message, boolean selected) {
+            this.message = message;
+            this.selected = selected;
+        }
+                
+        public String getMessage() {
+            return message;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isSelected() {
+            return selected;
+        }
+        
+        
+    }
+    
     public class ProfilePicResource implements GetableResource, DigestResource {
 
         private final String name;

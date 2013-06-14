@@ -74,7 +74,7 @@ public class HLSTest {
         Parser parser = new Parser();
         primaryFileHash = parser.parse(in, hashStore, blobStore);
         primaryFileName = "in.mp4";
-        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, currentRootFolderService, null, null);
+        AvconvConverter converter = new AvconvConverter(ffmpeg, primaryFileHash, primaryFileName, formatSpec, ext, contentTypeService, hashStore, blobStore, mediaInfoService, null);
 //        converter.generate(new With<InputStream, String>() {
 //
 //            @Override

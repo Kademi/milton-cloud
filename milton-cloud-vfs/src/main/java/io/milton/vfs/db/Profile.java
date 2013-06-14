@@ -428,6 +428,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
+    
+    public boolean isInGroup(Group group) {
+        if (getMemberships() != null) {
+            for (GroupMembership m : getMemberships()) {
+                if( m.getGroupEntity().getId() == group.getId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }    
 
     /**
      * Test if the current user is within a group, where the users membership

@@ -67,9 +67,15 @@ public class ProcessContext implements Contextual {
         if (token == null) {
             throw new NullPointerException("token is null");
         }
-        requestContext.put(token);
-        requestContext.put(process);
-        requestContext.put(timerService);
+        if (token != null) {
+            requestContext.put(token);
+        }
+        if (process != null) {
+            requestContext.put(process);
+        }
+        if (timerService != null) {
+            requestContext.put(timerService);
+        }
     }
 //
 //    public ProcessContext(CurrentDateService currentDateService) {

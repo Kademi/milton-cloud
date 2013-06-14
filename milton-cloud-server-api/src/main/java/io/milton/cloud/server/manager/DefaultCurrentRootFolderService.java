@@ -18,7 +18,6 @@ package io.milton.cloud.server.manager;
 
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
-import io.milton.cloud.server.apps.website.ManageWebsitesFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.Utils;
@@ -28,10 +27,11 @@ import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.HashMap;
+import java.util.Map;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Stores the root folder in a request attribute. Is null safe, ie does nothing
@@ -71,24 +71,24 @@ import org.slf4j.LoggerFactory;
 public class DefaultCurrentRootFolderService implements CurrentRootFolderService {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultCurrentRootFolderService.class);
-    
     public static String ROOT_FOLDER_NAME = "_spliffy_root_folder";
     private String primaryDomain = "localhost";
-
     private ApplicationManager applicationManager;
-    
+
     public DefaultCurrentRootFolderService() {
     }
 
-    
-    
     @Override
     public RootFolder getRootFolder() {
         Request req = HttpManager.request();
         if (req == null) {
             return null;
         }
-        return getRootFolder(req.getHostHeader(), req, true);
+        String host = req.getHostHeader();
+        if (host.contains(":")) {
+            host = host.substring(0, host.indexOf(":"));
+        }        
+        return getRootFolder(host, req, true);
     }
 
     @Override
@@ -97,10 +97,12 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         if (req == null) {
             return null;
         }
-        return getRootFolder(req.getHostHeader(), req, false);
+        String host = req.getHostHeader();
+        if (host.contains(":")) {
+            host = host.substring(0, host.indexOf(":"));
+        }            
+        return getRootFolder(host, req, false);
     }
-    
-    
 
     @Override
     public RootFolder getRootFolder(String host) {
@@ -109,17 +111,31 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
     }
 
     private RootFolder getRootFolder(String host, Request req, boolean resolve) {
+        Map<String, RootFolder> mapOfRoots = mapOfRoots(req);
         RootFolder rootFolder = null;
-        if( req != null ) {
-            rootFolder = (RootFolder) req.getAttributes().get(ROOT_FOLDER_NAME);
+        if (mapOfRoots != null) {
+            rootFolder = (RootFolder) mapOfRoots.get(host);
         }
         if (rootFolder == null && resolve) {
             rootFolder = resolve(host);
-            if( req != null ) {
-                req.getAttributes().put(ROOT_FOLDER_NAME, rootFolder);
+            if (mapOfRoots != null) {
+                mapOfRoots.put(host, rootFolder);
             }
         }
         return rootFolder;
+    }
+
+    private Map<String, RootFolder> mapOfRoots(Request req) {
+        if (req == null) {
+            return null;
+        } else {
+            Map<String, RootFolder> map = (Map<String, RootFolder>) req.getAttributes().get(ROOT_FOLDER_NAME);
+            if (map == null) {
+                map = new HashMap<>();
+                req.getAttributes().put(ROOT_FOLDER_NAME, map);
+            }
+            return map;
+        }
     }
 
     @Override
@@ -151,24 +167,24 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
             Website website = Website.findByName(subdomain, session);
             if (website != null) {
                 Branch b = website.liveBranch();
-                if( b != null) {
+                if (b != null) {
                     return new WebsiteRootFolder(applicationManager, website, b);
                 }
             }
-            
+
             // not exact match on website, but might have a branch suffix. Eg qa.mysite.somewhere.com
             // which would be QA branch of the "mysite" website, with somewhere.com as primary domain
             //System.out.println("resolve: subdomain=" + subdomain);
-            if( subdomain.contains(".")) {
+            if (subdomain.contains(".")) {
                 // split the subdomain
                 int pos = subdomain.indexOf(".");
                 String first = subdomain.substring(0, pos);
-                String otherPart = subdomain.substring(pos+1);
+                String otherPart = subdomain.substring(pos + 1);
                 website = Website.findByName(otherPart, session);
-                if( website != null ) {
+                if (website != null) {
                     // now look for branch
                     Branch b = website.branch(first);
-                    if( b != null ) {
+                    if (b != null) {
                         return new WebsiteRootFolder(applicationManager, website, b);
                     }
                 }
@@ -178,7 +194,7 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         // Didnt find anything matching primary domain, so look for an exact match on website
         Website website = Website.findByDomainName(host, session);
         if (website != null) {
-            if( !website.deleted() ) {
+            if (!website.deleted()) {
                 return new WebsiteRootFolder(applicationManager, website, website.liveBranch());
             } else {
                 log.warn("Request for deleted website");
@@ -193,7 +209,6 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
         return new OrganisationRootFolder(applicationManager, org);
     }
 
-    
     public ApplicationManager getApplicationManager() {
         return applicationManager;
     }
@@ -201,6 +216,4 @@ public class DefaultCurrentRootFolderService implements CurrentRootFolderService
     public void setApplicationManager(ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
     }
-
-    
 }

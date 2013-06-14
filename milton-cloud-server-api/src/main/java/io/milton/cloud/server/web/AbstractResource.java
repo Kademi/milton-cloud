@@ -60,7 +60,7 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         Profile u = _(SpliffySecurityManager.class).authenticate(getOrganisation(), user, password);
         if (u != null) {
             try {
-                PrincipalResource p = SpliffyResourceFactory.getRootFolder().findEntity(u);
+                PrincipalResource p = WebUtils.findRootFolder(this).findEntity(u);
                 if (p == null) {
                     log.warn("Could not locate a PrincipalResource for user: " + u.getName());
                 }
@@ -83,9 +83,9 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
         Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(org, digestRequest);
         if (u != null) {
             try {
-                PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);
+                PrincipalResource ur = WebUtils.findRootFolder(this).findEntity(u);
                 if (ur == null) {
-                    log.error("Failed to find UserResource for: " + u.getName() + " in root folder: " + SpliffyResourceFactory.getRootFolder().getName() + ", " + SpliffyResourceFactory.getRootFolder().getClass());
+                    log.error("Failed to find UserResource for: " + u.getName() + " in root folder: " + WebUtils.findRootFolder(this).getName());
                     return null;
                 }
                 return ur;

@@ -7,6 +7,7 @@ import io.milton.cloud.server.web.SpliffyResourceFactory;
 import java.util.Date;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
+import io.milton.cloud.server.web.WebUtils;
 import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.Request;
@@ -47,7 +48,7 @@ public abstract class BaseResource implements CommonResource{
         Profile u = _(SpliffySecurityManager.class).authenticate(getOrganisation(), user, password);
         if (u != null) {            
             try {
-                return SpliffyResourceFactory.getRootFolder().findEntity(u);
+                return WebUtils.findRootFolder(this).findEntity(u);
             } catch (NotAuthorizedException | BadRequestException ex) {
                 throw new RuntimeException(ex);
             }
@@ -61,9 +62,9 @@ public abstract class BaseResource implements CommonResource{
         Profile u = (Profile) _(SpliffySecurityManager.class).authenticate(getOrganisation(), digestRequest);
         if (u != null) {
             try {
-                PrincipalResource ur = SpliffyResourceFactory.getRootFolder().findEntity(u);
+                PrincipalResource ur = WebUtils.findRootFolder(this).findEntity(u);
                 if (ur == null) {
-                    log.error("Failed to find UserResource for: " + u.getName() + " in root folder: " + SpliffyResourceFactory.getRootFolder().getName() + ", " + SpliffyResourceFactory.getRootFolder().getClass());
+                    log.error("Failed to find UserResource for: " + u.getName() + " in root folder: " + WebUtils.findRootFolder(this).getName() );
                     return null;
                 }
                 return ur;

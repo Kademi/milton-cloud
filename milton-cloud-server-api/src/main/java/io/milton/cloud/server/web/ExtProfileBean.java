@@ -33,9 +33,9 @@ public class ExtProfileBean extends ProfileBean{
         return b;
     }        
     
-    private String email; // not normally populated
-    private String firstName; // not normally populated
-    private String surName;  // not normally populated
+    private String email; 
+    private String firstName;
+    private String surName;  
 
     public String getEmail() {
         return email;

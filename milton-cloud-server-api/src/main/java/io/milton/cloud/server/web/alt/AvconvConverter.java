@@ -2,11 +2,9 @@ package io.milton.cloud.server.web.alt;
 
 import com.bradmcevoy.utils.FileUtils;
 import io.milton.cloud.common.With;
-import io.milton.cloud.server.manager.CurrentRootFolderService;
 import io.milton.cloud.util.ScriptExecutor;
 import io.milton.common.ContentTypeService;
 import io.milton.context.RootContext;
-import io.milton.vfs.db.utils.SessionManager;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -33,12 +31,8 @@ public class AvconvConverter implements Closeable {
     public static HlsSpec[] HLS_DIMENSIONS = {new HlsSpec(360, 480, 512, 64, 12), new HlsSpec(720, 1024, 1024, 128, 24)};
     private final ContentTypeService contentTypeService;
     private final RootContext rootContext;
-    private final SessionManager sessionManager;
     private final String videoConverterProcess;
-    
-    // sudo apt-get install ffmpegthumbnailer
-    // ffmpegthumbnailer -i dodgy-convert.mp4 -o out.png
-    private final String imageConverterProcess = "convert"; // ImageMagick
+    private final ThumbGenerator thumbGenerator;
     private final String primaryMediaHash;
     private final FormatSpec format;
     private final String inputName;
@@ -46,18 +40,15 @@ public class AvconvConverter implements Closeable {
     private final HashStore hashStore;
     private final BlobStore blobStore;
     private final MediaInfoService mediaInfoService;
-    private final CurrentRootFolderService currentRootFolderService;
     private File source;
     private final File dest;
     private File generatedOutput;
     private long sourceLength;
 
-    public AvconvConverter(String process, String primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore, MediaInfoService mediaInfoService, CurrentRootFolderService currentRootFolderService, RootContext rootContext, SessionManager sessionManager) {
+    public AvconvConverter(String process, String primaryMediaHash, String inputName, FormatSpec format, String inputFormat, ContentTypeService contentTypeService, HashStore hashStore, BlobStore blobStore, MediaInfoService mediaInfoService, RootContext rootContext) {
         this.rootContext = rootContext;
-        this.sessionManager = sessionManager;
         this.hashStore = hashStore;
         this.blobStore = blobStore;
-        this.currentRootFolderService = currentRootFolderService;
         this.videoConverterProcess = process;
         this.mediaInfoService = mediaInfoService;
         this.format = format;
@@ -69,6 +60,7 @@ public class AvconvConverter implements Closeable {
         this.primaryMediaHash = primaryMediaHash;
         this.inputName = inputFormat;
         this.inputExt = FileUtils.getExtension(inputName);
+        thumbGenerator = new FTNThumbGenerator(); // ImageMagickThumbGenerator(mediaInfoService);
     }
 
     @Override
@@ -103,81 +95,16 @@ public class AvconvConverter implements Closeable {
     public String generate(With<InputStream, String> with) throws Exception {
         log.info("generateThumb: " + format + " to " + dest.getAbsolutePath());
         source = createSourceFile();
-        if (format.inputType.equals("video")) {
-            return generateFromVideo(with);
-        } else {
+//        if (format.inputType.equals("video")) {
+//            return generateFromVideo(with);
+//        } else {
             return generateFromImage(with);
-        }
+//        }
     }
 
     private String generateFromImage(With<InputStream, String> with) throws Exception {
-        try {
-            generatedOutput = dest;
-            List<String> args = new ArrayList<>();
-            if (source.length() > 1000000) {
-                args.add("-thumbnail");
-            } else {
-                args.add("-resize");
-            }
-
-            // determine original dimensions, then choose x or y axis to scale on so that 
-            // the resulting image or video is bound by the format dimensions            
-            MediaInfo info = mediaInfoService.getInfo(source);
-            String scale;
-            if (info == null) {
-                log.warn("Failed to find dimensions of source file, might not be able to generate thumb");
-                scale = format.getWidth() + "";
-            } else {
-                Proportion prop = new Proportion(info.getWidth(), info.getHeight(), format.getWidth(), format.getHeight());
-                if (info.getWidth() > info.getHeight()) {
-                    scale = "x" + prop.getContrainedHeight();
-                } else {
-                    scale = prop.getConstrainedWidth() + "";
-                }
-            }
-            args.add(scale);
-
-            // set the input file
-            args.add(source.getAbsolutePath());
-
-            // set output file - just a temp file
-            args.add(dest.getAbsolutePath());
-
-            int successCode = 0;
-            ScriptExecutor exec = new ScriptExecutor(imageConverterProcess, args, successCode);
-            try {
-                exec.exec();
-            } catch (Exception ex) {
-                throw new Exception("Failed to generate alternate format: " + format, ex);
-            }
-
-            if (!dest.exists()) {
-                throw new Exception("Conversion failed. Dest temp file was not created. Format: " + format);
-            }
-            if (dest.length() == 0) {
-                throw new Exception("Conversion failed. Dest temp file has size zero. format: " + format);
-            }
-
-            if (sourceLength > 0) {
-                long percent = dest.length() * 100 / sourceLength;
-                log.info("Compression: " + percent + "% of source file: " + sourceLength / 1000000 + "Mb");
-            }
-
-            log.debug(" ffmpeg ran ok. reading temp file back to out stream");
-            FileInputStream tempIn = null;
-            try {
-                tempIn = new FileInputStream(dest);
-                return with.use(tempIn);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            } finally {
-                FileUtils.close(tempIn);
-            }
-        } finally {
-//            if (dest.exists()) {
-//                dest.delete();
-//            }
-        }
+        generatedOutput = dest;
+        return thumbGenerator.generateImage(format, source, dest, with);
     }
 
     public void generateHlsVideo(HlsGeneratorListener generatorListener, int segmentDurationSecs) throws Exception {
@@ -225,46 +152,46 @@ public class AvconvConverter implements Closeable {
                 args.add(scale);
 
                 args.add("-b:v");
-                args.add( dimension.getTargetVideoBandwidthK() + "k");
-                
+                args.add(dimension.getTargetVideoBandwidthK() + "k");
+
                 args.add("-maxrate");
-                args.add( dimension.getTargetVideoBandwidthK() + "k");
+                args.add(dimension.getTargetVideoBandwidthK() + "k");
 
                 args.add("-bufsize"); // from namrekka - http://www.longtailvideo.com/support/forums/jw-player/video-encoding/33049/hls-skipping-forward-plays-audio-but-not-video
-                args.add( dimension.getTargetVideoBandwidthK() + "k");
-                
+                args.add(dimension.getTargetVideoBandwidthK() + "k");
+
                 args.add("-b:a");
-                args.add( dimension.getTargetAudioBandwidthK() + "k");
+                args.add(dimension.getTargetAudioBandwidthK() + "k");
 
                 args.add("-r"); // target framerate
-                args.add("" + dimension.getFrameRate());                                
+                args.add("" + dimension.getFrameRate());
 
                 args.add("-keyint_min");
                 args.add("" + dimension.getFrameRate());
-                
+
                 args.add("-refs");
                 args.add("1");
-                
+
                 args.add("-trellis");
-                args.add("0");                                
-                
+                args.add("0");
+
                 args.add("-g"); // one key frame every second
-                args.add("" + dimension.getFrameRate());                
+                args.add("" + dimension.getFrameRate());
                 //-crf 25 -profile:v baseline 
                 //-g 48 -sc_threshold 0 
                 //-flags +cgop -c:a aac -strict -2 -b:a 112k -map 0:v:0 -map 0:a:0 -f ssegment -metadata "service_provider=Some Provider" -metadata "service_name=Some Channel Name" -segment_time 10 -segment_format mpegts "hls_%02d.ts"
-                
+
                 // disables CABAC, but not sure how important it is
 //                args.add("-coder");
 //                args.add("0");
-                                
+
                 args.add("-profile:v");
                 args.add("baseline");
-                                
+
                 args.add("-level");
                 args.add("30");
 
-                
+
                 args.add("-segment_time");
                 args.add(segmentDurationSecs + "");
 
@@ -469,6 +396,7 @@ public class AvconvConverter implements Closeable {
             throw new RuntimeException(ex);
         }
     }
+    
 
     public class SegmentWriterListener extends TailerListenerAdapter {
 
@@ -530,7 +458,7 @@ public class AvconvConverter implements Closeable {
                 if (programId == null) {
                     Integer likelyBandwith = null;
                     if (secs > 0) {
-                        likelyBandwith = (int) (newSegment.length()*8 / secs);
+                        likelyBandwith = (int) (newSegment.length() * 8 / secs);
                         likelyBandwith = (int) (likelyBandwith * 1.2); // this is meant to be an upper bound, so build in a bit of room to allow for peaks
                     }
                     programId = generatorListener.onNewProgram(primaryId, dimension, likelyBandwith);

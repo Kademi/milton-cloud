@@ -21,12 +21,10 @@ import io.milton.cloud.server.db.utils.UserDao;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
-import io.milton.cloud.server.manager.DefaultCurrentRootFolderService;
 import io.milton.cloud.server.web.sync.DirectoryHashResource;
 import io.milton.common.ContentTypeUtils;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
-import io.milton.http.HttpManager;
 import io.milton.http.ResourceFactory;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -36,7 +34,6 @@ import io.milton.vfs.db.utils.SessionManager;
 import java.io.File;
 import javax.servlet.ServletContext;
 
-import static io.milton.context.RequestContext._;
 import io.milton.servlet.StaticResource;
 import io.milton.servlet.UrlResource;
 import java.net.URL;
@@ -56,13 +53,6 @@ public class SpliffyResourceFactory implements ResourceFactory {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffyResourceFactory.class);
     public static final String ROOTS_SYS_PROP_NAME = "template.file.roots"; // same as for HtmlTemplater
 
-    public static RootFolder getRootFolder() {
-        if (HttpManager.request() != null) {
-            return (RootFolder) HttpManager.request().getAttributes().get(DefaultCurrentRootFolderService.ROOT_FOLDER_NAME);
-        } else {
-            return null;
-        }
-    }
     private final UserDao userDao;
     private final SpliffySecurityManager securityManager;
     private final ApplicationManager applicationManager;

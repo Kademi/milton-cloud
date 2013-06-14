@@ -345,6 +345,7 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
     @Override
     public Branch getBranch() {
         if (parent == null) {
+            log.warn("No branch, because no parent: " + getClass());
             return null;
         }
         return parent.getBranch();
@@ -363,7 +364,7 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
     public Profile getOwnerProfile() {
         Branch b = getBranch();
         if (b == null) {
-            log.warn("Null branch for this content resource");
+            log.warn("Null branch for this content resource: " + getClass());
             return null;
         }
         BaseEntity be = b.getRepository().getBaseEntity();
