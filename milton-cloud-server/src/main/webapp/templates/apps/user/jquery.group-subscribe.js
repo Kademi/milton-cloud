@@ -6,24 +6,51 @@
             var container = this;
 
             var config = $.extend({
-                group: "everyone"
+                group: "everyone",
+                optedInClass: "opted-in",
+                optedOutClass: "opted-out",
+                events: "change switch-change",
+                subscribeEvents: null,
+                unsubscribeEvents: null,
+                onSuccess: function(newSelectedVal) {},
+                onError: function(resp) {
+                    alert("Error updating subscription details");
+                }
             }, options);
 
             // set initial state
             initSubscribeInitialState(container, config);
 
             log("init group subscribe", container);
-            container.on("change switch-change", function(e) {
-                log("change", e);
-                changeSubscribeState(container, config);
-            });
-            log("done fileupload init");
+            if (config.events !== null && config.events.length > 0) {
+                container.on(config.events, function(e) {
+                    log("change", e);
+                    onChangeSubscribeState(container, config);
+                });
+            }
+            if( config.subscribeEvents !== null ) {
+                log("listen for subcribe events", config.subscribeEvents);
+                container.on(config.subscribeEvents, function(e) {
+                    log("do subscribe");
+                    changeSubscribeState(container, config, true);
+                });                
+            }
+            if( config.unsubscribeEvents !== null ) {
+                log("listen for unsubcribe events", config.unsubscribeEvents);
+                container.on(config.unsubscribeEvents, function(e) {
+                    log("do unsubscribe");
+                    changeSubscribeState(container, config, false);
+                });                
+            }            
+            log("done group-subscribe init");
         },
         subscribe: function( ) {
             log("subscribe", this);
+            changeSubscribeState(container, config, true);
         },
         unsubscribe: function( ) {
             log("subscribe", this);
+            changeSubscribeState(container, config, false);
         }
     };
 
@@ -54,8 +81,12 @@ function initSubscribeInitialState(container, config) {
                 log("found", optin);
                 if (optin.selected) {
                     container.attr("checked", "true");
+                    container.removeClass(config.optedOutClass);
+                    container.addClass(config.optedInClass);                    
                 } else {
                     container.removeAttr("checked");
+                    container.removeClass(config.optedInClass);
+                    container.addClass(config.optedOutClass);                        
                 }
             },
             error: function(resp) {
@@ -70,10 +101,14 @@ function initSubscribeInitialState(container, config) {
     }
 }
 
-function changeSubscribeState(container, config ) {
+function onChangeSubscribeState(container, config) {
+    var newSelectedVal = container.is(":selected") || container.is(":checked");
+    changeSubscribeState(container, config, newSelectedVal);
+}
+
+function changeSubscribeState(container, config, newSelectedVal) {
     try {
         container.addClass("ajax-loading");
-        var newSelectedVal = container.is(":selected") || container.is(":checked");
         $.ajax({
             type: 'POST',
             url: "/profile",
@@ -85,15 +120,23 @@ function changeSubscribeState(container, config ) {
             success: function(resp) {
                 ajaxLoadingOff();
                 container.removeClass("ajax-loading");
+                if( newSelectedVal ) {
+                    container.removeClass(config.optedOutClass);
+                    container.addClass(config.optedInClass);
+                } else {
+                    container.removeClass(config.optedInClass);
+                    container.addClass(config.optedOutClass);                    
+                }
+                config.onSuccess(newSelectedVal);
             },
             error: function(resp) {
                 ajaxLoadingOff();
-                container.removeClass("ajax-loading");
-                alert("Error loading subscription details");
+                container.removeClass("ajax-loading");                
+                config.onError(resp);
             }
         });
     } catch (e) {
         ajaxLoadingOff();
         log("exception", e);
-    }    
+    }
 }
