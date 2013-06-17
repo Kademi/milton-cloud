@@ -95,11 +95,11 @@ public class AvconvConverter implements Closeable {
     public String generate(With<InputStream, String> with) throws Exception {
         log.info("generateThumb: " + format + " to " + dest.getAbsolutePath());
         source = createSourceFile();
-//        if (format.inputType.equals("video")) {
-//            return generateFromVideo(with);
-//        } else {
+        if (format.inputType.equals("video")) {
+            return generateFromVideo(with);
+        } else {
             return generateFromImage(with);
-//        }
+        }
     }
 
     private String generateFromImage(With<InputStream, String> with) throws Exception {

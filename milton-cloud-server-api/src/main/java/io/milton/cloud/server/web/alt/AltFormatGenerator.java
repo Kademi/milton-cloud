@@ -197,7 +197,6 @@ public class AltFormatGenerator implements EventListener {
 
     public FormatSpec findFormat(String name) {
         for (FormatSpec f : formats) {
-            System.out.println("findFormat: " + f.getName() + "=" + name);
             if (f.getName().equals(name)) {
                 return f;
             }
@@ -555,6 +554,7 @@ public class AltFormatGenerator implements EventListener {
          *
          * @return
          */
+        @Override
         public boolean done() {
             return jobDone;
         }
