@@ -17,8 +17,7 @@
 package io.milton.cloud.server.web;
 
 import io.milton.cloud.server.apps.ApplicationManager;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
-import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.apps.FolderViewApplication;
 import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.HttpManager;
 import io.milton.http.Range;
@@ -82,7 +81,7 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processForm");
         if (parameters.containsKey("importFromUrl")) {
-            String importFromUrl = WebUtils.getParam(parameters, "importFromUrl");
+            String importFromUrl = WebUtils.getRawParam(parameters, "importFromUrl");
             log.info("Start import from url: " + importFromUrl);
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
             if (p != null) {
@@ -182,10 +181,10 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     @Override
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         log.info("createNew: " + newName);
-        if( newName.length() == 0) {
+        if (newName.length() == 0) {
             throw new BadRequestException("Invalid name, cannot be blank");
         }
-        if( newName.trim().length() != newName.length()) {
+        if (newName.trim().length() != newName.length()) {
             throw new BadRequestException("Invalid name, cannot start or end with spaces");
         }
         return UploadUtils.createNew(this, newName, inputStream, length, contentType);
@@ -215,14 +214,16 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     }
 
     public void renderPage(OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        RootFolder rf = WebUtils.findRootFolder(this);
-        if (rf instanceof WebsiteRootFolder) {
-            WebUtils.setActiveMenu(getHref(), rf); // For front end        
+        FolderViewApplication folderViewApplication = _(ApplicationManager.class).getFolderViewApplication(WebUtils.findRootFolder(this));
+        if (folderViewApplication != null) {
+            folderViewApplication.renderPage(this, out, params, contentType);
         } else {
-            MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+            GetableResource index = getIndex();
+            if (index != null) {
+                index.sendContent(out, null, params, "text/html");
+            }
+            
         }
-        getTemplater().writePage("myfiles/directoryIndex", this, params, out);
-
     }
 
     @Override

@@ -233,14 +233,14 @@ public class BranchFolder extends AbstractBranchFolder implements MakeCollection
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        String copyToName = WebUtils.getParam(parameters, "copyToName");
+        String copyToName = WebUtils.getRawParam(parameters, "copyToName");
         log.info("processForm: " + copyToName);
         if (copyToName != null) {
             copyTo(getParent(), copyToName);
             String newHref = parent.getPath().child(copyToName).toString();
             jsonResult = new JsonResult(true, "Copied", newHref);
         } else if (parameters.containsKey("importFromUrl")) {
-            String importFromUrl = WebUtils.getParam(parameters, "importFromUrl");
+            String importFromUrl = WebUtils.getRawParam(parameters, "importFromUrl");
             log.info("Start import from url: " + importFromUrl);
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
             if (p != null) {

@@ -66,9 +66,9 @@ public class ManageOrgTypesFolder extends AbstractResource implements GetableRes
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         try {
-            String name =WebUtils.getParam(parameters, "name");
+            String name =WebUtils.getRawParam(parameters, "name");
             OrgType orgType = organisation.createOrgType(name, session);
-            String displayName = WebUtils.getParam(parameters, "displayName");
+            String displayName = WebUtils.getRawParam(parameters, "displayName");
             orgType.setDisplayName(displayName);
             session.save(orgType);
             jsonResult = new JsonResult(true, "Created");

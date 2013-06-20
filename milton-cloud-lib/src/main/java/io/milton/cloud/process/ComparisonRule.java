@@ -44,6 +44,7 @@ public class ComparisonRule implements Rule {
     }
 
     private Boolean doComparison(Object leftVal, Object rightVal) {
+        System.out.println("doComparison: " + leftVal + " " + operator + " " + rightVal);
         if (leftVal instanceof Float && rightVal instanceof Float) {
             Float left = (Float) leftVal;
             Float right = (Float) rightVal;

@@ -89,7 +89,7 @@ public class ManageGroupResourcesPage extends AbstractResource implements Getabl
      */
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        String createItemId = WebUtils.getParam(parameters, "createItemId");
+        String createItemId = WebUtils.getRawParam(parameters, "createItemId");
         if( createItemId != null ) {
             OrganisationFolder orgFolder = WebUtils.findParentOrg(this);
             List<GroupInWebsiteItem> list = getGroupFolders(orgFolder);

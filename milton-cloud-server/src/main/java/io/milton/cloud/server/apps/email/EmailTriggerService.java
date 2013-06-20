@@ -67,18 +67,26 @@ public class EmailTriggerService {
             }
         }
 
-        if (j.isIncludeUser()) {
-            for (Long entityId : sourceEntities) {
-                Profile source = Profile.get(entityId, session);
-                if (source != null) {
-                    directRecips.add(source);
-                } else {
-                    log.warn("Couldnt find entity: " + entityId);
-                }
+        List<Profile> sources = new ArrayList<>();
+        for (Long entityId : sourceEntities) {
+            Profile source = Profile.get(entityId, session);
+            if (source != null) {
+                sources.add(source);
+            } else {
+                log.warn("Couldnt find entity: " + entityId);
             }
         }
 
-        batchEmailService.generateEmailItems(j, directRecips, null, session);
+
+        if (j.isIncludeUser()) {
+            for (Profile source : sources) {
+                directRecips.add(source);
+            }
+        }
+
+        Profile evalTarget = sources.get(0); // this is the user we will execute filter scripts against
+        log.info("evalTarget: "+ evalTarget.getEmail());
+        batchEmailService.generateEmailItems(j, evalTarget, directRecips, null, session);
         session.save(j);
 
     }

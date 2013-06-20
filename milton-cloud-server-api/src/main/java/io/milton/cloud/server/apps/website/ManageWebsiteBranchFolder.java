@@ -137,7 +137,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("name")) {
             try {
-                String websiteName = WebUtils.getParam(parameters, "name");
+                String websiteName = WebUtils.getRawParam(parameters, "name");
                 if (websiteName == null) {
                     jsonResult = JsonResult.fieldError("name", "Please enter a name for the website");
                     return null;
@@ -150,7 +150,7 @@ public class ManageWebsiteBranchFolder extends BranchFolder implements GetableRe
                         return null;
                     }
                 }
-                String domainName = WebUtils.getParam(parameters, "domainName");
+                String domainName = WebUtils.getRawParam(parameters, "domainName");
                 if (domainName != null && domainName.equals(website.getDomainName())) {
                     Website checkOther = Website.findByDomainName(website.getDomainName(), session);
                     if (checkOther != null && checkOther != website) {

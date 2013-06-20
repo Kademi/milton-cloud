@@ -79,13 +79,13 @@ public class ManageWebsitesFolder extends AbstractCollectionResource implements 
 
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
-        String newName = WebUtils.getParam(parameters, "newName");
+        String newName = WebUtils.getRawParam(parameters, "newName");
         if (newName != null) {
             newName = newName.trim().toLowerCase();
             log.info("processForm: newName: " + newName);
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
-            String newDnsName = WebUtils.getParam(parameters, "newDnsName");
+            String newDnsName = WebUtils.getRawParam(parameters, "newDnsName");
             if (newDnsName != null) {
                 newDnsName = newDnsName.trim().toLowerCase();
             }

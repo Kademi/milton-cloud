@@ -506,7 +506,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
     private JsonResult buildRecipients() {
         jsonResult = new JsonResult(true);
         List<BaseEntity> initialRecips = _(GroupEmailService.class).getRecipients(job);
-        Set<Profile> finalRecips = _(BatchEmailService.class).filterRecipients(job, initialRecips, SessionManager.session());
+        Set<Profile> finalRecips = _(BatchEmailService.class).filterRecipients(job, null, initialRecips, SessionManager.session());
         List<ExtProfileBean> beans = new ArrayList<>();
         jsonResult.setData(beans);
         for( Profile p : finalRecips ) {

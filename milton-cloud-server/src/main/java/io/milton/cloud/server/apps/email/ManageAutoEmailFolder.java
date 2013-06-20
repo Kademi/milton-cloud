@@ -140,6 +140,10 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
         return Priviledge.WRITE_CONTENT;
     }
 
+    public EmailTrigger getJob() {
+        return job;
+    }
+        
     @Override
     protected void initChildren() {
         super.initChildren();

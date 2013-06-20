@@ -331,19 +331,21 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
      * @return
      */
     public List<GroupMembership> getMemberships() {
-        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-        Organisation thisOrg = getOrganisation();
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();        
         List<GroupMembership> list = new ArrayList<>();
-        Set<Group> optinGroups = new HashSet<>();
-        for (OptIn optin : getOptins()) {
-            optinGroups.add(optin.getOptinGroup());
-        }
-        if (p.getMemberships() != null) {
-            for (GroupMembership gm : p.getMemberships()) {
-                if (gm.getWithinOrg().isWithin(thisOrg)) {
-                    // if user has a membership to an optin group we should not show this as a normal membership
-                    if (!optinGroups.contains(gm.getGroupEntity())) {
-                        list.add(gm);
+        if (p != null) {
+            Organisation thisOrg = getOrganisation();
+            Set<Group> optinGroups = new HashSet<>();
+            for (OptIn optin : getOptins()) {
+                optinGroups.add(optin.getOptinGroup());
+            }
+            if (p.getMemberships() != null) {
+                for (GroupMembership gm : p.getMemberships()) {
+                    if (gm.getWithinOrg().isWithin(thisOrg)) {
+                        // if user has a membership to an optin group we should not show this as a normal membership
+                        if (!optinGroups.contains(gm.getGroupEntity())) {
+                            list.add(gm);
+                        }
                     }
                 }
             }
@@ -396,7 +398,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         Group foundGroup = null;
         for (OptIn optin : getOptins()) {
             if (optin.getOptinGroup().getName().equals(optinGroupName)) {
-                foundGroup = optin.getOptinGroup();;
+                foundGroup = optin.getOptinGroup();
                 break;
             }
         }
@@ -458,7 +460,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                         String val;
                         if (parameters.containsKey(nvpMeta.getName())) {
                             ExtraField field = ExtraField.parse(nvpMeta.getName(), nvpMeta.getPropValue());
-                            val = WebUtils.getParam(parameters, field.getName());
+                            val = WebUtils.getCleanedParam(parameters, field.getName());
                         } else {
                             val = oldFieldset.get(nvpMeta.getName());
                         }
@@ -484,7 +486,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             return orgSearchResults;
         }
         Map<String, String> params = HttpManager.request().getParams();
-        String q = WebUtils.getParam(params, "orgSearchQuery");
+        String q = WebUtils.getRawParam(params, "orgSearchQuery");
         int changeMemberOrgId = WebUtils.getParamAsInteger(params, "changeMemberOrg");
         GroupMembership membership = membership(changeMemberOrgId);
         if (q != null && q.length() > 0) {
@@ -533,21 +535,22 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         jsonResult.setData(map);
         Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         map.put("profile", ExtProfileBean.toBeanExt(p));
-        Map<String,OptinBean> optins = new HashMap<>();
-        for( OptIn optin : getOptins()) {
+        Map<String, OptinBean> optins = new HashMap<>();
+        for (OptIn optin : getOptins()) {
             Group optinGroup = optin.getOptinGroup();
             String groupName = optinGroup.getName();
             p.isInGroup(optin.getAttachedToGroup());
             boolean sel = p.isInGroup(optinGroup);
-            OptinBean bean = new OptinBean( optin.getMessage(), sel);
+            OptinBean bean = new OptinBean(optin.getMessage(), sel);
             optins.put(groupName, bean);
         }
-        map.put("optins",optins);
-        
+        map.put("optins", optins);
+
         jsonResult.write(out);
     }
 
     public class OptinBean {
+
         private String message;
         boolean selected;
 
@@ -555,7 +558,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             this.message = message;
             this.selected = selected;
         }
-                
+
         public String getMessage() {
             return message;
         }
@@ -567,10 +570,8 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         public boolean isSelected() {
             return selected;
         }
-        
-        
     }
-    
+
     public class ProfilePicResource implements GetableResource, DigestResource {
 
         private final String name;

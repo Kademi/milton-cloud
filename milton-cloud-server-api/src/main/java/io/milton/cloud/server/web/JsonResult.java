@@ -16,7 +16,8 @@ import java.util.List;
 public class JsonResult {
     
     //public static String CONTENT_TYPE = "application/x-javascript; charset=utf-8";
-    public static String CONTENT_TYPE = "application/json; charset=utf-8";
+    public static String MIME_TYPE = "application/json";
+    public static String CONTENT_TYPE = MIME_TYPE + "; charset=utf-8";
     
     public static JsonResult fieldError(String field, String fieldMessage) {
         JsonResult r = new JsonResult(false, "Validation error");

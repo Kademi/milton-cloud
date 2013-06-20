@@ -127,7 +127,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                     jsonResult = JsonResult.fieldError("group", "Please select a group for the new user");
                     return null;
                 }
-                String email = WebUtils.getParam(parameters, "email");
+                String email = WebUtils.getRawParam(parameters, "email");
                 Profile pExisting = Profile.find(email, session);
                 if (pExisting == null) {
                     profile = new Profile();
