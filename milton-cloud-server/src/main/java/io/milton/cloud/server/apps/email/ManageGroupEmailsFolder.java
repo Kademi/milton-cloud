@@ -92,7 +92,7 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
             }
             return b;
         } else {
-            System.out.println("DID NOT CREATE group emails repo");
+            //System.out.println("DID NOT CREATE group emails repo");
             return null;
         }
     }
@@ -338,7 +338,7 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
 
     public Branch branch(boolean autocreate) {
         if (_branch == null) {
-            System.out.println("get or create branch");
+            //System.out.println("get or create branch");
             _branch = getGroupEmailBranch(getOrganisation(), autocreate);
         }
         return _branch;

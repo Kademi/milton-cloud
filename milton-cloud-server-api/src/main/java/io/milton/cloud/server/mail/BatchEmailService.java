@@ -67,19 +67,37 @@ public class BatchEmailService {
      * process
      *
      * @param j
-     * @param directRecipients
+     * @param directRecipients - list of users or groups. Groups will be
+     * expanded to a list of users. The entire list of profiles is subject to
+     * filtering
      * @param callback - may be null, otherwise is called just prior to
      * generating the email content
      * @param session
      * @throws IOException
      */
     public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
-        Set<Profile> profiles = filterRecipients(j, directRecipients, session);
+        generateEmailItems(j, null, directRecipients, callback, session);
+    }
+
+    /**
+     *
+     * @param j
+     * @param evaluationTarget - the user to be used when evaluating filters. If
+     * null, will use the recipient
+     * @param directRecipients - list of users or groups. Groups will be
+     * expanded to a list of users. The entire list of profiles is subject to
+     * filtering
+     * @param callback
+     * @param session
+     * @throws IOException
+     */
+    public void generateEmailItems(BaseEmailJob j, Profile evaluationTarget, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
+        Set<Profile> profiles = filterRecipients(j, evaluationTarget, directRecipients, session);
         if (profiles.isEmpty()) {
             log.warn("No recipients!! For job: " + j.getId());
             return;
         }
-        
+
         log.info("recipients: " + profiles.size());
         if (j.getEmailItems() == null) {
             j.setEmailItems(new ArrayList<EmailItem>());
@@ -90,7 +108,7 @@ public class BatchEmailService {
         session.save(j);
     }
 
-    public Set<Profile> filterRecipients(BaseEmailJob j, List<BaseEntity> directRecipients, Session session) {
+    public Set<Profile> filterRecipients(BaseEmailJob j, Profile evaluationTarget, List<BaseEntity> directRecipients, Session session) {
         if (directRecipients.isEmpty()) {
             return Collections.EMPTY_SET;
         }
@@ -98,7 +116,7 @@ public class BatchEmailService {
         EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
         for (BaseEntity e : directRecipients) {
             if (e != null) {
-                append(j, e, evaluationContext, profiles);
+                checkFilterAndAppend(j, evaluationTarget, e, evaluationContext, profiles);
             } else {
                 log.warn("Found null recipient, ignoring");
             }
@@ -106,7 +124,15 @@ public class BatchEmailService {
         return profiles;
     }
 
-    private void append(final BaseEmailJob j, final BaseEntity g, final EvaluationContext evaluationContext, final Set<Profile> profiles) {
+    /**
+     * 
+     * @param j
+     * @param evaluationTarget - if not null is used as the subject to evaluation the filter, otherwise each recipient is used
+     * @param g
+     * @param evaluationContext
+     * @param recipientList 
+     */
+    private void checkFilterAndAppend(final BaseEmailJob j, final Profile evaluationTarget,final BaseEntity g, final EvaluationContext evaluationContext, final Set<Profile> recipientList) {
         log.info("append: group: " + g.getId() + " - " + g.getId());
 
         final VfsVisitor visitor = new AbstractVfsVisitor() {
@@ -114,22 +140,27 @@ public class BatchEmailService {
             public void visit(Group r) {
                 if (r.getGroupMemberships() != null) {
                     for (GroupMembership m : r.getGroupMemberships()) {
-                        append(j, m.getMember(), evaluationContext, profiles);
+                        checkFilterAndAppend(j, evaluationTarget, m.getMember(), evaluationContext, recipientList);
                     }
                 }
             }
 
             @Override
             public void visit(Profile p) {
-                if (checkFilterScript(j, p, evaluationContext)) {
-                    profiles.add(p);
+                Profile target = evaluationTarget; // use the evaluationTarget if provided, otherwise the recipient
+                if( target == null  ) {
+                    target = p;
+                }
+                System.out.println("checkFilterAndAppend: " + target.getEmail());
+                if (checkFilterScript(j, target, evaluationContext)) {
+                    recipientList.add(p);
                 }
             }
         };
         g.accept(visitor);
     }
 
-    private boolean checkFilterScript(BaseEmailJob j, Profile p, EvaluationContext evaluationContext) {
+    private boolean checkFilterScript(BaseEmailJob j, Profile evalTargetProfile, EvaluationContext evaluationContext) {
         if (j.getFilterScriptXml() != null && j.getFilterScriptXml().length() > 0) {
             RootFolder rf = null;
             if (j.getThemeSite() != null) {
@@ -138,7 +169,7 @@ public class BatchEmailService {
             } else {
                 rf = new OrganisationRootFolder(applicationManager, j.getOrganisation());
             }
-            return filterScriptEvaluator.checkFilterScript(evaluationContext, p, j.getOrganisation(), rf);
+            return filterScriptEvaluator.checkFilterScript(evaluationContext, evalTargetProfile, j.getOrganisation(), rf);
         } else {
             return true;
         }

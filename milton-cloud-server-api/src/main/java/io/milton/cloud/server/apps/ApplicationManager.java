@@ -558,4 +558,13 @@ public class ApplicationManager {
         }
         return list;
     }
+    
+    public FolderViewApplication getFolderViewApplication(RootFolder rf) {
+        for( Application app : getActiveApps(rf) ) {
+            if( app instanceof FolderViewApplication) {
+                return (FolderViewApplication)app;
+            }
+        }
+        return null;
+    }
 }

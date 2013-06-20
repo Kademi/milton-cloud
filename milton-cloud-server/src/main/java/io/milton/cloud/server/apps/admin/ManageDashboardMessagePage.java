@@ -84,8 +84,8 @@ public class ManageDashboardMessagePage extends AbstractResource implements Geta
         Transaction tx = session.beginTransaction();
 
         if (parameters.containsKey("html")) {
-            String html = WebUtils.getParam(parameters, "html");
-            String position = WebUtils.getParam(parameters, "position");
+            String html = WebUtils.getRawParam(parameters, "html");
+            String position = WebUtils.getRawParam(parameters, "position");
             try {
                 Properties props = DashboardMessageUtils.messageProps(HttpManager.request(), group, parent.getBranch());
                 if( html != null ) {

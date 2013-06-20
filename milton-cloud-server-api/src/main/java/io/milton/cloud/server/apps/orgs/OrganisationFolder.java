@@ -70,8 +70,7 @@ public class OrganisationFolder extends AbstractResource implements CommonCollec
         Transaction tx = session.beginTransaction();
         try {
             _(DataBinder.class).populate(organisation, parameters);            
-            System.out.println("admin domain: " + organisation.getAdminDomain());
-            String s = WebUtils.getParam(parameters, "orgTypeName");
+            String s = WebUtils.getRawParam(parameters, "orgTypeName");
             OrgType orgType = null;
             if( s != null ) {
                 orgType = findOrgType(s);

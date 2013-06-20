@@ -64,21 +64,7 @@ public class WebUtils {
         }
         return s;
     }    
-    
-    /**
-     * Use getCleanedParam for inputs which should be scrubbed of <script> tags
-     * etc, or use getRawParam for non-scrubbed inputs
-     * 
-     * @param params
-     * @param name
-     * @return
-     * @deprecated
-     */
-    @Deprecated
-    public static String getParam(Map<String, String> params, String name) {
-        return getCleanedParam(params, name);
-    }
-    
+        
     /**
      * Returns a trimmed, nulled, string value. If present the value is trimmed,
      * and if empty returns null

@@ -174,7 +174,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                     ExtraField f = ExtraField.parse(nvp.getName(), nvp.getPropValue());
                     extraFields.add(f);
                     if (f.isRequired()) {
-                        String s = WebUtils.getParam(parameters, f.getName());
+                        String s = WebUtils.getCleanedParam(parameters, f.getName());
                         if (s == null) {
                             jsonResult = JsonResult.fieldError(f.getName(), "No value was provided");
                             return null;
@@ -193,7 +193,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             // Check if the email is already taken. If so, and if the given password matches,
             // then we assume this is an existing Fuse user who is signing up for another
             // group or site
-            String email = WebUtils.getParam(parameters, "email");
+            String email = WebUtils.getCleanedParam(parameters, "email");
             parameters.remove("email");
             Profile p = Profile.find(email, session);
             if (p != null) {
@@ -211,7 +211,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             } else {
                 // Not existing, create a new profile
                 p = new Profile();
-                String nickName = WebUtils.getParam(parameters, "nickName");
+                String nickName = WebUtils.getCleanedParam(parameters, "nickName");
                 if (nickName != null) {
                     nickName = nickName.trim();
                     if (nickName.length() == 0) {
@@ -219,10 +219,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                     }
                 }
                 if (nickName == null) {
-                    nickName = WebUtils.getParam(parameters, "firstName");
+                    nickName = WebUtils.getCleanedParam(parameters, "firstName");
                 }
 
-                String newName = WebUtils.getParam(parameters, "name");
+                String newName = WebUtils.getCleanedParam(parameters, "name");
                 if (newName == null || newName.trim().length() == 0) {
                     if (nickName == null) {
                         jsonResult = JsonResult.fieldError("nickName", "Please enter a name or nick name");
@@ -241,10 +241,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 p.setModifiedDate(new Date());
 
                 // optional
-                String phone = WebUtils.getParam(parameters, "phone");
+                String phone = WebUtils.getCleanedParam(parameters, "phone");
                 p.setPhone(phone);
-                p.setFirstName(WebUtils.getParam(parameters, "firstName"));
-                p.setSurName(WebUtils.getParam(parameters, "surName"));
+                p.setFirstName(WebUtils.getCleanedParam(parameters, "firstName"));
+                p.setSurName(WebUtils.getCleanedParam(parameters, "surName"));
 
                 session.save(p);
                 _(SpliffySecurityManager.class).getPasswordManager().setPassword(p, password);
@@ -291,7 +291,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
 
             // Now process any opt-ins
-            String sOptins = WebUtils.getParam(parameters, "optins");
+            String sOptins = WebUtils.getCleanedParam(parameters, "optins");
             if (sOptins != null) {
                 List<OptIn> optins = OptIn.findForGroup(group, session);
                 for (String s : sOptins.split(",")) {
@@ -455,7 +455,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
         session.save(fields);
         log.info("Created NvSet: " + fields.getId());
         for (ExtraField f : extraFields) {
-            String val = WebUtils.getParam(parameters, f.getName());
+            String val = WebUtils.getCleanedParam(parameters, f.getName());
             if (val != null) {
                 NvPair nvp = fields.addPair(f.getName(), val);
                 session.save(nvp);

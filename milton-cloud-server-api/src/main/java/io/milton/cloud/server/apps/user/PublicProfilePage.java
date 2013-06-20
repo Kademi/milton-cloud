@@ -72,7 +72,7 @@ public class PublicProfilePage extends TemplatedHtmlPage implements PostableReso
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
         try {
-            String message = WebUtils.getParam(parameters, "message");
+            String message = WebUtils.getCleanedParam(parameters, "message");
             Long emailId = generateEmailItem(message, session);
             log.info("created email item: " + emailId);
             jsonResult = new JsonResult(true);

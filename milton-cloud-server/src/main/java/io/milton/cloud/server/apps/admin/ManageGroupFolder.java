@@ -88,20 +88,20 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         Transaction tx = session.beginTransaction();
 
         if (parameters.containsKey("addFieldName")) {
-            String addFieldName = WebUtils.getParam(parameters, "addFieldName");
-            String addFieldValue = WebUtils.getParam(parameters, "addFieldValue");
+            String addFieldName = WebUtils.getRawParam(parameters, "addFieldName");
+            String addFieldValue = WebUtils.getRawParam(parameters, "addFieldValue");
             addField(addFieldName, addFieldValue, session);
             tx.commit();
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("removeFieldName")) {
-            String addFieldName = WebUtils.getParam(parameters, "removeFieldName");
+            String addFieldName = WebUtils.getRawParam(parameters, "removeFieldName");
             removeField(addFieldName, session);
             tx.commit();
             jsonResult = new JsonResult(true);
         } else if (parameters.containsKey("role")) {
-            String appliesToType = WebUtils.getParam(parameters, "appliesToType");
-            String appliesTo = WebUtils.getParam(parameters, "appliesTo");
-            String role = WebUtils.getParam(parameters, "role");
+            String appliesToType = WebUtils.getRawParam(parameters, "appliesToType");
+            String appliesTo = WebUtils.getRawParam(parameters, "appliesTo");
+            String role = WebUtils.getRawParam(parameters, "role");
             if (appliesToType == null) {
                 jsonResult = JsonResult.fieldError("appliesToType", "Please select a appliesToType");
                 return null;
@@ -149,9 +149,9 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
             }
         } else if (parameters.containsKey("regoMode")) {
             try {
-                String sRegoMode = WebUtils.getParam(parameters, "regoMode");
+                String sRegoMode = WebUtils.getRawParam(parameters, "regoMode");
                 group.setRegistrationMode(sRegoMode);
-                String sOrgType = WebUtils.getParam(parameters, "orgType");
+                String sOrgType = WebUtils.getRawParam(parameters, "orgType");
                 OrgType orgType = null;
                 if (sOrgType != null) {
                     orgType = getOrganisation().orgType(sOrgType);
@@ -163,7 +163,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                 }
                 group.setRegoOrgType(orgType, session);
                 System.out.println("set ot: " + group.getRegoOrgType());
-                String sRootOrg = WebUtils.getParam(parameters, "sRootRegoOrg");
+                String sRootOrg = WebUtils.getRawParam(parameters, "sRootRegoOrg");
                 if (sRootOrg != null) {
                     Organisation org = getOrganisation().childOrg(sRootOrg, session);
                     group.setRootRegoOrg(org);
@@ -172,7 +172,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                 }
 
                 // update opt-ins
-                String sOptinGroups = WebUtils.getParam(parameters, "optinGroup");
+                String sOptinGroups = WebUtils.getRawParam(parameters, "optinGroup");
                 List<OptIn> toRemove = OptIn.findForGroup(group, session);
                 if (sOptinGroups != null) {
                     for (String groupName : sOptinGroups.split(",")) {
@@ -189,7 +189,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
 
                                     toRemove.remove(o); // found it, so remove it from list. We will delete whats left
                                 }
-                                String desc = WebUtils.getParam(parameters, "optin" + groupName + "_Desc");
+                                String desc = WebUtils.getRawParam(parameters, "optin" + groupName + "_Desc");
                                 if (desc == null) {
                                     desc = "Would you like to receive communications for " + groupName;
                                 }
@@ -212,7 +212,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                 jsonResult = new JsonResult(false, ex.getMessage());
             }
         } else if (parameters.containsKey("sourceGroup")) {
-            String sSourceGroup = WebUtils.getParam(parameters, "sourceGroup");
+            String sSourceGroup = WebUtils.getRawParam(parameters, "sourceGroup");
             Group sourceGroup = getOrganisation().group(sSourceGroup, session);
             if (sourceGroup == null) {
                 jsonResult = new JsonResult(false, "Couldnt find group: " + sSourceGroup);

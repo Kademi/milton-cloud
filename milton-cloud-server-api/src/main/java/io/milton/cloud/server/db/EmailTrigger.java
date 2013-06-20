@@ -95,18 +95,18 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     }
 
     private static boolean matches(String triggerCondition, String eventValue) {
-        System.out.println("matches: " + triggerCondition + " - " + eventValue);
+        //System.out.println("matches: " + triggerCondition + " - " + eventValue);
         if (triggerCondition == null) {            
-            System.out.println("  - yes");
+//            System.out.println("  - yes");
             return true; // null trigger condition means match anything or nothing
         } else {
             if (eventValue == null) {
-                System.out.println("  - no, event value is null");
+//                System.out.println("  - no, event value is null");
                 return false; // not null trigger condition means match specific value, but no value given
             }
         }
         boolean  b = eventValue.startsWith(triggerCondition); // the trigger condition can be an initial portion of the value
-        System.out.println("  - " + b + " " + eventValue + " starts with " + triggerCondition);
+//        System.out.println("  - " + b + " " + eventValue + " starts with " + triggerCondition);
         return b;
     }
     

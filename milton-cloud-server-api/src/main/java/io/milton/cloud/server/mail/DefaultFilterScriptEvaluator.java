@@ -47,6 +47,7 @@ public class DefaultFilterScriptEvaluator implements FilterScriptEvaluator {
 
     @Override
     public boolean checkFilterScript(EvaluationContext context, Profile p, Organisation org, RootFolder rf) {
+        System.out.println("checkFilterScript: " + p.getEmail());
         Rule rule = (Rule) context.getCompiledScript();
         if (rule == null) {
             scriptParser.parse(context);
@@ -69,6 +70,8 @@ public class DefaultFilterScriptEvaluator implements FilterScriptEvaluator {
         processContext.addAttribute("user", userRes);
         processContext.addAttribute("userResource", userRes);
         processContext.addAttribute("formatter", formatter);
-        return rule.eval(processContext);
+        boolean b = rule.eval(processContext);
+        System.out.println("result=" + b);
+        return b;
     }
 }

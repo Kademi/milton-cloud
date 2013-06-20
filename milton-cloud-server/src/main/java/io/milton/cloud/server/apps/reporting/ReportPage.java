@@ -56,14 +56,14 @@ public class ReportPage extends TemplatedHtmlPage implements IReportPage {
             Date finish;
             try {
                 // Note that the scheduled app uses fromDate/toDate parameters
-                String sStart = WebUtils.getParam(params, "startDate");
+                String sStart = WebUtils.getRawParam(params, "startDate");
                 if (sStart == null) {
-                    sStart = WebUtils.getParam(params, "fromDate");
+                    sStart = WebUtils.getRawParam(params, "fromDate");
                 }
                 start = parseDate(sStart);
-                String sFinish = WebUtils.getParam(params, "finishDate");
+                String sFinish = WebUtils.getRawParam(params, "finishDate");
                 if (sFinish == null) {
-                    sFinish = WebUtils.getParam(params, "toDate");
+                    sFinish = WebUtils.getRawParam(params, "toDate");
                 }
                 finish = parseDate(sFinish);
                 jsonResult = new JsonResult(true);
