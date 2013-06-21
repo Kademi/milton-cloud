@@ -411,4 +411,15 @@ public class Group implements Serializable, VfsAcceptor {
     public boolean isOpenGroup() {
         return getRegistrationMode() != null && getRegistrationMode().equals(REGO_MODE_OPEN);
     }    
+    
+    /**
+     * Find any GroupInWebsite records for this group. This is a fairly inefficient
+     * call, so you should probably cache results if it will be called repeatedly
+     * 
+     * @param session
+     * @return 
+     */
+    public List<GroupInWebsite> groupInWebsites(Session session) {
+        return GroupInWebsite.findByGroup(this, SessionManager.session());
+    }    
 }

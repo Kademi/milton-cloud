@@ -15,7 +15,6 @@
 package io.milton.cloud.server.apps.signup;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import io.milton.cloud.util.TimeDataPointBean;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.cloud.server.web.reporting.GraphData;
@@ -39,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Profile;
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
@@ -82,26 +83,15 @@ public class GroupSignupsReport implements JsonReport {
         log.info("runReport: " + start + " - " + finish);
         Session session = SessionManager.session();
         Formatter f = _(Formatter.class);
-        Criteria crit = session.createCriteria(SignupLog.class)
-                .setProjection(Projections.projectionList()
+        Criteria crit = createBaseCriteria(session, start, finish, website, org);
+        crit.setProjection(Projections.projectionList()
                 .add(Projections.min("reqDate"))
                 .add(Projections.rowCount())
                 .add(Projections.groupProperty("groupEntity"))
                 .add(Projections.groupProperty("reqYear"))
                 .add(Projections.groupProperty("reqMonth"))
                 .add(Projections.groupProperty("reqDay")));
-        if (start != null) {
-            crit.add(Restrictions.ge("reqDate", start));
-        }
-        if (finish != null) {
-            crit.add(Restrictions.le("reqDate", finish));
-        }
-        if (website != null) {
-            crit.add(Restrictions.eq("website", website));
-        }
-        if (org != null) {
-            crit.add(Restrictions.eq("organisation", org));
-        }
+
         List list = crit.list();
         Set<String> groupsInSeries = new HashSet<>();
         List<Map<String, Object>> dataPoints = new ArrayList<>();
@@ -161,6 +151,32 @@ public class GroupSignupsReport implements JsonReport {
             }
             writer.writeNext(GraphData.toArray(line));
         }
+
+        // Write a seperator row
+        writer.writeNext(GraphData.emptyArray());
+        
+        // Now we need to write raw data
+        line = new ArrayList<>();
+        addRawHeaders(line);
+        writer.writeNext(GraphData.toArray(line));
+
+        Session session = SessionManager.session();
+        Criteria crit = createBaseCriteria(session, start, finish, website, org);
+        Map<Group, Boolean> mapOfGroupInclusions = new HashMap<>();
+        for (SignupLog signupLog : DbUtils.toList(crit, SignupLog.class)) {
+            // Check if this group should be included in the report. We dont want to include mailing lists
+            Group group = signupLog.getGroupEntity();
+            Boolean include = mapOfGroupInclusions.get(group);
+            if (include == null) {
+                include = !group.groupInWebsites(session).isEmpty(); // consider it an option group if has no website access
+                mapOfGroupInclusions.put(group, include);
+            }
+            if (include) {
+                line = new ArrayList<>();
+                addRawData(signupLog, line);
+                writer.writeNext(GraphData.toArray(line));
+            }
+        }
     }
 
     @Override
@@ -192,7 +208,7 @@ public class GroupSignupsReport implements JsonReport {
         }
 
         JFreeChart chart = ChartFactory.createXYLineChart(title, "Date", "Number of signups", xyDataset, PlotOrientation.VERTICAL, true, false, false);
-        
+
         XYPlot plot = chart.getXYPlot();
         DateAxis dateAxis = new DateAxis("Date");
         DateTickUnit unit = new DateTickUnit(DateTickUnitType.DAY, 1);
@@ -200,7 +216,7 @@ public class GroupSignupsReport implements JsonReport {
         dateAxis.setDateFormatOverride(chartFormatter);
         dateAxis.setTickUnit(unit);
         plot.setDomainAxis(dateAxis);
-        
+
         //JFreeChart chart = new JFreeChart("Hits", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         //chart.setBackgroundPaint(java.awt.Color.WHITE);
         try {
@@ -209,5 +225,62 @@ public class GroupSignupsReport implements JsonReport {
         } catch (IOException e) {
             log.error("Exception rendering chart", e);
         }
+    }
+
+    private Criteria createBaseCriteria(Session session, Date start, Date finish, Website website, Organisation org) {
+        Criteria crit = session.createCriteria(SignupLog.class);
+        if (start != null) {
+            crit.add(Restrictions.ge("reqDate", start));
+        }
+        if (finish != null) {
+            crit.add(Restrictions.le("reqDate", finish));
+        }
+        if (website != null) {
+            crit.add(Restrictions.eq("website", website));
+        }
+        if (org != null) {
+            crit.add(Restrictions.eq("organisation", org));
+        }
+        return crit;
+    }
+
+    private void addRawData(SignupLog log, List<String> line) {
+        Group group = log.getGroupEntity();
+        // TODO: only call this if groupInWebsites > 0
+        Organisation org = log.getMembershipOrg(); // we're interested in the org they signed up to
+        Profile p = log.getProfile();
+
+        String state = org.getAddressState();
+        String orgTitle = org.getTitleOrId();
+        String orgId = org.getOrgId();
+        String firstName = p.getFirstName();
+        String surName = p.getSurName();
+        String email = p.getEmail();
+        String phone = p.getPhone();
+        String groupName = group.getName();
+        String createDate = _(Formatter.class).formatDate(log.getReqDate());
+
+        line.add(state);
+        line.add(orgTitle);
+        line.add(orgId);
+        line.add(firstName);
+        line.add(surName);
+        line.add(email);
+        line.add(phone);
+        line.add(groupName);
+        line.add(createDate);
+    }
+
+    private void addRawHeaders(List<String> line) {
+        line.add("Org State");
+        line.add("Org Title");
+        line.add("Org Id");
+        line.add("First Name");
+        line.add("Surname");
+        line.add("Email");
+        line.add("Phone");
+        line.add("Group");
+        line.add("Create Date");
+
     }
 }

@@ -51,7 +51,11 @@ public class GraphData<T> {
     public static  String[] toArray(List<String> line) {
         String[] arr = new String[line.size()];
         line.toArray(arr);
-        System.out.println("toArray: " + line.size());
+        return arr;
+    }
+    
+    public static String[] emptyArray() {
+        String[] arr = new String[0];
         return arr;
     }
 
