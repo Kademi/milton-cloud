@@ -376,6 +376,11 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         gm.setWithinOrg(hasGroupInOrg);
         gm.setModifiedDate(new Date());
         session.save(gm);
+        
+        if( g.getGroupMemberships() == null ) {
+            g.setGroupMemberships(new ArrayList<GroupMembership>());
+        }
+        g.getGroupMemberships().add(gm);
 
         // Need to create a subordinate record for each parent organisation
         Organisation subordinateTo = hasGroupInOrg;
