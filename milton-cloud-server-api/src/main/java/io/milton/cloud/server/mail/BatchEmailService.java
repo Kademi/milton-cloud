@@ -110,8 +110,10 @@ public class BatchEmailService {
 
     public Set<Profile> filterRecipients(BaseEmailJob j, Profile evaluationTarget, List<BaseEntity> directRecipients, Session session) {
         if (directRecipients.isEmpty()) {
+            log.info("No direct recipients");
             return Collections.EMPTY_SET;
         }
+        log.info("Direct recipients: " + directRecipients.size());
         Set<Profile> profiles = new HashSet<>();
         EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
         for (BaseEntity e : directRecipients) {
@@ -121,6 +123,7 @@ public class BatchEmailService {
                 log.warn("Found null recipient, ignoring");
             }
         }
+        log.info("expanded recipients: " + profiles.size());
         return profiles;
     }
 

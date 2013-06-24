@@ -53,10 +53,11 @@ public class EmailTriggerService {
         EmailTrigger j = (EmailTrigger) session.get(EmailTrigger.class, jobId);
         if (j == null) {
             log.warn("Job not found: " + jobId);
+            return ;
         }
 
         List<BaseEntity> directRecips = new ArrayList<>();
-        if (j.getGroupRecipients() != null) {
+        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty() ) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
                 Group recipient = gr.getRecipient();
                 if (recipient != null) {
@@ -65,6 +66,8 @@ public class EmailTriggerService {
                     log.warn("Couldnt find recipient for GroupRecipient=" + gr.getId());
                 }
             }
+        } else {
+            log.info("No Group recipients specified for job: " + jobId);
         }
 
         List<Profile> sources = new ArrayList<>();
