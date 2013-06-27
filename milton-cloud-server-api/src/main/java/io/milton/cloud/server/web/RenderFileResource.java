@@ -110,6 +110,18 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         this.fileResource = fileResource;
     }
 
+    /**
+     * Call when the underlying FileResource has changed. This will cause this
+     * RFR to flush any cached representation of the file
+     */
+    public void reset() {
+        parsed = false;
+        bodyClasses.clear();
+        webResources.clear();
+        body = null;
+        title = null;
+    }
+    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         log.info("processform: " + getName());
@@ -170,7 +182,7 @@ public class RenderFileResource extends AbstractResource implements GetableResou
         }
         parsed = true;
         try {
-            _(HtmlTemplateParser.class).parse(this, Path.root);
+            _(HtmlTemplateParser.class).parse(this);
         } catch (XMLStreamException ex) {
             throw new RuntimeException(getHref(), ex);
         } catch (IOException ex) {

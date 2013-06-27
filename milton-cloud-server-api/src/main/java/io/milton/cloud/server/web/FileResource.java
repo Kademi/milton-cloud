@@ -380,10 +380,22 @@ public class FileResource extends AbstractContentResource implements Replaceable
     @Override
     public void setHash(String s) {
         if (htmlPage != null) {
-            log.warn("Set hash, but htmlpage representation exists and will not be updated"); // TODO: should we flush the htmlpage?
+            //log.warn("Set hash, but htmlpage representation exists and will not be updated"); // TODO: should we flush the htmlpage?
+            // Yes, lets have a try            
+            htmlPage.reset();
         }
         super.setHash(s);
     }
+
+    @Override
+    public void updateModDate() {
+        if (htmlPage != null) {
+            htmlPage.reset();
+        }        
+        super.updateModDate(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {

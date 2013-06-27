@@ -263,7 +263,7 @@ public class HtmlTemplater {
                         System.out.println("put to cache: " + source);
                         cachedTemplateMetaData.put(source, meta);
                     } else {
-                        log.warn("Null or incompatible resource: " + r + " for source: " + source);
+                        log.warn("Null or incompatible resource: " + r + " for source: " + source + " in resource factory: " + resourceFactory);
                     }
                 } catch (NotAuthorizedException | BadRequestException e) {
                     throw new RuntimeException(e);

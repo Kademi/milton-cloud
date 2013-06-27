@@ -21,15 +21,11 @@ import io.milton.cloud.server.web.RenderFileResource;
 import io.milton.common.Path;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import javax.xml.stream.XMLStreamException;
-import net.htmlparser.jericho.Attributes;
-import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -51,7 +47,8 @@ public class HtmlTemplateParser {
                 .build();
     }
 
-    public void parse(RenderFileResource meta, Path webPath) throws IOException, XMLStreamException {
+    public void parse(RenderFileResource meta) throws IOException, XMLStreamException {
+        System.out.println("parse: " + meta.getName());
         String hash = meta.getHash();
         ParsedResource pr = cache.get(hash);
         if (pr == null) {
@@ -70,32 +67,11 @@ public class HtmlTemplateParser {
         meta.setTitle(pr.title);
         meta.getBodyClasses().clear();
         meta.getBodyClasses().addAll(pr.bodyClasses);
-        meta.getWebResources().clear();
-        meta.getWebResources().addAll(pr.webResources);
+        meta.getWebResources().clear();        
+        meta.getWebResources().addAll(copy(pr.webResources));
 
     }
 
-    public ParsedResource parse(InputStream in, String hash) throws IOException, XMLStreamException {
-        ParsedResource pr = cache.get(hash);
-        if (pr == null) {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            IOUtils.copy(in, bout);
-            String sourceXml = bout.toString("UTF-8");
-            pr = new ParsedResource(sourceXml);
-            cache.putIfAbsent(hash, pr);
-        }
-        return pr;
-    }
-
-    public ParsedResource parse(String sourceXml, String hash) throws IOException, XMLStreamException {
-        ParsedResource pr = cache.get(hash);
-        if (pr == null) {
-            pr = new ParsedResource(sourceXml);
-            cache.putIfAbsent(hash, pr);
-        }
-        return pr;
-    }
-    
     
     /**
      * Parse the file associated with the meta, extracting webresources, body
@@ -104,7 +80,7 @@ public class HtmlTemplateParser {
      *
      * @param meta
      */
-    public void parse(HtmlPage meta, Path webPath) throws IOException, XMLStreamException {
+    public void parse(HtmlPage meta) throws IOException, XMLStreamException {
         log.info("parse: " + meta.getSource() + " - " + meta.getClass() + " accumulated time=" + time + "ms");
         long tm = System.currentTimeMillis();
 
@@ -128,6 +104,17 @@ public class HtmlTemplateParser {
         time += tm;
     }
 
+
+    public ParsedResource parse(String sourceXml, String hash) throws IOException, XMLStreamException {
+        ParsedResource pr = cache.get(hash);
+        if (pr == null) {
+            pr = new ParsedResource(sourceXml);
+            cache.putIfAbsent(hash, pr);
+        }
+        return pr;
+    }
+        
+    
     /**
      * Does the opposite of parse, formats the structured fields into HTML
      *
@@ -161,5 +148,13 @@ public class HtmlTemplateParser {
         return s.trim();
 
 
+    }
+
+    private Collection<? extends WebResource> copy(List<WebResource> webResources) {
+        List<WebResource> copy = new ArrayList<>();
+        for( WebResource wr : webResources) {
+            copy.add(wr.duplicate());
+        }
+        return copy;
     }
 }

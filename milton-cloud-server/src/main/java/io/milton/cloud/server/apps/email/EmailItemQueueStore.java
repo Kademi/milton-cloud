@@ -29,7 +29,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.masukomi.aspirin.core.config.Configuration;
 import org.masukomi.aspirin.core.listener.ListenerManager;
-import org.masukomi.aspirin.core.store.queue.DeliveryState;
 import org.masukomi.aspirin.core.store.queue.QueueInfo;
 import org.masukomi.aspirin.core.store.queue.QueueStore;
 import org.slf4j.Logger;

@@ -161,6 +161,8 @@ public class ManageGroupEmailsFolder extends AbstractCollectionResource implemen
         return children;
     }
 
+
+
     @Override
     public CommonCollectionResource getParent() {
         return parent;

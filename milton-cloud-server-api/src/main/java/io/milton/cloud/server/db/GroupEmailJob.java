@@ -22,6 +22,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,8 @@ public class GroupEmailJob extends BaseEmailJob {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("organisation", org));
+        crit.addOrder(Order.asc("status"));
+        crit.addOrder(Order.desc("statusDate"));
         return DbUtils.toList(crit, GroupEmailJob.class);
     }
     

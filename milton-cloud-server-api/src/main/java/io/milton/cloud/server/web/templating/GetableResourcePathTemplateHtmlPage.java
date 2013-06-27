@@ -91,7 +91,7 @@ public class GetableResourcePathTemplateHtmlPage extends TemplateHtmlPage {
             throw new RuntimeException("Couldnt parse: " + resource, e);
         }
         bytes = bout.toByteArray();
-        templateParser.parse(this, path.getParent());
+        templateParser.parse(this);
     }
 
     @Override

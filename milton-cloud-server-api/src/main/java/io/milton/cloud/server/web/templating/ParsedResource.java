@@ -82,8 +82,8 @@ public class ParsedResource {
                 }
             }
         }
-        this.title = title;
-        this.webResources = list;
+        this.title = title;        
+        this.webResources = Collections.unmodifiableList(list);
     }
 
     public String getTitle() {

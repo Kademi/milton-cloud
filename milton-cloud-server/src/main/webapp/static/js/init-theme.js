@@ -7,7 +7,7 @@
  *  application to get the toolbars you want
  */
 
-CKEDITOR_BASEPATH = "/static/ckeditor36/";
+CKEDITOR_BASEPATH = "/static/ckeditor41/";
 
 
 // Templates should push theme css files into this array, so they will be included in the editor
@@ -165,23 +165,27 @@ function getSavedFontSize() {
     return $.cookie("font-size");
 }
 
+
+
 /**
  * Make sure you push any required css files into "themeCssFiles" before calling
+ * 
+ * See /static/js/toolbars.js
  */
 function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
-    log("initHtmlEditors: css files=", themeCssFiles, $('.htmleditor'));
-    if (!$('.htmleditor').ckeditor) {
-        log("ckeditor jquery adapter is not loaded");
-        return;
-    }
+    log("initHtmlEditors: height=", height);
+//    if (!$('.htmleditor').ckeditor) {
+//        log("ckeditor jquery adapter is not loaded");
+//        return;
+//    }
     if (!elements) {
         elements = $(".htmleditor");
     }
     if (!extraPlugins) {
-        extraPlugins = 'autogrow,embed_video,image2,modal';  // see /static/js/toolbars.js
+        extraPlugins = standardExtraPlugins; // see toolbars.js
     }
     if (!removePlugins) {
-        removePlugins = 'resize,image';
+        removePlugins = standardRemovePlugins;
     }
     log("prepare html editors", elements);
     elements.each(function(i, n) {
@@ -202,6 +206,7 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
             }
         }
 
+        toolbar = "Default"; // HACK!!
         log("using toolbar", toolbar, "=>", toolbarSets[toolbar]);
         var config = {
             skin: editorSkin,
@@ -209,7 +214,7 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
             bodyId: "editor",
             templates_files: ['/static/editor/templates.js'],
             templates_replaceContent: false,
-            toolbar: toolbarSets[toolbar],
+            toolbarGroups: toolbarSets[toolbar],
             extraPlugins: extraPlugins,
             removePlugins: removePlugins,
             enterMode: "P",
@@ -224,6 +229,7 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
                 }
             }
         };
+
         if (height) {
             config.height = height;
         } else {
