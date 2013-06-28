@@ -1,63 +1,169 @@
-var editorSkin = "office2003";
+var editorSkin = "moono";
 
 var toolbarSets = {};
 
-toolbarSets["Full"] = [
-	{ name: 'document', items : [ 'Source','-' ] },
-	{ name: 'clipboard', items : [ 'Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
-	{ name: 'editing', items : [ 'Find','Replace','-','SelectAll','-','SpellChecker' ] },
-	{ name: 'forms', items : [ 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select'] },
-        { name: 'links', items : [ 'Link','Unlink','Anchor','Modal' ] },
-	{ name: 'insert', items : [ 'Video', 'Image2','Table','HorizontalRule','SpecialChar' ] },        
-	{ name: 'tools', items : [ 'Maximize', 'ShowBlocks' ] },
-	'/',
-	{ name: 'styles', items : [ 'Styles','Format','FontSize','Templates' ] },        
-	{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
-	{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote',
-	'-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
-] ;
+var standardExtraPlugins = "autogrow,embed_video,image2,modal,mysave";
+var standardRemovePlugins = "resize,image,save,newpage,preview,form"
 
- 
+toolbarSets["Full"] = [
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'others'},
+    '/',
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'},
+    {name: 'colors'},
+    {name: 'about'}
+];
 
 toolbarSets["Balanced"] = [
-	['Paste','PasteText','PasteFromWord','-','Print','SpellChecker'],
-	['Undo','Redo','-','Find','Replace'],
-	['Bold','Italic','Underline','-','Subscript','Superscript','RemoveFormat'],
-	['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],
-	['FontFormat','FontSize'],
-	['Link','Image','Table','SpecialChar'] // No comma for the last row.
-			
-] ;
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'others'},
+    '/',
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'},
+    {name: 'colors'},
+    {name: 'about'}
+];
+
+//toolbarSets["Balanced"] = [
+//    ['Paste', 'PasteText', 'PasteFromWord', '-', 'Print', 'SpellChecker'],
+//    ['Undo', 'Redo', '-', 'Find', 'Replace'],
+//    ['Bold', 'Italic', 'Underline', '-', 'Subscript', 'Superscript', 'RemoveFormat'],
+//    ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote'],
+//    ['FontFormat', 'FontSize'],
+//    ['Link', 'Image', 'Table', 'SpecialChar'] // No comma for the last row.
+//
+//];
 
 toolbarSets["Default"] = [
-	['Source','-'],
-	['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print','SpellCheckerer'],
-	['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-	['Video','Image2','Table','Rule','SpecialChar','PageBreak'],
-	['Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript'],
-	['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],
-	['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
-	['Link','Unlink','Anchor'],
-	['Maximize','ShowBlocks','-','Templates'],		// No comma for the last row.
-	['Styles','Format']
-] ;
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},    
+    {name: 'others'},
+    {name: 'colors'},
+    {name: 'about'},
+    '/',
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'}
+];
 
-
+//toolbarSets["Default"] = [
+//    ['Source', '-'],
+//    ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Print', 'SpellCheckerer'],
+//    ['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'],
+//    ['Video', 'Image2', 'Table', 'Rule', 'SpecialChar', 'PageBreak'],
+//    ['Bold', 'Italic', 'Underline', 'StrikeThrough', '-', 'Subscript', 'Superscript'],
+//    ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote'],
+//    ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyFull'],
+//    ['Link', 'Unlink', 'Anchor'],
+//    ['Maximize', 'ShowBlocks', '-', 'Templates'], // No comma for the last row.
+//    ['Styles', 'Format']
+//];
+//
 
 toolbarSets["Lite"] = [
-	['Bold','Italic','-','Image','Link','Unlink']
-] ;
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'others'},
+    '/',
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'},
+    {name: 'colors'},
+    {name: 'about'}
+];
+
+//toolbarSets["Lite"] = [
+//    ['Bold', 'Italic', '-', 'Image', 'Link', 'Unlink']
+//];
 
 toolbarSets["BasicAndStyle"] = [
-	['FontFormat'],
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'others'},
     '/',
-    ['Bold','Italic','-','NumberedList','BulletedList','-','Image','Link','Unlink','-','About']
-] ;
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'},
+    {name: 'colors'},
+    {name: 'about'}
+];
+
+//toolbarSets["BasicAndStyle"] = [
+//    ['FontFormat'],
+//    '/',
+//    ['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Image', 'Link', 'Unlink', '-', 'About']
+//];
 
 toolbarSets["Image"] = [
-	['Bold','Italic','-','Link','Unlink','-','Image','Flash']
-] ;
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'others'},
+    '/',
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'},
+    {name: 'colors'},
+    {name: 'about'}
+];
+
+
+//toolbarSets["Image"] = [
+//    ['Bold', 'Italic', '-', 'Link', 'Unlink', '-', 'Image', 'Flash']
+//];
 
 toolbarSets["Logo"] = [
-	['Bold','Italic','-','Image','-','Source']
-] ;
+    {name: 'clipboard', groups: ['clipboard', 'undo']},
+    {name: 'editing', groups: ['find', 'selection', 'spellchecker']},
+    {name: 'links'},
+    {name: 'insert'},
+    {name: 'forms'},
+    {name: 'tools'},
+    {name: 'document', groups: ['mode', 'document', 'doctools']},
+    {name: 'others'},
+    '/',
+    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']},
+    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align']},
+    {name: 'styles'},
+    {name: 'colors'},
+    {name: 'about'}
+];
+
+//
+//toolbarSets["Logo"] = [
+//    ['Bold', 'Italic', '-', 'Image', '-', 'Source']
+//];

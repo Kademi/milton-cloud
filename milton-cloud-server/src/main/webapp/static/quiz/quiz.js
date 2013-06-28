@@ -41,13 +41,16 @@ function loadQuizEditor(modal, data) {
 }
 
 function prepareQuizForSave(form, data) {
-    log("build data object for quiz");
+    log("prepareQuizForSave: build data object for quiz");
     var quiz = form.find("#quizQuestions");
     // Set names onto all inputs. Just number them answer0, answer1, etc. And add a class to the li with the name of the input, to use in front end validation
     var questions = quiz.find("ol.quiz > li");
     questions.each(function(q, n) {
         var li = $(n);
-        setClass(li, "answer", q); // will remove old classes
+        var id = li.attr("id");
+        setClass(li, "answer", id); // will remove old classes
+        li.data("type","input");
+        //setClass(li, "answer", q); // will remove old classes
         li.find("input,select,textarea").each(function(inpNum, inp) {
             $(inp).attr("name", "answer" + q);
         });
@@ -64,12 +67,26 @@ function prepareQuizForSave(form, data) {
             template: form.find("input[name=template]").val()
         };
     }
+    
+    // Update the names of all inputs to be the class on the question li
+    var inputs = quiz.find("input,select,textarea").not(".newQuestionType,input[name=pageTitle],input[name=pageName]");
+    log("update input names", inputs);
+    inputs.each(function(i,n){
+        var inp = $(n);
+        var name = inp.closest("li[id]").attr("class"); // the question li is the closest one with an id. question name is its class
+        inp.attr("name", name);
+        log("set name", name, inp);
+    });
+    
     // Find all inputs and add them to the data object
     var inputs = quiz.find("input[type=text],select,textarea,input[type=radio]:checked").not(".newQuestionType,input[name=pageTitle],input[name=pageName]");
     log("add inputs", inputs);
     inputs.each(function(i,n){
         var inp = $(n);
-        data["answer" + i] = inp.val();
+        var name = inp.attr("name");
+        var val = inp.val();
+        data[name] = val;
+        log("set data att", name, val);
     });
         
     // remove any "temp" elements that have been added as part of editing
@@ -78,6 +95,7 @@ function prepareQuizForSave(form, data) {
     removeEmptyRadios(quiz.find("ol ol"));
                         
     data.body = quiz.html();    
+    log("html", data.body);
     return data;
 }
 

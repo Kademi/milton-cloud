@@ -41,7 +41,7 @@ public class HtmlTemplateParserTest {
         HtmlTemplateParser parser = new HtmlTemplateParser();
         URL resource = this.getClass().getResource("/test.html");
         HtmlPage htmlPage = new ClassPathTemplateHtmlPage(resource);
-        parser.parse(htmlPage, Path.root);
+        parser.parse(htmlPage);
         
         WebResource wrScript = null;
         WebResource wrParam = null;

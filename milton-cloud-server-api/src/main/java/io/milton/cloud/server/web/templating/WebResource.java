@@ -206,4 +206,21 @@ public class WebResource {
         }
         return true;
     }
+
+    /**
+     * Create a copy of this WebResource
+     * 
+     * @return 
+     */
+    public WebResource duplicate() {
+        WebResource dup = new WebResource();
+        dup.setBody(body);
+        dup.setTag(tag);
+        Map<String,String> dupedAtts = new HashMap<>();
+        for( Map.Entry<String, String> entry : atts.entrySet()) {
+            dupedAtts.put(entry.getKey(), entry.getValue());
+        }
+        dup.setAtts(dupedAtts);
+        return dup;
+    }
 }

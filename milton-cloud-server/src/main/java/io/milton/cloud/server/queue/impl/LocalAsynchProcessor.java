@@ -140,11 +140,12 @@ public class LocalAsynchProcessor implements AsynchProcessor {
         history.add(0, p.getClass().getCanonicalName() + " finished at " + new Date());
 
         while( history.size() > 100 ) {
-            history.remove(history.size());
+            history.remove(history.size()-1);
         }
         
     }
 
+    @Override
     public List<String> getHistory() {
         return history;
     }

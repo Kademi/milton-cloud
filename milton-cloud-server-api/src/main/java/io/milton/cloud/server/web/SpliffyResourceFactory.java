@@ -52,7 +52,6 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffyResourceFactory.class);
     public static final String ROOTS_SYS_PROP_NAME = "template.file.roots"; // same as for HtmlTemplater
-
     private final UserDao userDao;
     private final SpliffySecurityManager securityManager;
     private final ApplicationManager applicationManager;
@@ -116,10 +115,10 @@ public class SpliffyResourceFactory implements ResourceFactory {
     }
 
     public Resource findResource(String host, Path path) throws NotAuthorizedException, BadRequestException {
-        if( path.getFirst() != null && path.getFirst().equals("templates")) {
+        if (path.getFirst() != null && path.getFirst().equals("templates")) {
             RootFolder rootFolder = currentRootFolderService.getRootFolder(host);
             Resource override = findStaticTemplateResourceOverride(rootFolder, path);
-            if( override != null ) {
+            if (override != null) {
                 return override;
             }
         }
@@ -237,6 +236,9 @@ public class SpliffyResourceFactory implements ResourceFactory {
     }
 
     private Resource findStaticThemeResource(RootFolder rf, Path path) {
+        if (log.isTraceEnabled()) {
+            log.trace("findStaticThemeResource: " + path);
+        }
         Path relPath = path.getStripFirst();
         String internalTheme = "admin";
         if (rf instanceof WebsiteRootFolder) {
@@ -246,9 +248,15 @@ public class SpliffyResourceFactory implements ResourceFactory {
         //return find(rf, internalTheme, internalTheme);
         // Check if exists as a file resource (ie unpacked servlet resource) in the theme
         String staticThemeResPath = "/templates/themes/" + internalTheme + relPath;
+        if (log.isTraceEnabled()) {
+            log.trace("Check roots: " + roots.size());
+        }
         for (File root : roots) {
             File file = new File(root, staticThemeResPath);
             if (!file.exists()) {
+                if (log.isTraceEnabled()) {
+                    log.trace("file not found in root: " + root.getAbsolutePath());
+                }
                 //log.info("resource does not exist: " + templateFile.getAbsolutePath());
             } else {
                 if (file.isFile()) {
@@ -262,10 +270,18 @@ public class SpliffyResourceFactory implements ResourceFactory {
         // Check if exists as a file resource in apps
         if (relPath.getFirst().equals("apps")) {
             String appPath = "templates" + relPath;
+            if (log.isTraceEnabled()) {
+                log.trace("Check if exists in apps dir: " + appPath + " in roots: " + roots.size());
+            }
             for (File root : roots) {
+                if( log.isTraceEnabled() ) {
+                    log.trace("Check for app resource in root: " + root.getAbsolutePath());
+                }
                 File file = new File(root, appPath);
                 if (!file.exists()) {
-                    //log.info("resource does not exist: " + templateFile.getAbsolutePath());
+                    if( log.isTraceEnabled()) {
+                        log.trace("app resource does not exist: " + file.getAbsolutePath());
+                    }
                 } else {
                     if (file.isFile()) {
                         log.trace("found file: " + file.getAbsolutePath());
@@ -279,20 +295,24 @@ public class SpliffyResourceFactory implements ResourceFactory {
 
         // ok, last chance, look for a classpath resource
         String cpPath = "/templates" + relPath;
+        if (log.isTraceEnabled()) {
+            log.trace("Check in classpath: " + cpPath);
+        }
         URL resource = this.getClass().getResource(cpPath);
         if (resource != null) {
             String contentType = ContentTypeUtils.findContentTypes(path.getName());
             return new UrlResource(path.getName(), resource, contentType, loadedDate);
         }
+        log.trace("Not found in website repository themes, or in apps, or as a classpath resource");
         return null;
     }
 
     /**
      * Check if there is a theme resource which overrides a template resource
-     * 
+     *
      * @param rf
      * @param path
-     * @return 
+     * @return
      */
     public Resource findStaticTemplateResourceOverride(RootFolder rf, Path path) {
         Path relPath = path.getStripFirst();
@@ -308,7 +328,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
         Resource r = findStaticTemplateResource(rf, p);
         return r;
     }
-    
+
     public Resource findStaticTemplateResource(RootFolder rf, Path path) {
         for (File root : roots) {
             File file = new File(root, path.toString());
