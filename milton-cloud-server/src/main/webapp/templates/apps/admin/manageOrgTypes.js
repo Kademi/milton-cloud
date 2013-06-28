@@ -2,6 +2,17 @@ function initManageOrgTypes() {
     initEditing();
 }
 
+function initManageOrgTypeModal() {
+    $("body").on("click", ".addField", function(e) {
+        e.preventDefault();
+        var name = prompt("Please enter a name for the new field");
+        var newLi = $("<li>");
+        $("ul.fields").append(newLi);
+        newLi.append($("<h4>").text(name) );
+        newLi.append($("<input type='text' name='field-" + name + "'/>"));
+        newLi.append($("<a href='" + name +"' class='removeField'>Delete</a>"));                                                            
+    });
+}
 
 function initEditing() {
     var modal = $("div.Modal.newOrgType");

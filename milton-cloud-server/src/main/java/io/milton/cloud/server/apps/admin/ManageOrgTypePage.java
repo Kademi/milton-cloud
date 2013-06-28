@@ -174,6 +174,9 @@ public class ManageOrgTypePage extends AbstractResource implements DeletableReso
             log.info("setDataCaptureFields: set new fieldset");
             orgType.setFieldset(newSet);
             session.save(newSet);
+            for( NvPair nv : newSet.getNvPairs()) {
+                session.save(nv);
+            }
         } else {
             log.info("setDataCaptureFields: dont set new fieldset");
         }

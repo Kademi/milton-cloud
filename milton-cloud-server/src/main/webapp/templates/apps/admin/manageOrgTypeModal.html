@@ -1,6 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>Manage Organisation Type</title>
+        <script type="text/javascript" src="manageOrgTypes.js">//</script>
     </head>
     <body>
 
@@ -21,14 +22,8 @@
                     </div>
 
                     <h2>What extra fields are associated with this type of organisation or business unit?</h2>
-                    <button type="button" class="SmallBtn Add addField" onclick="$('.addField').toggle()"><span>Add field</span></button>
+                    <button type="button" class="SmallBtn Add addField"><span>Add field</span></button>
                     <div class="fields">
-                        <div class=" addField Hidden">
-                            <p>Enter a name for the field and the information about the format of the field</p>
-                            <input type="text" class="required" placeholder="Name for the field" name="addFieldName" style="width: 100px" />
-                            <input type="text" placeholder="Format. Eg required;options(yes,no);text=Would you like..?" name="addFieldValue" style="width: 250px" />
-                            <button type="button" class="Btn">Add</button>                
-                        </div>
                         <ul class="fields">
                             #foreach($field in $page.dataCaptureFields.entrySet())
                             <li>
@@ -43,6 +38,11 @@
                     <button type="submit" class="Btn" style="float: right">Save</button>
                 </form>
             </div>
-        </div>       
+        </div>  
+        <script type="text/javascript" >
+            jQuery(function() {
+                initManageOrgTypeModal();                
+            });            
+        </script>         
     </body>
 </html>
