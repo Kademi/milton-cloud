@@ -54,6 +54,7 @@ public class OrgType implements Serializable {
     private String name; // matched on orgs upload spreadsheet
     private String displayName; // used on the registration form
     private Organisation organisation; // the org which owns the list of org types
+    private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect for orgs of this type
 
     @Id
     @GeneratedValue
@@ -65,6 +66,33 @@ public class OrgType implements Serializable {
         this.id = id;
     }
 
+    /**
+     * An optional reference to the NvSet which hold a list of data capture fields
+     * for orgs of this type. The name of each NvPair is the name of the field, and the
+     * value is meta data keywords in the form:
+     * 
+     * required,numeric,options(csv list)
+     * 
+     * Eg1 - for a "how did you hear about us" question
+     * name=howHeard
+     * value=required,options(google,newspaper,friend or colleague)
+     * 
+     * Eg2 - "how many guests will you be bringing?"
+     * name=numGuests
+     * value=required,numeric
+     * 
+     * @return 
+     */
+    @ManyToOne
+    public NvSet getFieldset() {
+        return fieldset;
+    }
+
+    public void setFieldset(NvSet fieldset) {
+        this.fieldset = fieldset;
+    }
+    
+    
     @ManyToOne(optional = false)
     public Organisation getOrganisation() {
         return organisation;

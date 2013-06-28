@@ -221,7 +221,7 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
             forceEnterMode: true,
             filebrowserBrowseUrl: '/static/fckfilemanager/browser/default/browser.html?Type=Image&Connector=/fck_connector.html',
             filebrowserUploadUrl: '/uploader/upload',
-            format_tags: 'p;h1;h2;h3;h4;h5', // removed p2
+            format_tags: 'p;h1;h2;h3;h4;h5;h6', // removed p2
             format_p2: {
                 element: 'p',
                 attributes: {
