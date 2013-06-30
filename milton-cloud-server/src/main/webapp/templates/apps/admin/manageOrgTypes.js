@@ -1,11 +1,18 @@
 function initManageOrgTypes() {
     initEditing();
+    initManageOrgTypeModal();    
 }
 
 function initManageOrgTypeModal() {
     $("body").on("click", ".addField", function(e) {
         e.preventDefault();
         var name = prompt("Please enter a name for the new field");
+        if( name === "" ) {
+            return;
+        } else if( name.contains(" ")) {
+            alert("Please enter a name without spaces or other special characters");
+            return;
+        }
         var newLi = $("<li>");
         $("ul.fields").append(newLi);
         newLi.append($("<h4>").text(name) );
@@ -59,9 +66,9 @@ function initEditing() {
 
 
 function showEditForm(orgHref) {
-    var modal = $(".editOrgType");
+    var modal = $(".Modal.editOrgType");
     modal.load(orgHref + " #editOrgTypeModal", function() {
-        $(".editOrgType form").forms({
+        modal.find("form").forms({
             callback: function(resp) {
                 log("done", resp);
                 $.tinybox.close();

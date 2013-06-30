@@ -69,6 +69,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     
     private List<OrgType> orgTypes;
     
+    private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect for orgs of this type
 
     public static String getDeletedName(String origName) {
         return origName + "-deleted-" + System.currentTimeMillis();
@@ -402,6 +403,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgType = orgType;
     }
 
+    @ManyToOne
+    public NvSet getFieldset() {
+        return fieldset;
+    }
+
+    public void setFieldset(NvSet fieldset) {
+        this.fieldset = fieldset;
+    }
+        
+    
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;

@@ -20,10 +20,13 @@
                         <label for="newOrgTypeDisplayName">Display name</label>
                         <input type="text" name="displayName" id="newOrgTypeDisplayName" class="required" value="$page.orgType.displayName" />
                     </div>
+                    <button type="submit" class="Btn" style="float: right">Save</button>
 
-                    <h2>What extra fields are associated with this type of organisation or business unit?</h2>
+                    <h2 style="clear: both">What extra fields are associated with this type of organisation or business unit?</h2>
+                    <p>To add new fields, choose a name containing only letters and numbers, and no spaces or other special characters. Then
+                    set a comma seperated list of options. For example <i>required</i></p>
                     <button type="button" class="SmallBtn Add addField"><span>Add field</span></button>
-                    <div class="fields">
+                    <div class="fields" style="clear: both">
                         <ul class="fields">
                             #foreach($field in $page.dataCaptureFields.entrySet())
                             <li>
@@ -34,8 +37,7 @@
                             #end
                         </ul>
                     </div>
-
-                    <button type="submit" class="Btn" style="float: right">Save</button>
+                    
                 </form>
             </div>
         </div>  

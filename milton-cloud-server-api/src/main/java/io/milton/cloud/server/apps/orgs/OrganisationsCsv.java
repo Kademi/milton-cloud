@@ -16,6 +16,7 @@ package io.milton.cloud.server.apps.orgs;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
@@ -23,7 +24,6 @@ import io.milton.cloud.server.web.WebUtils;
 import io.milton.common.Path;
 import io.milton.http.Auth;
 import io.milton.http.FileItem;
-import io.milton.http.HttpManager;
 import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
@@ -33,10 +33,12 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PostableResource;
+import io.milton.resource.ReplaceableResource;
+import io.milton.vfs.db.NvPair;
+import io.milton.vfs.db.NvSet;
 import io.milton.vfs.db.OrgType;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,17 +51,22 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
+
+import static io.milton.context.RequestContext._;
 
 /**
  * Returns a CSV view of the business units in the parent folder
  *
  * @author brad
  */
-public class OrganisationsCsv extends AbstractResource implements GetableResource, PostableResource {
+public class OrganisationsCsv extends AbstractResource implements GetableResource, PostableResource, ReplaceableResource {
 
     private static final Logger log = LoggerFactory.getLogger(OrganisationsCsv.class);
     private final String name;
@@ -68,6 +75,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
     private List<List<String>> unmatched = new ArrayList<>();
     private int numUpdated;
     private int currentLine;
+    private Date now;
 
     public OrganisationsCsv(String name, OrganisationsFolder parent) {
         this.parent = parent;
@@ -110,12 +118,11 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            List<String> extraColumns = findExtraColumns();
             try (OutputStreamWriter pw = new OutputStreamWriter(out)) {
                 CSVWriter writer = new CSVWriter(pw);
-                String[] arr = {"OrgID", "OrgType", "Path", "OrgTitle", "Address1", "Address2", "AddressState", "Phone", "Postcode"};
-                writer.writeNext(arr);
-
-                toCsv(parent.getOrganisation(), parent.getOrganisation().childOrgs(), writer);
+                writeHeaders(writer, extraColumns);
+                toCsv(parent.getOrganisation(), parent.getOrganisation().childOrgs(), writer, extraColumns);
                 pw.flush();
             }
         }
@@ -167,7 +174,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         return super.is(type);
     }
 
-    private void toCsv(Organisation rootOrg, List<Organisation> orgs, CSVWriter writer) {
+    private void toCsv(Organisation rootOrg, List<Organisation> orgs, CSVWriter writer, List<String> extraCols) {
         if (orgs == null) {
             return;
         }
@@ -175,15 +182,15 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         List<String> values;
         String[] arr;
         for (Organisation org : orgs) {
-            values = buildLineOfValues(rootOrg, org);
+            values = buildLineOfValues(rootOrg, org, extraCols);
             arr = new String[values.size()];
             values.toArray(arr);
             writer.writeNext(arr);
-            toCsv(rootOrg, org.childOrgs(), writer);
+            toCsv(rootOrg, org.childOrgs(), writer, extraCols);
         }
     }
 
-    private List<String> buildLineOfValues(Organisation rootOrg, Organisation org) {
+    private List<String> buildLineOfValues(Organisation rootOrg, Organisation org, List<String> extraCols) {
         List<String> values = new ArrayList<>();
         Path path = toOrgPath(rootOrg, org);
         if (!path.isRoot()) {
@@ -203,6 +210,13 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         values.add(org.getAddressState());
         values.add(org.getPhone());
         values.add(org.getPostcode());
+        NvSet fieldset = org.getFieldset();
+        if (fieldset != null && fieldset.getNvPairs() != null) {
+            for (String colName : extraCols) {
+                String colVal = fieldset.get(colName);
+                values.add(colVal);  // maybe null
+            }
+        }
         return values;
     }
 
@@ -219,19 +233,16 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         InputStream in = null;
         try {
             in = file.getInputStream();
-            Request req = HttpManager.request();
-            if (insertMode) {
-                fromCsv(in, session);
-
-            } else {
-                updateOnlyFromCsv(in, session);
-            }
+            doUpload(in, insertMode, session);
         } finally {
             IOUtils.closeQuietly(in);
         }
     }
 
-    public void fromCsv(InputStream in, Session session) throws IOException {
+    private void doUpload(InputStream in, Boolean insertMode, Session session) throws IOException {
+        log.info("doUpload: " + insertMode);
+        List<String> extraColumns = findExtraColumns();
+
         InputStreamReader r = new InputStreamReader(in);
         CSVReader reader = new CSVReader(r);
 
@@ -250,7 +261,7 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 List<String> lineList = new ArrayList<>();
                 lineList.addAll(Arrays.asList(lineParts));
                 if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(rootOrg, lineList, currentLine, true, session);
+                    doProcess(rootOrg, lineList, currentLine, insertMode, extraColumns, session);
                 }
                 if (currentLine % 20 == 0) {
                     log.info("Flush and clear session");
@@ -260,11 +271,11 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 }
             }
         }
-        // TODO: find all recs not updated and delete them
+        // TODO: find all recs not updated and delete them, maybe??
         jsonResult = new JsonResult(true, "Done insert and updates");
     }
 
-    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts, Session session) {
+    private void doProcess(Organisation rootOrg, List<String> lineList, int line, boolean allowInserts,List<String> extraColumns, Session session) {
         String orgId = lineList.get(0);
         if (orgId == null || orgId.length() == 0) {
             //throw new RuntimeException("Cant save record with an empty name: column" + pos + " line: " + line);
@@ -286,10 +297,10 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         } else {
             log.trace("found record to update: " + child.getOrgId());
         }
-        updateRecord(child, lineList, line, rootOrg, session);
+        updateRecord(child, lineList, line, rootOrg, extraColumns, session);
     }
 
-    private void updateRecord(Organisation child, List<String> lineList, int line, Organisation rootOrg, Session session) {
+    private void updateRecord(Organisation child, List<String> lineList, int line, Organisation rootOrg, List<String> extraColumns, Session session) {
         numUpdated++;
         String sOrgType = get(lineList, 1);
         if (sOrgType != null) {
@@ -306,34 +317,40 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         child.setAddressLine2(get(lineList, 5));
         child.setAddressState(get(lineList, 6));
         child.setPhone(get(lineList, 7));
-        child.setPostcode(get(lineList, 8));
+        child.setPostcode(get(lineList, 8)); // see colIndex below
         session.save(child);
-    }
-
-    private void updateOnlyFromCsv(InputStream in, Session session) throws IOException {
-        InputStreamReader r = new InputStreamReader(in);
-        CSVReader reader = new CSVReader(r);
-
-        String[] lineParts;
-        currentLine = 1;
-        reader.readNext(); // skip first row, column headings
-
-        while ((lineParts = reader.readNext()) != null) {
-            if (lineParts.length > 0) {
-                currentLine++;
-                if (log.isTraceEnabled()) {
-                    log.trace("process line: " + currentLine + " : " + Arrays.toString(lineParts));
-                }
-                List<String> lineList = new ArrayList<>();
-                lineList.addAll(Arrays.asList(lineParts));
-                if (lineList.size() > 0 && lineList.get(0).length() > 0) {
-                    doProcess(getOrganisation(), lineList, currentLine, false, session);
+        
+        NvSet newSet = new NvSet();
+        newSet.setCreatedDate(now());        
+        if( child.getFieldset() != null ) {
+            newSet.setPreviousSetId(child.getFieldset().getId());
+            newSet.setNvPairs(new HashSet<NvPair>());
+        }
+        int colIndex = 9; // 
+        if( extraColumns !=null) {
+            for( String colName : extraColumns) {
+                String colVal = get(lineList, colIndex++);
+                log.info("extracol - " + colName + " = " + colVal);
+                if( colVal != null && colVal.length() > 0 ) {
+                    newSet.addPair(colName, colVal);
                 }
             }
         }
-        jsonResult = new JsonResult(true, "Done updates");
-        jsonResult.setData(unmatched);
+        if( newSet.isDirty(child.getFieldset())) {
+            session.save(newSet);
+            for( NvPair nvp : newSet.getNvPairs()) {
+                session.save(nvp);
+            }            
+            child.setFieldset(newSet);
+            session.save(child);
+        }
+    }
 
+    private Date now() {
+        if( now == null ) {
+            now = _(CurrentDateService.class).getNow();
+        }
+        return now;
     }
 
     /**
@@ -397,6 +414,46 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
             childToCheck.setOrganisation(org, session);
         }
 
+    }
+
+    private void writeHeaders(CSVWriter writer, List<String> extraColumns) {
+        List<String> headers = new ArrayList<>();
+        headers.addAll(Arrays.asList("OrgID", "OrgType", "Path", "OrgTitle", "Address1", "Address2", "AddressState", "Phone", "Postcode"));
+        for (String s : extraColumns) {
+            headers.add(s);
+        }
+        String[] arr = new String[headers.size()];
+        headers.toArray(arr);
+        writer.writeNext(arr);
+
+    }
+
+    private List<String> findExtraColumns() {
+        Organisation org = getOrganisation();
+        List<OrgType> orgTypes = org.getOrgTypes();
+        Set<String> cols = new LinkedHashSet<>();
+        if (orgTypes != null) {
+            for (OrgType ot : orgTypes) {
+                if (ot.getFieldset() != null && ot.getFieldset().getNvPairs() != null) {
+                    for (NvPair nvp : ot.getFieldset().getNvPairs()) {
+                        cols.add(nvp.getName());
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(cols);
+    }
+
+    @Override
+    public void replaceContent(InputStream in, Long length) throws BadRequestException, ConflictException, NotAuthorizedException {
+        Transaction tx = SessionManager.beginTx();
+        try {
+            doUpload(in, Boolean.TRUE, SessionManager.session());
+            tx.commit();
+        } catch (IOException ex) {
+            tx.rollback();
+            throw new BadRequestException(ex.getMessage());
+        }        
     }
 
     public class UploadResult {

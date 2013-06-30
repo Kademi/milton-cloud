@@ -146,6 +146,7 @@ public class ManageOrgTypePage extends AbstractResource implements DeletableReso
         if (nvset != null) {
             if (nvset.getNvPairs() != null) {
                 for (NvPair nvp : nvset.getNvPairs()) {
+                    System.out.println("nvp: " + nvp.getName() + " = " + nvp.getPropValue());
                     map.put(nvp.getName(), nvp.getPropValue());
                 }
             }
@@ -166,6 +167,7 @@ public class ManageOrgTypePage extends AbstractResource implements DeletableReso
             if (key.startsWith("field-")) {
                 String name = key.replace("field-", "");
                 String val = parameters.get(key);
+                System.out.println(name + " = " + val);
                 newSet.addPair(name, val);
             }
         }
@@ -174,8 +176,8 @@ public class ManageOrgTypePage extends AbstractResource implements DeletableReso
             log.info("setDataCaptureFields: set new fieldset");
             orgType.setFieldset(newSet);
             session.save(newSet);
-            for( NvPair nv : newSet.getNvPairs()) {
-                session.save(nv);
+            for( NvPair nvp : newSet.getNvPairs()) {
+                session.save(nvp);
             }
         } else {
             log.info("setDataCaptureFields: dont set new fieldset");

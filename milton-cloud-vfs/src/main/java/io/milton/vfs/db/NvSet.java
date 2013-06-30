@@ -227,7 +227,7 @@ public class NvSet implements Serializable {
             if( prevVal == null ) {
                 return newVal != null && newVal.length() > 0;
             } else {
-                return prevVal.equals(newVal);
+                return !prevVal.equals(newVal);
             }
         }
     }
