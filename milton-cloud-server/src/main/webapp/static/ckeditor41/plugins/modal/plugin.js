@@ -207,7 +207,9 @@
                             });
 						
                             editor.insertElement(link);
-                            editor.insertElement(div);
+                            var b = editor.document;
+                            var el = b.getElementsByTag("body").getItem(0);
+                            el.append(div);
                         }
                     }
                 };

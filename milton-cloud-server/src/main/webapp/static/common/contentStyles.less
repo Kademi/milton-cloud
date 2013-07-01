@@ -330,6 +330,19 @@ table.striped td, table.striped th {
 table.striped td {
     border-top-style: solid;
 }
+table.striped.striped-cols {
+    td, th {
+        border-left-style: solid;
+        border-right-style: solid;
+    }
+    th:first-child {
+        border-left-style: none;
+    }
+    th:last-child {
+        border-right-style: none;
+    }
+}
+
 table.striped td:first-child {
     border-left-style: solid;
 }
@@ -353,6 +366,45 @@ table.striped th:last-child {
     border-radius: 0 8px 0 0;
 }
 
+th.striped {
+    text-align: left;
+}
+table.striped thead th {
+    background-color: #4c4c4c;
+    color: white;
+}
+table.striped tbody tr:nth-child(odd) td {
+    background-color: #f1f1f1;
+}
+table.striped td, table.striped th {
+    border-color: #D4D4D4;    
+    border-width: 1px;    
+    padding: 10px;
+    border-style: solid none none none;
+}
+
+table.striped td:first-child {
+    border-left-style: solid;
+}
+table.striped td:last-child {
+    border-right-style: solid;
+}
+
+table.striped tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;    
+}
+table.striped tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;    
+}
+table.striped tr:last-child td {
+    border-bottom-style: solid;
+}
+table.striped thead th:first-child {
+    border-radius: 8px 0 0 0;
+}
+table.striped thead th:last-child {
+    border-radius: 0 8px 0 0;
+}
 
 /** from fuse/theme.dyn.css, needs fixing **/
 
@@ -593,45 +645,6 @@ table {
     border-spacing: 0;
 }
 
-th.striped {
-    text-align: left;
-}
-table.striped thead th {
-    background-color: #4c4c4c;
-    color: white;
-}
-table.striped tbody tr:nth-child(odd) td {
-    background-color: #f1f1f1;
-}
-table.striped td, table.striped th {
-    border-color: #D4D4D4;    
-    border-width: 1px;    
-    padding: 10px;
-    border-style: solid none none none;
-}
-
-table.striped td:first-child {
-    border-left-style: solid;
-}
-table.striped td:last-child {
-    border-right-style: solid;
-}
-
-table.striped tr:last-child td:first-child {
-    border-radius: 0 0 0 8px;    
-}
-table.striped tr:last-child td:last-child {
-    border-radius: 0 0 8px 0;    
-}
-table.striped tr:last-child td {
-    border-bottom-style: solid;
-}
-table.striped thead th:first-child {
-    border-radius: 8px 0 0 0;
-}
-table.striped thead th:last-child {
-    border-radius: 0 8px 0 0;
-}
 
 table.verticalFields tbody tr td, table.verticalFields tbody tr th {
     background-color: transparent;

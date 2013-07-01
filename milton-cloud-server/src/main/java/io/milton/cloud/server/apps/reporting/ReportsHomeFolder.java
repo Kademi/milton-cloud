@@ -25,6 +25,7 @@ import io.milton.cloud.server.web.WebUtils;
 import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -48,7 +49,7 @@ import io.milton.vfs.db.Website;
  *
  * @author brad
  */
-public class ReportsHomeFolder extends AbstractCollectionResource implements GetableResource {
+public class ReportsHomeFolder extends AbstractCollectionResource implements GetableResource, TitledPage {
 
     public static String HOME_NAME = "reporting";
     
@@ -103,6 +104,7 @@ public class ReportsHomeFolder extends AbstractCollectionResource implements Get
         return children;
     }
 
+    @Override
     public String getTitle() {
         return "Reports home: " + getOrganisation().getTitle();
     }

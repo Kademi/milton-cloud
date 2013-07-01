@@ -210,6 +210,7 @@ function initHtmlEditors(elements, height, width, extraPlugins, removePlugins) {
         log("using toolbar", toolbar, "=>", toolbarSets[toolbar]);
         var config = {
             skin: editorSkin,
+            allowedContent: true, // DISABLES Advanced Content Filter. This is so templates with classes are allowed through
             contentsCss: themeCssFiles, // mainCssFile,
             bodyId: "editor",
             templates_files: ['/static/editor/templates.js'],
