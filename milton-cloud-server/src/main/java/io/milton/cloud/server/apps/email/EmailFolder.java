@@ -131,7 +131,7 @@ public class EmailFolder extends AbstractCollectionResource implements GetableRe
         if (children == null) {
             children = new ResourceList();
             _(ApplicationManager.class).addBrowseablePages(this, children);
-            List<EmailItem> items = EmailItem.findByRecipient(getEntity(), SessionManager.session());
+            List<EmailItem> items = EmailItem.findByRecipientAndOrg(getOrganisation(), getEntity(), SessionManager.session());
             for (EmailItem item : items) {
                 if (!item.hidden()) {
                     EmailItemFolder f = new EmailItemFolder(this, item);

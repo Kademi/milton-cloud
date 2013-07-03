@@ -43,14 +43,14 @@
                                                 </tr>  
                                                 #if( not $page.extraFields.isEmpty() )
                                                 <tr>
-                                                #foreach($field in $page.extraFields)
+                                                    #foreach($field in $page.extraFields)
                                                     <td><label class="first collapse"  for="field_${field.name}">$field.text</label></td>                                                
                                                     <td>$field.html</td>
-                                                #end
+                                                    #end
                                                 </tr>
                                                 #end
-                                                                        
-                                                
+
+
                                                 #if( $page.hasOrgs )
                                                 <tr>
                                                     <td><label class="first collapse" for="orgName">$page.regoOrgType</label></td>
@@ -86,24 +86,26 @@
 
             </div> 
         </div> 
-        
+
         <div id="findOrg" class="Modal modal hide fade"> 
             <a href="" class="Close" title="Close">Close</a>
-            <h3 class="Title">Find your $page.regoOrgType</h3>
+            <div class="findOrgInner">
+                <h3 class="Title">Find your $page.regoOrgType</h3>
 
-            <input id="orgQuery" type="text" value="" placeholder="Search for your $page.regoOrgType here" />
-            <table id="orgSearchResults">
-                <tr>
-                    <th>Name</th>
-                </tr>
-                #foreach($org in $page.searchResults)
-                <tr>
-                    <td><a href="$org.orgId">$org.title</a></td>
-                </tr>
-                #end
-            </table>                
+                <input id="orgQuery" type="text" value="" placeholder="Search for your $page.regoOrgType here" />
+                <table id="orgSearchResults">
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                    #foreach($org in $page.searchResults)
+                    <tr>
+                        <td><a href="$org.orgId">$org.title</a></td>
+                    </tr>
+                    #end
+                </table>                
+            </div>
         </div>   
-        
+
         <div id="pending" class="Modal modal hide fade"> 
             <a href="" class="Close" title="Close">Close</a>
             <h3 class="Title">Account pending</h3>

@@ -800,4 +800,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
         return p;
     }
+    
+    public String field(String fieldName) {
+        if( getFieldset() == null || getFieldset().getNvPairs() == null ) {
+            return null;
+        }
+        return getFieldset().get(fieldName);
+    }
 }

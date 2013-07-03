@@ -37,10 +37,7 @@ function initRegisterForms(afterRegisterHref, callback) {
         }
     });
     $("#orgName").on("focus click", function() {
-        jQuery.tinybox.show($("#findOrg"), {
-            overlayClose: false,
-            opacity: 0
-        });
+        showModal($("#findOrg"));
         $("#findOrg").find("input").focus();
     });
     $("#orgQuery").keyup(function () {
@@ -56,7 +53,7 @@ function initRegisterForms(afterRegisterHref, callback) {
         var orgLink = $(e.target);
         $("#orgName").val(orgLink.text());
         $("#orgId").val(orgLink.attr("href"));
-        $.tinybox.close();
+        closeModals();
     });
     function doOrgSearch() {
         var q = $("#orgQuery").val();

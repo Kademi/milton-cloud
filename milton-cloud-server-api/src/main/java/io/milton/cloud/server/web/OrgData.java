@@ -14,13 +14,22 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.NvPair;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.utils.SessionManager;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author brad
  */
 public class OrgData {
+
+    private transient Organisation org;
     private long id;
     private String orgId;
     private String title;
@@ -30,8 +39,10 @@ public class OrgData {
     private String phone;
     private String state;
     private String postcode;
+    private Map<String, String> fields;
 
     public OrgData(Organisation org) {
+        this.org = org;
         id = org.getId();
         orgId = org.getOrgId();
         title = org.getTitle();
@@ -41,12 +52,18 @@ public class OrgData {
         phone = org.getPhone();
         state = org.getAddressState();
         postcode = org.getPostcode();
+        fields = new HashMap<>();
+        if (org.getFieldset() != null && org.getFieldset().getNvPairs() != null) {
+            for (NvPair f : org.getFieldset().getNvPairs()) {
+                fields.put(f.getName(), f.getPropValue());
+            }
+        }
     }
 
     public long getId() {
         return id;
-    }   
-    
+    }
+
     public String getOrgId() {
         return orgId;
     }
@@ -77,5 +94,17 @@ public class OrgData {
 
     public String getPostcode() {
         return postcode;
-    }            
+    }
+
+    public Map<String, String> getFields() {
+        return fields;
+    }
+
+    public List<MembershipBean> members(String groupName) {
+        List<MembershipBean> list = new ArrayList<>();
+        for (GroupMembership gm : GroupMembership.find(groupName, org, SessionManager.session())) {
+            list.add(new MembershipBean(gm));
+        }
+        return list;
+    }
 }

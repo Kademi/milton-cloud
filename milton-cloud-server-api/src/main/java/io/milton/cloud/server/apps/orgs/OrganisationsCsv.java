@@ -214,6 +214,10 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
         if (fieldset != null && fieldset.getNvPairs() != null) {
             for (String colName : extraCols) {
                 String colVal = fieldset.get(colName);
+                if( colVal == null ) {
+                    colVal = "";
+                }
+                System.out.println(colName + " = " + colVal);
                 values.add(colVal);  // maybe null
             }
         }

@@ -296,9 +296,7 @@
                         <configuration>
                             <webAppConfig>
                                 <contextPath>/</contextPath>
-                                <!--
                                 <overrideDescriptor>src/test/resources/web.xml</overrideDescriptor>
-                                -->
                             </webAppConfig>                            
                             <systemProperties>
                                 <systemProperty>

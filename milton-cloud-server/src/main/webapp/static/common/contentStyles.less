@@ -27,18 +27,18 @@
 
 
 /** this span is inserted by jquery so we can use a sprite as background image for the icon. Will not be present in the editor */
-.activity > span.sprite, .keyPoint > span.sprite {
+body div.activity span.sprite, .keyPoint span.sprite {
     background-image: url("images/icons.png");
     background-repeat: no-repeat;
     height: 34px;
     left: 12px;
     position: absolute;
     top: 12px;
-    width: 35px;
+    width: 35px;    
 }
 
 /** paddy added this so he can position just the lighbulb icon */
-.lightbulb h6 span.sprite {
+body div.lightbulb h6 span.sprite {
     background-image: url("images/icons.png");
     background-repeat: no-repeat;
     height: 34px;
@@ -48,7 +48,7 @@
     width: 35px;
 }
 
-.activity > span.sprite {
+body div.activity > span.sprite {
     background-position: -1px -48px;    
 }
 body .lightbulb div h6 {
@@ -57,11 +57,11 @@ body .lightbulb div h6 {
     padding: 0px 40px 0px 40px;
 }
 
-.keyPoint > span.sprite {
+body div.keyPoint > span.sprite {
     background-position: -46px -48px;    
 }
 
-body .lightbulb div > span.sprite {
+body div.lightbulb div > span.sprite {
     top: 8px;
 }
 

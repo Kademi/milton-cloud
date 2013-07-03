@@ -422,4 +422,6 @@ public class Group implements Serializable, VfsAcceptor {
     public List<GroupInWebsite> groupInWebsites(Session session) {
         return GroupInWebsite.findByGroup(this, SessionManager.session());
     }    
+
+
 }

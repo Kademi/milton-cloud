@@ -95,7 +95,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
 
     @Override
     public String checkRedirect(Request request) throws NotAuthorizedException, BadRequestException {
-        if( request.getParams() != null && request.getParams().containsKey("loginTo")) {
+        if (request.getParams() != null && request.getParams().containsKey("loginTo")) {
             String domainName = request.getParams().get("loginTo");
             CookieAuthenticationHandler auth = _(CookieAuthenticationHandler.class);
             String userUrl = "/users/" + profile.getName() + "/";
@@ -105,12 +105,10 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             redirect += auth.getCookieNameUserUrlHash() + "=" + hash;
             return redirect;
         }
-            
+
         return super.checkRedirect(request);
     }
 
-    
-    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
@@ -135,7 +133,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                     Date now = _(CurrentDateService.class).getNow();
                     profile.setName(nameToCreate);
                     profile.setCreatedDate(now);
-                    profile.setModifiedDate(now);                    
+                    profile.setModifiedDate(now);
                 } else {
                     profile = pExisting;
                     log.warn("An existing user account was found with that email address, this will be added to the group");
@@ -231,25 +229,29 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        if( params.containsKey("availWebsites")) {
+        if (params.containsKey("availWebsites")) {
             jsonResult = new JsonResult(true);
             Set<String> websites = new HashSet<>();
             jsonResult.setData(websites);
             Session session = SessionManager.session();
-            if( profile.getMemberships() != null ) {
-                for( GroupMembership m : profile.getMemberships()) {
-                    Group g = m.getGroupEntity();
-                    for( GroupInWebsite giw : GroupInWebsite.findByGroup(g, session) ) {
-                        Website w = giw.getWebsite();
-                        String websiteDomain = w.getDomainName();
-                        if( websiteDomain == null ) {
-                            websiteDomain = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+            if (profile.getMemberships() != null) {
+
+                Organisation thisOrg = getOrganisation();
+                for (GroupMembership m : profile.getMemberships()) {
+                    if (m.getGroupEntity().getOrganisation().isWithin(thisOrg)) {
+                        Group g = m.getGroupEntity();
+                        for (GroupInWebsite giw : GroupInWebsite.findByGroup(g, session)) {
+                            Website w = giw.getWebsite();
+                            String websiteDomain = w.getDomainName();
+                            if (websiteDomain == null) {
+                                websiteDomain = w.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+                            }
+                            websites.add(websiteDomain);
                         }
-                        websites.add(websiteDomain);
                     }
                 }
             }
-        }        
+        }
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
@@ -274,8 +276,6 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         return getProfile();
     }
 
-    
-    
     public Profile getProfile() {
         return profile;
     }
@@ -391,7 +391,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             jsonResult = JsonResult.fieldError("orgId", "Please select an organisation");
             return false;
         }
-        Organisation subOrg = getOrganisation().childOrg(orgId, session); 
+        Organisation subOrg = getOrganisation().childOrg(orgId, session);
         if (subOrg == null) {
             jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
             return false;
@@ -566,7 +566,4 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
     public boolean authorise(Request request, Request.Method method, Auth auth) {
         return _(SpliffySecurityManager.class).authorise(request, method, auth, this);
     }
-    
-    
-    
 }

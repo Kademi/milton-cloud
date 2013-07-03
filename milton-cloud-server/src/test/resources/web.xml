@@ -8,7 +8,7 @@
     <!-- Only for developing in jetty, not for deployment -->
     <servlet>
         <servlet-name>default</servlet-name>
-        <servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
+        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
         <init-param>
             <param-name>useFileMappedBuffer</param-name>
             <param-value>false</param-value>

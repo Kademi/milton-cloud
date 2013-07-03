@@ -64,18 +64,26 @@ function closeMyPrompt() {
     myPromptModal.remove();
 }
 
-function closeModal() {
+function showModal(modal) {
+    $.tinybox.show(modal, {
+        overlayClose: false,
+        opacity: 0
+    });
+}
+
+function closeModals() {
     $.tinybox.close();
 }
 
 function initModal() {
     $("body").on("click", ".Modal a.Close", function(e) {
         log("close tinybox");
-        closeModals();
+        $.tinybox.close();
         e.preventDefault();
     });
     $('a.ShowModal').tinybox({
         overlayClose: false,
         opacity: 0
-    });    
+    });
 }
+

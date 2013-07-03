@@ -15,7 +15,11 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Group;
+import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -63,6 +67,22 @@ public class OptIn {
         return null;
     }    
     
+    /**
+     * Is this group an available Opt-in group for the given group g
+     * 
+     * @param groupEntity
+     * @return 
+     */
+    public static boolean isOptinFor(Group optin, Group g, Session session) {
+        List<OptIn> optins = findForGroup(g, session);
+        for( OptIn o : optins ) {
+            if( o.optinGroup == optin)  {
+                return true;
+            }                
+        }
+        return false;
+    }    
+    
     private long id;
     private Group attachedToGroup;
     private Group optinGroup;
@@ -104,4 +124,25 @@ public class OptIn {
     public void setMessage(String message) {
         this.message = message;
     }
+    
+    /**
+     * Since this group is an available optin for a group that the user is
+     * subscribed to, then find what org the existing subscription is for
+     * and connect the optin to that org
+     * 
+     * @param optinGroup
+     * @return 
+     */
+    public Organisation findOrgForOptin(Profile p, Session session) {
+        Group g = getOptinGroup();
+        Organisation parentOrg = g.getOrganisation();
+        for( GroupMembership gm : p.getMemberships()) {
+            if( gm.getWithinOrg().isWithin( parentOrg )) {
+                if( OptIn.isOptinFor(g, gm.getGroupEntity(), session) ) {
+                    return gm.getWithinOrg();
+                }
+            }
+        }
+        return parentOrg; 
+    }    
 }

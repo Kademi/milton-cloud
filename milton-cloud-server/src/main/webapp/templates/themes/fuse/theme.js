@@ -23,7 +23,7 @@ function showModal(modal) {
     });      
 }
 
-function closeModal() {
+function closeModals() {
     $.tinybox.close();
 }
 

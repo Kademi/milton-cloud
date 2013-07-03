@@ -35,6 +35,7 @@ import io.milton.principal.CalDavPrincipal;
 import io.milton.principal.CardDavPrincipal;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.GroupMembership;
+import io.milton.vfs.db.NvPair;
 
 /**
  *
@@ -332,18 +333,29 @@ public class UserResource extends AbstractCollectionResource implements Collecti
         return getThisUser().isInChildGroup(group.getName(), getOrganisation());
     }
     
-    public List<GroupMembership> getMemberships() {
+    public MembershipList getMemberships() {
         if( getThisProfile().getMemberships() == null ) {
-            return Collections.EMPTY_LIST;
+            return new MembershipList();
         } else {
             Organisation thisOrg = getOrganisation();
-            List<GroupMembership> list = new ArrayList<>();
+            MembershipList list = new MembershipList();
             for( GroupMembership m : getThisProfile().getMemberships() ) {
                 if( m.getGroupEntity().getOrganisation().isWithin( thisOrg)) {
-                    list.add(m);
+                    list.add(new MembershipBean(m));
                 }
             }
             return list;
         }
+    }
+    
+    public class MembershipList extends ArrayList<MembershipBean> {
+        public MembershipBean get(String groupName) {
+            for(MembershipBean gm : this ) {
+                if( gm.getGroupName().equals(groupName)) {
+                    return gm;
+                }
+            }
+            return null;
+        }        
     }
 }

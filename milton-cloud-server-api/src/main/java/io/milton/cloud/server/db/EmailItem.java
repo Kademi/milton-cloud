@@ -15,6 +15,7 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.BaseEntity;
+import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
@@ -25,6 +26,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -75,6 +77,18 @@ public class EmailItem implements Serializable {
         crit.addOrder(Order.desc("sendStatusDate"));
         return DbUtils.toList(crit, EmailItem.class);
     }
+    
+    public static List<EmailItem> findByRecipientAndOrg(Organisation org, BaseEntity p, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        Criteria critJob = crit.createCriteria("job", "j",  Criteria.LEFT_JOIN);
+        Criteria critTrigger = crit.createCriteria("emailTrigger", "t",  Criteria.LEFT_JOIN);
+        
+        crit.add(Restrictions.eq("recipient", p));
+        LogicalExpression orgRestrictions = Restrictions.or(Restrictions.eq("j.organisation", org), Restrictions.eq("t.organisation", org));
+        crit.add(orgRestrictions);
+        crit.addOrder(Order.desc("sendStatusDate"));
+        return DbUtils.toList(crit, EmailItem.class);
+    }    
 
     public static long findByNumUnreadByRecipient(Profile p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);

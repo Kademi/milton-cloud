@@ -394,19 +394,20 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
     }
 
-    private void setOptin(boolean enableOptin, String optinGroupName, Session session) {
-        Group foundGroup = null;
+    private void setOptin(boolean enableOptin, String optinGroupName, Session session) {        
+        OptIn foundOptIn = null;
         for (OptIn optin : getOptins()) {
             if (optin.getOptinGroup().getName().equals(optinGroupName)) {
-                foundGroup = optin.getOptinGroup();
+                foundOptIn = optin;
                 break;
             }
         }
-        if (foundGroup != null) {
-            Organisation thisOrg = getOrganisation();
+        if (foundOptIn != null) {
+            Group foundGroup = foundOptIn.getOptinGroup();
             Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            Organisation memberOrg = foundOptIn.findOrgForOptin(p, SessionManager.session());
             if (enableOptin) {
-                p.addToGroup(foundGroup, thisOrg, session);
+                p.addToGroup(foundGroup, memberOrg, session);
                 String sourceIp = "unknown";
                 if (HttpManager.request() != null) {
                     sourceIp = HttpManager.request().getFromAddress();
@@ -414,7 +415,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
                 OptInLog.create(p, sourceIp, foundGroup, sourceIp, session);
 
                 Website w = WebUtils.getWebsite(this);
-                SignupLog.logSignup(w, p, thisOrg, foundGroup, SessionManager.session());
+                SignupLog.logSignup(w, p, memberOrg, foundGroup, SessionManager.session());
             } else {
                 p.removeMembership(foundGroup, session);
             }
@@ -548,6 +549,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
 
         jsonResult.write(out);
     }
+
 
     public class OptinBean {
 

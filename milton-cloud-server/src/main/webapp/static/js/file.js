@@ -412,11 +412,6 @@ function doEdit() {
 }
 
 
-
-function closeModal() {
-    $.modal.close();
-}
-
 // Turns a href like /files/Pictures/abc/ into Pictures/abc
 function toDisplayFolder(href) {
     var s = href;
@@ -592,7 +587,7 @@ function inviteSend() {
 }
 
 function inviteCancel() {
-    closeModal();
+    closeModals();
 }
 
 function onDoneInvite(resp) {
