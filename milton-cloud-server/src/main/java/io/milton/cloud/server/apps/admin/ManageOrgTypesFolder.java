@@ -18,6 +18,7 @@ import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -46,7 +47,7 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class ManageOrgTypesFolder extends AbstractResource implements GetableResource, CommonCollectionResource, PostableResource {
+public class ManageOrgTypesFolder extends AbstractResource implements GetableResource, CommonCollectionResource, PostableResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(ManageOrgTypesFolder.class);
     private final String name;
@@ -115,6 +116,7 @@ public class ManageOrgTypesFolder extends AbstractResource implements GetableRes
         }
     }
 
+    @Override
     public String getTitle() {
         return "Manage Organisation Types";
     }

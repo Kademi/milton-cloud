@@ -145,3 +145,6 @@ div.Modal div.ModalContent .FuseChkLabel {
     opacity: 0.2;
     text-shadow: 0 1px 0 #FFFFFF;
 }  
+.linked-modal {
+    display: none;
+}

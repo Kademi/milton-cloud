@@ -304,7 +304,7 @@
                                     <!--
                                     <value>com.fuselms.apps.util.datacreator.FuseDataCreatorApp,com.fuselms.apps.learning.LearningApp</value>
                                     -->
-                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp,com.fuselms.apps.offsitelogin.OffSiteLoginApp</value>
+                                    <value>io.milton.cloud.server.init.InitialDataCreator,com.fuselms.apps.learning.LearningApp,com.fuselms.apps.products.ProductsApp,com.fuselms.apps.software.SoftwareRegApp,com.fuselms.apps.offsitelogin.OffSiteLoginApp,com.fuselms.apps.rewardsonline.RewardsOnlineApp</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>static.resource.roots</name>

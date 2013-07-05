@@ -40,7 +40,7 @@ body.profile label {
 body.profile form h4 {
     margin-top: 0;
 }
-body.profile input, body.profile select {
+body.profile input[type=text], body.profile select {
     width: 70%;
     margin-right: 0;
 }

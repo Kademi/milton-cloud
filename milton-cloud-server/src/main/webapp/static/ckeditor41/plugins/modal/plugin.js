@@ -167,9 +167,9 @@
                         }
                     },
                     onOk: function() {
-                        var dialog = this,
-                                data = {},
-                                id;
+                        var dialog = this;
+                        var data = {};
+                        var id;
 
                         this.commitContent(data);
 
@@ -197,8 +197,8 @@
                             modal.setHtml(data.content);
                             modal.setAttribute('style', style);
                         } else {
-                            var link = editor.document.createElement('a'),
-                                    div = editor.document.createElement('div');
+                            var link = editor.document.createElement('a');
+                            var div = editor.document.createElement('div');
 
                             id = 'modal_' + Math.round(Math.random() * 1000000).toString();
 

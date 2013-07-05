@@ -71,7 +71,7 @@ var shownModal;
 function showModal(modal) {
     shownModal = modal;
     var overlay = checkOverlayExists(modal);
-    modal.find(".close").click(function() {
+    modal.find(".close,.close-modal").click(function() {
         closeModals();
     });
     $(document).on('keydown',modal, function(event) {

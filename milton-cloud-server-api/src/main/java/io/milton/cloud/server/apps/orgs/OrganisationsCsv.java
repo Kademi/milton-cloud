@@ -60,6 +60,7 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 
 import static io.milton.context.RequestContext._;
+import java.util.Collections;
 
 /**
  * Returns a CSV view of the business units in the parent folder
@@ -217,7 +218,6 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 if( colVal == null ) {
                     colVal = "";
                 }
-                System.out.println(colName + " = " + colVal);
                 values.add(colVal);  // maybe null
             }
         }
@@ -445,7 +445,10 @@ public class OrganisationsCsv extends AbstractResource implements GetableResourc
                 }
             }
         }
-        return new ArrayList<>(cols);
+        //Alphateical sort to ensure stable
+        List<String> list = new ArrayList<>(cols);
+        Collections.sort(list);
+        return list;
     }
 
     @Override

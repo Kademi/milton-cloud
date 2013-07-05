@@ -109,6 +109,10 @@ public class GraphData<T> {
         return graphType;
     }
 
+    /**
+     * Defaults to Line. Other options include Bar
+     * @param graphType 
+     */
     public void setGraphType(String graphType) {
         this.graphType = graphType;
     }       

@@ -67,7 +67,7 @@ public class DynamicCssApp implements ResourceApplication {
     private ResourceFactory resourceFactory;
     private Date modDate;
     private LessEngine engine;
-    private final ConcurrentMap<String, String> cache; // cache of ParsedResources, keyed on hash, for FileResource's
+    private final ConcurrentMap<String, String> cache;
 
     public DynamicCssApp() {
         cache = new ConcurrentLinkedHashMap.Builder()
@@ -154,7 +154,7 @@ public class DynamicCssApp implements ResourceApplication {
                     log.warn("No paths found: " + path);
                     return null;
                 } else {
-                    return new MultiLessCssResource(resources, notFound, reqName, parentUrl);
+                    return new MultiLessCssResource(host, resources, notFound, reqName, parentUrl);
                 }
             }
         } else {
@@ -212,26 +212,28 @@ public class DynamicCssApp implements ResourceApplication {
 
     public class MultiLessCssResource extends LessCssResource {
 
+        private final String host;
         private final List<GetableResource> fileResources;
         private final GetableResource mostRecentModResource;
         private final List<String> notFound;
         private final String parentUrl;
 
-        public MultiLessCssResource(List<GetableResource> fileResources, List<String> notFound, String name, String parentUrl) {
+        public MultiLessCssResource(String host, List<GetableResource> fileResources, List<String> notFound, String name, String parentUrl) {
             super(name);
+            this.host = host;
             this.fileResources = fileResources;
             this.notFound = notFound;
             this.parentUrl = parentUrl;
             GetableResource mr = null;
             Date mostRecentDate = null;
-            for( GetableResource gr : fileResources) {
-                if( mr == null ) {
+            for (GetableResource gr : fileResources) {
+                if (mr == null) {
                     mr = gr;
                     mostRecentDate = gr.getModifiedDate();
                 } else {
                     Date dt = gr.getModifiedDate();
-                    if( dt != null && mostRecentDate != null ) {
-                        if( dt.after(mostRecentDate)) {
+                    if (dt != null && mostRecentDate != null) {
+                        if (dt.after(mostRecentDate)) {
                             mr = gr;
                             mostRecentDate = gr.getModifiedDate();
                         }
@@ -248,7 +250,7 @@ public class DynamicCssApp implements ResourceApplication {
 
         @Override
         public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-            String cacheKey = getName() + getUniqueId() + getModifiedDate();
+            String cacheKey = host + getName() + getUniqueId() + getModifiedDate();
             String lessText = cache.get(cacheKey);
             if (lessText == null) {
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -266,7 +268,7 @@ public class DynamicCssApp implements ResourceApplication {
                 }
                 String rawCss = bout.toString("UTF-8");
                 try {
-                    lessText = engine.compile(rawCss, parentUrl);                    
+                    lessText = engine.compile(rawCss, parentUrl);
                     cache.put(cacheKey, lessText);
                 } catch (LessException ex) {
                     log.warn("LESS compilation exception", ex);

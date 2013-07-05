@@ -19,7 +19,11 @@ function loadQuizEditor(modal, data) {
     for( prop in data) {
         if( prop.startsWith("answer")) {
             var n = prop.replace("answer",""); // get the answer number
-            var li = $(quizItems[n]);
+            log("answer number:", n, "quizItems", quizItems);
+            //var li = $(quizItems[n]);
+            //var li = quizItems.find("#" + n);
+            var li = hackyFind(quizItems, n);
+            log("li", li);
             log("answer",n, prop, data[prop], li);
             var input = li.find("input[type=text],select,textarea");
             if( input.length > 0 ) {
@@ -27,8 +31,11 @@ function loadQuizEditor(modal, data) {
                 log("restored input", input, data[prop]);
             } else {
                 var radios = li.find("input[type=radio]");
+                log("radios", radios);
                 radios.attr("checked", "");
-                var radio = radios.filter("[value=" + data[prop] + "]");
+                var val = data[prop];                
+                var radio = radios.filter("[value=" + val + "]");
+                log("radio val", val, radio);
                 radio.attr("checked", "true"); // set radio buttons
                 log("restored radio", radio);
             }                        
@@ -38,6 +45,20 @@ function loadQuizEditor(modal, data) {
         var ol = $(n);
         ensureOneEmptyRadio(ol);
     });    
+}
+
+function hackyFind( arr, id) {
+    log("hackyFind id=", id, "array", arr);
+    var found = null;
+    $.each(arr, function(i,n) {
+        var node = $(n);
+        var nodeId = node.attr("id")
+        var answerClass = "answer" + id; // old way of identifying answers
+        if( nodeId === id || node.hasClass(answerClass) ) {
+            found = node;
+        }
+    });
+    return found;
 }
 
 function prepareQuizForSave(form, data) {
