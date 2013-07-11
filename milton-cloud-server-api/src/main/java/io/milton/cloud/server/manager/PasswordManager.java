@@ -4,7 +4,7 @@ import java.util.Date;
 import io.milton.vfs.db.Credential;
 import io.milton.vfs.db.PasswordCredential;
 import io.milton.vfs.db.Profile;
-import io.milton.http.http11.auth.DigestGenerator;
+import io.milton.http.http11.auth.DigestGenerator; 
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;

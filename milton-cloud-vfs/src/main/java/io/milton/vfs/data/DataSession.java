@@ -331,6 +331,10 @@ public class DataSession {
                 throw new RuntimeException("Invalid character in name: " + name + " Colons and newline characters are not permitted");
             }
         }
+        
+        public Branch getBranch() {
+            return DataSession.this.branch;
+        }
     }
 
     public class DirectoryNode extends DataNode implements Iterable<DataNode> {
@@ -346,7 +350,7 @@ public class DataSession {
             newDir.addDirectory(newName, this.hash);
         }
 
-        private List<DataNode> getChildren() {
+        public List<DataNode> getChildren() {
             if (members == null) {
                 members = new ArrayList<>();
                 if (hash != null) {

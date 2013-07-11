@@ -68,7 +68,7 @@ div.Modal div.ModalContent table th, div.Modal div.ModalContent table td     {
 
 }
 div.Modal div.ModalContent table td textarea {
-    height: 170px;
+    height: 100px;
     overflow: auto;
     resize: none;
 }

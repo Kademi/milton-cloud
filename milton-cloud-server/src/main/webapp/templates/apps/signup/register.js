@@ -52,7 +52,11 @@ function initRegisterForms(afterRegisterHref, callback) {
         log("clicked", e.target);
         var orgLink = $(e.target);
         $("#orgName").val(orgLink.text());
-        $("#orgId").val(getFileName(orgLink.attr("href"))); // IE7 converts the relative path to a full URL, so need to get just the end bit
+        var href = orgLink.attr("href");
+        if( href.contains("/")) {// IE7 converts the relative path to a full URL, so need to get just the end bit
+            href = getFileName(href);
+        }
+        $("#orgId").val(href); 
         closeModals();
     });
     function doOrgSearch() {

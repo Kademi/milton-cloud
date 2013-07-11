@@ -128,7 +128,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         critSubordinate.add(Restrictions.eq("withinOrg", organisation));
         return DbUtils.toList(crit, Profile.class);
     }
+    public static List<Profile> findAll(Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.setCacheable(true);
+        return DbUtils.toList(crit, Profile.class);
 
+    }
+
+    
     /**
      * Find a profile by email address, but only looking within the given
      * organisation or subordinate orgs
@@ -181,6 +188,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Object result = DbUtils.unique(crit);
         return result == null;
     }
+
     private String name;
     private String firstName;
     private String surName;
