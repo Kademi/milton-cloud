@@ -101,14 +101,21 @@ public class OrganisationsFolder extends AbstractResource implements CommonColle
             parameters.remove("orgId"); // so it doesnt data bind
             Organisation c = getOrganisation().createChildOrg(newOrgId, session);            
             System.out.println("Create org, with orgId=" + c.getOrgId());
+
+            _(DataBinder.class).populate(c, parameters);
+            if( c.getAdminDomain() != null && c.getAdminDomain().length() == 0 ) {
+                c.setAdminDomain(null);
+            }
             String s = WebUtils.getRawParam(parameters, "orgTypeName");
             OrgType orgType = null;
             if( s != null ) {
                 orgType = findOrgType(s);
+                if( orgType == null ) {
+                    jsonResult = new JsonResult(false, "Could not find org type: " + s);
+                    return null;
+                }
             }
-            organisation.setOrgType(orgType);
-
-            _(DataBinder.class).populate(c, parameters);
+            c.setOrgType(orgType);            
             session.save(c);
 
             Date now = _(CurrentDateService.class).getNow();
