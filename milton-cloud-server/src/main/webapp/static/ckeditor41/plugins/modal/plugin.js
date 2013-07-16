@@ -3,6 +3,10 @@
 
     CKEDITOR.plugins.add('modal', {
         init: function(editor) {
+            
+            editor.element.getDocument().appendStyleSheet('/static/jqte/jquery-te-1.4.0.css');
+            CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/jqte/jquery-te-1.4.0.js'));
+            
             editor.addCommand('insertModalLink', new CKEDITOR.dialogCommand('modalLinkDialog'));
 
             editor.ui.addButton('Modal', {
@@ -87,6 +91,19 @@
                                 }, {
                                     type: 'textarea',
                                     id: 'content',
+                                    onLoad: function() {
+                                        $("#" + this.domId + " textarea").jqte({
+                                            strike: false,
+                                            rule: false,
+                                            sub: false,
+                                            sup: false,
+                                            right: false,
+                                            center: false,
+                                            left: false,
+                                            remove: false,
+                                            fsize: false
+                                        });
+                                    },
                                     label: 'Modal Content' + required_string,
                                     validate: CKEDITOR.dialog.validate.notEmpty('The Modal Content cannot be empty!'),
                                     required: true,
@@ -101,6 +118,7 @@
                                 }, {
                                     type: 'text',
                                     id: 'width',
+                                    default: "400",
                                     label: 'Width',
                                     setup: function(data) {
                                         if (data.width) {
@@ -123,6 +141,7 @@
                                 }, {
                                     type: 'text',
                                     id: 'height',
+                                    default: '400',
                                     label: 'Height',
                                     setup: function(data) {
                                         if (data.height) {

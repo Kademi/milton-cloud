@@ -40,10 +40,12 @@ public class Repository implements Serializable {
         r.setName(name);
         r.setTitle(name);
         r.setLiveBranch(Branch.TRUNK);
-        try {
-            session.save(r);
-        } catch (Throwable e) {
-            throw new RuntimeException("Exception saving repo");
+        if (session != null) {
+            try {
+                session.save(r);
+            } catch (Throwable e) {
+                throw new RuntimeException("Exception saving repo");
+            }
         }
 
         r.createBranch(Branch.TRUNK, user, session);
@@ -199,16 +201,22 @@ public class Repository implements Serializable {
         head.setCreatedDate(new Date());
         head.setEditor(user);
         head.setItemHash(null);
-        session.save(head);
+        if (session != null) {
+            session.save(head);
+        }
 
         Branch b = new Branch();
         b.setName(name);
         b.setRepository(this);
         b.setHead(head);
-        session.save(b);
+        if (session != null) {
+            session.save(b);
+        }
 
         head.setBranch(b);
-        session.save(b);
+        if (session != null) {
+            session.save(b);
+        }
 
         if (getBranches() == null) {
             setBranches(new ArrayList<Branch>());
@@ -282,12 +290,12 @@ public class Repository implements Serializable {
             return getDeleted();
         }
     }
-    
+
     /**
-     * Overridden by subclasses to return a definite identifier for the type of 
+     * Overridden by subclasses to return a definite identifier for the type of
      * Repository, since we can't use instanceof with Hibernate classes
-     * 
-     * @return 
+     *
+     * @return
      */
     @Transient
     public String getRepoType() {

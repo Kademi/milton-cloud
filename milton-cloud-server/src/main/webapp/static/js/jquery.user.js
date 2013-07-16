@@ -67,7 +67,7 @@
                 }
                 doLogin(userName, password, config, container);
             } catch(e) {
-                log("exception sending forum comment", e);
+                log("exception doing login", e);
             }            
             return false;
         });    

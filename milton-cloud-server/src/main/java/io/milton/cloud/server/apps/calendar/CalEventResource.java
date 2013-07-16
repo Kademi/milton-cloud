@@ -87,7 +87,7 @@ public class CalEventResource extends io.milton.cloud.server.web.FileResource im
         if (params.containsKey("edit")) {
             _(HtmlTemplater.class).writePage("calendar/editEvent", this, params, out);
         } else {
-            super.sendContent(out, range, params, contentType); //To change body of generated methods, choose Tools | Templates.
+            super.sendContent(out, range, params, contentType);
         }
     }
 

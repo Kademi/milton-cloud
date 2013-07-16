@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
         uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
+    private List<AttendeeRequest> attendeeRequests;
 
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
 
@@ -518,5 +519,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             }
         }
         return null;
+    }
+
+    @OneToMany(mappedBy = "attendee")
+    public List<AttendeeRequest> getAttendeeRequests() {
+        return attendeeRequests;
+    }
+
+    public void setAttendeeRequests(List<AttendeeRequest> attendeeRequests) {
+        this.attendeeRequests = attendeeRequests;
     }
 }

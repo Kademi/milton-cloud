@@ -29,6 +29,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CalEvent implements Serializable {
+    private AttendeeRequest attendeeRequest;
     private Long id;
     
     private String name; // the "file" name
@@ -175,5 +176,14 @@ public class CalEvent implements Serializable {
      */
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @OneToOne(mappedBy = "attendeeEvent")
+    public AttendeeRequest getAttendeeRequest() {
+        return attendeeRequest;
+    }
+
+    public void setAttendeeRequest(AttendeeRequest attendeeRequest) {
+        this.attendeeRequest = attendeeRequest;
     }
 }

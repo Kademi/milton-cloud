@@ -125,6 +125,24 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         Repository.initRepo(r, name, session, user, this);
         return r;
     }
+    
+    /**
+     * Creates, but does not call save
+     * 
+     * @param name
+     * @param currentUser
+     * @return 
+     */
+    public Calendar newCalendar(String name,Profile currentUser) {
+        Calendar cal = new Calendar();
+        cal.setBaseEntity(this);
+        cal.setCreatedDate(new Date());
+        cal.setName(name);
+        cal.setTitle(name);
+        Repository.initRepo(cal, name, null, currentUser, this);
+        this.getCalendars().add(cal);
+        return cal;
+    }
 
     public void delete(Session session) {
 

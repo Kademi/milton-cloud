@@ -36,6 +36,11 @@ public class Calendar extends Repository {
     private String color;
     private String description;
 
+    public Calendar() {
+    }
+
+    
+    
     @Override
     @Transient
     public String getRepoType() {

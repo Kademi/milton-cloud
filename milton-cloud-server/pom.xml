@@ -34,7 +34,12 @@
             <artifactId>jstree</artifactId>
             <version>1.0.1</version>
             <type>war</type>
-        </dependency>            
+        </dependency>           
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>milton-api</artifactId>
+            <version>${milton.version}</version>
+        </dependency>         
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-mail-server</artifactId>
@@ -204,6 +209,12 @@
             <groupId>io.milton</groupId>
             <type>jar</type>
             <version>1.0.7</version>
+        </dependency>
+        <dependency>
+            <artifactId>milton-api</artifactId>
+            <groupId>io.milton</groupId>
+            <type>jar</type>
+            <version>2.5.0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
     
