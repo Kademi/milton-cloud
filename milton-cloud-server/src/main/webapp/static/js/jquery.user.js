@@ -186,6 +186,10 @@ function initUser() {
 function initUserCookie() {    
     userUrl = $.cookie('miltonUserUrl');
     if( userUrl && userUrl.length > 1 ) {
+        if( userUrl.startsWith("b64")) { // milton will append b64 if the url is base64 encoded
+            userUrl = userUrl.substr(3);
+            userUrl = Base64.decode(userUrl);
+        }
         userUrl = dropQuotes(userUrl);
         userUrl = dropHost(userUrl);
         userName = userUrl.substr(0, userUrl.length-1); // drop trailing slash

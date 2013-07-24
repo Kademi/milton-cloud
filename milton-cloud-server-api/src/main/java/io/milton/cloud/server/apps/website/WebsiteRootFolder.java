@@ -116,7 +116,12 @@ public class WebsiteRootFolder extends BranchFolder implements RootFolder, Commo
 
     @Override
     public Date getModifiedDate() {
-        return null;
+        Commit c = branch.getHead();
+        if( c == null ) {
+            return branch.getCreatedDate();            
+        } else {
+            return c.getCreatedDate();
+        }
     }
 
     @Override
