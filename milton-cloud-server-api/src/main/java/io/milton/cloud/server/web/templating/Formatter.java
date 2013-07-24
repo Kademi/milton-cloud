@@ -35,8 +35,6 @@ import java.io.IOException;
 import static io.milton.context.RequestContext._;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.vfs.db.Commit;
-import io.milton.vfs.db.utils.SessionManager;
 
 /**
  * Handy functions exposes to rendering logic for formatting.

@@ -53,7 +53,7 @@ public class AttendeeRequest implements Serializable {
             p.setAttendeeRequests(new ArrayList<AttendeeRequest>());
         }
         for( AttendeeRequest ar : p.getAttendeeRequests() ) {
-            if( ar.getAttendeeEvent().getId().equals(e.getId()) ) {
+            if( ar.getOrganiserEvent().getId().equals(e.getId()) ) {
                 // exists, so abort
                 return ;
             }
