@@ -326,20 +326,27 @@ function showAddItem(source) {
     return false;
 }
 
+
 function initRotation() {
     $(function() {
-        var degree = 0;
+        log("initRotation");
+        try {
+            var rotateDegrees = 0;
 
-        setInterval(function() {
-            if (degree === 360) {
-                degree = 0;
-            } else {
-                degree += 2;
-            }
+            setInterval(function() {
+                if (rotateDegrees === 360) {
+                    rotateDegrees = 0;
+                } else {
+                    rotateDegrees += 2;
+                }
 
-            $('.rotate.anticlockwise').rotate(-degree);
-            $('.rotate.clockwise').rotate(degree);
-        }, 50);
+                $('.rotate.anticlockwise').rotate(-rotateDegrees);
+                $('.rotate.clockwise').rotate(rotateDegrees);
+            }, 50);
+        } catch(e) {
+            log("initRotation - exception: " + e);
+            alert("exception in init rotation");
+        }
     });
 }
 

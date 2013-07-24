@@ -92,7 +92,8 @@
                                     type: 'textarea',
                                     id: 'content',
                                     onLoad: function() {
-                                        $("#" + this.domId + " textarea").jqte({
+                                        text = $("#" + this.domId + " textarea");
+                                        text.jqte({
                                             strike: false,
                                             rule: false,
                                             sub: false,
