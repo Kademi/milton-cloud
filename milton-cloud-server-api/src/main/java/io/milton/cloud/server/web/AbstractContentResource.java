@@ -27,7 +27,7 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
-import io.milton.property.BeanProperty;
+import io.milton.annotations.BeanProperty;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Repository;
 
@@ -248,6 +248,7 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
         return parent.getOrganisation();
     }
 
+    @BeanProperty
     public List<CommentBean> getComments() {
         return _(CommentService.class).comments(this);
     }
@@ -260,13 +261,16 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
             return list.size();
         }
     }
-
+    
     public void setNewComment(String s) throws NotAuthorizedException {
         RootFolder rootFolder = WebUtils.findRootFolder(this);
         if (rootFolder instanceof WebsiteRootFolder) {
             WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
             Profile currentUser = _(SpliffySecurityManager.class).getCurrentUser();
-            _(CommentService.class).newComment(this, s, wrf.getWebsite(), currentUser, SessionManager.session());
+            Session session = SessionManager.session();
+            Transaction tx = SessionManager.beginTx();
+            _(CommentService.class).newComment(this, s, wrf.getWebsite(), currentUser, session);
+            tx.commit();
         }
     }
 
@@ -275,10 +279,10 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
      *
      * @return
      */
-    @BeanProperty(writeRole = Priviledge.READ)
+    @BeanProperty( writeRole = Priviledge.READ)
     public String getNewComment() {
         return null;
-    }
+    } 
 
     @Override
     public boolean isPublic() {

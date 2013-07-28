@@ -26,7 +26,7 @@ import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse;
 import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.principal.Principal;
-import io.milton.property.BeanPropertyResource;
+import io.milton.annotations.BeanPropertyResource;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.GetableResource;

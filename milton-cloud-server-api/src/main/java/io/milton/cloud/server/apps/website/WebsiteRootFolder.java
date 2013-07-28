@@ -34,13 +34,13 @@ import io.milton.resource.Resource;
 import io.milton.vfs.db.*;
 
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.property.BeanProperty;
+import io.milton.annotations.BeanProperty;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import static io.milton.context.RequestContext._;
-import io.milton.property.BeanPropertyResource;
+import io.milton.annotations.BeanPropertyResource;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 

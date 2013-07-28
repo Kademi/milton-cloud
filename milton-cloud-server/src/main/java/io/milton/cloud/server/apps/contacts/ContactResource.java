@@ -30,7 +30,7 @@ import io.milton.vfs.db.Contact;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.property.BeanPropertyResource;
+import io.milton.annotations.BeanPropertyResource;
 import io.milton.resource.*;
 import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;

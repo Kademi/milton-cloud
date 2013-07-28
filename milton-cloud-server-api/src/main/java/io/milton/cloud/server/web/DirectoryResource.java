@@ -28,7 +28,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
-import io.milton.property.BeanPropertyResource;
+import io.milton.annotations.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.PutableResource;

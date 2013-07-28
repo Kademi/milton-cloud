@@ -14,6 +14,8 @@
  */
 package io.milton.cloud.server.apps.admin;
 
+import io.milton.annotations.BeanProperty;
+import io.milton.annotations.BeanPropertyResource;
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.db.OptIn;
@@ -47,8 +49,6 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.http.webdav.PropertySourcePatchSetter;
-import io.milton.property.BeanPropertyAccess;
-import io.milton.property.BeanPropertyResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.DeletableResource;
@@ -308,7 +308,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         return parent;
     }
 
-    @BeanPropertyAccess(value = true)
+    @BeanProperty(value = true)
     @Override
     public String getName() {
         return group.getName();
@@ -318,7 +318,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         group.setName(s);
     }
 
-    @BeanPropertyAccess(value = true)
+    @BeanProperty(value = true)
     public String getRegoMode() {
         return group.getRegistrationMode();
     }

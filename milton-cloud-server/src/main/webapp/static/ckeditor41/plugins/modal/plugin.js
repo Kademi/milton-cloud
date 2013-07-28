@@ -44,9 +44,10 @@
             CKEDITOR.dialog.add('modalLinkDialog', function(editor) {
                 var default_width = 350;
 
-                var parseModalLink = function(editor, element) {
-                    var href = element.getAttribute('href').replace('#', ''),
-                            modal = editor.document.getById(href);
+                var parseModalLink = function(editor, element) {                    
+                    var href = element.getAttribute('href').replace('#', '');
+                    var modal = editor.document.getById(href);
+                    log("parseModalLink", modal);
 
                     this._.selectedElement = element;
                     if (modal !== null) {
@@ -57,6 +58,7 @@
                             height: modal.getStyle('height').replace('px', '')
                         };
                     } else {
+                        log("no modal");
                         return {
                             text: element.getHtml(),
                             content: "",
@@ -81,6 +83,7 @@
                                     validate: CKEDITOR.dialog.validate.notEmpty('The Displayed Text cannot be empty!'),
                                     required: true,
                                     setup: function(data) {
+                                        log("setup text", data);
                                         if (data.text) {
                                             this.setValue(data.text);
                                         }
@@ -91,7 +94,11 @@
                                 }, {
                                     type: 'textarea',
                                     id: 'content',
+                                    onShow: function() {
+                                        log("onshow......");
+                                    },
                                     onLoad: function() {
+                                        log("onLoad1");
                                         text = $("#" + this.domId + " textarea");
                                         text.jqte({
                                             strike: false,
@@ -104,13 +111,19 @@
                                             remove: false,
                                             fsize: false
                                         });
+                                        log("onLoad2");
                                     },
                                     label: 'Modal Content' + required_string,
                                     validate: CKEDITOR.dialog.validate.notEmpty('The Modal Content cannot be empty!'),
                                     required: true,
                                     setup: function(data) {
+                                        log("setup content", data);
                                         if (data.content) {
+                                            text = $("#" + this.domId + " textarea");
+                                            text.jqteVal(data.content);
                                             this.setValue(data.content);
+                                        } else {
+                                            text.jqteVal("");
                                         }
                                     },
                                     commit: function(data) {
@@ -165,10 +178,12 @@
                                 }]
                         }],
                     onShow: function() {
-                        var editor = this.getParentEditor(),
-                                selection = editor.getSelection(),
-                                element = null,
-                                text = selection.getSelectedText();
+                        log("onShow-modal 1");
+                        var editor = this.getParentEditor();
+                        var selection = editor.getSelection();
+                        var element = null;
+                        var text = selection.getSelectedText();
+                        log("text=", text, "selected", this._.selectedElement);
 
                         if ((element = CKEDITOR.plugins.modalLink.getSelectedLink(editor)) && element.hasAttribute('href')) {
                             selection.selectElement(element);
@@ -179,21 +194,26 @@
                         if (element) {
                             this.setupContent(parseModalLink.apply(this, [editor, element]));
                         } else {
+                            this._.selectedElement = null;
                             if (text) {
                                 this.setupContent({
                                     text: text
                                 })
                             }
                         }
+                        log("onShow-modal 2");
                     },
                     onOk: function() {
+                        log("onOk 1");
                         var dialog = this;
                         var data = {};
                         var id;
 
                         this.commitContent(data);
+                        log("onOk 2", this._.selectedElement);
 
                         if (this._.selectedElement) {
+                            log("onOk 3");
                             var target = this._.selectedElement;
                             var id = target.getAttribute('href').replace('#', '');
                             var modal = editor.document.getById(id);
@@ -216,9 +236,10 @@
 
                             modal.setHtml(data.content);
                             modal.setAttribute('style', style);
-                        } else {
+                        } else {                            
                             var link = editor.document.createElement('a');
                             var div = editor.document.createElement('div');
+                            log("create new modal", link, div);
 
                             id = 'modal_' + Math.round(Math.random() * 1000000).toString();
 
@@ -245,6 +266,7 @@
                             var b = editor.document;
                             var el = b.getElementsByTag("body").getItem(0);
                             el.append(div);
+                            log("appended new div", div);
                         }
                     }
                 };

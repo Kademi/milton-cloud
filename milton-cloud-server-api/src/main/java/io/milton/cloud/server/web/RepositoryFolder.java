@@ -23,7 +23,7 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.principal.Principal;
-import io.milton.property.BeanPropertyResource;
+import io.milton.annotations.BeanPropertyResource;
 import io.milton.resource.*;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;

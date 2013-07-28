@@ -218,7 +218,8 @@ function doLogout() {
             window.location = "/";
         },
         error: function(resp) {
-            log('There was a problem logging you out', resp);
+            log('There was a problem logging you out, a 400 error is expected', resp);
+            window.location = "/";
         }
     });    
 }
