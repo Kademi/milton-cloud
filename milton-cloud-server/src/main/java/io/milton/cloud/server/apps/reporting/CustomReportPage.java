@@ -14,14 +14,18 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.db.CustomReport;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
-import io.milton.cloud.server.web.ResourceList;
+import io.milton.cloud.server.web.JsonResult;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TitledPage;
+import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -29,7 +33,6 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.principal.Principal;
 import io.milton.resource.GetableResource;
-import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,41 +40,69 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static io.milton.context.RequestContext._;
+import io.milton.http.FileItem;
 import io.milton.http.Request;
+import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.AccessControlledResource.Priviledge;
+import io.milton.resource.PostableResource;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.Arrays;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
-public class CustomReportPage extends AbstractResource implements GetableResource, TitledPage {
+public class CustomReportPage extends AbstractResource implements GetableResource, TitledPage, PostableResource {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomReportPage.class);
     public static String HOME_NAME = "reporting";
-    
-    private final CommonCollectionResource parent;    
+    private final CommonCollectionResource parent;
     private final CustomReport customReport;
-    private final ApplicationManager applicationManager;  
+    private final ApplicationManager applicationManager;
+    private Map<String, String> mapOfDataSources;
+    protected JsonResult jsonResult;
 
-    public CustomReportPage( CommonCollectionResource parent, CustomReport customReport ) {
+    public CustomReportPage(CommonCollectionResource parent, CustomReport customReport) {
         this.parent = parent;
         this.customReport = customReport;
         applicationManager = _(ApplicationManager.class);
+    }
+
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        log.info("processForm");
+        Session session = SessionManager.session();
+        Transaction tx = session.beginTransaction();
+        // Editign details
+        try {
+            _(DataBinder.class).populate(customReport, parameters);
+            session.save(customReport);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } catch (Throwable ex) {
+            tx.rollback();
+            jsonResult = new JsonResult(false);
+            log.error("exception updating", ex);
+            jsonResult.setMessages(Arrays.asList("Failed to update: " + ex.getMessage()));
+        }
+
+
+        return null;
     }
 
     public CustomReport getReport() {
         return customReport;
     }
 
-    
-    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         MenuItem.setActiveIds("menuReporting");
         _(HtmlTemplater.class).writePage("reporting/manageCustomReportPage", this, params, out);
     }
-
 
     @Override
     public String getTitle() {
@@ -116,5 +147,22 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.READ_CONTENT;
+    }
+
+    public Map<String, String> getDatasources() {
+        if (mapOfDataSources == null) {
+            for (Application app : applicationManager.findActiveApps(getOrganisation())) {
+                if (app instanceof ReportingApplication) {
+                    ReportingApplication rapp = (ReportingApplication) app;
+                    List<ReportingApplication.CustomReportDataSource> srcs = rapp.getDataSources();
+                    if (srcs != null) {
+                        for (ReportingApplication.CustomReportDataSource src : srcs) {
+                            mapOfDataSources.put(src.getId(), src.getTitle());
+                        }
+                    }
+                }
+            }
+        }
+        return mapOfDataSources;
     }
 }

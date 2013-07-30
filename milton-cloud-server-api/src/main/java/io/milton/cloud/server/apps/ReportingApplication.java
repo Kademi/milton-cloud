@@ -18,6 +18,7 @@ import io.milton.cloud.server.web.reporting.JsonReport;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import java.util.List;
+import org.hibernate.Criteria;
 
 /**
  * A specialisation of Application which allows it to provide reports to the
@@ -34,4 +35,17 @@ public interface ReportingApplication {
      * @return 
      */
     List<JsonReport> getReports(Organisation org, Website website);
+    
+    List<CustomReportDataSource> getDataSources();
+    
+    public interface CustomReportDataSource {
+        public Criteria buildBaseCriteria(Organisation org, Website website);
+        
+        public List<String> getFieldNames();
+        
+        public String getTitle();
+        
+        public String getId();
+    }
+    
 }
