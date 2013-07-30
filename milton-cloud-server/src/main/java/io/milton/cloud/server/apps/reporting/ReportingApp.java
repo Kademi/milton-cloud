@@ -145,8 +145,8 @@ public class ReportingApp implements MenuApplication, EventListener, LifecycleAp
             OrganisationFolder p = (OrganisationFolder) parent;
             if (requestedName.equals(ReportsHomeFolder.HOME_NAME)) {
                 return new ReportsHomeFolder(p);
-//            } else if( requestedName.equals("customReports")) {
-//                return new CustomReportsHomeFolder(p, requestedName);
+            } else if( requestedName.equals("customReports")) {
+                return new CustomReportsHomeFolder(p, requestedName);
             }
         }
         return null;

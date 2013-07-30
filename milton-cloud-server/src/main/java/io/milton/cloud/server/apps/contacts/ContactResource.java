@@ -18,6 +18,7 @@ package io.milton.cloud.server.apps.contacts;
 
 import info.ineighborhood.cardme.engine.VCardEngine;
 import info.ineighborhood.cardme.vcard.VCard;
+import io.milton.annotations.BeanPropertyResource;
 import java.io.*;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -30,13 +31,11 @@ import io.milton.vfs.db.Contact;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.annotations.BeanPropertyResource;
 import io.milton.resource.*;
 import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.hibernate.Session;
 
 /**

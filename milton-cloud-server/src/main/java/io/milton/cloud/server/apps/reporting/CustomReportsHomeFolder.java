@@ -14,7 +14,6 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
-import com.fuselms.db.Reward;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.db.CustomReport;
 import io.milton.cloud.server.web.AbstractCollectionResource;
@@ -93,7 +92,7 @@ public class CustomReportsHomeFolder extends AbstractCollectionResource implemen
             jsonResult.write(out);
         } else {
             MenuItem.setActiveIds("menuReporting");
-            _(HtmlTemplater.class).writePage("reporting/customReportsHome", this, params, out);
+            _(HtmlTemplater.class).writePage("reporting/manageCustomReportsHome", this, params, out);
         }
     }
 

@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.web;
 
+import io.milton.annotations.BeanPropertyResource;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
@@ -23,7 +24,6 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
 import io.milton.principal.Principal;
-import io.milton.annotations.BeanPropertyResource;
 import io.milton.resource.*;
 import io.milton.vfs.db.*;
 import io.milton.vfs.db.utils.SessionManager;

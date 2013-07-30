@@ -52,8 +52,7 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
     
     private final CommonCollectionResource parent;    
     private final CustomReport customReport;
-    private final ApplicationManager applicationManager;
-    private ResourceList children;
+    private final ApplicationManager applicationManager;  
 
     public CustomReportPage( CommonCollectionResource parent, CustomReport customReport ) {
         this.parent = parent;
@@ -61,10 +60,16 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
         applicationManager = _(ApplicationManager.class);
     }
 
+    public CustomReport getReport() {
+        return customReport;
+    }
+
+    
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         MenuItem.setActiveIds("menuReporting");
-        _(HtmlTemplater.class).writePage("reporting/customReportsHome", this, params, out);
+        _(HtmlTemplater.class).writePage("reporting/manageCustomReportPage", this, params, out);
     }
 
 
