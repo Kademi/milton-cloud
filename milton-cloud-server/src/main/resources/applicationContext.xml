@@ -187,6 +187,7 @@
             <bean class="io.milton.cloud.server.web.SpliffyLoginTypeHandler"/>
         </property>
         <property name="enabledCkBrowser" value="true"/>
+        <property name="cookieSigningKeysFile" value="${cookie.keys.file}"/>
     </bean>
     
 

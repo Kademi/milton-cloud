@@ -385,8 +385,6 @@ public class ResourceList extends ArrayList<CommonResource> {
                 } else {
                     Integer i1 = toInt(val1);
                     Integer i2 = toInt(val2);
-                    log.info("page1: " + o1.getName() + " = " + i1);
-                    log.info("page2: " + o2.getName() + " = " + i2);
                             
                     try {
                         if (i2 != null) {

@@ -15,7 +15,6 @@
 package io.milton.cloud.server.db;
 
 import io.milton.vfs.db.Organisation;
-import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.List;
@@ -24,7 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -41,9 +39,23 @@ import org.hibernate.criterion.Restrictions;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CustomReport implements Serializable{
     
+    public static List<CustomReport> findByOrg(Organisation org, Session session) {
+        Criteria crit = session.createCriteria(CustomReport.class);
+        crit.add(Restrictions.eq("organisation", org));
+        return DbUtils.toList(crit, CustomReport.class);
+    }    
+
+    public static CustomReport create(Organisation org, String newName, String newTitle) {
+        CustomReport r = new CustomReport();
+        r.setName(newName);
+        r.setTitle(newTitle);
+        r.setOrganisation(org);
+        return r;
+    }
     
     private long id;
     private Organisation organisation;
+    private String sourceClass;
     private String name;
     private String title;
     private String fields;
@@ -73,6 +85,16 @@ public class CustomReport implements Serializable{
         this.title = title;
     }
 
+    public String getSourceClass() {
+        return sourceClass;
+    }
+
+    public void setSourceClass(String sourceClass) {
+        this.sourceClass = sourceClass;
+    }
+
+    
+    
     @ManyToOne
     public Organisation getOrganisation() {
         return organisation;
