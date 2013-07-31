@@ -45,8 +45,10 @@ import io.milton.http.Request;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.PostableResource;
+import io.milton.vfs.db.NvPair;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.Arrays;
+import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -59,11 +61,11 @@ import org.slf4j.LoggerFactory;
 public class CustomReportPage extends AbstractResource implements GetableResource, TitledPage, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(CustomReportPage.class);
-    public static String HOME_NAME = "reporting";
     private final CommonCollectionResource parent;
     private final CustomReport customReport;
     private final ApplicationManager applicationManager;
     private Map<String, String> mapOfDataSources;
+    private Map<String, String> mapOfFields;
     protected JsonResult jsonResult;
 
     public CustomReportPage(CommonCollectionResource parent, CustomReport customReport) {
@@ -149,20 +151,42 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
         return Priviledge.READ_CONTENT;
     }
 
-    public Map<String, String> getDatasources() {
+    public Map<String, String> getDataSources() {
         if (mapOfDataSources == null) {
+            mapOfDataSources = new HashMap<>();
             for (Application app : applicationManager.findActiveApps(getOrganisation())) {
                 if (app instanceof ReportingApplication) {
                     ReportingApplication rapp = (ReportingApplication) app;
                     List<ReportingApplication.CustomReportDataSource> srcs = rapp.getDataSources();
                     if (srcs != null) {
                         for (ReportingApplication.CustomReportDataSource src : srcs) {
-                            mapOfDataSources.put(src.getId(), src.getTitle());
+                            if (src != null) {
+                                mapOfDataSources.put(src.getId(), src.getTitle());
+                            } else {
+                                log.warn("Got null data source from: " + app);
+                            }
+                                   
                         }
                     }
                 }
             }
         }
         return mapOfDataSources;
+    }
+    
+    public Map<String, String> getFields() {
+        if( mapOfFields == null ) {
+            mapOfFields = new HashMap<>();
+            if( customReport.getFieldset() != null ) {
+                for( NvPair nvp : customReport.getFieldset().getNvPairs()) {
+                    String title = nvp.getPropValue();
+                    if( title == null ) {
+                        title = nvp.getName();
+                    }
+                    mapOfFields.put(nvp.getName(), title);
+                }
+            }
+        }
+        return mapOfFields;
     }
 }

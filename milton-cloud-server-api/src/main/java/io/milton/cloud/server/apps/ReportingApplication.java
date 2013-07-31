@@ -41,7 +41,7 @@ public interface ReportingApplication {
     public interface CustomReportDataSource {
         public Criteria buildBaseCriteria(Organisation org, Website website);
         
-        public List<String> getFieldNames();
+        public List<String> getFieldNames(Organisation org, Website website);
         
         public String getTitle();
         

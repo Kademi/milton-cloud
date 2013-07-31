@@ -77,7 +77,6 @@ public class CustomReportsHomeFolder extends AbstractCollectionResource implemen
             Session session = SessionManager.session();
             Transaction tx = session.beginTransaction();
             String newName = NewPageResource.findAutoCollectionName(newTitle, this, parameters);
-            Profile creator = _(SpliffySecurityManager.class).getCurrentUser();
             CustomReport customReport = CustomReport.create(getOrganisation(), newName, newTitle);
             session.save(customReport);
             tx.commit();

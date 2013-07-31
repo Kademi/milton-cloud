@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.NvSet;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
@@ -58,7 +59,7 @@ public class CustomReport implements Serializable{
     private String sourceClass;
     private String name;
     private String title;
-    private String fields;
+    private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect
     
     @Id
     @GeneratedValue
@@ -121,15 +122,16 @@ public class CustomReport implements Serializable{
         this.name = name;
     }
 
-    @Column
-    public String getFields() {
-        return fields;
+    @ManyToOne
+    public NvSet getFieldset() {
+        return fieldset;
     }
 
-    public void setFields(String fields) {
-        this.fields = fields;
+    public void setFieldset(NvSet fieldset) {
+        this.fieldset = fieldset;
     }
 
+    
 
     
 }

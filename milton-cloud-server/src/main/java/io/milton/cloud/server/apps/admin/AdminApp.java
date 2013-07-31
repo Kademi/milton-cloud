@@ -267,6 +267,11 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
         writer.append("</div>\n");
     }
 
+    @Override
+    public List<CustomReportDataSource> getDataSources() {
+        return null;
+    }
+
     public class AdminRole implements Role {
 
         @Override

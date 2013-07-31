@@ -180,6 +180,11 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         return new SubscriptionEventActionHandler(a);
     }
 
+    @Override
+    public List<CustomReportDataSource> getDataSources() {
+        return null;
+    }
+
     public void onNewMembership(GroupMembership gm, RootFolder rf) {
         long tm = System.currentTimeMillis();
         MembershipProcess pp = new MembershipProcess();
@@ -193,7 +198,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         if (rf instanceof WebsiteRootFolder) {
             RootFolder wrf = rf;
             context.addAttribute("website", wrf);
-        }        
+        }
         context.scan();
         if (log.isDebugEnabled()) {
             log.debug("Final state: " + pp.getStateName() + " processed in: " + (System.currentTimeMillis() - tm) + "ms");
@@ -349,7 +354,7 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
             try {
                 SubscriptionEvent e = new SubscriptionEvent(gm, website, org, action);
                 eventManager.fireEvent(e);
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.debug("Fired " + e + " Duration=" + (System.currentTimeMillis() - tm) + "ms");
                 }
             } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
