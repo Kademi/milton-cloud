@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.reporting;
 import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.ReportingApplication;
+import io.milton.cloud.server.apps.ReportingApplication.CustomReportDataSource;
 import io.milton.cloud.server.db.CustomReport;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -64,9 +65,9 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
     private final CommonCollectionResource parent;
     private final CustomReport customReport;
     private final ApplicationManager applicationManager;
-    private Map<String, String> mapOfDataSources;
     private Map<String, String> mapOfFields;
     protected JsonResult jsonResult;
+    private CustomReportDataSource customReportDataSource;
 
     public CustomReportPage(CommonCollectionResource parent, CustomReport customReport) {
         this.parent = parent;
@@ -151,9 +152,22 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
         return Priviledge.READ_CONTENT;
     }
 
-    public Map<String, String> getDataSources() {
-        if (mapOfDataSources == null) {
-            mapOfDataSources = new HashMap<>();
+    /**
+     * Find available for fields for the selected data source
+     *
+     * @return
+     */
+    public List<String> getAvailableFields() {
+        CustomReportDataSource src = getDataSource();
+        if( src == null ) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return src.getFieldNames(getOrganisation(), null);
+        }
+    }
+
+    public CustomReportDataSource getDataSource() {
+        if (customReportDataSource == null) {
             for (Application app : applicationManager.findActiveApps(getOrganisation())) {
                 if (app instanceof ReportingApplication) {
                     ReportingApplication rapp = (ReportingApplication) app;
@@ -161,26 +175,27 @@ public class CustomReportPage extends AbstractResource implements GetableResourc
                     if (srcs != null) {
                         for (ReportingApplication.CustomReportDataSource src : srcs) {
                             if (src != null) {
-                                mapOfDataSources.put(src.getId(), src.getTitle());
-                            } else {
-                                log.warn("Got null data source from: " + app);
+                                if( src.getId().equals(customReport.getSourceClass())) {
+                                    customReportDataSource = src;
+                                    break;
+                                }
                             }
-                                   
+
                         }
                     }
                 }
             }
         }
-        return mapOfDataSources;
+        return customReportDataSource;
     }
-    
+
     public Map<String, String> getFields() {
-        if( mapOfFields == null ) {
+        if (mapOfFields == null) {
             mapOfFields = new HashMap<>();
-            if( customReport.getFieldset() != null ) {
-                for( NvPair nvp : customReport.getFieldset().getNvPairs()) {
+            if (customReport.getFieldset() != null) {
+                for (NvPair nvp : customReport.getFieldset().getNvPairs()) {
                     String title = nvp.getPropValue();
-                    if( title == null ) {
+                    if (title == null) {
                         title = nvp.getName();
                     }
                     mapOfFields.put(nvp.getName(), title);

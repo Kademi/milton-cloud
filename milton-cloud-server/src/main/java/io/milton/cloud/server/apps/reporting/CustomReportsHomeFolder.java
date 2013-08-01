@@ -14,7 +14,9 @@
  */
 package io.milton.cloud.server.apps.reporting;
 
+import io.milton.cloud.server.apps.Application;
 import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.ReportingApplication;
 import io.milton.cloud.server.db.CustomReport;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -48,8 +50,11 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.resource.PostableResource;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.utils.SessionManager;
+import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -58,9 +63,13 @@ import org.hibernate.Transaction;
 public class CustomReportsHomeFolder extends AbstractCollectionResource implements GetableResource, TitledPage, PostableResource {
 
     public static String HOME_NAME = "reporting";
+    
+    private static final Logger log = LoggerFactory.getLogger(CustomReportsHomeFolder.class);
+    
     private final CommonCollectionResource parent;
     private final String name;
     private final ApplicationManager applicationManager;
+    private Map<String, String> mapOfDataSources;    
     private ResourceList children;
     private JsonResult jsonResult;
 
@@ -94,6 +103,30 @@ public class CustomReportsHomeFolder extends AbstractCollectionResource implemen
             _(HtmlTemplater.class).writePage("reporting/manageCustomReportsHome", this, params, out);
         }
     }
+    
+
+    public Map<String, String> getDataSources() {
+        if (mapOfDataSources == null) {
+            mapOfDataSources = new HashMap<>();
+            for (Application app : applicationManager.findActiveApps(getOrganisation())) {
+                if (app instanceof ReportingApplication) {
+                    ReportingApplication rapp = (ReportingApplication) app;
+                    List<ReportingApplication.CustomReportDataSource> srcs = rapp.getDataSources();
+                    if (srcs != null) {
+                        for (ReportingApplication.CustomReportDataSource src : srcs) {
+                            if (src != null) {
+                                mapOfDataSources.put(src.getId(), src.getTitle());
+                            } else {
+                                log.warn("Got null data source from: " + app);
+                            }
+                                   
+                        }
+                    }
+                }
+            }
+        }
+        return mapOfDataSources;
+    }    
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
