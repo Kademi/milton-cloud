@@ -796,6 +796,10 @@ function refreshIE8Layout(element) {
         p.css('height', 'auto');
         var height = p.height();
         p.css('height', height);
+        p.css('height', 'auto');
+        
+//        var contentForm = element.closest(".contentForm");
+//        contentForm
     }
 }
 
