@@ -116,6 +116,7 @@ public class BatchEmailService {
         log.info("Direct recipients: " + directRecipients.size());
         Set<Profile> profiles = new HashSet<>();
         EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
+        evaluationContext.getAttributes().put("org", j.getOrganisation());        
         for (BaseEntity e : directRecipients) {
             if (e != null) {
                 checkFilterAndAppend(j, evaluationTarget, e, evaluationContext, profiles);

@@ -1,0 +1,98 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Introduction</title>
+    <meta content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net" name="generator" />
+<link rel="template" href="learner/modulePage" /><script title="order" type="data/parameter">
+<![CDATA[
+2
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Create the maven project in eclipse</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">So open eclipse and create a new maven project</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml"><img src="eclipse1.png" /></p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">&#160;</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Then choose to create a "simple project" and on the next screen use group and artefact Id of "myastronomy", and select packaging of "war":</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml"><img src="eclipse2.png" /></p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Click "Finish" to generate the project. Now we need to edit the generated pom.xml file to include milton and to integrate the jetty plugin which we'll use as the embedded web server. So open the pom.xml as "XML file" (if you just open normally you'll get the UI which is difficult to copy and paste).</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">First we'll add the dependencies which will include milton, so paste this just before the closing project tag:</p>
+<pre class="prettyprint">
+    <span class="nt">
+&lt;repositories&gt;</span>
+        <span class="nt">
+&lt;repository&gt;</span>
+            <span class="nt">
+&lt;id&gt;</span>ettrema-repo<span class="nt">
+&lt;/id&gt;</span>
+            <span class="nt">
+&lt;url&gt;</span>http://milton.io/maven/<span class="nt">
+&lt;/url&gt;</span>
+        <span class="nt">
+&lt;/repository&gt;</span>
+    <span class="nt">
+&lt;/repositories&gt;</span>
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Then insert the jetty plugin:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-jetty-plugin&lt;/artifactId&gt;
+                &lt;configuration&gt;
+                    &lt;contextPath&gt;/&lt;/contextPath&gt;
+                    &lt;connectors&gt;
+                        &lt;connector implementation="org.mortbay.jetty.nio.SelectChannelConnector"&gt;
+                            &lt;!--&lt;port&gt;8085&lt;/port&gt;--&gt;
+                            &lt;port&gt;8080&lt;/port&gt;
+                            &lt;maxIdleTime&gt;60000&lt;/maxIdleTime&gt;
+                        &lt;/connector&gt;
+                    &lt;/connectors&gt;
+                    &lt;stopKey&gt;stop&lt;/stopKey&gt;
+                    &lt;stopPort&gt;8089&lt;/stopPort&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;            
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">And now add the milton version, and character formatting (its just good practise). You can check the latest milton version on <a href="/downloads/">the downloads page</a>:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+    &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;milton.version&gt;2.4.2.2&lt;/milton.version&gt;
+    &lt;/properties&gt;
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Now we can add a dependency on the milton runtime. We'll use the community edition which doesnt require registration. We also need to add a slf4 adapter:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.milton&lt;/groupId&gt;
+            &lt;artifactId&gt;milton-server-ce&lt;/artifactId&gt;
+            &lt;version&gt;${milton.version}&lt;/version&gt;
+        &lt;/dependency&gt;     
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+            &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+            &lt;version&gt;1.6.1&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">And the final result <a href="https://github.com/miltonio/milton2/blob/master/examples/eclipse-tut-1/pom.xml" target="_blank">should look like this</a></p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml"><strong>IMPORTANT: Check your project preferences and ensure you're using JDK16 or higher</strong> (this example uses interface annotations that cause an error on 1.5)</p>
+  </body>
+</html>

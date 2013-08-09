@@ -149,7 +149,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         this.blobStore = config.getContext().get(BlobStore.class);
         mailStore = new EmailItemMailStore(resourceFactory.getSessionManager(), smf, hashStore, blobStore, rootContext);
         mailFilter = new MCMailFilter(resourceFactory.getSessionManager(), config.getContext());
-        emailTriggerService = new EmailTriggerService(batchEmailService);
+        emailTriggerService = new EmailTriggerService(batchEmailService, filterScriptEvaluator, resourceFactory.getApplicationManager());
         config.getContext().put(emailTriggerService);
 
         resourceFactory.getApplicationManager().getEmailTriggerTypes().add(new SubscriptionEventTriggerType());
@@ -370,9 +370,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         log.info("checkTriggers");
         Session session = SessionManager.session();
         List<EmailTrigger> triggers = EmailTrigger.find(session, event.getEventId(), event.getWebsite(), event.getTriggerItem1(), event.getTriggerItem2(), event.getTriggerItem3(), event.getTriggerItem4(), event.getTriggerItem5());
+        Profile currentUser = securityManager.getCurrentUser();
         for (EmailTrigger trigger : triggers) {
             log.info("found activated trigger: " + trigger.getEventId());
-            enqueueTrigger(trigger, event);
+            if( emailTriggerService.checkConditions(trigger, event, currentUser) ) {
+                enqueueTrigger(trigger, event);
+            }
         }
     }
 

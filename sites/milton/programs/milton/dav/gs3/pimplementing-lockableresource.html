@@ -1,0 +1,93 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Implementing LockableResource</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+2
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Implementing
+    LockableResource</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">This page will cover
+    how to implement the simpler of the two interfaces,
+    LockableResource</p>
+
+    <div class="dropdown" xmlns="http://www.w3.org/1999/xhtml">
+      <h6>LockableResource.java</h6>
+
+      <div>
+<pre class="prettyprint">
+public interface LockableResource extends Resource {
+    /**
+     * Lock this resource and return a token
+     * 
+     * @param timeout - in seconds, or null
+     * @param lockInfo
+     * @return - a result containing the token representing the lock if succesful,
+     * otherwise a failure reason code
+     */
+    public LockResult lock(LockTimeout timeout, LockInfo lockInfo) throws NotAuthorizedException, PreConditionFailedException, LockedException;
+    
+    /**
+     * Renew the lock and return new lock info
+     * 
+     * @param token
+     * @return
+     */
+    public LockResult refreshLock(String token) throws NotAuthorizedException, PreConditionFailedException;
+
+    /**
+     * If the resource is currently locked, and the tokenId  matches the current
+     * one, unlock the resource
+     *
+     * @param tokenId
+     */
+    public void unlock(String tokenId) throws NotAuthorizedException, PreConditionFailedException;
+
+    /**
+     *
+     * @return - the current lock, if the resource is locked, or null
+     */
+    public LockToken getCurrentLock();
+} <span style="display: none;">
+
+</span>
+</pre>
+      </div>
+    </div>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Your implementation
+    needs to create a lock on the specified resource, and this lock
+    information must be returned on subsequent calls to
+    getCurrentLock etc. Note that some developers new to milton
+    hack the implementation and just return static data or nulls -
+    this will not work in practise. Webdav clients are very
+    particular about the lock state of a resource and they don't
+    like it when things arent what they expect!</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Usually you'll want to
+    store locks in a database, but its often acceptable to hold
+    locks in memory provided the information is shared across your
+    cluster (if you have a cluster).</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">If you're using a
+    single server, and if your resources have a not-null and
+    immutable uniqueId field you can use Milton's
+    SimpleLockManager, which is often a good way to get
+    started.</p>
+
+    <div id="cke_pastebin"
+    style="position: absolute; top: 161.967px; width: 1px; height: 1px; overflow: hidden; left: -1000px;"
+     xmlns="http://www.w3.org/1999/xhtml">
+      &#195;&#194;&#131;&#194;&#194;&#130;&#195;&#194;&#130;&#194;&#160;
+    </div>
+  </body>
+</html>

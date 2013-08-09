@@ -1,0 +1,116 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Uploading files with @PutChild</title>
+<link rel="template" href="learner/modulePage" /><script title="order" type="data/parameter">
+<![CDATA[
+5
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1>Uploading files</h1>
+
+    <p>There's actually two related use-cases for uploading files:</p>
+
+    <ol>
+      <li>Creating a new file</li>
+
+      <li>Updating an existing file</li>
+    </ol>
+
+    <p>You implement both cases with the same annotation, but different arguments. For creating a new resource the first argument is the parent folder to create in, followed by the name to give it, followed by the data. For updating the first argument is the object to update, followed by the data.</p>
+
+    <p>You can ask for the data as either a byte[] or an InputStream, and you can also have a Long argument which will be the content length, if its available.</p>
+
+    <p>Some examples below. This shows creating and updating contacts, where we parse the incoming data:</p>
+<pre class="prettyprint">
+    @PutChild
+    public MusicianContact createMusicianContact(MusicianAddressBook abook, String newName, byte[] vcardData) throws BadRequestException {
+        Transaction tx = SessionManager.session().beginTransaction();
+        try {
+            VCardEngine cardEngine = new VCardEngine();
+            String vc = new String(vcardData);
+            VCard vcard = cardEngine.parse(vc);
+            Musician m = new Musician();
+            if (vcard.getUID() != null) {
+                m.setContactUid(vcard.getUID().getUID());
+            } else {
+                m.setContactUid(UUID.randomUUID().toString());
+            }
+            m.setName(newName);
+            m.setCreatedDate(new Date());
+            m.setGivenName(vcard.getName().getGivenName());
+            m.setSurName(vcard.getName().getFamilyName());
+            m.setModifiedDate(new Date());
+            {
+                Iterator&lt;TelephoneFeature&gt; it = vcard.getTelephoneNumbers();
+                while (it.hasNext()) {
+                    m.setTelephonenumber(it.next().getTelephone());
+                }
+            }
+            {
+                Iterator&lt;EmailFeature&gt; itEmails = vcard.getEmails();
+                while (itEmails.hasNext()) {
+                    m.setMail(itEmails.next().getEmail());
+                }
+            }
+
+            SessionManager.session().save(m);
+            SessionManager.session().flush();
+            tx.commit();
+            return new MusicianContact(m);
+        } catch (Exception e) {
+            tx.rollback();
+            log.error("exception uploading musician contact", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @PutChild
+    public MusicianContact updateMusicianContact(MusicianContact contact, byte[] vcardData) throws BadRequestException {
+        log.info("updateMusicianContact");
+        Transaction tx = SessionManager.session().beginTransaction();
+        try {
+            Musician m = contact.getMusician();
+            VCardEngine cardEngine = new VCardEngine();
+            String vc = new String(vcardData);
+
+            VCard vcard = cardEngine.parse(vc);
+            if (vcard.getUID() != null) {
+                m.setContactUid(vcard.getUID().getUID());
+            }
+
+            if (vcard.getName() != null) {
+                m.setGivenName(vcard.getName().getGivenName());
+                m.setSurName(vcard.getName().getFamilyName());
+            } else {
+                log.warn("No name feature in supplied vcard: " + vc);
+            }
+            m.setModifiedDate(new Date());
+            {
+                Iterator&lt;TelephoneFeature&gt; it = vcard.getTelephoneNumbers();
+                while (it.hasNext()) {
+                    m.setTelephonenumber(it.next().getTelephone());
+                }
+            }
+            {
+                Iterator&lt;EmailFeature&gt; itEmails = vcard.getEmails();
+                while (itEmails.hasNext()) {
+                    m.setMail(itEmails.next().getEmail());
+                }
+            }
+            m.setModifiedDate(new Date());
+            SessionManager.session().save(m);
+            SessionManager.session().flush();
+            tx.commit();
+            return contact;
+        } catch (Exception e) {
+            tx.rollback();
+            log.error("exception uploading musician contact", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+</pre>
+  </body>
+</html>

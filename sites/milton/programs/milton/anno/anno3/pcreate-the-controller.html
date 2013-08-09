@@ -1,0 +1,39 @@
+<html>
+
+<head>
+
+<title>Create the controller</title>
+
+<link rel="template" href="learner/modulePage" />
+<script title="order" type="data/parameter" >3</script>
+
+</head>
+
+<body>
+
+<h1>
+			Create the controller
+		</h1>
+		<p>
+			All of the code for the webdav/caldav handling will be in a single controller class.
+		</p>
+		<p>
+			So create HelloCaldavController in the com.hellocaldav package.
+		</p>
+		<p>
+			Give it the ResourceController annotation, a logger and a list of users to pretend to be our database:
+		</p>
+		<pre class="prettyprint">
+@ResourceController
+public class HelloCaldavController {
+
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HelloCaldavController.class);
+    private final List&lt;User&gt; users = new ArrayList&lt;User&gt;();
+
+    public HelloCaldavController() {
+        createUser(&quot;jack&quot;);
+        createUser(&quot;jill&quot;);
+    }</pre></body>
+
+</html>
+

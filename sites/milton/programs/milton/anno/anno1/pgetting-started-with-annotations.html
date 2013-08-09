@@ -1,0 +1,78 @@
+<html>
+
+<head>
+
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+<title>Getting Started with annotations</title>
+
+<link rel="template" href="learner/modulePage" />
+<script title="order" type="data/parameter" >1</script>
+
+</head>
+
+<body>
+
+<h1>Hello World - Create the project</h1>
+
+    <p>In this tutorial we'll use maven to create a really simple hello world application.</p>
+
+    <p><a href="https://github.com/miltonio/milton2/tree/master/examples/tuts-anno1">Full source code for this tutorial</a> is in github</p>
+
+    <p>Start by creating a maven project and adding milton-server-ce as a dependency and include jetty to run the server:</p>
+
+    <p>&#160;</p>
+<pre class="prettyprint">
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;io.milton.tuts&lt;/groupId&gt;
+    &lt;artifactId&gt;tuts-anno1&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;packaging&gt;war&lt;/packaging&gt;
+
+    &lt;name&gt;tuts-anno1&lt;/name&gt;
+
+    &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;milton.version&gt;2.4.1.2&lt;/milton.version&gt;
+    &lt;/properties&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-jetty-plugin&lt;/artifactId&gt;
+                &lt;configuration&gt;
+                    &lt;contextPath&gt;/&lt;/contextPath&gt;
+                    &lt;connectors&gt;
+                        &lt;connector implementation="org.mortbay.jetty.nio.SelectChannelConnector"&gt;
+                            &lt;!--&lt;port&gt;8085&lt;/port&gt;--&gt;
+                            &lt;port&gt;8080&lt;/port&gt;
+                            &lt;maxIdleTime&gt;60000&lt;/maxIdleTime&gt;
+                        &lt;/connector&gt;
+                    &lt;/connectors&gt;
+                    &lt;stopKey&gt;stop&lt;/stopKey&gt;
+                    &lt;stopPort&gt;8089&lt;/stopPort&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;            
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+            &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+            &lt;version&gt;1.6.1&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.milton&lt;/groupId&gt;
+            &lt;artifactId&gt;milton-server-ce&lt;/artifactId&gt;
+            &lt;version&gt;${milton.version}&lt;/version&gt;
+        &lt;/dependency&gt;     
+    &lt;/dependencies&gt;
+&lt;/project&gt;
+
+</pre></body>
+
+</html>
+

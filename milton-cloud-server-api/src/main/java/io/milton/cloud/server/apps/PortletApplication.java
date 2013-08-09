@@ -67,6 +67,11 @@ public interface PortletApplication extends Application{
     public static final String PORTLET_SECTION_DASH_SECONDARY = "dashboardSecondary";
     
     /**
+     * For email triggers, shows additional actions
+     */
+    public static final String PORTLET_SECTION_TRIGGER_ACTIONS = "triggerActions";
+    
+    /**
      * 
      * @param portletSection - the name of the section being rendered
      * @param currentUser - the current user

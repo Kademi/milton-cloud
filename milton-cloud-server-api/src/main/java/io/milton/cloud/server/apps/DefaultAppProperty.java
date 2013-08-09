@@ -93,7 +93,6 @@ public class DefaultAppProperty implements PropertyProviderApplication.Applicati
                 throw new RuntimeException("no class");
             }
             Object source = context.get(c);
-            System.out.println("eval: " + source + " - " + getName());
             if( source == null ) {
                 throw new RuntimeException("Source not found in context: " + c);
             }

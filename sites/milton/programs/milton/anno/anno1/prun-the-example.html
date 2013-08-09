@@ -1,0 +1,74 @@
+<html>
+
+<head>
+
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+<title>Run the example</title>
+
+<link rel="template" href="learner/modulePage" />
+<script title="order" type="data/parameter" >5</script>
+
+</head>
+
+<body>
+
+<h1>Run the example</h1>
+
+    <p>We'll use maven to run the web application:</p>
+<pre class="prettyprint">
+mvn jetty:run
+</pre>
+
+    <p>You should see some logs being printed out to the console. If you havent used maven before it will download all the jars it needs for jetty etc, and this can take a couple of minutes.</p>
+
+    <p>If all goes well you'll end up with this in the logs</p>
+<pre class="prettyprint">
+INFO  io.milton.config.HttpManagerBuilder  - Configuring default user and password: user/password for SimpleSecurityManager
+INFO  io.milton.config.HttpManagerBuilder  - Starting io.milton.http.http11.auth.ExpiredNonceRemover@1c6d8f0 this will remove Digest nonces from memory when they expire
+2013-03-10 13:46:03.978:INFO::Started SelectChannelConnector@0.0.0.0:8080
+Started Jetty Server
+</pre>
+
+    <p>&#160;</p>
+
+    <p>Note that by default the credentials to login are <strong>user</strong> and <strong>password</strong>, and the server is running on port 8080</p>
+
+    <p>So now you can connect to http://localhost:8080 <strong>using a webdav client</strong> (No you cant use a web browser yet!!). How you connect depends on your operating system:</p>
+
+    <ul>
+      <li>Windows: Go to "My Computer", right-click and select "Add Network Place", and enter the URL above. Alternative is BitKinex</li>
+
+      <li>Mac: Open Finder, click on Connect to server and enter the URL above. Alternatively, use Cyberduck</li>
+
+      <li>Linux: Use the gnome or KDE file browser, or use cadaver from the command line</li>
+    </ul>
+
+    <p>I'm on linux so here's what i see:</p>
+
+    <p><img src="tuts-anno1-naut.png" /></p>
+
+    <p>&#160;</p>
+
+    <p><strong>AHHHH!!! Whats with the horrible name!!!???</strong></p>
+
+    <p>Well, we havent actually told milton how to get the name for our products, so what would we expect it to do? The trick is to make the name available on a sensible bean property like name, or use an annotation. I'll just use a sensible bean property name, by adding this to our Product class:</p>
+<pre class="prettyprint">
+        public String getName() {
+            return name;
+        }  
+</pre>
+
+    <p>&#160;</p>
+
+    <p>So stop the server and run it again, then refresh your webdav client and you should see something like this:</p>
+
+    <p><img src="tuts-anno1-naut2.png" /></p>
+
+    <p>&#160;</p>
+
+    <p>Ah, now that looks better!</p>
+
+    <p>But, they look like files, and we wanted folders? How to make them folders? See the next page...</p></body>
+
+</html>
+

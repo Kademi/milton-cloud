@@ -1,0 +1,94 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Creating and updating contacts</title>
+<link rel="template" href="learner/modulePage" /><script title="order" type="data/parameter">
+<![CDATA[
+5
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1>Creating and updating contacts</h1>
+
+    <p>Contacts are created by UserAddressBookResource's createNew method, which is called from a PUT:</p>
+<pre class="prettyprint">
+    @Override
+    public Resource createNew(String newName, InputStream in, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        IOUtils.copy(in, bout);
+        String icalData = bout.toString("UTF-8");
+        Contact cNew = contactManager.createContact(newName, icalData);
+        return new ContactResource(this, cNew);
+    }
+</pre>
+
+    <p>The data which is PUT is just the iCal data like this:</p>
+<pre class="prettyprint">
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Inverse inc.//SOGo Connector 1.0//EN
+UID:C58AF283-7320-0001-2447-9D801A301A9A
+N:Bloggs;Joe
+FN:Joe Bloggs
+X-MOZILLA-HTML:FALSE
+EMAIL;TYPE=work:joe@bloggs.com
+END:VCARD
+</pre>
+
+    <p>Our implementation delegates to a ContactManager class to do the actual processing. That returns a domain object which we wrap with a milton resource to represent the new object.</p>
+
+    <p>ContactManager is going to create our contact, then parse the iCal data and set individual fields, and 'persist' the original ical data:</p>
+
+    <div class="lightbulb">
+      <div class="dropdown">
+        <h6>To persist or to generate iCal data?</h6>
+
+        <div>
+          <p>In this example we save the original iCal data and we also parse it into its component fields like first name, surname, etc.</p>
+
+          <p>Of course you don't need to do both. If you don't have any reason for parsing and storing individual fields you can simple persist the ical data. And if you are persisting fields you might think that you don't need to save the ical data, and just generate it on demand from the fields.</p>
+
+          <p>Experience has shown, however, that you will get the best result from storing the original ical data and returning it on a GET, and use any parsed data as auxilary data. If you integrate with a web page where individual fields are editable you should apply those changes to the iCal data when the changes are made.</p>
+        </div>
+      </div>
+    </div>
+<pre class="prettyprint">
+    public ContactsDao.Contact createContact(String newName, String icalData) throws UnsupportedEncodingException {
+        ContactsDao.Contact e = contactsDao.addContact(newName);
+        update(e, icalData);        
+        return e;
+    }
+       
+    public void update(ContactsDao.Contact contact, String data) {
+        log.info("update: " + data);
+        VCard vcard = parse(data);
+        if (vcard.getUID() != null &amp;&amp; vcard.getUID().hasUID()) {
+            contact.setUid(vcard.getUID().getUID());
+        } else {
+            log.warn("NO UID FOUND, making up our own");
+            contact.setUid(UUID.randomUUID().toString());
+        }
+        if (vcard.getName() != null) {
+            contact.setGivenName(vcard.getName().getGivenName());
+            contact.setSurName(vcard.getName().getFamilyName());
+            log.info("parsed name: " + contact.getGivenName() + " " + contact.getSurName());
+        } else {
+            log.warn("No name component found!");
+        }
+        contact.setMail(""); // reset in case none given
+        Iterator&lt;EmailFeature&gt; it = vcard.getEmails();
+        while (it.hasNext()) {
+            contact.setMail(it.next().getEmail());
+        }
+        log.info("email: " + contact.getMail());
+
+        String ph = getPhone(vcard);
+        contact.setTelephonenumber(ph);
+        log.info("phone: " + contact.getTelephonenumber());
+        contact.setIcalData(data);
+        contactsDao.incrementContactsVersion();
+    }
+</pre>
+  </body>
+</html>

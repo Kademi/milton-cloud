@@ -118,6 +118,7 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     private String triggerCondition5;
     private boolean enabled;
     private boolean includeUser; // whether the email should go to the user associated with the event which fires this trigger
+    private String conditionScriptXml; // if present will be checked on triggers, and will only fire if returns true
 
     public EmailTrigger() {
     }
@@ -136,6 +137,17 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
         this.eventId = eventId;
     }
 
+    @Column(length = 2000)
+    public String getConditionScriptXml() {
+        return conditionScriptXml;
+    }
+
+    public void setConditionScriptXml(String conditionScriptXml) {
+        this.conditionScriptXml = conditionScriptXml;
+    }
+
+    
+    
     public String getTriggerCondition1() {
         return triggerCondition1;
     }

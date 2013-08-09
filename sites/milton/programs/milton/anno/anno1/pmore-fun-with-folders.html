@@ -1,0 +1,44 @@
+<html>
+
+<head>
+
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+<title>Getting Started with annotations</title>
+
+<link rel="template" href="learner/modulePage" />
+<script title="order" type="data/parameter" >7</script>
+
+</head>
+
+<body>
+
+<h1>More fun with folders</h1>
+
+    <p>So here's what i got when i ran it:</p>
+
+    <p><img src="tuts-anno1-naut3.png" /></p>
+
+    <p>&#160;</p>
+
+    <p>As promised our hello and world resources now look like folders. You can open them with your webdav browser and (of course) there's nothing inside.</p>
+
+    <p><strong>But you can't upload files yet!</strong> Why not? Because we havent annotated a method which allows uploads. So lets do that now</p>
+
+    <p>The annotation we're interested in here is @PutChild. We're going to <strong>put</strong> a <strong>child</strong> into a <strong>product</strong>, which we can do like this:</p>
+<pre class="prettyprint">
+    @PutChild
+    public ProductFile upload(Product product, String newName, byte[] bytes) {
+        ProductFile pf = new ProductFile(newName, bytes);
+        product.getProductFiles().add(pf);
+        return pf;
+    }
+</pre>
+
+    <p>Note that we've asked for a byte[], so we got a byte array. But we could also have asked for an InputStream which would of course be better for larger files to allow streaming data transfer. Its very important to return a reference to the created object so milton can give the correct response to the client.</p>
+
+    <p>So lets stop the server, run it with the new code, and upload a file <strong>to the "hello" folder</strong>. It worked! Here's what i got:</p>
+
+    <p><img src="tuts-anno1-naut4.png" /></p></body>
+
+</html>
+

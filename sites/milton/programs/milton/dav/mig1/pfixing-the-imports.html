@@ -1,0 +1,57 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Fixing the imports</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+3
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Fixing the
+    imports</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">The major difference
+    between milton1.8 and milton2 is the package names. They moved
+    from com.bradmcevoy and com.ettrema to just io.milton. But the
+    class names themselves have stayed the same and do the same
+    thing. So all you should need to do is remove the old import
+    statements and let your IDE add the new ones.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">For example, your old
+    Resource implementation might look like this:</p>
+<pre xmlns="http://www.w3.org/1999/xhtml" class="prettyprint">
+package com.mycompany;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
+
+<strong>
+import com.bradmcevoy.http.Range;</strong>
+
+public class TTempResource extends TResource{
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Then you would delete
+    the Range import, do a fix imports, and then it would look like
+    this:</p>
+<pre xmlns="http://www.w3.org/1999/xhtml" class="prettyprint">
+package com.mycompany;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
+
+<strong>
+import io.milton.http.Range;</strong>
+
+public class TTempResource extends TResource{
+</pre>
+  </body>
+</html>

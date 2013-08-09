@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Documentation home</title>
+    </head>
+    <body>
+		<div class="row">
+	        <h2>Documentation</h2>		
+	        <div class="well pull-right span4">
+	        	<h3>Get support on the mailing list</h3>
+	        	<p>The <a href="http://lists.justthe.net/mailman/listinfo/milton-users">milton mailing list</a> is active and responsive, with most questions answered within 12 hours</p>
+	        	<p>Its indexed on nabble.</p>
+	        	<p><a href="http://milton-users.96038.n3.nabble.com/" class="btn btn-primary">Search the mailing list on nabble</a></p>	        	        
+	        </div>
+	        <p>Below is a list of articles and guides about milton. Its not complete as of time of writing, but is being constantly added to.</p>
+	        <ul>
+	        #foreach($f in $folder.children.ofType.folder)
+			<li>
+				<a href="${f.href}index.html">$f.title</a>
+				<ul>
+	                #foreach($subFolder in $f.children.ofType.folder)
+					<li><a href="${subFolder.href}index.html">$subFolder.title</a></li>
+	                #end	                
+				</ul>
+			</li>
+        	#end	        
+		</div>
+
+        
+    </body>
+</html>

@@ -1,0 +1,114 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Downloading files</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+3
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Downloading files</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Webdav is an extension
+    to HTTP, and in HTTP you "download" files simply by doing a GET
+    request. So when a user uses a webdav client like Windows
+    Explorer to download a file from the server it actually just
+    does a normal GET on that url.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">To support GET in
+    Milton you implement GetableResource. The interface looks like
+    this:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+public interface GetableResource extends Resource {
+    void sendContent( OutputStream out, Range range, Map&lt;String,String&gt; params, String contentType ) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException;
+
+    Long getMaxAgeSeconds(Auth auth);
+
+    String getContentType(String accepts);
+
+    Long getContentLength();
+}
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Let quickly describe
+    what those methods do:</p>
+
+    <ul xmlns="http://www.w3.org/1999/xhtml">
+      <li><strong>sendContent</strong>: This is the main method, it
+      must write the content to the given outputstream. If a range
+      is given then you should skip over bytes and stop at the
+      given byte. Note that range support is very important in some
+      cases, such as streaming videos for HTML5 players. The
+      content type given is that requested by the client, so if you
+      support multiple representations you should choose a format
+      using that. This method may not be called if the resource has
+      not been modified (ie in response to a conditional GET)</li>
+
+      <li><strong>getMaxAgeSeconds</strong>: If you want the
+      resource to be cached return the number of seconds to cache
+      it for, otherwise return null to disable caching</li>
+
+      <li><strong>getContentType</strong>: Called with a list of
+      content types which are acceptable by the client, you should
+      select the best one you support and return this. This will be
+      given to sendContent</li>
+
+      <li><strong>getContentLength</strong>: If you know the
+      resource length return it, otherwise return null. If you
+      return null the framework will either buffer the content to
+      find the length, or send the content with a content length
+      and drop the connection to indicate EOF, both of which have
+      performance impacts - so its best to give a content length if
+      you can.</li>
+    </ul>
+
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      &#160;
+    </div>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">In this example
+    project, the Astronomy Management System, we've actually
+    already implemented GetableResource for the PlanetResource,
+    lets take a look:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+    @Override
+    public void sendContent(OutputStream out, Range range, Map&lt;String, String&gt; params, String contentType) throws IOException {
+        Properties props = new Properties();
+        if( planet.getType() == null ) {
+            props.setProperty("type", "");
+        } else {
+            props.setProperty("type", planet.getType());
+        }
+        props.setProperty("radius", planet.getRadius() + "" );
+        props.setProperty("yearLength", planet.getYearLength() + "" );
+        props.store(out, null);
+    }
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">You can see its pretty
+    simple, we load the planets properties into a Properties object
+    and then write that to the output.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Generaly sendContent
+    will be implemented in one of two ways:</p>
+
+    <ul xmlns="http://www.w3.org/1999/xhtml">
+      <li>transfer content from storage to the stream, such as when
+      serving digital assets from a content repository or file</li>
+
+      <li>generate content from a template, such as generating HTML
+      files using JSP/Velocity/etc or generating PDF's on
+      demand</li>
+    </ul>
+
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      &#160;
+    </div>
+  </body>
+</html>

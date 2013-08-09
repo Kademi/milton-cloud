@@ -1,0 +1,74 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Lock enforcement</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+4
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Lock enforcement</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">You don't need to worry
+    about enforcing locks, Milton will do that for you at the
+    protocol level. And its probably better if you dont because
+    there's some ambiguity about exactly who/what can operate on a
+    locked resource. Milton has settled on a slightly fuzzy-logic
+    implementation which is known to work across clients but if you
+    do your own enforcement that could interfere.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">The one time you should
+    do your own checking for locks is if you want performance
+    optimised deletes of collections.</p>
+
+    <div class="lightbulb" xmlns="http://www.w3.org/1999/xhtml">
+      <div class="dropdown">
+        <h6>Why deleting collections can be slow, and what to do
+        about it</h6>
+
+        <div>
+          <p>When a webdav client deletes a collection resource
+          they should just issue a delete on the collection itself,
+          and not its members (in reality some OS clients delete
+          each member and there's nothing we can do about
+          that).</p>
+
+          <p>But if a collection is deleted, its possible that any
+          member of that collection is locked which should prevent
+          the delete. Or, its possible that a user might have
+          permission to delete the collection, but not some member
+          of it - which should also prevent the delete.</p>
+
+          <p>To make sure these conditions are satisfied milton
+          recursively deletes each member within the collection
+          explicitly, thuse invoking its lock and permission
+          checks. This can of course be very slow, such as if the
+          collection contains thousands of resources which might
+          happen to be database rows.</p>
+
+          <p>However, the application might be able to do the same
+          check is a much more optimised way. It could check for
+          any locks or permissions within the whole collection with
+          a single SQL call (for example). So to support this
+          Milton has an optional interface -
+          DeletableCollectionResource</p>
+
+          <p>If you implement this on your collection milton will
+          NOT do recursive deletes, it will just call the
+          isLockedOut method and then, if ok, delete the
+          collection.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      &#160;
+    </div>
+  </body>
+</html>

@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.web.templating;
 
+import io.milton.cloud.server.apps.Application;
 import io.milton.resource.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,6 +27,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.PortletApplication;
+import io.milton.cloud.server.apps.TemplatingApplication;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.CommonResource;
@@ -83,6 +85,13 @@ public class HtmlTemplateRenderer {
         OrganisationFolder orgFolder = WebUtils.findParentOrg(page);
         if (orgFolder != null) {
             datamodel.put("parentOrg", orgFolder);
+        }
+        
+        for( Application app : applicationManager.getActiveApps(rootFolder)) {
+            if( app instanceof TemplatingApplication) {
+                TemplatingApplication tapp = (TemplatingApplication) app;
+                tapp.appendTemplatingObjects(datamodel, rootFolder, page, params, user);
+            }
         }
 
 //        System.out.println("themeTemplateTemplateMeta: " + themeTemplateTemplateMeta.getId());

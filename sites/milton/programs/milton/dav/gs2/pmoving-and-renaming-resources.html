@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Moving and Renaming resources</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+4
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Moving and Renaming
+    resources</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">In Webdav moving and
+    renaming files and folders are all done with the MOVE request,
+    which is supported in Milton with the MoveableResource
+    interface.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml"><strong>void
+    moveTo(CollectionResource rDest, String name) throws
+    ConflictException, NotAuthorizedException,
+    BadRequestException;</strong></p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">The incoming MOVE
+    request includes a URL which identifies the resource to move
+    and a destination url to which it should be moved. Milton
+    seperates the destination into the parent collection and the
+    name, and provides that information seperately when it calls
+    your move method</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">In our example, for
+    simplicity, we will permit renames but we will not allow moves
+    to other collections.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">So modify the
+    GalaxyResource class as follows:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+public class GalaxyResource extends AbstractResource implements CollectionResource, MakeCollectionableResource, MoveableResource {
+
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GalaxyResource.class);
+    private ArrayList&lt;Resource&gt; children;
+    private final RootUniverseResource parent;
+    private final Galaxy galaxy;
+
+    public GalaxyResource(RootUniverseResource parent, Galaxy galaxy) {
+        this.parent = parent;
+        this.galaxy = galaxy;
+    }
+
+    @Override
+    public void moveTo(CollectionResource rDest, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
+        if( rDest != parent ) {
+            throw new BadRequestException("Cant move galaxy to a different folder. Current parent=" +parent.getName() + " dest parent=" + rDest.getName());
+        }
+        newName = newName.replace(".properties", ""); // need to strip suffix we add in getName method
+        galaxy.setName(newName);
+    }
+
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">This will throw a bad
+    request exception if the user tries to move to a different
+    folder, but permits renames. Actually permitting folder moves
+    isnt hard, just need to update the parent reference on the data
+    object.</p>
+
+    <div id="cke_pastebin"
+    style="position: absolute; top: 239.833px; width: 1px; height: 1px; overflow: hidden; left: -1000px;">
+      &#160;
+    </div>
+  </body>
+</html>

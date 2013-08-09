@@ -1,0 +1,36 @@
+div.profilePic img.avatar { 
+    float: left;
+    margin-right: 1em;
+    height: 52px;
+    width: 52px;
+}
+body.profile legend {
+    font-size: 0.8em;
+}
+
+body.profile #fileupload {
+    margin: 0;
+    padding: 0;
+}
+
+body.profile .muploadBtn {        
+    margin-left: 85px;
+}
+
+body.profile .fileupload-buttonbar .progress {
+    border: 1px solid #51A351;
+    border-radius: 5px 5px 5px 5px;
+    display: none;
+    width: 65%;
+    float: right;
+}
+body.profile .fileupload-buttonbar .progress div {
+    background-color: #51A351;
+    height: 2em;
+    width: 0;
+    padding: 0;
+    margin: 0;
+}
+p.confirm {
+    display: none;
+}

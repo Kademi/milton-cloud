@@ -1,0 +1,60 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Updating the dependencies</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+2
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Updating the
+    dependencies</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">In the old milton most
+    people included two jars - milton-api and milton-servlet. The
+    API jar wasnt really just the API, it included the runtime
+    implementations of the method handlers. The milton-servlet jar
+    has the actual servlet that most people used.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">The new milton has a
+    different structure:</p>
+
+    <ul xmlns="http://www.w3.org/1999/xhtml">
+      <li>milton-api: Includes all of the compile time classes you
+      need, but not the runtime classes</li>
+
+      <li>milton-server-ce: Depends on the API, and includes only
+      the runtime classes required for DAV level 1 support (file
+      browsing but not locking)</li>
+
+      <li>milton-server-ent: Depdends on the API and the CE jar,
+      adds support for DAV level 2, Caldav and Carddav</li>
+    </ul>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">So typically the old
+    maven dependencies would look like this:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ettrema&lt;/groupId&gt;
+    &lt;artifactId&gt;milton-servlet&lt;/artifactId&gt;
+    &lt;version&gt;1.8.1.4&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">And you should change
+    it to this:</p>
+<pre class="prettyprint" xmlns="http://www.w3.org/1999/xhtml">
+&lt;dependency&gt;
+    &lt;groupId&gt;io.milton&lt;/groupId&gt;
+    &lt;artifactId&gt;milton-server-ce&lt;/artifactId&gt;
+    &lt;version&gt;2.2.1&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+  </body>
+</html>

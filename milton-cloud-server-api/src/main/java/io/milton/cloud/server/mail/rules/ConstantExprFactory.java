@@ -26,6 +26,10 @@ import org.dom4j.Element;
  */
 public class ConstantExprFactory implements ExpressionFactory {
 
+    public ConstantExprFactory() {
+    }
+    
+    
     @Override
     public Expression create(Element el, Map<String, ExpressionFactory> map) {
         String s = el.getStringValue();

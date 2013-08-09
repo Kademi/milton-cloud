@@ -56,6 +56,7 @@ public class DefaultFilterScriptEvaluator implements FilterScriptEvaluator {
 
         RequestContext rctx = RequestContext.getCurrent();
         ProcessContext processContext = new ProcessContext(rctx);
+        processContext.put(context);
         processContext.addAttribute("rootFolder", rf);
         processContext.addAttribute("profile", p);
         processContext.addAttribute("organisation", org);

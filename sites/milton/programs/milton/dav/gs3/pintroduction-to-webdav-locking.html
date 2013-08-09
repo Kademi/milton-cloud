@@ -1,0 +1,89 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Introduction to Webdav locking</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+1
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Introduction to Webdav
+    locking</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Webdav includes an
+    optional locking mechanism to support concurrency safety in
+    multi-user environments. This is an optional feature for webdav
+    servers and most common webdav clients will use locking if its
+    available, but will function correctly without it. Plain webdav
+    servers, without locking support, are referred to as DAV level
+    1 servers and those with locking are referred to as DAV level 2
+    servers.</p>
+
+    <div class="lightbulb" xmlns="http://www.w3.org/1999/xhtml">
+      <div class="dropdown">
+        <h6>DAV Levels and Milton Licensing</h6>
+
+        <div>
+          <p>Milton community edition is an apache licensed project
+          and supports DAV Level 1.</p>
+
+          <p>DAV Level 2 multi-user concurrency features are
+          typically required for professional or enterprise
+          applications so is supported by Milton's Enterprise
+          edition. This library is usually licensed commercially
+          for a fee, although it can be freely used by projects
+          which are themselves licensed on the Affero GPL license
+          (typically academic and educational organisations).</p>
+
+          <p>Please see the <a href="/about/license">Milton license
+          page for details.</a></p>
+        </div>
+      </div>
+    </div>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Webdav's locking
+    feature supports both creation of locks on resources (ie
+    locking the resource), discovery of locks and the enforcement
+    of restrictions on locked resources.</p>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Locking resources has
+    two broad use cases:</p>
+
+    <ul xmlns="http://www.w3.org/1999/xhtml">
+      <li>Locking an existing resource</li>
+
+      <li>Locking a resource immediately prior to its creation</li>
+    </ul>
+
+    <div class="accentuated" xmlns="http://www.w3.org/1999/xhtml">
+      <p>The first use case is easily understood and implemented,
+      but the second is a bit tricky. This is referred to as the
+      <strong>lock-null method</strong>, and it has rather awkward
+      semantics. When a LOCK is issued on a non-existing resource
+      the specification requires a placeholder resource to be
+      created, and the lock persisted, but at this point the server
+      <em>does not know what type of resource it will be</em> - it
+      could be a file or a folder.</p>
+    </div>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Milton supports both of
+    those use cases with two interfaces:</p>
+
+    <ul xmlns="http://www.w3.org/1999/xhtml">
+      <li>LockableResource - for locking existing resources</li>
+
+      <li>LockingCollectionResource - for locking yet-to-be-created
+      resources</li>
+    </ul>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">The rest of this module
+    will cover the implementation of those interfaces, please click
+    Next to continue.</p>
+  </body>
+</html>

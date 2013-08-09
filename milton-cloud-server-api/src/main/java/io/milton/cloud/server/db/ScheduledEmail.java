@@ -78,7 +78,7 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
     }
 
     public enum Frequency {
-
+        HOURLY,
         DAILY,
         WEEKLY,
         MONTHLY,
@@ -266,6 +266,10 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
         Calendar cal = Calendar.getInstance();
         cal.setTime(lastRun);
         switch (getFrequency()) {
+            case HOURLY:
+                cal.add(Calendar.DATE, getPeriodMultiples());
+                break;
+            
             case DAILY:
                 cal.add(Calendar.DATE, getPeriodMultiples());
                 break;

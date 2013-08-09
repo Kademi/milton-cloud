@@ -1,0 +1,34 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Creating collections</title>
+<link rel="template" href="learner/modulePage" /><script title="order" type="data/parameter">
+<![CDATA[
+4
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1>Creating collections</h1>
+
+    <p>This is a nice easy one, just use the @MakeCollection annotation. Its up to you to ensure that an object created with @MakeCollection is actually a collection in the sense that it has a corresponding @ChildrenOf method. If not ... strange things might happen.</p>
+<pre class="prettyprint">
+    @MakeCollection
+    public Musician createAndSaveMusician(MusiciansController root, String newName) {
+        Transaction tx = SessionManager.session().beginTransaction();
+        Musician m = new Musician();
+        m.setCreatedDate(new Date());
+        m.setModifiedDate(new Date());
+        m.setName(newName);
+        SessionManager.session().save(m);
+        SessionManager.session().flush();
+        tx.commit();
+        return m;
+    }
+</pre>
+
+    <p>&#160;</p>
+
+    <p>See <a href="https://github.com/miltonio/milton2/blob/master/examples/milton-anno-bandstand/src/main/java/com/bandstand/web/MusiciansController.java">MusiciansController</a> for full source code</p>
+  </body>
+</html>

@@ -139,6 +139,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
                     String s = WebUtils.getRawParam(parameters, "filterScriptXml");
                     if( s != null ) {
                         EvaluationContext evalContext = new EvaluationContext(s);
+                        evalContext.getAttributes().put("org", getOrganisation());        
                         _(XmlScriptParser.class).parse(evalContext);
                         log.info("parsed ok");
                     }

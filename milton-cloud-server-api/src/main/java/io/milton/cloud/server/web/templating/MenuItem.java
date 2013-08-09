@@ -21,6 +21,7 @@ import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.common.Path;
 import io.milton.http.HttpManager;
+import io.milton.http.Request;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Profile;
 import java.util.Collections;
@@ -51,6 +52,10 @@ public class MenuItem implements Comparable<MenuItem> {
     }
     
     public static Set<String> getActiveMenuIdSet() {
+        Request req = HttpManager.request();
+        if( req == null ) {
+            return new HashSet<>();
+        }
         Set<String> set = (Set<String>) HttpManager.request().getAttributes().get("activeMenuIds");
         if( set == null ) {
             set = new HashSet<>();

@@ -1,0 +1,132 @@
+<html>
+
+<head>
+
+<title>Create the domain model</title>
+
+<link rel="template" href="learner/modulePage" />
+<script title="order" type="data/parameter" >2</script>
+
+</head>
+
+<body>
+
+<h1>
+			Create the domain model
+		</h1>
+		<p>
+			We&#39;re simulating a normal database driven web application with this example project, so lets create typical domain model classes. These won&#39;t actually get persisted in this example but the usage is exactly the same if they are. You can see the BandStand example in github for a fully worked database example.
+		</p>
+		<h3>
+			Our domain model
+		</h3>
+		<p>
+			We&#39;re going to use just two domain model classes - User and Meeting. Where User represents a user of the system who has a calendar of Meetings.
+		</p>
+		<p>
+			A couple of things you should take note of:
+		</p>
+		<ul>
+			<li>
+				in this example we have the user&#39;s plaintext password available. If you only store a hash of the password in your real application thats ok.
+			</li>
+			<li>
+				we&#39;re storing the bytes of the calendar events in the icalData property, but its quite common to parse that data and store it in a structured form
+			</li>
+		</ul>
+		<p>
+			I&#39;ll create these classes in the com.hellocaldav package:
+		</p>
+		<p>
+			&nbsp;
+		</p>
+		<pre class="prettyprint">
+package com.hellocaldav;
+
+import java.util.List;
+
+public class User {
+
+    private String name;
+    private String password;
+    private List&lt;Meeting&gt; meetings;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public List&lt;Meeting&gt; getMeetings() {
+        return meetings;
+    }
+
+    public void setMeetings(List&lt;Meeting&gt; meetings) {
+        this.meetings = meetings;
+    }
+}
+</pre>
+		<p>
+			and the Meeting class...
+		</p>
+		<p>
+			&nbsp;
+		</p>
+		<pre class="prettyprint">
+package com.hellocaldav;
+
+import java.util.Date;
+
+public class Meeting {
+
+    private long id;
+    private String name;  // filename for the meeting. Must be unique within the user
+    private Date modifiedDate;
+    private byte[] icalData;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    public byte[] getIcalData() {
+        return icalData;
+    }
+
+    public void setIcalData(byte[] icalData) {
+        this.icalData = icalData;
+    }
+}
+</pre></body>
+
+</html>
+

@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>File operations with annotations</title>
+<link rel="template" href="learner/modulePage" /><script title="order" type="data/parameter">
+<![CDATA[
+1
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1>File operations with annotations</h1>
+
+    <p>This tutorial is based on the bandstand example application. You might want to check out the source code and experiment with it:</p>
+
+    <p><a href="https://github.com/miltonio/milton2/tree/master/examples/milton-anno-bandstand">https://github.com/miltonio/milton2/tree/master/examples/milton-anno-bandstand</a></p>
+
+    <h2>Deleting</h2>
+
+    <p>Lets kick things off with the simplest of all the file operations, at least to understand - deleting</p>
+
+    <p>Just add the @Delete annotation to a method with the first argument being the thing to delete:</p>
+<pre class="prettyprint">
+    @Delete
+    public void deleteImage(Image image) {
+        Transaction tx = SessionManager.session().beginTransaction();
+        try {
+            SessionManager.session().delete(image);
+            SessionManager.session().flush();
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        }        
+    }
+</pre>
+
+    <p>From <a href="https://github.com/miltonio/milton2/blob/master/examples/milton-anno-bandstand/src/main/java/com/bandstand/web/ImagesController.java">ImagesController</a></p>
+
+    <p>Note that the transaction handling in this example app isnt anything very special, you should probably do it a bit more declaratively!</p>
+
+    <p>&#160;</p>
+  </body>
+</html>

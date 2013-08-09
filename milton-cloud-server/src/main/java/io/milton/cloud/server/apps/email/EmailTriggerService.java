@@ -16,9 +16,17 @@
  */
 package io.milton.cloud.server.apps.email;
 
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupRecipient;
+import io.milton.cloud.server.event.TriggerEvent;
+import io.milton.cloud.server.mail.EvaluationContext;
+import io.milton.cloud.server.mail.FilterScriptEvaluator;
+import io.milton.cloud.server.web.RootFolder;
+import static io.milton.context.RequestContext._;
 import org.hibernate.Session;
 
 import io.milton.vfs.db.BaseEntity;
@@ -28,6 +36,7 @@ import io.milton.vfs.db.Profile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -37,9 +46,13 @@ public class EmailTriggerService {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EmailTriggerService.class);
     private final BatchEmailService batchEmailService;
+    private final FilterScriptEvaluator filterScriptEvaluator;
+    private final ApplicationManager applicationManager;
 
-    public EmailTriggerService(BatchEmailService batchEmailService) {
+    public EmailTriggerService(BatchEmailService batchEmailService, FilterScriptEvaluator filterScriptEvaluator, ApplicationManager applicationManager) {
         this.batchEmailService = batchEmailService;
+        this.filterScriptEvaluator = filterScriptEvaluator;
+        this.applicationManager = applicationManager;
     }
 
     /**
@@ -100,5 +113,21 @@ public class EmailTriggerService {
                 recipients.add(gm.getMember());
             }
         }
+    }
+
+    public boolean checkConditions(EmailTrigger j, TriggerEvent event, Profile currentUser) {
+        if( StringUtils.isBlank(j.getConditionScriptXml())) {
+            return true;
+        }
+            RootFolder rf = null;
+            if (j.getThemeSite() != null) {
+                ApplicationManager appManager = _(ApplicationManager.class);
+                rf = new WebsiteRootFolder(appManager, j.getThemeSite(), j.getThemeSite().getTrunk());
+            } else {
+                rf = new OrganisationRootFolder(applicationManager, j.getOrganisation());
+            }        
+        EvaluationContext evaluationContext = new EvaluationContext(j.getConditionScriptXml());
+        evaluationContext.getAttributes().put("org", j.getOrganisation());        
+        return filterScriptEvaluator.checkFilterScript(evaluationContext, currentUser, j.getOrganisation(), rf);
     }
 }

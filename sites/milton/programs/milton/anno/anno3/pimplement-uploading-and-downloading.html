@@ -1,0 +1,66 @@
+<html>
+
+<head>
+
+<title>Implement uploading and downloading</title>
+
+<link rel="template" href="learner/modulePage" />
+<script title="order" type="data/parameter" >5</script>
+
+</head>
+
+<body>
+
+<h1>
+			Implement uploading and downloading
+		</h1>
+		<p>
+			Obviously clients need to be create to create events (ie upload ICS files) and retrieve events (ie download ICS files).
+		</p>
+		<p>
+			The uploading and downloading is just normal webdav operations, not specific to caldav, so we can build and test that before using a caldav client. Its generally much easier to get this part working with webdav clients first.
+		</p>
+		<p>
+			So lets add a method to create a new event:
+		</p>
+		<pre class="prettyprint">
+    @PutChild
+    public Meeting createMeeting(Calendar cal, byte[] ical, String newName) {
+        Meeting m = new Meeting();
+        m.setIcalData(ical);
+        m.setName(newName);
+        m.setId(System.currentTimeMillis()); // just a unique ID for use with locking and etags
+        m.setModifiedDate(new Date());
+        cal.user.getMeetings().add(m);
+        return m;
+    }</pre>
+		<p>
+			As you can see we&#39;re asking for the ical data as a byte array, although we could have asked for it as an InputStream. We&#39;re also getting the requested name for the event and its very important that you use this name. The supplied Calendar argument is the parent object in which the event is being created. Note that we assign a unique ID to the meeting, this is will be required in the next section
+		</p>
+		<p>
+			So that method will create a new meeting, but what if the user wants to update (ie replace) an existing meeting? In this case we want a method which will be given the meeting to update:
+		</p>
+		<pre class="prettyprint">
+    @PutChild
+    public Meeting updateMeeting(Meeting m, byte[] ical) {
+        m.setIcalData(ical);
+        m.setModifiedDate(new Date());
+        return m;
+    }</pre>
+		<p>
+			If you don&#39;t implement an update method then when a user attempts to replace a resource milton will delete it and create a new one using the create method above.
+		</p>
+		<p>
+			Now we need to support downloads. This is about the simplest you&#39;ll ever see:
+		</p>
+		<pre class="prettyprint">
+    @Get
+    public byte[] getMeetingData(Meeting m) {
+        return m.getIcalData();
+    }</pre>
+		<p>
+			You can now run it and you should be able to upload and download files of any type. Note that we&#39;re holding all this data in memory, so uploading large files might crash your VM!
+		</p></body>
+
+</html>
+

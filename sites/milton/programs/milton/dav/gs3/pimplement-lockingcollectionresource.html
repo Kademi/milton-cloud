@@ -1,0 +1,80 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Implement LockingCollectionResource</title>
+    <meta
+    content="HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net"
+     name="generator" />
+<link rel="template" href="learner/modulePage" /><script
+title="order" type="data/parameter">
+<![CDATA[
+3
+]]>
+</script>
+  </head>
+
+  <body>
+    <h1 xmlns="http://www.w3.org/1999/xhtml">Implement
+    LockingCollectionResource</h1>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">OK, this is the tricky
+    one, despite its simple looking interface</p>
+
+    <div class="dropdown" xmlns="http://www.w3.org/1999/xhtml">
+      <h6>Implement LockingCollectionResource.java</h6>
+
+      <div>
+<pre class="prettyprint">
+public interface  LockingCollectionResource extends CollectionResource, LockableResource {
+    
+    /**
+     * Create an empty non-collection resource of the given name and immediately
+     * lock it.
+     * &lt;P/&gt;
+     * It is suggested that the implementor have a specific Resource class to act
+     * as the lock null resource. You should consider using the {@see LockNullResource}
+     * interface.
+     *
+     * @see  LockNullResource
+     *
+     * @param name - the name of the resource to create
+     * @param timeout - in seconds
+     * @param lockInfo
+     * @return
+     */
+    public LockToken createAndLock(String name, LockTimeout timeout, LockInfo lockInfo) throws NotAuthorizedException;
+    
+}
+
+</pre>
+      </div>
+    </div>
+
+    <div class="accentuated" xmlns="http://www.w3.org/1999/xhtml">
+      <p>When <em><strong>createAndLock</strong></em> is called you
+      somehow need to record a placeholder resource which is
+      neither a file nor a collection, but which will
+      <strong>become a file or collection</strong> when the next
+      PUT or MKCOL is called on the same resource.</p>
+    </div>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Note that you shouldnt
+    ignore this, because it implements a vitally important
+    mechanism for operating system clients. It provides an atomic
+    action which:</p>
+
+    <ul xmlns="http://www.w3.org/1999/xhtml">
+      <li>checks for the existence of a resource with the given
+      path</li>
+
+      <li>creates it (sort of)</li>
+
+      <li>locks it</li>
+    </ul>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">Its necessary that
+    these steps can all be done atomically to ensure files dont get
+    overwritten by different processes. In reality this will happen
+    rarely, but because some operating systems are predicated on
+    this capability being available, you really need it.</p>
+  </body>
+</html>

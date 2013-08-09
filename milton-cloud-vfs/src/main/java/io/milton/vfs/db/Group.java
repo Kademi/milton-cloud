@@ -51,8 +51,8 @@ public class Group implements Serializable, VfsAcceptor {
         crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
         return (Group) crit.uniqueResult();
     }
-    public static String ADMINISTRATORS = "administrators";
-    public static String USERS = "everyone";
+    public final static String ADMINISTRATORS = "administrators";
+    public final static String USERS = "everyone";
     /**
      * Intended to be used as the public group in SpliffySecurityManager
      */
