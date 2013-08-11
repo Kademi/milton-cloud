@@ -752,7 +752,7 @@ textarea.smaller {
 /* Select box */
 select {
     border-radius: 3px;
-    width: 190px;
+/*    width: 190px; */
     padding: 5px 3px 5px 6px;
     border: 1px solid;
     border-color: #b4b4b4 #e8e8e8 #e8e8e8 #b4b4b4;
