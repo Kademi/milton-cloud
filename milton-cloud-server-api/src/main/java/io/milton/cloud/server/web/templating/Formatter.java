@@ -35,6 +35,8 @@ import java.io.IOException;
 import static io.milton.context.RequestContext._;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Handy functions exposes to rendering logic for formatting.
@@ -762,7 +764,7 @@ public class Formatter {
         if (o1 == null) {
             return o2 == null ? ifEqual : ifNotEqual;
         } else {
-            if ( o2 != null && o1.getClass() == o2.getClass()) {
+            if (o2 != null && o1.getClass() == o2.getClass()) {
                 return o1.equals(o2) ? ifEqual : ifNotEqual;
             } else {
                 String s1 = o1.toString();
@@ -922,6 +924,35 @@ public class Formatter {
         sb.append(text).append("</option>");
         return sb.toString();
 
+    }
+
+    public String select(String name, Map<Object, Object> data) {
+        return select(name, null, data);
+    }
+
+    public String select(String name, Object currentVal, Map<Object, Object> data) {
+        return select(null, name, null, currentVal, data);
+    }
+
+    public String select(String id, String name, String htmlClass, Object currentVal, Map<Object, Object> data) {
+        StringBuilder sb = new StringBuilder("<select");
+        if (id != null) {
+            sb.append(" id='").append(id).append("'");
+        }
+        if (name != null) {
+            sb.append(" name='").append(name).append("'");
+        }
+        if (htmlClass != null) {
+            sb.append(" class='").append(htmlClass).append("'");
+        }
+        sb.append(">\n");
+        if (data != null) {
+            for (Map.Entry entry : data.entrySet()) {
+                sb.append(option(entry.getKey(), entry.getValue(), currentVal)).append("\n");
+            }
+        }
+        sb.append("</select>");
+        return sb.toString();
     }
 
     /**

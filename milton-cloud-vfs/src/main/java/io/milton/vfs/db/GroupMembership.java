@@ -19,8 +19,10 @@ package io.milton.vfs.db;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -124,6 +126,22 @@ public class GroupMembership implements Serializable {
             }
         }
     }
+    
+    /**
+     * Returns a de-duped set of organisations which the given memberships are
+     * linked ot
+     * 
+     * @param memberships
+     * @return 
+     */
+    public static Set<Organisation> toOrgs(List<GroupMembership> memberships) {
+        Set<Organisation> set = new HashSet<>();
+        for( GroupMembership m : memberships ) {
+            set.add(m.getWithinOrg());
+        }
+        return set;
+    }
+    
     private Long id;
     private Organisation withinOrg;
     private Profile member;

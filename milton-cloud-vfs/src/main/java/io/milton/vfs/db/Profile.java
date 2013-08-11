@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
         uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
-    private List<AttendeeRequest> attendeeRequests;
 
+    private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
 
     public static String findAutoName(String nickName, Session session) {
@@ -97,11 +97,11 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     /**
      * Find a user who has a membership in the given organisation
-     * 
+     *
      * @param org
      * @param name
      * @param session
-     * @return 
+     * @return
      */
     public static Profile find(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
@@ -129,6 +129,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         critSubordinate.add(Restrictions.eq("withinOrg", organisation));
         return DbUtils.toList(crit, Profile.class);
     }
+
     public static List<Profile> findAll(Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.setCacheable(true);
@@ -136,7 +137,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     }
 
-    
     /**
      * Find a profile by email address, but only looking within the given
      * organisation or subordinate orgs
@@ -189,7 +189,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Object result = DbUtils.unique(crit);
         return result == null;
     }
-
     private String name;
     private String firstName;
     private String surName;
@@ -369,9 +368,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public GroupMembership addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
         if (getMemberships() != null) {
             for (GroupMembership gm : getMemberships()) {
-                if( gm.getGroupEntity().getId() == g.getId()) {
+                if (gm.getGroupEntity().getId() == g.getId()) {
                     // same group
-                    if( gm.getWithinOrg().getId() == hasGroupInOrg.getId()) {
+                    if (gm.getWithinOrg().getId() == hasGroupInOrg.getId()) {
                         // and same org, so its a duplicate
                         return gm;
                     }
@@ -385,8 +384,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         gm.setWithinOrg(hasGroupInOrg);
         gm.setModifiedDate(new Date());
         session.save(gm);
-        
-        if( g.getGroupMemberships() == null ) {
+
+        if (g.getGroupMemberships() == null) {
             g.setGroupMemberships(new ArrayList<GroupMembership>());
         }
         g.getGroupMemberships().add(gm);
@@ -442,17 +441,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return false;
     }
-    
+
     public boolean isInGroup(Group group) {
         if (getMemberships() != null) {
             for (GroupMembership m : getMemberships()) {
-                if( m.getGroupEntity().getId() == group.getId()) {
+                if (m.getGroupEntity().getId() == group.getId()) {
                     return true;
                 }
             }
         }
         return false;
-    }    
+    }
 
     /**
      * Test if the current user is within a group, where the users membership
@@ -528,5 +527,41 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public void setAttendeeRequests(List<AttendeeRequest> attendeeRequests) {
         this.attendeeRequests = attendeeRequests;
+    }
+
+    /**
+     * Find all memberships of this user to organisations of the given type, which
+     * are within the given parent org. If the orgtype is null returns all memberships
+     * withint the given parent org
+     * 
+     * 
+     * @param ot
+     * @param parentOrg
+     * @return 
+     */
+    public List<GroupMembership> membershipsForOrgType(OrgType ot, Organisation parentOrg) {
+        List<GroupMembership> list = new ArrayList<>();
+        if (ot == null) {
+            // use any membership from within the awarding org
+            if (getMemberships() != null) {
+                for (GroupMembership m : getMemberships()) {
+                    if (m.getWithinOrg().isWithin(parentOrg)) {
+                        list.add(m);                        
+                    }
+                }
+            }
+        } else {
+            // find a membership to an org of type pointsOrgType
+            if (getMemberships() != null) {
+                for (GroupMembership m : getMemberships()) {
+                    if (m.getWithinOrg().isWithin(parentOrg)) {
+                        if (m.getWithinOrg().getOrgType() != null && ot.getId() == m.getWithinOrg().getOrgType().getId()) {
+                            list.add(m);
+                        }
+                    }
+                }
+            }
+        }
+        return list;
     }
 }
