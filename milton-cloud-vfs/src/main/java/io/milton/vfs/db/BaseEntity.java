@@ -50,9 +50,23 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     private Date modifiedDate;
     private List<Repository> repositories;    // has repositories
 
+    /**
+     * Returns a human readable representation of the name of this entity
+     * 
+     * @return 
+     */
     @Transient
     public abstract String getFormattedName();
 
+    /**
+     * Returns the logical name of the entity. For a Profile this is its name property which is globally unique,
+     * for an organisation its the orgId which is unique within its administrative domain
+     * 
+     * @return 
+     */
+    @Transient
+    public abstract String getEntityName();
+    
     @Id
     @GeneratedValue
     public long getId() {

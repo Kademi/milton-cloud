@@ -807,4 +807,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
         return getFieldset().get(fieldName);
     }
+    
+    @Transient
+    @Override
+    public String getEntityName() {
+        return getOrgId();
+    }
+
+    
 }

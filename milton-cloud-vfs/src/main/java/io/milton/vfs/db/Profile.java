@@ -509,6 +509,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     @Transient
+    @Override
+    public String getEntityName() {
+        return getName();
+    }
+
+    
+    
+    @Transient
     public Date getPasswordCredentialDate() {
         if (getCredentials() != null) {
             for (Credential c : getCredentials()) {
