@@ -67,6 +67,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
     
+    public static final String ENTITY_TYPE_ORG = "O";
+    
     private List<OrgType> orgTypes;
     
     private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect for orgs of this type

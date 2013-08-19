@@ -378,3 +378,15 @@ function replaceSpecialChars(nameToUse) {
     nameToUse = nameToUse.replace("--", "-");
     return nameToUse;
 }
+
+function pulseBorder(node) {
+    node.animate({
+        boxShadow: '0 0 30px #ED9DAE'
+    }, 2000, function() {
+        setTimeout(function() {
+            node.animate({
+                boxShadow: '0 0 0 #FFF'
+            }, 1000);
+        }, 5000);
+    });
+}

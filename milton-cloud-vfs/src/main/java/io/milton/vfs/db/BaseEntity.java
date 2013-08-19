@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseEntity.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseEntity.class);   
     
     public static BaseEntity find(String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);

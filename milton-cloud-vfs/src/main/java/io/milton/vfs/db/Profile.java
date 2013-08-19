@@ -34,6 +34,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
 
+    public static final String ENTITY_TYPE_PROFILE = "U";
+    
     public static String findAutoName(String nickName, Session session) {
         String nameToUse = DbUtils.replaceYuckyChars(nickName);
         nameToUse = getUniqueName(nameToUse, session);
