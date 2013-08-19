@@ -20,6 +20,7 @@ import io.milton.cloud.server.web.OrgData;
 import io.milton.cloud.server.web.ExtraField;
 import io.milton.cloud.server.web.GroupInWebsiteFolder;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.common.With;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.GroupMembershipApplication;
 import io.milton.cloud.server.db.OptIn;
@@ -166,7 +167,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
 
             // Check that any mandatory extra fields have been provided
-            Group group = parent.getGroup();
+            final Group group = parent.getGroup();
             NvSet fieldset = group.getFieldset();
             List<ExtraField> extraFields = new ArrayList<>();
             if (fieldset != null && !fieldset.isEmpty()) {
@@ -260,8 +261,11 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             }
 
 
-            String result;
-            WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
+            String result;            
+            final WebsiteRootFolder wrf = (WebsiteRootFolder) WebUtils.findRootFolder(this);
+            final Profile profile = p;
+            final Organisation logOrg = org;
+            
             if (!Group.REGO_MODE_OPEN.equals(group.getRegistrationMode())) {
                 // Not open, just create application
                 log.info("Group is not open, so create a membership application");
@@ -280,12 +284,18 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             } else {
                 // add directly to group
                 log.info("Group is open, so create membership immediately");
-                GroupMembership gm = p.addToGroup(group, org, session);
+                GroupMembership gm = p.getOrCreateGroupMembership(group, org, session, new With<GroupMembership, Object>() {
+
+                    @Override
+                    public Object use(GroupMembership t) throws Exception {
+                        SignupLog.logSignup(wrf.getWebsite(), profile, logOrg, group, SessionManager.session());
+                        return null;
+                    }
+                });
                 gm.setFields(fields);
                 session.save(gm);
                 log.info("attached NvSet to gm: " + gm.getId());
-                _(SignupApp.class).onNewMembership(p.membership(group), wrf);
-                SignupLog.logSignup(wrf.getWebsite(), p, org, group, SessionManager.session());
+                _(SignupApp.class).onNewMembership(p.membership(group), wrf);                
                 result = "created";
                 OptInLog.create(p, sourceIp, group, OptInLog.REGISTERED, session);
             }
@@ -295,14 +305,21 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             if (sOptins != null) {
                 List<OptIn> optins = OptIn.findForGroup(group, session);
                 for (String s : sOptins.split(",")) {
-                    Group optInGroup = getOrganisation().group(s, session);
+                    final Group optInGroup = getOrganisation().group(s, session);
                     if (optInGroup != null) {
                         OptIn o = OptIn.findOptin(optins, optInGroup);
                         if (o != null) {
-                            p.addToGroup(optInGroup, org, session);
+                            p.getOrCreateGroupMembership(optInGroup, org, session, new With<GroupMembership, Object>() {
+
+                                @Override
+                                public Object use(GroupMembership t) throws Exception {
+                                    SignupLog.logSignup(wrf.getWebsite(), profile, logOrg, optInGroup, SessionManager.session());
+                                    return null;
+                                }
+                            });
                             OptInLog.create(p, sourceIp, optInGroup, OptInLog.SELECT_OPTION, session);
                             _(SignupApp.class).onNewMembership(p.membership(optInGroup), wrf);
-                            SignupLog.logSignup(wrf.getWebsite(), p, org, optInGroup, SessionManager.session());
+                            
                         }
                     }
                 }

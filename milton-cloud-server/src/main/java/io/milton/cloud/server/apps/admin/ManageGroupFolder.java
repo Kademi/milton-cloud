@@ -224,7 +224,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     if (sourceGroup.getGroupMemberships() != null) {
                         for (GroupMembership m : sourceGroup.getGroupMemberships()) {
                             count++;
-                            m.getMember().addToGroup(group, m.getWithinOrg(), session);
+                            m.getMember().getOrCreateGroupMembership(group, m.getWithinOrg(), session, null);
                         }
                     }
                     session.save(group);

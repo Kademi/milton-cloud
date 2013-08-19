@@ -17,7 +17,9 @@ package io.milton.cloud.server.apps.admin;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.common.With;
 import io.milton.cloud.server.apps.signup.SignupApp;
+import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.PasswordManager;
 import io.milton.cloud.server.web.AbstractResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
@@ -331,7 +333,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         }
 
 
-        Organisation withinOrg = getOrganisation().childOrg(orgId, session);
+        final Organisation withinOrg = getOrganisation().childOrg(orgId, session);
         if (withinOrg == null) {
             // Try to find the org
             unmatched.add(lineList);
@@ -357,7 +359,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
             }
         } else {
             p = Profile.find(userName, session);
-        }
+        }        
 
         Date now = _(CurrentDateService.class).getNow();
 
@@ -386,6 +388,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         } else {
             numUpdated++;
         }
+        final Profile profile = p;
         p.setNickName(nickName);
         p.setEmail(email);
         p.setFirstName(firstName);
@@ -403,7 +406,7 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
         if (p.isInGroup(groupName, withinOrg)) {
             // great, do nothing
         } else {
-            Group g = rootOrg.group(groupName, session);
+            final Group g = rootOrg.group(groupName, session);
             if (g == null) {
                 lineList.add("Couldnt find group " + groupName + " on line: " + line);
                 unmatched.add(lineList);
@@ -413,9 +416,16 @@ public class ManageUsersCsv extends AbstractResource implements GetableResource,
                 if (g.isMember(p)) {
                     p.removeMembership(g, session);
                 }
-                p.addToGroup(g, withinOrg, session);
-                tm = System.currentTimeMillis();
-                _(SignupApp.class).onNewMembership(p.membership(g), null);
+                p.getOrCreateGroupMembership(g, withinOrg, session, new With<GroupMembership, Object>() {
+
+                    @Override
+                    public Object use(GroupMembership t) throws Exception {
+                        _(SignupApp.class).onNewMembership(profile.membership(g), null);
+                        SignupLog.logSignup(null, getOrganisation(), profile, withinOrg, g, SessionManager.session());
+                        return null;
+                    }
+                });
+                tm = System.currentTimeMillis();                
                 session.flush();
 
             }

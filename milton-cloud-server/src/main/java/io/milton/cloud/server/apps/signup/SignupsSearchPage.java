@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.apps.signup;
 
+import io.milton.cloud.common.With;
 import io.milton.cloud.server.apps.admin.*;
 import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.db.SignupLog;
@@ -87,9 +88,8 @@ public class SignupsSearchPage extends AbstractResource implements GetableResour
                     long profileId = Long.parseLong(sMemberId);
                     Profile p = Profile.get(profileId, session);
                     if( p != null ) {
-                        Organisation orgToAddTo = findOrgToAddTo(p);
-                        
-                        p.addToGroup(g, orgToAddTo, session);
+                        Organisation orgToAddTo = findOrgToAddTo(p);                        
+                        p.getOrCreateGroupMembership(g, orgToAddTo, session, null);
                     }
                 }
             }

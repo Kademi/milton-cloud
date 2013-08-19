@@ -18,6 +18,7 @@ package io.milton.cloud.server.apps.signup;
 
 import io.milton.cloud.server.web.GroupInWebsiteFolder;
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.common.With;
 import io.milton.cloud.process.*;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
@@ -319,13 +320,19 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
      * @param gma
      * @param b
      */
-    public void processPending(GroupMembershipApplication gma, Boolean b, Session session) {
+    public void processPending(final GroupMembershipApplication gma, Boolean b, Session session) {
         if (b) {
-            Profile p = gma.getMember();
-            Organisation org = gma.getWithinOrg();
-            Group group = gma.getGroupEntity();
-            p.addToGroup(group, org, session);
-            SignupLog.logSignup(gma.getWebsite(), p, org, group, SessionManager.session());
+            final Profile p = gma.getMember();
+            final Organisation org = gma.getWithinOrg();
+            final Group group = gma.getGroupEntity();
+            p.getOrCreateGroupMembership(group, org, session, new With<GroupMembership, Object>() {
+
+                @Override
+                public Object use(GroupMembership t) throws Exception {
+                    SignupLog.logSignup(gma.getWebsite(), p, org, group, SessionManager.session());
+                    return null;
+                }
+            });            
         } else {
             // TODO: send rejected email
         }

@@ -1,5 +1,6 @@
 package io.milton.vfs.db;
 
+import io.milton.cloud.common.With;
 import io.milton.vfs.db.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,9 +34,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
-
     public static final String ENTITY_TYPE_PROFILE = "U";
-    
+
     public static String findAutoName(String nickName, Session session) {
         String nameToUse = DbUtils.replaceYuckyChars(nickName);
         nameToUse = getUniqueName(nameToUse, session);
@@ -358,16 +358,32 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Create a GroupMembership linking this profile to the given group, within
-     * the given organisation. Is immediately saved
-     *
-     * First checks to see if the profile already has that membership. If so no
-     * changes are made
      *
      * @param g
+     * @param hasGroupInOrg
+     * @param session
+     * @param membershipCreatedCallback - called only if a membership is created. Optional.
+     * actually created
      * @return
      */
-    public GroupMembership addToGroup(Group g, Organisation hasGroupInOrg, Session session) {
+    public GroupMembership getOrCreateGroupMembership(Group g, Organisation hasGroupInOrg, Session session, With<GroupMembership, Object> membershipCreatedCallback) {
+        GroupMembership gm = getGroupMembership(g, hasGroupInOrg, session);
+        if (gm != null) {
+            return gm;
+        } else {
+            gm = createGroupMembership(g, hasGroupInOrg, session);
+            if (membershipCreatedCallback != null) {
+                try {
+                    membershipCreatedCallback.use(gm);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            return gm;
+        }
+    }
+
+    public GroupMembership getGroupMembership(Group g, Organisation hasGroupInOrg, Session session) {
         if (getMemberships() != null) {
             for (GroupMembership gm : getMemberships()) {
                 if (gm.getGroupEntity().getId() == g.getId()) {
@@ -379,7 +395,27 @@ public class Profile extends BaseEntity implements VfsAcceptor {
                 }
             }
         }
-        GroupMembership gm = new GroupMembership();
+        return null;
+    }
+
+    /**
+     * Create a GroupMembership linking this profile to the given group, within
+     * the given organisation. Is immediately saved
+     *
+     * If a duplicate membership exists an exception is thrown
+     *
+     * Check for existing membership by calling getGroupMembership(group,
+     * hasGruopInOrg, session)
+     *
+     * @param g
+     * @return
+     */
+    public GroupMembership createGroupMembership(Group g, Organisation hasGroupInOrg, Session session) {
+        GroupMembership gm = getGroupMembership(g, hasGroupInOrg, session);
+        if (gm != null) {
+            throw new RuntimeException("Found duplicate membership");
+        }
+        gm = new GroupMembership();
         gm.setCreatedDate(new Date());
         gm.setGroupEntity(g);
         gm.setMember(this);
@@ -516,8 +552,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         return getName();
     }
 
-    
-    
     @Transient
     public Date getPasswordCredentialDate() {
         if (getCredentials() != null) {
@@ -540,14 +574,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Find all memberships of this user to organisations of the given type, which
-     * are within the given parent org. If the orgtype is null returns all memberships
-     * withint the given parent org
-     * 
-     * 
+     * Find all memberships of this user to organisations of the given type,
+     * which are within the given parent org. If the orgtype is null returns all
+     * memberships withint the given parent org
+     *
+     *
      * @param ot
      * @param parentOrg
-     * @return 
+     * @return
      */
     public List<GroupMembership> membershipsForOrgType(OrgType ot, Organisation parentOrg) {
         List<GroupMembership> list = new ArrayList<>();
@@ -556,7 +590,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             if (getMemberships() != null) {
                 for (GroupMembership m : getMemberships()) {
                     if (m.getWithinOrg().isWithin(parentOrg)) {
-                        list.add(m);                        
+                        list.add(m);
                     }
                 }
             }

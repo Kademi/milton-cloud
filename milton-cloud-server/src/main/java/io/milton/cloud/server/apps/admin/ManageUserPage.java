@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.admin;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.common.With;
 import io.milton.cloud.server.apps.signup.SignupApp;
 import io.milton.cloud.server.db.SignupLog;
 import io.milton.cloud.server.manager.CurrentRootFolderService;
@@ -383,7 +384,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
      * @return
      */
     private boolean addMembership(String sGroup, Long orgId, Session session) {
-        Group group = getOrganisation().group(sGroup, session);
+        final Group group = getOrganisation().group(sGroup, session);
         if (group == null) {
             jsonResult = JsonResult.fieldError("group", "Sorry, I couldnt find group: " + sGroup);
             return false;
@@ -392,7 +393,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             jsonResult = JsonResult.fieldError("orgId", "Please select an organisation");
             return false;
         }
-        Organisation subOrg = getOrganisation().childOrg(orgId, session);
+        final Organisation subOrg = getOrganisation().childOrg(orgId, session);
         if (subOrg == null) {
             jsonResult = JsonResult.fieldError("orgId", "Organisation not found: " + orgId);
             return false;
@@ -400,9 +401,14 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
         if (!subOrg.isWithin(getOrganisation())) {
             throw new RuntimeException("Selected org is not contained within this org. selected orgId=" + orgId + " this org: " + getOrganisation().getFormattedName());
         }
-        profile.addToGroup(group, subOrg, session);
-        _(SignupApp.class).onNewMembership(profile.membership(group), null);
-        SignupLog.logSignup(null, getOrganisation(), profile, subOrg, group, SessionManager.session());
+        profile.getOrCreateGroupMembership(group, subOrg, session, new With<GroupMembership, Object>() {
+            @Override
+            public Object use(GroupMembership t) throws Exception {
+                _(SignupApp.class).onNewMembership(profile.membership(group), null);
+                SignupLog.logSignup(null, getOrganisation(), profile, subOrg, group, SessionManager.session());
+                return null;
+            }
+        });
         return true;
     }
 
