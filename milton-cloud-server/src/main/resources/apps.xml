@@ -34,6 +34,7 @@
                 <bean class="io.milton.cloud.server.apps.cors.CorsApp"/>
                 <bean class="io.milton.cloud.server.apps.scheduler.SchedulerApp"/>
                 <bean class="io.milton.cloud.server.apps.journal.JournalApp"/>
+                <bean class="io.milton.cloud.server.apps.snapengage.SnapEngageApp"/>
             </list>
         </constructor-arg>
         <constructor-arg ref="current.root.folder.service"/>
