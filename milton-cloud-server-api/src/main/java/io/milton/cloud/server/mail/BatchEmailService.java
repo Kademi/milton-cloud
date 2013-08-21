@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.mvel2.templates.TemplateRuntime;
 
@@ -75,11 +76,13 @@ public class BatchEmailService {
      * @param session
      * @throws IOException
      */
-    public void generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
-        generateEmailItems(j, null, directRecipients, callback, session);
+    public BaseEmailJob generateEmailItems(BaseEmailJob j, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
+        return generateEmailItems(j, null, directRecipients, callback, session);
     }
 
     /**
+     * This may clear the session, so dont use any of the hibernate objects passed
+     * in after the method completes!
      *
      * @param j
      * @param evaluationTarget - the user to be used when evaluating filters. If
@@ -91,21 +94,37 @@ public class BatchEmailService {
      * @param session
      * @throws IOException
      */
-    public void generateEmailItems(BaseEmailJob j, Profile evaluationTarget, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
+    public BaseEmailJob generateEmailItems(BaseEmailJob j, Profile evaluationTarget, List<BaseEntity> directRecipients, BatchEmailCallback callback, Session session) throws IOException {
         Set<Profile> profiles = filterRecipients(j, evaluationTarget, directRecipients, session);
         if (profiles.isEmpty()) {
             log.warn("No recipients!! For job: " + j.getId());
-            return;
+            return j;
         }
-
+        // Copy ID's so we can flush the session...
+        Set<Long> profileIds = new HashSet<>();
+        for( Profile p : profiles) {
+            profileIds.add(p.getId());
+        }
         log.info("recipients: " + profiles.size());
         if (j.getEmailItems() == null) {
             j.setEmailItems(new ArrayList<EmailItem>());
         }
-        for (Profile p : profiles) {
+        long jobId = j.getId();
+        int count = 0;
+        session.setFlushMode(FlushMode.MANUAL);
+        for (Long pId : profileIds) {
+            count++;
+            Profile p = Profile.get(pId, session);
             enqueueSingleEmail(j, p, callback, session);
+            if (count % 20 == 0) {
+                log.info("Flush and clear session");
+                session.flush();
+                session.clear();
+                j = (BaseEmailJob) session.get(BaseEmailJob.class, jobId);
+            }
         }
         session.save(j);
+        return j;
     }
 
     public Set<Profile> filterRecipients(BaseEmailJob j, Profile evaluationTarget, List<BaseEntity> directRecipients, Session session) {
@@ -116,7 +135,7 @@ public class BatchEmailService {
         log.info("Direct recipients: " + directRecipients.size());
         Set<Profile> profiles = new HashSet<>();
         EvaluationContext evaluationContext = new EvaluationContext(j.getFilterScriptXml());
-        evaluationContext.getAttributes().put("org", j.getOrganisation());        
+        evaluationContext.getAttributes().put("org", j.getOrganisation());
         for (BaseEntity e : directRecipients) {
             if (e != null) {
                 checkFilterAndAppend(j, evaluationTarget, e, evaluationContext, profiles);
@@ -128,15 +147,17 @@ public class BatchEmailService {
         return profiles;
     }
 
+    
     /**
-     * 
+     *
      * @param j
-     * @param evaluationTarget - if not null is used as the subject to evaluation the filter, otherwise each recipient is used
+     * @param evaluationTarget - if not null is used as the subject to
+     * evaluation the filter, otherwise each recipient is used
      * @param g
      * @param evaluationContext
-     * @param recipientList 
+     * @param recipientList
      */
-    private void checkFilterAndAppend(final BaseEmailJob j, final Profile evaluationTarget,final BaseEntity g, final EvaluationContext evaluationContext, final Set<Profile> recipientList) {
+    private void checkFilterAndAppend(final BaseEmailJob j, final Profile evaluationTarget, final BaseEntity g, final EvaluationContext evaluationContext, final Set<Profile> recipientList) {
         log.info("append: group: " + g.getId() + " - " + g.getId());
 
         final VfsVisitor visitor = new AbstractVfsVisitor() {
@@ -152,7 +173,7 @@ public class BatchEmailService {
             @Override
             public void visit(Profile p) {
                 Profile target = evaluationTarget; // use the evaluationTarget if provided, otherwise the recipient
-                if( target == null  ) {
+                if (target == null) {
                     target = p;
                 }
                 System.out.println("checkFilterAndAppend: " + target.getEmail());

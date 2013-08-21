@@ -199,7 +199,7 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
             Profile p = Profile.find(email, session);
             if (p != null) {
                 // Check password matches
-                if (p.getCredentials() != null && p.getCredentials().isEmpty()) {
+                if (p.getCredentials() != null && !p.getCredentials().isEmpty()) {
                     if (_(PasswordManager.class).verifyPassword(p, password)) {
                         // Passwords match, all good
                     } else {

@@ -86,7 +86,7 @@ public class GroupEmailService {
      * @param j
      * @param session
      */
-    private void generateEmailItems(final GroupEmailJob j, final Session session) throws IOException {
+    private void generateEmailItems(GroupEmailJob j, Session session) throws IOException {
         boolean isPasswordReset = j.isPasswordReset() == null ? false : j.isPasswordReset();
         if (j.getThemeSite() == null && isPasswordReset) {
             throw new RuntimeException("Cant send password reset group email because no theme has been selected");
@@ -99,7 +99,7 @@ public class GroupEmailService {
         final Date now = _(CurrentDateService.class).getNow();
         BatchEmailCallback callback = getCallback(j, session);
 
-        batchEmailService.generateEmailItems(j, directRecips, callback, session);
+        j = (GroupEmailJob) batchEmailService.generateEmailItems(j, directRecips, callback, session);
 
         if (directRecips.isEmpty()) {
             j.setStatus(GroupEmailJob.STATUS_COMPLETED);
