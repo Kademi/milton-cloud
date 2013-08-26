@@ -322,3 +322,67 @@ function asc_sort(a, b){
 function dec_sort(a, b){
     return ($(b).text()) > ($(a).text());    
 }
+
+
+function submitEdifiedForm(callback, validateCallback) {
+    var form = $("#edifyForm");
+    log("trigger event..");
+    form.trigger("submitEdified");
+    log("submit form", form);
+    for (var key in CKEDITOR.instances) {
+        var editor = CKEDITOR.instances[key];
+        var content = editor.getData();
+        var inp = $("input[name=" + key + "], textarea[name=" + key + "]");
+        if (inp.length > 0) {
+            inp.val(content);
+        } else {
+            inp = $("<input type='hidden' name='" + key + "/>");
+            form.append(inp);
+            inp.val(content);
+        }
+        log("copied html editor val to:", inp, "for", key);
+    }
+
+    resetValidation(form);
+    if (!checkRequiredFields(form)) {
+        return false;
+    }
+
+    if (validateCallback) {
+        if (!validateCallback(form)) {
+            log("validation callback reported false");
+            return false;
+        }
+    }
+
+
+    var data = form.serialize();
+    log("serialied", data);
+
+    try {
+        //$("#edifyForm input[name=body]").attr("value", CKEDITOR.instances["editor1"].getData() );
+        $.ajax({
+            type: 'POST',
+            url: $("#edifyForm").attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(resp) {
+                ajaxLoadingOff();
+                log("common.js: edify: save success", resp, window.location.path);
+                if (callback) {
+                    log("call callback", callback);
+                    callback(resp);
+                } else {
+                    log("no callback");
+                }
+            },
+            error: function(resp) {
+                ajaxLoadingOff();
+                alert("err");
+            }
+        });
+    } catch (e) {
+        log("exception", e);
+    }
+    return false;
+}
