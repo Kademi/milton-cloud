@@ -88,7 +88,7 @@ public class InitHelper {
             for (int i = 0; i < numUsers; i++) {
                 String pname = name + i;
                 Profile p = checkCreateUser(pname, "password8", session, org, emailSender);
-                p.addToGroup(g, org, session);
+                p.getOrCreateGroupMembership(g, org, session, null);
             }
         }
         return g;

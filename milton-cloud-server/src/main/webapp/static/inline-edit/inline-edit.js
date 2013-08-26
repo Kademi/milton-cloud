@@ -10,7 +10,7 @@ $(function() {
                 return;
             }
             var formContainer = $(".contentForm");
-            if( formContainer.length == 0 ) {
+            if( formContainer.length === 0 ) {
                 return;
             }        
             initInlineEdit(formContainer);
@@ -27,10 +27,38 @@ function initInlineEdit(formContainer) {
     });
     var btnNew = $("<button class='new'>New Page</button>");
     btnNew.click(function() {
-        var href = window.location.pathname;
-        href = getFolderPath(href);
-        href = href + "/autoname.new?template=learner/modulePage"; // TODO: make configurable somewhoe
-        window.location.href = href;
+        var divTemplate = adminToolbar.find(".template");
+        if( divTemplate.length === 0 ) {
+            divTemplate = $("<div class='template well' style='display: none;'><p>Please wait while we get the list of templates...</p><img src='/static/common/ajax-loader.gif' /></div>");
+            adminToolbar.append(divTemplate);
+            divTemplate.show(300);
+            listTemplates(function(resp) {
+                log("got resp", resp);
+                divTemplate.html("<h4>New page</h4><p>Select a page template</p><ul class='templates'></ul>");
+                var ul = divTemplate.find("ul");
+                $.each(resp, function(i,n) {
+                    if( n.name.endsWith(".html") ) {                        
+                        ul.append("<li><a class='template' href='" + n.href + "'>" + n.name + "</a></li>");
+                    }
+                }); 
+            });
+            divTemplate.on("click", "a.template", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var target = $(e.target);
+                var href = window.location.pathname;
+                href = getFolderPath(href);
+                href = href + "/autoname.new?template=" + target.attr("href");
+                window.location.href = href;                
+            });
+        } else {
+            if( divTemplate.is(":visible") ) {
+                divTemplate.hide(300);
+            } else {
+                divTemplate.show(300);
+            }
+        }
+
     });
     adminToolbar.append(btnEdit).append(btnNew);
     $("body").append(adminToolbar);
@@ -43,9 +71,39 @@ function initInlineEdit(formContainer) {
             themeCssFiles.push(href);
         }
     });
-    if( window.location.href.endsWith(".new")) {
+    if( window.location.pathname.endsWith(".new")) {
         edifyPage(".contentForm");
     }    
+}
+
+function listTemplates( callback) {
+    var url = "/theme/_DAV/PROPFIND?fields=name,href&depth=2";
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: function(resp) {
+            $("body").trigger("ajaxLoading", {
+                loading: false
+            });
+            if( callback ) {
+                callback(resp);
+            }
+        },
+        error: function(resp) {
+            log("error", resp);
+            $("body").trigger("ajaxLoading", {
+                loading: false
+            });
+            if( resp.status == 200 ) {
+                if( callback ) {
+                    callback(name, resp);
+                }
+                return;
+            }
+            
+            alert('There was a problem looking for templates');
+        }
+    });
 }
 
 function edifyPage(selector) {

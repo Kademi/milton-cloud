@@ -208,15 +208,31 @@ public class ContentApp implements Application, PortletApplication, ResourceAppl
             List<Pair<String, String>> pairs = WebUtils.getThemeMenu(rootFolder);
             if (pairs != null) {
                 int cnt = 0;
+                String longestHref = null;
+                String longestId = null;
                 for (Pair<String, String> pair : pairs) {
                     String id = "menuContent" + cnt++;
                     String menuHref = pair.getObject1();
                     MenuItem i = parent.getOrCreate(id, pair.getObject2(), menuHref);
                     i.setOrdering(cnt * 10);
-                    if (thisHref != null && thisHref.startsWith(menuHref)) {
-                        MenuItem.setActiveId(id);
-                    }
+                    
+                    // Were setting active ID here, but thats no good because this doesnt have all
+                    // of the menu items, only those produced by the content app. So if rendering a non-content
+                    // page it will select the best match content page, which is not the real current page, so it will be wrong
+                    // Instead, we require pages to select the active id(s) because only the page can know logical hierarchy of parent menu items
+                    // Eg see RenderFileResource, it calls setActive
+                    
+//                    if (thisHref != null && thisHref.startsWith(menuHref)) {
+//                        if( longestHref == null || menuHref.length() > longestHref.length() ) {
+//                            longestHref = menuHref;
+//                            longestId = id;
+//                        }                        
+//                    }
                 }
+//                if( longestHref != null ) {
+//                    log.info("Longest: " + longestHref + " - " + longestId);
+////                    MenuItem.setActiveId(longestId);
+//                }
             }
         }
     }

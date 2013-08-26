@@ -198,6 +198,9 @@ function initUser() {
         userName = userUrl.substr(0, userUrl.length - 1); // drop trailing slash
         var pos = userUrl.indexOf("users");
         userName = userName.substring(pos + 6);
+        
+        log("current userName", userName);
+        
         $("#currentuser").attr("href", userUrl);
         $(".requiresuser").show();
         $(".sansuser").hide();
@@ -212,6 +215,11 @@ function initUser() {
 function initUserCookie() {
     userUrl = $.cookie('miltonUserUrl');
     if (userUrl && userUrl.length > 1) {
+        log("initUserCookie", userUrl);
+        if( userUrl.startsWith("b64")) {
+            userUrl = userUrl.substring(3); // strip b64 ext
+            userUrl = Base64.decode(userUrl);
+        }
         userUrl = dropQuotes(userUrl);
         userUrl = dropHost(userUrl);
         userName = userUrl.substr(0, userUrl.length - 1); // drop trailing slash

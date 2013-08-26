@@ -248,19 +248,17 @@ public class WebUtils {
                     String id = "menuContent" + cnt++;
                     String href = pair.getObject1();
                     Path p = Path.path(href);
-                    if (p.getParent() != null) {
-                        String parentHref = p.getParent().toString();
-                        if (thisHref.startsWith(parentHref)) {
-                            if (longestHref == null || parentHref.length() > longestHref.length()) {
-                                longestHref = parentHref;
-                                menuId = id;
-                            }
-                        }
+                    String sectionHref;
+                    if( p.getName() != null && p.getName().equals("index.html")) {
+                        sectionHref = p.getParent().toString();
                     } else {
-                        // is root
-                        if( thisHref.equals("/") || thisHref.equals("/index.html")) {
+                        sectionHref = p.toString();
+                    }
+                    
+                    if (thisHref.startsWith(sectionHref)) {
+                        if (longestHref == null || sectionHref.length() > longestHref.length()) {
+                            longestHref = sectionHref;
                             menuId = id;
-                            break;
                         }
                     }
                 }

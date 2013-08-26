@@ -17,6 +17,7 @@
 package io.milton.cloud.server.apps.user;
 
 import io.milton.cloud.common.CurrentDateService;
+import io.milton.cloud.common.With;
 import io.milton.cloud.server.DataSessionManager;
 import io.milton.cloud.server.db.OptIn;
 import io.milton.cloud.server.db.OptInLog;
@@ -331,7 +332,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
      * @return
      */
     public List<GroupMembership> getMemberships() {
-        Profile p = _(SpliffySecurityManager.class).getCurrentUser();        
+        Profile p = _(SpliffySecurityManager.class).getCurrentUser();
         List<GroupMembership> list = new ArrayList<>();
         if (p != null) {
             Organisation thisOrg = getOrganisation();
@@ -394,7 +395,7 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
         }
     }
 
-    private void setOptin(boolean enableOptin, String optinGroupName, Session session) {        
+    private void setOptin(boolean enableOptin, String optinGroupName, Session session) {
         OptIn foundOptIn = null;
         for (OptIn optin : getOptins()) {
             if (optin.getOptinGroup().getName().equals(optinGroupName)) {
@@ -403,19 +404,25 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
             }
         }
         if (foundOptIn != null) {
-            Group foundGroup = foundOptIn.getOptinGroup();
-            Profile p = _(SpliffySecurityManager.class).getCurrentUser();
-            Organisation memberOrg = foundOptIn.findOrgForOptin(p, SessionManager.session());
+            final Group foundGroup = foundOptIn.getOptinGroup();
+            final Profile p = _(SpliffySecurityManager.class).getCurrentUser();
+            final Organisation memberOrg = foundOptIn.findOrgForOptin(p, SessionManager.session());
             if (enableOptin) {
-                p.addToGroup(foundGroup, memberOrg, session);
+                final Resource thisRes = this;
+                p.getOrCreateGroupMembership(foundGroup, memberOrg, session, new With<GroupMembership, Object>() {
+                    @Override
+                    public Object use(GroupMembership t) throws Exception {
+                        Website w = WebUtils.getWebsite(thisRes);
+                        SignupLog.logSignup(w, p, memberOrg, foundGroup, SessionManager.session());
+                        return null;
+                    }
+                });
                 String sourceIp = "unknown";
                 if (HttpManager.request() != null) {
                     sourceIp = HttpManager.request().getFromAddress();
                 }
                 OptInLog.create(p, sourceIp, foundGroup, sourceIp, session);
 
-                Website w = WebUtils.getWebsite(this);
-                SignupLog.logSignup(w, p, memberOrg, foundGroup, SessionManager.session());
             } else {
                 p.removeMembership(foundGroup, session);
             }
@@ -549,7 +556,6 @@ public class ProfilePage extends TemplatedHtmlPage implements PostableResource, 
 
         jsonResult.write(out);
     }
-
 
     public class OptinBean {
 

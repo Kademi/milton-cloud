@@ -65,3 +65,10 @@ div.adminToolbar button:hover {
     max-height: 300px;
     overflow: scroll;
 }
+
+.adminToolbar div.template {
+    left: -235px;
+    position: relative;
+    top: -55px;
+    width: 200px;
+}

@@ -19,6 +19,7 @@
         var config = $.extend( {
             'pageUrl' : window.location,
             'renderCommentFn' : function(user, date, comment) {
+                log("Show user", user);
                 var s = "";
                 s = s + "<p class='forumAnnotation'>" + user.name + " | " + toDisplayDateNoTime(date) + "</p>";
                 s = s + "<p class='forumText'>" + comment + "</p>";

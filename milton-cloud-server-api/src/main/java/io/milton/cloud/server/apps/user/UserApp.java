@@ -150,7 +150,7 @@ public class UserApp implements Application, ChildPageApplication, BrowsableAppl
             RootFolder rf = (RootFolder) parent;
             switch (requestedName) {
                 case "profile":
-                    MenuItem.setActiveIds("menuDashboard");
+                    //MenuItem.setActiveIds("menuDashboard");
                     return new ProfilePage(requestedName, rf);
             }
         } else if( parent instanceof UserResource) {
