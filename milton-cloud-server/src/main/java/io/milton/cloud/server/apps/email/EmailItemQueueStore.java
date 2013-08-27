@@ -150,6 +150,7 @@ public class EmailItemQueueStore implements QueueStore {
                 log.info("next: Loaded queue size: " + items.size());
                 currentQueue = new ArrayList<>();
                 for (EmailItem i : items) {
+                    // TODO email: only send from jobs which are not canceled or paused
                     QueueInfo info = new QueueInfo(aspirinConfiguration, listenerManager);
                     info.setMailid(i.getId() + "");
                     info.setRecipient(i.getRecipientAddress());

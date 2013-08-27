@@ -100,17 +100,22 @@ function initHelp() {
         var page = $(document).find("meta[name=templateName]").attr("value");
         // TODO: make this domain configurable
         //var href = "http://fuselms.loopbackdns.com:8080/docs";
-        var href = "http://www.fuselms.com/docs";
+        var href = "http://docs.fuselms.com/ref/screens";
         href += page;
         modal.find(".ModalContent").load(href + " #helpContent", function(responseText, textStatus, XMLHttpRequest) {
             log("finished", textStatus);
             if (textStatus == "error") {
                 modal.find(".ModalContent").html("Sorry, help content for this page is unavailable");
+            } else {
+                var contentPage = $(responseText);
+                var content = contentPage.find("#body").contents();
+                modal.find(".ModalContent").html(content);
             }
         });
 
     });
 }
+
 
 function initNav() {
     var bodyClasses = jQuery("body").attr("class");

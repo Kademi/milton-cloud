@@ -57,6 +57,10 @@ public class EmailItem implements Serializable {
      * @return
      */
     public static List<EmailItem> findToSend(Date now, Session session) {
+        
+        // TODO email: should select up to 10 from each job
+        // TODO email: only select from jobs which are not canceled or paused
+        
         Criteria crit = session.createCriteria(EmailItem.class);
         // sendStatus must be null or "r" = try
         crit.add(Restrictions.or(
