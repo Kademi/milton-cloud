@@ -37,7 +37,7 @@
     background-image: -moz-linear-gradient(center top , #FAB14B, #F89810);
 }
 .mtreeAddFolder, .mtreeDelete {
-    width: 45%;
+    width: 35%;
 }
 .mtreeAddFolder {
     margin-left: 20px;
