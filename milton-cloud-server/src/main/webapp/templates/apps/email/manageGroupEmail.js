@@ -409,7 +409,8 @@ function sendMailAjax(reallySend) {
                     $("a.statusTab").click();
                     $("#manageEmail button").hide();
                     $(".GroupList a").hide();
-                    $(".Content.Send").html("<h4>Email has been sent, or is sending</h4>");
+                    $(".Draft").removeClass("Draft").addClass("Running");
+                    
                     initStatusPolling();
                 } else {
                     alert("The preview email has been sent to your email address. Please review it");
@@ -449,9 +450,11 @@ function pollStatus() {
             success: function(resp) {
                 displayStatus(resp.data);
                 if (resp.data.statusCode != "c") {
+                    $(".Draft").removeClass("Draft").addClass("Running");
                     window.setTimeout(pollStatus, 2000);
                 } else {
                     log("job status is finished, so don't poll");
+                    $(".Running").removeClass("Running").addClass("Complete");
                 }
             },
             error: function(resp) {

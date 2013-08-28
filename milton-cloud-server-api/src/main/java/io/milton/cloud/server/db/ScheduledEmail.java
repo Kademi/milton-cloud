@@ -27,6 +27,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +48,22 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
     public static List<ScheduledEmail> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(ScheduledEmail.class);
         crit.add(Restrictions.eq("organisation", org));
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+        
         return DbUtils.toList(crit, ScheduledEmail.class);
     }
 
     public static List<ScheduledEmail> findPossiblyDue(Date now, Session session) {
         Criteria crit = session.createCriteria(ScheduledEmail.class);
         crit.add(Restrictions.eq("enabled", true));
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+        
         crit.add(Restrictions.lt("startDate", now));
         crit.add(
                 Restrictions.or(Restrictions.gt("endDate", now), Restrictions.isNull("endDate")));
@@ -288,6 +299,14 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
         cal.set(Calendar.HOUR_OF_DAY, getRunHour());
         return cal.getTime();
     }
+
+    @Transient
+    @Override
+    public boolean isActive() {
+        return enabled && !deleted();
+    }
+    
+    
 
     public static class TakeResult {
 

@@ -115,7 +115,7 @@ public class BatchEmailService {
         for (Long pId : profileIds) {
             count++;
             Profile p = Profile.get(pId, session);
-            enqueueSingleEmail(j, p, callback, session);
+            enqueueSingleEmail(j, p, false, callback, session);
             if (count % 20 == 0) {
                 log.info("Flush and clear session");
                 session.flush();
@@ -200,7 +200,17 @@ public class BatchEmailService {
         }
     }
 
-    public void enqueueSingleEmail(BaseEmailJob j, Profile recipientProfile, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
+    /**
+     * 
+     * @param j
+     * @param recipientProfile
+     * @param forceSend - email should be sent even if job is not active
+     * @param callback
+     * @param session
+     * @throws HibernateException
+     * @throws IOException 
+     */
+    public void enqueueSingleEmail(BaseEmailJob j, Profile recipientProfile, boolean forceSend, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
         String from = j.getFromAddress();
         if (from == null) {
             from = "@" + _(CurrentRootFolderService.class).getPrimaryDomain();
@@ -227,6 +237,7 @@ public class BatchEmailService {
         if (subject == null || subject.trim().length() == 0) {
             subject = "Auto mail from " + j.getOrganisation().getFormattedName();
         }
+        i.setForceSend(forceSend);
         i.setSubject(subject);
 
         j.getEmailItems().add(i);

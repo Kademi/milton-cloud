@@ -184,6 +184,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             if (requestedName.equals("inbox")) {
                 return new EmailFolder(wrf, requestedName, null);
             }
+        } else if( parent instanceof ManageGroupEmailFolder) {
+            if( requestedName.equals("log.html")) {
+                ManageGroupEmailFolder f = (ManageGroupEmailFolder) parent;
+                return new ManageGroupEmailLog(requestedName, f, f.getJob());
+            }
+            
         }
         return null;
     }

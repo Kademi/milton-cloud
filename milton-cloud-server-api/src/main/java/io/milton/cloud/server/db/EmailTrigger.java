@@ -26,6 +26,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,11 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     public static List<EmailTrigger> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(EmailTrigger.class);
         crit.add(Restrictions.eq("organisation", org));
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+        
         return DbUtils.toList(crit, EmailTrigger.class);
     }
 
@@ -57,6 +63,11 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
         crit.setCacheable(true);
         crit.add(Restrictions.eq("themeSite", website));
         crit.add(Restrictions.eq("eventId", eventId));
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+        
         List<EmailTrigger> rawList = DbUtils.toList(crit, EmailTrigger.class);
         log.info("triggers raw: " + rawList.size());
         List<EmailTrigger> finalList = new ArrayList<>();
@@ -254,4 +265,12 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     public List<EmailItem> history(Date from, Date to, boolean reverseOrder, Session session) {
         return EmailItem.findByJobAndDate(this, from, to,reverseOrder, session);
     }
+
+    @Transient
+    @Override
+    public boolean isActive() {
+        return enabled && !deleted();
+    }
+    
+    
 }

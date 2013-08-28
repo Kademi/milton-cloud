@@ -57,6 +57,7 @@ public class GroupEmailService {
         GroupEmailJob j = (GroupEmailJob) session.get(GroupEmailJob.class, jobId);
         if (j == null) {
             log.warn("Job not found: " + jobId);
+            return ;
         }
         log.info("send: " + j.getSubject() + " status: " + j.getStatus());
         if (j.readyToSend()) {
@@ -76,7 +77,7 @@ public class GroupEmailService {
         }
 
         BatchEmailCallback callback = getCallback(j, session);
-        batchEmailService.enqueueSingleEmail(j, recipientProfile, callback, session);
+        batchEmailService.enqueueSingleEmail(j, recipientProfile,true, callback, session);
     }
 
     /**

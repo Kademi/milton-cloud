@@ -3,18 +3,26 @@
         <title>$view.title</title>
         <link href="manageGroupEmail.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageGroupEmail.js">//</script>
+        <style>
+            .status-tools * {
+                display: none;
+            }
+            .status-tools.draft .draft, .status-tools.Running sending .status-tools.Complete complete {
+                display: inline-block;
+            }
+        </style>
     </head>
     <body>
         <form name="frmDetails" action="." method="post" class="">
 
             <section id="manageEmail" class="MainContent">
-
-                <div class="pull-right">
-                    #if( $page.status == "Draft" )
-                    <button class="Btn">Save Changes</button>
-                    #else
-                    This email has been sent.
-                    #end                
+                
+                <div class="pull-right $page.status status-tools">
+                    <button class="Btn Draft">Save Changes</button>
+                    <span class="Complete">This email has been sent.</span>
+                    <span class="Running">Job is running..</span>
+                    <a class="Running Complete" href="log.html">See Log</a>
+                    
                 </div>
 
                 <nav class="TabNav ClearFix">

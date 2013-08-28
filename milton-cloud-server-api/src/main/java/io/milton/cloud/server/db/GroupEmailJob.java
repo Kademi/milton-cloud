@@ -22,6 +22,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -56,8 +57,14 @@ public class GroupEmailJob extends BaseEmailJob {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("organisation", org));
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+        
         crit.addOrder(Order.asc("status"));
         crit.addOrder(Order.desc("statusDate"));
+        
         return DbUtils.toList(crit, GroupEmailJob.class);
     }
     
@@ -65,6 +72,11 @@ public class GroupEmailJob extends BaseEmailJob {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("status", STATUS_IN_PROGRESS));
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+        
         return DbUtils.toList(crit, GroupEmailJob.class);
     }    
     
@@ -92,6 +104,8 @@ public class GroupEmailJob extends BaseEmailJob {
         this.status = status;
     }
 
+    
+    
     @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getStatusDate() {
@@ -167,5 +181,11 @@ public class GroupEmailJob extends BaseEmailJob {
 
     }
 
-    
+
+    @Transient
+    @Override
+    public boolean isActive() {
+        // Note that when sending preview, status will be nu
+        return (status == null || STATUS_READY_TO_SEND.equals(status)) && !deleted(); 
+    }     
 }

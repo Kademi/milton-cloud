@@ -134,6 +134,16 @@ public class EmailItemQueueStore implements QueueStore {
                 Date now = currentDateService.getNow();
                 List<EmailItem> items = EmailItem.findToSend(now, session);
                 if (items == null || items.isEmpty()) {
+                    // No remaining items, so check for any completed jobs to tidy up
+                    List<GroupEmailJob> inProgress = GroupEmailJob.findInProgress(session);
+                    if (!inProgress.isEmpty()) {
+                        Transaction tx = session.beginTransaction();
+                        for (GroupEmailJob j : inProgress) {
+                            j.checkStatus(now, session);
+                        }
+                        tx.commit();
+                    }
+
                     // Convenient place to show memory usage
                     long free = Runtime.getRuntime().freeMemory();
                     long total = Runtime.getRuntime().totalMemory();
@@ -141,8 +151,8 @@ public class EmailItemQueueStore implements QueueStore {
                     long used = total - free;
                     long actualPerc = used * 100 / max;
                     long maxMb = max / (1024 * 1024);
-                    Cache c = sessionManager.getCache();
-                    
+//                    Cache c = sessionManager.getCache();
+
                     //System.out.println("cache: " + c.getClass());
                     log.info("next: Nothing more to send. Memory used=" + actualPerc + "%" + " of " + maxMb + "Mb");
                     return null;
@@ -150,35 +160,52 @@ public class EmailItemQueueStore implements QueueStore {
                 log.info("next: Loaded queue size: " + items.size());
                 currentQueue = new ArrayList<>();
                 for (EmailItem i : items) {
-                    // TODO email: only send from jobs which are not canceled or paused
-                    QueueInfo info = new QueueInfo(aspirinConfiguration, listenerManager);
-                    info.setMailid(i.getId() + "");
-                    info.setRecipient(i.getRecipientAddress());
-                    currentQueue.add(info);
+                    if (canSend(i)) {
+                        QueueInfo info = new QueueInfo(aspirinConfiguration, listenerManager);
+                        info.setMailid(i.getId() + "");
+                        info.setRecipient(i.getRecipientAddress());
+                        currentQueue.add(info);
+                    } else {
+                        log.info("Not adding emailitem because job is disabled. EmailItemId=" + i.getId());
+                    }
                 }
             } finally {
                 sessionManager.close();
             }
         }
 
-        QueueInfo next = currentQueue.remove(0);
-        log.info("Current queue size: " + currentQueue.size());
+        QueueInfo next = null;
+        while (next == null && !currentQueue.isEmpty()) {
+            next = currentQueue.remove(0);
+            log.info("Current queue size: " + currentQueue.size());
 
-        // Mark it as pending
-        Session session = sessionManager.open();
-        Transaction tx = session.beginTransaction();
-        try {
-            Date now = currentDateService.getNow();
-            Long id = Long.parseLong(next.getMailid());
-            EmailItem i = (EmailItem) session.get(EmailItem.class, id);
-            i.setSendStatus("p");
-            i.setSendStatusDate(now);
-            session.save(i);
-            tx.commit();
+            // Mark it as pending
+            Session session = sessionManager.open();
+            Transaction tx = session.beginTransaction();
+            try {
+                Date now = currentDateService.getNow();
+                Long id = Long.parseLong(next.getMailid());
+                EmailItem i = (EmailItem) session.get(EmailItem.class, id);
+                if (canSend(i)) {
+                    session.refresh(i);
+                    if (i.isReadyToSend()) {
+                        i.setSendStatus(EmailItem.STATUS_PENDING);
+                        i.setSendStatusDate(now);
+                        session.save(i);
+                        session.flush();
+                        tx.commit();
+                        log.info("next item: " + i.getRecipientAddress() + " attempts: " + i.getNumAttempts() + " id: " + i.getId());
+                    } else {
+                        log.info("EmailItem is no longer in the ready status, so ignore: " + i.getId() + " - status=" + i.getSendStatus());
+                    }
 
-            log.info("next item: " + i.getRecipientAddress() + " attempts: " + i.getNumAttempts() + " id: " + i.getId());
-        } finally {
-            sessionManager.close();
+                } else {
+                    log.info("Not taking EmailItem because job is not active: " + i.getId());
+                    next = null;
+                }
+            } finally {
+                sessionManager.close();
+            }
         }
 
         return next;
@@ -226,7 +253,7 @@ public class EmailItemQueueStore implements QueueStore {
             Integer status = SmtpUtils.getStatusCode(sStatus);
             if (status != null && (status >= 200 && status < 300)) {
                 log.info("setting complete email status complete: status code=" + status + " sStatus=" + sStatus);
-                i.setSendStatus("c");
+                i.setSendStatus(EmailItem.STATUS_COMPLETE);
             } else {
                 long tm = currentDateService.getNow().getTime();
                 tm = tm + retryIntervalMs;
@@ -236,13 +263,13 @@ public class EmailItemQueueStore implements QueueStore {
                     attempts = i.getNumAttempts();
                 }
                 if (attempts >= maxAttempts) {
-                    i.setSendStatus("f");
+                    i.setSendStatus(EmailItem.STATUS_FAILED);
                     log.warn("Set retry. Reached max attempts=" + attempts + " for id: " + i.getId());
                 } else {
                     attempts++;
                     i.setNextAttempt(retryDate); // when next to attempt delivery
                     i.setNumAttempts(attempts);
-                    i.setSendStatus("r"); // is now a retry
+                    i.setSendStatus(EmailItem.STATUS_RETRY); // is now a retry
                     log.warn("Set retry. Attempts=" + attempts + " for id: " + i.getId());
                 }
             }
@@ -282,5 +309,9 @@ public class EmailItemQueueStore implements QueueStore {
 
     public void setRetryIntervalMs(long retryIntervalMs) {
         this.retryIntervalMs = retryIntervalMs;
+    }
+
+    private boolean canSend(EmailItem i) {
+        return i.getJob() == null || i.getJob().isActive() || i.forceSend();
     }
 }

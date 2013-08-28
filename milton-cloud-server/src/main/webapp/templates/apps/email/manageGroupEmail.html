@@ -26,13 +26,14 @@
                         <td><span class='Status'>$!email.status</span></td>
                         <td>
                             <aside>
+                                <a class="Delete DeleteEmail" title="Delete" href="$email.name">
+                                    <span class="Hidden">Delete</span>
+                                </a>                                
+                                
                                 #if($email.status == "Draft" )
                                 <a class="Edit EditEmail" title="Edit" href="$email.name">
                                     <span class="Hidden">Edit</span>
                                 </a>
-                                <a class="Delete DeleteEmail" title="Delete" href="$email.name">
-                                    <span class="Hidden">Delete</span>
-                                </a>                                
                                 #else
                                 <a class="View ViewEmail" title="View" href="$email.name">
                                     <span class="Hidden">View</span>

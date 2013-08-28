@@ -14,10 +14,10 @@
  */
 package io.milton.cloud.server.db;
 
-import io.milton.vfs.db.Profile;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+import org.hibernate.Session;
 
 /**
  * Represents an attempt of sending an email, which might have been successful 
@@ -71,6 +71,10 @@ public class EmailSendAttempt implements Serializable{
 
     public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
+    }
+
+    public void delete(Session session) {
+        session.delete(this);
     }
 
     

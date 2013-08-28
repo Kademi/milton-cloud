@@ -63,6 +63,7 @@ import org.hibernate.Transaction;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Request;
 import io.milton.resource.DeletableResource;
+import io.milton.resource.Resource;
 import io.milton.vfs.data.DataSession;
 import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Group;
@@ -90,6 +91,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         this.parent = parent;
     }
 
+    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
@@ -311,7 +313,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
                 case "c":
                     return "Completed";
                 case "p":
-                    return "In progress";
+                    return "Running";
                 default:
                     return "Status: " + job.getStatus();
             }

@@ -26,11 +26,11 @@ import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
- * Base class for entities which represent email jobs, such as a group email
- * or an email trigger
- * 
- * This base class is not itself has no status information because in this abstract
- * sense it can't be sent.
+ * Base class for entities which represent email jobs, such as a group email or
+ * an email trigger
+ *
+ * This base class is not itself has no status information because in this
+ * abstract sense it can't be sent.
  *
  * @author brad
  */
@@ -38,10 +38,20 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 2)
 @Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public abstract class BaseEmailJob  implements Serializable{
+public abstract class BaseEmailJob implements Serializable {
 
     public abstract void accept(EmailJobVisitor visitor);
-    
+
+    /**
+     * Indicates if a job is 'active' in the sense that email items associated
+     * with it should be sent. A job may be paused or canceled, in which case
+     * any email items associated with the job should not be sent. However,
+     * status fields are associated with concrete subclasses of BaseEmailJob
+     *
+     * @return
+     */
+    @Transient
+    public abstract boolean isActive();
     private List<EmailItem> emailItems;
     private List<GroupRecipient> groupRecipients;
     private long id;
@@ -55,19 +65,10 @@ public abstract class BaseEmailJob  implements Serializable{
     private String fromAddress;
     private String html;
     private String filterScriptXml; // if present will filter out recipients which do not evaluate to true
+    private Boolean deleted;
 
-    public void delete(Session session) {
-        if( groupRecipients != null ) {
-            for( GroupRecipient gr : groupRecipients ) {
-                session.delete(gr);
-            }
-            groupRecipients.clear();
-        }
-        session.delete(this);
-    }    
-    
     @Id
-    @GeneratedValue    
+    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -76,7 +77,7 @@ public abstract class BaseEmailJob  implements Serializable{
         this.id = id;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Organisation getOrganisation() {
         return organisation;
     }
@@ -85,7 +86,7 @@ public abstract class BaseEmailJob  implements Serializable{
         this.organisation = organisation;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getName() {
         return name;
     }
@@ -159,8 +160,6 @@ public abstract class BaseEmailJob  implements Serializable{
         this.themeSite = themeSite;
     }
 
-    
-    
     public String getHtml() {
         return html;
     }
@@ -178,13 +177,11 @@ public abstract class BaseEmailJob  implements Serializable{
         this.filterScriptXml = filterScriptXml;
     }
 
-    
-    
     /**
      * Adds, but does not save, the group recipient
      */
     public void addGroupRecipient(Group g) {
-        if( this.getGroupRecipients() == null ) {
+        if (this.getGroupRecipients() == null) {
             setGroupRecipients(new ArrayList<GroupRecipient>());
         }
         GroupRecipient gr = new GroupRecipient();
@@ -200,6 +197,54 @@ public abstract class BaseEmailJob  implements Serializable{
     public void setType(String type) {
         this.type = type;
     }
+
+    /**
+     * Soft deletion flag
+     *
+     * @return
+     */
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public void delete(Session session) {
+        if( emailItems != null && !emailItems.isEmpty()) {
+            softDelete(session);
+        } else {
+            physicalDelete(session);
+        }
+    }
     
+    public void softDelete(Session session) {
+        setDeleted(true);
+        setName(getName() + "-Deleted-" + System.currentTimeMillis());
+        session.save(this);
+    }
     
+    public void physicalDelete(Session session) {
+        if (groupRecipients != null) {
+            for (GroupRecipient gr : groupRecipients) {
+                session.delete(gr);
+            }
+            groupRecipients.clear();
+        }
+        if (emailItems != null) {
+            for (EmailItem i : emailItems) {
+                i.delete(session);
+            }
+        }
+        session.delete(this);
+    }
+    
+    public boolean deleted() {
+        if( deleted == null ) {
+            return false;
+        } else {
+            return deleted.booleanValue();
+        }
+    }
 }

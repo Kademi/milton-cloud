@@ -19,6 +19,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,10 @@ public class EmailAttachment implements Serializable {
 
     public void setDisposition(String disposition) {
         this.disposition = disposition;
+    }
+
+    public void delete(Session session) {
+        session.delete(this);
     }
     
     

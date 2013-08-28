@@ -316,6 +316,9 @@ public class Formatter {
      * @return
      */
     public String formatAge(Object o) {
+        if( o == null ) {
+            return null;
+        }
         DateTime dt = getDateTime(o);
         DateTime now = new DateTime();
         Interval i;
