@@ -73,6 +73,13 @@ public class EmailItem implements Serializable {
         }
         // Find jobs with email items to send
         Criteria crit = session.createCriteria(EmailItem.class);
+        Criteria critJob = crit.createCriteria("job");
+
+        Disjunction jobNotDeleted = Restrictions.disjunction();
+        jobNotDeleted.add(Restrictions.isNull("deleted"));
+        jobNotDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        critJob.add(jobNotDeleted);
+                
         crit.add(Restrictions.isNotNull("job"));
         crit.add(Restrictions.or(
                 Restrictions.isNull("sendStatus"),

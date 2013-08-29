@@ -204,13 +204,14 @@ public class BatchEmailService {
      * 
      * @param j
      * @param recipientProfile
-     * @param forceSend - email should be sent even if job is not active
+     * @param isPreview - email should be sent even if job is not active. The emailItem will not be linked to the job, so 
+     * the email item will not show up in the job's history and will not affect its status
      * @param callback
      * @param session
      * @throws HibernateException
      * @throws IOException 
      */
-    public void enqueueSingleEmail(BaseEmailJob j, Profile recipientProfile, boolean forceSend, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
+    public void enqueueSingleEmail(BaseEmailJob j, Profile recipientProfile, boolean isPreview, BatchEmailCallback callback, Session session) throws HibernateException, IOException {
         String from = j.getFromAddress();
         if (from == null) {
             from = "@" + _(CurrentRootFolderService.class).getPrimaryDomain();
@@ -229,7 +230,10 @@ public class BatchEmailService {
         i.setReplyToAddress(replyTo);
 
         // Templating requires a HtmlPage to represent the template        
-        i.setJob(j);
+        if( !isPreview) {
+            i.setJob(j);
+            j.getEmailItems().add(i);
+        }
         i.setRecipient(recipientProfile);
         i.setRecipientAddress(recipientProfile.getEmail());
         i.setSendStatusDate(now);
@@ -237,10 +241,9 @@ public class BatchEmailService {
         if (subject == null || subject.trim().length() == 0) {
             subject = "Auto mail from " + j.getOrganisation().getFormattedName();
         }
-        i.setForceSend(forceSend);
+        i.setForceSend(isPreview); // force send might be redundant if not connecting to job?
         i.setSubject(subject);
-
-        j.getEmailItems().add(i);
+        
         session.save(i);
         String html = generateHtml(j, recipientProfile, callback, i);
         i.setHtml(html);

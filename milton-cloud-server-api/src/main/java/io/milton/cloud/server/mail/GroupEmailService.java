@@ -63,6 +63,7 @@ public class GroupEmailService {
         if (j.readyToSend()) {
             Transaction tx = session.beginTransaction();
             generateEmailItems(j, session);
+            session.flush();
             tx.commit();
         } else {
             log.warn("Job is not ready to send. Current statyus: " + j.getStatus());
@@ -109,6 +110,7 @@ public class GroupEmailService {
         }
         j.setStatusDate(now);
         session.save(j);
+        System.out.println("saved job " + j.getId() + " status " + j.getStatus());
     }
 
     public List<BaseEntity> getRecipients(final GroupEmailJob j) {

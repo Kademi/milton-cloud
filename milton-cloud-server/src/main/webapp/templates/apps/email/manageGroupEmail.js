@@ -37,12 +37,23 @@ function initEditEmailPage() {
     $("button.send").click(function(e) {
         e.stopPropagation();
         e.preventDefault();
-        sendMail();
+        if( $("body").hasClass("dirty") ) {
+            alert("Please save your changes before sending the email");
+        } else {
+            sendMail();
+        }
     });
     $("button.preview").click(function(e) {
         e.stopPropagation();
         e.preventDefault();
-        previewMail();
+        if( $("body").hasClass("dirty") ) {
+            alert("Please save your changes before sending the preview");
+        } else {
+            previewMail();
+        }                
+    });
+    $("input, select, textarea").change(function() {
+        $("body").addClass("dirty");
     });
 }
 
@@ -409,7 +420,7 @@ function sendMailAjax(reallySend) {
                     $("a.statusTab").click();
                     $("#manageEmail button").hide();
                     $(".GroupList a").hide();
-                    $(".Draft").removeClass("Draft").addClass("Running");
+                    $("#status-tools").removeClass("Draft").addClass("Running");
                     
                     initStatusPolling();
                 } else {
@@ -450,11 +461,11 @@ function pollStatus() {
             success: function(resp) {
                 displayStatus(resp.data);
                 if (resp.data.statusCode != "c") {
-                    $(".Draft").removeClass("Draft").addClass("Running");
+                    $("#status-tools").removeClass("Draft").addClass("Running");
                     window.setTimeout(pollStatus, 2000);
                 } else {
                     log("job status is finished, so don't poll");
-                    $(".Running").removeClass("Running").addClass("Complete");
+                    $("#status-tools").removeClass("Running").addClass("Complete");
                 }
             },
             error: function(resp) {

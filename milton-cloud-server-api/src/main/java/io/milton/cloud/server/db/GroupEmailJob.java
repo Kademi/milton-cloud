@@ -186,6 +186,13 @@ public class GroupEmailJob extends BaseEmailJob {
     @Override
     public boolean isActive() {
         // Note that when sending preview, status will be nu
-        return (status == null || STATUS_READY_TO_SEND.equals(status)) && !deleted(); 
+        return (status == null || STATUS_IN_PROGRESS.equals(status) || STATUS_READY_TO_SEND.equals(status)) && !deleted(); 
     }     
+
+    @Override
+    public String toString() {
+        return getName() + " (" + getId() + ") status=" + getStatus();
+    }
+    
+    
 }

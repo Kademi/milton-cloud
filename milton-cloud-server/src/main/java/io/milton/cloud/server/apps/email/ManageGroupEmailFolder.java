@@ -310,10 +310,12 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             return "Draft";
         } else {
             switch (job.getStatus()) {
-                case "c":
+                case GroupEmailJob.STATUS_COMPLETED:
                     return "Completed";
-                case "p":
+                case GroupEmailJob.STATUS_IN_PROGRESS:
                     return "Running";
+                case GroupEmailJob.STATUS_READY_TO_SEND:
+                    return "Preparing";
                 default:
                     return "Status: " + job.getStatus();
             }
@@ -452,7 +454,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         Date now = _(CurrentDateService.class).getNow();
         if (reallySend) {
             log.info("Sending real email");
-            job.setStatus("r");
+            job.setStatus(GroupEmailJob.STATUS_READY_TO_SEND);
             job.setStatusDate(now);
             session.save(job);
         } else {

@@ -133,30 +133,6 @@ public class EmailItemQueueStore implements QueueStore {
             try {
                 Date now = currentDateService.getNow();
                 List<EmailItem> items = EmailItem.findToSend(now, session);
-                if (items == null || items.isEmpty()) {
-                    // No remaining items, so check for any completed jobs to tidy up
-                    List<GroupEmailJob> inProgress = GroupEmailJob.findInProgress(session);
-                    if (!inProgress.isEmpty()) {
-                        Transaction tx = session.beginTransaction();
-                        for (GroupEmailJob j : inProgress) {
-                            j.checkStatus(now, session);
-                        }
-                        tx.commit();
-                    }
-
-                    // Convenient place to show memory usage
-                    long free = Runtime.getRuntime().freeMemory();
-                    long total = Runtime.getRuntime().totalMemory();
-                    long max = Runtime.getRuntime().maxMemory();
-                    long used = total - free;
-                    long actualPerc = used * 100 / max;
-                    long maxMb = max / (1024 * 1024);
-//                    Cache c = sessionManager.getCache();
-
-                    //System.out.println("cache: " + c.getClass());
-                    log.info("next: Nothing more to send. Memory used=" + actualPerc + "%" + " of " + maxMb + "Mb");
-                    return null;
-                }
                 log.info("next: Loaded queue size: " + items.size());
                 currentQueue = new ArrayList<>();
                 for (EmailItem i : items) {
@@ -166,7 +142,7 @@ public class EmailItemQueueStore implements QueueStore {
                         info.setRecipient(i.getRecipientAddress());
                         currentQueue.add(info);
                     } else {
-                        log.info("Not adding emailitem because job is disabled. EmailItemId=" + i.getId());
+                        log.info("Not adding emailitem because job is disabled. EmailItemId=" + i.getId() + " job: " + i.getJob());
                     }
                 }
             } finally {
@@ -203,6 +179,37 @@ public class EmailItemQueueStore implements QueueStore {
                     log.info("Not taking EmailItem because job is not active: " + i.getId());
                     next = null;
                 }
+            } finally {
+                sessionManager.close();
+            }
+        }
+
+        if (next == null) {
+            try {
+                Session session = sessionManager.open();
+                // No remaining items, so check for any completed jobs to tidy up
+                List<GroupEmailJob> inProgress = GroupEmailJob.findInProgress(session);
+                if (!inProgress.isEmpty()) {
+                    Transaction tx = session.beginTransaction();
+                    for (GroupEmailJob j : inProgress) {
+                        Date now = currentDateService.getNow();
+                        log.info("Found in progress job to check status of: " + j);
+                        j.checkStatus(now, session);
+                    }
+                    tx.commit();
+                }
+
+                // Convenient place to show memory usage
+                long free = Runtime.getRuntime().freeMemory();
+                long total = Runtime.getRuntime().totalMemory();
+                long max = Runtime.getRuntime().maxMemory();
+                long used = total - free;
+                long actualPerc = used * 100 / max;
+                long maxMb = max / (1024 * 1024);
+//                    Cache c = sessionManager.getCache();
+
+                //System.out.println("cache: " + c.getClass());
+                log.info("next: Nothing more to send. Memory used=" + actualPerc + "%" + " of " + maxMb + "Mb");
             } finally {
                 sessionManager.close();
             }
