@@ -76,7 +76,7 @@ CKEDITOR.plugins.add( 'image2',
                     [
                     {
                         type : 'html',
-                        html: "<div id='imageTree' class='tree'></div><div id='imageUploaded'></div><div class='imageEditor' style='position: absolute; top: 85px; left: 250px'><div id='imageContainer'></div></div>",
+                        html: "<div id='imageTree' class='tree'></div><div id='imageUploaded'></div><div class='imageEditor' style='position: absolute; top: 95px; left: 250px'><div id='imageContainer'></div></div>",
                         commit: function(data) {
                             log("commit, data=", data);
                         }
