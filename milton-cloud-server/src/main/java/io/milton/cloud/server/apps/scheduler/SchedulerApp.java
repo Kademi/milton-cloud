@@ -127,6 +127,7 @@ public class SchedulerApp implements Application, MenuApplication, ChildPageAppl
         BatchEmailService batchEmailService = _(BatchEmailService.class);
         List<BaseEntity> directRecips = getRecipients(due);
         session.save(due);
+        
         batchEmailService.generateEmailItems(due, directRecips, new BatchEmailCallback() {
             @Override
             public String beforeSend(Profile p, String template, Map templateVars, EmailItem emailItem) {

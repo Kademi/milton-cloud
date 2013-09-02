@@ -79,7 +79,7 @@ public class EmailItem implements Serializable {
         jobNotDeleted.add(Restrictions.isNull("deleted"));
         jobNotDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         critJob.add(jobNotDeleted);
-                
+
         crit.add(Restrictions.isNotNull("job"));
         crit.add(Restrictions.or(
                 Restrictions.isNull("sendStatus"),
@@ -155,8 +155,6 @@ public class EmailItem implements Serializable {
 
     public static List<EmailItem> findByRecipientAndOrg(Organisation org, BaseEntity p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
-        Criteria critJob = crit.createCriteria("job", "j", Criteria.LEFT_JOIN);
-        Criteria critTrigger = crit.createCriteria("emailTrigger", "t", Criteria.LEFT_JOIN);
 
         crit.add(Restrictions.eq("recipient", p));
         LogicalExpression orgRestrictions = Restrictions.or(Restrictions.eq("j.organisation", org), Restrictions.eq("t.organisation", org));
@@ -197,6 +195,18 @@ public class EmailItem implements Serializable {
         crit.add(Restrictions.eq("sendStatus", STATUS_PENDING));
         return DbUtils.toList(crit, EmailItem.class);
     }
+    
+    public static List<EmailItem> findInprogressByJob(BaseEmailJob job, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be "p" = in progress
+        crit.add(Restrictions.eq("job", job));
+        Disjunction inProg = Restrictions.disjunction();
+        inProg.add(Restrictions.eq("sendStatus", STATUS_RETRY));
+        inProg.add(Restrictions.eq("sendStatus", STATUS_PENDING));
+        crit.add(inProg);
+        return DbUtils.toList(crit, EmailItem.class);
+    }    
+        
 
     public static List<EmailItem> findByJobAndDate(BaseEmailJob job, Date from, Date to, boolean orderReverseDate, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
@@ -216,7 +226,24 @@ public class EmailItem implements Serializable {
         return DbUtils.toList(crit, EmailItem.class);
     }
 
-    public static long findIncompleteByJob(BaseEmailJob job, Session session) {
+    public static List<EmailItem> findByJob(BaseEmailJob job, Integer maxResults, Boolean orderReverseDate, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be "p" = in progress
+        crit.add(Restrictions.eq("job", job));
+        if (orderReverseDate != null) {
+            if (orderReverseDate) {
+                crit.addOrder(Order.desc("createdDate"));
+            } else {
+                crit.addOrder(Order.asc("createdDate"));
+            }
+        }
+        if (maxResults != null) {
+            crit.setMaxResults(maxResults);
+        }
+        return DbUtils.toList(crit, EmailItem.class);
+    }
+
+    public static long countIncompleteByJob(BaseEmailJob job, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
         // sendStatus must be "p" = in progress
         crit.add(Restrictions.eq("job", job));
@@ -227,15 +254,61 @@ public class EmailItem implements Serializable {
         crit.add(inProg);
         crit.setProjection(Projections.count("id"));
         Object result = crit.uniqueResult();
-        if( result == null ) {
+        if (result == null) {
             return 0;
-        } else if( result instanceof Integer ) {
+        } else if (result instanceof Integer) {
             Integer i = (Integer) result;
             return i.longValue();
         } else {
             return (long) result;
         }
     }
+    
+    
+    public static long countByJob(BaseEmailJob job, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be "p" = in progress
+        crit.add(Restrictions.eq("job", job));
+        crit.setProjection(Projections.count("id"));
+        Object result = crit.uniqueResult();
+        if (result == null) {
+            return 0;
+        } else if (result instanceof Integer) {
+            Integer i = (Integer) result;
+            return i.longValue();
+        } else {
+            return (long) result;
+        }
+    }            
+    
+    
+
+    /**
+     * 
+     * @param job
+     * @param status
+     * @param session
+     * @return 
+     */
+    public static long countByJob(BaseEmailJob job, String sendStatus, Session session) {
+        Criteria crit = session.createCriteria(EmailItem.class);
+        // sendStatus must be "p" = in progress
+        crit.add(Restrictions.eq("job", job));
+        if( sendStatus != null ) {
+            crit.add(Restrictions.eq("sendStatus", sendStatus));
+        }
+        crit.setProjection(Projections.count("id"));
+        Object result = crit.uniqueResult();
+        if (result == null) {
+            return 0;
+        } else if (result instanceof Integer) {
+            Integer i = (Integer) result;
+            return i.longValue();
+        } else {
+            return (long) result;
+        }
+    }    
+    
     private long id;
     private List<EmailSendAttempt> emailSendAttempts;
     private List<EmailAttachment> attachments;

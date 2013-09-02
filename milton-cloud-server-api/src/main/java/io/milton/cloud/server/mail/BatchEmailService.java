@@ -106,9 +106,6 @@ public class BatchEmailService {
             profileIds.add(p.getId());
         }
         log.info("recipients: " + profiles.size());
-        if (j.getEmailItems() == null) {
-            j.setEmailItems(new ArrayList<EmailItem>());
-        }
         long jobId = j.getId();
         int count = 0;
         session.setFlushMode(FlushMode.MANUAL);
@@ -232,7 +229,6 @@ public class BatchEmailService {
         // Templating requires a HtmlPage to represent the template        
         if( !isPreview) {
             i.setJob(j);
-            j.getEmailItems().add(i);
         }
         i.setRecipient(recipientProfile);
         i.setRecipientAddress(recipientProfile.getEmail());

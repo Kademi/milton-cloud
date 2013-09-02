@@ -24,6 +24,7 @@ import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class ManageGroupEmailLog extends TemplatedHtmlPage {
     protected Map<String, Object> buildModel(Map<String, String> params) {
         Map<String, Object> map = super.buildModel(params);
         map.put("job", job);
+        map.put("items", job.listItems(Boolean.TRUE, SessionManager.session()));
         return map;
     }
 

@@ -24,6 +24,8 @@ import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for entities which represent email jobs, such as a group email or
@@ -40,6 +42,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEmailJob implements Serializable {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseEmailJob.class);
+    
     public abstract void accept(EmailJobVisitor visitor);
 
     /**
@@ -52,7 +56,6 @@ public abstract class BaseEmailJob implements Serializable {
      */
     @Transient
     public abstract boolean isActive();
-    private List<EmailItem> emailItems;
     private List<GroupRecipient> groupRecipients;
     private long id;
     private String type;
@@ -141,16 +144,6 @@ public abstract class BaseEmailJob implements Serializable {
         this.groupRecipients = groupRecipients;
     }
 
-    @OneToMany(mappedBy = "job")
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    public List<EmailItem> getEmailItems() {
-        return emailItems;
-    }
-
-    public void setEmailItems(List<EmailItem> emailItems) {
-        this.emailItems = emailItems;
-    }
-
     @ManyToOne
     public Website getThemeSite() {
         return themeSite;
@@ -212,39 +205,68 @@ public abstract class BaseEmailJob implements Serializable {
     }
 
     public void delete(Session session) {
-        if( emailItems != null && !emailItems.isEmpty()) {
+        long numItems = countItems(session);
+        if (numItems > 0) {
             softDelete(session);
         } else {
             physicalDelete(session);
         }
     }
-    
+
     public void softDelete(Session session) {
+        log.info("softDelete: " + getId());
         setDeleted(true);
         setName(getName() + "-Deleted-" + System.currentTimeMillis());
         session.save(this);
     }
-    
+
     public void physicalDelete(Session session) {
+        log.info("physicalDelete: " + getId());
         if (groupRecipients != null) {
             for (GroupRecipient gr : groupRecipients) {
                 session.delete(gr);
             }
             groupRecipients.clear();
         }
-        if (emailItems != null) {
-            for (EmailItem i : emailItems) {
-                i.delete(session);
-            }
+        for (EmailItem i : EmailItem.findByJob(this, null, null, session)) {
+            i.delete(session);
         }
         session.delete(this);
     }
-    
+
     public boolean deleted() {
-        if( deleted == null ) {
+        if (deleted == null) {
             return false;
         } else {
             return deleted.booleanValue();
         }
     }
+
+    public List<EmailItem> listItems(Session session) {
+        return EmailItem.findByJob(this, null, null, session);
+    }
+
+    public List<EmailItem> listItems(Boolean sortByDate, Session session) {
+        return EmailItem.findByJob(this, null, sortByDate, session);
+    }
+    
+    public long countIncompleteItems(Session session) {
+        return EmailItem.countIncompleteByJob(this, session);
+    }
+
+    public long countItems(Session session) {
+        return EmailItem.countByJob(this, session);
+    }
+
+    public long countFailedItems(Session session) {
+        return EmailItem.countByJob(this, EmailItem.STATUS_FAILED, session);
+    }
+    
+    public long countSuccessulItems(Session session) {
+        return EmailItem.countByJob(this, EmailItem.STATUS_COMPLETE, session);
+    }
+
+    
+    
+    
 }

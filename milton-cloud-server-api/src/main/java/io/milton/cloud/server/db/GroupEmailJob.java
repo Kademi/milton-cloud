@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class GroupEmailJob extends BaseEmailJob {
 
     private static final Logger log = LoggerFactory.getLogger(GroupEmailJob.class);
-    
     /**
      * When set to READY_TO_SEND the job will be queued for sending by the
      * dispatcher
@@ -61,13 +60,13 @@ public class GroupEmailJob extends BaseEmailJob {
         notDeleted.add(Restrictions.isNull("deleted"));
         notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         crit.add(notDeleted);
-        
+
         crit.addOrder(Order.asc("status"));
         crit.addOrder(Order.desc("statusDate"));
-        
+
         return DbUtils.toList(crit, GroupEmailJob.class);
     }
-    
+
     public static List<GroupEmailJob> findInProgress(Session session) {
         Criteria crit = session.createCriteria(GroupEmailJob.class);
         crit.setCacheable(true);
@@ -76,15 +75,13 @@ public class GroupEmailJob extends BaseEmailJob {
         notDeleted.add(Restrictions.isNull("deleted"));
         notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         crit.add(notDeleted);
-        
+
         return DbUtils.toList(crit, GroupEmailJob.class);
-    }    
-    
+    }
     private String status;
     private Date statusDate;
     private Boolean passwordReset;
     private String passwordResetLinkText;
-    
 
     public GroupEmailJob() {
     }
@@ -104,8 +101,6 @@ public class GroupEmailJob extends BaseEmailJob {
         this.status = status;
     }
 
-    
-    
     @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getStatusDate() {
@@ -115,17 +110,18 @@ public class GroupEmailJob extends BaseEmailJob {
     public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
     }
-    
+
     /**
-     * If true, sending this email will generate a password reset token for each user
-     * 
-     * @return 
+     * If true, sending this email will generate a password reset token for each
+     * user
+     *
+     * @return
      */
     @Column
     public Boolean isPasswordReset() {
         return passwordReset;
     }
-    
+
     public void setPasswordReset(Boolean b) {
         this.passwordReset = b;
     }
@@ -139,8 +135,6 @@ public class GroupEmailJob extends BaseEmailJob {
         this.passwordResetLinkText = passwordResetLinkText;
     }
 
-    
-    
     public boolean readyToSend() {
         return STATUS_READY_TO_SEND.equals(getStatus());
     }
@@ -148,31 +142,26 @@ public class GroupEmailJob extends BaseEmailJob {
     public boolean completed() {
         return STATUS_COMPLETED.equals(getStatus());
     }
-    
+
     public boolean inProgress() {
         return STATUS_IN_PROGRESS.equals(getStatus());
-    }    
-    
-    
+    }
+
     @Override
     public void accept(EmailJobVisitor visitor) {
         visitor.visit(this);
     }
 
-    public void checkStatus(Date now, Session session) {        
-        if( !inProgress() ) {
+    public void checkStatus(Date now, Session session) {
+        if (!inProgress()) {
             log.info("checkStatus: not in progress");
-            return ;
+            return;
         }
         // If all email items are completed or failed then the job is complete
-        if( getEmailItems() != null ) {
-            for( EmailItem i : getEmailItems() ) {
-                boolean finished = i.complete() || i.failed();
-                if( !finished ) {
-                    log.info("checkStatus: found an unfinished item");
-                    return ; // not finished
-                }
-            }
+        long numIncomplete = EmailItem.countIncompleteByJob(this, session);
+        if (numIncomplete > 0) {
+            log.info("checkStatus: found unfinished item(s): " + numIncomplete);
+            return;
         }
         log.info("checkStatus: All items are finished, so mark job as complete");
         setStatus(GroupEmailJob.STATUS_COMPLETED);
@@ -181,18 +170,15 @@ public class GroupEmailJob extends BaseEmailJob {
 
     }
 
-
     @Transient
     @Override
     public boolean isActive() {
         // Note that when sending preview, status will be nu
-        return (status == null || STATUS_IN_PROGRESS.equals(status) || STATUS_READY_TO_SEND.equals(status)) && !deleted(); 
-    }     
+        return (status == null || STATUS_IN_PROGRESS.equals(status) || STATUS_READY_TO_SEND.equals(status)) && !deleted();
+    }
 
     @Override
     public String toString() {
         return getName() + " (" + getId() + ") status=" + getStatus();
     }
-    
-    
 }

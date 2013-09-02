@@ -460,7 +460,10 @@ function pollStatus() {
             },
             success: function(resp) {
                 displayStatus(resp.data);
-                if (resp.data.statusCode != "c") {
+                if (resp.data.statusCode === "") {
+                    //$("#status-tools").removeClass("Draft").addClass("Running");
+                    window.setTimeout(pollStatus, 2000);
+                } else if (resp.data.statusCode !== "c") {
                     $("#status-tools").removeClass("Draft").addClass("Running");
                     window.setTimeout(pollStatus, 2000);
                 } else {
@@ -487,27 +490,29 @@ function displayStatus(data) {
         $("div.status").addClass("status_" + data.statusCode);
         $("div.status div.SendProgress").show();
         $("div.status div.Percent").css("width", data.percent + "%");
-        var txtProgress = data.successful.length + " sent ok, ";
-
-        if (data.failed) {
-            txtProgress += data.failed.length + " failed, ";
+        var txtProgress = "";
+        if( data.successful > 0 ) {
+            var txtProgress = data.successful + " sent ok, ";
         }
-        if (data.retrying) {
+        if (data.sending && data.sending.length > 0 ) {
+            txtProgress += data.sending.length + " sending, ";
+        }
+
+        if (data.totalFailed && data.totalFailed > 0 ) {
+            txtProgress += data.totalFailed + " failed, ";
+        }
+        if (data.retrying && data.retrying.length > 0 ) {
             txtProgress += data.retrying.length + " retrying, ";
         }
-        if (data.totalToSend) {
+        if (data.totalToSend && data.totalToSend > 0 ) {
             txtProgress += data.totalToSend + " in total to send";
+        } else {
+            txtProgress = "Preparing emails...";
         }
         $("div.status div.stats").text(txtProgress);
 
-        $.each(data.successful, function(i, emailId) {
-            var tr = tbody.find("#" + emailId);
-            log("remove", emailId, tr)
-            tr.remove();
-        });
         addRows(data.sending, "Sending..", tbody);
         addRows(data.retrying, "Retrying..", tbody);
-        addRows(data.failed, "Failed", tbody);
     } else {
         $("div.status > div").hide();
         $("div.status div.NotSent").show();

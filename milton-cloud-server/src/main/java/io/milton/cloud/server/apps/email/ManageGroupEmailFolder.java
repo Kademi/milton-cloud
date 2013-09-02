@@ -91,7 +91,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         this.parent = parent;
     }
 
-    
     @Override
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
@@ -136,16 +135,16 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
                         }
                         job.setThemeSite(themeSite);
                     }
-                    
+
                     // if filterScriptXml parse it to check syntax
                     String s = WebUtils.getRawParam(parameters, "filterScriptXml");
-                    if( s != null ) {
+                    if (s != null) {
                         EvaluationContext evalContext = new EvaluationContext(s);
-                        evalContext.getAttributes().put("org", getOrganisation());        
+                        evalContext.getAttributes().put("org", getOrganisation());
                         _(XmlScriptParser.class).parse(evalContext);
                         log.info("parsed ok");
                     }
-                    
+
                     _(DataBinder.class).populate(job, parameters);
                 } catch (IllegalAccessException | InvocationTargetException ex) {
                     throw new RuntimeException(ex);
@@ -179,7 +178,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         if (params.containsKey("status")) {
             jsonResult = buildStatus();
-        } else if( params.containsKey("recipients")) {
+        } else if (params.containsKey("recipients")) {
             jsonResult = buildRecipients();
         }
         if (jsonResult != null) {
@@ -204,33 +203,29 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         SendStatus status = new SendStatus();
         status.setStatusCode(getStatusCode());
         status.setStatusDescription(getStatus());
-        if (job.getEmailItems() != null) {
-            status.setTotalToSend(job.getEmailItems().size());
-            for (EmailItem e : job.getEmailItems()) {
-                if (e.getRecipient() instanceof Profile) {
-                    if (e.getSendStatus() != null) {
-                        switch (e.getSendStatus()) {
-                            case "c":
-                                status.getSuccessful().add(e.getId());
-                                break;
-                            case "f":
-                                EmailBean p = toBean(e);
-                                status.getFailed().add(p);
-                                break;
-                            case "r":
-                                p = toBean(e);
-                                status.getRetrying().add(p);
-                                break;
-                            case "p":
-                                p = toBean(e);
-                                status.getSending().add(p);
-                                break;
+        Session session = SessionManager.session();
+        status.setTotalToSend(job.countItems(session));
+        status.setTotalFailed( job.countFailedItems(session) ); 
+        status.setSuccessful(job.countSuccessulItems(session) );  
 
-                        }
+        for (EmailItem e : EmailItem.findInprogressByJob(job, session) ) {
+            if (e.getRecipient() instanceof Profile) {
+                if (e.getSendStatus() != null) {
+                    switch (e.getSendStatus()) {
+                        case "r":
+                            EmailBean p = toBean(e);
+                            status.getRetrying().add(p);
+                            break;
+                        case "p":
+                            p = toBean(e);
+                            status.getSending().add(p);
+                            break;
+
                     }
                 }
             }
         }
+
 
 
         JsonResult r = new JsonResult(true);
@@ -487,19 +482,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         b.setEmailId(email.getId());
         b.setProfile(ProfileBean.toBean(p));
         b.setEmail(p.getEmail());
-        String fullName = p.getFirstName();
-        if (fullName != null) {
-            fullName += " ";
-        }
-        if (p.getSurName() != null) {
-            fullName += p.getSurName();
-        }
-        if (fullName == null) {
-            fullName = p.getNickName();
-        }
-        if (fullName == null) {
-            fullName = p.getName();
-        }
         b.setRetries(email.getNumAttempts());
         EmailSendAttempt lastAttempt = findLastAttempt(email);
         if (lastAttempt != null) {
@@ -514,7 +496,7 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
         Set<Profile> finalRecips = _(BatchEmailService.class).filterRecipients(job, null, initialRecips, SessionManager.session());
         List<ExtProfileBean> beans = new ArrayList<>();
         jsonResult.setData(beans);
-        for( Profile p : finalRecips ) {
+        for (Profile p : finalRecips) {
             beans.add(ExtProfileBean.toBeanExt(p));
         }
         return jsonResult;
@@ -524,11 +506,11 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
 
         private String statusCode;
         private String statusDescription;
-        private List<Long> successful = new ArrayList<>();
         private List<EmailBean> sending = new ArrayList<>();
-        private List<EmailBean> failed = new ArrayList<>();
         private List<EmailBean> retrying = new ArrayList<>();
-        private int totalToSend;
+        private long totalToSend;
+        private long totalFailed;
+        private long successful;
 
         public String getStatusCode() {
             return statusCode;
@@ -546,15 +528,6 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             this.statusDescription = statusDescription;
         }
 
-        /**
-         * A list of email IDs of successfully completed email items
-         *
-         * @return
-         */
-        public List<Long> getSuccessful() {
-            return successful;
-        }
-
         public List<EmailBean> getRetrying() {
             return retrying;
         }
@@ -563,17 +536,32 @@ public class ManageGroupEmailFolder extends DirectoryResource<ManageGroupEmailsF
             return sending;
         }
 
-        public List<EmailBean> getFailed() {
-            return failed;
-        }
-
-        public int getTotalToSend() {
+        public long getTotalToSend() {
             return totalToSend;
         }
 
-        public void setTotalToSend(int totalToSend) {
+        public void setTotalToSend(long totalToSend) {
             this.totalToSend = totalToSend;
         }
+
+        public long getTotalFailed() {
+            return totalFailed;
+        }
+
+        public void setTotalFailed(long totalFailed) {
+            this.totalFailed = totalFailed;
+        }
+
+        public long getSuccessful() {
+            return successful;
+        }
+
+        public void setSuccessful(long successful) {
+            this.successful = successful;
+        }
+        
+        
+        
     }
 
     public class EmailBean {
