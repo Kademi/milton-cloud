@@ -155,6 +155,8 @@ public class EmailItem implements Serializable {
 
     public static List<EmailItem> findByRecipientAndOrg(Organisation org, BaseEntity p, Session session) {
         Criteria crit = session.createCriteria(EmailItem.class);
+        Criteria critJob = crit.createCriteria("job", "j",  Criteria.LEFT_JOIN);
+        Criteria critTrigger = crit.createCriteria("emailTrigger", "t",  Criteria.LEFT_JOIN);
 
         crit.add(Restrictions.eq("recipient", p));
         LogicalExpression orgRestrictions = Restrictions.or(Restrictions.eq("j.organisation", org), Restrictions.eq("t.organisation", org));

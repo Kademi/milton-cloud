@@ -42,7 +42,7 @@ public class SchedulerProcessor implements Processable, Serializable {
         ScheduledEmail.TakeResult takeResult = ScheduledEmail.takeDue(now, session);
         while (takeResult != null) {
             ScheduledEmail due = takeResult.getScheduledEmail();
-            log.info("process due job: " + due.getSubject());
+            log.info("process due job: " + due.getSubject() + " ID=" + due.getId());
             try {
                 Date fromDate = takeResult.getScheduledEmail().getStartDate();
                 if (takeResult.getPreviousResult() != null) {
@@ -50,8 +50,10 @@ public class SchedulerProcessor implements Processable, Serializable {
                 }
                 schedulerApp.sendScheduledEmail(due, fromDate, takeResult.getThisResult().getStartDate(), session);
                 session.save(due);
+                session.flush();
                 tx.commit();
-            } catch (IOException ex) {
+                log.info("Completed sending job: " + due.getId());
+            } catch (Exception ex) {
                 log.error("exception", ex);
                 tx.rollback();
             }
