@@ -280,4 +280,15 @@ public class ManageScheduledEmailFolder extends AbstractCollectionResource imple
         }
         return list;
     }
+    
+    public Date getNextRunTime() {
+        Date now = _(Formatter.class).getNow();
+        return job.nextDue(now, SessionManager.session());
+    }
+    
+    public Date getLastRunTime() {
+        Date now = _(Formatter.class).getNow();
+        return job.lastRun(now, SessionManager.session());
+    }
+    
 }

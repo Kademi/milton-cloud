@@ -3,6 +3,11 @@
         <title>$view.title</title>
         <link href="manageScheduledEmails.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript" src="manageScheduledEmails.js">//</script>
+        <style>
+            .time-details {
+                display: none;
+            }
+        </style>
     </head>
     <body>
         <section id="manageEmail" class="MainContent">
@@ -114,6 +119,34 @@
                                     <th>End Date (optional)</th>
                                     <td><input type="text" name="endDate" value="$formatter.formatDate($page.job.endDate)" placeholder="End date" class="" /></td>
                                 </tr>
+                                <tr class="show-time-details">
+                                    <th><a href="#">Show date/time details</a></th>
+                                </tr>                                    
+                                <tr class="time-details">
+                                    <th>Job ID</th>
+                                    <td>
+                                        $page.job.id
+                                    </td>
+                                </tr>                                    
+                                
+                                <tr class="time-details">
+                                    <th>Current server time</th>
+                                    <td>
+                                        $formatter.formatDateLong($formatter.now)
+                                    </td>
+                                </tr>                                    
+                                <tr class="time-details">
+                                    <th>Next run</th>
+                                    <td>
+                                        $formatter.formatDateLong($page.nextRunTime)                                        
+                                    </td>
+                                </tr>            
+                                <tr class="time-details">
+                                    <th>Last run</th>
+                                    <td>
+                                        $formatter.formatDateLong($page.lastRunTime)
+                                    </td>
+                                </tr>                                 
 
                             </tbody>                            
                         </table>                        
@@ -200,6 +233,10 @@
         <script type="text/javascript">
             jQuery(function() {
                 initEditEmailPage();
+                $(".show-time-details").click(function(e){
+                    e.preventDefault();
+                    $(".time-details").toggle(200);
+                });
                 $("form").forms({
                     callback: function() {
                         alert("Saved");

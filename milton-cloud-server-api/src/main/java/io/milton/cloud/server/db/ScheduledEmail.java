@@ -82,6 +82,7 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
         for (ScheduledEmail e : findPossiblyDue(now, session)) {
             TakeResult takeResult = e.take(now, session);
             if (takeResult != null) {
+                log.info("takeDue: Found scheduled email, job ID=" + takeResult.scheduledEmail.getId());
                 return takeResult;
             }
         }
@@ -217,6 +218,34 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
         return ScheduledEmailResult.findLatest(this, session);
     }
 
+    public Date lastRun(Date now, Session session) {
+        Date lastRun = null;
+        ScheduledEmailResult result = getLastResult(session);
+        while (result != null && lastRun == null) {
+            if (result.getCompletedDate() == null) {
+                if (result.isExpired(now)) {
+                    result = getLastResult(session);
+                } else {
+                    lastRun = result.getStartDate();
+                    break;
+                }
+            } else {
+                lastRun = result.getStartDate();
+                break;
+            }
+        }
+        if (lastRun == null) {
+            lastRun = getStartDate();
+        }
+        return lastRun;
+    }    
+    
+    public Date nextDue(Date now, Session session) {
+        Date lastRun = lastRun(now, session);
+        Date nextRun = nextRun(lastRun);        
+        return nextRun;
+    }
+    
     public TakeResult take(Date now, Session session) {
         ScheduledEmailResult result = getLastResult(session);
         Date lastRun = null;
@@ -278,25 +307,28 @@ public class ScheduledEmail extends BaseEmailJob implements Serializable {
         cal.setTime(lastRun);
         switch (getFrequency()) {
             case HOURLY:
-                cal.add(Calendar.DATE, getPeriodMultiples());
+                cal.add(Calendar.HOUR, getPeriodMultiples());
                 break;
             
-            case DAILY:
+            case DAILY:                
                 cal.add(Calendar.DATE, getPeriodMultiples());
+                cal.set(Calendar.HOUR_OF_DAY, getRunHour());
                 break;
-            case WEEKLY:
-                cal.add(Calendar.DATE, getPeriodMultiples());
+            case WEEKLY:                
+                cal.add(Calendar.WEEK_OF_YEAR, getPeriodMultiples());
+                cal.set(Calendar.HOUR_OF_DAY, getRunHour());
                 break;
-            case MONTHLY:
-                cal.add(Calendar.DATE, getPeriodMultiples());
+            case MONTHLY:                
+                cal.add(Calendar.MONTH, getPeriodMultiples());
+                cal.set(Calendar.HOUR_OF_DAY, getRunHour());
                 break;
             case ANNUAL:
-                cal.add(Calendar.DATE, getPeriodMultiples());
+                cal.add(Calendar.YEAR, getPeriodMultiples());
+                cal.set(Calendar.HOUR_OF_DAY, getRunHour());
                 break;
             default:
                 return null;
-        }
-        cal.set(Calendar.HOUR_OF_DAY, getRunHour());
+        }        
         return cal.getTime();
     }
 

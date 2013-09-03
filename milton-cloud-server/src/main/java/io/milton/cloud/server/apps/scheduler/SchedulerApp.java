@@ -69,6 +69,7 @@ public class SchedulerApp implements Application, MenuApplication, ChildPageAppl
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(SchedulerApp.class);
     private SchedulerProcessor schedulerProcessor;
     private int pollScheduledTasks = 1000 * 60 * 60;
+    //private int pollScheduledTasks = 1000 * 20;
 
     @Override
     public String getInstanceId() {
