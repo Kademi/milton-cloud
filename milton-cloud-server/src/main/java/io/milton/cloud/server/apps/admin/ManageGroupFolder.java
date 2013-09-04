@@ -128,10 +128,10 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     if (org == null) {
                         jsonResult = JsonResult.fieldError("appliesTo", "Could not locate child organistion: " + appliesTo);
                         return null;
-                    } else if(!org.isWithin(getOrganisation())) {
+                    } else if (!org.isWithin(getOrganisation())) {
                         jsonResult = JsonResult.fieldError("appliesTo", "Selected organistion is not within parent: " + appliesTo);
                         return null;
-                        
+
                     } else {
                         gr = group.grantRole(org, role, session);
                     }
@@ -252,6 +252,8 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
                     children.add(p);
                 }
             }
+            children.add(new ManageGroupMembersCsv("members.csv", this, group));
+
         }
         return children;
     }
@@ -335,7 +337,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         }
         return false;
     }
-    
+
     public String getRegoModeText() {
         if (getRegoMode().equals(Group.REGO_MODE_ADMIN_REVIEW)) {
             return "Administrator review";
@@ -419,7 +421,7 @@ public class ManageGroupFolder extends AbstractResource implements PostableResou
         if (!(rDest instanceof ManageGroupsFolder)) {
             throw new ConflictException("Parent folder must be manage groups folder. Is a: " + rDest.getClass() + " with name: " + rDest.getName());
         }
-        if( name.equals("users")) {
+        if (name.equals("users")) {
             throw new ConflictException("Cannot rename to reserved word 'users'");
         }
         group.setName(name);

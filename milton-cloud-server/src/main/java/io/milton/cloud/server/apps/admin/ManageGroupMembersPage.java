@@ -23,6 +23,7 @@ import io.milton.cloud.server.web.PrincipalResource;
 import io.milton.cloud.server.web.RootFolder;
 import io.milton.cloud.server.web.UserResource;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.http.Range;
 import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
@@ -93,6 +94,7 @@ public class ManageGroupMembersPage extends AbstractResource implements GetableR
         if (jsonResult != null) {
             jsonResult.write(out);
         } else {
+            MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
             _(HtmlTemplater.class).writePage("admin", "admin/manageGroupMembers", this, params, out);
         }
     }

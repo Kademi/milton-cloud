@@ -17,6 +17,7 @@ package io.milton.cloud.server.apps.admin;
 import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
+import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TitledPage;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -105,6 +106,7 @@ public class ManageGroupsFolder extends AbstractResource implements GetableResou
         if( jsonResult != null ) {
             jsonResult.write(out);
         } else {
+            MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
             _(HtmlTemplater.class).writePage("admin", "admin/manageGroups", this, params, out);
         }
     }

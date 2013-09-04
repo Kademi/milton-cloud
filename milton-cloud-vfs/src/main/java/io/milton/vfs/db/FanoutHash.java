@@ -18,6 +18,9 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents either a list of other fanout hashes, or a list of blob hashes
@@ -34,11 +37,13 @@ import org.hibernate.criterion.Restrictions;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(
-uniqueConstraints = {
+        uniqueConstraints = {
     @UniqueConstraint(columnNames = {"type", "fanoutHash"})}// item names must be unique within a directory
-)
+        )
 public class FanoutHash implements Serializable, Fanout {
 
+    private static final Logger log = LoggerFactory.getLogger(Organisation.class);
+    
     public static void insertFanout(String type, String hash, List<String> childCrcs, long actualContentLength, Session session) {
         FanoutHash fanout = new FanoutHash();
         fanout.setType(type);
@@ -53,6 +58,10 @@ public class FanoutHash implements Serializable, Fanout {
         }
         fanout.setFanoutEntrys(list);
         session.save(fanout);
+        // We must flush here because findByHashAndType uses caching. Without the 
+        // flush a subsequent call to findByHashAndType would find null, and then it would end up
+        // being inserted again causing a constraint exception
+        session.flush();
     }
 
     /**
@@ -76,6 +85,9 @@ public class FanoutHash implements Serializable, Fanout {
     private long actualContentLength;
     private List<FanoutEntry> fanoutEntrys;
 
+    public FanoutHash() {
+    }
+
     @Id
     @GeneratedValue
     public Long getId() {
@@ -85,9 +97,8 @@ public class FanoutHash implements Serializable, Fanout {
     public void setId(Long id) {
         this.id = id;
     }
-    
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getFanoutHash() {
         return fanoutHash;
     }
@@ -99,8 +110,8 @@ public class FanoutHash implements Serializable, Fanout {
     /**
      * The fanout type, either can be a chunk fanout = c, or a file fanout=f
      *
-     * File fanouts contain hashes of other fanouts, while chunk fanouts
-     * contain hashes of blobs
+     * File fanouts contain hashes of other fanouts, while chunk fanouts contain
+     * hashes of blobs
      *
      * @return
      */
@@ -111,7 +122,7 @@ public class FanoutHash implements Serializable, Fanout {
 
     public void setType(String type) {
         this.type = type;
-    }    
+    }
 
     @Column(nullable = false)
     @Override

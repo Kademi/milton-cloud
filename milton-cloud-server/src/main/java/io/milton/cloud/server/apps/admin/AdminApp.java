@@ -113,9 +113,6 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 case "manageUsers":
                     MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuUsers");
                     return new ManageUsersFolder(requestedName, p.getOrganisation(), p);
-                case "groups":
-                    MenuItem.setActiveIds("menuDashboard", "menuGroupsUsers", "menuGroups");
-                    return new ManageGroupsFolder(requestedName, p.getOrganisation(), p);
                 case "manageApps":
                     MenuItem.setActiveIds("menuDashboard", "menuWebsiteManager", "manageApps");
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
@@ -219,7 +216,9 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     public void addBrowseablePages(CollectionResource parent, ResourceList children) {
         if (parent instanceof OrganisationFolder) {
             CommonCollectionResource p = (CommonCollectionResource) parent;
-            children.add(new ManageWebsitesFolder("websites", p.getOrganisation(), p));
+            children.add(new ManageWebsitesFolder("websites", p.getOrganisation(), p));            
+            children.add( new ManageGroupsFolder("groups", p.getOrganisation(), p) );
+            
         }
         // Only show orgTypes page for root admin folder
         if (parent instanceof OrganisationRootFolder) {
