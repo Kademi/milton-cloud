@@ -214,7 +214,8 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
     }
 
     public void renderPage(OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-        FolderViewApplication folderViewApplication = _(ApplicationManager.class).getFolderViewApplication(WebUtils.findRootFolder(this));
+        RootFolder rf = WebUtils.findRootFolder(this);
+        FolderViewApplication folderViewApplication = _(ApplicationManager.class).getFolderViewApplication(rf);
         if (folderViewApplication != null) {
             folderViewApplication.renderPage(this, out, params, contentType);
         } else {

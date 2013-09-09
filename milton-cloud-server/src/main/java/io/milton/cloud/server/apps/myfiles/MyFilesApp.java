@@ -172,4 +172,9 @@ public class MyFilesApp implements Application, EventListener, PortletApplicatio
         _(HtmlTemplater.class).writePage("myfiles/directoryIndex", folder, params, out);
 
     }
+
+    @Override
+    public boolean supports(RootFolder rf) {
+        return rf instanceof WebsiteRootFolder;
+    }
 }

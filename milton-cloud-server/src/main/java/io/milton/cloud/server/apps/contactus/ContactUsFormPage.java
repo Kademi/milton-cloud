@@ -99,7 +99,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
             ContactRequest r = new ContactRequest();
             _(DataBinder.class).populate(r, parameters);
             log.info("processForm: customer email: " + r.getEmail());
-            Long jobId = generateEmailItems(r, session);
+            Long jobId = generateEmailItems(r, parameters, session);
             jsonResult = new JsonResult(true);
             tx.commit();
 
@@ -139,7 +139,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         return _appControl;
     }
 
-    private Long generateEmailItems(ContactRequest r, Session session) {
+    private Long generateEmailItems(ContactRequest r, Map<String, String> params, Session session) {
 
         Website website = (Website) appControl().getWebsiteBranch().getRepository();
         AppControl appControl = appControl();
@@ -147,10 +147,10 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
             throw new RuntimeException("Cant process contact request, no AppControl record");
         }
 
-        String emailBody = toMessageHtml(r);
+        String emailBody = toMessageHtml(r, params);
         Date now = _(CurrentDateService.class).getNow();
         Group group = findGroup(appControl, session);
-        GroupEmailJob job = new GroupEmailJob();        
+        GroupEmailJob job = new GroupEmailJob();
         String name = "contact-" + _(Formatter.class).formatDateLong(now) + "-" + r.getEmail();
         name = DbUtils.replaceYuckyChars(name);
         job.setName(name);
@@ -206,7 +206,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
 
     public String getThankYouMessage() {
         String thankyou = appControl().getSetting("thankyou");
-        if( thankyou == null || thankyou.trim().length() == 0 ) {
+        if (thankyou == null || thankyou.trim().length() == 0) {
             thankyou = "Thank you for your message, we will reply shortly.";
         }
         return thankyou;
@@ -258,20 +258,31 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         return true;
     }
 
-    private String toMessageHtml(ContactRequest r) {
+    private String toMessageHtml(ContactRequest r, Map<String, String> params) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XmlWriter w = new XmlWriter(out);
         Element html = w.begin("html");
         Element body = html.begin("body");
         Element table = body.begin("table");
+        
         addRow(table, "Name", r.getFirstName() + " " + r.getSurName());
         addRow(table, "Email", r.getEmail());
         addRow(table, "Phone", r.getPhone());
         addRow(table, "Company", r.getCompany());
-        table.close();
-        Element p = body.begin("p");
-        p.writeText(r.getMessage());
-        p.close();
+        
+        removeKeys(params, "firstName", "lastName", "email", "phone", "company");        
+        
+        for (String key : params.keySet()) {
+            String val = WebUtils.getCleanedParam(params, key);
+            addRow(table, key, val);
+        }
+        table.close();        
+        if (r.getMessage() != null) {
+            Element p = body.begin("p");
+            p.writeText(r.getMessage());
+            p.close();
+        }
+        
         body.close();
         html.close();
         w.flush();
@@ -320,7 +331,7 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
     private void addRow(Element table, String name, String val) {
         Element tr = table.begin("tr");
         tr.begin("td").writeText(name).close();
-        if( val != null ) {
+        if (val != null) {
             tr.begin("td").writeText(val).close();
         }
         tr.close();
@@ -331,4 +342,9 @@ public class ContactUsFormPage extends AbstractResource implements GetableResour
         return "Contact from: " + name + " for " + website.getName();
     }
 
+    private void removeKeys(Map<String, String> params, String ... keys) {
+        for( String s : keys ) {
+            params.remove(s);
+        }
+    }
 }

@@ -216,13 +216,8 @@ function changeSubscribeState(container, config, newSelectedVal) {
             success: function(resp) {
                 ajaxLoadingOff();
                 container.removeClass("ajax-loading");
-                if (newSelectedVal) {
-                    container.removeClass(config.optedOutClass);
-                    container.addClass(config.optedInClass);
-                } else {
-                    container.removeClass(config.optedInClass);
-                    container.addClass(config.optedOutClass);
-                }
+                log("changeSubscribeState: finished", newSelectedVal, container);
+                displaySubscribeState(container, config, newSelectedVal);
                 config.onSuccess(newSelectedVal);
             },
             error: function(resp) {

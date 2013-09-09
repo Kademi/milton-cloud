@@ -1,0 +1,139 @@
+/** Begin Fuse/theme.css **/
+#manageFiles > header {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dadada;
+    color: #333;
+    font-size: 11px;
+    line-height: 24px;
+    height: 24px;
+}
+/* Content */
+#manageFiles > div.Content {
+    border: 1px solid #cecece;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+#manageFiles > div.Content.ajax-loading {
+    background-image: url('/static/common/ajax-loader.gif');
+    background-position: 0 50px;
+    background-repeat: no-repeat;
+    background-position: 92% 0;
+}
+/* Content for page */
+#manageFiles div.Content h4 {
+    font-size: 13px;
+    border-radius: 5px 5px 0 0;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    font-weight: bold;
+}
+#manageFiles div.Content div.MainContent {
+    padding: 5px;
+    border-top: 1px solid #cecece;
+    background: #FFF;
+    border-radius: 0 0 5px 5px;
+}
+#manageFiles div.Content div.MainContent article {
+    margin-top: 5px;
+    padding: 4px 4px 4px 30px;
+    line-height: 25px;
+    height: 25px;
+    border: 1px solid #dedede;
+    border-radius: 3px;
+    cursor: move;
+    position: relative;
+}
+#manageFiles div.Content div.MainContent article:first-child { margin-top: 0; }
+#manageFiles div.Content div.MainContent article.Even { background-color: #ededed; }
+#manageFiles div.Content div.MainContent article aside { float: right; }
+#manageFiles div.Content div.MainContent article aside a {
+    float: left;
+    width: 23px;
+    height: 23px;
+    padding: 1px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+#manageFiles div.Content div.MainContent article:hover aside a { display: block; }
+#manageFiles div.Content div.MainContent article aside a:hover, #manageFiles div.Content div.MainContent article aside a.Active {
+    padding: 0;
+    border: 1px solid #c7c7c7;
+    background-color: #e3e3e3;
+    border-radius: 3px;
+}
+/* Content for details */
+#manageFiles div.Content form { border: 0; }
+#manageFiles div.Content form.Details table tbody td .EmailMessage {
+    clear: both;
+    padding-top: 5px;
+}
+#manageFiles div.Content form.Details table tbody td div.Certificate, #manageFiles div.Content form.Details table tbody td div.Reward {
+    clear: both;
+    margin-top: 7px;
+}
+#manageFiles div.Content form.Details table tbody td div.Certificate.First, #manageFiles div.Content form.Details table tbody td div.Reward.First { margin-top: 0; }
+
+#manageFiles form.Details div.Certificate label, #manageFiles form.Details div.Reward label {
+    font-weight: bold;
+    margin-right: 10px;
+    float: left;
+    line-height: 32px;
+}
+/* Controller panel for Edit mode */
+#manageFiles .Controller {
+    padding: 4px;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    height: auto;
+}
+#manageFiles .Controller .Left .Btn { margin-right: 5px; }
+#manageFiles .Controller .Right .Btn { margin-left: 5px; }
+
+.modulePage:hover aside {
+    display: block;
+}
+#manageFiles .AddModulePage {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+#manageFiles .AddQuizPage { 
+    background-image: url(/templates/themes/admin/images/icon_quiz.png); 
+    right: 35px;
+    position: absolute;
+    top: 0;
+}
+.pageBtn {
+    float: right;
+    width: 140px;
+}
+body button.historyBtn {
+    float: right;
+    width: 100px;
+    background-color: #E78B00;
+    margin-right: 10px;
+}
+.Details #emailConfirm {
+    float: left;
+    margin: 0 5px 0 0;
+}
+div.EmailMessage {
+    display: none;
+}
+#emailConfirm:checked + div.EmailMessage {
+    display: block;
+}
+.Details label[for=emailConfirm] {
+    float: none !important;
+}
+.previewCertPdf {
+    float: right;
+}
+input.thumbnail {
+    margin-right: 10px;
+}
+#modalCreatePage div.ModalContent {
+    max-height: none;
+}

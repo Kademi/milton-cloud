@@ -153,6 +153,7 @@ public abstract class BaseEmailJob implements Serializable {
         this.themeSite = themeSite;
     }
 
+    @Column(length = 2048)
     public String getHtml() {
         return html;
     }

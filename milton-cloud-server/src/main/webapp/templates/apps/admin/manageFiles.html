@@ -1,0 +1,147 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Manage modules</title>
+        <link href="manageFiles.css" rel="stylesheet" type="text/css" />
+        <link href="/static/quiz/quiz.css" rel="stylesheet" type="text/css" />
+        <link href="/static/history/jquery.history.css" rel="stylesheet" type="text/css" />
+        <link href="/static/js/milton-image-select.css" rel="stylesheet" type="text/css" />
+        
+        <script type="text/javascript" src="/static/history/jquery.history.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.milton-image-select.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.milton-tree.js">//</script>
+        <script type="text/javascript" src="/static/js/managePublishing.js">//</script>
+        <script type="text/javascript" src="/templates/themes/admin/prompt.js">//</script>
+    </head>
+    <body class="manageFiles">
+        <section id="manageFiles" class="MainContent">
+            <header>
+                <div class="DropdownControl publishing">
+                    <div class="DropdownWrapper">
+                        #set($currentBranch = $page.closest("branch"))
+                        <span>
+                            <b>Version:</b> 
+                            $currentBranch.name
+                            #if( $currentBranch.live )
+                            <strong class="islive">LIVE</strong>
+                            #else
+                            <a href="${currentBranch.href}publish" class="publish">PUBLISH</a>
+                            #end
+
+                        </span> 
+                        <a href="#" class="Control"><span class="Hidden">Change version</span></a>
+                    </div>
+                    <div class="DropdownContent Hidden">
+                        <div class="Content">
+                            <ul class="Program branches">
+                                #foreach($b in $page.closest("branch").parent.children)
+                                <li>
+                                    <a href="#" class="copy"><span>Copy</span></a>
+                                    #if( $b.live )
+                                    <strong class="islive">LIVE</strong>
+                                    #end
+
+                                    <a href="${b.href}manageModules">
+                                        $b.name
+                                    </a>                                    
+                                </li>
+                                #end
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="DropdownControl">
+                    <div class="DropdownWrapper">
+                        <span><b>Website:</b> $page.closest("repository").name</span> 
+                        <a href="#" class="Control"><span class="Hidden">Change</span></a>
+                    </div>
+                    <div class="DropdownContent Rows3 Hidden">
+                        <div class="Content ClearFix">
+                            <section rel="program">
+                                #foreach($w in $page.closest("repository").parent.children)
+                                <a href="${w.href}">$w.name</a>
+                                #end
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                <div class="DropdownControl selectModule">                    
+                    <div class="DropdownWrapper">
+                        <span><b>Folder:</b> $page.path</span>
+                        <a href="#" class="Control"><span class="Hidden">Change folder</span></a>
+                    </div>
+                    <div class="DropdownContent Rows3 Hidden">
+                        <header>
+                            <h3>Programs</h3>
+                            <h3>Courses</h3>
+                            <h3>Modules</h3>
+                        </header>
+                        <div class="Content ClearFix">
+                            <section rel="program" class="programList">                                
+                                #set($parentProgram = $page.closest("program"))
+                                #foreach($program in $page.closest("programs").children.ofType.program)                                
+                                <a href="$program.href" class="${formatter.ifEqual('Active','', $parentProgram, $program)}">$program.title</a>
+                                #end
+                            </section>
+                            <section rel="course" class="coursesList">
+                                #set($parentCourse = $page.closest("course"))
+                                #foreach($course in $page.closest("program").children.ofType.course)
+                                <a href="$course.href" class="${formatter.ifEqual('Active','', $parentCourse, $course)}">$course.title</a>
+                                #end                                
+                            </section>
+                            <section rel="module" class="modulesList">
+                                #set($selectedModule = $page.closest("module"))
+                                #foreach($mod in $page.closest("course").children.ofType.module)
+                                <a href="$mod.href" class="${formatter.ifEqual('Active','', $selectedModule, $mod)}">$mod.title</a>
+                                #end                                                                
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <nav class="TabNav ClearFix">
+                <a href="#pages">Pages</a>
+                <a href="#files">Files</a>
+            </nav>
+            <div class="Content TabContent" rel="#pages" style="position: relative">
+                <h4>$page.title</h4>
+                <a title="Add Page" class="SmallBtn Add NoText AddModulePage" href=""><span>Add</span></a>
+                <a title="Add Quiz" class="SmallBtn Add NoText AddQuizPage" href=""><span>Quiz</span></a>
+                <form method="POST" action="" class="modulePages">
+                    <div class="MainContent">
+                        #set($order = 0)
+
+                        #foreach($page in $page.children.ofType.Page)
+                        <article class="">
+                            <span>$modulePage.title</span>
+                            <aside class="Hidden">
+                                <a href="${page.name}" class="Edit" title="Edit page"><span class="Hidden">Edit page</span></a>
+                                <a href="?goto=${page.name}" target="_blank" class="View" title="View page"><span class="Hidden">View page</span></a>
+                                <a href="${page.path}" class="Delete" title="Delete page"><span class="Hidden">Delete page</span></a>
+                            </aside>    
+                        </article>
+
+                        #end
+
+                    </div>                
+                </form>
+            </div>
+            <div class="Content TabContent" rel="#detail">
+                <form name="frmDetails" action="" method="post" class="Details" id="moduleDetailsForm">
+                    <div class="pageMessage">.</div>
+                    
+                </form>
+            </div>
+            
+        </section>
+
+
+               
+        <script type="text/javascript" >
+            var themePath = "${page.themePath}";
+            jQuery(function() {
+                //initManageModule("../../..", themePath);
+            });            
+        </script>        
+    </body>
+</html>

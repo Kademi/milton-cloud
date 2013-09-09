@@ -15,6 +15,7 @@
 package io.milton.cloud.server.apps;
 
 import io.milton.cloud.server.web.ContentDirectoryResource;
+import io.milton.cloud.server.web.RootFolder;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
@@ -40,4 +41,14 @@ public interface FolderViewApplication extends Application {
      * @throws NotFoundException 
      */
     void renderPage(ContentDirectoryResource folder, OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException;
+
+    /**
+     * Return true if this app can handle the given type of root. Typically AdminApp
+     * will handle stuff inside the admin console, while some front-end app
+     * will hand stuff inside WebsiteRootFolder
+     * 
+     * @param rf
+     * @return 
+     */
+    boolean supports(RootFolder rf);
 }

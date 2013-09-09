@@ -14,7 +14,7 @@ function initMyQuestion() {
     $("#postComment form").forms({
         callback: function(resp) {
             log("done post", resp);
-            $.tinybox.close();
+            closeModals();
             addReply($("#postComment form textarea").val());
             $("#postComment form textarea").val("")
         }

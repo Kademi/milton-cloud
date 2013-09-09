@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.server.apps;
 
+import io.milton.cloud.server.apps.orgs.OrganisationRootFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
 import io.milton.cloud.server.mail.EmailTriggerType;
@@ -112,7 +113,7 @@ public class ApplicationManager {
             List<Application> active = (List<Application>) rootFolder.getAttributes().get(attName);
             if (active == null) {
                 active = findActiveApps(rootFolder);
-                if( active.isEmpty()) {
+                if (active.isEmpty()) {
                     log.warn("No active apps for rootFolder: " + rootFolder.getId() + " ----");
                 }
                 //log.info("init active apps for: " + rootFolder.getClass() + " = " + active.size());
@@ -190,7 +191,7 @@ public class ApplicationManager {
                         return child;
                     }
                 }
-            }            
+            }
         }
         return null;
     }
@@ -306,9 +307,9 @@ public class ApplicationManager {
         }
         avail = new ArrayList<>(avail); // defensive programming
         List<Repository> repos = org.getRepositories();
-        if( repos != null ) {
-            for( Repository r : repos ) {
-                if( r.getName().startsWith("App-")) {
+        if (repos != null) {
+            for (Repository r : repos) {
+                if (r.getName().startsWith("App-")) {
                     CustomApp ca = new CustomApp(r);
                     avail.add(ca);
                 }
@@ -349,54 +350,55 @@ public class ApplicationManager {
         }
         return false;
     }
-    
+
     public boolean isActive(Application aThis, List<Application> activeApps) {
         for (Application a : activeApps) {
             if (a.getInstanceId().equals(aThis.getInstanceId())) {
                 return true;
             }
         }
-        return false;        
+        return false;
     }
 
     /**
-     * Will compile an ordered list of portlet apps using website theme attributes, ordering-portletname attribute
-     * 
+     * Will compile an ordered list of portlet apps using website theme
+     * attributes, ordering-portletname attribute
+     *
      * Eg dashboardPrimary would be in theme att: ordering-dashboardPrimary
-     * 
+     *
      * @param portletSection
      * @param currentUser
      * @param rootFolder
      * @param context
      * @param writer
-     * @throws IOException 
+     * @throws IOException
      */
     public void renderPortlets(String portletSection, Profile currentUser, RootFolder rootFolder, org.apache.velocity.context.Context context, Writer writer) throws IOException {
-        LinkedHashMap<String,PortletApplication> portletApps = new LinkedHashMap<>();
+        LinkedHashMap<String, PortletApplication> portletApps = new LinkedHashMap<>();
         for (Application app : getActiveApps(rootFolder)) {
             if (app instanceof PortletApplication) {
                 portletApps.put(app.getInstanceId(), (PortletApplication) app);
             }
         }
         List<PortletApplication> orderedApps = new ArrayList<>();
-        if( !portletApps.isEmpty()) {
+        if (!portletApps.isEmpty()) {
             // look for reordering            
-            if( rootFolder instanceof WebsiteRootFolder) {
+            if (rootFolder instanceof WebsiteRootFolder) {
                 WebsiteRootFolder wrf = (WebsiteRootFolder) rootFolder;
                 String ordering = wrf.getThemeAttributes().get("ordering-" + portletSection);
-                if( ordering != null ) {
+                if (ordering != null) {
                     orderedApps = new ArrayList<>();
-                    for( String appId : ordering.split(",")) {
-                        orderedApps.add( portletApps.get(appId));
+                    for (String appId : ordering.split(",")) {
+                        orderedApps.add(portletApps.get(appId));
                         portletApps.remove(appId);
-                    }                    
+                    }
                 }
             }
         }
         orderedApps.addAll(portletApps.values());
-        
-        for( PortletApplication app : orderedApps ) {
-            app.renderPortlets(portletSection, currentUser, rootFolder, context, writer);            
+
+        for (PortletApplication app : orderedApps) {
+            app.renderPortlets(portletSection, currentUser, rootFolder, context, writer);
         }
     }
 
@@ -519,9 +521,9 @@ public class ApplicationManager {
     private List<DataResourceApplication> getResourceCreators(RootFolder rf) {
         List<DataResourceApplication> list;
         boolean initList = false;
-        if( rf != null ) {
+        if (rf != null) {
             list = (List<DataResourceApplication>) rf.getAttributes().get("resourceCreators");
-            if( list == null ) {
+            if (list == null) {
                 initList = true;
                 list = new ArrayList<>();
                 rf.getAttributes().put("resourceCreators", list);
@@ -529,14 +531,14 @@ public class ApplicationManager {
         } else {
             RequestContext ctx = RequestContext.getCurrent();
             list = (List<DataResourceApplication>) ctx.get("resourceCreators");
-            if( list == null ) {
+            if (list == null) {
                 initList = true;
                 list = new ArrayList<>();
                 ctx.put("resourceCreators", list);
             }
-            
+
         }
-        if (initList) {            
+        if (initList) {
             for (Application app : getActiveApps(rf)) {
                 if (app instanceof DataResourceApplication) {
                     DataResourceApplication rc = (DataResourceApplication) app;
@@ -546,23 +548,26 @@ public class ApplicationManager {
         }
         return list;
     }
-    
+
     public List<PropertyProviderApplication> getPropertyProviderApps(RootFolder rf) {
         List<PropertyProviderApplication> list = new ArrayList();
         Iterator<Application> it = getActiveApps(rf).iterator();
-        while( it.hasNext() ) {
+        while (it.hasNext()) {
             Application app = it.next();
-            if( app instanceof PropertyProviderApplication ) {
+            if (app instanceof PropertyProviderApplication) {
                 list.add((PropertyProviderApplication) app);
             }
         }
         return list;
     }
-    
+
     public FolderViewApplication getFolderViewApplication(RootFolder rf) {
-        for( Application app : getActiveApps(rf) ) {
-            if( app instanceof FolderViewApplication) {
-                return (FolderViewApplication)app;
+        for (Application app : getActiveApps(rf)) {
+            if (app instanceof FolderViewApplication) {
+                FolderViewApplication fapp = (FolderViewApplication) app;
+                if (fapp.supports(rf)) {
+                    return fapp;
+                }
             }
         }
         return null;

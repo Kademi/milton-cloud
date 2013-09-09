@@ -24,6 +24,7 @@ import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.apps.BrowsableApplication;
 import io.milton.cloud.server.apps.ChildPageApplication;
 import io.milton.cloud.server.apps.DataResourceApplication;
+import io.milton.cloud.server.apps.FolderViewApplication;
 import io.milton.cloud.server.apps.MenuApplication;
 import io.milton.cloud.server.apps.PortletApplication;
 import io.milton.cloud.server.apps.ReportingApplication;
@@ -34,8 +35,10 @@ import io.milton.cloud.server.role.Role;
 import io.milton.cloud.server.text.TextFromHtmlService;
 import io.milton.cloud.server.web.*;
 import io.milton.cloud.server.web.reporting.JsonReport;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
+import static io.milton.context.RequestContext._;
 import io.milton.resource.AccessControlledResource.Priviledge;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Group;
@@ -43,23 +46,27 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import java.util.Set;
 
-import static io.milton.context.RequestContext._;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.CollectionResource;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Repository;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.velocity.context.Context;
 
 /**
  *
  * @author brad
  */
-public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication, PortletApplication, DataResourceApplication, BrowsableApplication {
+public class AdminApp implements MenuApplication, ReportingApplication, ChildPageApplication, PortletApplication, DataResourceApplication, BrowsableApplication, FolderViewApplication {
 
     public static final String ALT_TXT_SUFFIX = ".alt.txt";
     
@@ -269,6 +276,29 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
     @Override
     public List<CustomReportDataSource> getDataSources() {
         return null;
+    }
+
+    /**
+     * Renders a directory
+     * 
+     * @param folder
+     * @param out
+     * @param params
+     * @param contentType
+     * @throws IOException
+     * @throws NotAuthorizedException
+     * @throws BadRequestException
+     * @throws NotFoundException 
+     */
+    @Override
+    public void renderPage(ContentDirectoryResource folder, OutputStream out, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
+        MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+        _(HtmlTemplater.class).writePage("admin/manageFiles", folder, params, out);
+    }
+
+    @Override
+    public boolean supports(RootFolder rf) {
+        return rf instanceof OrganisationRootFolder;
     }
 
     public class AdminRole implements Role {

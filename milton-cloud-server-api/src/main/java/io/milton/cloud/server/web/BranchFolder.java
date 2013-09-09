@@ -5,11 +5,12 @@ import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Commit;
 import io.milton.cloud.common.HashCalc;
 import io.milton.cloud.server.DataSessionManager;
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.FolderViewApplication;
 import io.milton.cloud.server.apps.website.LessParameterParser;
-import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.db.AppControl;
-import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.cloud.server.web.templating.TitledPage;
+import static io.milton.context.RequestContext._;
 import io.milton.http.*;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -24,7 +25,6 @@ import java.util.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import static io.milton.context.RequestContext._;
 import io.milton.vfs.db.Repository;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -175,22 +175,28 @@ public class BranchFolder extends AbstractBranchFolder implements MakeCollection
     }
 
     protected void renderPage(OutputStream out, Map<String, String> params) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
-//        if (renderMode) {
-//            if (getIndex() != null) {
-//                getIndex().sendContent(out, null, params, null);
-//                return;
-//            }
-//        }
         log.trace("sendContent: render template");
         ContentRedirectorPage.select(this);
         RootFolder rf = WebUtils.findRootFolder(this);
-        if (rf instanceof WebsiteRootFolder) {
-            WebUtils.setActiveMenu(getHref(), rf); // For front end        
+//        if (rf instanceof WebsiteRootFolder) {
+//            WebUtils.setActiveMenu(getHref(), rf); // For front end        
+//        } else {
+//            MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
+//        }
+//
+//        getTemplater().writePage("myfiles/directoryIndex", this, params, out);
+//        
+//        RootFolder rf = WebUtils.findRootFolder(this);
+        FolderViewApplication folderViewApplication = _(ApplicationManager.class).getFolderViewApplication(rf);
+        if (folderViewApplication != null) {
+            folderViewApplication.renderPage(this, out, params, null);
         } else {
-            MenuItem.setActiveIds("menuDashboard", "menuFileManager", "menuManageRepos"); // For admin
-        }
-
-        getTemplater().writePage("myfiles/directoryIndex", this, params, out);
+            GetableResource index = getIndex();
+            if (index != null) {
+                index.sendContent(out, null, params, "text/html");
+            }
+            
+        }        
     }
 
     @Override
@@ -271,7 +277,14 @@ public class BranchFolder extends AbstractBranchFolder implements MakeCollection
     @Override
     public String getTitle() {
         if (branch != null) {
-            return this.branch.getRepository().getTitle();
+            String s = this.branch.getRepository().getTitle();
+            if( s == null ) {
+                s = this.branch.getRepository().getName();
+            }
+            if( !this.isLive()) {
+                s += "(" + this.branch.getName() + ")";
+            }
+            return s;
         } else {
             if (commit != null) {
                 if (commit.getBranch() != null) {
