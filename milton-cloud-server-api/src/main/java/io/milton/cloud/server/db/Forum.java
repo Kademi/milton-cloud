@@ -17,6 +17,7 @@ package io.milton.cloud.server.db;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
@@ -132,5 +133,13 @@ public class Forum implements Serializable{
             }
         }
         session.delete(this);
+    }
+
+    public long numTopics(Session session) {
+        return ForumPost.count(this, session);
+    }
+    
+    public Date mostRecentPostDate(Session session) {
+        return ForumPost.mostRecent(this, session);
     }
 }

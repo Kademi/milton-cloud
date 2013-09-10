@@ -27,7 +27,10 @@
 	border-bottom: 1px solid #dedede;
 	padding-bottom: 5px;
 }
-#manageForum div.Forum div.ContentForum ul { margin-top: 5px; }
+#manageForum div.Forum div.ContentForum ul { 
+    margin-top: 5px; 
+    margin-left: 0;
+}
 #manageForum div.Forum div.ContentForum ul li {
 	background: #ededed;
 	border-radius: 3px;
@@ -35,6 +38,7 @@
 	padding: 4px 0 4px 10px;
 	line-height: 27px;
 	height: 25px;
+        list-style-type: none;
 }
 #manageForum div.Forum div.ContentForum ul li aside { float: right; }
 #manageForum div.Forum div.ContentForum ul li aside a {

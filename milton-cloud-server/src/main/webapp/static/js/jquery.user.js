@@ -110,8 +110,10 @@ function doLogin(userName, password, config, container) {
                 if( config.afterLoginUrl === null) {
                     // If not url in config then use the next href in the response, if given, else reload current page
                     if( resp.nextHref ) {
+                        log("login: no afterLoginUrl and received next href, so go there", resp.nextHref);
                         window.location.href = resp.nextHref;
                     } else {
+                        log("login: no afterLoginUrl and no nextHref, so reload");
                         window.location.reload();
                     }                    
                 } else if( config.afterLoginUrl.startsWith("/")) {

@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="myForums.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="myTopic.js" >//</script>
+    </head>
+    <body class="forums">
+        <div id="content">
+            <ul class="PostList ClearFix">
+                #foreach($forum in $page.children)
+                <li class="topic">
+                    <h3>$forum.title</h3>
+                    <div class="topic-notes">$!forum.notes</div>
+                    <div class="topic-info">                                                
+                        #if( $forum.numTopics > 0 )
+                        <span>$forum.numTopics topics</span>
+                        #if( $forum.mostRecentPostDate )
+                        <span>last post $forum.mostRecentPostDate</span>
+                        #end
+
+                        #else
+                        <span>No posts yet</span>
+                        #end                                               
+                    </div>
+                </li>
+                #end
+            </ul>
+        </div>
+
+
+        <script type="text/javascript">
+            jQuery(function($) {
+                initMyTopic();
+            });
+        </script>        
+    </body>
+</html>

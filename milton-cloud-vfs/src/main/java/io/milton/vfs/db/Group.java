@@ -339,6 +339,12 @@ public class Group implements Serializable, VfsAcceptor {
                 session.flush();
             }
         }
+        Organisation org = getOrganisation();
+        if( org != null ) {
+            if( org.getGroups() != null  ) {
+                org.getGroups().remove(this);
+            }
+        }
         for (GroupInWebsite giw : GroupInWebsite.findByGroup(this, session)) {
             session.delete(giw);
         }

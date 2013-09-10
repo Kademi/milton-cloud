@@ -13,7 +13,11 @@ div.Modal.wide {
     width: 950px;
 }
 div#modalHelp {
-    width: 300px;
+    width: 800px;
+}
+body.admin div.Modal {
+        top: 100px !important;
+        margin-top: 0 !important;
 }
 div.Modal header {
     border-radius: 5px 5px 0 0;

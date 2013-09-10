@@ -56,6 +56,10 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     private final Forum forum;
     private final CommonCollectionResource parent;
     private ResourceList children;
+    private Long numTopics;
+    private Date mostRecentDate;
+    private boolean mostRecentDateLoaded;
+    
     
     private JsonResult jsonResult;
 
@@ -188,5 +192,27 @@ public class MyForumFolder extends AbstractCollectionResource implements Getable
     public Long getContentLength() {
         return null;
     }
-          
+
+    @Override
+    public boolean is(String type) {
+        if( type.equals("forum")) {
+            return true;
+        }
+        return super.is(type); //To change body of generated methods, choose Tools | Templates.
+    }
+     
+    public long getNumTopics() {
+        if( numTopics == null ) {
+            numTopics = forum.numTopics(SessionManager.session());
+        }
+        return numTopics;
+    }
+    
+    public Date getMostRecentPostDate() {
+        if( !mostRecentDateLoaded ) {
+            mostRecentDateLoaded = true;
+            mostRecentDate = forum.mostRecentPostDate(SessionManager.session());
+        }
+        return mostRecentDate;
+    }
 }

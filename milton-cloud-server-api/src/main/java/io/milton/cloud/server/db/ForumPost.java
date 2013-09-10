@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -63,11 +64,57 @@ public class ForumPost extends Post implements Serializable{
         List<ForumPost> list = DbUtils.toList(crit, ForumPost.class);
         return list;
     }       
+
+    public static long count(Forum forum, Session session) {
+        Criteria crit = session.createCriteria(ForumPost.class)
+                .add(Restrictions.isNull("deleted"))
+                .setProjection(Projections.projectionList()
+                .add(Projections.rowCount()));
+        crit.add(Restrictions.eq("forum", forum));
+        crit.setCacheable(true);
+        List list = crit.list();
+        if (list == null || list.isEmpty()) {
+            return 0;
+        } else {
+            Object o = list.get(0);
+            if (o instanceof Long) {
+                return (long) o;
+            } else if (o instanceof Integer) {
+                Integer i = (Integer) o;
+                return i.longValue();
+            } else {
+                throw new RuntimeException("Unknown type: " + o.getClass());
+            }
+        }        
+    }
+    
+    public static Date mostRecent(Forum forum, Session session) {
+        Criteria crit = session.createCriteria(ForumPost.class)
+                .add(Restrictions.isNull("deleted"))
+                .setProjection(Projections.projectionList()
+                .add(Projections.max("postDate") ));
+        crit.add(Restrictions.eq("forum", forum));
+        crit.setCacheable(true);
+        List list = crit.list();
+        if (list == null || list.isEmpty()) {
+            return null;
+        } else {
+            Object o = list.get(0);            
+            if (o instanceof Date) {
+                return (Date) o;
+            } else if( o == null ) {
+                return null;
+            } else {
+                throw new RuntimeException("Unknown type: " + o.getClass());
+            }
+        }        
+    }    
     
     private List<ForumReply> forumReplys;
     private Forum forum;
     private String name;
     private String title;
+    private Boolean deleted;
 
 
     @ManyToOne(optional=false)
@@ -112,6 +159,18 @@ public class ForumPost extends Post implements Serializable{
         visitor.visit(this);
     }
 
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+    
+    public boolean deleted() {
+        return deleted != null && deleted.booleanValue();
+    }    
+    
     @Override
     public void delete(Session session) {
         if( getForumReplys() != null ) {
