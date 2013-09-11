@@ -100,8 +100,7 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
             String domainName = request.getParams().get("loginTo");
             CookieAuthenticationHandler auth = _(CookieAuthenticationHandler.class);
             String userUrl = "/users/" + profile.getName() + "/";
-            String salt = auth.getRandomSalt();
-            String hash = auth.getUrlSigningHash(userUrl, salt);
+            String hash = auth.getUrlSigningHash(userUrl, request);
             String redirect = "http://" + domainName + _(Formatter.class).getPortString() + "/dashboard?";
             redirect += auth.getCookieNameUserUrl() + "=" + userUrl + "&";
             redirect += auth.getCookieNameUserUrlHash() + "=" + hash;

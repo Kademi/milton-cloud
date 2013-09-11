@@ -23,6 +23,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -37,6 +38,7 @@ public class Forum implements Serializable{
         Criteria crit = session.createCriteria(Forum.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("website", website));
+        crit.addOrder(Order.asc("name"));
         return DbUtils.toList(crit, Forum.class);
     }    
     
@@ -48,7 +50,7 @@ public class Forum implements Serializable{
         session.save(f);
         return f;
     }
-    
+        
     private List<ForumPost> forumPosts;
     private long id;
     private Website website;
@@ -107,7 +109,7 @@ public class Forum implements Serializable{
         this.name = name;
     }
 
-    @Column
+    @Column(length = 2048)
     public String getNotes() {
         return notes;
     }

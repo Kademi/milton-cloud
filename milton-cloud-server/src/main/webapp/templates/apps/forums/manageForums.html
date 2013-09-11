@@ -70,29 +70,31 @@
                         <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
                     </header>
                     <div class="ModalContent">
-                        <div class="pageMessage">.</div>
-                        <table>
-                            <tr>
-                                <th><label for="name">Forum name</label></th>
-                                <td><input type="text" name="name" id="name" value="$forum.name" class="required simpleChars" maxlength="30" placeholder="Forum name" /></td>
-                            </tr>
-                            <tr>
-                                <th><label for="name">Forum Title</label></th>
-                                <td><input type="text" name="title" id="title" value="$forum.title" class="required" maxlength="" placeholder="Forum title" /></td>
-                            </tr>                    
-                            <tr>
-                                <th><label for="name">Description</label></th>
-                                <td>
-                                    <textarea name="notes" id="notes">$!forum.notes</textarea>
-                                </td>
-                            </tr>                    
+                        <form method="post" action="$forum.name" class="update-modal">
+                            <div class="pageMessage">.</div>
+                            <table>
+                                <tr>
+                                    <th><label for="name">Forum name</label></th>
+                                    <td><input type="text" name="name" id="name" value="$forum.name" class="required simpleChars" maxlength="30" placeholder="Forum name" /></td>
+                                </tr>
+                                <tr>
+                                    <th><label for="name">Forum Title</label></th>
+                                    <td><input type="text" name="title" id="title" value="$forum.title" class="required" maxlength="" placeholder="Forum title" /></td>
+                                </tr>                    
+                                <tr>
+                                    <th><label for="name">Description</label></th>
+                                    <td>
+                                        <textarea name="notes" id="notes">$!forum.notes</textarea>
+                                    </td>
+                                </tr>                    
 
-                            <tr>
-                                <td colspan="2" class="Btn">
-                                    <button>Save changes</button>
-                                </td>
-                            </tr>
-                        </table>
+                                <tr>
+                                    <td colspan="2" class="Btn">
+                                        <button>Save changes</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
                     </div>
                 </div>                
             </div>
@@ -100,6 +102,41 @@
             #end
 
         </section>
+
+        <div class="Modal" id="addForumModal">
+            <header>
+                <h3>Add Forum</h3>
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent">
+                <form method="post" action=".">
+                    <input type="hidden" name="action" value="create"/>
+                    <div class="pageMessage">.</div>
+                    <table>
+                        <tr>
+                            <th><label for="name">Forum name</label></th>
+                            <td><input type="text" name="name" id="name" value="" class="required simpleChars" maxlength="30" placeholder="Forum name" /></td>
+                        </tr>
+                        <tr>
+                            <th><label for="name">Forum Title</label></th>
+                            <td><input type="text" name="title" id="title" value="" class="required" maxlength="" placeholder="Forum title" /></td>
+                        </tr>                    
+                        <tr>
+                            <th><label for="name">Description</label></th>
+                            <td>
+                                <textarea name="notes" id="notes"></textarea>
+                            </td>
+                        </tr>                    
+
+                        <tr>
+                            <td colspan="2" class="Btn">
+                                <button>Save changes</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>          
 
         <script type="text/javascript">
             jQuery(function() {

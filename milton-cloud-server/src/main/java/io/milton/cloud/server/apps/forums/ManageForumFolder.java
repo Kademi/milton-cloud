@@ -22,14 +22,14 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.http.values.ValueAndType;
-import io.milton.http.webdav.PropFindResponse;
-import io.milton.http.webdav.PropertySourcePatchSetter;
 import io.milton.principal.Principal;
 import io.milton.annotations.BeanPropertyResource;
+import io.milton.cloud.server.web.templating.DataBinder;
+import static io.milton.context.RequestContext._;
 import io.milton.resource.AccessControlledResource;
 import io.milton.resource.DeletableCollectionResource;
 import io.milton.resource.GetableResource;
+import io.milton.resource.PostableResource;
 import io.milton.resource.Resource;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
@@ -37,9 +37,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
-import javax.xml.namespace.QName;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * for managing a single forum
@@ -47,8 +48,10 @@ import org.hibernate.Transaction;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class ManageForumFolder extends AbstractCollectionResource implements PropertySourcePatchSetter.CommitableResource, DeletableCollectionResource, GetableResource {
+public class ManageForumFolder extends AbstractCollectionResource implements DeletableCollectionResource, GetableResource, PostableResource {
 
+    private static final Logger log = LoggerFactory.getLogger(ManageForumFolder.class);
+    
     private final Forum forum;
     private final CommonCollectionResource parent;
     private ResourceList children;
@@ -60,6 +63,30 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
         this.parent = parent;
     }
 
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        try {
+            Session session = SessionManager.session();
+            Transaction tx = session.beginTransaction();
+            _(DataBinder.class).populate(forum, parameters);
+            // Check if uniquely named
+            for( Forum existing: Forum.findByWebsite(forum.getWebsite(), session) ) {
+                if( existing.getName().equals( forum.getName() ) && existing.getId() != forum.getId() ) {
+                    jsonResult = new JsonResult(false, "Please choose a unique name");
+                    return null;
+                }
+            }
+            session.save(forum);
+            tx.commit();
+            jsonResult = new JsonResult(true);
+        } catch (Exception e) {
+            log.error("Exception updating forum: " + forum.getName(), e);
+            jsonResult = new JsonResult(false);
+        }
+        return null;
+    }
+
+    
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
@@ -77,19 +104,6 @@ public class ManageForumFolder extends AbstractCollectionResource implements Pro
     }    
     
     
-    /**
-     * Implemented to support saving after proppatch
-     *
-     * @param knownProps
-     * @param errorProps
-     */
-    @Override
-    public void doCommit(Map<QName, ValueAndType> knownProps, Map<Response.Status, List<PropFindResponse.NameAndError>> errorProps) {
-        Session session = SessionManager.session();
-        Transaction tx = session.beginTransaction();
-        session.save(forum);
-        tx.commit();
-    }
 
     public List<ForumPost> getRecentPosts() {
         return ForumPost.findRecentByForum(forum, 10, SessionManager.session());  

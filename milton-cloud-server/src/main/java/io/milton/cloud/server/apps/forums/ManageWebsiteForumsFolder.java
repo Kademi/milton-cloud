@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.*;
+import io.milton.cloud.server.web.templating.DataBinder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.resource.AccessControlledResource.Priviledge;
@@ -92,21 +93,20 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
     public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
         Session session = SessionManager.session();
         Transaction tx = session.beginTransaction();
-        String newName = parameters.get("newName");
-        if (newName != null) {
-            createForum(newName, tx, session);
+        String action = parameters.get("action");
+        if ("create".equals(action)) {
+            createForum(tx, session, parameters);
         }
         return null;
     }
-    
+
     public ManageForumsFolder getForumsRoot() {
         return parent;
     }
-    
 
     public String getTitle() {
         String w = website.getName();
-        if( website.getDomainName() != null  ) {
+        if (website.getDomainName() != null) {
             w = website.getDomainName();
         }
         return "Manage forums: " + w;
@@ -188,17 +188,30 @@ public class ManageWebsiteForumsFolder extends AbstractCollectionResource implem
         return super.is(type);
     }
 
-    private void createForum(String newTitle, Transaction tx, Session session) {
+    private void createForum(Transaction tx, Session session, Map<String, String> params) {
         Forum f = new Forum();
-        String newName = NewPageResource.findAutoName(newTitle, this, null);
-        newName = newName.replace(".html", ""); // HACK: remove .html suffix added about
-        Forum.addToWebsite(website, newName, newTitle, session);
-        tx.commit();
-        jsonResult = new JsonResult(true, "Created", newName);
+        f.setWebsite(website);
+        try {
+            _(DataBinder.class).populate(f, params);
+            // Check if uniquely named
+            for( Forum existing: Forum.findByWebsite(website, session) ) {
+                if( existing.getName().equals( f.getName() ) ) {
+                    jsonResult = new JsonResult(false, "Please choose a unique name");
+                    return ;
+                }
+            }
+            session.save(f);
+            tx.commit();
+            jsonResult = new JsonResult(true, "Created", f.getName());
+        } catch (Exception e) {
+            log.error("Exception creating forum: " + f.getName(), e);
+            jsonResult = new JsonResult(false);
+        }
+
     }
-    
+
     @Override
     public Priviledge getRequiredPostPriviledge(Request request) {
         return Priviledge.WRITE_CONTENT;
-    }        
+    }
 }

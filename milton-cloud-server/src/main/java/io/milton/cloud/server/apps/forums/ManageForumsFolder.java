@@ -1,5 +1,6 @@
 package io.milton.cloud.server.apps.forums;
 
+import io.milton.cloud.server.db.Forum;
 import io.milton.cloud.server.web.AbstractCollectionResource;
 import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
@@ -22,8 +23,14 @@ import java.util.Map;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.FileItem;
 import io.milton.http.Request;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.resource.PostableResource;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.Collections;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Just provides a list of manage forums by website folders
@@ -42,6 +49,7 @@ public class ManageForumsFolder extends AbstractCollectionResource implements Ge
         this.parent = parent;
     }
 
+    
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         MenuItem.setActiveIds("menuTalk", "menuManageForums", "menuEditForums");

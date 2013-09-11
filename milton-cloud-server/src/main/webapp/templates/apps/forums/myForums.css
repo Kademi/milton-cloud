@@ -227,9 +227,7 @@ div.forums tbody td.progress {
     font-size: 0.9em;
     font-weight: bold;
 }
-div.forums tbody tr.brief {
-    display: none;
-}
+
 div.forums tbody .brief td {
     font-size: 0.7em;   
     padding-bottom: 0.4em;

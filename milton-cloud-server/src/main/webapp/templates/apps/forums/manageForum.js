@@ -8,6 +8,16 @@ function initManageForum() {
     addForumButton();
     addTopicButton();
     eventForModal();
+    $("#addForumModal form").forms({
+        callback: function() {
+            window.location.reload();
+        }
+    });
+    $("form.update-modal").forms({
+        callback: function() {
+            window.location.reload();
+        }
+    });    
 }
 
 
@@ -75,9 +85,7 @@ function initForumDialog() {
 function addForumButton() {
     $("body").on("click", "button.AddForum", function(e) {
         e.preventDefault();
-        showForumModal("Forum", "Add", null, function() {
-            addForum();
-        });
+        showModal( $("#addForumModal") );
     });
 }
 
