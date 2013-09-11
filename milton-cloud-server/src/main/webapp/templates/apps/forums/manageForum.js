@@ -48,17 +48,13 @@ function addOrderForumNTopic() {
     });
 }
 
-function initForumDialog() {
-    var tempDialog = $("#dialogForum").html();
-    $("div.Forum").each(function() {
-        $(this).find("header div").append(tempDialog);
-    });
-	
+function initForumDialog() {	
     // Bind event for header of forum - show dialog
-    $("body").on("click", "div.Forum header > div.ShowDialog", function(e) {
+    $("body").on("click", "div.Forum header div.ShowDialog", function(e) {
         e.preventDefault();	
-        var dialog = $(this).find("div.Dialog");		
+        var dialog = $(this).closest(".Forum").find("div.Dialog");		
         dialog.toggle();
+        log("show", dialog);        
     });
 	
     // Bind event for Delete forum
@@ -68,17 +64,11 @@ function initForumDialog() {
     });
 	
     // Bind event for Edit forum
-    $("body").on("click", "a.RenameForum", function(e) {
+    $("body").on("click", "a.EditForum", function(e) {
         e.preventDefault();
-		
-        var _selectedForum = $(this).parents("div.Forum");
-		
-        showForumModal("Forum", "Rename", {
-            name: $(this).parent().parent().find("> span").html(),
-            forum: _selectedForum.attr("data-forum")
-        }, function() {
-            renameForum(_selectedForum);
-        });
+	
+        var selectedForum = $(this).closest("div.Forum");
+        showModal( selectedForum.find(".Modal") );
     });
 }
 
@@ -107,37 +97,7 @@ function addTopicButton() {
     });
 }
 
-function showForumModal(name, type, data, callback) {
-    var _modal = $("#modalForum");
-	
-    _modal.find("header h3").html(name + " Details")    
-    _modal.find("div.ModalContent label[for=name]").html("Enter " + name.toLowerCase() + " name")
-    _modal.find("div.ModalContent input[name=name]").attr("placeholder", name + " name").val("")
-    
-    _modal.find("button").html(type).attr("rel", name);
-    
-    _modal.find("button").unbind();
-    _modal.find("button").click(callback);
-			
-    if(data) {			
-        if(data.name) {
-            _modal.find("div.ModalContent input[name=name]").val(data.name);
-        }
-				
-        if(data.forum) {
-            _modal.attr("data-forum", data.forum);
-        }
-		
-        if(data.topic) {
-            _modal.attr("data-topic", data.topic);
-        }
-    }
-	
-    $.tinybox.show(_modal, {
-        overlayClose: false,
-        opacity: 0
-    });
-}
+
 
 function maxOrderForum() {
     var _order = [];

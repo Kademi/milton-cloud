@@ -6,6 +6,7 @@ import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.ResourceList;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.cloud.server.web.templating.MenuItem;
+import io.milton.cloud.server.web.templating.TitledPage;
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class MyForumsFolder extends AbstractCollectionResource implements GetableResource, IForumResource {
+public class MyForumsFolder extends AbstractCollectionResource implements GetableResource, IForumResource, TitledPage {
 
     private static final Logger log = LoggerFactory.getLogger(MyForumsFolder.class);
     private final String name;
@@ -119,5 +120,10 @@ public class MyForumsFolder extends AbstractCollectionResource implements Getabl
     @Override
     public Long getContentLength() {
         return null;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Community";
     }
 }

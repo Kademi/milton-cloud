@@ -22,13 +22,13 @@
                             <section>                                
                                 #set($websites = $page.forumsRoot.children)
                                 <ul class="Websites">
-                                #if( $websites.isEmpty() )
-                                <li>You need at least one website to add a forum</li>
-                                #else
-                                #foreach($websiteFolder in $websites)
-                                <li><a href="$websiteFolder.href">$websiteFolder.name</a></li>
-                                #end
-                                #end
+                                    #if( $websites.isEmpty() )
+                                    <li>You need at least one website to add a forum</li>
+                                    #else
+                                    #foreach($websiteFolder in $websites)
+                                    <li><a href="$websiteFolder.href">$websiteFolder.name</a></li>
+                                    #end
+                                    #end
                                 </ul>
                             </section>
                         </div>
@@ -44,7 +44,15 @@
             #foreach($forum in $page.children)
             <div class="Forum">
                 <header class="ClearFix">
-                    <div class="ShowDialog"><a href="$forum.name">$forum.title</a></div>
+                    <div class="ShowDialog">
+                        <a href="$forum.name">$forum.title</a>
+                        <div class="Dialog Hidden">
+                            <a href="" class="EditForum">Edit name and notes</a>
+                            <a href="" class="Delete DeleteForum">Delete this forum</a>
+                        </div>
+
+                    </div>
+
                 </header>
                 <div class="ContentForum ClearFix">
                     <h4>Recent posts</h4>
@@ -56,39 +64,43 @@
                         #end
                     </ul>			
                 </div>
+                <div class="Modal">
+                    <header>
+                        <h3>Edit Forum</h3>
+                        <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+                    </header>
+                    <div class="ModalContent">
+                        <div class="pageMessage">.</div>
+                        <table>
+                            <tr>
+                                <th><label for="name">Forum name</label></th>
+                                <td><input type="text" name="name" id="name" value="$forum.name" class="required simpleChars" maxlength="30" placeholder="Forum name" /></td>
+                            </tr>
+                            <tr>
+                                <th><label for="name">Forum Title</label></th>
+                                <td><input type="text" name="title" id="title" value="$forum.title" class="required" maxlength="" placeholder="Forum title" /></td>
+                            </tr>                    
+                            <tr>
+                                <th><label for="name">Description</label></th>
+                                <td>
+                                    <textarea name="notes" id="notes">$!forum.notes</textarea>
+                                </td>
+                            </tr>                    
+
+                            <tr>
+                                <td colspan="2" class="Btn">
+                                    <button>Save changes</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>                
             </div>
             #end
             #end
 
-            <div class="Hidden">
-                <div id="dialogForum">
-                    <div class="Dialog Hidden">
-                        <a href="" class="RenameForum">Rename this forum</a>
-                        <a href="" class="Delete DeleteForum">Delete this forum</a>
-                    </div>
-                </div>
-            </div>
         </section>
-        <div id="modalForum" class="Modal">
-            <header>
-                <h3>Edit Forum</h3>
-                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
-            </header>
-            <div class="ModalContent">
-                <div class="pageMessage">.</div>
-                <table>
-                    <tr>
-                        <th><label for="name">Enter program name</label></th>
-                        <td><input type="text" name="name" id="name" value="" class="required simpleChars" maxlength="30" placeholder="Program name" /></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="Btn">
-                            <button>Save changes</button>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+
         <script type="text/javascript">
             jQuery(function() {
                 initManageForum();

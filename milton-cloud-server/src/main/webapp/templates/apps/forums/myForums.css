@@ -170,3 +170,97 @@ ul.PostList li.Post div.Reply { float: right; }
 abbr.timeago {
     color: #959595;
 }
+
+div.forums table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+div.forums col.first, div.forums col.last {
+    width: 62px;
+}
+div.forums col.title {
+    width: 70%;
+}
+div.forums col {
+    width: 90px;
+}
+
+div.forums td {
+    vertical-align: middle;
+}
+div.forums td.progress, div.forums td.assessment, div.forums td.cert {
+    text-align: center;
+}
+
+div.forums thead td.last, div.forums tbody td.last {
+    padding: 0 23px 0 8px;
+}
+
+div.forums tr.even td {
+    background-color: white;
+}
+div.forums tr.title td {
+    border-top:1px solid #dbdada;    
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+}
+div.forums tbody tr.title.last td, .forums tbody tr.brief.last td {
+    border-bottom:1px solid #dbdada;    
+}
+div.forums tbody tr.title.last.expanded td {
+    border-bottom: none;
+}
+
+div.forums tbody td.first {
+    padding-left: 0.3em;
+}
+div.forums tbody td.title, .forums tr.brief td {
+    padding: 0 5px;    
+}
+div.forums tbody td.title {
+    font-weight: bold;
+    line-height: 1.35em;
+    font-size: 0.9em;
+}
+div.forums tbody td.progress {
+    font-size: 0.9em;
+    font-weight: bold;
+}
+div.forums tbody tr.brief {
+    display: none;
+}
+div.forums tbody .brief td {
+    font-size: 0.7em;   
+    padding-bottom: 0.4em;
+}
+
+div.forums a.title:hover {
+    text-decoration: none;
+}
+div.forums tbody tr.title td.first, div.forums tbody tr.title td.title {
+    cursor: pointer;
+}
+div.forums td p {
+    font-size: 1em;    
+}
+
+table td.recent-posts {
+    width: 29%;
+    vertical-align: top;
+}
+abbr.timeago {
+    font-size: 10px;
+    font-style: italic;
+}
+
+
+div.forums td.title a {
+    display: inline-block;
+    margin: 16px 0;
+}
+
+tr.gap td {
+    background: none repeat scroll 0 0 white;
+    height: 2px;
+}
