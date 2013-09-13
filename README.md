@@ -36,6 +36,8 @@ drop the WAR into tomcat etc, but then you'll just need to do some configuration
 get the initial data setup. If you'd really like to skip maven and go direct to tomcat
 let me know.
 
+A more completed getting started guide is on the site: http://cloud.milton.io/server/index.html
+
 Prerequisites
  - java 7 JDK (yes, must be version 7!)
  - maven 3
