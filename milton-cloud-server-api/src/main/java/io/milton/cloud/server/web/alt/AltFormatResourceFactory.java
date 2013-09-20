@@ -107,7 +107,7 @@ public class AltFormatResourceFactory implements ResourceFactory {
                     log.warn("fanout not found");
                     return null;
                 } else {
-                    return new GetResource(p.getName(), fanout, hash, _(SpliffySecurityManager.class), hr.getOrganisation(), blobStore, hashStore);
+                    return new GetResource(p.getName(), fanout, hash, _(SpliffySecurityManager.class), blobStore, hashStore, hr.getParent());
                 }
             }
             return null;

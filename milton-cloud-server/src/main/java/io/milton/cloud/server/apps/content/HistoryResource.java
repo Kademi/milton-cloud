@@ -179,6 +179,7 @@ public class HistoryResource implements GetableResource, PostableResource, Diges
     }
 
     private void sendHistoryAsJson(Session session, OutputStream out) throws IOException {
+        log.info("sendHistoryAsJson");
         List<HistoryItem> history = new ArrayList<>();
         Profile lastModifiedBy = contentResource.getModifiedBy();
         long modifiedById = 0;
@@ -188,6 +189,7 @@ public class HistoryResource implements GetableResource, PostableResource, Diges
         Date modDate = contentResource.getModifiedDate();
         if (modDate != null) {
             Version v = Version.find(contentResource.getHash(), modDate, modifiedById, SessionManager.session());
+            log.info("version: " + v);
             while (history.size() < 100 && v != null) {
                 history.add(toHistory(v));
                 v = v.previousVersion(session);

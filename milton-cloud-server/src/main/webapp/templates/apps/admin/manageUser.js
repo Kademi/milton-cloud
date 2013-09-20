@@ -14,6 +14,19 @@ function initManageUsers() {
     initLoginAs();
 }
 
+function initChangeUserId() {
+    $(".change-userid").click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if( confirm("Changing the userID will invalidate the user's password. They will need to reset their password. Are you sure you want to continue?") ) {
+            var newId = prompt("Please enter a new UserID. This must be unique across all users in this system");
+            if( newId ) {
+                doUpdateUserId(newId);
+            }
+        }
+    });
+}
+
 function initUploadUsers() {
     $(".showUploadCsvModal").click(function() {
         $.tinybox.show($("#modalUploadCsv"), {
@@ -91,6 +104,29 @@ function doSearch() {
         },
         error: function(resp) {
             alert("An error occured doing the user search. Please check your internet connection and try again");
+        }
+    });      
+}
+
+function doUpdateUserId(newUserId) {
+    $.ajax({
+        type: 'POST',
+        url: window.location.pathname,
+        dataType: "json",
+        data: {
+            newUserId: newUserId
+        },
+        success: function(data) {
+            log("success", data)
+            if( data.status ) {
+                window.location.reload();
+            } else {
+                alert("Could not change the user's ID: " + data.messages);
+            }
+            
+        },
+        error: function(resp) {
+            alert("An error occured attempting to update the userID. Please check your internet connection");
         }
     });      
 }

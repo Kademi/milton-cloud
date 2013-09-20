@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.JsonResult;
 import io.milton.resource.Resource;
 import io.milton.http.exceptions.BadRequestException;
@@ -32,7 +33,7 @@ import org.hashsplit4j.api.Parser;
  *
  * @author brad
  */
-class FilesFolder extends BaseResource implements PutableResource, PostableResource {
+class FilesFolder extends BaseResource implements PutableResource, PostableResource, CommonCollectionResource {
 
     private final BlobStore blobStore;
     private final HashStore hashStore;
@@ -40,8 +41,8 @@ class FilesFolder extends BaseResource implements PutableResource, PostableResou
     
     private JsonResult jsonResult;
 
-    public FilesFolder(BlobStore blobStore, HashStore hashStore, String name, SpliffySecurityManager securityManager, Organisation org) {
-        super(securityManager, org);
+    public FilesFolder(BlobStore blobStore, HashStore hashStore, String name, SpliffySecurityManager securityManager, CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.name = name;
@@ -71,7 +72,7 @@ class FilesFolder extends BaseResource implements PutableResource, PostableResou
         Parser parser = new Parser();
         String hash = parser.parse(inputStream, hashStore, blobStore);
         Fanout fanout = hashStore.getFileFanout(hash);
-        return new GetResource(newName, fanout, hash, securityManager, org, blobStore, hashStore);
+        return new GetResource(newName, fanout, hash, securityManager, blobStore, hashStore, this);
     }
 
     @Override

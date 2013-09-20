@@ -95,4 +95,13 @@ public class ManageGroupRolePage extends AbstractResource implements DeletableRe
         tx.commit();
     }
 
+    @Override
+    public boolean is(String type) {
+        if( type.equals("role")) {
+            return true;
+        }
+        return super.is(type); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 }

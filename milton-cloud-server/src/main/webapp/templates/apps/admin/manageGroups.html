@@ -21,7 +21,7 @@
                     #portlets("groupDetails")
                     <h4>Roles</h4>
                     <ul class="PermissionList ClearFix">
-                        #foreach($role in $group.children)
+                        #foreach($role in $group.children.ofType.role)
                         <li>
                             <span>$role.title</span>
                             <a href="$role.href">Delete</a>

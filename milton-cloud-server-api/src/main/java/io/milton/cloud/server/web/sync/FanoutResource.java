@@ -1,6 +1,7 @@
 package io.milton.cloud.server.web.sync;
 
 import io.milton.cloud.common.FanoutSerializationUtils;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -25,8 +26,8 @@ public class FanoutResource extends BaseResource implements GetableResource {
     private final Fanout fanout;
     private final String hash;
 
-    public FanoutResource(Fanout fanout, String hash, SpliffySecurityManager securityManager, Organisation org) {
-        super(securityManager, org);
+    public FanoutResource(Fanout fanout, String hash, SpliffySecurityManager securityManager,CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.fanout = fanout;
         this.hash = hash;
     }

@@ -341,7 +341,16 @@ function getFileName(path) {
     return name;
 }
 
+/**
+ * 
+ * Get the path of the resource which contains the given path
+ * 
+ */
 function getFolderPath(path) {
+    path = stripFragment(path); // remove any fragment like #section
+    if( path.endsWith("/")) {
+        path = path.substring(0, path.length-1);
+    }
     var pos = path.lastIndexOf("/");
     return path.substring(0, pos);
 }
@@ -615,11 +624,13 @@ function promptRename(sourceHref, callback) {
         newName = newName.trim();
         if (newName.length > 0 && currentName != newName) {
             var currentFolder = getFolderPath(sourceHref);
+            log("promptRename: currentFolder", currentFolder);
             var dest = currentFolder;
             if (!dest.endsWith("/")) {
                 dest += "/";
             }
             dest += newName;
+            log("promptRename: dest", dest);
             move(sourceHref, dest, callback);
         }
     }
@@ -807,6 +818,14 @@ function refreshIE8Layout(element) {
 function isIE() {
     var myNav = navigator.userAgent.toLowerCase();
     return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+}
+
+function stripFragment(href) {
+    var i = href.indexOf("#");
+    if( i > 0 ) {
+        href = href.substring(0, i-1);
+    }
+    return href;
 }
 
 /*

@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -28,8 +29,8 @@ public class DirectoryHashResource extends BaseResource implements GetableResour
     
     private final String hash;
 
-    public DirectoryHashResource(String hash, SpliffySecurityManager securityManager, Organisation org) {
-        super(securityManager, org);
+    public DirectoryHashResource(String hash, SpliffySecurityManager securityManager, CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.hash = hash;
     }
 

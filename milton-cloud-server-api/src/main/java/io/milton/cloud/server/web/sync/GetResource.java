@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.cloud.server.web.HashResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
@@ -10,10 +11,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import org.hashsplit4j.api.Fanout;
-import io.milton.vfs.db.Organisation;
 import io.milton.cloud.server.web.SpliffySecurityManager;
 import io.milton.common.ContentTypeUtils;
-import io.milton.common.DefaultContentTypeService;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.resource.GetableResource;
@@ -33,8 +32,8 @@ public class GetResource extends BaseResource implements GetableResource, HashRe
     private final BlobStore blobStore;
     private final HashStore hashStore;
 
-    public GetResource(String name, Fanout fanout, String hash, SpliffySecurityManager securityManager, Organisation org, BlobStore blobStore, HashStore hashStore) {
-        super(securityManager, org);
+    public GetResource(String name, Fanout fanout, String hash, SpliffySecurityManager securityManager, BlobStore blobStore, HashStore hashStore, CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.name = name;
         this.fanout = fanout;
         this.hash = hash;

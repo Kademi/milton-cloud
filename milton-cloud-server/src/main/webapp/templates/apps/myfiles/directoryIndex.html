@@ -4,6 +4,8 @@
         <link href="directoryIndex.css" rel="stylesheet" type="text/css" />
         <link href="/static/css/jquery.lightbox-0.5.css" rel="stylesheet" type="text/css" media="screen" />
         <script type="text/javascript" src="myfiles.js">//</script>
+        <script type="text/javascript" src="/static/history/jquery.history.js">//</script>
+        <link href="/static/history/jquery.history.css" rel="stylesheet" type="text/css" media="screen" />
     </head>    
     <body class="directory">
         <div class="btn-group pull-right">
@@ -43,6 +45,7 @@
                         <a href="$f.href">$f.name</a>
                     </td>
                     <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
+                    <td></td>
                     <td>
                         <a href="$f.href" class="hidden">hidden</a>
                     </td>

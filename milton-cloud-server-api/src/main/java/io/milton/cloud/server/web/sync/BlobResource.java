@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.http.Auth;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
@@ -25,8 +26,8 @@ public class BlobResource extends BaseResource implements GetableResource{
     private final byte[] blob;
     private final String hash;
     
-    public BlobResource(byte[] blob, String hash, SpliffySecurityManager securityManager, Organisation org) {
-        super(securityManager, org);
+    public BlobResource(byte[] blob, String hash, SpliffySecurityManager securityManager, CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.blob = blob;
         this.hash = hash;
     }        

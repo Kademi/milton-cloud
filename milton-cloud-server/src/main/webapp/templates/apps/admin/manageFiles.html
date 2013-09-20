@@ -2,15 +2,19 @@
     <head>
         <title>Manage modules</title>
         <link href="manageFiles.css" rel="stylesheet" type="text/css" />
-        <link href="/static/quiz/quiz.css" rel="stylesheet" type="text/css" />
         <link href="/static/history/jquery.history.css" rel="stylesheet" type="text/css" />
         <link href="/static/js/milton-image-select.css" rel="stylesheet" type="text/css" />
-        
+
         <script type="text/javascript" src="/static/history/jquery.history.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.milton-image-select.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.milton-tree.js">//</script>
         <script type="text/javascript" src="/static/js/managePublishing.js">//</script>
         <script type="text/javascript" src="/templates/themes/admin/prompt.js">//</script>
+        <script type="text/javascript" src="/templates/apps/admin/manageFiles.js">//</script>
+        <script type="text/javascript" src="/static/js/types.js">// </script>
+        <script type="text/javascript" src="/static/js/jquery.fileupload.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.milton-upload.js">//</script>
+        <script type="text/javascript" src="/static/js/jquery.lightbox-0.5.js">//</script>          
     </head>
     <body class="manageFiles">
         <section id="manageFiles" class="MainContent">
@@ -63,42 +67,9 @@
                             </section>
                         </div>
                     </div>
-                </div>
-                <div class="DropdownControl selectModule">                    
-                    <div class="DropdownWrapper">
-                        <span><b>Folder:</b> $page.path</span>
-                        <a href="#" class="Control"><span class="Hidden">Change folder</span></a>
-                    </div>
-                    <div class="DropdownContent Rows3 Hidden">
-                        <header>
-                            <h3>Programs</h3>
-                            <h3>Courses</h3>
-                            <h3>Modules</h3>
-                        </header>
-                        <div class="Content ClearFix">
-                            <section rel="program" class="programList">                                
-                                #set($parentProgram = $page.closest("program"))
-                                #foreach($program in $page.closest("programs").children.ofType.program)                                
-                                <a href="$program.href" class="${formatter.ifEqual('Active','', $parentProgram, $program)}">$program.title</a>
-                                #end
-                            </section>
-                            <section rel="course" class="coursesList">
-                                #set($parentCourse = $page.closest("course"))
-                                #foreach($course in $page.closest("program").children.ofType.course)
-                                <a href="$course.href" class="${formatter.ifEqual('Active','', $parentCourse, $course)}">$course.title</a>
-                                #end                                
-                            </section>
-                            <section rel="module" class="modulesList">
-                                #set($selectedModule = $page.closest("module"))
-                                #foreach($mod in $page.closest("course").children.ofType.module)
-                                <a href="$mod.href" class="${formatter.ifEqual('Active','', $selectedModule, $mod)}">$mod.title</a>
-                                #end                                                                
-                            </section>
-                        </div>
-                    </div>
-                </div>
+                </div>                
             </header>
-            
+
             <nav class="TabNav ClearFix">
                 <a href="#pages">Pages</a>
                 <a href="#files">Files</a>
@@ -126,22 +97,70 @@
                     </div>                
                 </form>
             </div>
-            <div class="Content TabContent" rel="#detail">
-                <form name="frmDetails" action="" method="post" class="Details" id="moduleDetailsForm">
-                    <div class="pageMessage">.</div>
-                    
-                </form>
+            <div class="Content TabContent" rel="#files">
+                <table id="fileList" class="bar table table-striped vcenter">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Files: $page.name</th>
+                            <th>Modified</th>
+                            <th>Size</th>
+                            <th>Tools</th>
+                        </tr>
+                        <tr class="seperator">
+
+                        </tr>
+                    </thead>
+                    <tbody>                
+                        #foreach($f in $page.subFolders)
+                        <tr>
+                            <td style="width: 70px">
+                                <a href="${f.href}#files">
+                                    <img  height="48" width="48" alt="" src="/static/icons/folder.png"/>
+                                </a>
+                            </td>
+                            <td class="left">
+                                <a href="${f.href}#files">$f.name</a>
+                            </td>
+                            <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
+                            <td></td>
+                            <td>
+                                <a href="$f.href" class="hidden">hidden</a>
+                            </td>
+                        </tr>
+                        #end
+                        #foreach($f in $page.files)                
+                        #set($lightBoxClass = "lightbox")
+                        #if( $f.contentLength < 100000 )
+                        #set($lightBoxClass = "")
+                        #end
+                        <tr class="file $lightBoxClass">
+                            #set($imgClass = $formatter.ifTrue($f.is("image"), "image", "" ) )
+                            <td style="width: 70px">
+                                <a href="$f.href" class="$imgClass"><img height="48" width="48" alt="" src="/templates/images/img8.gif"/></a>
+                            </td>
+                            <td class="left">
+                                <a href="$f.href" class="$imgClass">$f.name</a>
+                            </td>
+                            <td><abbr title="$formatter.formatDateISO8601($!f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
+                            <td>$f.contentLength</td>
+                            <td>
+                                <a href="$f.href" class="hidden">hidden</a>
+                            </td>
+                        </tr>
+                        #end                 
+                    </tbody>
+                </table>                
             </div>
-            
+
         </section>
 
 
-               
+
         <script type="text/javascript" >
             var themePath = "${page.themePath}";
             jQuery(function() {
                 //initManageModule("../../..", themePath);
-            });            
+            });
         </script>        
     </body>
 </html>

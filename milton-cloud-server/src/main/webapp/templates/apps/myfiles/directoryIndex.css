@@ -33,6 +33,9 @@ body.directory #fileupload {
 .tools a.download {
     background-image: url(/static/common/download.png);
 }
+.tools a.history {
+    background-image: url(/static/common/history.png);
+}
 
 /*http://www.iconlooker.com/icon/vistaico-toolbar-icons-rename_w33061.html*/
 .tools a.rename {    

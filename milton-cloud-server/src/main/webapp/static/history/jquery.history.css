@@ -3,11 +3,13 @@
     padding: 10px;
 }
 div.history {
-    background-color: white;
+    background-color: white;    
+    width: 400px;
 }
 div.history .historyList {
     max-height: 300px;
     overflow-y: scroll;
+    border: 1px solid #DDDDDD;
 }
 
 div.history a.Close {
@@ -23,7 +25,10 @@ div.history h3 {
     background-image: -moz-linear-gradient(center bottom , #1E2330 17%, #333A4A 50%);
     border-radius: 5px 5px 0 0;
     color: white;
-    padding: 10px;    
+    padding: 10px;   
+    font-size: 15px;
+    line-height: inherit;
+    margin: 0;
 }
 
 button.history {

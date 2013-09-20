@@ -96,9 +96,11 @@ function showFileTools(tr) {
     if( toolsDiv.length === 0 ) {
         var td = tr.find("td:last-child");        
         var href = tr.find("a.hidden").first().attr("href"); // a.hidden does not get changed by lightbox
+        href = stripFragment(href);
         toolsDiv = $("<div class='tools'><a class='history'>History</a><a class='delete'>Delete</a><a class='rename'>Rename</a><a target='_blank' class='download'>Download</a></div>")
         toolsDiv.find("a").attr("href", href);
         td.append(toolsDiv);
+        log("init history", href);
         toolsDiv.find("a.history").history({
             pageUrl: href
         });

@@ -100,7 +100,7 @@ public class SpliffyResourceFactory implements ResourceFactory {
             if (r != null) {
                 if (r instanceof ContentDirectoryResource) {
                     ContentDirectoryResource dr = (ContentDirectoryResource) r;
-                    r = new DirectoryHashResource(dr.getDirectoryNode().getHash(), securityManager, dr.getOrganisation());
+                    r = new DirectoryHashResource(dr.getDirectoryNode().getHash(), securityManager, dr);
                 }
             }
         } else {

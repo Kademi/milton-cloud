@@ -64,13 +64,14 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
 
         if (path.startsWith(basePath)) {
             RootFolder rootFolder = currentRootFolderService.getRootFolder(host);
-            return getSyncResource(path, rootFolder.getOrganisation());
+            return getSyncResource(path, rootFolder);
         } else {
             return null;
         }
     }
 
-    private Resource getSyncResource(String path, Organisation org) throws NumberFormatException {
+    private Resource getSyncResource(String path, RootFolder rootFolder) throws NumberFormatException {
+        Organisation org = rootFolder.getOrganisation();
         path = path.substring(basePath.length()); // strip the base path
         Path p = Path.path(path);
         int numPathParts = p.getParts().length;
@@ -83,49 +84,51 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
         switch (first) {
             case "fileFanouts": // for getting the fanouts that make up a file
                 if (numPathParts == 1) {
-                    return new FanoutFolder(hashStore, first, securityManager, org, false);
+                    return new FanoutFolder(hashStore, first, securityManager, false, rootFolder);
                 } else {
-                    return findFanout(p.getName(), org, false);
+                    return findFanout(p.getName(), rootFolder, false);
                 }
             case "chunkFanouts": // for getting the list of blobs within a fanout
                 if (numPathParts == 1) {
-                    return new FanoutFolder(hashStore, first, securityManager, org, true);
+                    return new FanoutFolder(hashStore, first, securityManager, true, rootFolder);
                 } else {
-                    return findFanout(p.getName(), org, true);
+                    return findFanout(p.getName(), rootFolder, true);
                 }
             case "blobs": // For writing blobs, ie chunks of files
                 if (numPathParts == 1) {
-                    return new BlobFolder(blobStore, first, securityManager, org);
+                    return new BlobFolder(blobStore, first, securityManager, rootFolder);
                 } else {
-                    return findBlob(p.getName(), org);
+                    return findBlob(p.getName(), rootFolder);
                 }
             case "files": // For writing entire file contents, not just blobs
                 if (numPathParts == 1) {
-                    return new FilesFolder(blobStore, hashStore, path, securityManager, org);
+                    return new FilesFolder(blobStore, hashStore, path, securityManager, rootFolder);
                 } else {
-                    return findGetResource(p.getName(), org);
+                    return findGetResource(p.getName(), rootFolder);
                 }
             case "dirhashes": // gets the triplets within a directory, keyed by the hash of the directory
                 if (numPathParts == 1) {
-                    return new DirectoryHashesFolder(blobStore, hashStore, path, securityManager, org);
+                    return new DirectoryHashesFolder(blobStore, hashStore, path, securityManager, rootFolder);
                 } else {
-                    return findDirectoryHashResource(p.getName(), org);
+                    return findDirectoryHashResource(p.getName(), rootFolder);
                 }
             default:
                 return null;
         }
     }
 
-    private Resource findBlob(String hash, Organisation org) {
+    private Resource findBlob(String hash, RootFolder rootFolder) {
+        Organisation org = rootFolder.getOrganisation();
         byte[] bytes = blobStore.getBlob(hash);
         if (bytes == null) {
             return null;
         } else {
-            return new BlobResource(bytes, hash, securityManager, org);
+            return new BlobResource(bytes, hash, securityManager, rootFolder);
         }
     }
 
-    private Resource findFanout(String hash, Organisation org, boolean isChunk) {
+    private Resource findFanout(String hash, RootFolder rootFolder, boolean isChunk) {
+        Organisation org = rootFolder.getOrganisation();
         Fanout fanout;
         if( isChunk ) {
             fanout = hashStore.getChunkFanout(hash);
@@ -136,24 +139,26 @@ public class SpliffySyncResourceFactory implements ResourceFactory {
             log.warn("fanout not found");
             return null;
         } else {
-            return new FanoutResource(fanout, hash, securityManager, org);
+            return new FanoutResource(fanout, hash, securityManager, rootFolder);
         }
     }
     
-    private Resource findGetResource(String fileName, Organisation org) {
+    private Resource findGetResource(String fileName, RootFolder rootFolder) {
+        Organisation org = rootFolder.getOrganisation();
         String hash = FileUtils.stripExtension(fileName);
         Fanout fanout = hashStore.getFileFanout(hash);
         if (fanout == null) {
             log.warn("fanout not found");
             return null;
         } else {
-            return new GetResource(fileName, fanout, hash, securityManager, org, blobStore, hashStore);
+            return new GetResource(fileName, fanout, hash, securityManager, blobStore, hashStore, rootFolder);
         }
         
     }
 
-    private Resource findDirectoryHashResource(String hash, Organisation org) {
-        return new DirectoryHashResource(hash, securityManager, org);
+    private Resource findDirectoryHashResource(String hash, RootFolder rootFolder) {
+        Organisation org = rootFolder.getOrganisation();
+        return new DirectoryHashResource(hash, securityManager, rootFolder);
     }
             
 }

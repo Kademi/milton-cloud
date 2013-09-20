@@ -1,5 +1,6 @@
 package io.milton.cloud.server.web.sync;
 
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.resource.Resource;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
@@ -25,8 +26,8 @@ public class DirectoryHashesFolder extends BaseResource implements CollectionRes
     private final HashStore hashStore;
     private final String name;
 
-    public DirectoryHashesFolder(BlobStore blobStore, HashStore hashStore, String name, SpliffySecurityManager securityManager, Organisation org) {
-        super(securityManager, org);
+    public DirectoryHashesFolder(BlobStore blobStore, HashStore hashStore, String name, SpliffySecurityManager securityManager, CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.name = name;

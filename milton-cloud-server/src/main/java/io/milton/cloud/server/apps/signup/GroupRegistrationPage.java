@@ -233,6 +233,10 @@ public class GroupRegistrationPage extends AbstractResource implements GetableRe
                 } else {
                     newName = DbUtils.replaceYuckyChars(newName);
                 }
+                newName = newName.replace(".", "");
+                if( newName.length() < 4 ) {
+                    newName = "u" + (Math.random() * 10000);
+                }
                 newName = Profile.findUniqueName(newName, session);
 
                 p.setName(newName);

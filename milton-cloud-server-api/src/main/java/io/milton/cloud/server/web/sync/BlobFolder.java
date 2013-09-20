@@ -1,6 +1,7 @@
 package io.milton.cloud.server.web.sync;
 
 import io.milton.cloud.common.HashCalc;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.resource.Resource;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -23,15 +24,15 @@ import org.apache.log4j.Logger;
  *
  * @author brad
  */
-class BlobFolder extends  BaseResource implements PutableResource {
+public class BlobFolder extends  BaseResource implements PutableResource, CommonCollectionResource {
 
     private static final Logger log = Logger.getLogger(BlobFolder.class);
     
     private final BlobStore blobStore;
     private final String name;
     
-    public BlobFolder(BlobStore blobStore, String name, SpliffySecurityManager securityManager,Organisation org) {
-        super(securityManager, org);
+    public BlobFolder(BlobStore blobStore, String name, SpliffySecurityManager securityManager,CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.blobStore = blobStore;
         this.name = name;
     }
@@ -76,7 +77,7 @@ class BlobFolder extends  BaseResource implements PutableResource {
         log.info("set blob into store: " + blobStore.getClass());
         blobStore.setBlob(newName, bytes);
         log.info("done set blob" + " duration=" + (System.currentTimeMillis()-tm));
-        return new BlobResource(bytes, newName, securityManager, org);
+        return new BlobResource(bytes, newName, securityManager, this);
     }
 
     @Override

@@ -161,6 +161,18 @@ public class ManageUserPage extends TemplatedHtmlPage implements GetableResource
                 log.error("exception: " + profile.getId(), ex);
                 jsonResult = new JsonResult(false, ex.getMessage());
             }
+        } else if( parameters.containsKey("newUserId")) {
+            String newId = WebUtils.getRawParam(parameters, "newUserId");
+            Profile pExisting = Profile.find(newId, session);
+            if( pExisting != null ) {
+                jsonResult = new JsonResult(false, "That userId is already being used");
+                tx.rollback();
+            } else {
+                profile.setName(newId);
+                session.save(profile);
+                jsonResult = new JsonResult(true);
+                tx.commit();
+            }
         } else if (parameters.containsKey("password")) {
             String newPassword = parameters.get("password");
             _(PasswordManager.class).setPassword(profile, newPassword);

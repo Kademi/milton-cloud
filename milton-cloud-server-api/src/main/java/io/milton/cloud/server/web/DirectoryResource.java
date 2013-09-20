@@ -175,6 +175,9 @@ public class DirectoryResource<P extends ContentDirectoryResource> extends Abstr
         if (curUser == null) {
             throw new RuntimeException("No current user!!");
         }
+        if( parent == this ) {
+            throw new RuntimeException("EEK, my parent is myself??? " + this.getClass());
+        }
         parent.save();
     }
 

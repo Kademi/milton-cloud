@@ -1,6 +1,7 @@
 package io.milton.cloud.server.web.sync;
 
 import io.milton.cloud.common.FanoutSerializationUtils;
+import io.milton.cloud.server.web.CommonCollectionResource;
 import io.milton.resource.Resource;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -27,15 +28,15 @@ import org.hibernate.Transaction;
  *
  * @author brad
  */
-public class FanoutFolder extends BaseResource implements PutableResource {
+public class FanoutFolder extends BaseResource implements PutableResource , CommonCollectionResource{
 
     private static Logger log = Logger.getLogger(FanoutFolder.class);
     private final HashStore hashStore;
     private final String name;
     private final boolean isChunk; // or file
 
-    public FanoutFolder(HashStore hashStore, String name, SpliffySecurityManager securityManager, Organisation org, boolean isChunk) {
-        super(securityManager, org);
+    public FanoutFolder(HashStore hashStore, String name, SpliffySecurityManager securityManager, boolean isChunk, CommonCollectionResource parent) {
+        super(securityManager, parent);
         this.hashStore = hashStore;
         this.name = name;
         this.isChunk = isChunk;
@@ -72,7 +73,7 @@ public class FanoutFolder extends BaseResource implements PutableResource {
             hashStore.setFileFanout(hash, fanout.getHashes(), fanout.getActualContentLength());
         }
         tx.commit();
-        return new FanoutResource(fanout, hash, securityManager, org);
+        return new FanoutResource(fanout, hash, securityManager, this);
     }
 
     @Override

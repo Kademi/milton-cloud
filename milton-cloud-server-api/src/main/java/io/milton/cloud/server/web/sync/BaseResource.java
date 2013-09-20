@@ -30,10 +30,12 @@ public abstract class BaseResource implements CommonResource{
     private static final Logger log = Logger.getLogger(BaseResource.class);
     protected final SpliffySecurityManager securityManager;
     protected final Organisation org;
+    protected final CommonCollectionResource parent;
 
-    public BaseResource(SpliffySecurityManager securityManager, Organisation org) {
+    public BaseResource(SpliffySecurityManager securityManager, CommonCollectionResource parent) {
         this.securityManager = securityManager;
-        this.org = org;
+        this.org = parent.getOrganisation();
+        this.parent = parent;
     }
     
     
@@ -109,7 +111,7 @@ public abstract class BaseResource implements CommonResource{
 
     @Override
     public CommonCollectionResource getParent() {
-        return null;
+        return parent;
     }
 
     @Override
