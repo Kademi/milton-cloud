@@ -213,7 +213,7 @@ public class ResourceList extends ArrayList<CommonResource> {
         Iterator<CommonResource> it = newList.iterator();
         while (it.hasNext()) {
             Resource ct = it.next();
-            if (contains(s, ct.getName())) {
+            if (contains(s, ct.getName()) ) {
                 it.remove();
             }
         }

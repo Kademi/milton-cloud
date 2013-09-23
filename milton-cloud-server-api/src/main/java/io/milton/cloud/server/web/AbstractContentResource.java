@@ -308,11 +308,11 @@ public abstract class AbstractContentResource<T extends DataNode, P extends Cont
      */
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-        if (!method.isWrite) {
-            if (isPublic()) {
-                return true;
-            }
-        }
+//        if (!method.isWrite) {
+//            if (isPublic()) {
+//                return true;
+//            }
+//        }
         return super.authorise(request, method, auth);
     }
 

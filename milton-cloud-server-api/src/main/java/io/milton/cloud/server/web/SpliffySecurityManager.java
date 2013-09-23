@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SpliffySecurityManager {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffySecurityManager.class);
+    public static final String PRIVS_ATT = "privs";
     private String realm = "spliffy";
     private final CurrentPrincipalService currentPrincipalService;
     private final UserDao userDao;
@@ -141,11 +142,17 @@ public class SpliffySecurityManager {
             }
         }
         Set<AccessControlledResource.Priviledge> privs = getPriviledges(curUser, resource);
+
+        if (resource.isPublic()) {
+            // public resource, so grant read content access to anyone
+            privs.add(Priviledge.READ_CONTENT);
+        }
+
         Set<Priviledge> expanded = AclUtils.expand(privs);
         if (log.isDebugEnabled()) {
             log.debug("expanded privs: " + expanded);
         }
-        req.getAttributes().put("privs", expanded); // stash them for later, page rendering might be interested
+        req.getAttributes().put(PRIVS_ATT, expanded); // stash them for later, page rendering might be interested
         AccessControlledResource.Priviledge required = findRequiredPriv(method, resource, req);
         boolean allows;
         if (required == null) {

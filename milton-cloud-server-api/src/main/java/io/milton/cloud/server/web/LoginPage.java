@@ -1,5 +1,8 @@
 package io.milton.cloud.server.web;
 
+import io.milton.cloud.server.apps.ApplicationManager;
+import io.milton.cloud.server.apps.user.UserDashboardApp;
+import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.web.templating.HtmlTemplater;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +19,7 @@ import io.milton.http.exceptions.NotFoundException;
 import io.milton.resource.GetableResource;
 
 import static io.milton.context.RequestContext._;
+import io.milton.resource.Resource;
 
 /**
  *
@@ -62,13 +66,20 @@ public class LoginPage extends AbstractResource implements GetableResource, Comm
     @Override
     public String checkRedirect(Request request) {
         if (request.getAuthorization() != null && request.getAuthorization().getTag() != null) {
-            // logged in, so go to user's home page
-            Object oUser = request.getAuthorization().getTag();
-            if( oUser instanceof UserResource ) {
-                UserResource user = (UserResource) oUser;
-                return "/" + user.getName() + "/";
+            // logged in, so go to user's dashboard or home page
+            RootFolder rf = WebUtils.findRootFolder(this);
+            if( rf instanceof WebsiteRootFolder ) {
+                // Go to dashboard if available
+                Resource dash = _(ApplicationManager.class).getPage(rf, UserDashboardApp.DASHBOARD_NAME);
+                if( dash != null ) {
+                    return "/" + dash.getName();
+                } else {
+                    // No dash, so best to go to site home page
+                    return "/";
+                }
+            } else {
+                return "/"; // go to admin dashboard which is the root
             }
-            throw new RuntimeException("Unexpected tag type: " + oUser.getClass() + " - expected UserResource");
         } else {
             return null;
         }

@@ -4,6 +4,7 @@
  *
  * Config:
  * pageUrl - url of the resource to show history for.
+ * showPreview - whether or not to show a preview link in the history table
  * 
  */
 
@@ -24,6 +25,7 @@
         });
 
     };
+})(jQuery);
 
 
     function showHistory(btn, config) {
@@ -80,8 +82,6 @@
         }
 
     }
-
-})(jQuery);
 
 
 function buildHistoryTable(data, tbody, config) {

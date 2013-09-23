@@ -70,7 +70,7 @@ CKEDITOR.plugins.add( 'embed_video',
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/jplayer/x.jplayer.init.js'));        
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('plugins/embed_video/controller.js'));        
  
-        var pagePath = getFolderPath(window.location.pathname);
+        var pagePath = toFolderPath(window.location.pathname);
         CKEDITOR.dialog.add( 'videoDialog', function( editor ) {
             log("add to editor", editor);
             return {
@@ -110,11 +110,11 @@ CKEDITOR.plugins.add( 'embed_video',
                     } else {
                         this.insertMode = false;
                         var p = getPathFromHref(window.location.href);
-                        p = getFolderPath(p);
+                        p = toFolderPath(p);
                         initialSelect = p;
                         mtype = element.getAttribute("mtype");
                         src = element.getAttribute("src");
-                        url = getFolderPath(src); // the url of the video is the parent of the preview image
+                        url = toFolderPath(src); // the url of the video is the parent of the preview image
                         log("update mode", initialSelect, url, mtype, src);
                     }
  

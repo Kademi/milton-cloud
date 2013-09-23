@@ -828,9 +828,30 @@ select.Medium { width: 100px; }
     background-image: url(images/icon_dialogue.png);
     border-color: #d1d1d1 !important;
 }
-#manageModule div.Content div.MainContent article.Quiz { background-image: url(images/icon_quiz.png); }
-#manageModule div.Content div.MainContent article {
-    background: #FFF url(images/icon_document.png) no-repeat 7px 50%;
+.filesList article.Quiz { background-image: url(images/icon_quiz.png); }
+.filesList article {
+    background-color: #FFF;
+    background-image: url(images/icon_document.png);
+    background-repeat: no-repeat;
+    background-position: 7px 50%;
+}
+.filesList article:first-child { margin-top: 0; }
+.filesList article:nth-child(odd) { background-color: #ededed; }
+.filesList article aside { float: right; }
+.filesList article aside a {
+    float: left;
+    width: 23px;
+    height: 23px;
+    padding: 1px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+.filesList article:hover aside a { display: block; }
+.filesList article aside a:hover, .filesList article aside a.Active {
+    padding: 0;
+    border: 1px solid #c7c7c7;
+    background-color: #e3e3e3;
+    border-radius: 3px;
 }
 
 
@@ -1467,4 +1488,14 @@ ul.list, ul.ClearFix, ul.ListItem, ul.appliesTo {
 }
 .ajax-processing .ajax-loader {
     display: inline;
+}
+
+div.Modal div.ModalContent.new-page-modal-content table th {
+    vertical-align: middle;
+    text-align: right;
+    padding-right: 10px;
+}
+div.Modal div.ModalContent.new-page-modal-content table th:first-child {
+    text-align: left;
+    width: 60px;
 }

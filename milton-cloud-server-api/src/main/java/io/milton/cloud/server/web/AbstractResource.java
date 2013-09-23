@@ -145,6 +145,10 @@ public abstract class AbstractResource implements CommonResource, PropFindableRe
                 }
             }
         }
+        String gt = request.getParams().get("goto");
+        if (gt != null) {
+            return WebUtils.externalUrl(this);
+        }        
         return null;
     }
 

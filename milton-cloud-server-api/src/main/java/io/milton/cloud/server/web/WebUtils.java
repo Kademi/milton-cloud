@@ -20,10 +20,15 @@ import io.milton.cloud.server.apps.orgs.OrganisationFolder;
 import io.milton.cloud.server.apps.website.WebsiteRootFolder;
 import io.milton.cloud.server.mail.BatchEmailService;
 import io.milton.cloud.server.manager.CommentService;
+import io.milton.cloud.server.manager.CurrentRootFolderService;
+import io.milton.cloud.server.web.templating.Formatter;
 import io.milton.cloud.server.web.templating.MenuItem;
 import io.milton.common.Path;
+import static io.milton.context.RequestContext._;
+import io.milton.http.HttpManager;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.http11.auth.CookieAuthenticationHandler;
 import io.milton.http.values.Pair;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.Resource;
@@ -43,7 +48,7 @@ import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.SourceFormatter;
 import org.w3c.tidy.Tidy;
 
-import static io.milton.context.RequestContext._;
+import io.milton.vfs.db.Branch;
 
 /**
  *
@@ -52,7 +57,7 @@ import static io.milton.context.RequestContext._;
 public class WebUtils {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebUtils.class);
-    
+
     public static String getRawParam(Map<String, String> params, String name) {
         String s = params.get(name);
         if (s == null) {
@@ -63,8 +68,8 @@ public class WebUtils {
             return null;
         }
         return s;
-    }    
-        
+    }
+
     /**
      * Returns a trimmed, nulled, string value. If present the value is trimmed,
      * and if empty returns null
@@ -75,7 +80,7 @@ public class WebUtils {
      */
     public static String getCleanedParam(Map<String, String> params, String name) {
         String s = getRawParam(params, name);
-        if( s == null ) {
+        if (s == null) {
             return s;
         }
         return _(CommentService.class).cleanInput(s);
@@ -249,12 +254,12 @@ public class WebUtils {
                     String href = pair.getObject1();
                     Path p = Path.path(href);
                     String sectionHref;
-                    if( p.getName() != null && p.getName().equals("index.html")) {
+                    if (p.getName() != null && p.getName().equals("index.html")) {
                         sectionHref = p.getParent().toString();
                     } else {
                         sectionHref = p.toString();
                     }
-                    
+
                     if (thisHref.startsWith(sectionHref)) {
                         if (longestHref == null || sectionHref.length() > longestHref.length()) {
                             longestHref = sectionHref;
@@ -309,11 +314,11 @@ public class WebUtils {
             tidy.setIndentContent(true);
             tidy.setSmartIndent(true);
             tidy.setTidyMark(false);
-            tidy.setWraplen(500);            
-            
+            tidy.setWraplen(500);
+
             tidy.setInputEncoding("UTF-8");
             tidy.setOutputEncoding("UTF-8");
-                        
+
             tidy.setDocType("omit");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             InputStream in = new ByteArrayInputStream(s.getBytes("UTF-8"));
@@ -324,7 +329,7 @@ public class WebUtils {
             throw new RuntimeException(ex);
         }
     }
-    
+
     public static String tidyHtml2(String messy) {
         try {
             Source source = new Source(messy);
@@ -338,7 +343,7 @@ public class WebUtils {
             log.error("Failed to generate text from HTML", e);
             return null;
         }
-    }    
+    }
 
     public static Long getParamAsLong(Map<String, String> parameters, String key) {
         String s = getRawParam(parameters, key);
@@ -413,5 +418,35 @@ public class WebUtils {
             }
         }
         return s1 + s2;
+    }
+
+    public static String externalUrl(CommonResource cr) {
+        StringBuilder sb = _externalUrl(cr);
+
+        // Add auth params
+        CookieAuthenticationHandler cookieAuth = _(CookieAuthenticationHandler.class);
+        sb.append( "?" );
+        sb.append( cookieAuth.getCookieNameUserUrl() + "=" + cookieAuth.getUserUrlFromRequest(HttpManager.request()) );
+        sb.append(  "&" );
+        sb.append( cookieAuth.getCookieNameUserUrlHash() + "=" + cookieAuth.getHashFromRequest(HttpManager.request()) );
+        return sb.toString();
+    }
+
+    public static StringBuilder _externalUrl(CommonResource cr) {
+        if (cr instanceof BranchFolder) {
+            BranchFolder websiteBranch = (BranchFolder) cr;
+            Website website = (Website) websiteBranch.branch.getRepository();
+            String host = "http://" + websiteBranch.getName() + "." + website.getName() + "." + _(CurrentRootFolderService.class).getPrimaryDomain();
+            host += _(Formatter.class).getPortString();
+            String url = host + "/";
+            return new StringBuilder(url);
+        } else {
+            StringBuilder sb = _externalUrl(cr.getParent());
+            sb.append(cr.getName());
+            if( cr instanceof CollectionResource) {
+                sb.append("/");
+            }
+            return sb;
+        }
     }
 }

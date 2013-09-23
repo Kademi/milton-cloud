@@ -46,7 +46,9 @@ import javax.xml.namespace.QName;
 
 import static io.milton.context.RequestContext._;
 import io.milton.http.Auth;
+import io.milton.http.FileItem;
 import io.milton.http.Request;
+import io.milton.resource.PostableResource;
 import java.util.HashMap;
 
 /**
@@ -55,7 +57,7 @@ import java.util.HashMap;
  * @author brad
  */
 @BeanPropertyResource(value = "milton")
-public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource, HashResource {
+public class FileResource extends AbstractContentResource implements ReplaceableResource, ParameterisedResource, ContentResource, HashResource, PostableResource {
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
     private static final Range docTypeRange = new Range(0, 30);
@@ -73,6 +75,24 @@ public class FileResource extends AbstractContentResource implements Replaceable
         UploadUtils.replaceContent(this, in, length);
     }
 
+    @Override
+    public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
+        RenderFileResource html = getHtml();
+        if( html != null ) {
+            String result =  html.processForm(parameters, files);
+            this.jsonResult = html.getJsonResult();
+            return result;
+        } else {
+            log.warn("Nothing to do");
+            return null;
+        }
+    }
+
+    @Override
+    public Priviledge getRequiredPostPriviledge(Request request) {
+        return Priviledge.WRITE_CONTENT;
+    }    
+    
     /**
      * Just updates content, does not save on parent or do any transaction
      * handling
@@ -118,6 +138,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         Map<String, String> map = new HashMap<>();
         map.put("title", page.getTitle());
         map.put("body", page.getBody());
+        map.put("template", page.getTemplate() );
         for (String s : page.getParamNames()) {
             map.put(s, page.getParam(s));
         }
@@ -394,13 +415,7 @@ public class FileResource extends AbstractContentResource implements Replaceable
         }        
         super.updateModDate(); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
-
-    @Override
-    public Priviledge getRequiredPostPriviledge(Request request) {
-        return null;
-    }
+       
     
     public String getTextContent() {
         try {

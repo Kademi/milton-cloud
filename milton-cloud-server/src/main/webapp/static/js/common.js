@@ -356,6 +356,18 @@ function getFolderPath(path) {
 }
 
 /**
+ *  If the given path is a folder (ie ends with a slash) return it. Otherwise, 
+ *  strip the file portion and remove the collection path
+ */
+function toFolderPath(path) {
+    path = stripFragment(path); // remove any fragment like #section
+    var pos = path.lastIndexOf("/");
+    return path.substring(0, pos);
+}
+
+
+
+/**
  * just removed the server portion of the href
  */
 function getPathFromHref(href) {

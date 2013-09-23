@@ -44,7 +44,7 @@
                                     <strong class="islive">LIVE</strong>
                                     #end
 
-                                    <a href="${b.href}manageModules">
+                                    <a href="${b.href}">
                                         $b.name
                                     </a>                                    
                                 </li>
@@ -72,22 +72,21 @@
 
             <nav class="TabNav ClearFix">
                 <a href="#pages">Pages</a>
-                <a href="#files">Files</a>
+                <a href="#files">Files &amp; Folders</a>
             </nav>
             <div class="Content TabContent" rel="#pages" style="position: relative">
-                <h4>$page.title</h4>
+                <h4>$page.title - $page.class</h4>
                 <a title="Add Page" class="SmallBtn Add NoText AddModulePage" href=""><span>Add</span></a>
-                <a title="Add Quiz" class="SmallBtn Add NoText AddQuizPage" href=""><span>Quiz</span></a>
-                <form method="POST" action="" class="modulePages">
-                    <div class="MainContent">
+                <form method="POST" action="" class="">
+                    <div class="MainContent filesList">
                         #set($order = 0)
 
-                        #foreach($page in $page.children.ofType.Page)
-                        <article class="">
-                            <span>$modulePage.title</span>
+                        #foreach($page in $page.children.ofType.html)
+                        <article class="modulePage">
+                            <span>$page.title</span>
                             <aside class="Hidden">
                                 <a href="${page.name}" class="Edit" title="Edit page"><span class="Hidden">Edit page</span></a>
-                                <a href="?goto=${page.name}" target="_blank" class="View" title="View page"><span class="Hidden">View page</span></a>
+                                <a href="${page.name}?goto" target="_blank" class="View" title="View page"><span class="Hidden">View page</span></a>
                                 <a href="${page.path}" class="Delete" title="Delete page"><span class="Hidden">Delete page</span></a>
                             </aside>    
                         </article>
@@ -128,6 +127,7 @@
                             </td>
                         </tr>
                         #end
+
                         #foreach($f in $page.files)                
                         #set($lightBoxClass = "lightbox")
                         #if( $f.contentLength < 100000 )
@@ -154,11 +154,53 @@
 
         </section>
 
+        <div id="modalCreatePage" class="Modal wide">
+            <header>
+                <h3>Add/edit module page</h3>                
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent new-page-modal-content">
+                <form method="POST" action=".">
+                    <input type="hidden" name="pageName" />
+                    <div class="pageMessage">.</div>
+                    <table class=''>
+                        <tr>
+                            <th><label for="name">Page title</label></th>
+                            <td>
+                                <input type="text" name="title" id="pageTitle" class="required" value="" placeholder="A title for the new page" />                                
+                            </td>
+                            <th>Page template</th>
+                            <td>
+                                <select name="template">
+                                    #foreach($template in $page.closest("branch").child("theme").children.ofType.html.exclude('normal.html') )
+                                    <option value="theme/${template.name}">$template.name</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td style='width: 300px'>
+                                <button class="Btn pageBtn" type="submit">
+                                    Save page
+                                    <img class='ajax-loader' src='/static/common/loading.gif'/>
+                                </button>
+                                <button class="Btn historyBtn" type="button">History</button>
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <textarea name="body" id="body" class="htmleditor toolbar-Full" style="width: 800px"></textarea>
+                            </td>
+                        </tr>                        
+                    </table>
+                </form>
+            </div>
+        </div>          
 
 
         <script type="text/javascript" >
             var themePath = "${page.themePath}";
             jQuery(function() {
+                initPublishingMenu("");
                 //initManageModule("../../..", themePath);
             });
         </script>        

@@ -281,7 +281,26 @@ function getFileName(path) {
     return name;
 }
 
-function getFolderPath(path) { 
+/**
+ * 
+ * Get the path of the resource which contains the given path
+ * 
+ */
+function getFolderPath(path) {
+    path = stripFragment(path); // remove any fragment like #section
+    if( path.endsWith("/")) {
+        path = path.substring(0, path.length-1);
+    }
+    var pos = path.lastIndexOf("/");
+    return path.substring(0, pos);
+}
+
+/**
+ *  If the given path is a folder (ie ends with a slash) return it. Otherwise, 
+ *  strip the file portion and remove the collection path
+ */
+function toFolderPath(path) {
+    path = stripFragment(path); // remove any fragment like #section
     var pos = path.lastIndexOf("/");
     return path.substring(0, pos);
 }

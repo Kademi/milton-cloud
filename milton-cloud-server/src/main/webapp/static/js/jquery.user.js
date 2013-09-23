@@ -101,9 +101,10 @@ function doLogin(userName, password, config, container) {
         dataType: "json",
         acceptsMap: "application/x-javascript",
         success: function(resp) {
-            log("login success", resp)
+            log("received login response", resp)
             initUser();                
             if( resp.status ) {
+                log("login success", resp.status);
                 if( config.loginCallback) {
                     config.loginCallback();
                 }
@@ -125,6 +126,7 @@ function doLogin(userName, password, config, container) {
                     if( config.afterLoginUrl === "none") {
                         log("Not doing redirect because afterLoginUrl=='none'");
                     } else if( config.afterLoginUrl === "reload") {
+                        log("Reload current location");
                         window.location.reload();
                     } else {
                         // if config has a relative path, then evaluate it relative to the user's own url in response
@@ -134,6 +136,7 @@ function doLogin(userName, password, config, container) {
                     }
                 }
             } else {
+                log("Login not successful", resp.status);
                 // null userurl, so login was not successful
                 $(config.valiationMessageSelector, container).text(config.loginFailedMessage);
                 log("null userUrl, so failed. Set validation message message", $(config.valiationMessageSelector, this), config.loginFailedMessage);

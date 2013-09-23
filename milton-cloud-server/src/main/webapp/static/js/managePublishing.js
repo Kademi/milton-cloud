@@ -15,7 +15,7 @@ function initPublishingMenu(managePage) {
 
 function showCopyBranch(link, callback) {
     var srcHref = link.attr("href");
-    srcHref = getFolderPath(srcHref);
+    srcHref = toFolderPath(srcHref);
     myPrompt("copyVersion", "", "Copy website version", "Make a copy of this version of the website" ,"Enter a name","newName", "Copy", "simpleChars", "Enter a simple name for the version, eg version2", function(newName, form) {
         newName = newName.toLowerCase();
         log("create version", newName, form);
@@ -37,7 +37,7 @@ function createBranch(src, destName, callback) {
         },
         dataType: "json",
         success: function(resp) {
-            log("saved module", resp);
+            log("created branch", resp);
             callback(destName, resp);
         },
         error: function(resp) {

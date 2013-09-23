@@ -60,7 +60,7 @@ CKEDITOR.plugins.add( 'image2',
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/js/jquery.milton-tree.js'));
         CKEDITOR.scriptLoader.load(CKEDITOR.getUrl('/static/js/jquery.milton-upload.js'));        
           
-        var pagePath = getFolderPath(window.location.pathname);
+        var pagePath = toFolderPath(window.location.pathname);
         CKEDITOR.dialog.add( 'imageDialog', function( editor ) {
             log("add to editor", editor);
             return {
@@ -101,7 +101,7 @@ CKEDITOR.plugins.add( 'image2',
                     } else {
                         this.insertMode = false;
                         var p = getPathFromHref(window.location.href);
-                        p = getFolderPath(p);
+                        p = toFolderPath(p);
                         initialSelect = p;
                         mtype = element.getAttribute("mtype");
                         src = element.getAttribute("src");

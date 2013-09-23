@@ -326,6 +326,9 @@ public class RenderFileResource extends AbstractResource implements GetableResou
 
     @Override
     public boolean is(String type) {
+        if( type.equalsIgnoreCase("page") ) {
+            return true;
+        }
         if (isTemplate(type)) {
             return true;
         }
@@ -574,4 +577,10 @@ public class RenderFileResource extends AbstractResource implements GetableResou
     public String getNameOverride() {
         return nameOverride;
     }
+
+    public JsonResult getJsonResult() {
+        return jsonResult;
+    }
+    
+    
 }
