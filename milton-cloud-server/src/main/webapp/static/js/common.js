@@ -564,6 +564,15 @@ function suffixSlash(href) {
     return href + "/";
 }
 
+/**
+ * 
+ * @param {type} parentHref - folder to create the new folder in
+ * @param {type} title
+ * @param {type} text
+ * @param {type} callback
+ * @param {type} validatorFn
+ * @returns nothing
+ */
 function showCreateFolder(parentHref, title, text, callback, validatorFn) {
     log("showCreateFolder");
     var s = text;

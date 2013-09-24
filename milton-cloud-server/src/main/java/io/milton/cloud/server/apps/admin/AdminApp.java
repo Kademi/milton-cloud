@@ -125,6 +125,8 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                     return new ManageAppsPage(requestedName, p.getOrganisation(), p);
                 case "manageDashboardMessages":
                     return new ManageDashboardMessagesListPage(p, requestedName);
+                case "manageWebpages":
+                    return new ManageWebPagesPage(requestedName, p, "Manage web pages");
 
             }
         } else if (parent instanceof ManageWebsiteBranchFolder) {
@@ -170,6 +172,7 @@ public class AdminApp implements MenuApplication, ReportingApplication, ChildPag
                 break;
             case "menuWebsiteManager":
                 parent.getOrCreate("menuWebsites", "Manage websites", parentPath.child("websites")).setOrdering(10);
+                parent.getOrCreate("menuWebpages", "Edit web pages", parentPath.child("manageWebpages")).setOrdering(20);
                 //parent.getOrCreate("menuThemes", "Templates &amp; themes", parentPath.child("themes")).setOrdering(20);
                 parent.getOrCreate("menuApps", "Applications", parentPath.child("manageApps")).setOrdering(30);
                 break;

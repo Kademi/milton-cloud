@@ -3,7 +3,7 @@
  *  jquery.history.js
  *
  * Config:
- * pageUrl - url of the resource to show history for.
+ * pageUrl - url of the resource to show history for. For link tags will use the href by default
  * showPreview - whether or not to show a preview link in the history table
  * 
  */
@@ -12,10 +12,23 @@
     $.fn.history = function(options) {
         var btn = this;
         var config = $.extend({
-            'pageUrl': window.location,
+            'pageUrl': null,
             'showPreview': true,
             'afterRevertFn': function() {
                 window.location.reload();
+            },
+            'getPageUrl': function(target) {
+                if (target) {
+                    var href = target.attr("href");
+                    if (href && href.length > 0 && !href.equals("#")) {
+                        return href;
+                    }
+                }
+                if (this.pageUrl !== null) {
+                    return this.pageUrl;
+                } else {
+                    return window.location.pathname;
+                }
             }
         }, options);
         btn.click(function(e) {
@@ -28,60 +41,60 @@
 })(jQuery);
 
 
-    function showHistory(btn, config) {
-        var modal = $("div.history");
-        if (modal.length == 0) {
-            modal = $("<div class='history' style='display: none'><a title='Close' href='#' class='Close'><span class='Hidden' style='display: none;'>Close</span></a><h3>History</h3><div class='historyList'></div></div>");
-            $("body").append(modal);
-            modal.find(".historyList").append("<table><tbody></tbody></table>");
-            modal.find("a.Close").click(function(e) {
-                e.preventDefault();
-                modal.hide(300);
-            });
-        }
-        var tbody = modal.find("tbody");
-        loadHistory(tbody, config);
-        var p = btn.offset();
-        modal.css("position", "fixed");
-        modal.css("top", p.top + btn.height() + "px");
-        var left = p.left;
-        var windowWidth = $(window).width();
-        var modalWidth = modal.width();
-        if (modalWidth < 350) {
-            modalWidth = 350;
-        }
-        if (left + modalWidth > windowWidth) {
-            left = windowWidth - modalWidth;
-        }
-        modal.css("left", left + "px");
-        modal.css("z-index", "10000");
-        modal.show(300);
+function showHistory(btn, config) {
+    var modal = $("div.history");
+    if (modal.length == 0) {
+        modal = $("<div class='history' style='display: none'><a title='Close' href='#' class='Close'><span class='Hidden' style='display: none;'>Close</span></a><h3>History</h3><div class='historyList'></div></div>");
+        $("body").append(modal);
+        modal.find(".historyList").append("<table><tbody></tbody></table>");
+        modal.find("a.Close").click(function(e) {
+            e.preventDefault();
+            modal.hide(300);
+        });
+    }
+    var tbody = modal.find("tbody");
+    loadHistory(tbody, config);
+    var p = btn.offset();
+    modal.css("position", "fixed");
+    modal.css("top", p.top + btn.height() + "px");
+    var left = p.left;
+    var windowWidth = $(window).width();
+    var modalWidth = modal.width();
+    if (modalWidth < 350) {
+        modalWidth = 350;
+    }
+    if (left + modalWidth > windowWidth) {
+        left = windowWidth - modalWidth;
+    }
+    modal.css("left", left + "px");
+    modal.css("z-index", "10000");
+    modal.show(300);
+}
+
+function loadHistory(tbody, config) {
+    log("loadHistory", config);
+    try {
+        var href = suffixSlash(config.getPageUrl()) + ".history";
+
+        $.ajax({
+            type: 'GET',
+            url: href,
+            dataType: "json",
+            success: function(resp) {
+                ajaxLoadingOff();
+                log("got history", resp);
+                buildHistoryTable(resp.data, tbody, config);
+            },
+            error: function(resp) {
+                ajaxLoadingOff();
+                alert("err");
+            }
+        });
+    } catch (e) {
+        log("exception", e);
     }
 
-    function loadHistory(tbody, config) {
-        log("loadHistory", config.pageUrl);
-        try {
-            var href = suffixSlash(config.pageUrl) + ".history";
-
-            $.ajax({
-                type: 'GET',
-                url: href,
-                dataType: "json",
-                success: function(resp) {
-                    ajaxLoadingOff();
-                    log("got history", resp);
-                    buildHistoryTable(resp.data, tbody, config);
-                },
-                error: function(resp) {
-                    ajaxLoadingOff();
-                    alert("err");
-                }
-            });
-        } catch (e) {
-            log("exception", e);
-        }
-
-    }
+}
 
 
 function buildHistoryTable(data, tbody, config) {
@@ -102,8 +115,8 @@ function buildHistoryTable(data, tbody, config) {
             tr.append("<td><abbr class='timeago' title='" + formattedDate + "'>" + formattedDate + "</abbr></td>");
             tr.append("<td>" + n.user.name + "</td>");
             if (config.showPreview) {
-                log("show preview", config.pageUrl);
-                tr.append("<td><a target='_blank' href='" + config.pageUrl + ".preview?version=" + n.hash + "'>Preview</td>");
+                log("show preview", config.getPageUrl());
+                tr.append("<td><a target='_blank' href='" + config.getPageUrl() + ".preview?version=" + n.hash + "'>Preview</td>");
             }
             tbody.append(tr);
             btnRevert.click(function(e) {
@@ -127,7 +140,7 @@ function revert(hash, tbody, config) {
     try {
         $.ajax({
             type: 'POST',
-            url: config.pageUrl + "/.history",
+            url: config.getPageUrl() + "/.history",
             data: {
                 revertHash: hash
             },

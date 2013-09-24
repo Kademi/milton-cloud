@@ -45,8 +45,8 @@
 }
 #manageFiles div.Content div.MainContent article:first-child { margin-top: 0; }
 #manageFiles div.Content div.MainContent article.Even { background-color: #ededed; }
-#manageFiles div.Content div.MainContent article aside { float: right; }
-#manageFiles div.Content div.MainContent article aside a {
+#manageFiles div.Content aside { float: right; }
+#manageFiles div.Content aside a {
     float: left;
     width: 23px;
     height: 23px;
@@ -54,8 +54,10 @@
     background-repeat: no-repeat;
     background-position: 50% 50%;
 }
-#manageFiles div.Content div.MainContent article:hover aside a { display: block; }
-#manageFiles div.Content div.MainContent article aside a:hover, #manageFiles div.Content div.MainContent article aside a.Active {
+#manageFiles div.Content aside a span {
+    display: none;
+}
+#manageFiles div.Content div.MainContent aside a:hover, #manageFiles div.Content div.MainContent aside a.Active {
     padding: 0;
     border: 1px solid #c7c7c7;
     background-color: #e3e3e3;
@@ -90,7 +92,7 @@
 #manageFiles .Controller .Left .Btn { margin-right: 5px; }
 #manageFiles .Controller .Right .Btn { margin-left: 5px; }
 
-.modulePage:hover aside {
+.filesList article:hover aside, #fileList tbody tr:hover aside {
     display: block;
 }
 #manageFiles .AddModulePage {
@@ -137,17 +139,25 @@ input.thumbnail {
     max-height: none;
 }
 
+#fileList {
+    width: 100%;
+}
 
 #fileList tbody td:last-child {
     width: 175px;
 }
-#fileList tbody td.first a img {
+#fileList tbody td.first a {
     display: block;
     height: 48px;
     width: 48px;    
-    background-image: url(/static/icons/file.png);
     background-position: center center;
     background-repeat: no-repeat;
+}
+.filesList .file td.first a {
+    background-image: url(/static/icons/file.png);
+}
+.filesList .folder td.first a {
+    background-image: url(/static/icons/folder.png);
 }
 .tools {
     width: 170px;
@@ -162,20 +172,23 @@ input.thumbnail {
     float: right;
     margin-left: 7px;
 }
-.tools a.delete {
-    background-image: url(/static/images/icon_delete-32.png);
+a.delete {
+    background-image: url(/static/images/icon_delete-11.png);
 }
-.tools a.download {
-    background-image: url(/static/common/download.png);
+a.download {
+    background-image: url(/static/common/download-sm.png);
 }
-.tools a.history {
-    background-image: url(/static/common/history.png);
+a.history {
+    background-image: url(/static/common/history-sm.png);
 }
 
 /*http://www.iconlooker.com/icon/vistaico-toolbar-icons-rename_w33061.html*/
-.tools a.rename {    
-    background-image: url(/static/images/icon_rename-32.png);
+a.rename {    
+    background-image: url(/static/images/icon_rename-11.png);
 }
 a.hidden {
     display: none;
+}
+.SmallBtn.Add.createFolder {
+    background-image: url("/templates/themes/admin/images/icon_quiz.png");
 }

@@ -4,6 +4,7 @@
         <link href="manageFiles.css" rel="stylesheet" type="text/css" />
         <link href="/static/history/jquery.history.css" rel="stylesheet" type="text/css" />
         <link href="/static/js/milton-image-select.css" rel="stylesheet" type="text/css" />
+        <link href="/static/css/jquery.lightbox-0.5.css" rel="stylesheet" type="text/css" media="screen" />
 
         <script type="text/javascript" src="/static/history/jquery.history.js">//</script>
         <script type="text/javascript" src="/static/js/jquery.milton-image-select.js">//</script>
@@ -55,7 +56,7 @@
                 </div>
                 <div class="DropdownControl">
                     <div class="DropdownWrapper">
-                        <span><b>Website:</b> $page.closest("repository").name</span> 
+                        <span><b>Repository:</b> $page.closest("repository").name</span> 
                         <a href="#" class="Control"><span class="Hidden">Change</span></a>
                     </div>
                     <div class="DropdownContent Rows3 Hidden">
@@ -75,7 +76,7 @@
                 <a href="#files">Files &amp; Folders</a>
             </nav>
             <div class="Content TabContent" rel="#pages" style="position: relative">
-                <h4>$page.title - $page.class</h4>
+                <h4>$page.title</h4>
                 <a title="Add Page" class="SmallBtn Add NoText AddModulePage" href=""><span>Add</span></a>
                 <form method="POST" action="" class="">
                     <div class="MainContent filesList">
@@ -97,25 +98,26 @@
                 </form>
             </div>
             <div class="Content TabContent" rel="#files">
-                <table id="fileList" class="bar table table-striped vcenter">
+                <table id="fileList" class="filesList table table-striped vcenter">
                     <thead>
                         <tr>
                             <th colspan="2">Files: $page.name</th>
                             <th>Modified</th>
                             <th>Size</th>
-                            <th>Tools</th>
+                            <th>
+                                <a style="float: right" title="Upload files" class="SmallBtn Add NoText uploadFiles" href=""><span>Add</span></a>
+                                <a style="float: right" title="Create a folder" class="SmallBtn Add NoText createFolder" href=""><span>Quiz</span></a>
+                            </th>
                         </tr>
                         <tr class="seperator">
-
+                            <td colspan="4"></td>
                         </tr>
                     </thead>
                     <tbody>                
                         #foreach($f in $page.subFolders)
-                        <tr>
+                        <tr class="folder">
                             <td style="width: 70px">
-                                <a href="${f.href}#files">
-                                    <img  height="48" width="48" alt="" src="/static/icons/folder.png"/>
-                                </a>
+                                <a href="$f.href#files"><span class="Hidden">folder</span></a>
                             </td>
                             <td class="left">
                                 <a href="${f.href}#files">$f.name</a>
@@ -123,7 +125,10 @@
                             <td><abbr title="$formatter.formatDateISO8601($f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
                             <td></td>
                             <td>
-                                <a href="$f.href" class="hidden">hidden</a>
+                                <aside class="Hidden">
+                                    <a href="${f.path}" class='rename' title="Rename file"><span>Rename</span></a>
+                                    <a href="${f.path}" class="Delete" title="Delete folder"><span class="Hidden">Delete folder</span></a>
+                                </aside> 
                             </td>
                         </tr>
                         #end
@@ -136,7 +141,7 @@
                         <tr class="file $lightBoxClass">
                             #set($imgClass = $formatter.ifTrue($f.is("image"), "image", "" ) )
                             <td style="width: 70px">
-                                <a href="$f.href" class="$imgClass"><img height="48" width="48" alt="" src="/templates/images/img8.gif"/></a>
+                                <a href="$f.href" class="$imgClass"><span class="Hidden">file</span></a>
                             </td>
                             <td class="left">
                                 <a href="$f.href" class="$imgClass">$f.name</a>
@@ -144,7 +149,12 @@
                             <td><abbr title="$formatter.formatDateISO8601($!f.modifiedDate)" class="timeago">$!f.modifiedDate</abbr></td>
                             <td>$f.contentLength</td>
                             <td>
-                                <a href="$f.href" class="hidden">hidden</a>
+                                <aside class="Hidden">
+                                    <a href="${f.path}" class='history' title="Show history"><span>History</span></a>
+                                    <a href="${f.path}" class="Delete" title="Delete file"><span>Delete file</span></a>
+                                    <a href="${f.path}" class='rename' title="Rename file"><span>Rename</span></a>
+                                    <a href="${f.path}" target="_blank" class="View" title="Download file"><span>Download file</span></a>                                                                                                            
+                                </aside> 
                             </td>
                         </tr>
                         #end                 
@@ -183,7 +193,7 @@
                                     <img class='ajax-loader' src='/static/common/loading.gif'/>
                                 </button>
                                 <button class="Btn historyBtn" type="button">History</button>
-                                
+
                             </td>
                         </tr>
                         <tr>
@@ -196,6 +206,15 @@
             </div>
         </div>          
 
+        <div id="modalUpload" class="Modal wide">
+            <header>
+                <h3>Upload files</h3>                
+                <a class="Close" href="#" title="Close"><span class="Hidden">Close</span></a>
+            </header>
+            <div class="ModalContent new-page-modal-content">
+                <div class="input" id='myUploaded' style="width: 150px"></div>        
+            </div>
+        </div>             
 
         <script type="text/javascript" >
             var themePath = "${page.themePath}";

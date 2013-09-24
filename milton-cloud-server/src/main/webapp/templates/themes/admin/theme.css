@@ -829,6 +829,7 @@ select.Medium { width: 100px; }
     border-color: #d1d1d1 !important;
 }
 .filesList article.Quiz { background-image: url(images/icon_quiz.png); }
+
 .filesList article {
     background-color: #FFF;
     background-image: url(images/icon_document.png);
@@ -836,7 +837,15 @@ select.Medium { width: 100px; }
     background-position: 7px 50%;
 }
 .filesList article:first-child { margin-top: 0; }
-.filesList article:nth-child(odd) { background-color: #ededed; }
+.filesList tbody th { 
+    text-align: left;
+}
+.filesList tbody tr td { 
+    background-color: white;
+}
+.filesList article:nth-child(odd), .filesList tbody tr:nth-child(even) td { 
+    background-color: #ededed; 
+}
 .filesList article aside { float: right; }
 .filesList article aside a {
     float: left;

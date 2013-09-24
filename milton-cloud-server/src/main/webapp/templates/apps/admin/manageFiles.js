@@ -11,13 +11,23 @@ jQuery(document).ready(function() {
             reloadFileList();
         }
     });
-    $(".newFolder").click(function(e) {
+    $(".createFolder").click(function(e) {
+        e.stopPropagation();
+        e.preventDefault();        
         var parentHref = window.location.pathname;
         showCreateFolder(parentHref, "New folder", "Please enter a name for the new folder", function() {
             reloadFileList();
         });
     });
-    $(".importFromUrl").click(function() {
+    
+    $(".uploadFiles").click(function(e) {
+        e.stopPropagation();
+        e.preventDefault();                
+        showModal( $("#modalUpload") );
+    });
+    $(".importFromUrl").click(function(e) {
+        e.stopPropagation();
+        e.preventDefault();                
         showImportFromUrl();
     });
     $(".filesList").on("click", "a.Edit", function(e) {
@@ -27,7 +37,21 @@ jQuery(document).ready(function() {
         var name = a.attr("href");
         var article = a.closest("article");
         showEditModal(name, article);
-    });    
+    });
+    $(".filesList").on("click", "a.Delete", function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        var target = $(e.target);
+        var href = target.attr("href");
+        log("click delete. href", href);
+        var name = getFileName(href);
+        var article = target.closest("article");
+        confirmDelete(href, name, function() {
+            log("deleted", article);
+            article.remove();
+            alert("Deleted " + name);
+        });
+    });
 });
 
 function reloadFileList() {
@@ -47,6 +71,7 @@ function initFiles() {
         var href = $(n).attr("href");
         $(n).attr("href", href + "/alt-640-360.png");
     });
+    log("init lightbox", $('a.image'));
     $('a.image').lightBox({
         imageLoading: '/static/images/lightbox-ico-loading.gif',
         imageBtnClose: '/static/images/lightbox-btn-close.gif',
@@ -62,14 +87,7 @@ function initFiles() {
         var icon = findIconByExt(href);
         $("img", tag).attr("src", icon);
     });
-    $("#fileList tbody").on("mouseenter", "tr", function(e) {
-        var target = $(e.target);
-        showFileTools(target.closest("tr"));
-    });
-    $("#fileList tbody").on("mouseleave", "tr", function(e) {
-        var target = $(e.target);
-        hideFileTools(target.closest("tr"));
-    });
+
     $("#fileList tbody").on("click", "a.delete", function(e) {
         e.stopPropagation();
         e.preventDefault();
@@ -98,10 +116,11 @@ function initFiles() {
         e.preventDefault();
 
     });
+    $("a.history").history();
 }
 
 function initAddPageModal() {
-    log("initAddPageModal", $(".AddModulePage"));    
+    log("initAddPageModal", $(".AddModulePage"));
     $(".AddModulePage").click(function(e) {
         e.preventDefault();
         log("initAddPageModal: click");
@@ -131,7 +150,7 @@ function showEditModal(name, pageArticle) {
         overlayClose: false,
         opacity: 0,
         top: "10px"
-    }); 
+    });
     modal.find("input[type=text], textarea").val("");
     modal.find("form").unbind();
     modal.find("form").submit(function(e) {
@@ -160,7 +179,8 @@ function loadModalEditorContent(modal, name) {
             var data = resp.data;
             log("resp", resp);
             var t = data.template;
-            if( !t.endsWith(".html")) t += ".html";
+            if (!t.endsWith(".html"))
+                t += ".html";
             log("select template", modal.find("select option[value='" + t + "']"));
             modal.find("select option[value='" + t + "']").attr("selected", true);
             modal.find("input[name=title]").val(data.title);
@@ -170,7 +190,7 @@ function loadModalEditorContent(modal, name) {
             log("error", resp);
             alert("err: couldnt load page data");
         }
-    });       
+    });
 }
 
 function doSavePage(form, pageArticle) {
@@ -198,7 +218,7 @@ function doSavePage(form, pageArticle) {
     data = $form.serialize();
 
     var url = form.find("input[name=pageName]").val();
-    if( url === null || url.length === 0 ) {
+    if (url === null || url.length === 0) {
         url = "autoname.new";
     }
 
@@ -252,34 +272,12 @@ function addPageToList(pageName, href, title) {
     var aside = $("<aside class='Hidden'></aside>");
     newRow.append(aside);
     var newFileName = getFileName(href);
-    aside.append("<a href='" + newFileName + "' class='Edit' title='Edit page'><span class='Hidden'>Edit page</span></a>");    
+    aside.append("<a href='" + newFileName + "' class='Edit' title='Edit page'><span class='Hidden'>Edit page</span></a>");
     aside.append("<a href='?goto=" + newFileName + "' target='_blank' class='View' title='View page'><span class='Hidden'>View page</span></a>");
     aside.append("<a href='' class='Move' title='Move up or down'><span class='Hidden'>Move up or down</span></a>");
-    aside.append("<a href='" + href + "' class='Delete' title='Delete page'><span class='Hidden'>Delete page</span></a>");    
+    aside.append("<a href='" + href + "' class='Delete' title='Delete page'><span class='Hidden'>Delete page</span></a>");
 }
 
-function showFileTools(tr) {
-    log("showFileTools");
-    var toolsDiv = tr.find("div.tools");
-    if (toolsDiv.length === 0) {
-        var td = tr.find("td:last-child");
-        var href = tr.find("a.hidden").first().attr("href"); // a.hidden does not get changed by lightbox
-        href = stripFragment(href);
-        toolsDiv = $("<div class='tools'><a class='history'>History</a><a class='delete'>Delete</a><a class='rename'>Rename</a><a target='_blank' class='download'>Download</a></div>")
-        toolsDiv.find("a").attr("href", href);
-        td.append(toolsDiv);
-        log("init history", href);
-        toolsDiv.find("a.history").history({
-            pageUrl: href
-        });
-    } else {
-        toolsDiv.show();
-    }
-}
-
-function hideFileTools(tr) {
-    tr.find(".tools").hide();
-}
 
 function showImportFromUrl() {
     var url = prompt("Please enter a url to import files from");
