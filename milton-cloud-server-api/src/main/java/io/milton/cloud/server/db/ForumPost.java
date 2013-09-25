@@ -175,7 +175,7 @@ public class ForumPost extends Post implements Serializable{
     public void delete(Session session) {
         if( getForumReplys() != null ) {
             for( ForumReply r : getForumReplys()) {
-                r.delete(session);
+                session.delete(r);
             }
         }
         session.delete(this);

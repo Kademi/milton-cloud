@@ -45,6 +45,11 @@ public class ForumReply extends Post implements Serializable {
 
     @Override
     public void delete(Session session) {
+        if( post != null ) {
+            if( post.getForumReplys() != null ) {
+                post.getForumReplys().remove(this);
+            }
+        }
         session.delete(this);
     }
 }

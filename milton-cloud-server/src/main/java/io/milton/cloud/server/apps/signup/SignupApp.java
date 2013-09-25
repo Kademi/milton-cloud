@@ -375,3 +375,4 @@ public class SignupApp implements ChildPageApplication, BrowsableApplication, Ev
         return signupPageName;
     }
 }
+
