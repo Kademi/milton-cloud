@@ -37,6 +37,7 @@ import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.annotations.BeanPropertyResource;
+import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
 import io.milton.resource.ReplaceableResource;
 import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
@@ -142,6 +143,8 @@ public class FileResource extends AbstractContentResource implements Replaceable
         for (String s : page.getParamNames()) {
             map.put(s, page.getParam(s));
         }
+        List<String> cssFiles = _(HtmlTemplateRenderer.class).getCssPaths(null, null, pages);
+        
         jsonResult = new JsonResult(true);
         jsonResult.setData(map);
         jsonResult.write(out);
