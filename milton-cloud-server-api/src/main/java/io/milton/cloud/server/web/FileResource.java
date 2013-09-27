@@ -38,6 +38,7 @@ import io.milton.http.values.ValueAndType;
 import io.milton.http.webdav.PropFindResponse.NameAndError;
 import io.milton.annotations.BeanPropertyResource;
 import io.milton.cloud.server.web.templating.HtmlTemplateRenderer;
+import io.milton.cloud.server.web.templating.HtmlTemplater;
 import io.milton.resource.ReplaceableResource;
 import io.milton.vfs.data.DataSession.FileNode;
 import io.milton.vfs.db.utils.SessionManager;
@@ -136,14 +137,15 @@ public class FileResource extends AbstractContentResource implements Replaceable
 
     private void sendContentAsJson(OutputStream out) throws IOException {
         RenderFileResource page = getHtml();
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("title", page.getTitle());
         map.put("body", page.getBody());
         map.put("template", page.getTemplate() );
         for (String s : page.getParamNames()) {
             map.put(s, page.getParam(s));
         }
-        List<String> cssFiles = _(HtmlTemplateRenderer.class).getCssPaths(null, null, pages);
+        List<String> cssFiles = _(HtmlTemplater.class).getCssPaths( this );
+        map.put("cssFiles", cssFiles);
         
         jsonResult = new JsonResult(true);
         jsonResult.setData(map);

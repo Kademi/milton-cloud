@@ -30,8 +30,6 @@ import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 import io.milton.cloud.server.apps.ApplicationManager;
 import io.milton.cloud.server.web.*;
 import io.milton.context.RequestContext;
-
-import io.milton.http.HttpManager;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.GetableResource;
@@ -95,7 +93,6 @@ public class HtmlTemplater {
         writePage(theme, templatePath, aThis, params, out);
     }
 
-
     /**
      * Generate a templated page with the given theme and template. The theme
      * controls the "chrome", ie the menu, header, footer, etc. The template
@@ -137,7 +134,7 @@ public class HtmlTemplater {
         }
         templatePath = rootFolder.getDomainName() + ":" + templatePath;
         Template bodyTemplate = getTemplate(templatePath);
-        if( bodyTemplate == null ) {
+        if (bodyTemplate == null) {
             throw new RuntimeException("Couldnt find template: " + templatePath);
         }
         TemplateHtmlPage bodyTemplateMeta = getTemplateResource(templatePath);
@@ -166,6 +163,12 @@ public class HtmlTemplater {
         }
 
         templateRenderer.renderHtml(rootFolder, aThis, params, user, themeTemplate, themeTemplateTemplateMeta, bodyTemplate, bodyTemplateMeta, theme, themePath, out);
+    }
+
+    public List<String> getCssPaths(FileResource page) {
+        String themeName = findTheme(page);
+        List<String> cssFiles = templateRenderer.getCssPaths(themeName, page.getHtml());
+        return cssFiles;
     }
 
     public String findTheme(Resource r) {
@@ -247,7 +250,7 @@ public class HtmlTemplater {
         if (!source.contains(":")) {
             System.out.println("no semicolon: " + source);
             return null;
-        }        
+        }
         synchronized (this) {
             GetableResourcePathTemplateHtmlPage meta = cachedTemplateMetaData.get(source);
             //System.out.println("meta: " + meta + " source=" + source);
@@ -269,7 +272,7 @@ public class HtmlTemplater {
                     throw new RuntimeException(e);
                 }
             }
-            return meta;            
+            return meta;
         }
     }
 
@@ -280,7 +283,7 @@ public class HtmlTemplater {
         }
 
         @Override
-        public synchronized InputStream getResourceStream(String source) throws ResourceNotFoundException {            
+        public synchronized InputStream getResourceStream(String source) throws ResourceNotFoundException {
             if (HtmlTemplater.log.isTraceEnabled()) {
                 HtmlTemplater.log.trace("getResourceStream( " + source + ") ");
             }
