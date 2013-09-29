@@ -239,6 +239,59 @@ public class HtmlTemplateRenderer {
         pw.println();
     }
 
+    public List<String> getCssPaths(String themeName, String themePath, HtmlPage... pages) {
+        Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();        
+        for (HtmlPage page : pages) {
+            if (page != null) {
+                List<WebResource> webResources = page.getWebResources();
+                if (webResources != null) {
+                    // webPath is just the path of the directory containing the template
+                    // this allows us to evaluate relative path of resources on the template to absolute paths
+                    Path webPath = page.getPath();
+                    if( !webPath.isRoot() ) {                        
+                        webPath = webPath.getParent();
+                    }
+                    for (WebResource wr : webResources) {
+                        if (wr.getTag().equals("link") && "stylesheet".equals(wr.getAtts().get("rel"))) {
+                            String media = wr.getAtts().get("media");
+                            if (media != null && media.length() > 0) {
+                                List<String> cssFilesForMedia = mapOfCssFilesByMedia.get(media);
+                                if (cssFilesForMedia == null) {
+                                    cssFilesForMedia = new ArrayList<>();
+                                    mapOfCssFilesByMedia.put(media, cssFilesForMedia);
+                                }
+                                String href = wr.getAtts().get("href");
+                                href = wr.adjustRelativePath("href", href, themeName, webPath);
+                                cssFilesForMedia.add(href);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Now write out the combined css files as a link to a LESS css file
+        // This is so that less files (such as for apps) can use the mixins provided
+        // by the theme        
+        List<String> cssPaths = new ArrayList<>();
+        for (String media : mapOfCssFilesByMedia.keySet()) {
+            List<String> paths = mapOfCssFilesByMedia.get(media);
+            String link = "<link rel='stylesheet' type='text/css'";
+            if (media != null) {
+                link += " media='" + media + "'";
+            }
+            link += " href='/theme/";
+            String cssName = "";
+            for (String path : paths) {
+                cssName += path.replace("/", COMBINED_RESOURCE_SEPERATOR) + ",";
+            }
+            link += cssName + EXT_COMPILE_LESS;
+            cssPaths.add(link);
+        }
+        return cssPaths;
+    }
+    
+    
     private void printBottomWebResources(String themeName, String themePath, PrintWriter pw, HtmlPage... pages) {
         pw.println();
         for (HtmlPage page : pages) {
