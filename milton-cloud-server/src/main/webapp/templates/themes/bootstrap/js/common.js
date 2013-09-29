@@ -410,6 +410,13 @@ function pulseBorder(node) {
     });
 }
 
+function stripFragment(href) {
+    var i = href.indexOf("#");
+    if( i > 0 ) {
+        href = href.substring(0, i-1);
+    }
+    return href;
+}
 
 /*
  * http://javascriptbase64.googlecode.com/svn/trunk/base64.js

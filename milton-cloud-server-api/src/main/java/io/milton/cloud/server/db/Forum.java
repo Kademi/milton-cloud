@@ -131,7 +131,7 @@ public class Forum implements Serializable{
     public void delete(Session session) {
         if( getForumPosts() != null ) {
             for( ForumPost t : getForumPosts()) {
-                t.delete(session);
+                t.deleteDirect(session);
             }
         }
         session.delete(this);

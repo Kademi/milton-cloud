@@ -171,15 +171,34 @@ public class ForumPost extends Post implements Serializable{
         return deleted != null && deleted.booleanValue();
     }    
     
+    /**
+     * Delete and remove from parent
+     * 
+     * @param session 
+     */
     @Override
     public void delete(Session session) {
+        deleteDirect(session);
+        if( forum != null ) {
+            if( forum.getForumPosts() != null ) {
+                forum.getForumPosts().remove(this);
+            }
+        }
+    }
+    
+    /**
+     * Delete this and children, but do not remove from parent
+     * 
+     * @param session 
+     */
+    public void deleteDirect(Session session) {
         if( getForumReplys() != null ) {
             for( ForumReply r : getForumReplys()) {
                 session.delete(r);
             }
         }
         session.delete(this);
-    }
+    }    
 
     public ForumReply addComment(String newComment, Profile currentUser, Date now, Session session) {
         ForumReply r = new ForumReply();
