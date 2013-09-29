@@ -239,7 +239,7 @@ public class HtmlTemplateRenderer {
         pw.println();
     }
 
-    public List<String> getCssPaths(String themeName, String themePath, HtmlPage... pages) {
+    public List<String> getCssPaths(String themeName, HtmlPage... pages) {
         Map<String, List<String>> mapOfCssFilesByMedia = new HashMap<>();        
         for (HtmlPage page : pages) {
             if (page != null) {
