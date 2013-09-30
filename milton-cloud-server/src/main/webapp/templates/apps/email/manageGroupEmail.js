@@ -8,23 +8,13 @@ function initManageEmail() {
     initAddJob();
 }
 
-function initShowRecips() {
-    log("initshowrecips", $(".showRecipients button"));
-    $(".showRecipients button").click(function(e) {
-        e.preventDefault();
-        var table = $(e.target).closest("div").find("table");
-        table.show(200);
-        showRecipients(table.find("tbody"));
-    });
-}
-
-
 function initEditEmailPage() {
     initShowRecips();
     initRemoveRecipientGroup();
     addGroupBtn();
     eventForModal();
     initGroupCheckbox();
+    initEditActions();
 
     checkPasswordResetVisible();
 
@@ -54,6 +44,36 @@ function initEditEmailPage() {
     });
     $("input, select, textarea").change(function() {
         $("body").addClass("dirty");
+    });
+}
+
+function initEditActions() {
+    var chks = $(".actionItem input[type=checkbox]");
+    
+    chks.click(function(e) {
+        var node = $(e.target);
+        if( node.is(":checked")) {
+            node.closest("div").find("div.actionItemDetails").show(200);
+        } else {
+            node.closest("div").find("div.actionItemDetails").hide(200);
+        }
+    });
+    chks = chks.filter(":checked");
+    log("initEditActions: chcks", chks);
+    chks.each(function(i, n) {
+        var node = $(n);
+        node.parent().find("div.actionItemDetails").show();
+    })
+}
+
+
+function initShowRecips() {
+    log("initshowrecips", $(".showRecipients button"));
+    $(".showRecipients button").click(function(e) {
+        e.preventDefault();
+        var table = $(e.target).closest("div").find("table");
+        table.show(200);
+        showRecipients(table.find("tbody"));
     });
 }
 
@@ -572,5 +592,4 @@ function showRecipients(tableBody) {
     } catch (e) {
         log("exception in createJob", e);
     }
-
 }

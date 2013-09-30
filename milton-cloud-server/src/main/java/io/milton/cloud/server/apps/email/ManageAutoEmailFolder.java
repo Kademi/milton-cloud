@@ -346,6 +346,18 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
         return null;
     }
 
+    public boolean isEmailEnabled() {
+        return job.getEmailEnabled() == null || job.getEmailEnabled();
+    }
+    
+    public  boolean isAddToGroupEnabled() {
+        return job.getAddToGroupEnabled() != null && job.getAddToGroupEnabled();
+    }
+    
+    public boolean isCreateTimerEnabled() {
+        return job.getCreateTimerEnabled() != null && job.getCreateTimerEnabled();
+    }
+    
     public class GroupRecipientResource extends AbstractResource implements DeletableResource {
 
         private final GroupRecipient recipient;

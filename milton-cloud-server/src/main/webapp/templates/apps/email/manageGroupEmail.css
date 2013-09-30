@@ -247,3 +247,17 @@ ul.GroupList li:hover a {
 .rules-ref > ul li li {
     list-style-type: none;
 }
+
+.actionItemDetails {
+    display: none;
+}
+
+
+div.actionItem {
+    border: 1px solid #DEDEDE;
+    border-radius: 5px 5px 5px 5px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding: 10px;
+    background-color: white;
+}

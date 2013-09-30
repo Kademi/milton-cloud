@@ -9,8 +9,8 @@
             <form name="frmDetails" action="." method="post" class="MainForm">
                 <button class="Btn" style="float: right">Save Changes</button>
                 <nav class="TabNav ClearFix">
-                    <a href="#sendInfo">Send information</a>
-                    <a href="#message">Message</a>
+                    <a href="#sendInfo">General</a>
+                    <a href="#message">Actions</a>
                     <a href="#recipients">Recipients</a>
                     <a href="#triggers">Triggers</a>
                     <a href="#actions">Actions</a>
@@ -21,20 +21,8 @@
                     <table class="">
                         <tbody>
                             <tr>
-                                <th>Send name</th>
+                                <th>Trigger name</th>
                                 <td><input type="text" name="title" value="$!page.title" placeholder="" class="required" /></td>
-                            </tr>
-                            <tr>
-                                <th>Website</th>
-                                <td>
-                                    <select name="themeSiteId" class="Medium required">
-                                        $formatter.option("", "[Please select]", $page.themeSiteId)
-                                        #foreach($website in $page.organisation.websites)
-                                        $formatter.option($website.id, $website.name, $page.themeSiteId)
-                                        #end
-                                    </select>
-
-                                </td>
                             </tr>
                             <tr>
                                 <th>Enabled</th>
@@ -47,21 +35,61 @@
                                 <th>Notes <small>These notes are for internal purposes only.</small></th>
                                 <td><textarea cols="100" name="notes" rows="10" placeholder="">$!page.notes</textarea></td>
                             </tr>
-                            <tr>
-                                <th>Email subject</th>
-                                <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
-                            </tr>
-                            <tr>
-                                <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
-                                <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>	
-                <div rel="#message" class="TabContent Content">
-                    <div class="messageContent Details">
-                        <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
+                <div rel="#message" class="TabContent Content Details">
+                    <div class="actionItem">
+                        $formatter.checkbox("emailEnabled", "emailEnabled", $page.emailEnabled)
+                        <label for="emailEnabled">Send an email</label>
+
+                        <div class="actionItemDetails">
+                            <table class="">
+                                <tbody>
+                                    <tr>
+                                        <th>Website</th>
+                                        <td>
+                                            <select name="themeSiteId" class="Medium required">
+                                                $formatter.option("", "[Please select]", $page.themeSiteId)
+                                                #foreach($website in $page.organisation.websites)
+                                                $formatter.option($website.id, $website.name, $page.themeSiteId)
+                                                #end
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email subject</th>
+                                        <td><input type="text" name="subject" value="$!page.subject" placeholder="" class="required" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email from address <small>Choose an email address for example admin@mybusinessname.com</small></th>
+                                        <td><input type="text" name="fromAddress" value="$!page.fromAddress" placeholder="" class="required email" /></td>
+                                    </tr>
+                                </tbody>
+                            </table>                    
+                            <div class="messageContent">
+                                <textarea class="htmleditor" cols="100" name="html" rows="10" placeholder="">$!page.html</textarea>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="actionItem">
+                        $formatter.checkbox("addToGroupEnabled", "addToGroupEnabled", $page.addToGroupEnabled)
+                        <label for="emailEnabled">Add to a group</label>
+                        <div class="actionItemDetails">
+                            TODO
+                        </div>
+                    </div>
+
+                    <div class="actionItem">
+                        $formatter.checkbox("createTimerEnabled", "createTimerEnabled", $page.createTimerEnabled)
+                        <label for="emailEnabled">Set a timer</label>
+                        <div class="actionItemDetails">
+                            TODO
+                        </div>
+
+                    </div>                    
                 </div>
                 <div rel="#recipients" class="TabContent Content">
                     <div class="Recipient Details">
@@ -120,7 +148,7 @@
                             </ul>
                         </div>
                         <textarea name="filterScriptXml" style='height: 300px; width: 400px'>$!page.job.filterScriptXml</textarea>
-                                            
+
                     </div>
                     <script type="text/javascript">
                         jQuery(function() {
@@ -191,13 +219,13 @@
                         <textarea name="conditionScriptXml" style='height: 300px; width: 400px'>$!page.job.conditionScriptXml</textarea>
                     </div>
                 </div>
-                
+
                 <div rel="#actions" class="TabContent Content">
                     <div class="messageContent Details">
                         #portlets("triggerActions")
                     </div>
                 </div>                
-                
+
                 <div rel="#history" class="TabContent Content status">
                     <div class="Send Details" id="manageEmail">
                         <article class="Note">

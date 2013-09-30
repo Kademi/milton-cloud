@@ -14,6 +14,7 @@
  */
 package io.milton.cloud.server.db;
 
+import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.DbUtils;
@@ -22,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
-import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -121,6 +121,14 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
         return b;
     }
     
+    public enum TimeUnit {
+        HOURLY,
+        DAILY,
+        WEEKLY,
+        MONTHLY,
+        ANNUAL
+    }
+    
     private String eventId;
     private String triggerCondition1;
     private String triggerCondition2;
@@ -130,10 +138,74 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     private boolean enabled;
     private boolean includeUser; // whether the email should go to the user associated with the event which fires this trigger
     private String conditionScriptXml; // if present will be checked on triggers, and will only fire if returns true
+    private Boolean emailEnabled;
+    private Boolean addToGroupEnabled;
+    private Group groupToJoin;
+    private Boolean createTimerEnabled;
+    private TimeUnit timerUnit;
+    private Integer timerMultiple; // eg run every 3 days
+    
 
     public EmailTrigger() {
     }
 
+    /**
+     * Whether email sending is enabled for this trigger. On by default, ie 
+     * if null then email is enabled
+     * 
+     * @return 
+     */
+    public Boolean getEmailEnabled() {
+        return emailEnabled;
+    }
+
+    public void setEmailEnabled(Boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
+    }
+
+    public Boolean getAddToGroupEnabled() {
+        return addToGroupEnabled;
+    }
+
+    public void setAddToGroupEnabled(Boolean addToGroupEnabled) {
+        this.addToGroupEnabled = addToGroupEnabled;
+    }
+
+    @ManyToOne
+    public Group getGroupToJoin() {
+        return groupToJoin;
+    }
+
+    public void setGroupToJoin(Group groupToJoin) {
+        this.groupToJoin = groupToJoin;
+    }
+
+    public Boolean getCreateTimerEnabled() {
+        return createTimerEnabled;
+    }
+
+    public void setCreateTimerEnabled(Boolean createTimerEnabled) {
+        this.createTimerEnabled = createTimerEnabled;
+    }
+
+    public TimeUnit getTimerUnit() {
+        return timerUnit;
+    }
+
+    public void setTimerUnit(TimeUnit timerUnit) {
+        this.timerUnit = timerUnit;
+    }
+
+    public Integer getTimerMultiple() {
+        return timerMultiple;
+    }
+
+    public void setTimerMultiple(Integer timerMultiple) {
+        this.timerMultiple = timerMultiple;
+    }
+
+    
+    
     /**
      * This is the eventId to trigger on. Required
      *

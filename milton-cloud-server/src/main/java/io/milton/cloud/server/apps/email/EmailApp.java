@@ -30,6 +30,12 @@ import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
+import static io.milton.cloud.server.db.ScheduledEmail.Frequency.ANNUAL;
+import static io.milton.cloud.server.db.ScheduledEmail.Frequency.DAILY;
+import static io.milton.cloud.server.db.ScheduledEmail.Frequency.HOURLY;
+import static io.milton.cloud.server.db.ScheduledEmail.Frequency.MONTHLY;
+import static io.milton.cloud.server.db.ScheduledEmail.Frequency.WEEKLY;
+import io.milton.cloud.server.db.TriggerTimer;
 import io.milton.cloud.server.event.TriggerEvent;
 import io.milton.cloud.server.mail.DefaultFilterScriptEvaluator;
 import io.milton.cloud.server.mail.FilterScriptEvaluator;
@@ -66,6 +72,7 @@ import io.milton.vfs.db.Organisation;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -126,8 +133,8 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     @Override
     public void init(SpliffyResourceFactory resourceFactory, AppConfig config) throws Exception {
         smtpPort = config.getInt("smtp.port");
-        
-        this.rootContext = config.getContext();     
+
+        this.rootContext = config.getContext();
         this.sessionManager = resourceFactory.getSessionManager();
         Properties props = new Properties();
         String hostName = config.getContext().get(CurrentRootFolderService.class).getPrimaryDomain();
@@ -184,12 +191,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             if (requestedName.equals("inbox")) {
                 return new EmailFolder(wrf, requestedName, null);
             }
-        } else if( parent instanceof ManageGroupEmailFolder) {
-            if( requestedName.equals("log.html")) {
+        } else if (parent instanceof ManageGroupEmailFolder) {
+            if (requestedName.equals("log.html")) {
                 ManageGroupEmailFolder f = (ManageGroupEmailFolder) parent;
                 return new ManageGroupEmailLog(requestedName, f, f.getJob());
             }
-            
+
         }
         return null;
     }
@@ -299,9 +306,9 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             i.setCreatedDate(now);
             i.setRecipient(p);
             i.setRecipientAddress(p.getEmail());
-            i.setSendStatusDate(now);            
-            
-            EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore,blobStore, rootContext, sessionManager);
+            i.setSendStatusDate(now);
+
+            EmailItemStandardMessage sm = new EmailItemStandardMessage(i, hashStore, blobStore, rootContext, sessionManager);
             StandardMessageFactoryImpl parser = new StandardMessageFactoryImpl();
             parser.toStandardMessage(mm, sm);
             session.save(i);
@@ -319,12 +326,12 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             job.setGroupRecipients(new ArrayList<GroupRecipient>());
             job.setName("received-" + System.currentTimeMillis()); // HACK HACK - make a nice name from subject and ensure uniqueness
             GroupEmailStandardMessage sm = new GroupEmailStandardMessage(job);
-            
-            if( !isFromMember(sm, gr.getGroup())) {
+
+            if (!isFromMember(sm, gr.getGroup())) {
                 log.warn("Received mail from non-group member, discarding..");
                 return;
             }
-            
+
             job.setTitle(job.getSubject());
             job.setStatusDate(currentDateService.getNow());
             session.save(job);
@@ -380,7 +387,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         Profile currentUser = securityManager.getCurrentUser();
         for (EmailTrigger trigger : triggers) {
             log.info("found activated trigger: " + trigger.getEventId());
-            if( emailTriggerService.checkConditions(trigger, event, currentUser) ) {
+            if (emailTriggerService.checkConditions(trigger, event, currentUser)) {
                 enqueueTrigger(trigger, event);
             }
         }
@@ -388,25 +395,76 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
     private void enqueueTrigger(EmailTrigger trigger, TriggerEvent event) {
         log.info("enqueueTrigger: " + trigger.getName() + " - " + event.getEventId());
-        List<Long> sourceIds = new ArrayList<>();
-        for (BaseEntity entity : event.getSourceEntities()) {
-            sourceIds.add(entity.getId());
+        Session session = SessionManager.session();
+        if (trigger.getEmailEnabled() == null || trigger.getEmailEnabled()) {
+            List<Long> sourceIds = new ArrayList<>();
+            for (BaseEntity entity : event.getSourceEntities()) {
+                sourceIds.add(entity.getId());
+            }
+            EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);
+            asynchProcessor.enqueue(p);
         }
-        EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);
-        asynchProcessor.enqueue(p);
+        if (trigger.getAddToGroupEnabled() != null && trigger.getAddToGroupEnabled()) {
+            if (trigger.getGroupToJoin() != null) {
+                Group groupToJoin = trigger.getGroupToJoin();
+                for (BaseEntity entity : event.getSourceEntities()) {
+                    if (entity instanceof Profile) {
+                        Profile p = (Profile) entity;
+                        p.createGroupMembership(groupToJoin, groupToJoin.getOrganisation(), session);
+                    }
+                }
+            }
+        }
+        if (trigger.getCreateTimerEnabled() != null && trigger.getCreateTimerEnabled()) {
+            Date now = currentDateService.getNow();
+            Date fireAt = timerFireAt(now, trigger);
+            for (BaseEntity entity : event.getSourceEntities()) {
+                if (entity instanceof Profile) {
+                    Profile p = (Profile) entity;
+                    TriggerTimer.create(event.getOrganisation(), event.getWebsite(), p, fireAt, "Created by trigger: " + trigger.getName(), session);
+                }
+            }
+        }
+    }
+
+    public Date timerFireAt(Date now, EmailTrigger trigger) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+        int units = trigger.getTimerMultiple();
+        switch (trigger.getTimerUnit() ) {
+            case HOURLY:
+                cal.add(Calendar.HOUR, units);
+                break;
+
+            case DAILY:
+                cal.add(Calendar.DATE, units);
+                break;
+            case WEEKLY:
+                cal.add(Calendar.WEEK_OF_YEAR, units);
+                break;
+            case MONTHLY:
+                cal.add(Calendar.MONTH, units);
+                break;
+            case ANNUAL:
+                cal.add(Calendar.YEAR, units);
+                break;
+            default:
+                return null;
+        }
+        return cal.getTime();
     }
 
     private boolean isFromMember(GroupEmailStandardMessage sm, Group group) {
-        if( sm.getFrom() == null ) {
+        if (sm.getFrom() == null) {
             log.warn("No from address");
             return false;
         }
         Profile p = Profile.findByEmail(sm.getFrom().toPlainAddress(), SessionManager.session());
-        if( p == null ) {
+        if (p == null) {
             log.warn("Received group email from unknown source: " + sm.getFrom().toPlainAddress());
             return false;
         }
-        if( !group.isMember(p)) {
+        if (!group.isMember(p)) {
             log.warn("Not a group member: " + p.getName());
             return false;
         }
@@ -431,7 +489,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
             Transaction tx = session.beginTransaction();
             try {
                 EmailTriggerService emailTriggerService = context.get(EmailTriggerService.class);
-                if( emailTriggerService == null ) {
+                if (emailTriggerService == null) {
                     throw new RuntimeException("No " + EmailTriggerService.class + " in context");
                 }
                 emailTriggerService.send(jobId, sourceEntityIds, session);
@@ -447,4 +505,3 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         }
     }
 }
-
