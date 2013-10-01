@@ -261,3 +261,7 @@ div.actionItem {
     padding: 10px;
     background-color: white;
 }
+
+.actionItemDetails p {
+    margin: 5px 0;
+}

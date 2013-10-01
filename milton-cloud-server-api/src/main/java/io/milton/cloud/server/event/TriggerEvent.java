@@ -17,10 +17,9 @@
 package io.milton.cloud.server.event;
 
 import io.milton.event.Event;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Profile;
 import io.milton.vfs.db.Website;
-import java.util.List;
 
 /**
  * base class for events handled by the EmailTrigger system
@@ -56,12 +55,10 @@ public interface TriggerEvent extends Event {
     Website getWebsite();
     
     /**
-     * Returns the entities which caused the event. This will usually be a single
-     * Profile object, such as when a user registers. However, in some cases there
-     * might be multiple source entities
+     * Returns the entity which caused the event.
      * @return 
      */
-    List<BaseEntity> getSourceEntities();
+    Profile getSourceProfile();
     
     String getTriggerItem1();
     

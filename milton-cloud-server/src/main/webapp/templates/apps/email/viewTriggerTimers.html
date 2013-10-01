@@ -1,0 +1,39 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>$view.title</title>
+        <link href="manageGroupEmail.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="manageGroupEmail.js">//</script>
+    </head>
+    <body>
+        <section id="manageEmail" class="MainContent">
+            <div class="Content">	
+                <table style='width: 100%' class='Summary'>
+                    <thead>
+                        <tr>
+                            <th>Trigger</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    #foreach($tt in $page.model.recentTriggerTimers)
+                    <tr >
+                        <td>$tt.emailTrigger.name</td>
+                        <td><a href="/manageUsers/$tt.fireForProfile.id/">$tt.fireForProfile.email</a></td>
+                        <td>$page.status($tt)</td>
+                        <td>$tt.fireAt</td>
+                    </tr>                    
+                    #end   
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <script type="text/javascript">
+            jQuery(function() {
+                
+            });
+        </script>
+    </body>
+</html>

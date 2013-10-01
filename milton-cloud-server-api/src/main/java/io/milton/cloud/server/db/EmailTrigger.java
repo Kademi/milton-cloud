@@ -122,10 +122,10 @@ public class EmailTrigger extends BaseEmailJob implements Serializable {
     }
     
     public enum TimeUnit {
-        HOURLY,
-        DAILY,
-        WEEKLY,
-        MONTHLY,
+        HOURS,
+        DAYS,
+        WEEKS,
+        MONTHS,
         ANNUAL
     }
     

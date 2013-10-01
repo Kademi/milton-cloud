@@ -82,10 +82,8 @@ public class SubscriptionEvent implements TriggerEvent {
     }
 
     @Override
-    public List<BaseEntity> getSourceEntities() {
-        List<BaseEntity> list = new ArrayList<>();
-        list.add(membership.getMember());
-        return list;
+    public Profile getSourceProfile() {
+        return membership.getMember();
     }
 
     @Override

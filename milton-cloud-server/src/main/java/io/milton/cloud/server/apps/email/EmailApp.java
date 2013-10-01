@@ -30,11 +30,6 @@ import io.milton.cloud.server.db.EmailItem;
 import io.milton.cloud.server.db.EmailTrigger;
 import io.milton.cloud.server.db.GroupEmailJob;
 import io.milton.cloud.server.db.GroupRecipient;
-import static io.milton.cloud.server.db.ScheduledEmail.Frequency.ANNUAL;
-import static io.milton.cloud.server.db.ScheduledEmail.Frequency.DAILY;
-import static io.milton.cloud.server.db.ScheduledEmail.Frequency.HOURLY;
-import static io.milton.cloud.server.db.ScheduledEmail.Frequency.MONTHLY;
-import static io.milton.cloud.server.db.ScheduledEmail.Frequency.WEEKLY;
 import io.milton.cloud.server.db.TriggerTimer;
 import io.milton.cloud.server.event.TriggerEvent;
 import io.milton.cloud.server.mail.DefaultFilterScriptEvaluator;
@@ -65,14 +60,14 @@ import io.milton.event.EventManager;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.mail.*;
-import io.milton.vfs.db.BaseEntity;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Group;
 import io.milton.vfs.db.Organisation;
+import io.milton.vfs.db.Website;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -114,6 +109,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
     private RootContext rootContext;
     private SessionManager sessionManager;
     private int smtpPort = 2525;
+    private long scanTriggersPeriod = 1000 * 60; // * 60;
 
     @Override
     public String getInstanceId() {
@@ -182,6 +178,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         eventManager.registerEventListener(this, TriggerEvent.class);
 
         asynchProcessor = config.getContext().get(AsynchProcessor.class);
+        asynchProcessor.schedule(new ScanTriggerTimersProcess(), scanTriggersPeriod);
     }
 
     @Override
@@ -197,6 +194,11 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
                 return new ManageGroupEmailLog(requestedName, f, f.getJob());
             }
 
+        } else if (parent instanceof ManageAutoEmailFolder) {
+            if (requestedName.equals("timerTriggers.html")) {
+                ManageAutoEmailFolder f = (ManageAutoEmailFolder) parent;
+                return new ViewTriggerTimersPage(requestedName, f);
+            }
         }
         return null;
     }
@@ -384,75 +386,42 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
         log.info("checkTriggers");
         Session session = SessionManager.session();
         List<EmailTrigger> triggers = EmailTrigger.find(session, event.getEventId(), event.getWebsite(), event.getTriggerItem1(), event.getTriggerItem2(), event.getTriggerItem3(), event.getTriggerItem4(), event.getTriggerItem5());
-        Profile currentUser = securityManager.getCurrentUser();
         for (EmailTrigger trigger : triggers) {
             log.info("found activated trigger: " + trigger.getEventId());
-            if (emailTriggerService.checkConditions(trigger, event, currentUser)) {
-                enqueueTrigger(trigger, event);
-            }
+            enqueueTrigger(trigger, event);
         }
     }
 
     private void enqueueTrigger(EmailTrigger trigger, TriggerEvent event) {
         log.info("enqueueTrigger: " + trigger.getName() + " - " + event.getEventId());
         Session session = SessionManager.session();
-        if (trigger.getEmailEnabled() == null || trigger.getEmailEnabled()) {
-            List<Long> sourceIds = new ArrayList<>();
-            for (BaseEntity entity : event.getSourceEntities()) {
-                sourceIds.add(entity.getId());
+
+        if (trigger.getCreateTimerEnabled() != null && trigger.getCreateTimerEnabled()) {
+            Date now = currentDateService.getNow();            
+            // Create a TriggerTimer to refire the event after the specified delay
+            TriggerTimer.create(trigger, event.getOrganisation(), event.getWebsite(), event.getSourceProfile(), now, "Created by trigger: " + trigger.getName(), session);
+
+        } else {
+            if (emailTriggerService.checkConditions(trigger, event.getSourceProfile())) {
+                executeTriggerImmediate(trigger, event, session);
             }
-            EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), sourceIds);
+        }
+    }
+
+    private void executeTriggerImmediate(EmailTrigger trigger, TriggerEvent event, Session session) {
+        if (trigger.getEmailEnabled() == null || trigger.getEmailEnabled()) {
+            EmailTriggerProcessable p = new EmailTriggerProcessable(trigger.getId(), event.getSourceProfile().getId());
             asynchProcessor.enqueue(p);
         }
         if (trigger.getAddToGroupEnabled() != null && trigger.getAddToGroupEnabled()) {
             if (trigger.getGroupToJoin() != null) {
                 Group groupToJoin = trigger.getGroupToJoin();
-                for (BaseEntity entity : event.getSourceEntities()) {
-                    if (entity instanceof Profile) {
-                        Profile p = (Profile) entity;
-                        p.createGroupMembership(groupToJoin, groupToJoin.getOrganisation(), session);
-                    }
-                }
-            }
-        }
-        if (trigger.getCreateTimerEnabled() != null && trigger.getCreateTimerEnabled()) {
-            Date now = currentDateService.getNow();
-            Date fireAt = timerFireAt(now, trigger);
-            for (BaseEntity entity : event.getSourceEntities()) {
-                if (entity instanceof Profile) {
-                    Profile p = (Profile) entity;
-                    TriggerTimer.create(event.getOrganisation(), event.getWebsite(), p, fireAt, "Created by trigger: " + trigger.getName(), session);
-                }
+                Profile p = event.getSourceProfile();
+                p.createGroupMembership(groupToJoin, groupToJoin.getOrganisation(), session);
             }
         }
     }
-
-    public Date timerFireAt(Date now, EmailTrigger trigger) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
-        int units = trigger.getTimerMultiple();
-        switch (trigger.getTimerUnit() ) {
-            case HOURLY:
-                cal.add(Calendar.HOUR, units);
-                break;
-
-            case DAILY:
-                cal.add(Calendar.DATE, units);
-                break;
-            case WEEKLY:
-                cal.add(Calendar.WEEK_OF_YEAR, units);
-                break;
-            case MONTHLY:
-                cal.add(Calendar.MONTH, units);
-                break;
-            case ANNUAL:
-                cal.add(Calendar.YEAR, units);
-                break;
-            default:
-                return null;
-        }
-        return cal.getTime();
-    }
+   
 
     private boolean isFromMember(GroupEmailStandardMessage sm, Group group) {
         if (sm.getFrom() == null) {
@@ -475,11 +444,11 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
         private static final long serialVersionUID = 1l;
         private final long jobId;
-        private final List<Long> sourceEntityIds;
+        private final Long sourceProfileId;
 
-        public EmailTriggerProcessable(long jobId, List<Long> sourceEntityIds) {
+        public EmailTriggerProcessable(long jobId, long sourceProfileId) {
             this.jobId = jobId;
-            this.sourceEntityIds = sourceEntityIds;
+            this.sourceProfileId = sourceProfileId;
         }
 
         @Override
@@ -492,6 +461,7 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
                 if (emailTriggerService == null) {
                     throw new RuntimeException("No " + EmailTriggerService.class + " in context");
                 }
+                List<Long> sourceEntityIds = Arrays.asList(sourceProfileId);
                 emailTriggerService.send(jobId, sourceEntityIds, session);
                 tx.commit();
             } catch (Exception e) {
@@ -502,6 +472,111 @@ public class EmailApp implements MenuApplication, LifecycleApplication, PortletA
 
         @Override
         public void pleaseImplementSerializable() {
+        }
+    }
+
+    public class ScanTriggerTimersProcess implements Serializable, Processable {
+
+        private List<Long> dueIds;
+
+        @Override
+        public void doProcess(io.milton.context.Context context) {
+            Session session = SessionManager.session();
+            if (dueIds == null || dueIds.isEmpty()) {
+                Transaction tx = session.beginTransaction();
+                try {
+                    Date now = currentDateService.getNow();
+                    dueIds = TriggerTimer.takeDue(now, 10, 5, 3, session);
+                    tx.commit();
+                } catch (Exception e) {
+                    tx.rollback();
+                    log.error("Exception processing ScanTriggerTimersProcess", e);
+                }
+            }
+
+            for (Long id : dueIds) {
+                Transaction tx = session.beginTransaction();
+                try {
+                    TriggerTimer tt = TriggerTimer.get(id, session);
+                    if (tt != null) {
+                        Date now = currentDateService.getNow();
+                        TriggerTimerEvent event = new TriggerTimerEvent(tt);
+                        if (emailTriggerService.checkConditions(tt.getEmailTrigger(), event.getSourceProfile())) {
+                            executeTriggerImmediate(tt.getEmailTrigger(), event, session);                            
+                        }
+                        tt.setCompletedProcessingAt(now);
+                        session.save(tt);                        
+                        tx.commit();
+                    }
+                } catch (Exception e) {
+                    tx.rollback();
+                    log.error("Exception processing ScanTriggerTimersProcess", e);
+                } finally {
+                    session.flush();
+                }
+            }
+
+        }
+
+        @Override
+        public void pleaseImplementSerializable() {
+            // ok, done
+        }
+    }
+
+    public class TriggerTimerEvent implements TriggerEvent {
+
+        private final TriggerTimer triggerTimer;
+        private final EmailTrigger emailTrigger;
+
+        public TriggerTimerEvent(TriggerTimer triggerTimer) {
+            this.triggerTimer = triggerTimer;
+            this.emailTrigger = triggerTimer.getEmailTrigger();
+        }
+
+        @Override
+        public String getEventId() {
+            return emailTrigger.getEventId();
+        }
+
+        @Override
+        public Organisation getOrganisation() {
+            return emailTrigger.getOrganisation();
+        }
+
+        @Override
+        public Website getWebsite() {
+            return triggerTimer.getWebsite();
+        }
+
+        @Override
+        public Profile getSourceProfile() {
+            return triggerTimer.getFireForProfile();
+        }
+
+        @Override
+        public String getTriggerItem1() {
+            return emailTrigger.getTriggerCondition1();
+        }
+
+        @Override
+        public String getTriggerItem2() {
+            return emailTrigger.getTriggerCondition2();
+        }
+
+        @Override
+        public String getTriggerItem3() {
+            return emailTrigger.getTriggerCondition3();
+        }
+
+        @Override
+        public String getTriggerItem4() {
+            return emailTrigger.getTriggerCondition4();
+        }
+
+        @Override
+        public String getTriggerItem5() {
+            return emailTrigger.getTriggerCondition5();
         }
     }
 }

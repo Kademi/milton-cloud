@@ -13,7 +13,6 @@
                     <a href="#message">Actions</a>
                     <a href="#recipients">Recipients</a>
                     <a href="#triggers">Triggers</a>
-                    <a href="#actions">Actions</a>
                     <a href="#history">History</a>
                 </nav>
 
@@ -76,20 +75,19 @@
 
                     <div class="actionItem">
                         $formatter.checkbox("addToGroupEnabled", "addToGroupEnabled", $page.addToGroupEnabled)
-                        <label for="emailEnabled">Add to a group</label>
+                        <label for="addToGroupEnabled">Add to a group</label>
                         <div class="actionItemDetails">
-                            TODO
+                            <p>When this trigger fires add the user to a selected group.</p>
+                            <label for="groupToJoin">Group to join</label>
+                            <select name="groupToJoinName" id="groupToJoin">
+                                $formatter.option( "", "[Please select]", $page.job.groupToJoin.name )
+                                #foreach($group in $page.organisation.groups)
+                                $formatter.option( $group.name, $group.name, $page.job.groupToJoin.name )
+                                #end
+                            </select>
                         </div>
                     </div>
 
-                    <div class="actionItem">
-                        $formatter.checkbox("createTimerEnabled", "createTimerEnabled", $page.createTimerEnabled)
-                        <label for="emailEnabled">Set a timer</label>
-                        <div class="actionItemDetails">
-                            TODO
-                        </div>
-
-                    </div>                    
                 </div>
                 <div rel="#recipients" class="TabContent Content">
                     <div class="Recipient Details">
@@ -214,6 +212,25 @@
                                 #end
                             </tbody>
                         </table>
+
+                        <div class="actionItem">
+                            <a style="float: right" href="timerTriggers.html">View history</a>
+                            $formatter.checkbox("createTimerEnabled", "createTimerEnabled", $page.createTimerEnabled)
+                            <label for="createTimerEnabled">Enable event delay</label>
+                            <div class="actionItemDetails">
+                                <p>You can set a timer so the event is only fired after a delay. This can be used
+                                    to send reminder emails a week or so later, for example. Any conditional rules are applied after the delay</p>
+                                <label for="groupToJoin">Fire the next event after</label>
+                                <input type="text" style="width: 50px" value="$!page.job.timerMultiple" name="timerMultiple" />
+                                <select name="timerUnitName" id="timerUnit">
+                                    #foreach($unit in $page.timerUnits)
+                                    $formatter.option( $unit, $unit, $page.job.timerUnit )
+                                    #end
+                                </select>                            
+                            </div>
+                        </div>
+
+
                         <header>Advanced</header>
                         <p>You can enter XML rules below, the trigger will only fire if this evaluates to true</p>                        
                         <textarea name="conditionScriptXml" style='height: 300px; width: 400px'>$!page.job.conditionScriptXml</textarea>

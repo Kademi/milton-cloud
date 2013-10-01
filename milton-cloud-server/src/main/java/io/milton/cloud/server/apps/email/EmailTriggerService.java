@@ -66,11 +66,11 @@ public class EmailTriggerService {
         EmailTrigger j = (EmailTrigger) session.get(EmailTrigger.class, jobId);
         if (j == null) {
             log.warn("Job not found: " + jobId);
-            return ;
+            return;
         }
 
         List<BaseEntity> directRecips = new ArrayList<>();
-        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty() ) {
+        if (j.getGroupRecipients() != null && !j.getGroupRecipients().isEmpty()) {
             for (GroupRecipient gr : j.getGroupRecipients()) {
                 Group recipient = gr.getRecipient();
                 if (recipient != null) {
@@ -101,7 +101,7 @@ public class EmailTriggerService {
         }
 
         Profile evalTarget = sources.get(0); // this is the user we will execute filter scripts against
-        log.info("evalTarget: "+ evalTarget.getEmail());
+        log.info("evalTarget: " + evalTarget.getEmail());
         batchEmailService.generateEmailItems(j, evalTarget, directRecips, null, session);
         session.save(j);
 
@@ -115,19 +115,19 @@ public class EmailTriggerService {
         }
     }
 
-    public boolean checkConditions(EmailTrigger j, TriggerEvent event, Profile currentUser) {
-        if( StringUtils.isBlank(j.getConditionScriptXml())) {
+    public boolean checkConditions(EmailTrigger j, Profile currentUser) {
+        if (StringUtils.isBlank(j.getConditionScriptXml())) {
             return true;
         }
-            RootFolder rf = null;
-            if (j.getThemeSite() != null) {
-                ApplicationManager appManager = _(ApplicationManager.class);
-                rf = new WebsiteRootFolder(appManager, j.getThemeSite(), j.getThemeSite().getTrunk());
-            } else {
-                rf = new OrganisationRootFolder(applicationManager, j.getOrganisation());
-            }        
+        RootFolder rf = null;
+        if (j.getThemeSite() != null) {
+            ApplicationManager appManager = _(ApplicationManager.class);
+            rf = new WebsiteRootFolder(appManager, j.getThemeSite(), j.getThemeSite().getTrunk());
+        } else {
+            rf = new OrganisationRootFolder(applicationManager, j.getOrganisation());
+        }
         EvaluationContext evaluationContext = new EvaluationContext(j.getConditionScriptXml());
-        evaluationContext.getAttributes().put("org", j.getOrganisation());        
+        evaluationContext.getAttributes().put("org", j.getOrganisation());
         return filterScriptEvaluator.checkFilterScript(evaluationContext, currentUser, j.getOrganisation(), rf);
     }
 }

@@ -109,6 +109,17 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
                 job.setThemeSite(themeSite);
             }
 
+            String s = WebUtils.getRawParam(parameters, "timerUnitName");
+            EmailTrigger.TimeUnit timeUnit = null;
+            if( s != null ) {
+                timeUnit = EmailTrigger.TimeUnit.valueOf( s );                
+            }
+            job.setTimerUnit(timeUnit);
+            
+            String groupName = WebUtils.getRawParam(parameters, "groupToJoinName");
+            Group groupToJoin = getOrganisation().group(groupName, session);
+            job.setGroupToJoin(groupToJoin);
+
             _(DataBinder.class).populate(job, parameters);
             job.checkNulls();
         } catch (IllegalAccessException | InvocationTargetException ex) {
@@ -143,7 +154,7 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
     public EmailTrigger getJob() {
         return job;
     }
-        
+
     @Override
     protected void initChildren() {
         super.initChildren();
@@ -349,15 +360,19 @@ public class ManageAutoEmailFolder extends DirectoryResource<ManageAutoEmailsFol
     public boolean isEmailEnabled() {
         return job.getEmailEnabled() == null || job.getEmailEnabled();
     }
-    
-    public  boolean isAddToGroupEnabled() {
+
+    public boolean isAddToGroupEnabled() {
         return job.getAddToGroupEnabled() != null && job.getAddToGroupEnabled();
     }
-    
+
     public boolean isCreateTimerEnabled() {
         return job.getCreateTimerEnabled() != null && job.getCreateTimerEnabled();
     }
     
+    public EmailTrigger.TimeUnit[] getTimerUnits() {
+        return EmailTrigger.TimeUnit.values();
+    }
+
     public class GroupRecipientResource extends AbstractResource implements DeletableResource {
 
         private final GroupRecipient recipient;
