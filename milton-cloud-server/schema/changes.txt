@@ -1,5 +1,0 @@
-6/9/2012
- add adminOrg column to GroupMembershipApplication
-
-25/9/2012
- Comments.contentId field changed from UUID to String
