@@ -174,6 +174,8 @@ public class Website extends Repository implements VfsAcceptor {
             cur = new GroupInWebsite();
             cur.setWebsite(this);
             cur.setUserGroup(group);
+        } else {
+            // already in group
         }
         session.save(cur);
     }
