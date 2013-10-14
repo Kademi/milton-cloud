@@ -24,7 +24,11 @@ public class SessionManager {
     }
 
     public static Transaction beginTx() {
-        return session().beginTransaction();
+        Session s = session();
+        if( s == null ) {
+            throw new NullPointerException("There is no session bound to the current thread");
+        }
+        return s.beginTransaction();
     }
 
     public static void commit(Transaction tx) {
@@ -54,17 +58,5 @@ public class SessionManager {
 
     public org.hibernate.Cache getCache() {
         return sessionFactory.getCache();
-    }
-
-    public <X> X doLocalTx(With<Session, X> callback) {
-        Session s = sessionFactory.openSession();
-        try {
-            return callback.use(s);
-        } catch(Exception e) {
-            log.error("Exception thrown from callback", e);
-            throw new RuntimeException(e);
-        } finally {
-            s.close();
-        }
     }
 }
