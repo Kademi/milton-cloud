@@ -43,6 +43,7 @@ public class Branch implements Serializable, VfsAcceptor {
     private Repository repository;
     private Date createdDate;
     private String publicTheme;
+    private Profile hiddenBy;
 
     public Branch() {
     }
@@ -55,6 +56,25 @@ public class Branch implements Serializable, VfsAcceptor {
         this.name = name;
     }
 
+    /**
+     * If not null the branch is considered hidden, and the hiddenBy profile
+     * indicates the user who hid it.
+     * 
+     * If null then the branch is not hidden
+     * 
+     * @return 
+     */
+    @ManyToOne
+    public Profile getHiddenBy() {
+        return hiddenBy;
+    }
+
+    public void setHiddenBy(Profile hiddenBy) {
+        this.hiddenBy = hiddenBy;
+    }
+
+    
+    
     /**
      * The public theme is intended for non-logged in access. It will usually
      * control the landing page and other content pages available to users prior
