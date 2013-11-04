@@ -413,7 +413,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public GroupMembership createGroupMembership(Group g, Organisation hasGroupInOrg, Session session) {
         GroupMembership gm = getGroupMembership(g, hasGroupInOrg, session);
         if (gm != null) {
-            throw new RuntimeException("Found duplicate membership");
+            return gm;
         }
         gm = new GroupMembership();
         gm.setCreatedDate(new Date());

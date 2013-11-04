@@ -471,7 +471,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * Create a website for this organisation with the domain name given. Also
      * creates an alias subdomain if the alias argument is not null
      *
-     */
+     * @param name
+     * @param dnsName
+     * @param theme
+     * @param user
+     * @param session
+     * @return 
+     */    
     public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {
         Website w = new Website();
         w.setBaseEntity(this);
@@ -483,7 +489,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (this.getWebsites() == null) {
             this.setWebsites(new ArrayList<Website>());
         }
+        if( this.getRepositories() == null ) {
+            this.setRepositories(new ArrayList<Repository>());
+        }
         this.getWebsites().add(w);
+        this.getRepositories().add(w);
         session.save(w);
 
         Branch b = w.createBranch(Branch.TRUNK, user, session);
