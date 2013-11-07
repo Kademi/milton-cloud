@@ -2,6 +2,7 @@ package io.milton.vfs.db;
 
 import io.milton.cloud.common.With;
 import io.milton.vfs.db.utils.DbUtils;
+import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -58,9 +59,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     /**
      *
-     * @param baseName
      * @param parameters
-     * @param folder
      * @return
      */
     public static String getImpliedName(Map<String, String> parameters) {
@@ -481,14 +480,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     public boolean isInGroup(Group group) {
-        if (getMemberships() != null) {
-            for (GroupMembership m : getMemberships()) {
-                if (m.getGroupEntity().getId() == group.getId()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        List<GroupMembership> list = GroupMembership.find(group, this, SessionManager.session());
+        return !list.isEmpty();
     }
 
     /**

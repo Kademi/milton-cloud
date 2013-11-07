@@ -141,6 +141,22 @@ public class GroupMembership implements Serializable {
         }
         return set;
     }
+
+    /**
+     * Find memberships for a profile and group, regardless of containing org
+     * 
+     * @param group
+     * @param member
+     * @param session
+     * @return 
+     */
+    public static List<GroupMembership> find(Group group, Profile member, Session session) {
+        Criteria crit = session.createCriteria(GroupMembership.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("member", member));
+        crit.add(Restrictions.eq("groupEntity", group));
+        return DbUtils.toList(crit, GroupMembership.class);
+    }
     
     private Long id;
     private Organisation withinOrg;
