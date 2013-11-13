@@ -76,6 +76,11 @@ public class Group implements Serializable, VfsAcceptor {
         crit.add(Restrictions.eq("name", name));
         return (Group) crit.uniqueResult();
     }
+
+    public static Group get(long id, Session session) {
+        return (Group) session.get(Group.class, id);
+    }
+    
     private long id;
     private String name;
     private Date createdDate;
@@ -208,7 +213,7 @@ public class Group implements Serializable, VfsAcceptor {
      * administrator enabled, anyone can register but their account only becomes
      * active after being enabled
      *
-     * @return
+     * @param registrationMode
      */
     public void setRegistrationMode(String registrationMode) {
         this.registrationMode = registrationMode;
@@ -237,8 +242,8 @@ public class Group implements Serializable, VfsAcceptor {
      * also saves the change in the session
      *
      * @param roleName
-     * @param isGrant - true means to grant permission, false to remove
      * @param session
+     * @return 
      */
     public GroupRole grantRole(String roleName, Session session) {
         return grantRole(null, null, roleName, session);
