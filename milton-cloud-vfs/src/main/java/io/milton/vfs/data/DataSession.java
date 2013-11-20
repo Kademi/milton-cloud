@@ -134,7 +134,9 @@ public class DataSession {
      * the tree which this session directly represents, but it will also contain
      * the roots of trees which have been affected through linked item updates
      *
+     * @param currentUser
      * @return
+     * @throws java.io.IOException
      */
     public String save(Profile currentUser) throws IOException {
         if (branch == null) {

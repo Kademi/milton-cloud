@@ -191,6 +191,9 @@ public class NvSet implements Serializable {
      * @return 
      */
     public boolean isDirty(NvSet previous) {
+        if( previous == null ) {
+            return true;
+        }
         int prevSize = numFields(previous);
         int newSize = numFields(this);
         if( prevSize != newSize ) {
