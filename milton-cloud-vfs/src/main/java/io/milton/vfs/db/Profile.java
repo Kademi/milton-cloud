@@ -601,4 +601,16 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return list;
     }
+    
+    public List<GroupMembership> memberships(Organisation parentOrg) {
+        List<GroupMembership> list = new ArrayList<>();
+        if( getMemberships() != null ) {
+            for( GroupMembership gm : getMemberships() ) {
+                if( gm.getGroupEntity().getOrganisation() == parentOrg ) {
+                    list.add(gm);
+                }
+            }
+        }
+        return list;
+    }
 }
