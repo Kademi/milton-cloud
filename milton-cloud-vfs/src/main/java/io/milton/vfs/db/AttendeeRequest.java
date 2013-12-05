@@ -83,8 +83,6 @@ public class AttendeeRequest implements Serializable {
     private String participationStatus; // http://tools.ietf.org/html/draft-desruisseaux-caldav-sched-12#section-3.2.8
     
     
-    
-    
     @Id
     @GeneratedValue
     public Long getId() {

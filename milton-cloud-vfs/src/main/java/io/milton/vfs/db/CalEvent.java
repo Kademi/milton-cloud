@@ -29,7 +29,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CalEvent implements Serializable {
+    
     private AttendeeRequest attendeeRequest;
+    
     private Long id;
     
     private String name; // the "file" name
