@@ -94,6 +94,10 @@ public class BlobbyResourceFactory implements ResourceFactory {
     @Override
     public Resource getResource(String host, final String path) throws NotAuthorizedException, BadRequestException {
         Path p = Path.path(path);
+        if( p.getFirst().equals("dirs") ) {
+            p = p.getStripFirst();
+            return findDir(p);
+        }
         return find(p, rootFolder);        
     }
 
@@ -115,6 +119,17 @@ public class BlobbyResourceFactory implements ResourceFactory {
 
     public BlobStore getBlobStore() {
         return blobStore;
+    }
+
+    /**
+     * Find a resource representing the hashes of a directory. The given path
+     * will identify a physical directory in the blobs dir
+     * 
+     * @param p
+     * @return 
+     */
+    private Resource findDir(Path p) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     

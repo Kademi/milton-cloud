@@ -16,11 +16,17 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
@@ -29,6 +35,36 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CalEvent implements Serializable {
+    
+    public static List<CalEvent> find(Calendar cal, Date from, Date to, Session session) {
+        Criteria crit = session.createCriteria(CalEvent.class);
+        crit.add( Restrictions.eq("calendar", cal));
+        if( from != null ) {
+            crit.add(Restrictions.ge("startDate", from));
+        }
+        if( to != null ) {
+            crit.add(Restrictions.le("startDate", to));
+        }
+        
+        crit.addOrder(Order.asc("startDate"));
+        return DbUtils.toList(crit, CalEvent.class);
+    }    
+
+    public static List<CalEvent> find(BaseEntity owner, Date from, Date to, Session session) {
+        Criteria crit = session.createCriteria(CalEvent.class);
+        Criteria critCal = crit.createCriteria("calendar");
+        critCal.add( Restrictions.eq("baseEntity", owner));
+        if( from != null ) {
+            crit.add(Restrictions.ge("startDate", from));
+        }
+        if( to != null ) {
+            crit.add(Restrictions.le("startDate", to));
+        }
+        
+        crit.addOrder(Order.asc("startDate"));
+        return DbUtils.toList(crit, CalEvent.class);
+    }    
+    
     
     private AttendeeRequest attendeeRequest;
     

@@ -39,7 +39,8 @@ public class HttpHashStore implements HashStore {
 
     /**
      *
-     * @param client
+     * @param host
+     * @param filesHashCache
      * @param chunksHashCache - optional, may be null. If provided will be used
      * to optimise hasFanout
      */

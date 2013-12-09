@@ -44,7 +44,7 @@ public class Repository implements Serializable {
             try {
                 session.save(r);
             } catch (Throwable e) {
-                throw new RuntimeException("Exception saving repo");
+                throw new RuntimeException("Exception saving repo", e);
             }
         }
 

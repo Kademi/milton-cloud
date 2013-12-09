@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseEntity.class);   
-    
+    private static final Logger log = LoggerFactory.getLogger(BaseEntity.class);
+
     public static BaseEntity find(String name, Session session) {
         Criteria crit = session.createCriteria(BaseEntity.class);
         crit.setCacheable(true);
@@ -52,21 +52,22 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
 
     /**
      * Returns a human readable representation of the name of this entity
-     * 
-     * @return 
+     *
+     * @return
      */
     @Transient
     public abstract String getFormattedName();
 
     /**
-     * Returns the logical name of the entity. For a Profile this is its name property which is globally unique,
-     * for an organisation its the orgId which is unique within its administrative domain
-     * 
-     * @return 
+     * Returns the logical name of the entity. For a Profile this is its name
+     * property which is globally unique, for an organisation its the orgId
+     * which is unique within its administrative domain
+     *
+     * @return
      */
     @Transient
     public abstract String getEntityName();
-    
+
     @Id
     @GeneratedValue
     public long getId() {
@@ -129,9 +130,9 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         if (user == null) {
             throw new RuntimeException("Cant create repository with a null user");
         }
-        
+
         Repository r = repository(name);
-        if( r != null ) {
+        if (r != null) {
             log.warn("Repository already exists");
             return r;
         }
@@ -139,21 +140,21 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         Repository.initRepo(r, name, session, user, this);
         return r;
     }
-    
+
     /**
      * Creates, but does not call save
-     * 
+     *
      * @param name
      * @param currentUser
-     * @return 
+     * @return
      */
-    public Calendar newCalendar(String name,Profile currentUser) {
+    public Calendar newCalendar(String name, Profile currentUser, Session session) {
         Calendar cal = new Calendar();
         cal.setBaseEntity(this);
         cal.setCreatedDate(new Date());
         cal.setName(name);
         cal.setTitle(name);
-        Repository.initRepo(cal, name, null, currentUser, this);
+        Repository.initRepo(cal, name, session, currentUser, this);
         this.getCalendars().add(cal);
         return cal;
     }
@@ -225,7 +226,6 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         }
         return list;
     }
-    
 
     public Calendar calendar(String name) {
         for (Calendar a : getCalendars()) {
@@ -244,5 +244,5 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         }
 
         return null;
-    }    
+    }
 }

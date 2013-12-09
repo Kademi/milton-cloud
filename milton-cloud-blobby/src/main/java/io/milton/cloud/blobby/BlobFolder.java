@@ -22,12 +22,10 @@ class BlobFolder extends  BaseResource implements PutableResource {
 
     private final BlobStore blobStore;
     private final String name;
-    private final BlobbyResourceFactory resourceFactory;
     
     public BlobFolder(BlobStore blobStore, String name, BlobbyResourceFactory resourceFactory) {
         super(resourceFactory);
         this.blobStore = blobStore;
-        this.resourceFactory = resourceFactory;
         this.name = name;
     }
 
@@ -54,7 +52,7 @@ class BlobFolder extends  BaseResource implements PutableResource {
     public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         ByteArrayOutputStream bout = new ByteArrayOutputStream(length.intValue());
         long actualBytes = IOUtils.copyLarge(inputStream, bout);
-        if( length != null && !length.equals(actualBytes)) {
+        if( !length.equals(actualBytes)) {
             throw new RuntimeException("Blob is not of expected length: expected=" + length + " actual=" + actualBytes);
         }
         byte[] bytes = bout.toByteArray();
