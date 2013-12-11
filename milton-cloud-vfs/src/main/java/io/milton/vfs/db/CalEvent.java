@@ -97,6 +97,10 @@ public class CalEvent implements Serializable {
     private Boolean allowGuests;
     
     private Integer maxAttendees;
+    
+    private Boolean emailConfirm;
+    
+    private String emailConfirmTemplate;
 
     public CalEvent() {
     }
@@ -278,6 +282,38 @@ public class CalEvent implements Serializable {
     public void setMaxAttendees(Integer maxAttendees) {
         this.maxAttendees = maxAttendees;
     }
+
+    /**
+     * Whether to send an email to the attendee when they register to attend
+     * 
+     * @return 
+     */
+    public Boolean isEmailConfirm() {
+        return emailConfirm;
+    }
+
+    public void setEmailConfirm(Boolean emailConfirm) {
+        this.emailConfirm = emailConfirm;
+    }
+
+    
+    
+    /**
+     * If emailConfirm is true, this contains the MVEL template to generate
+     * the email body content
+     * 
+     * @return 
+     */
+    @Column(length = 4000)
+    public String getEmailConfirmTemplate() {
+        return emailConfirmTemplate;
+    }
+
+    public void setEmailConfirmTemplate(String emailConfirmTemplate) {
+        this.emailConfirmTemplate = emailConfirmTemplate;
+    }
+    
+    
     
     
     /**
@@ -300,6 +336,15 @@ public class CalEvent implements Serializable {
         } else {
             return false;
         }
+    }
+    
+    /**
+     * true by default
+     * 
+     * @return 
+     */
+    public boolean emailConfirm() {
+        return emailConfirm == null || emailConfirm.booleanValue();
     }
 
     /**
