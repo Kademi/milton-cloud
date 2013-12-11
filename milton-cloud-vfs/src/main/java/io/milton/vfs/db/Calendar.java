@@ -16,6 +16,7 @@
  */
 package io.milton.vfs.db;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
@@ -32,6 +33,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Calendar extends Repository {
 
+    public static final String CALENDAR_NAME_DEFAULT = "default";
+    
     private List<CalEvent> events;
     private String color;
     private String description;
@@ -83,7 +86,8 @@ public class Calendar extends Repository {
     @Override
     public void delete(Session session) {
         if (getEvents() != null) {
-            for (CalEvent e : getEvents()) {
+            List<CalEvent> list = new ArrayList( getEvents() );
+            for (CalEvent e : list) {
                 session.delete(e);
             }
             setEvents(null);

@@ -16,13 +16,17 @@
  */
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.*;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +44,12 @@ public class AttendeeRequest implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(AttendeeRequest.class);
     
+    public static final String PARTSTAT_ACCEPTED = "ACCEPTED";
+    
+    public static final String PARTSTAT_DECLINED = "DECLINED";
+    
+    public static final String PARTSTAT_NEEDS_ACTION = "NEEDS-ACTION";
+    
     /**
      * Check if there is an attendee request for the given user on the given event.
      * If not create it
@@ -47,18 +57,18 @@ public class AttendeeRequest implements Serializable {
      * @param p
      * @param e
      * @param session 
+     * @return  
      */
-    public static void checkCreate(Profile p, CalEvent e, Session session) {
+    public static AttendeeRequest checkCreate(Profile p, CalEvent e, Session session) {
+        AttendeeRequest ar = findForUserAndEvent(p, e, session);
+        if( ar != null ) {
+            return ar;
+        }
+        ar = new AttendeeRequest();        
         if( p.getAttendeeRequests() == null ) {
             p.setAttendeeRequests(new ArrayList<AttendeeRequest>());
         }
-        for( AttendeeRequest ar : p.getAttendeeRequests() ) {
-            if( ar.getOrganiserEvent().getId().equals(e.getId()) ) {
-                // exists, so abort
-                return ;
-            }
-        }
-        AttendeeRequest ar = new AttendeeRequest();
+        
         ar.setAttendee(p);
         ar.setName(UUID.randomUUID().toString());
         ar.setOrganiserEvent(e);
@@ -66,7 +76,28 @@ public class AttendeeRequest implements Serializable {
         p.getAttendeeRequests().add(ar);
         session.save(ar);
         log.info("Created AttendeeRequest: " + ar.getId());
+        return ar;
     }
+    
+    public static AttendeeRequest findForUserAndEvent(Profile p, CalEvent e, Session session) {
+        if( p.getAttendeeRequests() == null ) {
+            return null;
+        }
+        for( AttendeeRequest ar : p.getAttendeeRequests() ) {
+            if( ar.getOrganiserEvent().getId().equals(e.getId()) ) {
+                // exists, so abort
+                return ar;
+            }
+        }
+        return null;
+    }
+    
+    public static List<AttendeeRequest> findByOrganisorEvent(CalEvent e, Session session) {
+        Criteria crit = session.createCriteria(AttendeeRequest.class);
+        crit.add(Restrictions.eq("organiserEvent", e));
+        crit.add(Restrictions.eq("participationStatus", PARTSTAT_ACCEPTED));
+        return DbUtils.toList(crit, AttendeeRequest.class);
+    }    
     
     private Long id;
     
@@ -137,6 +168,11 @@ public class AttendeeRequest implements Serializable {
         this.acknowledged = acknowledged;
     }
 
+    /**
+     * 
+     * 
+     * @return 
+     */
     public String getParticipationStatus() {
         return participationStatus;
     }
@@ -144,6 +180,7 @@ public class AttendeeRequest implements Serializable {
     public void setParticipationStatus(String participationStatus) {
         this.participationStatus = participationStatus;
     }
+
 
     
 }

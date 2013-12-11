@@ -88,6 +88,19 @@ public class CalEvent implements Serializable {
     
     private String description;
     
+    private Profile organisor;
+    
+    private String location;
+    
+    private Boolean allowRegistration;
+    
+    private Boolean allowGuests;
+    
+    private Integer maxAttendees;
+
+    public CalEvent() {
+    }
+    
     
     
     @Id
@@ -224,4 +237,86 @@ public class CalEvent implements Serializable {
     public void setAttendeeRequest(AttendeeRequest attendeeRequest) {
         this.attendeeRequest = attendeeRequest;
     }
+
+    @ManyToOne
+    public Profile getOrganisor() {
+        return organisor;
+    }
+
+    public void setOrganisor(Profile organisor) {
+        this.organisor = organisor;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Boolean isAllowRegistration() {
+        return allowRegistration;
+    }
+
+    public void setAllowRegistration(Boolean allowRegistration) {
+        this.allowRegistration = allowRegistration;
+    }
+
+    public Boolean isAllowGuests() {
+        return allowGuests;
+    }
+
+    public void setAllowGuests(Boolean allowGuests) {
+        this.allowGuests = allowGuests;
+    }
+
+    public Integer getMaxAttendees() {
+        return maxAttendees;
+    }
+
+    public void setMaxAttendees(Integer maxAttendees) {
+        this.maxAttendees = maxAttendees;
+    }
+    
+    
+    /**
+     * true by default
+     * 
+     * @return 
+     */
+    public boolean allowGuests() {
+        return allowGuests == null || allowGuests.booleanValue();
+    }
+    
+    /**
+     * true by default
+     * 
+     * @return 
+     */
+    public boolean allowRegistration() {
+        if( allowRegistration == null || allowRegistration.booleanValue()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Deletes this event and remove from parent collection
+     * 
+     * @param session 
+     */
+    public void delete(Session session) {
+        Calendar cal = getCalendar();
+        if( cal != null && cal.getEvents() != null ) {
+            cal.getEvents().remove(this);
+        }
+        session.delete(this);
+        if( cal != null ) {
+        session.save(cal);
+        }
+    }
+    
+    
 }

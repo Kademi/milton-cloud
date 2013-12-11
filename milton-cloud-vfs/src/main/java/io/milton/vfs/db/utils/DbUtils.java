@@ -17,7 +17,6 @@
 package io.milton.vfs.db.utils;
 
 import io.milton.common.FileUtils;
-import io.milton.vfs.db.Organisation;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -117,8 +116,11 @@ public class DbUtils {
         nameToUse = nameToUse.replace("\\", "-");
         nameToUse = nameToUse.replace("/", "-");
         nameToUse = nameToUse.replace("!", "-");
+        nameToUse = nameToUse.replace("#", "-");
+        nameToUse = nameToUse.replace("%", "-");
+        nameToUse = nameToUse.replace("\"", "-");
         nameToUse = nameToUse.replace("--", "-");
-        nameToUse = nameToUse.replace("--", "-");        
+        nameToUse = nameToUse.replace("--", "-");                
         return nameToUse;
     }
 }

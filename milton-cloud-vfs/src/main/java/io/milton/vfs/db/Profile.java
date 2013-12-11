@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(
         uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})})
+            @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
 
     private List<AttendeeRequest> attendeeRequests;
@@ -361,8 +361,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * @param g
      * @param hasGroupInOrg
      * @param session
-     * @param membershipCreatedCallback - called only if a membership is created. Optional.
-     * actually created
+     * @param membershipCreatedCallback - called only if a membership is
+     * created. Optional. actually created
      * @return
      */
     public GroupMembership getOrCreateGroupMembership(Group g, Organisation hasGroupInOrg, Session session, With<GroupMembership, Object> membershipCreatedCallback) {
@@ -601,16 +601,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return list;
     }
-    
+
     public List<GroupMembership> memberships(Organisation parentOrg) {
         List<GroupMembership> list = new ArrayList<>();
-        if( getMemberships() != null ) {
-            for( GroupMembership gm : getMemberships() ) {
-                if( gm.getGroupEntity().getOrganisation() == parentOrg ) {
+        if (getMemberships() != null) {
+            for (GroupMembership gm : getMemberships()) {
+                if (gm.getGroupEntity().getOrganisation() == parentOrg) {
                     list.add(gm);
                 }
             }
         }
         return list;
     }
+
 }
