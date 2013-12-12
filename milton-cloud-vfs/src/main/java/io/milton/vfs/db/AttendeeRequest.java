@@ -26,6 +26,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +99,14 @@ public class AttendeeRequest implements Serializable {
         crit.add(Restrictions.eq("participationStatus", PARTSTAT_ACCEPTED));
         return DbUtils.toList(crit, AttendeeRequest.class);
     }    
+
+    public static Long countAttending(CalEvent event, Session session) {
+        Criteria crit = session.createCriteria(AttendeeRequest.class);
+        crit.add(Restrictions.eq("organiserEvent", event));
+        crit.add(Restrictions.eq("participationStatus", PARTSTAT_ACCEPTED));
+        crit.setProjection(Projections.rowCount());
+        return DbUtils.asLong(crit.list(), 0);
+    }
     
     private Long id;
     

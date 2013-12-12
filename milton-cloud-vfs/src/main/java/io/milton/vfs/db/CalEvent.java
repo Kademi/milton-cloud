@@ -17,6 +17,7 @@
 package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
+import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -363,5 +364,7 @@ public class CalEvent implements Serializable {
         }
     }
     
-    
+    public long numAttendees() {
+        return AttendeeRequest.countAttending(this, SessionManager.session());
+    }    
 }

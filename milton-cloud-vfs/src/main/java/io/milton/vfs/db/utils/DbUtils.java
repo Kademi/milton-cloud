@@ -20,7 +20,7 @@ import io.milton.common.FileUtils;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import org.hibernate.Criteria; 
+import org.hibernate.Criteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,19 +29,20 @@ import org.slf4j.LoggerFactory;
  * @author brad
  */
 public class DbUtils {
-    
+
     private static final Logger log = LoggerFactory.getLogger(DbUtils.class);
-    
+
     /**
      * Just casts the list, and ensures it never returns null.
+     *
      * @param <T>
      * @param crit
      * @param c
-     * @return 
+     * @return
      */
     public static <T> List<T> toList(Criteria crit, Class<T> c) {
         List list = crit.list();
-        if( list == null ) {
+        if (list == null) {
             return Collections.EMPTY_LIST;
         } else {
             return list;
@@ -50,13 +51,13 @@ public class DbUtils {
 
     public static <T> T unique(Criteria crit) {
         List list = crit.list();
-        if( list == null || list.isEmpty() ) {
+        if (list == null || list.isEmpty()) {
             return null;
         }
-        if( list.size() > 1 ) {
-            if(log.isInfoEnabled()) {
+        if (list.size() > 1) {
+            if (log.isInfoEnabled()) {
                 log.info("Multiple items returned from query=" + list.size());
-                for( Object o : list ) {
+                for (Object o : list) {
                     Serializable id = SessionManager.session().getIdentifier(o);
                     log.info(" - class=" + o.getClass() + " id=" + id);
                 }
@@ -65,36 +66,55 @@ public class DbUtils {
         T item = (T) list.get(0);
         return item;
     }
-    
+
+    public static long asLong(List results, int columnIndex) {
+        if (results == null) {
+            return 0;
+        }
+        Object o = results.get(0);
+        if (o instanceof Long) {
+            Long num = (Long) o;
+            return num;
+        } else if (o instanceof Integer) {
+            Integer ii = (Integer) o;
+            return ii.intValue();
+        } else {
+            if (o != null) {
+                log.error("Unsupported value type: " + o.getClass());
+            }
+            return 0;
+        }
+    }
+
     public static String incrementFileName(String name, boolean isFirst) {
         String mainName = FileUtils.stripExtension(name);
         String ext = FileUtils.getExtension(name);
         int count;
-        if( isFirst ) {
+        if (isFirst) {
             count = 1;
         } else {
             int pos = mainName.lastIndexOf("-");
-            if( pos > 0 ) {
-                String sNum = mainName.substring(pos+1, mainName.length());
-                count = Integer.parseInt(sNum)+1;
-                mainName = mainName.substring(0,pos);
+            if (pos > 0) {
+                String sNum = mainName.substring(pos + 1, mainName.length());
+                count = Integer.parseInt(sNum) + 1;
+                mainName = mainName.substring(0, pos);
             } else {
                 count = 1;
             }
         }
         String s = mainName + "-" + count;
-        if( ext != null) {
+        if (ext != null) {
             s = s + "." + ext;
         }
         return s;
 
-    }   
-    
+    }
+
     /**
      * Change any characters that might be ugly in a url with hyphens.
-     * 
+     *
      * @param baseName
-     * @return 
+     * @return
      */
     public static String replaceYuckyChars(String baseName) {
         String nameToUse = baseName;
@@ -120,7 +140,7 @@ public class DbUtils {
         nameToUse = nameToUse.replace("%", "-");
         nameToUse = nameToUse.replace("\"", "-");
         nameToUse = nameToUse.replace("--", "-");
-        nameToUse = nameToUse.replace("--", "-");                
+        nameToUse = nameToUse.replace("--", "-");
         return nameToUse;
     }
 }
