@@ -32,7 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Represents a request for someone to attend a CalEvent
+ * Represents a request for someone to attend a CalEvent, or the status of someone
+ * who is attending
  *
  * @author brad
  */
@@ -122,6 +123,16 @@ public class AttendeeRequest implements Serializable {
    
     private String participationStatus; // http://tools.ietf.org/html/draft-desruisseaux-caldav-sched-12#section-3.2.8
     
+    private String firstName; // optional, only set if attendee is null
+    
+    private String surName; // optional, only set if attendee is null
+    
+    private String mail; // optional, only set if attendee is null
+        
+    private String orgName; // optional, only set if attendee is null
+    
+    private Profile guestOf; // will be set if this attendee is a guest
+
     
     @Id
     @GeneratedValue
@@ -178,7 +189,7 @@ public class AttendeeRequest implements Serializable {
     }
 
     /**
-     * 
+     * http://www.kanzaki.com/docs/ical/partstat.html
      * 
      * @return 
      */
@@ -191,5 +202,47 @@ public class AttendeeRequest implements Serializable {
     }
 
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSurName() {
+        return surName;
+    }
+
+    public void setSurName(String surName) {
+        this.surName = surName;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
+    @ManyToOne
+    public Profile getGuestOf() {
+        return guestOf;
+    }
+
+    public void setGuestOf(Profile guestOf) {
+        this.guestOf = guestOf;
+    }
+    
+    
     
 }
