@@ -109,6 +109,13 @@ public class AttendeeRequest implements Serializable {
         return DbUtils.asLong(crit.list(), 0);
     }
     
+    public static List<AttendeeRequest> findGuestsForProfileAndEvent(CalEvent organiserEvent, Profile member, Session session) {
+        Criteria crit = session.createCriteria(AttendeeRequest.class);
+        crit.add(Restrictions.eq("organiserEvent", organiserEvent));
+        crit.add(Restrictions.eq("guestOf", member));
+        return DbUtils.toList(crit, AttendeeRequest.class);        
+    }
+    
     private Long id;
     
     private String name; // the "file" name, globally unique
