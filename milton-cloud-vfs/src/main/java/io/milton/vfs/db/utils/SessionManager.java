@@ -10,7 +10,7 @@ import org.hibernate.Transaction;
 import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.orm.hibernate3.SessionFactoryUtils;
+import org.springframework.orm.hibernate4.SessionFactoryUtils; 
 
 /**
  *
@@ -47,7 +47,8 @@ public class SessionManager {
     }
 
     public Session open() {
-        Session session = SessionFactoryUtils.getSession(sessionFactory, true);
+        Session session = sessionFactory.openSession();
+        //Session session = SessionFactoryUtils.getSession(sessionFactory, true);
         tlSession.set(session);
 
         if (checkConnectionOnOpen) {
