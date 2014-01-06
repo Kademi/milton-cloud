@@ -1,6 +1,5 @@
 package io.milton.sync;
 
-import io.milton.cloud.common.FanoutSerializationUtils;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -12,6 +11,7 @@ import io.milton.httpclient.HttpResult;
 import java.io.*;
 import java.util.List;
 import org.hashsplit4j.api.Fanout;
+import org.hashsplit4j.api.FanoutSerializationUtils;
 import org.hashsplit4j.api.HashCache;
 import org.hashsplit4j.api.HashStore;
 

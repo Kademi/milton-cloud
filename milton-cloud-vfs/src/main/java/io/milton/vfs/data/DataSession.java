@@ -14,9 +14,7 @@
  */
 package io.milton.vfs.data;
 
-import io.milton.cloud.common.HashCalc;
 import io.milton.cloud.common.CurrentDateService;
-import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
@@ -28,6 +26,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 import org.hashsplit4j.api.*;
+import org.hashsplit4j.triplets.HashCalc;
+import org.hashsplit4j.triplets.ITriplet;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +232,7 @@ public class DataSession {
          * Move this item to a new parent, or to a new name, or both
          *
          * @param newParent
+         * @param newName
          */
         public void move(DirectoryNode newParent, String newName) {
             DirectoryNode oldParent = this.getParent();

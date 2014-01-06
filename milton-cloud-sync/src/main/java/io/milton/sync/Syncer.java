@@ -1,6 +1,5 @@
 package io.milton.sync;
 
-import io.milton.cloud.common.HashCalc;
 import io.milton.common.Path;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -14,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.*;
-import io.milton.cloud.common.store.ByteArrayBlobStore;
 import io.milton.event.EventManager;
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
@@ -30,6 +28,8 @@ import io.milton.sync.event.UploadSyncEvent;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.hashsplit4j.store.ByteArrayBlobStore;
+import org.hashsplit4j.triplets.HashCalc;
 
 /**
  * This class contains the code to actually perform file sync operations. This

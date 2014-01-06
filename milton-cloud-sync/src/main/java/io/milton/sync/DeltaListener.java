@@ -1,8 +1,8 @@
 package io.milton.sync;
 
-import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import java.io.IOException;
+import org.hashsplit4j.triplets.ITriplet;
 
 /**
  * A "delta" here refers to some difference between the client and server

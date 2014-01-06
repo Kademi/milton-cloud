@@ -1,8 +1,8 @@
 package io.milton.sync.triplets;
 
-import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import java.util.List;
+import org.hashsplit4j.triplets.ITriplet;
 
 /**
  * A Triplet describes a member within a directory/collection, but its

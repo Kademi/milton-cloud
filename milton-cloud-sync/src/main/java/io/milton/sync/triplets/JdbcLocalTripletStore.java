@@ -7,7 +7,6 @@ import com.ettrema.db.TableCreatorService;
 import com.ettrema.db.TableDefinitionSource;
 import com.ettrema.db.UseConnection;
 import com.ettrema.db.dialects.Dialect;
-import io.milton.cloud.common.HashCalc;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.*;
@@ -21,13 +20,14 @@ import java.util.concurrent.TimeUnit;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.NullHashStore;
 import org.hashsplit4j.api.Parser;
-import io.milton.cloud.common.ITriplet;
 import io.milton.event.EventManager;
 import io.milton.sync.Utils;
 import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.BlobDao.BlobVector;
 import io.milton.sync.triplets.CrcDao.CrcRecord;
+import org.hashsplit4j.triplets.HashCalc;
+import org.hashsplit4j.triplets.ITriplet;
 
 /**
  * Scans the given root directory on startup to ensure the triplet table is up
@@ -49,9 +49,9 @@ import io.milton.sync.triplets.CrcDao.CrcRecord;
  */
 public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(JdbcLocalTripletStore.class);
-    private static ThreadLocal<Connection> tlConnection = new ThreadLocal<>();
-    private static WatchEvent.Kind<?>[] events = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(JdbcLocalTripletStore.class);
+    private static final ThreadLocal<Connection> tlConnection = new ThreadLocal<>();
+    private static final WatchEvent.Kind<?>[] events = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
 
     private static Connection con() {
         return tlConnection.get();

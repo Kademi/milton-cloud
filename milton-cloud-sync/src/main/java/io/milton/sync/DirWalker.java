@@ -1,14 +1,14 @@
 package io.milton.sync;
 
-import io.milton.cloud.common.ITriplet;
 import io.milton.sync.triplets.TripletStore;
 import io.milton.common.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import io.milton.cloud.common.Triplet;
 import java.util.Collections;
+import org.hashsplit4j.triplets.ITriplet;
+import org.hashsplit4j.triplets.Triplet;
 
 /**
  * Walks two directory structures, looking for differences, and invoking methods

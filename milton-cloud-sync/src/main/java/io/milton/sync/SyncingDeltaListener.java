@@ -1,12 +1,12 @@
 package io.milton.sync;
 
-import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import io.milton.http.exceptions.ConflictException;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JOptionPane;
-import io.milton.cloud.common.Triplet;
+import org.hashsplit4j.triplets.ITriplet;
+import org.hashsplit4j.triplets.Triplet;
 
 /**
  *

@@ -124,7 +124,8 @@ public class AttendeeRequest implements Serializable {
     
     private CalEvent attendeeEvent;
     
-    private Profile attendee;
+    
+    private Profile attendee; // if attendee is not null, contact fields below will be null
     
     private boolean acknowledged;
    

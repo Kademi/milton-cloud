@@ -1,8 +1,5 @@
 package io.milton.sync;
 
-import io.milton.cloud.server.sync.push.AuthenticateMessage;
-import io.milton.cloud.server.sync.push.ChannelListener;
-import io.milton.cloud.server.sync.push.TcpChannelClient;
 import io.milton.common.Path;
 import io.milton.event.Event;
 import io.milton.event.EventListener;
@@ -27,7 +24,7 @@ import java.util.UUID;
  *
  * @author brad
  */
-public class SpliffySync implements ChannelListener{
+public class SpliffySync {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffySync.class);
 
@@ -45,7 +42,6 @@ public class SpliffySync implements ChannelListener{
     private ScheduledExecutorService scheduledExecService;
     private ScheduledFuture<?> scanJob;
     private boolean paused;
-    private TcpChannelClient pushClient;
     
     private boolean jobScheduled;
     private DirWalker dirWalker;
@@ -63,13 +59,13 @@ public class SpliffySync implements ChannelListener{
         statusStore = new JdbcSyncStatusStore(dbInit.getUseConnection(), dbInit.getDialect(), basePath, localRoot);
         deltaListener2 = new SyncingDeltaListener(syncer, archiver, localRoot, statusStore);       
         deltaListener2.setReadonlyLocal(localReadonly);
-        try {
-            // Now subscribe to server push notifications
-            pushClient = new TcpChannelClient(httpClient.server, 7020);            
-            pushClient.registerListener(this);
-        } catch (UnknownHostException ex) {
-            log.error("exception setting up push notifications", ex);
-        }
+//        try {
+//            // Now subscribe to server push notifications
+//            pushClient = new TcpChannelClient(httpClient.server, 7020);            
+//            pushClient.registerListener(this);
+//        } catch (UnknownHostException ex) {
+//            log.error("exception setting up push notifications", ex);
+//        }
         
     }
 
@@ -102,14 +98,14 @@ public class SpliffySync implements ChannelListener{
         // schedule a job to do the scanning with a fixed interval
         scanJob = scheduledExecService.scheduleWithFixedDelay(new ScanRunner(),5000, 60000*10, TimeUnit.MILLISECONDS); // scan at 10 min intervals
         jdbcTripletStore.start();
-        pushClient.start();
+//        pushClient.start();
         
-        log.info("Authenticate to push manager");
-        AuthenticateMessage msg = new AuthenticateMessage();
-        msg.setUsername(httpClient.user);
-        msg.setPassword(httpClient.password);
-        msg.setWebsite(httpClient.server);
-        pushClient.sendNotification(msg);
+//        log.info("Authenticate to push manager");
+//        AuthenticateMessage msg = new AuthenticateMessage();
+//        msg.setUsername(httpClient.user);
+//        msg.setPassword(httpClient.password);
+//        msg.setWebsite(httpClient.server);
+//        pushClient.sendNotification(msg);
     }
 
     public void stop() {
@@ -188,27 +184,27 @@ public class SpliffySync implements ChannelListener{
         return syncer;
     }
 
-    @Override
-    public void handleNotification(UUID sourceId, Serializable msg) {        
-        if( jobScheduled ) {
-            log.info("handleNotification: already scheduled");
-            return ;
-        } else {
-            log.info("handleNotification: schedule a scan");
-        }
-        jobScheduled = true; // try to ensure that if we get many rapid notifications we dont
-        scheduledExecService.schedule(new ScanRunner(), 500, TimeUnit.MILLISECONDS); // give a little delay
-    }
-
-    @Override
-    public void memberRemoved(UUID sourceId) {
-        
-    }
-
-    @Override
-    public void onConnect() {
-        
-    }
+//    @Override
+//    public void handleNotification(UUID sourceId, Serializable msg) {        
+//        if( jobScheduled ) {
+//            log.info("handleNotification: already scheduled");
+//            return ;
+//        } else {
+//            log.info("handleNotification: schedule a scan");
+//        }
+//        jobScheduled = true; // try to ensure that if we get many rapid notifications we dont
+//        scheduledExecService.schedule(new ScanRunner(), 500, TimeUnit.MILLISECONDS); // give a little delay
+//    }
+//
+//    @Override
+//    public void memberRemoved(UUID sourceId) {
+//        
+//    }
+//
+//    @Override
+//    public void onConnect() {
+//        
+//    }
     
     
 

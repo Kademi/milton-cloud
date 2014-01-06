@@ -1,6 +1,5 @@
 package io.milton.sync.triplets;
 
-import io.milton.cloud.common.ITriplet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,8 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.FileBlobStore;
-import io.milton.cloud.common.Triplet;
 import io.milton.sync.Utils;
+import org.hashsplit4j.triplets.ITriplet;
+import org.hashsplit4j.triplets.Triplet;
 
 /**
  * Just moving random stuff out of JdbcLocalTripletStore to make it tidier

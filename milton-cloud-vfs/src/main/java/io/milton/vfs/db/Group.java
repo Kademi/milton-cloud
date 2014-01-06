@@ -92,6 +92,7 @@ public class Group implements Serializable, VfsAcceptor {
     private OrgType regoOrgType; // label to display to users in signup form to selet their organisation
     private Organisation rootRegoOrg; // root org to select from when users select an org
     private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect
+    private Boolean primaryGroup; // optional, defaults to false
 
     @Id
     @GeneratedValue
@@ -236,6 +237,26 @@ public class Group implements Serializable, VfsAcceptor {
     public void setRootRegoOrg(Organisation rootRegoOrg) {
         this.rootRegoOrg = rootRegoOrg;
     }
+
+    /**
+     * If true, indicates that this group is the primary group for users in
+     * the organisation that defines the group. This means that when showing
+     * membership information about the user it should be taken from this group
+     * 
+     * Null indicates false
+     * 
+     * @return 
+     */
+    @Column
+    public Boolean isPrimaryGroup() {
+        return primaryGroup;
+    }
+
+    public void setPrimaryGroup(Boolean primary) {
+        this.primaryGroup = primary;
+    }
+    
+    
 
     /**
      * Add or remove the role to this group. Updates the groupRoles list and
@@ -434,5 +455,11 @@ public class Group implements Serializable, VfsAcceptor {
         return GroupInWebsite.findByGroup(this, SessionManager.session());
     }    
 
+    public boolean primary() {
+        if( primaryGroup == null ) {
+            return false;
+        }
+        return true;
+    }
 
 }

@@ -1,12 +1,11 @@
 package io.milton.sync;
 
-import io.milton.cloud.common.ITriplet;
 import io.milton.common.Path;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import io.milton.cloud.common.Triplet;
+import org.hashsplit4j.triplets.ITriplet;
 
 /**
  *

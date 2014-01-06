@@ -1,6 +1,5 @@
 package io.milton.sync.triplets;
 
-import io.milton.cloud.common.HashCalc;
 import io.milton.common.Path;
 import io.milton.http.exceptions.NotFoundException;
 import java.io.ByteArrayInputStream;
@@ -8,8 +7,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import io.milton.cloud.common.ITriplet;
 import io.milton.httpclient.Host;
+import org.hashsplit4j.triplets.HashCalc;
+import org.hashsplit4j.triplets.ITriplet;
 
 /**
  * Loads triplets from a remote server over HTTP. Can lookup triplets by path
