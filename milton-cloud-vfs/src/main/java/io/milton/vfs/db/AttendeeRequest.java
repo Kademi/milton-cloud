@@ -19,6 +19,7 @@ package io.milton.vfs.db;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.*;
@@ -56,17 +57,19 @@ public class AttendeeRequest implements Serializable {
      * Check if there is an attendee request for the given user on the given event.
      * If not create it
      * 
-     * @param p
-     * @param e
+     * @param p - the attendee profile
+     * @param e - the organisor's event which the attendee may attend
+     * @param now - the current date and time
      * @param session 
      * @return  
      */
-    public static AttendeeRequest checkCreate(Profile p, CalEvent e, Session session) {
+    public static AttendeeRequest checkCreate(Profile p, CalEvent e, Date now, Session session) {
         AttendeeRequest ar = findForUserAndEvent(p, e, session);
         if( ar != null ) {
             return ar;
         }
         ar = new AttendeeRequest();        
+        ar.setCreatedDate(now);
         if( p.getAttendeeRequests() == null ) {
             p.setAttendeeRequests(new ArrayList<AttendeeRequest>());
         }
@@ -94,12 +97,18 @@ public class AttendeeRequest implements Serializable {
         return null;
     }
     
-    public static List<AttendeeRequest> findByOrganisorEvent(CalEvent e, Session session) {
+    public static List<AttendeeRequest> findAcceptedByOrganisorEvent(CalEvent e, Session session) {
         Criteria crit = session.createCriteria(AttendeeRequest.class);
         crit.add(Restrictions.eq("organiserEvent", e));
         crit.add(Restrictions.eq("participationStatus", PARTSTAT_ACCEPTED));
         return DbUtils.toList(crit, AttendeeRequest.class);
     }    
+    
+    public static List<AttendeeRequest> findByOrganisorEvent(CalEvent e, Session session) {
+        Criteria crit = session.createCriteria(AttendeeRequest.class);
+        crit.add(Restrictions.eq("organiserEvent", e));
+        return DbUtils.toList(crit, AttendeeRequest.class);
+    }        
 
     public static Long countAttending(CalEvent event, Session session) {
         Criteria crit = session.createCriteria(AttendeeRequest.class);
@@ -115,6 +124,10 @@ public class AttendeeRequest implements Serializable {
         crit.add(Restrictions.eq("guestOf", member));
         return DbUtils.toList(crit, AttendeeRequest.class);        
     }
+
+    public static AttendeeRequest get(Long id, Session session) {
+        return (AttendeeRequest) session.get(AttendeeRequest.class, id);
+    }
     
     private Long id;
     
@@ -123,8 +136,7 @@ public class AttendeeRequest implements Serializable {
     private CalEvent organiserEvent;
     
     private CalEvent attendeeEvent;
-    
-    
+        
     private Profile attendee; // if attendee is not null, contact fields below will be null
     
     private boolean acknowledged;
@@ -140,6 +152,8 @@ public class AttendeeRequest implements Serializable {
     private String orgName; // optional, only set if attendee is null
     
     private Profile guestOf; // will be set if this attendee is a guest
+    
+    private Date createdDate;
 
     
     @Id
@@ -251,6 +265,17 @@ public class AttendeeRequest implements Serializable {
         this.guestOf = guestOf;
     }
     
-    
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }    
+
+    public void delete(Session session) {
+        session.delete(this);
+    }
     
 }

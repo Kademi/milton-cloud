@@ -66,13 +66,14 @@ public class CalEvent implements Serializable {
         return DbUtils.toList(crit, CalEvent.class);
     }    
     
-    
-    private AttendeeRequest attendeeRequest;
+        
     
     private Long id;
     
     private String name; // the "file" name
-        
+    
+    private AttendeeRequest attendeeRequest;
+    
     private Calendar calendar;
     
     private Date createdDate;
