@@ -46,6 +46,10 @@ import org.hibernate.criterion.Restrictions;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Group implements Serializable, VfsAcceptor {
 
+    public static final String GROUP_TYPE_PRIMARY = "P";
+    public static final String GROUP_TYPE_MAILLIST = "M";
+    public static final String GROUP_TYPE_SUBSCRIPTION = "S";
+    
     public static Group findGroup(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Group.class);
         crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
@@ -92,7 +96,8 @@ public class Group implements Serializable, VfsAcceptor {
     private OrgType regoOrgType; // label to display to users in signup form to selet their organisation
     private Organisation rootRegoOrg; // root org to select from when users select an org
     private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect
-    private Boolean primaryGroup; // optional, defaults to false
+    
+    private String groupType; // optional, defaults to "P" = primary. Others are "M"=mailing list; "S"=subscription
 
     @Id
     @GeneratedValue
@@ -239,22 +244,29 @@ public class Group implements Serializable, VfsAcceptor {
     }
 
     /**
-     * If true, indicates that this group is the primary group for users in
-     * the organisation that defines the group. This means that when showing
-     * membership information about the user it should be taken from this group
+     * The semantic type of the group. This is really about the intention
+     * of the group, and will influence the UI, but has little meaning internally
      * 
-     * Null indicates false
+     * If null, assume it is a primary group.
+     * 
+     * Intended types are
+     * - primary: a user should only have one membership to a primary group within an org
+     * - mailing list: a list of users for communication purposes
+     * - subscription: like a mailing list, but of a type that users would not consider
+     * a mailing list. It might be a subscription to a magazine, or a secondary working group, etc
      * 
      * @return 
      */
-    @Column
-    public Boolean isPrimaryGroup() {
-        return primaryGroup;
+    public String getGroupType() {
+        return groupType;
     }
 
-    public void setPrimaryGroup(Boolean primary) {
-        this.primaryGroup = primary;
+    public void setGroupType(String groupType) {
+        this.groupType = groupType;
     }
+
+    
+
     
     
 
@@ -456,10 +468,21 @@ public class Group implements Serializable, VfsAcceptor {
     }    
 
     public boolean primary() {
-        if( primaryGroup == null ) {
-            return false;
-        }
-        return true;
+        return groupType == null || groupType.equals(GROUP_TYPE_PRIMARY);
     }
 
+    @Transient
+    public boolean isPrimary() {
+        return primary();
+    }
+    
+    @Transient
+    public boolean isMailingList() {
+        return GROUP_TYPE_MAILLIST.equals(groupType);
+    }
+
+    @Transient
+    public boolean isSubscription() {
+        return GROUP_TYPE_SUBSCRIPTION.equals(groupType);
+    }
 }
