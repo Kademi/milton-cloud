@@ -146,6 +146,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
      *
      * @param name
      * @param currentUser
+     * @param session
      * @return
      */
     public Calendar newCalendar(String name, Profile currentUser, Session session) {

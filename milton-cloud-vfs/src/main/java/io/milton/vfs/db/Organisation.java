@@ -625,7 +625,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     /**
      * Return true if this entity contains or is the given user
      *
-     * @param user
+     * @param p
+     * @param session
      * @return
      */
     public boolean containsUser(Profile p, Session session) {

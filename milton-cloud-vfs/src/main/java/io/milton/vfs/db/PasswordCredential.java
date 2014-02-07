@@ -35,7 +35,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class PasswordCredential extends Credential{
     private String password;
     
-    @Column(nullable=false)
+    /**
+     * This should be nullable=false, but because we're using single-table
+     * inheritance and other subclasses do not set password it needs to be nullable
+     * 
+     * @return 
+     */
+    @Column(nullable=true)
     public String getPassword() {
         return password;
     }

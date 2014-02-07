@@ -33,9 +33,19 @@ import org.slf4j.LoggerFactory;
             @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
 
+    public static final String DEFAULT_CALENDAR_NAME = "default";
+
     private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
     public static final String ENTITY_TYPE_PROFILE = "U";
+
+    public static Profile create(String email, Date now) {
+        Profile p = new Profile();
+        p.setEmail(email);
+        p.setCreatedDate(now);
+        p.setModifiedDate(now);
+        return p;
+    }
 
     public static String findAutoName(String nickName, Session session) {
         String nameToUse = DbUtils.replaceYuckyChars(nickName);
@@ -407,6 +417,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * hasGruopInOrg, session)
      *
      * @param g
+     * @param hasGroupInOrg
+     * @param session
      * @return
      */
     public GroupMembership createGroupMembership(Group g, Organisation hasGroupInOrg, Session session) {
@@ -612,6 +624,17 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             }
         }
         return list;
+    }
+
+    public Calendar defaultCalendar(Session session) {
+        Calendar cal = calendar(DEFAULT_CALENDAR_NAME);
+        if (cal == null) {
+            if (getCalendars() != null && !getCalendars().isEmpty()) {
+                return getCalendars().get(0);
+            }
+        }
+        cal = newCalendar("default", this, session);
+        return cal;
     }
 
 }

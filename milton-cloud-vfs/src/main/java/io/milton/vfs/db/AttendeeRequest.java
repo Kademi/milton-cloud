@@ -49,6 +49,8 @@ public class AttendeeRequest implements Serializable {
     
     public static final String PARTSTAT_ACCEPTED = "ACCEPTED";
     
+    public static final String PARTSTAT_TENTATIVE = "TENTATIVE";
+    
     public static final String PARTSTAT_DECLINED = "DECLINED";
     
     public static final String PARTSTAT_NEEDS_ACTION = "NEEDS-ACTION";
@@ -60,12 +62,15 @@ public class AttendeeRequest implements Serializable {
      * @param p - the attendee profile
      * @param e - the organisor's event which the attendee may attend
      * @param now - the current date and time
+     * @param scheduleAgent
      * @param session 
      * @return  
      */
-    public static AttendeeRequest checkCreate(Profile p, CalEvent e, Date now, Session session) {
+    public static AttendeeRequest checkCreate(Profile p, CalEvent e, Date now, String scheduleAgent, Session session) {
         AttendeeRequest ar = findForUserAndEvent(p, e, session);
         if( ar != null ) {
+            ar.setScheduleAgent(scheduleAgent);
+            session.save(ar);
             return ar;
         }
         ar = new AttendeeRequest();        
@@ -78,8 +83,11 @@ public class AttendeeRequest implements Serializable {
         ar.setName(UUID.randomUUID().toString());
         ar.setOrganiserEvent(e);
         ar.setParticipationStatus("NEEDS-ACTION");
+        ar.setScheduleAgent(scheduleAgent);
         p.getAttendeeRequests().add(ar);
         session.save(ar);
+        
+        
         log.info("Created AttendeeRequest: " + ar.getId());
         return ar;
     }
@@ -103,6 +111,13 @@ public class AttendeeRequest implements Serializable {
         crit.add(Restrictions.eq("participationStatus", PARTSTAT_ACCEPTED));
         return DbUtils.toList(crit, AttendeeRequest.class);
     }    
+    
+    public static AttendeeRequest findByName(String name, Session session) {
+        Criteria crit = session.createCriteria(AttendeeRequest.class);
+        crit.add(Restrictions.eq("name", name));
+        return DbUtils.unique(crit);
+    }       
+     
     
     public static List<AttendeeRequest> findByOrganisorEvent(CalEvent e, Session session) {
         Criteria crit = session.createCriteria(AttendeeRequest.class);
@@ -154,7 +169,13 @@ public class AttendeeRequest implements Serializable {
     private Profile guestOf; // will be set if this attendee is a guest
     
     private Date createdDate;
+    
+    private String scheduleAgent; // http://tools.ietf.org/html/rfc6638#section-7.1
 
+    public AttendeeRequest() {
+    }
+
+    
     
     @Id
     @GeneratedValue
@@ -274,8 +295,35 @@ public class AttendeeRequest implements Serializable {
         this.createdDate = createdDate;
     }    
 
+    
+    /**
+     * Usually "SERVER" or "CLIENT"
+     * 
+     * See http://tools.ietf.org/html/rfc6638#section-7.1
+     * 
+     * @return 
+     */
+    @Column(nullable = true)
+    public String getScheduleAgent() {
+        return scheduleAgent;
+    }
+
+    public void setScheduleAgent(String scheduleAgent) {
+        this.scheduleAgent = scheduleAgent;
+    }
+
+    
+    
     public void delete(Session session) {
         session.delete(this);
     }
     
+    @Transient
+    public String getAckStatus() {
+        if( acknowledged ) {
+            return "Acknowledged";
+        } else {
+            return "Not acked";
+        }
+    }
 }

@@ -17,6 +17,7 @@
 package io.milton.vfs.db;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
@@ -38,6 +39,8 @@ public class Calendar extends Repository {
     private List<CalEvent> events;
     private String color;
     private String description;
+    private Boolean defaultCal;
+    private String calendarOrder;
 
     public Calendar() {
     }
@@ -75,9 +78,32 @@ public class Calendar extends Repository {
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    
 
+    public void setDefaultCal(Boolean defaultCal) {
+        this.defaultCal = defaultCal;
+    }
+
+    @Column(nullable = true)
+    public String getCalendarOrder() {
+        return calendarOrder;
+    }
+
+    public void setCalendarOrder(String calendarOrder) {
+        this.calendarOrder = calendarOrder;
+    }
+
+    
+    /**
+     * Is this the default calendar for the owner
+     * 
+     * @return 
+     */
+    @Column
+    public Boolean getDefaultCal() {
+        return defaultCal;
+    }
+    
+    
     @Override
     public String type() {
         return "CA";
@@ -111,5 +137,16 @@ public class Calendar extends Repository {
         c.setCalendar(this);
         c.setName(name);
         return c;
+    }
+    
+    public CalEvent add(String name, Date now) {
+        CalEvent c = add(name);
+        c.setCreatedDate(now);
+        c.setModifiedDate(now);
+        return c;
+    }    
+    
+    public boolean defaultCal() {
+        return defaultCal != null && defaultCal;
     }
 }

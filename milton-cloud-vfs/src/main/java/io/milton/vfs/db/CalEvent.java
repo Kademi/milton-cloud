@@ -65,7 +65,9 @@ public class CalEvent implements Serializable {
         crit.addOrder(Order.asc("startDate"));
         return DbUtils.toList(crit, CalEvent.class);
     }    
-    
+
+
+   
         
     
     private Long id;
