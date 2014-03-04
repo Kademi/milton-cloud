@@ -18,6 +18,7 @@ package io.milton.vfs.db;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Session;
@@ -111,14 +112,22 @@ public class Calendar extends Repository {
 
     @Override
     public void delete(Session session) {
-        if (getEvents() != null) {
-            List<CalEvent> list = new ArrayList( getEvents() );
-            for (CalEvent e : list) {
-                session.delete(e);
-            }
-            setEvents(null);
-        }
+        deleteEvents(session);
         super.delete(session);
+        session.flush();
+    }
+    
+    public void deleteEvents(Session session) {
+        if (getEvents() != null) {
+            Iterator<CalEvent> it = getEvents().iterator();
+            while( it.hasNext() ) {
+                CalEvent e = it.next();
+                session.delete(e);
+                it.remove();
+                session.flush();
+            }
+        }   
+        session.flush();
     }
 
     public CalEvent event(String name) {

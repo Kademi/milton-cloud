@@ -3,6 +3,7 @@ package io.milton.vfs.db;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.HibernateException;
@@ -227,12 +228,16 @@ public class Repository implements Serializable {
 
     public void delete(Session session) {
         if (getBranches() != null) {
-            for (Branch b : getBranches()) {
+            Iterator<Branch> it = getBranches().iterator();
+            while( it.hasNext() ) {
+                Branch b = it.next();
                 b.delete(session);
+                it.remove();
             }
-            setBranches(null);
         }
+        session.flush();
         session.delete(this);
+        session.flush();
     }
 
     /**
