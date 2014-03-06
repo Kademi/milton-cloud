@@ -180,6 +180,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private String addressLine2;
     private String state;
     private String postcode;
+    private String email;
     private OrgType orgType; // nullable, if present has the type of the org which can be used on signup form
     private Organisation organisation; // the parent org
     private Boolean deleted;
@@ -269,6 +270,17 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.phone = phone;
     }
 
+    @Column
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    
+    
     @Column
     public String getAddress() {
         return address;
