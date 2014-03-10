@@ -38,12 +38,13 @@ import org.hibernate.annotations.Cascade;
 /**
  * Represents a set of NvPair (ie Name/Value Pairs) which together form a set of
  * information about some item.
- * 
+ *
  * *** Here's the important bit ***
- * 
+ *
  * We use an NvSet to hold the metadata for information to collect at the Group
  * level, but we also use NvSet's to hold the captured information at the user
- * (and other) level. So the NvSet/NvPair classes are used for both purposes - confusing!
+ * (and other) level. So the NvSet/NvPair classes are used for both purposes -
+ * confusing!
  *
  * @author brad
  */
@@ -58,9 +59,9 @@ public class NvSet implements Serializable {
         if (previous != null) {
             newFieldset.setPreviousSetId(previous.getId());
         }
-        return newFieldset;                            
+        return newFieldset;
     }
-    
+
     private Long id;
     private Long previousSetId;
     private Date createdDate;
@@ -121,21 +122,21 @@ public class NvSet implements Serializable {
         }
         return null;
     }
-    
+
     /**
      * Get the value of the named field, if any
-     * 
+     *
      * @param name
-     * @return 
+     * @return
      */
     public String get(String name) {
         if (getNvPairs() != null) {
             for (NvPair nvp : getNvPairs()) {
-                if( nvp.getName().equals(name)) {
+                if (nvp.getName().equals(name)) {
                     return nvp.getPropValue();
                 }
             }
-        }        
+        }
         return null;
     }
 
@@ -183,29 +184,52 @@ public class NvSet implements Serializable {
             }
         }
     }
-    
+
+    public NvPair addOrUpdatePair(String name, String value) {
+        NvPair found = null;
+        Iterator<NvPair> it = getNvPairs().iterator();
+        if (getNvPairs() != null) {
+            while (it.hasNext()) {
+                NvPair nvp = it.next();
+                if (nvp.getName().equals(name)) {
+                    if (found == null) {
+                        nvp.setPropValue(value);
+                        found = nvp;
+                    } else {
+                        it.remove(); // already found one, so this is duplicate name, remove it
+                    }
+                }
+            }
+        }
+        if (found == null) {
+            // not found, so just add a new one
+            return addPair(name, value);
+        }
+        return found;
+    }
+
     /**
      * Returns true if the new set needs to be saved
-     * 
+     *
      * @param previous
-     * @return 
+     * @return
      */
     public boolean isDirty(NvSet previous) {
-        if( previous == null ) {
+        if (previous == null) {
             return true;
         }
         int prevSize = numFields(previous);
         int newSize = numFields(this);
-        if( prevSize != newSize ) {
+        if (prevSize != newSize) {
             return true;
         } else {
-            if( getNvPairs() == null || getNvPairs().isEmpty() ) {
+            if (getNvPairs() == null || getNvPairs().isEmpty()) {
                 return false;
-            } else {   
-                Map<String,String> prevMap = previous.toMap();
-                for( NvPair nvp :getNvPairs()) {
+            } else {
+                Map<String, String> prevMap = previous.toMap();
+                for (NvPair nvp : getNvPairs()) {
                     String newVal = nvp.getPropValue();
-                    if( isChanged(nvp.getName(), newVal, prevMap)) {
+                    if (isChanged(nvp.getName(), newVal, prevMap)) {
                         return true;
                     }
                 }
@@ -215,35 +239,35 @@ public class NvSet implements Serializable {
     }
 
     private int numFields(NvSet set) {
-        if( set == null || set.getNvPairs() == null ) {
+        if (set == null || set.getNvPairs() == null) {
             return 0;
         } else {
             return set.getNvPairs().size();
         }
     }
 
-    private boolean isChanged(String name, String newVal, Map<String,String> prevMap) {        
-        if( prevMap == null ) {
+    private boolean isChanged(String name, String newVal, Map<String, String> prevMap) {
+        if (prevMap == null) {
             return newVal != null && newVal.length() > 0;
         } else {
             String prevVal = prevMap.get(name);
-            if( prevVal == null ) {
+            if (prevVal == null) {
                 return newVal != null && newVal.length() > 0;
             } else {
                 return !prevVal.equals(newVal);
             }
         }
     }
-    
-    public Map<String,String> toMap() {
-        if( getNvPairs()== null ) {
+
+    public Map<String, String> toMap() {
+        if (getNvPairs() == null) {
             return Collections.EMPTY_MAP;
         } else {
-            Map<String,String> map = new HashMap<>();
-            for( NvPair nvp : getNvPairs()) {
+            Map<String, String> map = new HashMap<>();
+            for (NvPair nvp : getNvPairs()) {
                 map.put(nvp.getName(), nvp.getPropValue());
             }
             return map;
         }
-    }    
+    }
 }

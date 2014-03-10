@@ -38,7 +38,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
     public static final String ENTITY_TYPE_PROFILE = "U";
-
+    
     public static Profile create(String email, Date now) {
         Profile p = new Profile();
         p.setEmail(email);
