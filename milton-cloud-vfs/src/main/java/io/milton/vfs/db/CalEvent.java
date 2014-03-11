@@ -105,6 +105,8 @@ public class CalEvent implements Serializable {
     private Boolean emailConfirm;
     
     private String emailConfirmTemplate;
+    
+    private List<Reminder> reminders;
 
     public CalEvent() {
     }
@@ -316,6 +318,15 @@ public class CalEvent implements Serializable {
     public void setEmailConfirmTemplate(String emailConfirmTemplate) {
         this.emailConfirmTemplate = emailConfirmTemplate;
     }
+
+    @OneToMany(mappedBy = "event")
+    public List<Reminder> getReminders() {
+        return reminders;
+    }
+
+    public void setReminders(List<Reminder> reminders) {
+        this.reminders = reminders;
+    }
     
     
     
@@ -350,6 +361,7 @@ public class CalEvent implements Serializable {
     public boolean emailConfirm() {
         return emailConfirm == null || emailConfirm.booleanValue();
     }
+    
 
     /**
      * Deletes this event and remove from parent collection
@@ -370,4 +382,7 @@ public class CalEvent implements Serializable {
     public long numAttendees() {
         return AttendeeRequest.countAttending(this, SessionManager.session());
     }    
+    
+
+    
 }
