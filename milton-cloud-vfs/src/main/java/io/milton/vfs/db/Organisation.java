@@ -181,6 +181,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private String state;
     private String postcode;
     private String email;
+    private String timezone;
     private OrgType orgType; // nullable, if present has the type of the org which can be used on signup form
     private Organisation organisation; // the parent org
     private Boolean deleted;
@@ -752,6 +753,23 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgTypes = orgTypes;
     }
 
+
+    /**
+     * @return the timezone
+     */
+    @Column
+    public String getTimezone() {
+        return timezone;
+    }
+
+    /**
+     * @param timezone the timezone to set
+     */
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+    
+    
     /**
      * Get all linked memberships. Uses SessionManager.session
      *
