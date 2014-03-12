@@ -1,14 +1,22 @@
 package io.milton.vfs.db;
 
+import io.milton.vfs.db.utils.DbUtils;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Restrictions;
+import org.slf4j.LoggerFactory;
 
 /**
  * Sends a reminder to attendees of an invite at a certain amount of time
@@ -19,6 +27,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Reminder {
+    
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Reminder.class);
     
     /**
      * Creates, but does not save, an instance
@@ -34,6 +44,22 @@ public class Reminder {
         return r;
     }
     
+    public static List<Reminder> findDue(Date now, Session session) {
+        // Just get everything that is enabled and not-yet run, and iterate over
+        // them. Not very efficient, but should be low volume
+        Criteria crit = session.createCriteria(Reminder.class);
+        crit.add(Restrictions.eq("enabled", true));
+        crit.add(Restrictions.isNull("processedDate"));        
+        List<Reminder> list = DbUtils.toList(crit, Reminder.class);        
+        List<Reminder> result = new ArrayList<>();
+        for( Reminder r : list ) {
+            if( r.due(now) ) {
+                result.add(r);
+            }
+        }
+        return result;
+    }
+
     public enum TimeUnit {
         HOURS,
         DAYS,
@@ -50,6 +76,7 @@ public class Reminder {
     private String subject;
     private String html;
     private boolean enabled;
+    private Date processedDate; // not null means has been processed
     private Date createdDate;
 
     public Reminder() {
@@ -135,5 +162,65 @@ public class Reminder {
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }    
+
+    /**
+     * Null if this has not been processed yet, otherwise the date it was processed
+     * 
+     * @return 
+     */
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(nullable = true)    
+    public Date getProcessedDate() {
+        return processedDate;
+    }
+
+    public void setProcessedDate(Date processedDate) {
+        this.processedDate = processedDate;
+    }
     
+
+    /**
+     * Returns true if this reminder should be executed now
+     * 
+     * @param now
+     * @return 
+     */
+    public boolean due(Date now) {
+        // calculate the due date
+        Date eventDate = getEvent().getStartDate();
+        if( eventDate == null ) {
+            return false;
+        }
+        Date dueDate = dueDate(eventDate);
+        boolean b = dueDate.after(now);
+        log.info("due? eventDate: {} dueDate: {} result=", eventDate, dueDate, b);
+        return b;
+    }
+    
+    public Date dueDate(Date eventDate) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(eventDate);
+        switch (getTimerUnit() ) {
+            case HOURS:
+                cal.add(java.util.Calendar.HOUR, getTimerMultiple());
+                break;
+            
+            case DAYS:                
+                cal.add(java.util.Calendar.DATE, getTimerMultiple());
+                break;
+            case WEEKS:
+                cal.add(java.util.Calendar.WEEK_OF_YEAR, getTimerMultiple());
+                break;
+            case MONTHS:                
+                cal.add(java.util.Calendar.MONTH, getTimerMultiple());
+                break;
+            case ANNUAL:
+                cal.add(java.util.Calendar.YEAR, getTimerMultiple());
+                break;
+            default:
+                return null;
+        }        
+        return cal.getTime();
+    }    
+        
 }
