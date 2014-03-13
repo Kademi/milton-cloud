@@ -51,9 +51,13 @@ public class Reminder {
         crit.add(Restrictions.isNull("processedDate"));        
         List<Reminder> list = DbUtils.toList(crit, Reminder.class);        
         List<Reminder> result = new ArrayList<>();
+        log.info("Found raw reminders: " + list.size());
         for( Reminder r : list ) {
             if( r.due(now) ) {
+                log.info("Is due: " + r.getSubject());
                 result.add(r);
+            } else {
+                log.info("Not due: " + r.getSubject());
             }
         }
         return result;
@@ -194,8 +198,8 @@ public class Reminder {
         if( dueDate == null ) {
             return false;
         }
-        boolean b = dueDate.after(now);
-        log.info("due? eventDate: {} dueDate: {} result=", eventDate, dueDate, b);
+        boolean b = dueDate.before(now);
+        log.info("due? eventDate: {}, dueDate: {}, now: {}, result={}", eventDate, dueDate, now, b);
         return b;
     }
     
@@ -210,6 +214,7 @@ public class Reminder {
         if( multiples == null ) {
             return null;
         }
+        multiples = multiples * -1;
         switch ( tu ) {
             case HOURS:
                 cal.add(java.util.Calendar.HOUR, multiples);
