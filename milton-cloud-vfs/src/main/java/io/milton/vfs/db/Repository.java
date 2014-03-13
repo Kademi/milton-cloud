@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 @javax.persistence.Entity
 @Table(
         uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "base_entity"})})
+            @UniqueConstraint(columnNames = {"name", "base_entity"})})
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -229,7 +229,7 @@ public class Repository implements Serializable {
     public void delete(Session session) {
         if (getBranches() != null) {
             Iterator<Branch> it = getBranches().iterator();
-            while( it.hasNext() ) {
+            while (it.hasNext()) {
                 Branch b = it.next();
                 b.delete(session);
                 it.remove();
@@ -304,5 +304,47 @@ public class Repository implements Serializable {
     @Transient
     public String getRepoType() {
         return "R";
+    }
+
+    /**
+     * Check that this website is contained by the given organisation. Ie that
+     * the org directly owns this, or is a parent of the org that owns it
+     *
+     * @param entity
+     * @return
+     */
+    public boolean isContainedBy(BaseEntity entity) {
+        IsContainedVisitor v = new IsContainedVisitor(entity);
+        getBaseEntity().accept(v);
+        return v.isContained;
+    }
+
+    private class IsContainedVisitor extends AbstractVfsVisitor {
+
+        final BaseEntity entity;
+        boolean isContained;
+
+        public IsContainedVisitor(BaseEntity entity) {
+            this.entity = entity;
+        }                
+
+        @Override
+        public void visit(Organisation owner) {
+            if (owner.getId() == entity.getId()) {
+                isContained = true;
+                return ;
+            }    
+            Organisation parent = owner.getOrganisation();
+            if( parent != null ) {
+                parent.accept(this);
+            }
+        }
+
+        @Override
+        public void visit(Profile owner) {
+            if (owner.getId() == entity.getId()) {
+                isContained = true;
+            }    
+        }       
     }
 }

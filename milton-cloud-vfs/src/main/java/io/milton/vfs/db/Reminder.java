@@ -14,7 +14,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.LoggerFactory;
 
@@ -144,11 +143,11 @@ public class Reminder {
         this.html = html;
     }    
     
-    public boolean getCreateTimerEnabled() {
+    public boolean getEnabled() {
         return enabled;
     }
 
-    public void setCreateTimerEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
     
@@ -192,6 +191,9 @@ public class Reminder {
             return false;
         }
         Date dueDate = dueDate(eventDate);
+        if( dueDate == null ) {
+            return false;
+        }
         boolean b = dueDate.after(now);
         log.info("due? eventDate: {} dueDate: {} result=", eventDate, dueDate, b);
         return b;
@@ -200,22 +202,30 @@ public class Reminder {
     public Date dueDate(Date eventDate) {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.setTime(eventDate);
-        switch (getTimerUnit() ) {
+        TimeUnit tu = getTimerUnit();
+        if( tu == null ) {
+            return null;
+        }
+        Integer multiples = getTimerMultiple();
+        if( multiples == null ) {
+            return null;
+        }
+        switch ( tu ) {
             case HOURS:
-                cal.add(java.util.Calendar.HOUR, getTimerMultiple());
+                cal.add(java.util.Calendar.HOUR, multiples);
                 break;
             
             case DAYS:                
-                cal.add(java.util.Calendar.DATE, getTimerMultiple());
+                cal.add(java.util.Calendar.DATE, multiples);
                 break;
             case WEEKS:
-                cal.add(java.util.Calendar.WEEK_OF_YEAR, getTimerMultiple());
+                cal.add(java.util.Calendar.WEEK_OF_YEAR, multiples);
                 break;
             case MONTHS:                
-                cal.add(java.util.Calendar.MONTH, getTimerMultiple());
+                cal.add(java.util.Calendar.MONTH, multiples);
                 break;
             case ANNUAL:
-                cal.add(java.util.Calendar.YEAR, getTimerMultiple());
+                cal.add(java.util.Calendar.YEAR, multiples);
                 break;
             default:
                 return null;
