@@ -20,6 +20,7 @@ import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
@@ -36,83 +37,77 @@ import org.hibernate.criterion.Restrictions;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CalEvent implements Serializable {
-    
+
     public static List<CalEvent> find(Calendar cal, Date from, Date to, Session session) {
         Criteria crit = session.createCriteria(CalEvent.class);
-        crit.add( Restrictions.eq("calendar", cal));
-        if( from != null ) {
+        crit.add(Restrictions.eq("calendar", cal));
+        if (from != null) {
             crit.add(Restrictions.ge("startDate", from));
         }
-        if( to != null ) {
+        if (to != null) {
             crit.add(Restrictions.le("startDate", to));
         }
-        
+
         crit.addOrder(Order.asc("startDate"));
         return DbUtils.toList(crit, CalEvent.class);
-    }    
+    }
 
     public static List<CalEvent> find(BaseEntity owner, Date from, Date to, Session session) {
         Criteria crit = session.createCriteria(CalEvent.class);
         Criteria critCal = crit.createCriteria("calendar");
-        critCal.add( Restrictions.eq("baseEntity", owner));
-        if( from != null ) {
+        critCal.add(Restrictions.eq("baseEntity", owner));
+        if (from != null) {
             crit.add(Restrictions.ge("startDate", from));
         }
-        if( to != null ) {
+        if (to != null) {
             crit.add(Restrictions.le("startDate", to));
         }
-        
+
         crit.addOrder(Order.asc("startDate"));
         return DbUtils.toList(crit, CalEvent.class);
-    }    
+    }
 
-
-   
-        
-    
     private Long id;
-    
+
     private String name; // the "file" name
-    
+
     private AttendeeRequest attendeeRequest;
-    
+
     private Calendar calendar;
-    
+
     private Date createdDate;
-    
+
     private Date modifiedDate;
-    
+
     private Date startDate;
-    
+
     private Date endDate;
-    
+
     private String timezone;
-    
+
     private String summary;
-    
+
     private String description;
-    
+
     private Profile organisor;
-    
+
     private String location;
-    
+
     private Boolean allowRegistration;
-    
+
     private Boolean allowGuests;
-    
+
     private Integer maxAttendees;
-    
+
     private Boolean emailConfirm;
-    
+
     private String emailConfirmTemplate;
-    
+
     private List<Reminder> reminders;
 
     public CalEvent() {
     }
-    
-    
-    
+
     @Id
     @GeneratedValue
     public Long getId() {
@@ -123,7 +118,7 @@ public class CalEvent implements Serializable {
         this.id = id;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     public String getName() {
         return name;
     }
@@ -132,7 +127,7 @@ public class CalEvent implements Serializable {
         this.name = name;
     }
 
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Calendar getCalendar() {
         return calendar;
     }
@@ -140,9 +135,8 @@ public class CalEvent implements Serializable {
     public void setCalendar(Calendar calendar) {
         this.calendar = calendar;
     }
-    
-    
-    @Column(nullable=false)
+
+    @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getCreatedDate() {
         return createdDate;
@@ -152,7 +146,7 @@ public class CalEvent implements Serializable {
         this.createdDate = createdDate;
     }
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getModifiedDate() {
         return modifiedDate;
@@ -165,7 +159,7 @@ public class CalEvent implements Serializable {
     /**
      * @return the startDate
      */
-    @Column(nullable=false)    
+    @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getStartDate() {
         return startDate;
@@ -181,7 +175,7 @@ public class CalEvent implements Serializable {
     /**
      * @return the endDate
      */
-    @Column(nullable=false)    
+    @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getEndDate() {
         return endDate;
@@ -291,8 +285,8 @@ public class CalEvent implements Serializable {
 
     /**
      * Whether to send an email to the attendee when they register to attend
-     * 
-     * @return 
+     *
+     * @return
      */
     public Boolean isEmailConfirm() {
         return emailConfirm;
@@ -302,13 +296,11 @@ public class CalEvent implements Serializable {
         this.emailConfirm = emailConfirm;
     }
 
-    
-    
     /**
-     * If emailConfirm is true, this contains the MVEL template to generate
-     * the email body content
-     * 
-     * @return 
+     * If emailConfirm is true, this contains the MVEL template to generate the
+     * email body content
+     *
+     * @return
      */
     @Column(length = 4000)
     public String getEmailConfirmTemplate() {
@@ -327,62 +319,71 @@ public class CalEvent implements Serializable {
     public void setReminders(List<Reminder> reminders) {
         this.reminders = reminders;
     }
-    
-    
-    
-    
+
     /**
      * true by default
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean allowGuests() {
         return allowGuests == null || allowGuests.booleanValue();
     }
-    
+
     /**
      * true by default
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean allowRegistration() {
-        if( allowRegistration == null || allowRegistration.booleanValue()) {
+        if (allowRegistration == null || allowRegistration.booleanValue()) {
             return true;
         } else {
             return false;
         }
     }
-    
+
     /**
      * true by default
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean emailConfirm() {
         return emailConfirm == null || emailConfirm.booleanValue();
     }
-    
 
     /**
      * Deletes this event and remove from parent collection
-     * 
-     * @param session 
+     *
+     * @param session
      */
     public void delete(Session session) {
+        // Remove any reminders
+        if( getReminders() != null ) {
+            Iterator<Reminder> it = getReminders().iterator();
+            while( it.hasNext() ) {
+                Reminder r = it.next();
+                r.delete(session);
+                it.remove();
+            }
+        }
+        
+        // Remove any attendee events linked to this event
+        for( AttendeeRequest ar : AttendeeRequest.findByOrganisorEvent(this, session) ) {
+            ar.delete(session);
+        }
+        
         Calendar cal = getCalendar();
-        if( cal != null && cal.getEvents() != null ) {
+        if (cal != null && cal.getEvents() != null) {
             cal.getEvents().remove(this);
         }
         session.delete(this);
-        if( cal != null ) {
-        session.save(cal);
+        if (cal != null) {
+            session.save(cal);
         }
     }
-    
+
     public long numAttendees() {
         return AttendeeRequest.countAttending(this, SessionManager.session());
-    }    
-    
+    }
 
-    
 }

@@ -63,6 +63,10 @@ public class Reminder {
         return result;
     }
 
+    public void delete(Session session) {
+        session.delete(this);
+    }
+
     public enum TimeUnit {
         HOURS,
         DAYS,
