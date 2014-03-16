@@ -96,9 +96,13 @@ public class CalEvent implements Serializable {
     private Boolean allowRegistration;
 
     private Boolean allowGuests;
+    
+    private Boolean suppressGuestEmails;
 
     private Integer maxAttendees;
 
+    private String emailConfirmSubject;
+    
     private Boolean emailConfirm;
 
     private String emailConfirmTemplate;
@@ -275,6 +279,21 @@ public class CalEvent implements Serializable {
         this.allowGuests = allowGuests;
     }
 
+    /**
+     * If true emails will never be sent to guests
+     * 
+     * @return 
+     */
+    public Boolean isSuppressGuestEmails() {
+        return suppressGuestEmails;
+    }
+
+    public void setSuppressGuestEmails(Boolean suppressGuestEmails) {
+        this.suppressGuestEmails = suppressGuestEmails;
+    }
+
+    
+    
     public Integer getMaxAttendees() {
         return maxAttendees;
     }
@@ -296,6 +315,22 @@ public class CalEvent implements Serializable {
         this.emailConfirm = emailConfirm;
     }
 
+    
+    /**
+     * Subject line for the confirm email
+     * 
+     * @return 
+     */
+    public String getEmailConfirmSubject() {
+        return emailConfirmSubject;
+    }
+
+    public void setEmailConfirmSubject(String emailConfirmSubject) {
+        this.emailConfirmSubject = emailConfirmSubject;
+    }
+
+    
+    
     /**
      * If emailConfirm is true, this contains the MVEL template to generate the
      * email body content
@@ -351,6 +386,15 @@ public class CalEvent implements Serializable {
         return emailConfirm == null || emailConfirm.booleanValue();
     }
 
+    /**
+     * If true never send emails to guests
+     * 
+     * @return 
+     */
+    public boolean suppressGuestEmails() {
+        return suppressGuestEmails != null && suppressGuestEmails;
+    }
+    
     /**
      * Deletes this event and remove from parent collection
      *
