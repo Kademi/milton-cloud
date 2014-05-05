@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 @javax.persistence.Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseEntity implements Serializable, VfsAcceptor {

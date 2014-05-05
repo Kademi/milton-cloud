@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 @Table(
         uniqueConstraints = {
             @UniqueConstraint(columnNames = {"name", "base_entity"})})
-@DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

@@ -33,7 +33,7 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 20)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, length = 20)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public abstract class BaseProcess implements Serializable, ProcessInstance {
     
