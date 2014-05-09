@@ -336,6 +336,14 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.rejected = rejected;
     }
 
+    /**
+     * Returns the first membership for the given group. Often users will only
+     * have one membership for a group, but they are permitted to have multiple
+     * memberships to a group in different orgs
+     * 
+     * @param group
+     * @return 
+     */
     public GroupMembership membership(Group group) {
         if (getMemberships() != null) {
             for (GroupMembership gm : getMemberships()) {
@@ -346,6 +354,18 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return null;
     }
+    
+    public List<GroupMembership> memberships(Group group) {
+        List<GroupMembership> list = new ArrayList<>();
+        if (getMemberships() != null) {
+            for (GroupMembership gm : getMemberships()) {
+                if (gm.getGroupEntity() == group) {
+                    list.add(gm);
+                }
+            }
+        }
+        return list;
+    }    
 
     public void removeMembership(Group group, Session session) {
         if (getMemberships() != null) {
@@ -369,7 +389,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     /**
      *
      * @param g
-     * @param hasGroupInOrg
+     * @param hasGroupInOrg - the member will be created for this organisation. NOT always the same as the org which owns the group
      * @param session
      * @param membershipCreatedCallback - called only if a membership is
      * created. Optional. actually created
@@ -636,5 +656,22 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         cal = newCalendar("default", this, session);
         return cal;
     }
+
+    /**
+     * Get the primary membership of this user within the given root organsiation
+     * 
+     * @param rootOrg
+     * @return 
+     */
+    public GroupMembership primaryMembership(Organisation rootOrg) {
+        for( GroupMembership gm : memberships(rootOrg)) {
+            if( gm.getGroupEntity().isPrimary()) {
+                return gm;
+            }
+        }
+        return null;
+    }
+
+
 
 }

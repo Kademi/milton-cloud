@@ -26,8 +26,13 @@ public class HttpBlobStore implements BlobStore {
     private long gets;
     private long sets;
 
+    
+    
+    
+    
+    
     public HttpBlobStore(String server, int port, String rootPath, String username, String password) {
-        this.host = new Host(server, port, username, password, null, null);
+        this.host = new Host(server, port, username, password, null);
         this.host.setUseDigestForPreemptiveAuth(false); // we don't want DIGEST because it precludes preemptive auth
         this.hashCache = new MemoryHashCache();
         this.basePath = Path.path(rootPath);

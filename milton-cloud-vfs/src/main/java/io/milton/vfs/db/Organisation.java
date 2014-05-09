@@ -643,8 +643,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public boolean containsUser(Profile p, Session session) {
-        Subordinate s = Subordinate.find(this, p, session);
-        return s != null;
+        List<Subordinate> list = Subordinate.find(this, p, session);
+        return !list.isEmpty();
     }
 
     /**

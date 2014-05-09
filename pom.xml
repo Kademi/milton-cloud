@@ -25,7 +25,7 @@
         </developer>
     </developers>    
     <properties>
-        <milton.version>2.5.2.5</milton.version>
+        <milton.version>2.6.0.4</milton.version>
         <!-- Really want to deprecate endrick, but need to refactor cache in milton-client -->
         <endrick.version>1.7.8</endrick.version>
         <hashsplit4j.version>2.1.1</hashsplit4j.version>
@@ -53,7 +53,9 @@
         <url>http://www.mcevoysoftware.co.nz/</url>
     </organization>    
     <modules>
+        <!--
         <module>milton-cloud-sync</module>
+        -->
         <module>milton-cloud-vfs</module>
     </modules>
     <build>
@@ -83,6 +85,12 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.6.1</version>
         </dependency>    		
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+            <type>jar</type>
+        </dependency>        
     </dependencies>
         
     <repositories>

@@ -30,17 +30,7 @@
             <artifactId>h2</artifactId>
             <version>1.2.144</version>
         </dependency>        
-        <dependency>
-            <groupId>com.ettrema</groupId>
-            <artifactId>endrick-jdbc</artifactId>
-            <version>${endrick.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jcs</artifactId>
-                    <groupId>jcs</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>       
+              
     </dependencies>    
 </project>
 

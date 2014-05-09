@@ -18,6 +18,7 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -44,20 +45,20 @@ public class Subordinate implements Serializable {
 
     /**
      * /**
-     * Find a Subordinate (if one exists) between then given org and user
+     * Find the first Subordinate (if any exist) between then given org and user
      * profile
      *
      * @param org
      * @param p
      * @return
      */
-    public static Subordinate find(Organisation org, Profile p, Session session) {
+    public static List<Subordinate> find(Organisation org, Profile p, Session session) {
         Criteria c = session.createCriteria(Subordinate.class);
         c.add(Restrictions.eq("withinOrg", org));
-        Criteria cMemmbership = c.createCriteria("groupMembership");
+        Criteria cMemmbership = c.createCriteria("groupMembership");        
         cMemmbership.add(Restrictions.eq("member", p));
         c.setCacheable(true);
-        return DbUtils.unique(c);
+        return DbUtils.toList(c, Subordinate.class);
     }
 
     public static void deleteByOrg(Organisation org, Session session) {
