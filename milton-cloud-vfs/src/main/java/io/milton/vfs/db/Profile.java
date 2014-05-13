@@ -35,6 +35,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static final String DEFAULT_CALENDAR_NAME = "default";
 
+
     private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
     public static final String ENTITY_TYPE_PROFILE = "U";
@@ -96,6 +97,15 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         return nameToCreate;
     }
 
+    public static List<Profile> findByGroup(Group group, Session session) {
+        Criteria crit = session.createCriteria(Profile.class);
+        crit.setCacheable(true);
+        // join to group membership, then subordinate, then restrict on org        
+        Criteria critMembership = crit.createCriteria("memberships");
+        critMembership.add(Restrictions.eq("groupEntity", group));
+        return DbUtils.toList(crit, Profile.class);
+    }    
+    
     public static Profile find(String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.setCacheable(true);
