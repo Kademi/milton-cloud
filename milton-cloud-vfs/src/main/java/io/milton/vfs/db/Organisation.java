@@ -37,6 +37,7 @@ import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,11 +69,29 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
     
     public static final String ENTITY_TYPE_ORG = "O";
-    
-    private List<OrgType> orgTypes;
-    
-    private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect for orgs of this type
 
+    public static long countChildOrgs(Organisation organisation, Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        crit.setCacheable(true);
+        Disjunction notDeleted = Restrictions.disjunction();
+        notDeleted.add(Restrictions.isNull("deleted"));
+        notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
+        crit.add(notDeleted);
+
+        Criteria critParentLink = crit.createCriteria("parentOrgLinks");
+        critParentLink.add(Restrictions.eq("owner", organisation));
+        crit.setProjection(Projections.count("id"));
+        Object result = crit.uniqueResult();
+        if (result == null) {
+            return 0;
+        } else if (result instanceof Integer) {
+            Integer i = (Integer) result;
+            return i.longValue();
+        } else {
+            return (long) result;
+        }        
+    }
+    
     public static String getDeletedName(String origName) {
         return origName + "-deleted-" + System.currentTimeMillis();
     }
@@ -189,6 +208,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private List<Website> websites;
     private List<Group> groups;
     private List<SubOrg> parentOrgLinks;
+    private List<OrgType> orgTypes;    
+    private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect for orgs of this type
+    
 
     public Organisation() {
 
@@ -860,5 +882,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return getOrgId();
     }
 
+    public boolean hasGroup(Group g, Session session) {
+        if( getGroups() == null ) {
+            return false;
+        }
+        for( Group gg : getGroups() ) {
+            if( g == gg) {
+                return true;
+            }
+        }
+        return false;
+    }    
     
 }
