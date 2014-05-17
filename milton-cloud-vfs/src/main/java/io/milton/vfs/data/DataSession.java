@@ -225,6 +225,9 @@ public class DataSession {
             this.name = name;
             this.type = type;
             this.hash = hash;
+            if ("null".equals(hash)) {
+                throw new RuntimeException("Attempt to set hash to screwy value: " + hash);
+            }
             this.loadedHash = hash;
         }
 
@@ -299,6 +302,9 @@ public class DataSession {
             if (log.isTraceEnabled()) {
                 log.trace("setHash: " + hash + " on " + getName());
             }
+            if ("null".equals(hash)) {
+                throw new RuntimeException("Attempt to set hash to screwy value: " + hash);
+            }
             this.hash = hash;
             setDirty();
         }
@@ -334,7 +340,7 @@ public class DataSession {
                 throw new RuntimeException("Invalid character in name: " + name + " Colons and newline characters are not permitted");
             }
         }
-        
+
         public Branch getBranch() {
             return DataSession.this.branch;
         }
@@ -364,9 +370,17 @@ public class DataSession {
                             if (i.getType().equals("d")) {
                                 c = new DirectoryNode(this, i.getName(), i.getHash());
                             } else {
-                                c = new FileNode(this, i.getName(), i.getHash());
+                                if (i.getHash().equals("null")) {
+                                    log.warn("Screwy hash value: " + i.getHash() + " for node: " + i.getName());
+                                    c = new FileNode(this, i.getName(), null);
+                                } else {
+                                    c = new FileNode(this, i.getName(), i.getHash());
+                                }
                             }
-                            members.add(c);
+                            if (c != null) {
+                                members.add(c);
+                            }
+
                         }
                     }
                 }
@@ -493,9 +507,13 @@ public class DataSession {
 
         private Fanout getFanout() {
             if (fanout == null) {
+                if (getHash() == null) {
+                    log.warn("Null hash for node: " + getName());
+                    return null;
+                }
                 fanout = hashStore.getFileFanout(getHash());
                 if (fanout == null) {
-                    throw new RuntimeException("Fanout not found: " + getHash());
+                    throw new RuntimeException("Fanout not found: hash=" + getHash());
                 }
             }
             return fanout;
@@ -503,9 +521,12 @@ public class DataSession {
 
         public void writeContent(OutputStream out) throws IOException {
             Combiner combiner = new Combiner();
-            List<String> fanoutCrcs = getFanout().getHashes();
-            combiner.combine(fanoutCrcs, hashStore, blobStore, out);
-            out.flush();
+            Fanout f = getFanout();
+            if (f != null) {
+                List<String> fanoutCrcs = f.getHashes();
+                combiner.combine(fanoutCrcs, hashStore, blobStore, out);
+                out.flush();
+            }
         }
 
         /**
@@ -517,8 +538,12 @@ public class DataSession {
          * @throws IOException
          */
         public void writeContent(OutputStream out, long start, Long finish) throws IOException {
+            Fanout f = getFanout();
+            if (f == null) {
+                return ;
+            }            
             Combiner combiner = new Combiner();
-            List<String> fanoutCrcs = getFanout().getHashes();
+            List<String> fanoutCrcs = f.getHashes();
             combiner.combine(fanoutCrcs, hashStore, blobStore, out, start, finish);
             out.flush();
         }
