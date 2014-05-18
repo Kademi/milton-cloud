@@ -226,7 +226,8 @@ public class DataSession {
             this.type = type;
             this.hash = hash;
             if ("null".equals(hash)) {
-                throw new RuntimeException("Attempt to set hash to screwy value: " + hash);
+                log.warn("Attempt to set hash to screwy value: " + hash + " on node: " + getName());
+                hash = null;
             }
             this.loadedHash = hash;
         }
@@ -367,15 +368,16 @@ public class DataSession {
                     if (list != null) {
                         for (ITriplet i : list) {
                             DataNode c;
+                            String childHash = i.getHash();  // Wish i knew where these screwy hashes were coming from!
+                            if (i.getHash().equals("null")) {
+                                log.warn("Screwy hash value: " + i.getHash() + " for node: " + i.getName());
+                                childHash = null;
+                            }
+
                             if (i.getType().equals("d")) {
-                                c = new DirectoryNode(this, i.getName(), i.getHash());
+                                c = new DirectoryNode(this, i.getName(), childHash);
                             } else {
-                                if (i.getHash().equals("null")) {
-                                    log.warn("Screwy hash value: " + i.getHash() + " for node: " + i.getName());
-                                    c = new FileNode(this, i.getName(), null);
-                                } else {
-                                    c = new FileNode(this, i.getName(), i.getHash());
-                                }
+                                c = new FileNode(this, i.getName(), childHash);
                             }
                             if (c != null) {
                                 members.add(c);
@@ -540,8 +542,8 @@ public class DataSession {
         public void writeContent(OutputStream out, long start, Long finish) throws IOException {
             Fanout f = getFanout();
             if (f == null) {
-                return ;
-            }            
+                return;
+            }
             Combiner combiner = new Combiner();
             List<String> fanoutCrcs = f.getHashes();
             combiner.combine(fanoutCrcs, hashStore, blobStore, out, start, finish);
