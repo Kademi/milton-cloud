@@ -216,6 +216,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private String phone;
     private String email;
     private String photoHash;
+    private String origPhotoHash;
     private String nickName;
     private boolean enabled;
     private boolean rejected;
@@ -304,6 +305,11 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.nickName = nickName;
     }
 
+    /**
+     * Hash of the reduced resolution avatar image
+     * 
+     * @return 
+     */
     public String getPhotoHash() {
         return photoHash;
     }
@@ -312,6 +318,21 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.photoHash = photoHash;
     }
 
+    /**
+     * Hash of the original, full resolution, photo uploaded as the profile
+     * 
+     * @return 
+     */
+    public String getOrigPhotoHash() {
+        return origPhotoHash;
+    }
+
+    public void setOrigPhotoHash(String origPhotoHash) {
+        this.origPhotoHash = origPhotoHash;
+    }
+
+    
+    
     public String getPhone() {
         return phone;
     }
