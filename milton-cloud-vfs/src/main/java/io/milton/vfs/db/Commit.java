@@ -14,43 +14,63 @@ import org.hibernate.criterion.Restrictions;
 
 /**
  * A Commit is a link between a Repository and an TreeItem
- * 
- * The TreeItem linked to is a directory, and its members are the 
- * members of the Repository for this version
- * 
- * The latest version for a Repository (ie with the highest versionNum)
- * is the current version of the repository (ie the Head)
+ *
+ * The TreeItem linked to is a directory, and its members are the members of the
+ * Repository for this version
+ *
+ * The latest version for a Repository (ie with the highest versionNum) is the
+ * current version of the repository (ie the Head)
  *
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name="COMMIT_ITEM")
+@Table(name = "COMMIT_ITEM")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Commit implements Serializable {
 
     public static Commit find(Repository repo, long commitId, Session session) {
         Commit c = (Commit) session.get(Commit.class, commitId);
-        if( c == null ) {
+        if (c == null) {
             return null;
         }
-        if( c.getBranch().getRepository() != repo ) {
+        if (c.getBranch().getRepository() != repo) {
             return null;
         }
         return c;
     }
-    
+
     public static List<Commit> findByBranch(Branch branch, Session session) {
         Criteria c = session.createCriteria(Commit.class);
         c.add(Restrictions.eq("branch", branch));
         c.addOrder(Order.desc("createdDate"));
         return DbUtils.toList(c, Commit.class);
     }
-    
+
+    public static List<Commit> findByBranch(Branch branch, Date from, Date to, boolean orderReverseDate, Integer limit, Session session) {
+        Criteria c = session.createCriteria(Commit.class);
+        c.add(Restrictions.eq("branch", branch));
+        if (from != null) {
+            c.add(Restrictions.gt("createdDate", from));
+        }
+        if (to != null) {
+            c.add(Restrictions.le("createdDate", to));
+        }
+        if( limit != null ) {
+            c.setMaxResults(limit);
+        }
+        if (orderReverseDate) {
+            c.addOrder(Order.desc("createdDate"));
+        } else {
+            c.addOrder(Order.asc("createdDate"));
+        }
+        return DbUtils.toList(c, Commit.class);
+    }
+
     private long id;
     private Branch branch;
     private Long previousCommitId;
     private String itemHash; // this is the root directory for the repository (in this version)   
-    private Date createdDate; 
+    private Date createdDate;
     private Profile editor;
 
     public Commit() {
@@ -66,11 +86,11 @@ public class Commit implements Serializable {
     }
 
     /**
-     * This was originally a reference to the object, but it caused a StackOverflowError
-     * in some cases. Was impossible to determine exact cause but changing to
-     * an id instead of reference for safety.
-     * 
-     * @return 
+     * This was originally a reference to the object, but it caused a
+     * StackOverflowError in some cases. Was impossible to determine exact cause
+     * but changing to an id instead of reference for safety.
+     *
+     * @return
      */
     public Long getPreviousCommitId() {
         return previousCommitId;
@@ -80,11 +100,6 @@ public class Commit implements Serializable {
         this.previousCommitId = previousCommitId;
     }
 
-    
-    
-
-    
-    
     @Column
     public String getItemHash() {
         return itemHash;
@@ -96,10 +111,10 @@ public class Commit implements Serializable {
 
     /**
      * The user who created this commit
-     * 
-     * @return 
+     *
+     * @return
      */
-    @ManyToOne(optional=false)
+    @ManyToOne(optional = false)
     public Profile getEditor() {
         return editor;
     }
@@ -107,7 +122,7 @@ public class Commit implements Serializable {
     public void setEditor(Profile editor) {
         this.editor = editor;
     }
-    
+
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getCreatedDate() {
         return createdDate;
