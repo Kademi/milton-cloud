@@ -61,13 +61,13 @@ import org.slf4j.LoggerFactory;
 @javax.persistence.Entity
 @Table(name = "ORG_ENTITY", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"adminDomain"})}// website DNS names must be unique across whole system
-        )
+)
 @DiscriminatorValue("O")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Organisation extends BaseEntity implements VfsAcceptor {
 
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
-    
+
     public static final String ENTITY_TYPE_ORG = "O";
 
     public static long countChildOrgs(Organisation organisation, Session session) {
@@ -89,13 +89,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             return i.longValue();
         } else {
             return (long) result;
-        }        
+        }
     }
-    
+
     public static String getDeletedName(String origName) {
         return origName + "-deleted-" + System.currentTimeMillis();
     }
-
 
     /**
      * Find the given orgId within an administrative org
@@ -134,6 +133,18 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return DbUtils.toList(crit, Organisation.class);
     }
 
+    /**
+     * Perform a search over all child and sub orgs within the given organisation
+     * 
+     * If a search query is given it will be split by space and the key words searched
+     * in the title, orgid, address, addressLine2 and postcode fields.
+     * 
+     * @param q - search query, which is a space seperated list of key words. Optional
+     * @param organisation - search is for orgs inside this
+     * @param orgType - optional, if given results are limited to organisations of this type
+     * @param session
+     * @return 
+     */
     public static List<Organisation> search(String q, Organisation organisation, OrgType orgType, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
         crit.setCacheable(true);
@@ -142,19 +153,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         crit.add(notDeleted);
 
-        String[] arr = q.split(" ");
-        Conjunction con = Restrictions.conjunction();
-        for (String queryPart : arr) {
-            Disjunction dis = Restrictions.disjunction();
-            String s = "%" + queryPart + "%";
-            dis.add(Restrictions.ilike("title", s));
-            dis.add(Restrictions.ilike("orgId", s));
-            dis.add(Restrictions.ilike("address", s));
-            dis.add(Restrictions.ilike("addressLine2", s));
-            dis.add(Restrictions.ilike("postcode", s));
-            con.add(dis);
+        if (q != null) {
+            String[] arr = q.split(" ");
+            Conjunction con = Restrictions.conjunction();
+            for (String queryPart : arr) {
+                Disjunction dis = Restrictions.disjunction();
+                String s = "%" + queryPart + "%";
+                dis.add(Restrictions.ilike("title", s));
+                dis.add(Restrictions.ilike("orgId", s));
+                dis.add(Restrictions.ilike("address", s));
+                dis.add(Restrictions.ilike("addressLine2", s));
+                dis.add(Restrictions.ilike("postcode", s));
+                con.add(dis);
+            }
+            crit.add(con);
         }
-        crit.add(con);
 
         if (orgType != null) {
             crit.add(Restrictions.eq("orgType", orgType));
@@ -175,7 +188,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.setCacheable(true);
         crit.add(Restrictions.isNull("organisation"));
         List<Organisation> list = DbUtils.toList(crit, Organisation.class);
-        if( !list.isEmpty()) {
+        if (!list.isEmpty()) {
             return list.get(0);
         }
         return null;
@@ -186,8 +199,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         crit.setCacheable(true);
         crit.add(
                 Restrictions.and(
-                Restrictions.eq("organisation", organisation),
-                Restrictions.eq("name", name)));
+                        Restrictions.eq("organisation", organisation),
+                        Restrictions.eq("name", name)));
         Organisation org = (Organisation) crit.uniqueResult();
         return org;
     }
@@ -208,16 +221,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private List<Website> websites;
     private List<Group> groups;
     private List<SubOrg> parentOrgLinks;
-    private List<OrgType> orgTypes;    
+    private List<OrgType> orgTypes;
     private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect for orgs of this type
-    
 
     public Organisation() {
 
     }
 
-    
-    
     @Transient
     @Override
     public String getFormattedName() {
@@ -302,8 +312,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.email = email;
     }
 
-    
-    
     @Column
     public String getAddress() {
         return address;
@@ -448,8 +456,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public void setFieldset(NvSet fieldset) {
         this.fieldset = fieldset;
     }
-        
-    
+
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
@@ -490,7 +497,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public Organisation childOrg(String orgId, Session session) {
         return findByOrgId(this, orgId, session);
     }
-    
+
     public Organisation childOrg(Long orgId, Session session) {
         Organisation child = get(orgId, session);
         if (child == null) {
@@ -500,7 +507,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
             return child;
         }
         return null;
-    }    
+    }
 
     /**
      * Create a website for this organisation with the domain name given. Also
@@ -511,8 +518,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @param theme
      * @param user
      * @param session
-     * @return 
-     */    
+     * @return
+     */
     public Website createWebsite(String name, String dnsName, String theme, Profile user, Session session) {
         Website w = new Website();
         w.setBaseEntity(this);
@@ -524,7 +531,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (this.getWebsites() == null) {
             this.setWebsites(new ArrayList<Website>());
         }
-        if( this.getRepositories() == null ) {
+        if (this.getRepositories() == null) {
             this.setRepositories(new ArrayList<Repository>());
         }
         this.getWebsites().add(w);
@@ -588,7 +595,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Group group(String groupName, Session session) {
-        if( groupName == null ) {
+        if (groupName == null) {
             return null;
         }
         Group g = Group.findByOrgAndName(this, groupName, session);
@@ -775,7 +782,6 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.orgTypes = orgTypes;
     }
 
-
     /**
      * @return the timezone
      */
@@ -790,8 +796,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public void setTimezone(String timezone) {
         this.timezone = timezone;
     }
-    
-    
+
     /**
      * Get all linked memberships. Uses SessionManager.session
      *
@@ -833,49 +838,48 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
-
     private void findUniqueOrgId(Organisation o) {
         o.setOrgId(System.currentTimeMillis() + ""); // hack, todo, check for uniqueness within the account
     }
-    
+
     /**
-     * Check if the organisation ID on this org is unique within its administrative domain (ie first
-     * parent org with a non-null adminDomain)
-     * 
-     * @return 
+     * Check if the organisation ID on this org is unique within its
+     * administrative domain (ie first parent org with a non-null adminDomain)
+     *
+     * @return
      */
     public boolean isOrgIdUniqueWithinAdmin(Session session) {
         Organisation admin = closestAdminOrg();
         Organisation withSameOrgId = Organisation.findByOrgId(admin, getOrgId(), session);
-        if( withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
+        if (withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
             return true;
         } else {
             log.warn("Found same orgID on record: " + withSameOrgId.getId() + " matching this record " + getId() + " in admin org= " + admin.getAdminDomain() + " id=" + admin.getId());
             return false;
         }
     }
-    
+
     /**
      * Find the closest parent organisation with a non-null admin domain, or
      * this org if it has a non-null admin domain
-     * 
-     * @return 
+     *
+     * @return
      */
     public Organisation closestAdminOrg() {
         Organisation p = this;
-        while( p.getAdminDomain() == null && p.getOrganisation() != null ) {
+        while (p.getAdminDomain() == null && p.getOrganisation() != null) {
             p = p.getOrganisation();
         }
         return p;
     }
-    
+
     public String field(String fieldName) {
-        if( getFieldset() == null || getFieldset().getNvPairs() == null ) {
+        if (getFieldset() == null || getFieldset().getNvPairs() == null) {
             return null;
         }
         return getFieldset().get(fieldName);
     }
-    
+
     @Transient
     @Override
     public String getEntityName() {
@@ -883,15 +887,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     }
 
     public boolean hasGroup(Group g, Session session) {
-        if( getGroups() == null ) {
+        if (getGroups() == null) {
             return false;
         }
-        for( Group gg : getGroups() ) {
-            if( g == gg) {
+        for (Group gg : getGroups()) {
+            if (g == gg) {
                 return true;
             }
         }
         return false;
-    }    
-    
+    }
+
 }
