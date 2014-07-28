@@ -35,11 +35,10 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static final String DEFAULT_CALENDAR_NAME = "default";
 
-
     private List<AttendeeRequest> attendeeRequests;
     private static final Logger log = LoggerFactory.getLogger(Profile.class);
     public static final String ENTITY_TYPE_PROFILE = "U";
-    
+
     public static Profile create(String email, Date now) {
         Profile p = new Profile();
         p.setEmail(email);
@@ -104,8 +103,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Criteria critMembership = crit.createCriteria("memberships");
         critMembership.add(Restrictions.eq("groupEntity", group));
         return DbUtils.toList(crit, Profile.class);
-    }    
-    
+    }
+
     public static Profile find(String name, Session session) {
         Criteria crit = session.createCriteria(Profile.class);
         crit.setCacheable(true);
@@ -307,8 +306,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     /**
      * Hash of the reduced resolution avatar image
-     * 
-     * @return 
+     *
+     * @return
      */
     public String getPhotoHash() {
         return photoHash;
@@ -320,8 +319,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     /**
      * Hash of the original, full resolution, photo uploaded as the profile
-     * 
-     * @return 
+     *
+     * @return
      */
     public String getOrigPhotoHash() {
         return origPhotoHash;
@@ -331,8 +330,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         this.origPhotoHash = origPhotoHash;
     }
 
-    
-    
     public String getPhone() {
         return phone;
     }
@@ -371,9 +368,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      * Returns the first membership for the given group. Often users will only
      * have one membership for a group, but they are permitted to have multiple
      * memberships to a group in different orgs
-     * 
+     *
      * @param group
-     * @return 
+     * @return
      */
     public GroupMembership membership(Group group) {
         if (getMemberships() != null) {
@@ -385,7 +382,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         }
         return null;
     }
-    
+
     public List<GroupMembership> memberships(Group group) {
         List<GroupMembership> list = new ArrayList<>();
         if (getMemberships() != null) {
@@ -396,7 +393,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
             }
         }
         return list;
-    }    
+    }
 
     public void removeMembership(Group group, Session session) {
         if (getMemberships() != null) {
@@ -420,7 +417,8 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     /**
      *
      * @param g
-     * @param hasGroupInOrg - the member will be created for this organisation. NOT always the same as the org which owns the group
+     * @param hasGroupInOrg - the member will be created for this organisation.
+     * NOT always the same as the org which owns the group
      * @param session
      * @param membershipCreatedCallback - called only if a membership is
      * created. Optional. actually created
@@ -586,20 +584,22 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     @Transient
     @Override
     public String getFormattedName() {
-        String name = "";
+        String fname = "";
         if (getFirstName() != null && getFirstName().length() > 0) {
-            name += getFirstName();
+            fname += getFirstName();
         }
         if (getSurName() != null && getSurName().length() > 0) {
-            name = name + " " + getSurName();
+            fname = fname + " " + getSurName();
         }
-        if (name.length() == 0) {
-            name = getNickName();
+        if (fname.length() == 0) {
+            if (getNickName() != null && getNickName().length() > 0) {
+                fname = getNickName();
+            }
         }
-        if (name.length() == 0) {
-            name = getName();
+        if (fname.length() == 0) {
+            fname = getName();
         }
-        return name;
+        return fname;
     }
 
     @Transient
@@ -689,20 +689,19 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Get the primary membership of this user within the given root organsiation
-     * 
+     * Get the primary membership of this user within the given root
+     * organsiation
+     *
      * @param rootOrg
-     * @return 
+     * @return
      */
     public GroupMembership primaryMembership(Organisation rootOrg) {
-        for( GroupMembership gm : memberships(rootOrg)) {
-            if( gm.getGroupEntity().isPrimary()) {
+        for (GroupMembership gm : memberships(rootOrg)) {
+            if (gm.getGroupEntity().isPrimary()) {
                 return gm;
             }
         }
         return null;
     }
-
-
 
 }
