@@ -210,7 +210,7 @@ public class CalEvent implements Serializable {
     /**
      * @return the summary
      */
-    @Column
+    @Column(length = 5000)
     public String getSummary() {
         return summary;
     }
@@ -225,7 +225,7 @@ public class CalEvent implements Serializable {
     /**
      * @return the description
      */
-    @Column
+    @Column(length = 5000)
     public String getDescription() {
         return description;
     }
