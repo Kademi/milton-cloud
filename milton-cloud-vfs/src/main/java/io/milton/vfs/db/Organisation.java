@@ -846,6 +846,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * Check if the organisation ID on this org is unique within its
      * administrative domain (ie first parent org with a non-null adminDomain)
      *
+     * @param session
      * @return
      */
     public boolean isOrgIdUniqueWithinAdmin(Session session) {
@@ -853,7 +854,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         Organisation admin = closestAdminOrg();
         Organisation withSameOrgId = Organisation.findByOrgId(admin, getOrgId(), session);
         if (withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
-            log.info("isOrgIdUniqueWithinAdmin: withSameOrgId={}", withSameOrgId);
+            log.info("isOrgIdUniqueWithinAdmin: All good");
             return true;
         } else {
             log.warn("Found same orgID on record: " + withSameOrgId.getId() + " matching this record " + getId() + " in admin org= " + admin.getAdminDomain() + " id=" + admin.getId());

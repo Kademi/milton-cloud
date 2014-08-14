@@ -9,6 +9,19 @@
     <artifactId>milton-cloud-vfs</artifactId>
     <packaging>jar</packaging>
     <description>The VFS library provides a logical view of the current state of the versioned content repository</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <repositories>
         <repository>
             <url>http://download.java.net/maven/2/</url>
