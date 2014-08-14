@@ -849,9 +849,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public boolean isOrgIdUniqueWithinAdmin(Session session) {
+        log.info("isOrgIdUniqueWithinAdmin: My OrgID={}", getOrgId());
         Organisation admin = closestAdminOrg();
         Organisation withSameOrgId = Organisation.findByOrgId(admin, getOrgId(), session);
         if (withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
+            log.info("isOrgIdUniqueWithinAdmin: withSameOrgId={}", withSameOrgId);
             return true;
         } else {
             log.warn("Found same orgID on record: " + withSameOrgId.getId() + " matching this record " + getId() + " in admin org= " + admin.getAdminDomain() + " id=" + admin.getId());
