@@ -494,6 +494,14 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
+    /**
+     * Find a sub-org (direct child or child of a suborg, etc) with the given
+     * OrgID
+     * 
+     * @param orgId
+     * @param session
+     * @return 
+     */
     public Organisation childOrg(String orgId, Session session) {
         return findByOrgId(this, orgId, session);
     }
@@ -548,12 +556,12 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * Creates an organisation with an orgId the same as its name. Note that
      * orgId must be unique globally, so this might not always work
      *
-     * @param orgName
+     * @param orgId
      * @param session
      * @return
      */
-    public Organisation createChildOrg(String orgName, Session session) {
-        return createChildOrg(null, orgName, session);
+    public Organisation createChildOrg(String orgId, Session session) {
+        return createChildOrg(orgId, orgId, session);
     }
 
     public Organisation createChildOrg(String orgId, String title, Session session) {
