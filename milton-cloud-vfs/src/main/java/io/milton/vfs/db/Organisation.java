@@ -529,10 +529,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         w.setDomainName(dnsName);
         w.setLiveBranch(Branch.TRUNK);
         if (this.getWebsites() == null) {
-            this.setWebsites(new ArrayList<Website>());
+            this.setWebsites(new ArrayList<>());
         }
         if (this.getRepositories() == null) {
-            this.setRepositories(new ArrayList<Repository>());
+            this.setRepositories(new ArrayList<>());
         }
         this.getWebsites().add(w);
         this.getRepositories().add(w);
@@ -553,7 +553,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Organisation createChildOrg(String orgName, Session session) {
-        return createChildOrg(orgName, orgName, session);
+        return createChildOrg(null, orgName, session);
     }
 
     public Organisation createChildOrg(String orgId, String title, Session session) {
@@ -570,7 +570,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         o.setCreatedDate(new Date());
         o.setModifiedDate(new Date());
         if (this.getChildOrgs() == null) {
-            this.setChildOrgs(new ArrayList<Organisation>());
+            this.setChildOrgs(new ArrayList<>());
         }
         this.getChildOrgs().add(o);
         session.save(o);
