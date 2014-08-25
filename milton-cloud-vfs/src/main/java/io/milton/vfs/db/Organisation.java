@@ -575,7 +575,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.getChildOrgs().add(o);
         session.save(o);
         if (o.getOrgId() == null || o.getOrgId().trim().length() == 0) {
-            findUniqueOrgId(o);
+            findUniqueOrgId(o, session);
             session.save(o);
         }
         SubOrg.updateSubOrgs(o, session);
@@ -689,7 +689,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         g.setCreatedDate(new Date());
         g.setModifiedDate(new Date());
         if (this.getGroups() == null) {
-            this.setGroups(new ArrayList<Group>());
+            this.setGroups(new ArrayList<>());
         }
         getGroups().add(g);
         return g;
@@ -748,7 +748,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         if (ot == null) {
             if (autoCreate) {
                 if (getOrgTypes() == null) {
-                    setOrgTypes(new ArrayList<OrgType>());
+                    setOrgTypes(new ArrayList<>());
                 }
                 ot = new OrgType();
                 ot.setName(name);
@@ -820,6 +820,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * subordinate organisations
      *
      * @param profile
+     * @param session
      */
     public void removeMember(Profile profile, Session session) {
         log.info("removeMember: profileid=" + profile.getId() + " org=" + getOrgId());
@@ -838,8 +839,13 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         }
     }
 
-    private void findUniqueOrgId(Organisation o) {
-        o.setOrgId(System.currentTimeMillis() + ""); // hack, todo, check for uniqueness within the account
+    private void findUniqueOrgId(Organisation o, Session session) {
+        String candidate = "O" + System.currentTimeMillis();
+        int i=0;
+        while( !isOrgIdUniqueWithinAdmin(session)) {
+            candidate = "O" + System.currentTimeMillis() + i++;
+        }
+        o.setOrgId(candidate); // hack, todo, check for uniqueness within the account
     }
 
     /**
