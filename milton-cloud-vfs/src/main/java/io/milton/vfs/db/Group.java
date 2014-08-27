@@ -65,10 +65,18 @@ public class Group implements Serializable, VfsAcceptor {
     public static String REGO_MODE_ADMIN_REVIEW = "a";
     public static String REGO_MODE_CLOSED = "c";
 
+    /**
+     * Checks for null deleted flag
+     * 
+     * @param org
+     * @param session
+     * @return 
+     */
     public static List<Group> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(Group.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("organisation", org));
+        crit.add(Restrictions.isNull("deleted"));
         crit.addOrder(Order.asc("name"));
         return DbUtils.toList(crit, Group.class);
     }
@@ -78,6 +86,7 @@ public class Group implements Serializable, VfsAcceptor {
         crit.setCacheable(true);
         crit.add(Restrictions.eq("organisation", org));
         crit.add(Restrictions.eq("name", name));
+        crit.add(Restrictions.isNull("deleted"));
         return (Group) crit.uniqueResult();
     }
 
@@ -371,7 +380,26 @@ public class Group implements Serializable, VfsAcceptor {
         return b;
     }
 
+    /**
+     * Do a hard or soft delete. Note that either way will remove all memberships
+     * 
+     * SignupLog, and possibly other, tables refer to Group and cannot be deleted
+     * because we need the historical data
+     * 
+     * @param softDelete - true to set deleted flag instead of physical delete
+     * @param session 
+     */
     public void delete(boolean softDelete, Session session) {
+
+        // Delete memberships regardless of whether soft or hard delete
+        if (getGroupMemberships() != null) {
+            List<GroupMembership> list = new ArrayList<>(getGroupMemberships());
+            for (GroupMembership gm : list) {
+                gm.delete(session);
+                session.flush();
+            }
+        }
+
         if (softDelete) {
             setDeleted(true);
             setName(getName() + "-deleted-" + System.currentTimeMillis()); // rename to avoid duplicate name conflicts
@@ -380,13 +408,6 @@ public class Group implements Serializable, VfsAcceptor {
             if (getGroupRoles() != null) {
                 for (GroupRole gr : getGroupRoles()) {
                     gr.delete(session);
-                }
-            }
-            if (getGroupMemberships() != null) {
-                List<GroupMembership> list = new ArrayList<>(getGroupMemberships());
-                for (GroupMembership gm : list) {
-                    gm.delete(session);
-                    session.flush();
                 }
             }
             Organisation org = getOrganisation();
