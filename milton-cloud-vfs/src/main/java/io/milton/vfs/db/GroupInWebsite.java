@@ -2,6 +2,7 @@ package io.milton.vfs.db;
 
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.Criteria;
@@ -29,7 +30,13 @@ public class GroupInWebsite implements Serializable {
         Criteria crit = session.createCriteria(GroupInWebsite.class);
         crit.setCacheable(true);
         crit.add(Restrictions.eq("website", w));
-        return DbUtils.toList(crit, GroupInWebsite.class);
+        List<GroupInWebsite> list = new ArrayList<>();
+        for( GroupInWebsite giw : DbUtils.toList(crit, GroupInWebsite.class) ) {
+            if( !giw.getUserGroup().deleted()) {
+                list.add(giw);
+            }
+        }
+        return list;
     }
 
     public static List<GroupInWebsite> findByGroup(Group g, Session session) {

@@ -457,6 +457,11 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         this.fieldset = fieldset;
     }
 
+    /**
+     * Null safe, and does not return deleted websites
+     * 
+     * @return 
+     */
     public List<Website> websites() {
         if (getWebsites() == null) {
             return Collections.EMPTY_LIST;
