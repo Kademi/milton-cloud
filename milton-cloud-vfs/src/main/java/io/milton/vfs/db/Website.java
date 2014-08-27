@@ -25,6 +25,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -83,6 +84,22 @@ public class Website extends Repository implements VfsAcceptor {
         return DbUtils.unique(crit);
     }
 
+    /**
+     * Checks for null deleted flag
+     * 
+     * @param org
+     * @param session
+     * @return 
+     */
+    public static List<Website> findByOrg(Organisation org, Session session) {
+        Criteria crit = session.createCriteria(Website.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("organisation", org));
+        crit.add(Restrictions.isNull("deleted"));
+        crit.addOrder(Order.asc("name"));
+        return DbUtils.toList(crit, Website.class);
+    }    
+    
     public static Website get(Session session, Long themeSiteId) {
         return (Website) session.get(Website.class, themeSiteId);
     }
