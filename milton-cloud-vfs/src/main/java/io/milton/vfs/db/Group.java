@@ -49,7 +49,7 @@ public class Group implements Serializable, VfsAcceptor {
     public static final String GROUP_TYPE_PRIMARY = "P";
     public static final String GROUP_TYPE_MAILLIST = "M";
     public static final String GROUP_TYPE_SUBSCRIPTION = "S";
-    
+
     public static Group findGroup(Organisation org, String name, Session session) {
         Criteria crit = session.createCriteria(Group.class);
         crit.add(Restrictions.and(Restrictions.eq("organisation", org), Restrictions.eq("name", name)));
@@ -84,7 +84,7 @@ public class Group implements Serializable, VfsAcceptor {
     public static Group get(long id, Session session) {
         return (Group) session.get(Group.class, id);
     }
-    
+
     private long id;
     private String name;
     private Date createdDate;
@@ -96,8 +96,10 @@ public class Group implements Serializable, VfsAcceptor {
     private OrgType regoOrgType; // label to display to users in signup form to selet their organisation
     private Organisation rootRegoOrg; // root org to select from when users select an org
     private NvSet fieldset; // optional, if present is a list of field names and their metadata for what to collect
-    
+
     private String groupType; // optional, defaults to "P" = primary. Others are "M"=mailing list; "S"=subscription
+
+    private Boolean deleted;
 
     @Id
     @GeneratedValue
@@ -120,21 +122,19 @@ public class Group implements Serializable, VfsAcceptor {
     }
 
     /**
-     * An optional reference to the NvSet which hold a list of data capture fields
-     * for this group. The name of each NvPair is the name of the field, and the
-     * value is meta data keywords in the form:
-     * 
+     * An optional reference to the NvSet which hold a list of data capture
+     * fields for this group. The name of each NvPair is the name of the field,
+     * and the value is meta data keywords in the form:
+     *
      * required,numeric,options(csv list)
-     * 
-     * Eg1 - for a "how did you hear about us" question
-     * name=howHeard
+     *
+     * Eg1 - for a "how did you hear about us" question name=howHeard
      * value=required,options(google,newspaper,friend or colleague)
-     * 
-     * Eg2 - "how many guests will you be bringing?"
-     * name=numGuests
+     *
+     * Eg2 - "how many guests will you be bringing?" name=numGuests
      * value=required,numeric
-     * 
-     * @return 
+     *
+     * @return
      */
     @ManyToOne
     public NvSet getFieldset() {
@@ -145,8 +145,6 @@ public class Group implements Serializable, VfsAcceptor {
         this.fieldset = fieldset;
     }
 
-    
-    
     @Column(nullable = false)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     public Date getModifiedDate() {
@@ -244,18 +242,18 @@ public class Group implements Serializable, VfsAcceptor {
     }
 
     /**
-     * The semantic type of the group. This is really about the intention
-     * of the group, and will influence the UI, but has little meaning internally
-     * 
+     * The semantic type of the group. This is really about the intention of the
+     * group, and will influence the UI, but has little meaning internally
+     *
      * If null, assume it is a primary group.
-     * 
-     * Intended types are
-     * - primary: a user should only have one membership to a primary group within an org
-     * - mailing list: a list of users for communication purposes
-     * - subscription: like a mailing list, but of a type that users would not consider
-     * a mailing list. It might be a subscription to a magazine, or a secondary working group, etc
-     * 
-     * @return 
+     *
+     * Intended types are - primary: a user should only have one membership to a
+     * primary group within an org - mailing list: a list of users for
+     * communication purposes - subscription: like a mailing list, but of a type
+     * that users would not consider a mailing list. It might be a subscription
+     * to a magazine, or a secondary working group, etc
+     *
+     * @return
      */
     public String getGroupType() {
         return groupType;
@@ -265,10 +263,19 @@ public class Group implements Serializable, VfsAcceptor {
         this.groupType = groupType;
     }
 
-    
+    /**
+     * To support soft deletes
+     *
+     * @return
+     */
+    @Column
+    public Boolean getDeleted() {
+        return deleted;
+    }
 
-    
-    
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
 
     /**
      * Add or remove the role to this group. Updates the groupRoles list and
@@ -276,7 +283,7 @@ public class Group implements Serializable, VfsAcceptor {
      *
      * @param roleName
      * @param session
-     * @return 
+     * @return
      */
     public GroupRole grantRole(String roleName, Session session) {
         return grantRole(null, null, roleName, session);
@@ -334,8 +341,8 @@ public class Group implements Serializable, VfsAcceptor {
     public boolean isMember(BaseEntity u, Organisation withinOrg, Session session) {
         GroupMembership gm = getGroupMembership(u, withinOrg, session);
         return gm != null;
-    }    
-    
+    }
+
     public GroupMembership getGroupMembership(BaseEntity u, Organisation withinOrg, Session session) {
         Criteria crit = session.createCriteria(GroupMembership.class);
         crit.setCacheable(true);
@@ -364,29 +371,35 @@ public class Group implements Serializable, VfsAcceptor {
         return b;
     }
 
-    public void delete(Session session) {
-        if (getGroupRoles() != null) {
-            for (GroupRole gr : getGroupRoles()) {
-                gr.delete(session);
+    public void delete(boolean softDelete, Session session) {
+        if (softDelete) {
+            setDeleted(true);
+            setName(getName() + "-deleted-" + System.currentTimeMillis()); // rename to avoid duplicate name conflicts
+            session.save(this);
+        } else {
+            if (getGroupRoles() != null) {
+                for (GroupRole gr : getGroupRoles()) {
+                    gr.delete(session);
+                }
             }
-        }
-        if (getGroupMemberships() != null) {
-            List<GroupMembership> list = new ArrayList<>(getGroupMemberships());
-            for (GroupMembership gm : list) {
-                gm.delete(session);
-                session.flush();
+            if (getGroupMemberships() != null) {
+                List<GroupMembership> list = new ArrayList<>(getGroupMemberships());
+                for (GroupMembership gm : list) {
+                    gm.delete(session);
+                    session.flush();
+                }
             }
-        }
-        Organisation org = getOrganisation();
-        if( org != null ) {
-            if( org.getGroups() != null  ) {
-                org.getGroups().remove(this);
+            Organisation org = getOrganisation();
+            if (org != null) {
+                if (org.getGroups() != null) {
+                    org.getGroups().remove(this);
+                }
             }
+            for (GroupInWebsite giw : GroupInWebsite.findByGroup(this, session)) {
+                session.delete(giw);
+            }
+            session.delete(this);
         }
-        for (GroupInWebsite giw : GroupInWebsite.findByGroup(this, session)) {
-            session.delete(giw);
-        }
-        session.delete(this);
     }
 
     /**
@@ -417,55 +430,56 @@ public class Group implements Serializable, VfsAcceptor {
     public long getNumMembers() {
         return GroupMembership.count(this, SessionManager.session());
     }
-    
+
     /**
      * Null-safe alias for getFieldset().getNvPairs();
-     * 
-     * @return 
+     *
+     * @return
      */
     @Transient
     public Set<NvPair> getFieldMetaData() {
-        if( getFieldset() == null ) {
+        if (getFieldset() == null) {
             return Collections.EMPTY_SET;
         } else {
-            if( getFieldset().getNvPairs() == null ) {
+            if (getFieldset().getNvPairs() == null) {
                 return Collections.EMPTY_SET;
             } else {
                 return getFieldset().getNvPairs();
             }
         }
     }
-    
+
     /**
      * True if this group has a closed registration mode
-     * 
-     * @return 
+     *
+     * @return
      */
     @Transient
     public boolean isClosedGroup() {
         return getRegistrationMode() != null && getRegistrationMode().equals(REGO_MODE_CLOSED);
     }
-    
+
     /**
      * True if this group has an open rego mode
-     * 
-     * @return 
+     *
+     * @return
      */
     @Transient
     public boolean isOpenGroup() {
         return getRegistrationMode() != null && getRegistrationMode().equals(REGO_MODE_OPEN);
-    }    
-    
+    }
+
     /**
-     * Find any GroupInWebsite records for this group. This is a fairly inefficient
-     * call, so you should probably cache results if it will be called repeatedly
-     * 
+     * Find any GroupInWebsite records for this group. This is a fairly
+     * inefficient call, so you should probably cache results if it will be
+     * called repeatedly
+     *
      * @param session
-     * @return 
+     * @return
      */
     public List<GroupInWebsite> groupInWebsites(Session session) {
         return GroupInWebsite.findByGroup(this, SessionManager.session());
-    }    
+    }
 
     public boolean primary() {
         return groupType == null || groupType.equals(GROUP_TYPE_PRIMARY);
@@ -475,7 +489,7 @@ public class Group implements Serializable, VfsAcceptor {
     public boolean isPrimary() {
         return primary();
     }
-    
+
     @Transient
     public boolean isMailingList() {
         return GROUP_TYPE_MAILLIST.equals(groupType);
@@ -484,5 +498,18 @@ public class Group implements Serializable, VfsAcceptor {
     @Transient
     public boolean isSubscription() {
         return GROUP_TYPE_SUBSCRIPTION.equals(groupType);
+    }
+
+    /**
+     * null safe alias for getDeleted
+     *
+     * @return
+     */
+    public boolean deleted() {
+        if (getDeleted() == null) {
+            return false;
+        } else {
+            return getDeleted();
+        }
     }
 }

@@ -629,7 +629,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         setWebsites(null);
         if (getGroups() != null) {
             for (Group g : getGroups()) {
-                g.delete(session);
+                g.delete(false, session); // do a hard delete
             }
         }
 
