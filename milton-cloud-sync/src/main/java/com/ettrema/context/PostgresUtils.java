@@ -17,17 +17,6 @@ import java.util.List;
  */
 public class PostgresUtils {
 
-    public static VfsSession vfs() {
-        VfsSession vfs = requestContext().get( VfsSession.class );
-        if( vfs == null ) {
-            throw new RuntimeException( "Vfs is not registered with context. Add <factory class='com.bradmcevoy.vfs.CtxVfsFactory' /> to see catalog.xml" );
-        }
-        return vfs;
-    }
-
-    public static PostgresVfsProvider provider() {
-        return requestContext().get( PostgresVfsProvider.class );
-    }
 
     public static Connection con() {
         return requestContext().get( Connection.class );
@@ -67,13 +56,6 @@ public class PostgresUtils {
         }
     }
 
-    public static void commit() {
-        vfs().commit();
-    }
-
-    public static void rollback() {
-        vfs().rollback();
-    }
 
     static boolean isEmpty( List roots ) {
         return roots == null || roots.size()==0;
