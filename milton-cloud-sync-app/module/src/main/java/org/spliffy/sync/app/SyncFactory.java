@@ -1,17 +1,13 @@
 package org.spliffy.sync.app;
 
-import io.milton.cloud.common.ITriplet;
-import io.milton.cloud.server.sync.push.TcpChannelClient;
 import io.milton.common.Path;
 import io.milton.event.EventManager;
 import io.milton.event.EventManagerImpl;
-import io.milton.sync.DeltaListener;
 import io.milton.sync.SpliffySync;
 import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.milton</groupId>        
         <artifactId>milton-cloud-sync-app-parent</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>milton-cloud-sync-module</artifactId>
 
@@ -70,9 +70,15 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>milton-cloud-sync</artifactId>
-            <version>${project.version}</version>
+            <version>1.2.1</version>
+            <type>jar</type>
         </dependency>
-
+        <dependency>
+            <groupId>io.milton</groupId>
+            <artifactId>milton-api</artifactId>
+            <version>2.6.3.0</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
