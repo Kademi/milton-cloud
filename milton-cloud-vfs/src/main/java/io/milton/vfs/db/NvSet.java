@@ -20,8 +20,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +35,6 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Cascade;
 
 /**
  * Represents a set of NvPair (ie Name/Value Pairs) which together form a set of
@@ -55,7 +56,7 @@ public class NvSet implements Serializable {
     public static NvSet create(NvSet previous) {
         NvSet newFieldset = new NvSet();
         newFieldset.setCreatedDate(new Date());
-        newFieldset.setNvPairs(new HashSet<NvPair>());
+        newFieldset.setNvPairs(new HashSet<>());
         if (previous != null) {
             newFieldset.setPreviousSetId(previous.getId());
         }
@@ -110,7 +111,7 @@ public class NvSet implements Serializable {
             for (NvPair nvp : getNvPairs()) {
                 nvp.delete(session);
             }
-            setNvPairs(new HashSet<NvPair>());
+            setNvPairs(new HashSet<>());
         }
 
         session.delete(this);
@@ -157,7 +158,7 @@ public class NvSet implements Serializable {
 
     public NvPair addPair(String name, String propValue) {
         if (getNvPairs() == null) {
-            setNvPairs(new HashSet<NvPair>());
+            setNvPairs(new HashSet<>());
         }
         NvPair nvp = new NvPair();
         nvp.setName(name);
@@ -268,6 +269,21 @@ public class NvSet implements Serializable {
                 map.put(nvp.getName(), nvp.getPropValue());
             }
             return map;
+        }
+    }
+    
+    /**
+     * Returns the nv pairs ordered by their ID which is the order inserted
+     * 
+     * 
+     * @return 
+     */
+    @Transient
+    public List<NvPair> getPairsOrdered() {
+        if( getNvPairs() == null ) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return getNvPairs().stream().sorted((e1, e2) -> Long.compare(e1.getId(),e2.getId())).collect(Collectors.toList());
         }
     }
 }

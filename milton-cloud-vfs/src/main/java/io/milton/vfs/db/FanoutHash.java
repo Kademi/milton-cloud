@@ -3,6 +3,7 @@ package io.milton.vfs.db;
 import io.milton.vfs.db.utils.DbUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -37,12 +38,12 @@ import org.slf4j.LoggerFactory;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(
         uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"type", "fanoutHash"})}// item names must be unique within a directory
-        )
+            @UniqueConstraint(columnNames = {"type", "fanoutHash"})}// item names must be unique within a directory
+)
 public class FanoutHash implements Serializable, Fanout {
 
     private static final Logger log = LoggerFactory.getLogger(Organisation.class);
-    
+
     public static void insertFanout(String type, String hash, List<String> childCrcs, long actualContentLength, Session session) {
         FanoutHash fanout = new FanoutHash();
         fanout.setType(type);
@@ -77,7 +78,7 @@ public class FanoutHash implements Serializable, Fanout {
         crit.add(Restrictions.eq("type", type));
         return DbUtils.unique(crit);
     }
-    
+
     private Long id;
     private String fanoutHash;
     private String type; // c=chunk, f=file    
@@ -147,9 +148,14 @@ public class FanoutHash implements Serializable, Fanout {
     @javax.persistence.Transient
     public List<String> getHashes() {
         List<String> list = new ArrayList<>();
-        for (FanoutEntry fe : fanoutEntrys) {
+
+        Comparator<FanoutEntry> c = (e1, e2) -> Long.compare(
+                e1.getId(), e2.getId());
+
+        fanoutEntrys.stream().sorted(c).forEach((FanoutEntry fe) -> {
             list.add(fe.getChunkHash());
-        }
+        });
+
         return list;
     }
 }
