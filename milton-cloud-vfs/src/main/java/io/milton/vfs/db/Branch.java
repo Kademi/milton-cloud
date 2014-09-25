@@ -172,6 +172,7 @@ public class Branch implements Serializable, VfsAcceptor {
     /**
      * Creates and saves a copy of this branch with the new name
      *
+     * @param repo
      * @param newName
      * @param now
      * @param session
@@ -188,7 +189,7 @@ public class Branch implements Serializable, VfsAcceptor {
         session.save(b);
 
         if (repo.getBranches() == null) {
-            repo.setBranches(new ArrayList<Branch>());
+            repo.setBranches(new ArrayList<>());
         }
         repo.getBranches().add(b);
 
