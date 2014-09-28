@@ -20,6 +20,7 @@ import io.milton.vfs.db.utils.DbUtils;
 import io.milton.vfs.db.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -472,6 +473,9 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
                     list.add(w);
                 }
             }
+            list.sort((Website o1, Website o2) -> {
+                return o1.getName().compareTo(o2.getName());
+            });
             return list;
         }
     }
