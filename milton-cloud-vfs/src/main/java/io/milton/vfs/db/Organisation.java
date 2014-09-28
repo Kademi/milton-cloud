@@ -115,6 +115,16 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         return DbUtils.unique(crit);
     }
 
+    public static List<Organisation> findListByOrgId(Organisation adminOrg, String orgId, Session session) {
+        Criteria crit = session.createCriteria(Organisation.class);
+        Criteria critSubOrg = crit.createCriteria("parentOrgLinks");
+
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("orgId", orgId));
+        critSubOrg.add(Restrictions.eq("owner", adminOrg));
+        return DbUtils.toList(crit, Organisation.class);
+    }
+
     public static Organisation get(Long id, Session session) {
         return (Organisation) session.get(Organisation.class, id);
     }
@@ -135,16 +145,19 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     }
 
     /**
-     * Perform a search over all child and sub orgs within the given organisation
-     * 
-     * If a search query is given it will be split by space and the key words searched
-     * in the title, orgid, address, addressLine2 and postcode fields.
-     * 
-     * @param q - search query, which is a space seperated list of key words. Optional
+     * Perform a search over all child and sub orgs within the given
+     * organisation
+     *
+     * If a search query is given it will be split by space and the key words
+     * searched in the title, orgid, address, addressLine2 and postcode fields.
+     *
+     * @param q - search query, which is a space seperated list of key words.
+     * Optional
      * @param organisation - search is for orgs inside this
-     * @param orgType - optional, if given results are limited to organisations of this type
+     * @param orgType - optional, if given results are limited to organisations
+     * of this type
      * @param session
-     * @return 
+     * @return
      */
     public static List<Organisation> search(String q, Organisation organisation, OrgType orgType, Session session) {
         Criteria crit = session.createCriteria(Organisation.class);
@@ -460,8 +473,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     /**
      * Null safe, and does not return deleted websites
-     * 
-     * @return 
+     *
+     * @return
      */
     public List<Website> websites() {
         if (getWebsites() == null) {
@@ -506,10 +519,10 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     /**
      * Find a sub-org (direct child or child of a suborg, etc) with the given
      * OrgID
-     * 
+     *
      * @param orgId
      * @param session
-     * @return 
+     * @return
      */
     public Organisation childOrg(String orgId, Session session) {
         return findByOrgId(this, orgId, session);
@@ -858,8 +871,8 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     private void findUniqueOrgId(Organisation o, Session session) {
         String candidate = "O" + System.currentTimeMillis();
-        int i=0;
-        while( !isOrgIdUniqueWithinAdmin(session)) {
+        int i = 0;
+        while (!isOrgIdUniqueWithinAdmin(session)) {
             candidate = "O" + System.currentTimeMillis() + i++;
         }
         o.setOrgId(candidate); // hack, todo, check for uniqueness within the account
@@ -875,14 +888,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     public boolean isOrgIdUniqueWithinAdmin(Session session) {
         log.info("isOrgIdUniqueWithinAdmin: My OrgID={}", getOrgId());
         Organisation admin = closestAdminOrg();
-        Organisation withSameOrgId = Organisation.findByOrgId(admin, getOrgId(), session);
-        if (withSameOrgId == null || withSameOrgId.getId() == this.getId()) {
-            log.info("isOrgIdUniqueWithinAdmin: All good");
-            return true;
-        } else {
-            log.warn("Found same orgID on record: " + withSameOrgId.getId() + " matching this record " + getId() + " in admin org= " + admin.getAdminDomain() + " id=" + admin.getId());
-            return false;
+        for (Organisation withSameOrgId : Organisation.findListByOrgId(admin, getOrgId(), session)) {
+            if (withSameOrgId.getId() != this.getId()) {
+                log.warn("Found same orgID on record: " + withSameOrgId.getId() + " matching this record " + getId() + " in admin org= " + admin.getAdminDomain() + " id=" + admin.getId());
+                return false;
+            }
         }
+        log.info("isOrgIdUniqueWithinAdmin: All good");
+        return true;
+
     }
 
     /**
