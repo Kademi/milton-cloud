@@ -16,6 +16,10 @@ package io.milton.vfs.data;
 
 import io.milton.cloud.common.CurrentDateService;
 import io.milton.common.Path;
+import io.milton.event.EventManager;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.vfs.db.Branch;
 import io.milton.vfs.db.Commit;
 import io.milton.vfs.db.Profile;
@@ -52,11 +56,13 @@ public class DataSession {
     private final HashCalc hashCalc = HashCalc.getInstance();
     private final CurrentDateService currentDateService;
     private final Branch branch;
+    private final EventManager eventManager;
 
-    public DataSession(Branch branch, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService) {
+    public DataSession(Branch branch, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService, EventManager eventManager) {
         if (branch == null) {
             throw new RuntimeException("Branch is null");
         }
+        this.eventManager = eventManager;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.session = session;
@@ -79,7 +85,8 @@ public class DataSession {
      * @param blobStore
      * @param currentDateService
      */
-    public DataSession(Commit commit, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService) {
+    public DataSession(Commit commit, Session session, HashStore hashStore, BlobStore blobStore, CurrentDateService currentDateService, EventManager eventManager) {
+        this.eventManager = eventManager;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.session = session;
@@ -143,7 +150,8 @@ public class DataSession {
             throw new RuntimeException("Cannot save to a readonly session. Session is readonly because no branch was given");
         }
         String oldHash = rootDataNode.loadedHash;
-        recalcHashes(rootDataNode);
+        List<DataSession.DirectoryNode> changedDirectoryNodes = new ArrayList<>();
+        recalcHashes(rootDataNode, changedDirectoryNodes);
         String newHash = rootDataNode.hash;
         if (newHash == null) {
             throw new RuntimeException("newHash is null");
@@ -161,6 +169,11 @@ public class DataSession {
             session.save(newCommit);
             branch.setHead(newCommit);
             session.save(branch);
+            try {
+                eventManager.fireEvent(new NodesChangedEvent(this, changedDirectoryNodes));
+            } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
+                throw new RuntimeException(ex);
+            }
         } else {
             log.warn("Hashes are unchanged, will not save");
         }
@@ -168,7 +181,7 @@ public class DataSession {
         return rootDataNode.hash;
     }
 
-    private void recalcHashes(DataNode item) throws IOException {
+    private void recalcHashes(DataNode item, List<DataSession.DirectoryNode> changedDirectoryNodes) throws IOException {
         if (item.dirty == null) {
             return; // not dirty, which means no children are dirty
         }
@@ -179,12 +192,17 @@ public class DataSession {
                 log.info("hash appears to have been set explicitly, will not recalc: " + item.hash + " old=" + item.loadedHash + " name=" + item.name);
             } else {
                 for (DataNode child : dirNode) {
-                    recalcHashes(child);
+                    recalcHashes(child, changedDirectoryNodes);
                 }
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 hashCalc.sort(dirNode.getChildren());
+                String oldHash = dirNode.hash;
                 String newHash = hashCalc.calcHash(dirNode, bout);
                 item.setHash(newHash);
+                
+                if( newHash.equals(oldHash)) {
+                    changedDirectoryNodes.add(dirNode);
+                }
                 byte[] arrTriplets = bout.toByteArray();
                 blobStore.setBlob(newHash, arrTriplets);
                 if (log.isTraceEnabled()) {
