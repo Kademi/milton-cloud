@@ -100,6 +100,10 @@ public class DataSession {
         return rootDataNode;
     }
 
+    public Branch getBranch() {
+        return branch;
+    }    
+
     public DataNode find(Path path) {
         if (path.isRoot()) {
             return rootDataNode;
@@ -168,6 +172,7 @@ public class DataSession {
             newCommit.setItemHash(newHash);
             session.save(newCommit);
             branch.setHead(newCommit);
+            //log.debug("New branch hash. Repo/Branch={}/{} BranchID={} CommitID={} Hash={}", branch.getRepository().getName(), branch.getName(), branch.getId(), newCommit.getId(), newHash);
             session.save(branch);
             try {
                 eventManager.fireEvent(new NodesChangedEvent(this, changedDirectoryNodes));
@@ -200,7 +205,8 @@ public class DataSession {
                 String newHash = hashCalc.calcHash(dirNode, bout);
                 item.setHash(newHash);
                 
-                if( newHash.equals(oldHash)) {
+                if( !newHash.equals(oldHash)) {
+                    //log.info("Found diry node: " + dirNode.getName());
                     changedDirectoryNodes.add(dirNode);
                 }
                 byte[] arrTriplets = bout.toByteArray();
