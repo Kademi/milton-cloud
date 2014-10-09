@@ -144,18 +144,18 @@ public class NvSet implements Serializable {
     public NvSet duplicate(Date now, Session session) {
         NvSet nvSet = new NvSet();
         nvSet.setCreatedDate(now);
-        nvSet.setNvPairs(new HashSet<NvPair>());
+        nvSet.setNvPairs(new HashSet<>());
         nvSet.setPreviousSetId(this.getId());
         session.save(nvSet);
         if (getNvPairs() != null) {
-            for (NvPair nvp : getNvPairs()) {
+            for (NvPair nvp : getPairsOrdered()) {
                 NvPair newNvp = nvSet.addPair(nvp.getName(), nvp.getPropValue());
                 session.save(newNvp);
             }
         }
         return nvSet;
-    }
-
+    }  
+    
     public NvPair addPair(String name, String propValue) {
         if (getNvPairs() == null) {
             setNvPairs(new HashSet<>());
