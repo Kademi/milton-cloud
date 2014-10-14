@@ -73,7 +73,8 @@ public class FanoutHash implements Serializable, Fanout {
      */
     public static FanoutHash findByHashAndType(String hash, String type, Session session) {
         Criteria crit = session.createCriteria(FanoutHash.class);
-        crit.setCacheable(true);
+        crit.setCacheable(false); // will be cached in the CachingHashStore
+        //crit.setCacheable(true);
         crit.add(Restrictions.eq("fanoutHash", hash));
         crit.add(Restrictions.eq("type", type));
         return DbUtils.unique(crit);
