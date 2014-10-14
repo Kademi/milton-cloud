@@ -59,15 +59,17 @@ public class AttendeeRequest implements Serializable {
      * Check if there is an attendee request for the given user on the given event.
      * If not create it
      * 
-     * @param p - the attendee profile
-     * @param e - the organisor's event which the attendee may attend
+     * Sets the participation status to NEEDS-ACTION
+     * 
+     * @param attendeeProfile - the attendee profile
+     * @param organisorsEvent - the organisor's event which the attendee may attend
      * @param now - the current date and time
      * @param scheduleAgent
      * @param session 
      * @return  
      */
-    public static AttendeeRequest checkCreate(Profile p, CalEvent e, Date now, String scheduleAgent, Session session) {
-        AttendeeRequest ar = findForUserAndEvent(p, e, session);
+    public static AttendeeRequest checkCreate(Profile attendeeProfile, CalEvent organisorsEvent, Date now, String scheduleAgent, Session session) {
+        AttendeeRequest ar = findForUserAndEvent(attendeeProfile, organisorsEvent, session);
         if( ar != null ) {
             ar.setScheduleAgent(scheduleAgent);
             session.save(ar);
@@ -75,16 +77,17 @@ public class AttendeeRequest implements Serializable {
         }
         ar = new AttendeeRequest();        
         ar.setCreatedDate(now);
-        if( p.getAttendeeRequests() == null ) {
-            p.setAttendeeRequests(new ArrayList<AttendeeRequest>());
+        if( attendeeProfile.getAttendeeRequests() == null ) {
+            attendeeProfile.setAttendeeRequests(new ArrayList<>());
         }
         
-        ar.setAttendee(p);
+        ar.setAttendee(attendeeProfile);
         ar.setName(UUID.randomUUID().toString());
-        ar.setOrganiserEvent(e);
+        ar.setOrganiserEvent(organisorsEvent);
         ar.setParticipationStatus("NEEDS-ACTION");
+        ar.setModifiedDate(now);
         ar.setScheduleAgent(scheduleAgent);
-        p.getAttendeeRequests().add(ar);
+        attendeeProfile.getAttendeeRequests().add(ar);
         session.save(ar);
         
         
@@ -104,6 +107,17 @@ public class AttendeeRequest implements Serializable {
         }
         return null;
     }
+    
+    public static List<AttendeeRequest> findInvitationsForProfile(Profile invited, Organisation org, Session session) {
+        Criteria crit = session.createCriteria(AttendeeRequest.class);
+        Criteria critOrganisorEvent = crit.createCriteria("organiserEvent");
+        Criteria critOrganisorCalendar = critOrganisorEvent.createCriteria("calendar");
+        critOrganisorCalendar.add(Restrictions.eq("baseEntity", org));
+        
+        crit.add(Restrictions.eq("attendee", invited));
+        
+        return DbUtils.toList(crit, AttendeeRequest.class);
+    }        
     
     public static List<AttendeeRequest> findAcceptedByOrganisorEvent(CalEvent e, Session session) {
         Criteria crit = session.createCriteria(AttendeeRequest.class);
@@ -170,6 +184,8 @@ public class AttendeeRequest implements Serializable {
     
     private Date createdDate;
     
+    private Date modifiedDate;
+    
     private String scheduleAgent; // http://tools.ietf.org/html/rfc6638#section-7.1
 
     public AttendeeRequest() {
@@ -187,6 +203,11 @@ public class AttendeeRequest implements Serializable {
         this.id = id;
     }
 
+    /**
+     * The resource name. Normally a UUID
+     * 
+     * @return 
+     */
     @Column(nullable=false)
     public String getName() {
         return name;
@@ -295,6 +316,16 @@ public class AttendeeRequest implements Serializable {
         this.createdDate = createdDate;
     }    
 
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    
     
     /**
      * Usually "SERVER" or "CLIENT"
