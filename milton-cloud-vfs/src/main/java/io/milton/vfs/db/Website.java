@@ -109,6 +109,8 @@ public class Website extends Repository implements VfsAcceptor {
     private Website aliasTo; // if not null, this website is really just an alias for that one
     private String redirectTo; // if not null, this website will redirect to that one
     private String mailServer; // if not null, will be used for email sending and generating MX records
+    private String dkimSelector;
+    private String dkimPrivateKey;
 
     @Override
     @Transient
@@ -165,6 +167,23 @@ public class Website extends Repository implements VfsAcceptor {
         this.redirectTo = redirectTo;
     }
 
+    @Column(length = 200)
+    public String getDkimPrivateKey() {
+        return dkimPrivateKey;
+    }
+    
+    public void setDkimPrivateKey(String dkimPrivateKey) {
+        this.dkimPrivateKey = dkimPrivateKey;
+    }
+
+    public String getDkimSelector() {
+        return dkimSelector;
+    }
+
+    public void setDkimSelector(String dkimSelector) {
+        this.dkimSelector = dkimSelector;
+    }
+    
 
     public String getMailServer() {
         return mailServer;
