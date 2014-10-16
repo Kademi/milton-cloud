@@ -172,7 +172,7 @@ public class DataSession {
             newCommit.setItemHash(newHash);
             session.save(newCommit);
             branch.setHead(newCommit);
-            //log.debug("New branch hash. Repo/Branch={}/{} BranchID={} CommitID={} Hash={}", branch.getRepository().getName(), branch.getName(), branch.getId(), newCommit.getId(), newHash);
+            log.info("New branch hash. Repo/Branch={}/{} BranchID={} CommitID={} Hash={}", branch.getRepository().getName(), branch.getName(), branch.getId(), newCommit.getId(), newHash);
             session.save(branch);
             try {
                 eventManager.fireEvent(new NodesChangedEvent(this, changedDirectoryNodes));
