@@ -262,4 +262,22 @@ public class Website extends Repository implements VfsAcceptor {
         this.setDomainName(null);
         session.save(this);
     }
+
+    /**
+     * Can only move to organisations
+     * 
+     * @param dest
+     * @param session 
+     */
+    @Override
+    public void moveTo(BaseEntity dest,Profile movedBy, Session session) {
+        getOrganisation().getWebsites().remove(this);
+        Organisation destOrg = (Organisation) dest;
+        this.setOrganisation(destOrg);
+        destOrg.getWebsites().add(this);
+        super.moveTo(dest, movedBy, session);
+        session.save(getOrganisation());
+    }
+    
+    
 }

@@ -319,6 +319,21 @@ public class Repository implements Serializable {
         return v.isContained;
     }
 
+    /**
+     * Move this repository to the given owner
+     * 
+     * @param dest
+     * @param movedBy - the user performing the move
+     * @param session 
+     */
+    public void moveTo(BaseEntity dest,Profile movedBy, Session session) {
+        getBaseEntity().getRepositories().remove(this);
+        this.setBaseEntity(dest);
+        dest.getRepositories().add(this);
+        session.save(this);
+        session.save(dest);
+    }
+
     private class IsContainedVisitor extends AbstractVfsVisitor {
 
         final BaseEntity entity;
