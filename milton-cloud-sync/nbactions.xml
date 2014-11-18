@@ -7,7 +7,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath io.milton.sync.SyncCommand /home/brad/sync-db /home/brad/sync-test http://localhost:8080/user1/repo1 user1 password1</exec.args>
+                <exec.args>-classpath %classpath io.milton.sync.SyncCommand /home/brad/sync-db /home/brad/sync-test http://localhost:8080/repositories/w1/version1/ admin password8</exec.args>
                 <exec.executable>java</exec.executable>
                 <exec.classpathScope>runtime</exec.classpathScope>
             </properties>
@@ -19,7 +19,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath io.milton.sync.SyncCommand /home/brad/sync-db /home/brad/sync-test http://localhost:8080/user1/repo1 user1 password1</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath io.milton.sync.SyncCommand /home/brad/sync-db /home/brad/sync-test http://localhost:8080/repositories/w1/version1/ admin password8</exec.args>
                 <exec.executable>java</exec.executable>
                 <exec.classpathScope>runtime</exec.classpathScope>
                 <jpda.listen>true</jpda.listen>
@@ -32,7 +32,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath io.milton.sync.SyncCommand /home/brad/sync-db /home/brad/sync-test http://localhost:8080/user1/repo1 user1 password1</exec.args>
+                <exec.args>-classpath %classpath io.milton.sync.SyncCommand /home/brad/sync-db /home/brad/sync-test http://localhost:8080/repositories/w1/version1/ admin password8</exec.args>
                 <exec.executable>${profiler.java}</exec.executable>
                 <profiler.action>profile</profiler.action>
             </properties>
