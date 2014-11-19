@@ -26,6 +26,7 @@ import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.BlobDao.BlobVector;
 import io.milton.sync.triplets.CrcDao.CrcRecord;
+import java.util.HashMap;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 
@@ -71,6 +72,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private final ScheduledExecutorService scheduledExecutorService;
     private final HashCalc hashCalc = HashCalc.getInstance();
 
+    
+    
     /**
      *
      * @param useConnection
@@ -245,7 +248,9 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         if (Utils.ignored(dir)) {
             return false;
         }
-        registerWatchDir(dir);
+        if( !initialScanDone ) {
+            registerWatchDir(dir);
+        }
 
         File[] children = dir.listFiles();
         if (children == null) {
@@ -356,16 +361,34 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
     }
 
+    private final Map<File,WatchKey> mapOfWatchKeysByDir = new HashMap<>();
+    
     private void registerWatchDir(final File dir) throws IOException {
+        if( mapOfWatchKeysByDir.containsKey(dir)) {
+            WatchKey key = mapOfWatchKeysByDir.get(dir);
+            key.cancel();
+            mapOfWatchKeysByDir.remove(dir);
+        }
         final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
         // will only watch specified directory, not subdirectories
-        path.register(watchService, events);
+        WatchKey key = path.register(watchService, events);
+        mapOfWatchKeysByDir.put(dir, key);
         log.info("Now watching: " + dir.getAbsolutePath());
+    }
+    
+    private void unregisterWatchDir(final File dir) {
+        final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
+        WatchKey key = mapOfWatchKeysByDir.get(dir);
+        if( key != null ) {
+            log.info("Cancel watch: " + dir.getAbsolutePath() + " - " + key.watchable());
+            key.cancel();
+        }
+
     }
 
     private void scanFsEvents() throws IOException {
         WatchKey watchKey;
-        watchKey = watchService.poll(); // this call is blocking until events are present
+        watchKey = watchService.poll(); // this call is blocking until events are present        
         if (watchKey == null) {
             return;
         }
@@ -376,15 +399,17 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             WatchEvent.Kind<?> kind = event.kind();
             if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
                 java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
+                System.out.println("pathCreated=" + pathCreated);
                 File f = new File(watchedPath + File.separator + pathCreated);
+                System.out.println("watchedPath=" + watchedPath);
                 if (f.isDirectory()) {
                     directoryCreated(f);
                 } else {
                     fileCreated(f);
                 }
-            } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+            } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {                
                 java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
-                File f = new File(watchedPath + File.separator + pathDeleted);
+                File f = new File(watchedPath + File.separator + pathDeleted);                
                 fileDeleted(f);
             } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                 java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
@@ -401,19 +426,24 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     }
 
     private void directoryCreated(final File f) throws IOException {
+        log.info("Directory Created: " + f.getAbsolutePath());
         registerWatchDir(f);
         scanDirTx(f);
     }
 
     private void fileCreated(File f) {
+        log.info("fileCreated: " + f.getAbsolutePath());
         scanDirTx(f.getParentFile());
     }
 
     private void fileModified(File f) {
+        log.info("fileModified: " + f.getAbsolutePath());
         scanDirTx(f.getParentFile());
     }
 
     private void fileDeleted(File f) {
+        log.info("file deleted " + f.getAbsolutePath());
+        unregisterWatchDir(f); // f might be a file or directory, but unregister checks for presence so ok to call regardless
         scanDirTx(f.getParentFile());
     }
 

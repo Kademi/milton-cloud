@@ -44,4 +44,11 @@
                 <goal>deploy</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-dependency:list</actionName>
+            <displayName>dependency:list</displayName>
+            <goals>
+                <goal>dependency:list</goal>
+            </goals>
+        </action>
     </actions>

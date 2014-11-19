@@ -59,6 +59,9 @@ public class SyncCommand {
     public static SpliffySync monitor(String sDbFile, String sLocalDir, String sRemoteAddress, String user, String pwd) throws Exception {
         File dbFile = new File(sDbFile);
         File localDir = new File(sLocalDir);
+        if( !localDir.exists() ) {
+            throw new Exception("Local sync directory does not exist: " + localDir.getAbsolutePath());
+        }
         SyncJob job = new SyncJob(localDir, sRemoteAddress, user, pwd, true, false);
         EventManager eventManager = new EventManagerImpl();
         return start(dbFile, Arrays.asList(job), eventManager).get(0);
