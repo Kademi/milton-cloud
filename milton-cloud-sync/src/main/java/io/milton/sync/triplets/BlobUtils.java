@@ -11,6 +11,8 @@ import org.hashsplit4j.api.FileBlobStore;
 import io.milton.sync.Utils;
 import org.hashsplit4j.triplets.ITriplet;
 import org.hashsplit4j.triplets.Triplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Just moving random stuff out of JdbcLocalTripletStore to make it tidier
@@ -19,6 +21,8 @@ import org.hashsplit4j.triplets.Triplet;
  */
 public class BlobUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(BlobUtils.class);
+    
     public static List<ITriplet> toTriplets(File parent, List<CrcDao.CrcRecord> records) {
         List<ITriplet> list = new ArrayList<>();
         for (CrcDao.CrcRecord r : records) {
@@ -26,7 +30,7 @@ public class BlobUtils {
             if (!child.exists()) {
                 // cached information is out of date
                 // TODO: should regenerate triplets, but should rarely happen
-                System.out.println("Stale triplet information. Child does not exist: " + child.getAbsolutePath());
+                log.warn("Stale triplet information. Child does not exist: " + child.getAbsolutePath());
             } else {
                 Triplet t = new Triplet();
                 t.setHash(r.crc);

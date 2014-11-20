@@ -40,7 +40,7 @@ public class SyncingDeltaListener implements DeltaListener {
                     throw new IOException("Couldnt create local directory: " + localFile.getAbsolutePath());
                 }
             } else {
-                System.out.println("Local already exists: " + localFile.getAbsolutePath());
+                log.info("Local already exists: " + localFile.getAbsolutePath());
             }
         } else {
             final File localChild = toFile(path);
@@ -89,7 +89,7 @@ public class SyncingDeltaListener implements DeltaListener {
     @Override
     public void onLocalDeletion(Path path, ITriplet remoteTriplet) {
         final File localChild = toFile(path);
-        System.out.println("Delete file from server for locally deleted file: " + localChild.getAbsolutePath());
+        log.info("Delete file from server for locally deleted file: " + localChild.getAbsolutePath());
         syncer.deleteRemote(path);
         syncStatusStore.clearBackedupHash(path);
     }

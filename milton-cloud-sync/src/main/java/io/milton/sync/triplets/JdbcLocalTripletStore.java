@@ -21,6 +21,7 @@ import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.NullHashStore;
 import org.hashsplit4j.api.Parser;
 import io.milton.event.EventManager;
+import io.milton.sync.Syncer;
 import io.milton.sync.Utils;
 import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FileChangedEvent;
@@ -207,7 +208,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         return getBlob(hash) != null;
     }
 
-    public void scan() {        
+    public void scan() {
         useConnection.use(new With<Connection, Object>() {
 
             @Override
@@ -231,7 +232,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 return null;
             }
         });
-        if( !initialScanDone ) {
+        if (!initialScanDone) {
             log.info("Done initial scan");
             initialScanDone = true;
         }
@@ -334,19 +335,21 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
         for (File f : mapOfFiles.values()) {
             if (f.isFile()) {
-                CrcRecord r = mapOfRecords.get(f.getName());
-                if (r == null) {
-                    log.trace("detected change, new file: " + f.getAbsolutePath() + " in map of size: " + mapOfRecords.size());
-                    changed = Boolean.TRUE;
-                    scanFile(con(), f);
-                } else {
-                    if (r.date.getTime() != f.lastModified()) {
-                        log.trace("detected change, file modified dates differ: " + f.getAbsolutePath());
+                if (!f.getName().endsWith(Syncer.TMP_SUFFIX)) {
+                    CrcRecord r = mapOfRecords.get(f.getName());
+                    if (r == null) {
+                        log.trace("detected change, new file: " + f.getAbsolutePath() + " in map of size: " + mapOfRecords.size());
                         changed = Boolean.TRUE;
-                        crcDao.deleteCrc(con(), parent.getAbsolutePath(), f.getName());
                         scanFile(con(), f);
                     } else {
-                        //log.trace("scanChildren: file is up to date: " + f.getAbsolutePath());
+                        if (r.date.getTime() != f.lastModified()) {
+                            log.trace("detected change, file modified dates differ: " + f.getAbsolutePath());
+                            changed = Boolean.TRUE;
+                            crcDao.deleteCrc(con(), parent.getAbsolutePath(), f.getName());
+                            scanFile(con(), f);
+                        } else {
+                            //log.trace("scanChildren: file is up to date: " + f.getAbsolutePath());
+                        }
                     }
                 }
             }

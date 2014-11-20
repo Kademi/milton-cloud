@@ -39,8 +39,12 @@ import org.hashsplit4j.triplets.HashCalc;
  * @author brad
  */
 public class Syncer {
-
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Syncer.class);
+    
+   
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Syncer.class);
+    
+    public static final String TMP_SUFFIX = ".new.tmp";
+    
     private final EventManager eventManager;
     private final HttpHashStore httpHashStore;
     private final HttpBlobStore httpBlobStore;
@@ -129,13 +133,13 @@ public class Syncer {
     }
 
     private void _downloadSync(String fileHash, Path path, File localFile) throws IOException {
-        System.out.println("downloadSync: " + path);
+        log.info("downloadSync: " + path);
         List<HashStore> hashStores = new ArrayList<>();
         List<BlobStore> blobStores = new ArrayList<>();
 
         // If we have a temp file it means a previous download didnt complete. Lets
         // use it as a store so we can resume the download
-        File fTemp = new File(localFile.getAbsolutePath() + ".new.tmp");
+        File fTemp = new File(localFile.getAbsolutePath() + TMP_SUFFIX);
         FileBlobStore partialDownloadBlobStore = null;
         FileBlobStore oldFileBlobStore = null;
         try {
@@ -212,7 +216,7 @@ public class Syncer {
             throw new RuntimeException("Downloaded update ok, and renamed old file, but failed to rename new file to original file name: " + localFile.getAbsolutePath());
         }
 
-        System.out.println("Finished update!");
+        log.info("Finished update " + localFile.getAbsolutePath());
     }
 
 //    public void deleteRemoteFile(String childEncodedPath) {
