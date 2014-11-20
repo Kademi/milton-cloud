@@ -66,4 +66,9 @@ public class HttpTripletStore implements ParentHashAwareTripletStore {
             throw new RuntimeException(p.toString(), e);
         }
     }
+
+    @Override
+    public String refreshDir(Path path) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

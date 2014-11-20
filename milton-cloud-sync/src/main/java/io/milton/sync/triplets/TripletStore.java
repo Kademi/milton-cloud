@@ -27,4 +27,12 @@ public interface TripletStore {
      */
     List<ITriplet> getTriplets(Path path);
     
+    /**
+     * Re-calc the directory hash and persist it
+     * 
+     * @param path
+     * @return 
+     */
+    String refreshDir(Path path);
+    
 }

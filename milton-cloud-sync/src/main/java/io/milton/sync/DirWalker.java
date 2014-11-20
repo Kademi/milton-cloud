@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
+import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.hashsplit4j.triplets.Triplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Walks two directory structures, looking for differences, and invoking methods
@@ -18,7 +21,7 @@ import org.hashsplit4j.triplets.Triplet;
  */
 public class DirWalker {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DirWalker.class);
+    private static final Logger log = LoggerFactory.getLogger(DirWalker.class);
     private final TripletStore remoteTripletStore;
     private final TripletStore localTripletStore;
     private final SyncStatusStore syncStatusStore;
@@ -41,21 +44,21 @@ public class DirWalker {
     }
 
     private void walk(Path path, String remoteDirHash, String localDirHash) throws IOException {
-        log.info("walk: " + path);
+        log.info("walk1: " + path);
         List<ITriplet> remoteTriplets = findTriplets(path, remoteDirHash, remoteTripletStore);
         List<ITriplet> localTriplets = findTriplets(path, localDirHash, localTripletStore);
-        walk(path, remoteTriplets, localTriplets);
+        walk(path, remoteTriplets, localTriplets, localDirHash, remoteDirHash);
     }
 
     private void walk(Path path) throws IOException {
-        log.info("walk: " + path);
+        log.info("walk2: " + path);
         List<ITriplet> remoteTriplets = remoteTripletStore.getTriplets(path);
         List<ITriplet> localTriplets = localTripletStore.getTriplets(path);
-        walk(path, remoteTriplets, localTriplets);
+        walk(path, remoteTriplets, localTriplets, null, null);
     }
 
-    private void walk(Path path, List<ITriplet> remoteTriplets, List<ITriplet> localTriplets) throws IOException {
-        log.info("walk: " + path);
+    private void walk(Path path, List<ITriplet> remoteTriplets, List<ITriplet> localTriplets, String parentLocalHash, String parentRemoteHash) throws IOException {
+        log.info("walk3: " + path);
         if (canceled) {
             log.trace("walk canceled");
             return;
@@ -66,6 +69,7 @@ public class DirWalker {
         //int numLocal = localTriplets == null ? 0 : localTriplets.size();
         //int numRemote = remoteTriplets == null ? 0 : remoteTriplets.size();
         //log.info("walk: " + path + " local items: " + numLocal + " - remote items: " + numRemote);        
+        boolean didFindChange = false;
 
         if (remoteTriplets != null) {
             for (ITriplet remoteTriplet : remoteTriplets) {
@@ -78,14 +82,17 @@ public class DirWalker {
                 if (localTriplet == null) {
                     log.info("No localtriplet: " + remoteTriplet.getName() + " in folder: " + path);
                     doMissingLocal(remoteTriplet, childPath);
+                    didFindChange = true;
                 } else {
+                    //log.info("Local {} Remote {}", localTriplet.getHash(), remoteTriplet.getHash());
                     if (localTriplet.getHash().equals(remoteTriplet.getHash())) {
                         // clean, nothing to do
                         //log.info("in sync: " + childPath);
                         syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
                     } else {
-                         log.info("different hashes: " + childPath + " local hash: " + localTriplet.getHash() +  " remote hash: " + remoteTriplet.getHash());
+                        log.info("different hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
                         doDifferentHashes(remoteTriplet, localTriplet, childPath);
+                        didFindChange = true;
                     }
                 }
             }
@@ -95,12 +102,34 @@ public class DirWalker {
         if (localTriplets != null) {
             for (ITriplet localTriplet : localTriplets) {
                 if (!remoteMap.containsKey(localTriplet.getName())) {
+                    log.info("Found missing remote");
                     Path childPath = path.child(localTriplet.getName());
                     doMissingRemote(localTriplet, childPath);
+                    didFindChange = true;
                 }
             }
         }
-        log.info("walk finished: " + path);
+        if (didFindChange) {
+            log.info("walk finished. Found and resolved changed: " + path);
+        } else {
+            log.warn("walk finished, did not find any changes- {} Listing local and remote hashes. Local={} Remote={}", path, parentLocalHash, parentRemoteHash );
+            if (remoteTriplets != null) {
+                for (ITriplet remoteTriplet : remoteTriplets) {
+                    Path childPath = path.child(remoteTriplet.getName());
+                    ITriplet localTriplet = localMap.get(remoteTriplet.getName());
+                    log.info("{} {} {}", childPath.toString(), localTriplet.getHash(), remoteTriplet.getHash());
+                }
+                HashCalc c = new HashCalc();
+                String expectedLocal = c.calcHash(localTriplets);               
+                String updatedDirHash = localTripletStore.refreshDir(path);                
+                if( !updatedDirHash.equals(expectedLocal)) {
+                    throw new RuntimeException("Unexpected hash " + updatedDirHash + " - " + expectedLocal);
+                }
+                log.info("local expected hash={} updated dir hash={} ", expectedLocal, updatedDirHash);
+            }
+            log.info("---- Done listing hashes");
+            //Thread.dumpStack();
+        }
     }
 
     /**
@@ -118,7 +147,7 @@ public class DirWalker {
             log.info("MISSING LOCAL1: " + path + "  no local backup hash, so remotely new");
             // not previously synced, so is remotely new
             deltaListener.onRemoteChange(remoteTriplet, remoteTriplet, path);
-            if (Triplet.isDirectory(remoteTriplet) ) {
+            if (Triplet.isDirectory(remoteTriplet)) {
                 walk(path, remoteTriplet.getHash(), null);
             }
         } else {
@@ -201,7 +230,7 @@ public class DirWalker {
             deltaListener.onLocalChange(localTriplet, path);  // if resource is a directory this should create it            
             if (Triplet.isDirectory(localTriplet)) {  // continue scan
                 List<ITriplet> localChildTriplets = findTriplets(path, localTriplet.getHash(), localTripletStore);
-                walk(path, Collections.EMPTY_LIST, localChildTriplets);
+                walk(path, Collections.EMPTY_LIST, localChildTriplets, null, null);
             }
         } else {
             // it was previously synced, but now gone. So must have been deleted remotely            

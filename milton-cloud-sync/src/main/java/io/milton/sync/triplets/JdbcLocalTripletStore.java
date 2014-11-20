@@ -27,6 +27,8 @@ import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.BlobDao.BlobVector;
 import io.milton.sync.triplets.CrcDao.CrcRecord;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 
@@ -72,8 +74,6 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private final ScheduledExecutorService scheduledExecutorService;
     private final HashCalc hashCalc = HashCalc.getInstance();
 
-    
-    
     /**
      *
      * @param useConnection
@@ -112,31 +112,54 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             }
         });
     }
-  
-    
+
     @Override
     public List<ITriplet> getTriplets(Path path) {
-        if (!initialScanDone) {
-            log.info("getTriplets: Initial scan not done, doing it now...");
-            scan();
-            initialScanDone = true;
-            log.info("getTriplets: Initial scan finished. Now, proceed with syncronisation...");
-        }
+        try {
+            if (!initialScanDone) {
+                log.info("getTriplets: Initial scan not done, doing it now...");
+                scan();
+                initialScanDone = true;
+                log.info("getTriplets: Initial scan finished. Now, proceed with syncronisation...");
+            }
 
+            final File f = Utils.toFile(root, path);
+            List<CrcRecord> records = useConnection.use(new With<Connection, List<CrcRecord>>() {
+
+                @Override
+                public List<CrcRecord> use(Connection con) throws Exception {
+                    tlConnection.set(con);
+                    List<CrcRecord> list = crcDao.listCrcRecords(con, f.getAbsolutePath());
+                    long count = crcDao.getCrcRecordCount(con());
+                    tlConnection.remove();
+                    return list;
+                }
+            });
+            // log.trace("JdbcLocalTripletStore: getTriplets: " + f.getAbsolutePath() + " - " + records.size());
+            List<ITriplet> triplets = BlobUtils.toTriplets(f, records);
+            HashCalc c = new HashCalc();
+            String expectedLocal = c.calcHash(triplets);
+
+            return triplets;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public String refreshDir(Path path) {
         final File f = Utils.toFile(root, path);
-        List<CrcRecord> records = useConnection.use(new With<Connection, List<CrcRecord>>() {
+        String newHash = useConnection.use(new With<Connection, String>() {
 
             @Override
-            public List<CrcRecord> use(Connection con) throws Exception {
+            public String use(Connection con) throws Exception {
                 tlConnection.set(con);
-                List<CrcRecord> list = crcDao.listCrcRecords(con, f.getAbsolutePath());
-                long count = crcDao.getCrcRecordCount(con());
+                String newHash = generateDirectoryRecord(con, f);
                 tlConnection.remove();
-                return list;
+                return newHash;
             }
         });
-        // log.trace("JdbcLocalTripletStore: getTriplets: " + f.getAbsolutePath() + " - " + records.size());
-        return BlobUtils.toTriplets(f, records);
+        return newHash;
     }
 
     /**
@@ -154,7 +177,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     @Override
     public byte[] getBlob(String hash) {
         try {
-            if (hash.equals(lastBlobHash) ) {  // this will often happen because hasBlob will be called first for same hash
+            if (hash.equals(lastBlobHash)) {  // this will often happen because hasBlob will be called first for same hash
                 return lastBlob;
             }
             List<BlobVector> list = blobDao.listBlobsByHash(con(), hash);
@@ -248,7 +271,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         if (Utils.ignored(dir)) {
             return false;
         }
-        if( !initialScanDone ) {
+        if (!initialScanDone) {
             registerWatchDir(dir);
         }
 
@@ -349,7 +372,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      *
      * @param dir
      */
-    private void generateDirectoryRecord(Connection c, File dir) throws SQLException, IOException {
+    private String generateDirectoryRecord(Connection c, File dir) throws SQLException, IOException {
         crcDao.deleteCrc(con(), dir.getParent(), dir.getName());
         // Note that we're reloading triplets, strictly not necessary but is a bit safer then
         // reusing the list we've been changing
@@ -359,12 +382,13 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         String newHash = hashCalc.calcHash(triplets);
         log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
         crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
+        return newHash;
     }
 
-    private final Map<File,WatchKey> mapOfWatchKeysByDir = new HashMap<>();
-    
+    private final Map<File, WatchKey> mapOfWatchKeysByDir = new HashMap<>();
+
     private void registerWatchDir(final File dir) throws IOException {
-        if( mapOfWatchKeysByDir.containsKey(dir)) {
+        if (mapOfWatchKeysByDir.containsKey(dir)) {
             WatchKey key = mapOfWatchKeysByDir.get(dir);
             key.cancel();
             mapOfWatchKeysByDir.remove(dir);
@@ -375,11 +399,11 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         mapOfWatchKeysByDir.put(dir, key);
         log.info("Now watching: " + dir.getAbsolutePath());
     }
-    
+
     private void unregisterWatchDir(final File dir) {
         final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
         WatchKey key = mapOfWatchKeysByDir.get(dir);
-        if( key != null ) {
+        if (key != null) {
             log.info("Cancel watch: " + dir.getAbsolutePath() + " - " + key.watchable());
             key.cancel();
         }
@@ -407,9 +431,9 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 } else {
                     fileCreated(f);
                 }
-            } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {                
+            } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                 java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
-                File f = new File(watchedPath + File.separator + pathDeleted);                
+                File f = new File(watchedPath + File.separator + pathDeleted);
                 fileDeleted(f);
             } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                 java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
