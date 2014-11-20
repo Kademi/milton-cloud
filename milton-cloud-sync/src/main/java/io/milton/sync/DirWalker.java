@@ -2,6 +2,7 @@ package io.milton.sync;
 
 import io.milton.sync.triplets.TripletStore;
 import io.milton.common.Path;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +89,7 @@ public class DirWalker {
                     if (localTriplet.getHash().equals(remoteTriplet.getHash())) {
                         // clean, nothing to do
                         //log.info("in sync: " + childPath);
-                        syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
+                        //syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
                     } else {
                         log.info("different hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
                         doDifferentHashes(remoteTriplet, localTriplet, childPath);
@@ -112,22 +113,25 @@ public class DirWalker {
         if (didFindChange) {
             log.info("walk finished. Found and resolved changed: " + path);
         } else {
-            log.warn("walk finished, did not find any changes- {} Listing local and remote hashes. Local={} Remote={}", path, parentLocalHash, parentRemoteHash );
-            if (remoteTriplets != null) {
-                for (ITriplet remoteTriplet : remoteTriplets) {
-                    Path childPath = path.child(remoteTriplet.getName());
-                    ITriplet localTriplet = localMap.get(remoteTriplet.getName());
-                    log.info("{} {} {}", childPath.toString(), localTriplet.getHash(), remoteTriplet.getHash());
-                }
-                HashCalc c = new HashCalc();
-                String expectedLocal = c.calcHash(localTriplets);               
-                String updatedDirHash = localTripletStore.refreshDir(path);                
-                if( !updatedDirHash.equals(expectedLocal)) {
-                    throw new RuntimeException("Unexpected hash " + updatedDirHash + " - " + expectedLocal);
-                }
-                log.info("local expected hash={} updated dir hash={} ", expectedLocal, updatedDirHash);
-            }
-            log.info("---- Done listing hashes");
+            log.warn("walk finished, did not find any changes- {} Local={} Remote={}", path, parentLocalHash, parentRemoteHash );
+//            if (remoteTriplets != null) {
+//                for (ITriplet remoteTriplet : remoteTriplets) {
+//                    Path childPath = path.child(remoteTriplet.getName());
+//                    ITriplet localTriplet = localMap.get(remoteTriplet.getName());
+//                    log.info("{} {} {}", childPath.toString(), localTriplet.getHash(), remoteTriplet.getHash());
+//                }
+//                HashCalc c = new HashCalc();
+//                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//                c.sort(localTriplets);
+//                String expectedLocal = c.calcHash(localTriplets, bout);
+//                String updatedDirHash = localTripletStore.refreshDir(path);                
+//                if( !updatedDirHash.equals(expectedLocal)) {
+//                    throw new RuntimeException("Unexpected hash " + updatedDirHash + " - " + expectedLocal);
+//                }
+//                log.info("local expected hash={} updated dir hash={} ", expectedLocal, updatedDirHash);
+//                System.out.println(bout.toString());
+//            }
+//            log.info("---- Done listing hashes");
             //Thread.dumpStack();
         }
     }

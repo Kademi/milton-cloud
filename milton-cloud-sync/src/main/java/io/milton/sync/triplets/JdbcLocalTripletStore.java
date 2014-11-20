@@ -118,6 +118,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         try {
             if (!initialScanDone) {
                 log.info("getTriplets: Initial scan not done, doing it now...");
+                //Thread.dumpStack();
                 scan();
                 initialScanDone = true;
                 log.info("getTriplets: Initial scan finished. Now, proceed with syncronisation...");
@@ -206,12 +207,13 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         return getBlob(hash) != null;
     }
 
-    public void scan() {
+    public void scan() {        
         useConnection.use(new With<Connection, Object>() {
 
             @Override
             public Object use(Connection t) throws Exception {
                 System.out.println("START SCAN");
+                //Thread.dumpStack();
                 try {
                     tlConnection.set(t);
                     scanDirectory(root);
@@ -229,6 +231,10 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 return null;
             }
         });
+        if( !initialScanDone ) {
+            log.info("Done initial scan");
+            initialScanDone = true;
+        }
 
     }
 
@@ -379,6 +385,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
         List<CrcRecord> crcRecords = crcDao.listCrcRecords(con(), dir.getAbsolutePath());
         List<ITriplet> triplets = BlobUtils.toTriplets(dir, crcRecords);
+        hashCalc.sort(triplets);
         String newHash = hashCalc.calcHash(triplets);
         log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
         crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());

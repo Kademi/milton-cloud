@@ -80,7 +80,7 @@ public class SpliffySync {
      * @throws IOException 
      */
     public void scan() throws HttpException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException, IOException {
-        jdbcTripletStore.scan();
+//        jdbcTripletStore.scan();
         dirWalker = new DirWalker(remoteTripletStore, jdbcTripletStore, statusStore, deltaListener2);
 
         // Now do the 
