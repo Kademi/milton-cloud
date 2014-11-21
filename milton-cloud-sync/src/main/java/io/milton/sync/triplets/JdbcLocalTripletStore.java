@@ -429,26 +429,33 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         Watchable w = watchKey.watchable();
         java.nio.file.Path watchedPath = (java.nio.file.Path) w;
         // poll for file system events on the WatchKey
+
         for (final WatchEvent<?> event : watchKey.pollEvents()) {
+            log.info("scanFsEvents: " + System.currentTimeMillis());
             WatchEvent.Kind<?> kind = event.kind();
-            if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-                java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
-                System.out.println("pathCreated=" + pathCreated);
-                File f = new File(watchedPath + File.separator + pathCreated);
-                System.out.println("watchedPath=" + watchedPath);
-                if (f.isDirectory()) {
-                    directoryCreated(f);
-                } else {
-                    fileCreated(f);
+            java.nio.file.Path p = (java.nio.file.Path) event.context();
+            if (p.toString().endsWith(".spliffy") || p.toString().endsWith(Syncer.TMP_SUFFIX)) {
+                //ignore
+            } else {
+                if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+                    java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
+
+                    File f = new File(watchedPath + File.separator + pathCreated);
+                    log.info("scanFsEvents: watchedPath=" + watchedPath);
+                    if (f.isDirectory()) {
+                        directoryCreated(f);
+                    } else {
+                        fileCreated(f);
+                    }
+                } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+                    java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
+                    File f = new File(watchedPath + File.separator + pathDeleted);
+                    fileDeleted(f);
+                } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
+                    java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
+                    File f = new File(watchedPath + File.separator + pathModified);
+                    fileModified(f);
                 }
-            } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-                java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
-                File f = new File(watchedPath + File.separator + pathDeleted);
-                fileDeleted(f);
-            } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-                java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
-                File f = new File(watchedPath + File.separator + pathModified);
-                fileModified(f);
             }
         }
 

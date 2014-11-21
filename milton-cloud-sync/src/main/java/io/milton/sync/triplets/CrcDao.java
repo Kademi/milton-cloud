@@ -3,14 +3,19 @@ package io.milton.sync.triplets;
 import com.ettrema.db.Table;
 import com.ettrema.db.TableDefinitionSource;
 import com.ettrema.db.types.FieldTypes;
+import io.milton.sync.DirWalker;
 import java.sql.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author brad
  */
 public class CrcDao {
+    
+    private static final Logger log = LoggerFactory.getLogger(CrcDao.class);
     
     public static final CrcTable CRC = new CrcTable();
     
@@ -34,6 +39,7 @@ public class CrcDao {
     }
 
     public void insertCrc(Connection c, String path, String name, String crc, long modDate) throws SQLException {
+        log.info("insertCrc path={} name={} modDate={}", path,name, modDate);
         String sql = CRC.getInsert();
         try (PreparedStatement stmt = c.prepareStatement(sql)) {
             CRC.crc.set(stmt, 1, crc);
