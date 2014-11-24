@@ -440,21 +440,50 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
                     java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
 
-                    File f = new File(watchedPath + File.separator + pathCreated);
+                    final File f = new File(watchedPath + File.separator + pathCreated);
                     log.info("scanFsEvents: watchedPath=" + watchedPath);
                     if (f.isDirectory()) {
-                        directoryCreated(f);
+                        scheduledExecutorService.schedule(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                directoryCreated(f);
+                            }
+                        }, 500, TimeUnit.MILLISECONDS);
                     } else {
-                        fileCreated(f);
+                        scheduledExecutorService.schedule(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                fileCreated(f);
+                            }
+                        }, 500, TimeUnit.MILLISECONDS);
+
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                     java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
-                    File f = new File(watchedPath + File.separator + pathDeleted);
-                    fileDeleted(f);
+                    final File f = new File(watchedPath + File.separator + pathDeleted);
+
+                    scheduledExecutorService.schedule(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            fileDeleted(f);
+                        }
+                    }, 500, TimeUnit.MILLISECONDS);
+
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                     java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
-                    File f = new File(watchedPath + File.separator + pathModified);
-                    fileModified(f);
+                    final File f = new File(watchedPath + File.separator + pathModified);
+                    scheduledExecutorService.schedule(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            fileModified(f);
+                        }
+                    }, 500, TimeUnit.MILLISECONDS);
+                    
+                    
                 }
             }
         }
@@ -466,10 +495,14 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         }
     }
 
-    private void directoryCreated(final File f) throws IOException {
+    private void directoryCreated(final File f) {
         log.info("Directory Created: " + f.getAbsolutePath());
-        registerWatchDir(f);
-        scanDirTx(f);
+        try {
+            registerWatchDir(f);
+            scanDirTx(f);
+        } catch (IOException e) {
+            log.error("Exception in directoryCreated", e);
+        }
     }
 
     private void fileCreated(File f) {
