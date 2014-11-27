@@ -18,12 +18,15 @@ import org.slf4j.LoggerFactory;
 public class SyncingDeltaListener implements DeltaListener {
 
     private static final Logger log = LoggerFactory.getLogger(SyncingDeltaListener.class);
+    private static final String EMPTY_DIR_HASH = "be1bdec0aa74b4dcb079943e70528096cca985f8"; // an empty directory (or file) has this hash
+    
     private final Syncer syncer;
     private final Archiver archiver;
     private final File root;
     private final SyncStatusStore syncStatusStore;
     private final TripletStore localTripletStore;
     private boolean readonlyLocal;
+    
 
     public SyncingDeltaListener(Syncer syncer, Archiver archiver, File localRoot, SyncStatusStore syncStatusStore, TripletStore localTripletStore) {
         this.syncer = syncer;
@@ -46,6 +49,7 @@ public class SyncingDeltaListener implements DeltaListener {
                     throw new IOException("Couldnt create local directory: " + localFile.getAbsolutePath());
                 }
                 localTripletStore.refreshDir(path);
+                syncStatusStore.setBackedupHash(path, EMPTY_DIR_HASH);
             } else {
                 log.info("Local already exists: " + localFile.getAbsolutePath());
             }
