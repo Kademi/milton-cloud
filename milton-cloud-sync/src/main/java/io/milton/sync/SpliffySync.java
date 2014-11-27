@@ -16,9 +16,6 @@ import java.io.IOException;
 import java.util.concurrent.*;
 import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.HttpTripletStore;
-import java.io.Serializable;
-import java.net.UnknownHostException;
-import java.util.UUID;
 
 /**
  *
@@ -57,7 +54,7 @@ public class SpliffySync {
         remoteTripletStore = new HttpTripletStore(httpClient, Path.path(basePath));
         jdbcTripletStore = new JdbcLocalTripletStore(dbInit.getUseConnection(), dbInit.getDialect(), localRoot, eventManager);
         statusStore = new JdbcSyncStatusStore(dbInit.getUseConnection(), dbInit.getDialect(), basePath, localRoot);
-        deltaListener2 = new SyncingDeltaListener(syncer, archiver, localRoot, statusStore);       
+        deltaListener2 = new SyncingDeltaListener(syncer, archiver, localRoot, statusStore, jdbcTripletStore);
         deltaListener2.setReadonlyLocal(localReadonly);
 //        try {
 //            // Now subscribe to server push notifications

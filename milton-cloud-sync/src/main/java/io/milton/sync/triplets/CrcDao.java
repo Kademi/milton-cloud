@@ -37,7 +37,7 @@ public class CrcDao {
     }
 
     public void insertCrc(Connection c, String path, String name, String crc, long modDate) throws SQLException {
-        log.info("insertCrc path={} name={} modDate={}", path,name, modDate);
+        //log.info("insertCrc path={} name={} modDate={}", path,name, modDate);
         String sql = CRC.getInsert();
         try (PreparedStatement stmt = c.prepareStatement(sql)) {
             CRC.crc.set(stmt, 1, crc);

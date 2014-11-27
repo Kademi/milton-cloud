@@ -86,7 +86,8 @@ public class SyncingDeltaListener implements DeltaListener {
         } else {
             log.info("create remote directory for locally new directory: " + localFile.getAbsolutePath());
             try {
-                syncer.createRemoteDir(path); // note that creating a remote directory does not ensure it is in sync
+                syncer.createRemoteDir(path);
+                syncStatusStore.setBackedupHash(path, localTriplet.getHash());
             } catch (ConflictException ex) {
                 throw new IOException("Exception creating collection, probably already exists", ex);
             }

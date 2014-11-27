@@ -411,8 +411,9 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private String generateDirectoryRecordRecusive(Connection con, File f) throws SQLException, IOException {
         String newHash = generateDirectoryRecord(con, f);
         File parent = f;
-        while (parent.getParentFile().equals(root)) {
-            parent = parent.getParentFile();
+        while (!parent.equals(root)) {
+            //log.info("generateDirectoryRecordRecusive - " + parent.getAbsolutePath() + " != " + root.getAbsolutePath());
+            parent = parent.getParentFile();            
             generateDirectoryRecord(con, parent);
         }
         return newHash;
@@ -425,7 +426,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      * @param dir
      */
     private String generateDirectoryRecord(Connection c, File dir) throws SQLException, IOException {
-
+        //log.info("generateDirectoryRecord: {}", dir.getAbsolutePath());
         crcDao.deleteCrc(con(), dir.getParent(), dir.getName());
         // Note that we're reloading triplets, strictly not necessary but is a bit safer then
         // reusing the list we've been changing
@@ -433,8 +434,10 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         List<CrcRecord> crcRecords = crcDao.listCrcRecords(con(), dir.getAbsolutePath());
         List<ITriplet> triplets = BlobUtils.toTriplets(dir, crcRecords);
         hashCalc.sort(triplets);
-        String newHash = hashCalc.calcHash(triplets);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        String newHash = hashCalc.calcHash(triplets, bout);
         log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
+        //log.info(bout.toString());
         crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
         return newHash;
     }
