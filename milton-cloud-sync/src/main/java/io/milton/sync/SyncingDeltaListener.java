@@ -2,11 +2,14 @@ package io.milton.sync;
 
 import io.milton.common.Path;
 import io.milton.http.exceptions.ConflictException;
+import io.milton.sync.triplets.TripletStore;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import org.hashsplit4j.triplets.ITriplet;
 import org.hashsplit4j.triplets.Triplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -14,18 +17,20 @@ import org.hashsplit4j.triplets.Triplet;
  */
 public class SyncingDeltaListener implements DeltaListener {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SyncingDeltaListener.class);
+    private static final Logger log = LoggerFactory.getLogger(SyncingDeltaListener.class);
     private final Syncer syncer;
     private final Archiver archiver;
     private final File root;
     private final SyncStatusStore syncStatusStore;
+    private final TripletStore localTripletStore;
     private boolean readonlyLocal;
 
-    public SyncingDeltaListener(Syncer syncer, Archiver archiver, File localRoot, SyncStatusStore syncStatusStore) {
+    public SyncingDeltaListener(Syncer syncer, Archiver archiver, File localRoot, SyncStatusStore syncStatusStore, TripletStore localTripletStore) {
         this.syncer = syncer;
         this.archiver = archiver;
         this.root = localRoot;
         this.syncStatusStore = syncStatusStore;
+        this.localTripletStore = localTripletStore;
     }
 
     @Override
@@ -36,9 +41,11 @@ public class SyncingDeltaListener implements DeltaListener {
                 if (readonlyLocal) {
                     return;
                 }
+                log.info("onRemoteChange: Create local dir: {}", localFile.getAbsolutePath());
                 if (!localFile.mkdirs()) {
                     throw new IOException("Couldnt create local directory: " + localFile.getAbsolutePath());
                 }
+                localTripletStore.refreshDir(path);
             } else {
                 log.info("Local already exists: " + localFile.getAbsolutePath());
             }

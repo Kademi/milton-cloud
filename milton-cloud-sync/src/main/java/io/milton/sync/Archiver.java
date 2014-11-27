@@ -2,6 +2,8 @@ package io.milton.sync;
 
 import io.milton.common.FileUtils;
 import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * For removing old versions of local files when they're updated. 
@@ -15,6 +17,8 @@ import java.io.File;
  */
 public class Archiver {
 
+    private static final Logger log = LoggerFactory.getLogger(Archiver.class);
+    
     public Archiver() {
     }
     
@@ -36,12 +40,14 @@ public class Archiver {
     private File getVersionsDir(File contentFile) {
         File hiddenDir = new File(contentFile.getParent(), ".spliffy");
         if (!hiddenDir.exists()) {
+            log.info("getVersionsDir: Creating missing hidden dir", hiddenDir.getAbsolutePath());
             if (!hiddenDir.mkdirs()) {
                 throw new RuntimeException("Couldnt create directory: " + hiddenDir.getAbsolutePath());
             }
         }
         File versionsDir = new File(hiddenDir, "versions");
         if( !versionsDir.exists()) {
+            log.info("getVersionsDir: Creating missing versions dir", versionsDir.getAbsolutePath());
             if(!versionsDir.mkdirs() ) {
                 throw new RuntimeException("Couldnt create directory for old versions: " + versionsDir.getAbsolutePath());
             }

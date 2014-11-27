@@ -1,9 +1,7 @@
 package io.milton.sync.triplets;
 
 import com.ettrema.db.Table;
-import com.ettrema.db.TableDefinitionSource;
 import com.ettrema.db.types.FieldTypes;
-import io.milton.sync.DirWalker;
 import java.sql.*;
 import java.util.*;
 import org.slf4j.Logger;

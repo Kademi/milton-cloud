@@ -28,10 +28,10 @@ import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.BlobDao.BlobVector;
 import io.milton.sync.triplets.CrcDao.CrcRecord;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scans the given root directory on startup to ensure the triplet table is up
@@ -53,7 +53,7 @@ import org.hashsplit4j.triplets.ITriplet;
  */
 public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(JdbcLocalTripletStore.class);
+    private static final Logger log = LoggerFactory.getLogger(JdbcLocalTripletStore.class);
     private static final ThreadLocal<Connection> tlConnection = new ThreadLocal<>();
     private static final WatchEvent.Kind<?>[] events = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
 
@@ -156,7 +156,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             @Override
             public String use(Connection con) throws Exception {
                 tlConnection.set(con);
-                String newHash = generateDirectoryRecord(con, f);
+                String newHash = generateDirectoryRecordRecusive(con, f);
                 tlConnection.remove();
                 return newHash;
             }
@@ -213,7 +213,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
             @Override
             public Object use(Connection t) throws Exception {
-                System.out.println("START SCAN");
+                log.info("START SCAN");
                 //Thread.dumpStack();
                 try {
                     tlConnection.set(t);
@@ -275,33 +275,67 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      * @return - true if anything was changed
      */
     private boolean scanDirectory(File dir) throws SQLException, IOException {
+        List<CrcRecord> oldRecords = crcDao.listCrcRecords(con(), dir.getParentFile().getAbsolutePath());
+        Map<String, CrcRecord> mapOfRecords = CrcDao.toMap(oldRecords);
+        CrcRecord rec = mapOfRecords.get(dir.getName());
+        String oldHash = null;
+        if( rec != null ) {
+            oldHash = rec.crc;
+        }
+        return scanDirectory(dir, oldHash);
+    }
+    
+    /**
+     * 
+     * @param dir
+     * @param dirHash - previous hash, null if the directory has not been seen before
+     * @return
+     * @throws SQLException
+     * @throws IOException 
+     */
+    private boolean scanDirectory(File dir, String dirHash) throws SQLException, IOException {
         if (Utils.ignored(dir)) {
             return false;
         }
         if (!initialScanDone) {
             registerWatchDir(dir);
         }
-
+        log.info("scanDirectory: dir={} old hash={}", dir.getAbsolutePath(), dirHash);
+        
+        final Map<String, File> mapOfFiles = Utils.toMap(dir.listFiles());
+        
+        List<CrcRecord> oldRecords = crcDao.listCrcRecords(con(), dir.getAbsolutePath());
+        Map<String, CrcRecord> mapOfRecords = CrcDao.toMap(oldRecords);
+        
+        
         File[] children = dir.listFiles();
-        if (children == null) {
-            log.trace("No children of: " + dir.getAbsolutePath());
-            return false;
-        }
-        boolean changed = false;
-        for (File child : children) {
-            if (child.isDirectory()) {
-                if (scanDirectory(child)) {
+        boolean changed = (dirHash == null); // if no previous has then definitely changed
+        if (children != null) {
+            for (File child : children) {
+                if (child.isDirectory()) {
+                    String oldChildHash = null;
+                    CrcRecord rec = mapOfRecords.get(child.getName());
+                    if( rec != null ) {
+                        oldChildHash = rec.crc;
+                    }
+                    if (scanDirectory(child, oldChildHash)) {
+                        changed = true;
+                    }
+                }
+                if( !mapOfRecords.containsKey(child.getName())) {
+                    log.info("A resource has been added: " + child.getName());
                     changed = true;
                 }
             }
         }
-        if (scanChildren(dir)) {
+        
+        if (scanChildren(dir, mapOfFiles, mapOfRecords)) {
             changed = true;
         }
 
         if (changed) {
             log.info("changed records found, refresh diretory record: " + dir.getAbsolutePath());
-            generateDirectoryRecord(con(), dir); // insert/update the hash for this directory
+            generateDirectoryRecordRecusive(con(), dir); // insert/update the hash for this directory
         }
 
         con().commit(); // commit every now and then
@@ -313,23 +347,22 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      * files. Delete records with no corresponding file/directory, insert new
      * ones, and update if the recorded modified date differs from actual
      *
-     * @param parent
+     * @param dir
      * @return - true if anything has changed
      */
-    private boolean scanChildren(final File parent) throws SQLException, IOException {
-        final Map<String, File> mapOfFiles = Utils.toMap(parent.listFiles());
+    private boolean scanChildren(final File dir, final Map<String, File> mapOfFiles, Map<String, CrcRecord> mapOfRecords) throws SQLException, IOException {
+        log.info("scanChildren: dir={}", dir.getAbsolutePath());        
 
         boolean changed = false;
-        List<CrcRecord> oldRecords = crcDao.listCrcRecords(con(), parent.getAbsolutePath());
-        Map<String, CrcRecord> mapOfRecords = CrcDao.toMap(oldRecords);
 
         // remove any that no longer exist
-        for (CrcRecord r : oldRecords) {
+        for (CrcRecord r : mapOfRecords.values()) {
+            //log.info("scanChildren check: {}", r.name);
             if (!mapOfFiles.containsKey(r.name)) {
                 changed = Boolean.TRUE;
-                File fRemoved = new File(parent, r.name);
-                log.trace("detected change, file removed: " + fRemoved.getAbsolutePath());
-                crcDao.deleteCrc(con(), parent.getAbsolutePath(), r.name);
+                File fRemoved = new File(dir, r.name);
+                log.info("detected change, file removed: " + fRemoved.getAbsolutePath());
+                crcDao.deleteCrc(con(), dir.getAbsolutePath(), r.name);
             }
         }
 
@@ -338,14 +371,14 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 if (!f.getName().endsWith(Syncer.TMP_SUFFIX)) {
                     CrcRecord r = mapOfRecords.get(f.getName());
                     if (r == null) {
-                        log.trace("detected change, new file: " + f.getAbsolutePath() + " in map of size: " + mapOfRecords.size());
+                        log.info("detected change, new file: " + f.getAbsolutePath() + " in map of size: " + mapOfRecords.size());
                         changed = Boolean.TRUE;
                         scanFile(con(), f);
                     } else {
                         if (r.date.getTime() != f.lastModified()) {
-                            log.trace("detected change, file modified dates differ: " + f.getAbsolutePath());
+                            log.info("detected change, file modified dates differ: " + f.getAbsolutePath());
                             changed = Boolean.TRUE;
-                            crcDao.deleteCrc(con(), parent.getAbsolutePath(), f.getName());
+                            crcDao.deleteCrc(con(), dir.getAbsolutePath(), f.getName());
                             scanFile(con(), f);
                         } else {
                             //log.trace("scanChildren: file is up to date: " + f.getAbsolutePath());
@@ -375,6 +408,16 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         crcDao.insertCrc(c, f.getParentFile().getAbsolutePath(), f.getName(), crc, f.lastModified());
     }
 
+    private String generateDirectoryRecordRecusive(Connection con, File f) throws SQLException, IOException {
+        String newHash = generateDirectoryRecord(con, f);
+        File parent = f;
+        while (parent.getParentFile().equals(root)) {
+            parent = parent.getParentFile();
+            generateDirectoryRecord(con, parent);
+        }
+        return newHash;
+    }
+
     /**
      * Called after all children of the directory have been processed, and only
      * if a change was detected in a child
@@ -382,6 +425,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
      * @param dir
      */
     private String generateDirectoryRecord(Connection c, File dir) throws SQLException, IOException {
+
         crcDao.deleteCrc(con(), dir.getParent(), dir.getName());
         // Note that we're reloading triplets, strictly not necessary but is a bit safer then
         // reusing the list we've been changing
@@ -482,8 +526,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                             fileModified(f);
                         }
                     }, 500, TimeUnit.MILLISECONDS);
-                    
-                    
+
                 }
             }
         }
@@ -499,7 +542,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         log.info("Directory Created: " + f.getAbsolutePath());
         try {
             registerWatchDir(f);
-            scanDirTx(f);
+            scanDirTx(f.getParentFile()); // scan the parent, so it can see the new member
         } catch (IOException e) {
             log.error("Exception in directoryCreated", e);
         }
@@ -529,9 +572,14 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             public Object use(Connection t) throws Exception {
                 tlConnection.set(t);
                 if (scanDirectory(dir)) {
-                    EventUtils.fireQuietly(eventManager, new FileChangedEvent());
+                    log.info("scanDirectory says something changed");
+                } else {
+                    log.info("scanDirectory says nothing changed");
                 }
                 con().commit();
+
+                log.info("something probably changed, fire event so everyone knows");
+                EventUtils.fireQuietly(eventManager, new FileChangedEvent());
 
                 tlConnection.remove();
                 return null;
