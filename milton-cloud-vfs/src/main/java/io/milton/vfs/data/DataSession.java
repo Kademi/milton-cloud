@@ -187,7 +187,7 @@ public class DataSession {
     }
 
     private void recalcHashes(DataNode item, List<DataSession.DirectoryNode> changedDirectoryNodes) throws IOException {
-        if (item.dirty == null) {
+        if (item.dirty == null && item.getHash() != null ) { // if hash is null we need to calc it
             return; // not dirty, which means no children are dirty
         }
         // only directories have derived hashes        
