@@ -50,9 +50,7 @@
         <url>http://www.mcevoysoftware.co.nz/</url>
     </organization>    
     <modules>
-        <!--
         <module>milton-cloud-sync</module>
-        -->
         <module>milton-cloud-vfs</module>
     </modules>
     <build>
