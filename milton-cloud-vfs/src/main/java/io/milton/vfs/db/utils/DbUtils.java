@@ -138,6 +138,8 @@ public class DbUtils {
         nameToUse = nameToUse.replace("!", "-");
         nameToUse = nameToUse.replace("#", "-");
         nameToUse = nameToUse.replace("%", "-");
+        nameToUse = nameToUse.replace("(", "-");
+        nameToUse = nameToUse.replace(")", "-");
         nameToUse = nameToUse.replace("\"", "-");
         nameToUse = nameToUse.replace("--", "-");
         nameToUse = nameToUse.replace("--", "-");
