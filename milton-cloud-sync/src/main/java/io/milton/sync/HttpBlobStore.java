@@ -25,11 +25,6 @@ public class HttpBlobStore implements BlobStore {
     private Path basePath;
     private long gets;
     private long sets;
-
-    
-    
-    
-    
     
     public HttpBlobStore(String server, int port, String rootPath, String username, String password) {
         this.host = new Host(server, port, username, password, null);
