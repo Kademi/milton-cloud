@@ -282,7 +282,9 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         if( rec != null ) {
             oldHash = rec.crc;
         }
-        return scanDirectory(dir, oldHash);
+        boolean b = scanDirectory(dir, oldHash);
+        log.info("scanDirectory: did something change? " + b);
+        return b;
     }
     
     /**
