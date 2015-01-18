@@ -16,6 +16,7 @@
  */
 package io.milton.cloud.common;
 
+import static io.milton.context.RequestContext.C;
 import io.milton.http.DateUtils;
 import java.util.Date;
 
@@ -25,6 +26,11 @@ import java.util.Date;
  * @author brad
  */
 public interface CurrentDateService {
+
+    public static Date now() {
+        Date now = C(CurrentDateService.class).getNow();
+        return now;
+    }
     
     Date getNow();
     
