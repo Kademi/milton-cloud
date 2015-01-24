@@ -112,52 +112,6 @@ public class Website extends Repository implements VfsAcceptor {
     private String dkimSelector;
     private String dkimPrivateKey;
 
-    private String keyStoreFile;
-    private String keyStorePass; 
-    private String trustStoreFile;
-    private String trustStorePass;   
-    private String securityProtocol;    
-
-    public String getKeyStoreFile() {
-        return keyStoreFile;
-    }
-
-    public String getKeyStorePass() {
-        return keyStorePass;
-    }
-
-    public String getTrustStoreFile() {
-        return trustStoreFile;
-    }
-
-    public String getTrustStorePass() {
-        return trustStorePass;
-    }
-
-    public void setKeyStoreFile(String keyStoreFile) {
-        this.keyStoreFile = keyStoreFile;
-    }
-
-    public void setKeyStorePass(String keyStorePass) {
-        this.keyStorePass = keyStorePass;
-    }
-
-    public void setTrustStoreFile(String trustStoreFile) {
-        this.trustStoreFile = trustStoreFile;
-    }
-
-    public void setTrustStorePass(String trustStorePass) {
-        this.trustStorePass = trustStorePass;
-    }
-    
-    public String getSecurityProtocol() {
-        return securityProtocol;
-    }
-
-    public void setSecurityProtocol(String securityProtocol) {
-        this.securityProtocol = securityProtocol;
-    }
-    
     @Override
     @Transient
     public String getRepoType() {
