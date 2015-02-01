@@ -118,31 +118,14 @@ public class DbUtils {
      */
     public static String replaceYuckyChars(String baseName) {
         String nameToUse = baseName;
-        // TODO: use regex
         nameToUse = nameToUse.toLowerCase().replace("/", "");
-        nameToUse = nameToUse.replace("'", "");
-        nameToUse = nameToUse.replace(",", "-");
-        nameToUse = nameToUse.replace("_", "-"); // underscores are very bad for domain names
-        nameToUse = nameToUse.replace("\"", "");
-        nameToUse = nameToUse.replace("@", "-");
-        nameToUse = nameToUse.replace(" ", "-");
-        nameToUse = nameToUse.replace("?", "-");
-        nameToUse = nameToUse.replace(":", "-");
-        nameToUse = nameToUse.replace("<", "-");
-        nameToUse = nameToUse.replace(">", "-");
-        nameToUse = nameToUse.replace("&", "-");
-        nameToUse = nameToUse.replace("[", "-");
-        nameToUse = nameToUse.replace("]", "-");
-        nameToUse = nameToUse.replace("\\", "-");
-        nameToUse = nameToUse.replace("/", "-");
-        nameToUse = nameToUse.replace("!", "-");
-        nameToUse = nameToUse.replace("#", "-");
-        nameToUse = nameToUse.replace("%", "-");
-        nameToUse = nameToUse.replace("(", "-");
-        nameToUse = nameToUse.replace(")", "-");
-        nameToUse = nameToUse.replace("\"", "-");
-        nameToUse = nameToUse.replace("--", "-");
-        nameToUse = nameToUse.replace("--", "-");
+        nameToUse = nameToUse.replaceAll("[^A-Za-z0-9]", "-");
+        while (nameToUse.contains("--")) {
+            nameToUse = nameToUse.replace("--", "-");
+        }
+        if (nameToUse.endsWith("-")) {
+            nameToUse = nameToUse.substring(0, nameToUse.length() - 1);
+        }
         return nameToUse;
     }
 }
