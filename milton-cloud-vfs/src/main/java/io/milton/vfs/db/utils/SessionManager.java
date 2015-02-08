@@ -10,7 +10,7 @@ import org.hibernate.Transaction;
 import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.orm.hibernate4.SessionFactoryUtils; 
+import org.springframework.orm.hibernate4.SessionFactoryUtils;
 
 /**
  *
@@ -47,9 +47,21 @@ public class SessionManager {
     }
 
     public Session open() {
+        return open(true);
+    }
+
+    /**
+     *
+     * @param associateWithThread - if true, sets the session into a thread
+     * local
+     * @return
+     */
+    public Session open(boolean associateWithThread) {
         Session session = sessionFactory.openSession();
         //Session session = SessionFactoryUtils.getSession(sessionFactory, true);
-        tlSession.set(session);
+        if (associateWithThread) {
+            tlSession.set(session);
+        }
 
         if (checkConnectionOnOpen) {
             // We're having some difficult to diagnose connection issues at the moment.
@@ -82,10 +94,14 @@ public class SessionManager {
 
     public void close() {
         Session s = tlSession.get();
-        if (s != null) {
+        closeSession(s);
+        tlSession.remove();
+    }
+    
+    public void closeSession(Session s) {
+        if( s != null ) {
             SessionFactoryUtils.closeSession(s);
         }
-        tlSession.remove();
     }
 
     public org.hibernate.Cache getCache() {
