@@ -19,14 +19,13 @@ public class SyncingDeltaListener implements DeltaListener {
 
     private static final Logger log = LoggerFactory.getLogger(SyncingDeltaListener.class);
     private static final String EMPTY_DIR_HASH = "be1bdec0aa74b4dcb079943e70528096cca985f8"; // an empty directory (or file) has this hash
-    
+
     private final Syncer syncer;
     private final Archiver archiver;
     private final File root;
     private final SyncStatusStore syncStatusStore;
     private final TripletStore localTripletStore;
     private boolean readonlyLocal;
-    
 
     public SyncingDeltaListener(Syncer syncer, Archiver archiver, File localRoot, SyncStatusStore syncStatusStore, TripletStore localTripletStore) {
         this.syncer = syncer;
@@ -37,7 +36,7 @@ public class SyncingDeltaListener implements DeltaListener {
     }
 
     @Override
-    public void onRemoteChange(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {        
+    public void onRemoteChange(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {
         if (Triplet.isDirectory(remoteTriplet)) {
             final File localFile = toFile(path);
             if (!localFile.exists()) {
@@ -55,11 +54,11 @@ public class SyncingDeltaListener implements DeltaListener {
             }
         } else {
             final File localChild = toFile(path);
-            if( localChild.exists() ) {
+            if (localChild.exists()) {
                 log.info("modified remote file: " + localChild.getAbsolutePath() + " remote:" + remoteTriplet.getHash() + " != " + localTriplet.getHash());
             } else {
                 log.info("new remote file: " + localChild.getAbsolutePath());
-            }            
+            }
             if (readonlyLocal) {
                 log.info("in read only mode so not doing anything");
                 return;
@@ -75,7 +74,7 @@ public class SyncingDeltaListener implements DeltaListener {
         if (readonlyLocal) {
             return;
         }
-        log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());        
+        log.info("Archiving remotely deleted file: " + localChild.getAbsolutePath());
         archiver.archive(localChild);
         syncStatusStore.clearBackedupHash(path);
     }
@@ -101,9 +100,13 @@ public class SyncingDeltaListener implements DeltaListener {
     @Override
     public void onLocalDeletion(Path path, ITriplet remoteTriplet) {
         final File localChild = toFile(path);
-        log.info("Delete file from server for locally deleted file: " + localChild.getAbsolutePath());
-        syncer.deleteRemote(path);
-        syncStatusStore.clearBackedupHash(path);
+        if (localChild.exists()) {
+            log.warn("Was going to delete remote resource, but the local still there!! " + localChild.getAbsolutePath());
+        } else {
+            log.info("Delete file from server for locally deleted file: " + localChild.getAbsolutePath());
+            syncer.deleteRemote(path);
+            syncStatusStore.clearBackedupHash(path);
+        }
     }
 
     @Override
@@ -113,7 +116,7 @@ public class SyncingDeltaListener implements DeltaListener {
         Object[] options = {"Use my local file",
             "Use the remote file",
             "Do nothing"};
-        String message = "Oh oh, remote is a " + typeOf(remoteTriplet) +" but local is a " + typeOf(localTriplet) +": " + localChild.getAbsolutePath();
+        String message = "Oh oh, remote is a " + typeOf(remoteTriplet) + " but local is a " + typeOf(localTriplet) + ": " + localChild.getAbsolutePath();
         String title = "Tree conflict";
         int n = JOptionPane.showOptionDialog(null,
                 message,
@@ -134,8 +137,8 @@ public class SyncingDeltaListener implements DeltaListener {
 
     @Override
     public void onFileConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {
-        final File localChild = toFile(path);        
-        if( localChild.getParentFile().getName().equals(".mil")) {
+        final File localChild = toFile(path);
+        if (localChild.getParentFile().getName().equals(".mil")) {
             log.info("Conflict on .mil file, use remote: " + localChild.getAbsolutePath());
             onRemoteChange(remoteTriplet, localTriplet, path);
             return;
@@ -179,7 +182,7 @@ public class SyncingDeltaListener implements DeltaListener {
     }
 
     private String typeOf(ITriplet remoteTriplet) {
-        if( remoteTriplet.getType().equals("d")) {
+        if (remoteTriplet.getType().equals("d")) {
             return "directory";
         } else {
             return "file";
