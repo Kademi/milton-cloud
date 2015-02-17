@@ -469,6 +469,9 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
     }
 
+    private int queuedEvents;
+    private long lastEventTime;
+    
     private void scanFsEvents() throws IOException {
         WatchKey watchKey;
         watchKey = watchService.poll(); // this call is blocking until events are present        
@@ -492,6 +495,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                     final File f = new File(watchedPath + File.separator + pathCreated);
                     log.info("scanFsEvents: watchedPath=" + watchedPath);
                     if (f.isDirectory()) {
+                        queuedEvents++;
+                        lastEventTime = System.currentTimeMillis();
                         scheduledExecutorService.schedule(new Runnable() {
 
                             @Override
@@ -500,6 +505,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                             }
                         }, 500, TimeUnit.MILLISECONDS);
                     } else {
+                        queuedEvents++;
+                        lastEventTime = System.currentTimeMillis();
                         scheduledExecutorService.schedule(new Runnable() {
 
                             @Override
@@ -512,7 +519,8 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                     java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
                     final File f = new File(watchedPath + File.separator + pathDeleted);
-
+                    queuedEvents++;
+                    lastEventTime = System.currentTimeMillis();
                     scheduledExecutorService.schedule(new Runnable() {
 
                         @Override
@@ -555,20 +563,24 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
 
     private void fileCreated(File f) {
         log.info("fileCreated: " + f.getAbsolutePath());
+        queuedEvents--;
         scanDirTx(f.getParentFile());
     }
 
     private void fileModified(File f) {
         log.info("fileModified: " + f.getAbsolutePath());
+        queuedEvents--;
         scanDirTx(f.getParentFile());
     }
 
     private void fileDeleted(File f) {
         log.info("file deleted " + f.getAbsolutePath());
+        queuedEvents--;
         unregisterWatchDir(f); // f might be a file or directory, but unregister checks for presence so ok to call regardless
         scanDirTx(f.getParentFile());
     }
-
+    
+    
     private void scanDirTx(final File dir) {
         log.info("scanDirTx: " + dir.getAbsolutePath());
         useConnection.use(new With<Connection, Object>() {
@@ -576,17 +588,24 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
             @Override
             public Object use(Connection t) throws Exception {
                 tlConnection.set(t);
+                log.info("//*************** Start Scan - " + dir.getName() + "***************************");
                 if (scanDirectory(dir)) {
                     log.info("scanDirectory says something changed");
                 } else {
                     log.info("scanDirectory says nothing changed");
                 }
                 con().commit();
-
-                log.info("something probably changed, fire event so everyone knows");
-                EventUtils.fireQuietly(eventManager, new FileChangedEvent());
+                
+                long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
+                log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
+                if( queuedEvents == 0 || durationSinceLastEvent > 5000 ) {
+                    queuedEvents = 0;
+                    log.info("No more queued events, or its been a while, so fire FileChangedEvent event" );
+                    EventUtils.fireQuietly(eventManager, new FileChangedEvent());
+                }
 
                 tlConnection.remove();
+                log.info("//*************** END Scan - " + dir.getName() + "***************************");
                 return null;
             }
         });
