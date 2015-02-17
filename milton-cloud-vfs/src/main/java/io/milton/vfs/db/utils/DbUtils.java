@@ -71,7 +71,7 @@ public class DbUtils {
         if (results == null) {
             return 0;
         }
-        Object o = results.get(0);
+        Object o = results.get(columnIndex);
         if (o instanceof Long) {
             Long num = (Long) o;
             return num;
