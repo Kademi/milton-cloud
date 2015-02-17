@@ -53,6 +53,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NvSet implements Serializable {
 
+    /**
+     * Creates an empty set, linked to the previous one
+     * 
+     * @param previous
+     * @return 
+     */
     public static NvSet create(NvSet previous) {
         NvSet newFieldset = new NvSet();
         newFieldset.setCreatedDate(new Date());

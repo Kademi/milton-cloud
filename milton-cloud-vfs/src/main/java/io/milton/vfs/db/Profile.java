@@ -41,7 +41,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static Profile create(String email, Date now) {
         Profile p = new Profile();
-        p.setEmail(email);
+        p.setEmail(email.toLowerCase());
         p.setCreatedDate(now);
         p.setModifiedDate(now);
         return p;

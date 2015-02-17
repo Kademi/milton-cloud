@@ -167,7 +167,7 @@ public class Website extends Repository implements VfsAcceptor {
         this.redirectTo = redirectTo;
     }
 
-    @Column(length = 200)
+    @Column(length = 2000)
     public String getDkimPrivateKey() {
         return dkimPrivateKey;
     }
