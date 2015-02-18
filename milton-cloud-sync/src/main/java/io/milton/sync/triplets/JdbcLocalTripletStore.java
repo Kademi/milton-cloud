@@ -218,8 +218,6 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         return paused;
     }
 
-    
-    
     public void scan() {
         useConnection.use(new With<Connection, Object>() {
 
@@ -483,16 +481,16 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
     private int queuedEvents;
     private long lastEventTime;
-    
+
     private void scanFsEvents() throws IOException {
         WatchKey watchKey;
         watchKey = watchService.poll(); // this call is blocking until events are present        
         if (watchKey == null) {
             return;
         }
-        if( paused ) {
+        if (paused) {
             log.info("Ignoring fs events while paused");
-            return ;
+            return;
         }
         Watchable w = watchKey.watchable();
         java.nio.file.Path watchedPath = (java.nio.file.Path) w;
@@ -509,11 +507,14 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
 
                     final File f = new File(watchedPath + File.separator + pathCreated);
-                    log.info("scanFsEvents: watchedPath=" + watchedPath);
-                    if (f.isDirectory()) {
-                        queuedEvents++;
-                        lastEventTime = System.currentTimeMillis();
-                        scheduledExecutorService.schedule(new Runnable() {
+                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                        // ignore it
+                    } else {
+                        log.info("scanFsEvents: watchedPath=" + watchedPath);
+                        if (f.isDirectory()) {
+                            queuedEvents++;
+                            lastEventTime = System.currentTimeMillis();
+                            scheduledExecutorService.schedule(new Runnable() {
 
                                 @Override
                                 public void run() {
@@ -550,16 +551,19 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                     java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
                     final File f = new File(watchedPath + File.separator + pathDeleted);
-                    queuedEvents++;
-                    lastEventTime = System.currentTimeMillis();
-                    scheduledExecutorService.schedule(new Runnable() {
+                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                        // ignored
+                    } else {
+                        queuedEvents++;
+                        lastEventTime = System.currentTimeMillis();
+                        scheduledExecutorService.schedule(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            fileDeleted(f);
-                        }
-                    }, 500, TimeUnit.MILLISECONDS);
-
+                            @Override
+                            public void run() {
+                                fileDeleted(f);
+                            }
+                        }, 500, TimeUnit.MILLISECONDS);
+                    }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                     java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
                     final File f = new File(watchedPath + File.separator + pathModified);
@@ -614,8 +618,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         unregisterWatchDir(f); // f might be a file or directory, but unregister checks for presence so ok to call regardless
         scanDirTx(f.getParentFile());
     }
-    
-    
+
     private void scanDirTx(final File dir) {
         scheduledExecutorService.schedule(new Runnable() {
 
@@ -640,12 +643,12 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     log.info("scanDirectory says nothing changed");
                 }
                 con().commit();
-                
+
                 long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
                 log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-                if( queuedEvents == 0 || durationSinceLastEvent > 5000 ) {
+                if (queuedEvents == 0 || durationSinceLastEvent > 5000) {
                     queuedEvents = 0;
-                    log.info("No more queued events, or its been a while, so fire FileChangedEvent event" );
+                    log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
                     EventUtils.fireQuietly(eventManager, new FileChangedEvent());
                 }
 
