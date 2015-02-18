@@ -291,21 +291,22 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         Map<String, CrcRecord> mapOfRecords = CrcDao.toMap(oldRecords);
         CrcRecord rec = mapOfRecords.get(dir.getName());
         String oldHash = null;
-        if( rec != null ) {
+        if (rec != null) {
             oldHash = rec.crc;
         }
         boolean b = scanDirectory(dir, oldHash);
         log.info("scanDirectory: did something change? " + b);
         return b;
     }
-    
+
     /**
-     * 
+     *
      * @param dir
-     * @param dirHash - previous hash, null if the directory has not been seen before
+     * @param dirHash - previous hash, null if the directory has not been seen
+     * before
      * @return
      * @throws SQLException
-     * @throws IOException 
+     * @throws IOException
      */
     private boolean scanDirectory(File dir, String dirHash) throws SQLException, IOException {
         if (Utils.ignored(dir)) {
@@ -315,13 +316,12 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
             registerWatchDir(dir);
         }
         log.info("scanDirectory: dir={} old hash={}", dir.getAbsolutePath(), dirHash);
-        
+
         final Map<String, File> mapOfFiles = Utils.toMap(dir.listFiles());
-        
+
         List<CrcRecord> oldRecords = crcDao.listCrcRecords(con(), dir.getAbsolutePath());
         Map<String, CrcRecord> mapOfRecords = CrcDao.toMap(oldRecords);
-        
-        
+
         File[] children = dir.listFiles();
         boolean changed = (dirHash == null); // if no previous has then definitely changed
         if (children != null) {
@@ -329,20 +329,20 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                 if (child.isDirectory()) {
                     String oldChildHash = null;
                     CrcRecord rec = mapOfRecords.get(child.getName());
-                    if( rec != null ) {
+                    if (rec != null) {
                         oldChildHash = rec.crc;
                     }
                     if (scanDirectory(child, oldChildHash)) {
                         changed = true;
                     }
                 }
-                if( !mapOfRecords.containsKey(child.getName())) {
+                if (!mapOfRecords.containsKey(child.getName())) {
                     log.info("A resource has been added: " + child.getName());
                     changed = true;
                 }
             }
         }
-        
+
         if (scanChildren(dir, mapOfFiles, mapOfRecords)) {
             changed = true;
         }
@@ -365,7 +365,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
      * @return - true if anything has changed
      */
     private boolean scanChildren(final File dir, final Map<String, File> mapOfFiles, Map<String, CrcRecord> mapOfRecords) throws SQLException, IOException {
-        log.info("scanChildren: dir={}", dir.getAbsolutePath());        
+        log.info("scanChildren: dir={}", dir.getAbsolutePath());
 
         boolean changed = false;
 
@@ -427,7 +427,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         File parent = f;
         while (!parent.equals(root)) {
             //log.info("generateDirectoryRecordRecusive - " + parent.getAbsolutePath() + " != " + root.getAbsolutePath());
-            parent = parent.getParentFile();            
+            parent = parent.getParentFile();
             generateDirectoryRecord(con, parent);
         }
         return newHash;
@@ -515,11 +515,27 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                         lastEventTime = System.currentTimeMillis();
                         scheduledExecutorService.schedule(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                directoryCreated(f);
-                            }
-                        }, 500, TimeUnit.MILLISECONDS);
+                                @Override
+                                public void run() {
+                                    directoryCreated(f);
+                                }
+                            }, 500, TimeUnit.MILLISECONDS);
+                        } else {
+                            scheduledExecutorService.schedule(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    fileCreated(f);
+                                }
+                            }, 500, TimeUnit.MILLISECONDS);
+
+                        }
+                    }
+                } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+                    java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
+                    final File f = new File(watchedPath + File.separator + pathDeleted);
+                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                        log.info("ignoring change to ignored file");
                     } else {
                         queuedEvents++;
                         lastEventTime = System.currentTimeMillis();
@@ -527,10 +543,9 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
                             @Override
                             public void run() {
-                                fileCreated(f);
+                                fileDeleted(f);
                             }
                         }, 500, TimeUnit.MILLISECONDS);
-
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                     java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
@@ -548,14 +563,18 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                     java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
                     final File f = new File(watchedPath + File.separator + pathModified);
-                    scheduledExecutorService.schedule(new Runnable() {
+                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                        log.info("ignoring change to ignored file");
+                    } else {
 
-                        @Override
-                        public void run() {
-                            fileModified(f);
-                        }
-                    }, 500, TimeUnit.MILLISECONDS);
+                        scheduledExecutorService.schedule(new Runnable() {
 
+                            @Override
+                            public void run() {
+                                fileModified(f);
+                            }
+                        }, 500, TimeUnit.MILLISECONDS);
+                    }
                 }
             }
         }
@@ -598,6 +617,16 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
     
     
     private void scanDirTx(final File dir) {
+        scheduledExecutorService.schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                _scanDirTx(dir);
+            }
+        }, 500, TimeUnit.MILLISECONDS);
+    }
+
+    private void _scanDirTx(final File dir) {
         log.info("scanDirTx: " + dir.getAbsolutePath());
         useConnection.use(new With<Connection, Object>() {
 
