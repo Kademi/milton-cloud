@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author brad
  */
-public class JdbcLocalTripletStore implements TripletStore, BlobStore {
+public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcLocalTripletStore.class);
     private static final ThreadLocal<Connection> tlConnection = new ThreadLocal<>();
@@ -74,6 +74,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
     private ScheduledFuture<?> futureScan;
     private final ScheduledExecutorService scheduledExecutorService;
     private final HashCalc hashCalc = HashCalc.getInstance();
+    private boolean paused; // if true ignores fs events
 
     /**
      *
@@ -208,6 +209,17 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         return getBlob(hash) != null;
     }
 
+    @Override
+    public void setPaused(boolean b) {
+        this.paused = b;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    
+    
     public void scan() {
         useConnection.use(new With<Connection, Object>() {
 
@@ -438,7 +450,7 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         hashCalc.sort(triplets);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         String newHash = hashCalc.calcHash(triplets, bout);
-        log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
+        // log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
         //log.info(bout.toString());
         crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
         return newHash;
@@ -478,12 +490,16 @@ public class JdbcLocalTripletStore implements TripletStore, BlobStore {
         if (watchKey == null) {
             return;
         }
+        if( paused ) {
+            log.info("Ignoring fs events while paused");
+            return ;
+        }
         Watchable w = watchKey.watchable();
         java.nio.file.Path watchedPath = (java.nio.file.Path) w;
         // poll for file system events on the WatchKey
 
         for (final WatchEvent<?> event : watchKey.pollEvents()) {
-            log.info("scanFsEvents: " + System.currentTimeMillis());
+            // log.info("scanFsEvents: " + System.currentTimeMillis());
             WatchEvent.Kind<?> kind = event.kind();
             java.nio.file.Path p = (java.nio.file.Path) event.context();
             if (p.toString().endsWith(".spliffy") || p.toString().endsWith(Syncer.TMP_SUFFIX)) {

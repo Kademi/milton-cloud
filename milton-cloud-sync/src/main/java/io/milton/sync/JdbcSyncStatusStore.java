@@ -103,7 +103,7 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
     @Override
     public void setBackedupHash(Path path, final String hash) {        
         final File f = toFile(path);
-        log.info("setBackedupHash: " + path + " hash: " + hash);
+        //log.info("setBackedupHash: " + path + " hash: " + hash);
         final String deleteSql = SYNC_TABLE.getDeleteBy(SYNC_TABLE.localPath);
 
         final String insertSql = SYNC_TABLE.getInsert();
