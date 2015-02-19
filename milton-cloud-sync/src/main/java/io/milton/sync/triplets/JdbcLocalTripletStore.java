@@ -28,6 +28,8 @@ import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.BlobDao.BlobVector;
 import io.milton.sync.triplets.CrcDao.CrcRecord;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.slf4j.Logger;
@@ -227,7 +229,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                 //Thread.dumpStack();
                 try {
                     tlConnection.set(t);
-                    scanDirectory(root);
+                    scanDirectory(root, true);
                     con().commit();
 
                     long count = crcDao.getCrcRecordCount(con());
@@ -284,7 +286,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
      * @param dir
      * @return - true if anything was changed
      */
-    private boolean scanDirectory(File dir) throws SQLException, IOException {
+    private boolean scanDirectory(File dir, boolean deep) throws SQLException, IOException {
         List<CrcRecord> oldRecords = crcDao.listCrcRecords(con(), dir.getParentFile().getAbsolutePath());
         Map<String, CrcRecord> mapOfRecords = CrcDao.toMap(oldRecords);
         CrcRecord rec = mapOfRecords.get(dir.getName());
@@ -292,7 +294,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         if (rec != null) {
             oldHash = rec.crc;
         }
-        boolean b = scanDirectory(dir, oldHash);
+        boolean b = scanDirectory(dir, oldHash, deep);
         log.info("scanDirectory: did something change? " + b);
         return b;
     }
@@ -306,7 +308,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
      * @throws SQLException
      * @throws IOException
      */
-    private boolean scanDirectory(File dir, String dirHash) throws SQLException, IOException {
+    private boolean scanDirectory(File dir, String dirHash, boolean deep) throws SQLException, IOException {
         if (Utils.ignored(dir)) {
             return false;
         }
@@ -322,25 +324,29 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
         File[] children = dir.listFiles();
         boolean changed = (dirHash == null); // if no previous has then definitely changed
-        if (children != null) {
-            for (File child : children) {
-                if (child.isDirectory()) {
-                    String oldChildHash = null;
-                    CrcRecord rec = mapOfRecords.get(child.getName());
-                    if (rec != null) {
-                        oldChildHash = rec.crc;
+        // scan directories, ie deep scan
+        if (deep) {
+            if (children != null) {
+                for (File child : children) {
+                    if (child.isDirectory()) {
+                        String oldChildHash = null;
+                        CrcRecord rec = mapOfRecords.get(child.getName());
+                        if (rec != null) {
+                            oldChildHash = rec.crc;
+                        }
+                        if (scanDirectory(child, oldChildHash, deep)) {
+                            changed = true;
+                        }
                     }
-                    if (scanDirectory(child, oldChildHash)) {
+                    if (!mapOfRecords.containsKey(child.getName())) {
+                        log.info("A resource has been added: " + child.getName());
                         changed = true;
                     }
-                }
-                if (!mapOfRecords.containsKey(child.getName())) {
-                    log.info("A resource has been added: " + child.getName());
-                    changed = true;
                 }
             }
         }
 
+        // scan just the files in this directory
         if (scanChildren(dir, mapOfFiles, mapOfRecords)) {
             changed = true;
         }
@@ -512,24 +518,9 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     } else {
                         log.info("scanFsEvents: watchedPath=" + watchedPath);
                         if (f.isDirectory()) {
-                            queuedEvents++;
-                            lastEventTime = System.currentTimeMillis();
-                            scheduledExecutorService.schedule(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    directoryCreated(f);
-                                }
-                            }, 500, TimeUnit.MILLISECONDS);
+                            directoryCreated(f);
                         } else {
-                            scheduledExecutorService.schedule(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    fileCreated(f);
-                                }
-                            }, 500, TimeUnit.MILLISECONDS);
-
+                            fileCreated(f);
                         }
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
@@ -538,15 +529,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
                         log.info("ignoring change to ignored file");
                     } else {
-                        queuedEvents++;
-                        lastEventTime = System.currentTimeMillis();
-                        scheduledExecutorService.schedule(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                fileDeleted(f);
-                            }
-                        }, 500, TimeUnit.MILLISECONDS);
+                        fileDeleted(f);
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                     java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
@@ -554,15 +537,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
                         // ignored
                     } else {
-                        queuedEvents++;
-                        lastEventTime = System.currentTimeMillis();
-                        scheduledExecutorService.schedule(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                fileDeleted(f);
-                            }
-                        }, 500, TimeUnit.MILLISECONDS);
+                        fileDeleted(f);
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                     java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
@@ -570,14 +545,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
                         log.info("ignoring change to ignored file");
                     } else {
-
-                        scheduledExecutorService.schedule(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                fileModified(f);
-                            }
-                        }, 500, TimeUnit.MILLISECONDS);
+                        fileModified(f);
                     }
                 }
             }
@@ -594,7 +562,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         log.info("Directory Created: " + f.getAbsolutePath());
         try {
             registerWatchDir(f);
-            scanDirTx(f.getParentFile()); // scan the parent, so it can see the new member
+            scanDirTx(f.getParentFile(), false); // scan the parent, so it can see the new member
         } catch (IOException e) {
             log.error("Exception in directoryCreated", e);
         }
@@ -602,34 +570,58 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
     private void fileCreated(File f) {
         log.info("fileCreated: " + f.getAbsolutePath());
-        queuedEvents--;
-        scanDirTx(f.getParentFile());
+        scanDirTx(f.getParentFile(), false);
     }
 
     private void fileModified(File f) {
         log.info("fileModified: " + f.getAbsolutePath());
-        queuedEvents--;
-        scanDirTx(f.getParentFile());
+        scanDirTx(f.getParentFile(), false);
     }
 
     private void fileDeleted(File f) {
         log.info("file deleted " + f.getAbsolutePath());
-        queuedEvents--;
         unregisterWatchDir(f); // f might be a file or directory, but unregister checks for presence so ok to call regardless
-        scanDirTx(f.getParentFile());
+        scanDirTx(f.getParentFile(), false);
     }
 
-    private void scanDirTx(final File dir) {
+    private final Set<File> scanningDirs = new HashSet<>();
+
+    /**
+     *
+     * @param dir
+     * @param deep - if true will scan the directory and its children, otherwise
+     * only the directory
+     */
+    private void scanDirTx(final File dir, final boolean deep) {
+        if( scanningDirs.contains(dir)) {
+            log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile() );
+            return ;
+        }
+        scanningDirs.add(dir);
+        queuedEvents++;
+        lastEventTime = System.currentTimeMillis();
         scheduledExecutorService.schedule(new Runnable() {
 
             @Override
             public void run() {
-                _scanDirTx(dir);
+                synchronized (JdbcLocalTripletStore.this) {
+                    queuedEvents--;
+                    if (queuedEvents < 0) {
+                        queuedEvents = 0;
+                    }
+                    try {
+                        _scanDirTx(dir, deep);
+                    } catch(Throwable e) {
+                        log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage());
+                    } finally {
+                        scanningDirs.remove(dir);
+                    }
+                }
             }
         }, 500, TimeUnit.MILLISECONDS);
     }
 
-    private void _scanDirTx(final File dir) {
+    private void _scanDirTx(final File dir, final boolean deep) {
         log.info("scanDirTx: " + dir.getAbsolutePath());
         useConnection.use(new With<Connection, Object>() {
 
@@ -637,23 +629,29 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
             public Object use(Connection t) throws Exception {
                 tlConnection.set(t);
                 log.info("//*************** Start Scan - " + dir.getName() + "***************************");
-                if (scanDirectory(dir)) {
+                if (scanDirectory(dir, deep)) {
                     log.info("scanDirectory says something changed");
                 } else {
                     log.info("scanDirectory says nothing changed");
                 }
                 con().commit();
 
+                tlConnection.remove();
+                log.info("//*************** END Scan - " + dir.getName() + "***************************");
+
                 long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
                 log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-                if (queuedEvents == 0 || durationSinceLastEvent > 5000) {
+                if (queuedEvents < 0) {
+                    log.warn("huh?? queuedEvents={}", queuedEvents);
+                }
+                if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
                     queuedEvents = 0;
                     log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
                     EventUtils.fireQuietly(eventManager, new FileChangedEvent());
+                } else {
+                    log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
                 }
 
-                tlConnection.remove();
-                log.info("//*************** END Scan - " + dir.getName() + "***************************");
                 return null;
             }
         });

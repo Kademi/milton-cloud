@@ -27,7 +27,7 @@ public class DirWalker {
     private final TripletStore remoteTripletStore;
     private final TripletStore localTripletStore;
     private final SyncStatusStore syncStatusStore;
-    private DeltaListener deltaListener;
+    private final DeltaListener deltaListener;
     private final List<LocalDelete> localDeletes = new ArrayList<>();
     private boolean canceled = false;
 
@@ -39,7 +39,7 @@ public class DirWalker {
     }
 
     public void walk() throws IOException {
-//        log.info("DirWalker::walk ----------------------------");
+        log.info("DirWalker::walk, looking for changes ------------------------");
         PausableTripletStore pausableTripletStore = null;
         if (localTripletStore instanceof PausableTripletStore) {
             pausableTripletStore = (PausableTripletStore) localTripletStore;
@@ -56,7 +56,7 @@ public class DirWalker {
                 pausableTripletStore.setPaused(false);
             }
         }
-//        log.info("DirWalker::End walk ----------------------------");
+        log.info("DirWalker::End walk ----------------------------");
     }
 
     private void walk(Path path, String remoteDirHash, String localDirHash) throws IOException {
@@ -67,7 +67,7 @@ public class DirWalker {
     }
 
     private void walk(Path path) throws IOException {
-        log.info("walk2: " + path);
+        //log.info("walk2: " + path);
         List<ITriplet> remoteTriplets = remoteTripletStore.getTriplets(path);
         List<ITriplet> localTriplets = localTripletStore.getTriplets(path);
         walk(path, remoteTriplets, localTriplets, null, null);
@@ -106,7 +106,8 @@ public class DirWalker {
                         //log.info("in sync: " + childPath);
                         //syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
                     } else {
-                        log.info("Walk: Found different hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
+                        //log.info("Walk: Found changed hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
+                        log.info("Walk: Found changed resource: " + childPath );
                         doDifferentHashes(remoteTriplet, localTriplet, childPath);
                         didFindChange = true;
                     }
