@@ -55,9 +55,9 @@ public class SyncingDeltaListener implements DeltaListener {
         } else {
             final File localChild = toFile(path);
             if (localChild.exists()) {
-                log.info("modified remote file: " + localChild.getAbsolutePath() + " remote:" + remoteTriplet.getHash() + " != " + localTriplet.getHash());
+                //log.info("modified remote file: " + localChild.getAbsolutePath() + " remote:" + remoteTriplet.getHash() + " != " + localTriplet.getHash());
             } else {
-                log.info("new remote file: " + localChild.getAbsolutePath());
+                //log.info("new remote file: " + localChild.getAbsolutePath());
             }
             if (readonlyLocal) {
                 log.info("in read only mode so not doing anything");

@@ -69,14 +69,14 @@ public class SpliffySync {
     /**
      * Perform an immediate scan
      * 
-     * @throws com.ettrema.httpclient.HttpException
+     * @throws io.milton.httpclient.HttpException
      * @throws NotAuthorizedException
      * @throws BadRequestException
      * @throws ConflictException
      * @throws NotFoundException
      * @throws IOException 
      */
-    public void scan() throws HttpException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException, IOException {
+    public void walk() throws HttpException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException, IOException {
 //        jdbcTripletStore.scan();
         dirWalker = new DirWalker(remoteTripletStore, jdbcTripletStore, statusStore, deltaListener2);
 
@@ -214,7 +214,7 @@ public class SpliffySync {
             try {
                 if( !paused ) {
                     log.info("ScanRunner: doing scan of: " + localRoot.getAbsolutePath());
-                    scan();
+                    walk();
                 } else {
                     log.info("ScanRunner: is paused: " + localRoot.getAbsolutePath());
                 }

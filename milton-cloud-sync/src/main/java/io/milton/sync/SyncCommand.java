@@ -102,7 +102,7 @@ public class SyncCommand {
             if (job.isMonitor()) {
                 spliffySync.start();
             } else {
-                spliffySync.scan();
+                spliffySync.walk();
             }
         }
         return syncers;

@@ -243,7 +243,7 @@ public class Syncer {
             String newHash;
             Path destPath = baseUrl.add(path);
             if (file.length() < 25000) {
-                log.info("upSync: upload small file: " + file.getAbsolutePath());
+                //log.info("upSync: upload small file: " + file.getAbsolutePath());
                 // for a small file its quicker just to upload it     
                 boolean done = false;
                 int cnt = 0;

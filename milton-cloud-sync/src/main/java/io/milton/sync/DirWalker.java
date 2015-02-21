@@ -2,6 +2,7 @@ package io.milton.sync;
 
 import io.milton.sync.triplets.TripletStore;
 import io.milton.common.Path;
+import io.milton.sync.triplets.PausableTripletStore;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class DirWalker {
     private final TripletStore remoteTripletStore;
     private final TripletStore localTripletStore;
     private final SyncStatusStore syncStatusStore;
-    private DeltaListener deltaListener;
+    private final DeltaListener deltaListener;
     private final List<LocalDelete> localDeletes = new ArrayList<>();
     private boolean canceled = false;
 
@@ -38,10 +39,24 @@ public class DirWalker {
     }
 
     public void walk() throws IOException {
-//        log.info("DirWalker::walk ----------------------------");
-        walk(Path.root());
-        processLocalDeletes(); // we want to leave deletes until last in case there's some bytes we can use
-//        log.info("DirWalker::End walk ----------------------------");
+        log.info("DirWalker::walk, looking for changes ------------------------");
+        PausableTripletStore pausableTripletStore = null;
+        if (localTripletStore instanceof PausableTripletStore) {
+            pausableTripletStore = (PausableTripletStore) localTripletStore;
+        }
+
+        try {
+            if (pausableTripletStore != null) {
+                pausableTripletStore.setPaused(true);
+            }
+            walk(Path.root());
+            processLocalDeletes(); // we want to leave deletes until last in case there's some bytes we can use
+        } finally {
+            if (pausableTripletStore != null) {
+                pausableTripletStore.setPaused(false);
+            }
+        }
+        log.info("DirWalker::End walk ----------------------------");
     }
 
     private void walk(Path path, String remoteDirHash, String localDirHash) throws IOException {
@@ -52,7 +67,7 @@ public class DirWalker {
     }
 
     private void walk(Path path) throws IOException {
-        log.info("walk2: " + path);
+        //log.info("walk2: " + path);
         List<ITriplet> remoteTriplets = remoteTripletStore.getTriplets(path);
         List<ITriplet> localTriplets = localTripletStore.getTriplets(path);
         walk(path, remoteTriplets, localTriplets, null, null);
@@ -91,7 +106,8 @@ public class DirWalker {
                         //log.info("in sync: " + childPath);
                         //syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
                     } else {
-                        log.info("Walk: Found different hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
+                        //log.info("Walk: Found changed hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
+                        log.info("Walk: Found changed resource: " + childPath );
                         doDifferentHashes(remoteTriplet, localTriplet, childPath);
                         didFindChange = true;
                     }
@@ -113,7 +129,7 @@ public class DirWalker {
         if (didFindChange) {
             log.info("walk finished. Found and resolved changed: " + path);
         } else {
-            log.warn("walk finished, did not find any changes- {} Local={} Remote={}", path, parentLocalHash, parentRemoteHash );
+            log.warn("walk finished, did not find any changes- {} Local={} Remote={}", path, parentLocalHash, parentRemoteHash);
             if (remoteTriplets != null) {
                 for (ITriplet remoteTriplet : remoteTriplets) {
                     Path childPath = path.child(remoteTriplet.getName());
@@ -124,12 +140,12 @@ public class DirWalker {
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 c.sort(localTriplets);
                 String expectedLocal = c.calcHash(localTriplets, bout);
-                String updatedDirHash = localTripletStore.refreshDir(path);                
-                if( !updatedDirHash.equals(expectedLocal)) {
+                String updatedDirHash = localTripletStore.refreshDir(path);
+                if (!updatedDirHash.equals(expectedLocal)) {
                     throw new RuntimeException("Unexpected hash " + updatedDirHash + " - " + expectedLocal);
                 }
-                log.info("local expected hash={} updated dir hash={} ", expectedLocal, updatedDirHash);
-                System.out.println(bout.toString());
+                //log.info("local expected hash={} updated dir hash={} ", expectedLocal, updatedDirHash);
+                //System.out.println(bout.toString());
             }
             log.info("---- Done listing hashes");
             //Thread.dumpStack();
@@ -148,9 +164,9 @@ public class DirWalker {
     private void doMissingLocal(ITriplet remoteTriplet, Path path) throws IOException {
         String localPreviousHash = syncStatusStore.findBackedUpHash(path);
         if (localPreviousHash == null) {
-            log.info("Missing local: " + path + "  no local backup hash, so remotely new");
+            //log.info("Missing local: " + path + "  no local backup hash, so remotely new");
             // not previously synced, so is remotely new
-            deltaListener.onRemoteChange(remoteTriplet, remoteTriplet, path);
+            deltaListener.onRemoteChange(remoteTriplet, null, path);
             if (Triplet.isDirectory(remoteTriplet)) {
                 walk(path, remoteTriplet.getHash(), null);
             }
