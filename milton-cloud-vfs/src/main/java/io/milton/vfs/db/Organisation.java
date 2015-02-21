@@ -624,17 +624,21 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
      * @return
      */
     public Group group(String groupName, Session session) {
-        if (groupName == null) {
-            return null;
-        }
-        Group g = Group.findByOrgAndName(this, groupName, session);
-        if (g == null) {
-            Organisation parent = getOrganisation();
-            if (parent != null) {
-                g = parent.group(groupName, session);
+        for( Group g : groups(session)) {
+            if( g.getName().equals(groupName)) {
+                return g;
             }
         }
-        return g;
+        return null;
+    }
+
+    public Group group(Long id, Session session) {
+        for( Group g : groups(session)) {
+            if( g.getId() == id) {
+                return g;
+            }
+        }
+        return null;
     }
 
     public List<Group> groups(Session session) {
