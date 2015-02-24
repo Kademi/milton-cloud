@@ -80,12 +80,18 @@ public class SyncingDeltaListener implements DeltaListener {
     }
 
     @Override
-    public void onLocalChange(ITriplet localTriplet, Path path) throws IOException {
+    public void onLocalChange(ITriplet localTriplet, Path path, ITriplet remoteTriplet) throws IOException {
         final File localFile = toFile(path);
         if (localFile.isFile()) {
-            log.info("upload locally new or modified file: " + localFile.getCanonicalPath());
-            syncer.upSync(path);
-            syncStatusStore.setBackedupHash(path, localTriplet.getHash());
+            if (remoteTriplet != null && localFile.getParentFile().getName().equals(".mil")) {
+                log.info("detected to change to meta file, so download latest from server: " + localFile.getCanonicalPath());
+                syncer.downloadSync(remoteTriplet.getHash(), path);
+                syncStatusStore.setBackedupHash(path, remoteTriplet.getHash());
+            } else {
+                log.info("upload locally new or modified file: " + localFile.getCanonicalPath());
+                syncer.upSync(path);
+                syncStatusStore.setBackedupHash(path, localTriplet.getHash());
+            }
         } else {
             log.info("create remote directory for locally new directory: " + localFile.getAbsolutePath());
             try {
@@ -128,7 +134,7 @@ public class SyncingDeltaListener implements DeltaListener {
                 options[2]);
         if (n == JOptionPane.YES_OPTION) {
             onLocalDeletion(path, remoteTriplet);
-            onLocalChange(localTriplet, path);
+            onLocalChange(localTriplet, path, null);
         } else if (n == JOptionPane.NO_OPTION) {
             onRemoteDelete(localTriplet, path);
             onRemoteChange(remoteTriplet, localTriplet, path);
@@ -159,7 +165,7 @@ public class SyncingDeltaListener implements DeltaListener {
                 options,
                 options[2]);
         if (n == JOptionPane.YES_OPTION) {
-            onLocalChange(localTriplet, path);
+            onLocalChange(localTriplet, path, null);
         } else if (n == JOptionPane.NO_OPTION) {
             onRemoteChange(remoteTriplet, localTriplet, path);
         }

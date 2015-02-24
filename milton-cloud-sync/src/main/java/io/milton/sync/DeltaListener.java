@@ -16,7 +16,7 @@ public interface DeltaListener {
     
     void onLocalDeletion(Path path, ITriplet remoteTriplet) throws IOException;
     
-    void onLocalChange(ITriplet localTriplet, Path path) throws IOException;
+    void onLocalChange(ITriplet localTriplet, Path path, ITriplet remoteTriplet) throws IOException;
 
     void onRemoteChange(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException;
     

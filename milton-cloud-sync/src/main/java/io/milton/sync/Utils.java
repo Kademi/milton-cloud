@@ -13,10 +13,27 @@ import org.hashsplit4j.triplets.ITriplet;
  */
 public class Utils {
     public static boolean ignored(File childFile) {
-        if( childFile.getName().equals(".mil")) { // usually ignore resources starting with a dot, but special case for .mil directory
+        if( childFile.getName().equals(".mil") ) { // usually ignore resources starting with a dot, but special case for .mil directory
             return false;
         }
         return childFile.isHidden() || childFile.getName().startsWith(".");
+    }
+    
+    public static boolean ignored(String name) {
+        if( name.equals(".mil") ) { // usually ignore resources starting with a dot, but special case for .mil directory
+            return false;
+        }
+        return name.startsWith(".");        
+    }
+    
+    public static boolean ignored(Path p) {
+        while (p != null && p.getName() != null ) {
+            if (Utils.ignored(p.getName())) {
+                return true;
+            }
+            p = p.getParent();
+        }
+        return false;
     }
     
     public static Map<String, File> toMap(File[] files) {
