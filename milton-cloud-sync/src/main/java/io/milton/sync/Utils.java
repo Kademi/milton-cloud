@@ -20,6 +20,9 @@ public class Utils {
     }
     
     public static boolean ignored(String name) {
+        if( name == null ) {
+            return false; //indicates the root of Path
+        }
         if( name.equals(".mil") ) { // usually ignore resources starting with a dot, but special case for .mil directory
             return false;
         }
