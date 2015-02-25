@@ -79,7 +79,9 @@ public class Syncer {
             EventUtils.fireQuietly(eventManager, new UploadSyncEvent(localFile));
             host.doMkCol(p);
         } catch (MethodNotAllowedException e) {
-            throw new ConflictException(p.toString());
+            log.warn("Tried to create a remote folder, but got a conflict which probably means it already exists so just carry on: " + e.getMessage());                    
+            // this should mean that the folder already exists, so cool            
+            //throw new ConflictException(p.toString());
         } catch (HttpException ex) {
             throw new RuntimeException(ex);
         } catch (NotAuthorizedException ex) {
