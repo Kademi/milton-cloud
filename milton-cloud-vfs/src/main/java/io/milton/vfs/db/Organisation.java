@@ -77,6 +77,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
         notDeleted.add(Restrictions.isNull("deleted"));
         notDeleted.add(Restrictions.eq("deleted", Boolean.FALSE));
         crit.add(notDeleted);
+        crit.add(Restrictions.ne("id", organisation.getId()));
 
         Criteria critParentLink = crit.createCriteria("parentOrgLinks");
         critParentLink.add(Restrictions.eq("owner", organisation));
