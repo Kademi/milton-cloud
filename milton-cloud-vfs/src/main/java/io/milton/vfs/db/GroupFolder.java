@@ -86,6 +86,16 @@ public class GroupFolder implements Serializable {
         crit.addOrder(Order.asc("name"));
         return DbUtils.toList(crit, Group.class);
     }
+    
+    private static List<Group> findGroupsToRemove(Organisation org, GroupFolder groupFolder, Session session) {
+        Criteria crit = session.createCriteria(Group.class);
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("organisation", org));
+        crit.add(Restrictions.eq("groupFolder", groupFolder));
+        
+        crit.addOrder(Order.asc("name"));
+        return DbUtils.toList(crit, Group.class);
+    }
 
     @Id
     @GeneratedValue
@@ -125,7 +135,7 @@ public class GroupFolder implements Serializable {
     }
     
     public void delete(Session session) {
-        List<Group> groups = findGroupsInFolder(this.org, this, session);
+        List<Group> groups = findGroupsToRemove(this.getOrg(), this, session);
         groups.stream().forEach((group) -> {
             group.setGroupFolder(null);
             session.save(group);
