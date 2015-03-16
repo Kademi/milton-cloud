@@ -243,7 +243,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         super.delete(session);
     }
 
-    @OneToMany(mappedBy = "profile")
+    @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<Credential> getCredentials() {
         return credentials;
@@ -259,7 +259,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
      *
      * @return
      */
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     public List<GroupMembership> getMemberships() {
         return memberships;

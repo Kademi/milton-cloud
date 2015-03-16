@@ -72,18 +72,22 @@ public class DbUtils {
             return 0;
         }
         Object o = results.get(columnIndex);
+        return asLong(o);
+    }
+    
+    public static long asLong(Object o) {
         if (o instanceof Long) {
             Long num = (Long) o;
             return num;
         } else if (o instanceof Integer) {
             Integer ii = (Integer) o;
-            return ii.intValue();
+            return ii;
         } else {
             if (o != null) {
                 log.error("Unsupported value type: " + o.getClass());
             }
             return 0;
-        }
+        }        
     }
 
     public static String incrementFileName(String name, boolean isFirst) {
