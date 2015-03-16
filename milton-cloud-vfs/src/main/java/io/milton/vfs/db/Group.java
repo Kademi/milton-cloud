@@ -109,6 +109,8 @@ public class Group implements Serializable, VfsAcceptor {
     private String groupType; // optional, defaults to "P" = primary. Others are "M"=mailing list; "S"=subscription
 
     private Boolean deleted;
+    
+    private GroupFolder groupFolder;
 
     @Id
     @GeneratedValue
@@ -532,5 +534,15 @@ public class Group implements Serializable, VfsAcceptor {
         } else {
             return getDeleted();
         }
+    }
+    
+    @ManyToOne(optional = true)
+    public GroupFolder getGroupFolder(){
+        return this.groupFolder;
+    }
+    
+    
+    public void setGroupFolder(GroupFolder groupFolder){
+        this.groupFolder = groupFolder;
     }
 }
