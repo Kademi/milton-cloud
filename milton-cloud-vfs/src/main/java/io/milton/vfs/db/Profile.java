@@ -198,16 +198,26 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         int counter = 1;
         while (!isUniqueName(candidateName, session)) {
             candidateName = nickName + counter++;
+            // have 20 tries, then shove some random digits on the end
+            if( counter > 20 ) {
+                String suffix = (System.currentTimeMillis() + "");
+                suffix = suffix.substring(suffix.length()-4);
+                nickName = nickName + "-" + suffix;
+            }
         }
         return candidateName;
     }
 
     public static boolean isUniqueName(String name, Session session) {
+        log.info("isUniqueName");
+        long tm = System.currentTimeMillis();
         Criteria crit = session.createCriteria(BaseEntity.class);
         crit.add(Restrictions.eq("name", name));
         Object result = DbUtils.unique(crit);
+        log.info("isUniqueName name={} result={} durationMs={}", name, result, (System.currentTimeMillis()-tm));
         return result == null;
     }
+    
     private String name;
     private String firstName;
     private String surName;
