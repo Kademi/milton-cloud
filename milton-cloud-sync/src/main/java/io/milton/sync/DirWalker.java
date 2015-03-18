@@ -106,9 +106,12 @@ public class DirWalker {
                 } else {
                     //log.info("Local {} Remote {}", localTriplet.getHash(), remoteTriplet.getHash());
                     if (localTriplet.getHash().equals(remoteTriplet.getHash())) {
-                        // clean, nothing to do
-                        //log.info("in sync: " + childPath);
-                        //syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
+                        // clean, nothing to do                                                
+                        String localPreviousHash = syncStatusStore.findBackedUpHash(childPath);
+                        if( localPreviousHash == null ) {
+                            log.info("detected in-sync file so record state: " + childPath);
+                            syncStatusStore.setBackedupHash(childPath, localTriplet.getHash());
+                        }
                     } else {
                         //log.info("Walk: Found changed hashes: " + childPath + " local hash: " + localTriplet.getHash() + " remote hash: " + remoteTriplet.getHash());
                         log.info("Walk: Found changed resource: " + childPath);

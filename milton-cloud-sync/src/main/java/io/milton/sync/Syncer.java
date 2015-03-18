@@ -275,7 +275,7 @@ public class Syncer {
                 }
 
             } else {
-                log.info("upSync: chunk larger file: " + file.getAbsolutePath());
+                log.info("upSync: chunk larger file: " + file.getAbsolutePath() + " - " + file.length() + "bytes");
                 newHash = parser.parse(bufIn, httpHashStore, httpBlobStore);
 
                 // Now set the new hash on the remote file, which effectively commits the new content
