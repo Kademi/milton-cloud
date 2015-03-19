@@ -494,10 +494,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         if (watchKey == null) {
             return;
         }
-        if (paused) {
-            log.info("Ignoring fs events while paused");
-            return;
-        }
+
         Watchable w = watchKey.watchable();
         java.nio.file.Path watchedPath = (java.nio.file.Path) w;
         // poll for file system events on the WatchKey
@@ -509,43 +506,47 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
             if (p.toString().endsWith(".spliffy") || p.toString().endsWith(Syncer.TMP_SUFFIX)) {
                 //ignore
             } else {
-                if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-                    java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
+                if (paused) {
+                    log.info("Ignoring fs events while paused during scan");
+                } else {
+                    if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+                        java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
 
-                    final File f = new File(watchedPath + File.separator + pathCreated);
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
-                        // ignore it
-                    } else {
-                        log.info("scanFsEvents: watchedPath=" + watchedPath);
-                        if (f.isDirectory()) {
-                            directoryCreated(f);
+                        final File f = new File(watchedPath + File.separator + pathCreated);
+                        if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                            // ignore it
                         } else {
-                            fileCreated(f);
+                            log.info("scanFsEvents: watchedPath=" + watchedPath);
+                            if (f.isDirectory()) {
+                                directoryCreated(f);
+                            } else {
+                                fileCreated(f);
+                            }
                         }
-                    }
-                } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-                    java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
-                    final File f = new File(watchedPath + File.separator + pathDeleted);
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
-                        log.info("ignoring change to ignored file");
-                    } else {
-                        fileDeleted(f);
-                    }
-                } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-                    java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
-                    final File f = new File(watchedPath + File.separator + pathDeleted);
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
-                        // ignored
-                    } else {
-                        fileDeleted(f);
-                    }
-                } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-                    java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
-                    final File f = new File(watchedPath + File.separator + pathModified);
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
-                        log.info("ignoring change to ignored file");
-                    } else {
-                        fileModified(f);
+                    } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+                        java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
+                        final File f = new File(watchedPath + File.separator + pathDeleted);
+                        if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                            log.info("ignoring change to ignored file");
+                        } else {
+                            fileDeleted(f);
+                        }
+                    } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+                        java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
+                        final File f = new File(watchedPath + File.separator + pathDeleted);
+                        if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                            // ignored
+                        } else {
+                            fileDeleted(f);
+                        }
+                    } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
+                        java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
+                        final File f = new File(watchedPath + File.separator + pathModified);
+                        if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                            log.info("ignoring change to ignored file");
+                        } else {
+                            fileModified(f);
+                        }
                     }
                 }
             }
@@ -593,9 +594,9 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
      * only the directory
      */
     private void scanDirTx(final File dir, final boolean deep) {
-        if( scanningDirs.contains(dir)) {
-            log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile() );
-            return ;
+        if (scanningDirs.contains(dir)) {
+            log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile());
+            return;
         }
         scanningDirs.add(dir);
         queuedEvents++;
@@ -611,7 +612,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     }
                     try {
                         _scanDirTx(dir, deep);
-                    } catch(Throwable e) {
+                    } catch (Throwable e) {
                         log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage());
                     } finally {
                         scanningDirs.remove(dir);
