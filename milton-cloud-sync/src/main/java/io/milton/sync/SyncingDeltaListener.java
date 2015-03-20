@@ -143,6 +143,7 @@ public class SyncingDeltaListener implements DeltaListener {
 
     @Override
     public void onFileConflict(ITriplet remoteTriplet, ITriplet localTriplet, Path path) throws IOException {
+        log.info("onFileConflict: path={} local={} remote={}", path, nullSafeHash(localTriplet), nullSafeHash(remoteTriplet));
         final File localChild = toFile(path);
         if (localChild.getParentFile().getName().equals(".mil")) {
             log.info("Conflict on .mil file, use remote: " + localChild.getAbsolutePath());
@@ -194,4 +195,12 @@ public class SyncingDeltaListener implements DeltaListener {
             return "file";
         }
     }
+
+    private String nullSafeHash(ITriplet t) {
+        if (t != null) {
+            return t.getHash();
+        }
+        return "[none]";
+    }
+
 }

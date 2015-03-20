@@ -329,6 +329,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
             if (children != null) {
                 for (File child : children) {
                     if (child.isDirectory()) {
+                        
                         String oldChildHash = null;
                         CrcRecord rec = mapOfRecords.get(child.getName());
                         if (rec != null) {
