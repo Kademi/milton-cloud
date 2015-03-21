@@ -213,6 +213,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
     @Override
     public void setPaused(boolean b) {
+        log.info("setPaused: " + b);
         this.paused = b;
     }
 
@@ -329,7 +330,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
             if (children != null) {
                 for (File child : children) {
                     if (child.isDirectory()) {
-                        
+
                         String oldChildHash = null;
                         CrcRecord rec = mapOfRecords.get(child.getName());
                         if (rec != null) {
@@ -340,8 +341,12 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                         }
                     }
                     if (!mapOfRecords.containsKey(child.getName())) {
-                        log.info("A resource has been added: " + child.getName());
-                        changed = true;
+                        if (Utils.ignored(child) || Utils.ignored(child.getParentFile())) {
+                            log.info("Found a new but ignored resource " + child.getAbsolutePath());
+                        } else {
+                            log.info("A resource has been added locally: " + child.getName());
+                            changed = true;
+                        }
                     }
                 }
             }

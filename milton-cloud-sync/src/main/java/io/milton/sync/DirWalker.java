@@ -40,9 +40,11 @@ public class DirWalker {
 
     public void walk() throws IOException {
         log.info("DirWalker::walk, looking for changes ------------------------");
-        PausableTripletStore pausableTripletStore = null;
+        final PausableTripletStore pausableTripletStore;
         if (localTripletStore instanceof PausableTripletStore) {
             pausableTripletStore = (PausableTripletStore) localTripletStore;
+        } else {
+            pausableTripletStore = null;
         }
 
         try {
@@ -54,6 +56,8 @@ public class DirWalker {
         } finally {
             if (pausableTripletStore != null) {
                 pausableTripletStore.setPaused(false);
+            } else {
+                throw new RuntimeException("Eeek");
             }
         }
         log.info("DirWalker::End walk ----------------------------");
