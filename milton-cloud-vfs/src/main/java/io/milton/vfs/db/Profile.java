@@ -28,9 +28,6 @@ import org.slf4j.LoggerFactory;
 @javax.persistence.Entity
 @DiscriminatorValue("U")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(
-        uniqueConstraints = {
-            @UniqueConstraint(columnNames = {"name"})})
 public class Profile extends BaseEntity implements VfsAcceptor {
 
     public static final String DEFAULT_CALENDAR_NAME = "default";
