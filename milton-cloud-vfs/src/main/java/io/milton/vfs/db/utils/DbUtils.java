@@ -18,8 +18,11 @@ package io.milton.vfs.db.utils;
 
 import io.milton.common.FileUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hibernate.Criteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,24 @@ public class DbUtils {
         }
     }
 
+    public static <T> List<T> toDistinctList(Criteria crit, Class<T> c) {
+        List list = crit.list();
+        if (list == null) {
+            return Collections.EMPTY_LIST;
+        } else {
+            Set set = new HashSet();
+            List deduped = new ArrayList<>();
+            list.stream().filter((t) -> ( !set.contains(t))).map((t) -> {
+                set.add(t);
+                return t;
+            }).forEach((t) -> {
+                deduped.add(t);
+            });
+            return deduped;
+        }
+    }
+
+
     public static <T> T unique(Criteria crit) {
         List list = crit.list();
         if (list == null || list.isEmpty()) {
@@ -74,7 +95,7 @@ public class DbUtils {
         Object o = results.get(columnIndex);
         return asLong(o);
     }
-    
+
     public static long asLong(Object o) {
         if (o instanceof Long) {
             Long num = (Long) o;
@@ -87,7 +108,7 @@ public class DbUtils {
                 log.error("Unsupported value type: " + o.getClass());
             }
             return 0;
-        }        
+        }
     }
 
     public static String incrementFileName(String name, boolean isFirst) {
