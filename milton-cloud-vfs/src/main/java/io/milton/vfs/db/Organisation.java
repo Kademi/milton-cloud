@@ -226,6 +226,7 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
     private String addressLine2;
     private String state;
     private String postcode;
+    private String country;
     private String email;
     private String timezone;
     private OrgType orgType; // nullable, if present has the type of the org which can be used on signup form
@@ -360,6 +361,15 @@ public class Organisation extends BaseEntity implements VfsAcceptor {
 
     public void setPostcode(String postcode) {
         this.postcode = postcode;
+    }
+    
+    @Column
+    public String getCountry(){
+        return country;
+    }
+    
+    public void setCountry(String country){
+        this.country = country;
     }
 
     @ManyToOne
