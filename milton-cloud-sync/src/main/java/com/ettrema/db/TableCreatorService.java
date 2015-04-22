@@ -5,7 +5,7 @@ import com.ettrema.common.Service;
 import com.ettrema.context.Context;
 import com.ettrema.context.Executable2;
 import com.ettrema.context.RootContext;
-import com.ettrema.vfs.PostgresUtils;
+import com.ettrema.context.PostgresUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;

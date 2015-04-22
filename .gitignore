@@ -22,3 +22,11 @@
 /milton-cloud-server/src/test/resources/milton.license.properties
 /milton-cloud-server/src/test/resources/milton.license.sig
 /examples/mc-vfs-gettingstarted/target/
+.project
+.settings/
+milton-cloud-sync/.classpath
+milton-cloud-sync/.project
+milton-cloud-sync/.settings/
+milton-cloud-vfs/.classpath
+milton-cloud-vfs/.project
+milton-cloud-vfs/.settings/

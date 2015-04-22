@@ -1,4 +1,4 @@
-package com.ettrema.vfs;
+package com.ettrema.context;
 
 import com.ettrema.context.RequestContext;
 import java.io.IOException;
