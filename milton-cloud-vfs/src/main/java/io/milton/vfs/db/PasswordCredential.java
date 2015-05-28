@@ -16,7 +16,6 @@
  */
 package io.milton.vfs.db;
 
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

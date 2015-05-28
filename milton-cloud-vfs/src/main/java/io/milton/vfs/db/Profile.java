@@ -196,9 +196,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         while (!isUniqueName(candidateName, session)) {
             candidateName = nickName + counter++;
             // have 20 tries, then shove some random digits on the end
-            if( counter > 20 ) {
+            if (counter > 20) {
                 String suffix = (System.currentTimeMillis() + "");
-                suffix = suffix.substring(suffix.length()-4);
+                suffix = suffix.substring(suffix.length() - 4);
                 nickName = nickName + "-" + suffix;
             }
         }
@@ -211,10 +211,10 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         Criteria crit = session.createCriteria(BaseEntity.class);
         crit.add(Restrictions.eq("name", name));
         Object result = DbUtils.unique(crit);
-        log.info("isUniqueName name={} result={} durationMs={}", name, result, (System.currentTimeMillis()-tm));
+        log.info("isUniqueName name={} result={} durationMs={}", name, result, (System.currentTimeMillis() - tm));
         return result == null;
     }
-    
+
     private String name;
     private String firstName;
     private String surName;
@@ -223,6 +223,7 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private String photoHash;
     private String origPhotoHash;
     private String nickName;
+    private Date birthDate;
     private boolean enabled;
     private boolean rejected;
     private List<Credential> credentials;
@@ -308,6 +309,15 @@ public class Profile extends BaseEntity implements VfsAcceptor {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+    
+    @Temporal(javax.persistence.TemporalType.DATE)
+    public Date getBirthDate(){
+        return birthDate;
+    }
+    
+    public void setBirthDate(Date birthDate){
+        this.birthDate = birthDate;
     }
 
     /**
@@ -650,22 +660,20 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         if (ot == null) {
             // use any membership from within the awarding org
             if (getMemberships() != null) {
-                for (GroupMembership m : getMemberships()) {
-                    if (m.getWithinOrg().isWithin(parentOrg)) {
-                        list.add(m);
-                    }
-                }
+                getMemberships().stream().filter((m) -> (m.getWithinOrg().isWithin(parentOrg))).forEach((m) -> {
+                    list.add(m);
+                });
             }
         } else {
             // find a membership to an org of type pointsOrgType
             if (getMemberships() != null) {
-                for (GroupMembership m : getMemberships()) {
-                    if (m.getWithinOrg().isWithin(parentOrg)) {
-                        if (m.getWithinOrg().getOrgType() != null && ot.getId() == m.getWithinOrg().getOrgType().getId()) {
+                getMemberships()
+                        .stream()
+                        .filter((m)
+                                -> (m.getWithinOrg().isWithin(parentOrg))).filter((m)
+                                -> (m.getWithinOrg().getOrgType() != null && ot.getId() == m.getWithinOrg().getOrgType().getId())).forEach((m) -> {
                             list.add(m);
-                        }
-                    }
-                }
+                        });
             }
         }
         return list;
@@ -674,11 +682,9 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     public List<GroupMembership> memberships(Organisation parentOrg) {
         List<GroupMembership> list = new ArrayList<>();
         if (getMemberships() != null) {
-            for (GroupMembership gm : getMemberships()) {
-                if (gm.getGroupEntity().getOrganisation() == parentOrg) {
-                    list.add(gm);
-                }
-            }
+            getMemberships().stream().filter((gm) -> (gm.getGroupEntity().getOrganisation() == parentOrg)).forEach((gm) -> {
+                list.add(gm);
+            });
         }
         return list;
     }
@@ -710,4 +716,16 @@ public class Profile extends BaseEntity implements VfsAcceptor {
         return null;
     }
 
+    public void removePasswordCredentials(Session session) {
+        if (getCredentials() != null) {
+            Iterator<Credential> it = getCredentials().iterator();
+            while(it.hasNext()){
+                Credential cred = it.next();
+                if(cred instanceof PasswordCredential){
+                    session.delete(cred);
+                    it.remove();
+                }
+            }
+        }
+    }
 }
