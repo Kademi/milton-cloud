@@ -526,6 +526,14 @@ public class DataSession {
             fanout = null; // if loaded, need to clear it
         }
 
+        @Override
+        public void setHash(String hash) {
+            super.setHash(hash);
+            fanout = null;
+        }
+
+
+
         public byte[] getContent() throws IOException {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             writeContent(bout);
