@@ -102,7 +102,7 @@ public class DataSession {
 
     public Branch getBranch() {
         return branch;
-    }    
+    }
 
     public DataNode find(Path path) {
         if (path.isRoot()) {
@@ -190,7 +190,7 @@ public class DataSession {
         if (item.dirty == null && item.getHash() != null ) { // if hash is null we need to calc it
             return; // not dirty, which means no children are dirty
         }
-        // only directories have derived hashes        
+        // only directories have derived hashes
         if (item instanceof DirectoryNode) {
             DirectoryNode dirNode = (DirectoryNode) item;
             if (item.hash != null && !item.hash.equals(item.loadedHash)) {
@@ -204,7 +204,7 @@ public class DataSession {
                 String oldHash = dirNode.hash;
                 String newHash = hashCalc.calcHash(dirNode, bout);
                 item.setHash(newHash);
-                
+
                 if( !newHash.equals(oldHash)) {
                     //log.info("Found diry node: " + dirNode.getName());
                     changedDirectoryNodes.add(dirNode);
@@ -523,6 +523,7 @@ public class DataSession {
             Parser parser = new Parser();
             String fileHash = parser.parse(in, hashStore, blobStore);
             setHash(fileHash);
+            fanout = null; // if loaded, need to clear it
         }
 
         public byte[] getContent() throws IOException {
