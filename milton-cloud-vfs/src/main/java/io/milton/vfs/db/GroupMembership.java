@@ -58,6 +58,16 @@ public class GroupMembership implements Serializable {
         return (GroupMembership) session.get(GroupMembership.class, membershipId);
     }
 
+    public static List<GroupMembership> findByCustomValue(Group g, String fieldName, String fieldValue, Session session) {
+        Criteria crit = session.createCriteria(GroupMembership.class);
+        crit.createAlias("fields.nvPairs", "p");
+        crit.setCacheable(true);
+        crit.add(Restrictions.eq("groupEntity", g));
+        crit.add(Restrictions.eq("p.name", fieldName));
+        crit.add(Restrictions.eq("p.propValue", fieldValue));
+        return DbUtils.toList(crit, GroupMembership.class);
+    }
+
     public static List<GroupMembership> find(Organisation withinOrg, Session session) {
         Criteria crit = session.createCriteria(GroupMembership.class);
         crit.setCacheable(true);
@@ -81,7 +91,7 @@ public class GroupMembership implements Serializable {
         critGroup.add(Restrictions.eq("name", groupName));
         return DbUtils.toList(crit, GroupMembership.class);
     }
-    
+
     public static long count(Group group, Session session) {
         Criteria crit = session.createCriteria(GroupMembership.class);
         crit.setCacheable(true)
@@ -126,13 +136,13 @@ public class GroupMembership implements Serializable {
             }
         }
     }
-    
+
     /**
      * Returns a de-duped set of organisations which the given memberships are
      * linked ot
-     * 
+     *
      * @param memberships
-     * @return 
+     * @return
      */
     public static Set<Organisation> toOrgs(List<GroupMembership> memberships) {
         Set<Organisation> set = new HashSet<>();
@@ -144,11 +154,11 @@ public class GroupMembership implements Serializable {
 
     /**
      * Find memberships for a profile and group, regardless of containing org
-     * 
+     *
      * @param group
      * @param member
      * @param session
-     * @return 
+     * @return
      */
     public static List<GroupMembership> find(Group group, Profile member, Session session) {
         Criteria crit = session.createCriteria(GroupMembership.class);
@@ -157,7 +167,7 @@ public class GroupMembership implements Serializable {
         crit.add(Restrictions.eq("groupEntity", group));
         return DbUtils.toList(crit, GroupMembership.class);
     }
-    
+
     private Long id;
     private Organisation withinOrg;
     private Profile member;
@@ -283,6 +293,6 @@ public class GroupMembership implements Serializable {
             subordinateTo = subordinateTo.getOrganisation();
         }
     }
-    
+
 
 }

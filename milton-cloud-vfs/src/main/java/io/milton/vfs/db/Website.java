@@ -43,8 +43,8 @@ import org.hibernate.criterion.Restrictions;
 public class Website extends Repository implements VfsAcceptor {
 
     public static String REPO_TYPE_WEBSITE = "W"; // discriminator
-    
-    
+
+
     /**
      * Attempts to locate a website with the exact name give. Will follow alias
      * links
@@ -66,7 +66,7 @@ public class Website extends Repository implements VfsAcceptor {
         crit.setCacheable(true);
         crit.add(Restrictions.eq("domainName", domainName));
         Website w = DbUtils.unique(crit);
-        return w;        
+        return w;
     }
 
     public static Website findByName(String name, Session session) {
@@ -86,10 +86,10 @@ public class Website extends Repository implements VfsAcceptor {
 
     /**
      * Checks for null deleted flag
-     * 
+     *
      * @param org
      * @param session
-     * @return 
+     * @return
      */
     public static List<Website> findByOrg(Organisation org, Session session) {
         Criteria crit = session.createCriteria(Website.class);
@@ -98,12 +98,12 @@ public class Website extends Repository implements VfsAcceptor {
         crit.add(Restrictions.isNull("deleted"));
         crit.addOrder(Order.asc("name"));
         return DbUtils.toList(crit, Website.class);
-    }    
-    
+    }
+
     public static Website get(Session session, Long themeSiteId) {
         return (Website) session.get(Website.class, themeSiteId);
     }
-    
+
     private Organisation organisation; // will generally be same as baseEntity on underlying repo
     private String domainName; // identifies the resource to webdav. This is the DNS name, eg www.bradsite.com
     private Website aliasTo; // if not null, this website is really just an alias for that one
@@ -111,13 +111,14 @@ public class Website extends Repository implements VfsAcceptor {
     private String mailServer; // if not null, will be used for email sending and generating MX records
     private String dkimSelector;
     private String dkimPrivateKey;
+    private String imageHash; // hash of a thumbnail for this site
 
     @Override
     @Transient
     public String getRepoType() {
         return REPO_TYPE_WEBSITE;
-    }        
-    
+    }
+
     @Column(length = 255, nullable = true)
     @Index(name = "idx_domain_name")
     public String getDomainName() {
@@ -127,7 +128,7 @@ public class Website extends Repository implements VfsAcceptor {
     public void setDomainName(String name) {
         this.domainName = name;
     }
-        
+
     @ManyToOne(optional = false)
     public Organisation getOrganisation() {
         return organisation;
@@ -171,7 +172,7 @@ public class Website extends Repository implements VfsAcceptor {
     public String getDkimPrivateKey() {
         return dkimPrivateKey;
     }
-    
+
     public void setDkimPrivateKey(String dkimPrivateKey) {
         this.dkimPrivateKey = dkimPrivateKey;
     }
@@ -183,7 +184,7 @@ public class Website extends Repository implements VfsAcceptor {
     public void setDkimSelector(String dkimSelector) {
         this.dkimSelector = dkimSelector;
     }
-    
+
 
     public String getMailServer() {
         return mailServer;
@@ -192,6 +193,16 @@ public class Website extends Repository implements VfsAcceptor {
     public void setMailServer(String mailServer) {
         this.mailServer = mailServer;
     }
+
+    public String getImageHash() {
+        return imageHash;
+    }
+
+    public void setImageHash(String imageHash) {
+        this.imageHash = imageHash;
+    }
+
+    
 
     @Override
     public void accept(VfsVisitor visitor) {
@@ -227,7 +238,7 @@ public class Website extends Repository implements VfsAcceptor {
     public List<GroupInWebsite> groups(Session session) {
         return GroupInWebsite.findByWebsite(this, session);
     }
-    
+
     public boolean hasGroup(Group g, Session session) {
         for( GroupInWebsite giw : groups(session)) {
             if( g == giw.getUserGroup()) {
@@ -257,7 +268,7 @@ public class Website extends Repository implements VfsAcceptor {
     @Override
     public void softDelete(Session session) {
         String deletedName = Organisation.getDeletedName(getName()); // change name to avoid name conflicts with new resources
-        this.setName(deletedName);        
+        this.setName(deletedName);
         this.setDeleted(true);
         this.setDomainName(null);
         session.save(this);
@@ -265,9 +276,9 @@ public class Website extends Repository implements VfsAcceptor {
 
     /**
      * Can only move to organisations
-     * 
+     *
      * @param dest
-     * @param session 
+     * @param session
      */
     @Override
     public void moveTo(BaseEntity dest,Profile movedBy, Session session) {
@@ -278,6 +289,6 @@ public class Website extends Repository implements VfsAcceptor {
         super.moveTo(dest, movedBy, session);
         session.save(getOrganisation());
     }
-    
-    
+
+
 }
