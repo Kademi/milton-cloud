@@ -2,6 +2,7 @@ package io.milton.sync;
 
 import io.milton.common.Path;
 import io.milton.http.exceptions.ConflictException;
+import io.milton.sync.SwingConflictResolver.ConflictChoice;
 import io.milton.sync.triplets.TripletStore;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,11 @@ public class SyncingDeltaListener implements DeltaListener {
     private final SyncStatusStore syncStatusStore;
     private final TripletStore localTripletStore;
     private boolean readonlyLocal;
+    private SwingConflictResolver conflictResolver = new SwingConflictResolver();
+
+    private Integer rememberSecs;
+    private ConflictChoice choice;
+    private Long choiceTimeout;
 
     public SyncingDeltaListener(Syncer syncer, Archiver archiver, File localRoot, SyncStatusStore syncStatusStore, TripletStore localTripletStore) {
         this.syncer = syncer;
@@ -152,24 +158,25 @@ public class SyncingDeltaListener implements DeltaListener {
         }
         Thread.dumpStack();
 
-        Object[] options = {"Use my local file",
-            "Use the remote file",
-            "Do nothing"};
-        String message = "Files are in conflict. There has been a change to a local file, but also a change to the corresponding remote file: " + localChild.getAbsolutePath();
-        String title = "File conflict";
-        int n = JOptionPane.showOptionDialog(null,
-                message,
-                title,
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[2]);
-        if (n == JOptionPane.YES_OPTION) {
+        // Check if we have a non-expired timeout
+        SwingConflictResolver.ConflictChoice n;
+        if (this.choice != null && System.currentTimeMillis() < choiceTimeout) {
+            n = choice;
+        } else {
+            String message = "Files are in conflict. There has been a change to a local file, but also a change to the corresponding remote file: " + localChild.getAbsolutePath();
+            n = conflictResolver.showConflictResolver(message, rememberSecs);
+            rememberSecs = conflictResolver.getRememberSecs();
+            if (rememberSecs != null) {
+                this.choice = n;
+                choiceTimeout = System.currentTimeMillis() + conflictResolver.rememberSecs * 1000;
+            }
+        }
+        if (n == ConflictChoice.LOCAL) {
             onLocalChange(localTriplet, path, null);
-        } else if (n == JOptionPane.NO_OPTION) {
+        } else if (n == ConflictChoice.REMOTE) {
             onRemoteChange(remoteTriplet, localTriplet, path);
         }
+
     }
 
     private File toFile(Path path) {

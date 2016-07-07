@@ -29,6 +29,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.hashsplit4j.store.ByteArrayBlobStore;
+import org.hashsplit4j.store.FileBlobStore;
+import org.hashsplit4j.store.MemoryHashStore;
+import org.hashsplit4j.store.MultipleBlobStore;
+import org.hashsplit4j.store.MultipleHashStore;
+import org.hashsplit4j.store.NullHashStore;
 import org.hashsplit4j.triplets.HashCalc;
 
 /**
@@ -39,12 +44,12 @@ import org.hashsplit4j.triplets.HashCalc;
  * @author brad
  */
 public class Syncer {
-    
-   
+
+
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Syncer.class);
-    
+
     public static final String TMP_SUFFIX = ".new.tmp";
-    
+
     private final EventManager eventManager;
     private final HttpHashStore httpHashStore;
     private final HttpBlobStore httpBlobStore;
@@ -79,8 +84,8 @@ public class Syncer {
             EventUtils.fireQuietly(eventManager, new UploadSyncEvent(localFile));
             host.doMkCol(p);
         } catch (MethodNotAllowedException e) {
-            log.warn("Tried to create a remote folder, but got a conflict which probably means it already exists so just carry on: " + e.getMessage());                    
-            // this should mean that the folder already exists, so cool            
+            log.warn("Tried to create a remote folder, but got a conflict which probably means it already exists so just carry on: " + e.getMessage());
+            // this should mean that the folder already exists, so cool
             //throw new ConflictException(p.toString());
         } catch (HttpException ex) {
             throw new RuntimeException(ex);
@@ -188,7 +193,7 @@ public class Syncer {
                 fout = new FileOutputStream(fTemp);
                 try (BufferedOutputStream bufOut = new BufferedOutputStream(fout)) {
                     combiner = new Combiner();
-                    // TODO: Use MultipleBlobStore with the httpHashStore and LocalFileTriplet.blobStore to minimise network traffic                
+                    // TODO: Use MultipleBlobStore with the httpHashStore and LocalFileTriplet.blobStore to minimise network traffic
                     combiner.combine(rootHashes, multiHashStore, multiBlobStore, bufOut);
                     bufOut.flush();
                     combiner = null;
@@ -246,7 +251,7 @@ public class Syncer {
             Path destPath = baseUrl.add(path);
             if (file.length() < 25000) {
                 //log.info("upSync: upload small file: " + file.getAbsolutePath());
-                // for a small file its quicker just to upload it     
+                // for a small file its quicker just to upload it
                 boolean done = false;
                 int cnt = 0;
                 while (!done) {

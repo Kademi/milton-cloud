@@ -18,7 +18,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.hashsplit4j.api.BlobStore;
-import org.hashsplit4j.api.NullHashStore;
 import org.hashsplit4j.api.Parser;
 import io.milton.event.EventManager;
 import io.milton.sync.Syncer;
@@ -30,6 +29,7 @@ import io.milton.sync.triplets.CrcDao.CrcRecord;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.hashsplit4j.store.NullHashStore;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.slf4j.Logger;
@@ -496,7 +496,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
     private void scanFsEvents() throws IOException {
         WatchKey watchKey;
-        watchKey = watchService.poll(); // this call is blocking until events are present        
+        watchKey = watchService.poll(); // this call is blocking until events are present
         if (watchKey == null) {
             return;
         }
