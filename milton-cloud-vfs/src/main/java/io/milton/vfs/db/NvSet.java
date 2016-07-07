@@ -15,6 +15,7 @@
 package io.milton.vfs.db;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -194,6 +195,9 @@ public class NvSet implements Serializable {
 
     public NvPair addOrUpdatePair(String name, String value) {
         NvPair found = null;
+        if( getNvPairs() == null ) {
+            setNvPairs(new HashSet<>() ) ;
+        }
         Iterator<NvPair> it = getNvPairs().iterator();
         if (getNvPairs() != null) {
             while (it.hasNext()) {
