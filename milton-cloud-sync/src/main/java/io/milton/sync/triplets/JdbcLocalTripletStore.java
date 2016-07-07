@@ -462,9 +462,17 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         String newHash = hashCalc.calcHash(triplets, bout);
         // log.info("Insert new directory hash: " + dir.getParent() + " :: " + dir.getName() + " = " + newHash);
         //log.info(bout.toString());
-        crcDao.insertCrc(c, dir.getParentFile().getAbsolutePath(), dir.getName(), newHash, dir.lastModified());
+        File parent = dir.getParentFile();
+        String parentPath = "";
+        if( parent != null ) {
+            parentPath = parent.getAbsolutePath();
+        } else {
+            log.warn("Could not get parent path for {}", dir);
+        }
+        crcDao.insertCrc(c, parentPath, dir.getName(), newHash, dir.lastModified());
         return newHash;
     }
+
 
     private final Map<File, WatchKey> mapOfWatchKeysByDir = new HashMap<>();
 
@@ -619,7 +627,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                     try {
                         _scanDirTx(dir, deep);
                     } catch (Throwable e) {
-                        log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage());
+                        log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage(), e);
                     } finally {
                         scanningDirs.remove(dir);
                     }
