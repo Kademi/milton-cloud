@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.milton</groupId>
+    <artifactId>milton-cloud</artifactId>
+    <version>1.2.1</version>
+    <packaging>pom</packaging>
+    <distributionManagement>
+        <repository>
+            <id>ettrema-repo</id>
+            <url>http://milton.io/maven</url>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>ettrema-repo</id>
+            <url>http://milton.io/maven</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <developers>
+        <developer>
+            <name>Brad McEvoy</name>
+            <timezone>GMT+12</timezone>
+            <organization>McEvoy Software</organization>
+            <organizationUrl>http://www.mcevoysoftware.co.nz/</organizationUrl>
+        </developer>
+    </developers>    
+    <properties>
+        <milton.version>2.6.3.3</milton.version>
+        <!-- Really want to deprecate endrick, but need to refactor cache in milton-client -->
+        <endrick.version>1.7.8</endrick.version>
+        <jpa.version>1.0</jpa.version>
+        <jdbc.driverClassName>org.hsqldb.jdbcDriver</jdbc.driverClassName>
+        <jdbc.username>sa</jdbc.username>
+        <jdbc.password />
+        <jdbc.groupId>hsqldb</jdbc.groupId>
+        <jdbc.artifactId>hsqldb</jdbc.artifactId>
+        <jdbc.version>1.8.0.7</jdbc.version>   
+        <netbeans.hint.license>agpl3</netbeans.hint.license>
+    </properties>
+    <licenses>
+        <license>
+            <name>Affero GPL3</name>
+            <url>http://www.gnu.org/licenses/agpl.html</url>
+            <distribution>repo</distribution>
+            <comments>The GNU Affero General Public License is a free, copyleft license for software and other kinds of works, specifically designed to ensure cooperation with the community in the case of network server software.</comments>
+        </license>
+    </licenses>    
+    <organization>
+        <name>McEvoy Software Ltd</name>
+        <url>http://www.mcevoysoftware.co.nz/</url>
+    </organization>    
+    <modules>
+        <module>milton-cloud-sync</module>
+        <module>milton-cloud-vfs</module>
+    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <dependency>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-clean-plugin</artifactId>
+    <version>2.4.1</version>
+</dependency>
+
+        <dependency>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.19.1</version>
+</dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+<dependency>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-resources-plugin</artifactId>
+    <version>2.5</version>
+</dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>        
+        <dependency>
+            <scope>test</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.7</version>
+        </dependency>    		
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+            <type>jar</type>
+        </dependency>        
+    </dependencies>
+        
+    <repositories>
+        <repository>
+            <id>ettrema-repo</id>
+            <url>http://milton.io/maven</url>
+        </repository>
+    </repositories>    
+</project>
+
