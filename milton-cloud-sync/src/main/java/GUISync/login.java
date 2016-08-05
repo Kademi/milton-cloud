@@ -5,7 +5,6 @@
 package GUISync;
 
 import io.milton.sync.SpliffySync;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import static java.awt.image.ImageObserver.PROPERTIES;
 import java.util.LinkedList;
