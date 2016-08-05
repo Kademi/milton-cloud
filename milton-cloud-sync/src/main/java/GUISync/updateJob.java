@@ -22,8 +22,21 @@ public class updateJob extends javax.swing.JPanel {
     /**
      * Creates new form addJob
      */
-    public updateJob() {
+    SyncJob updateJob;
+    
+    public updateJob(SyncJob updateJob) {
         initComponents();
+        this.updateJob = updateJob;
+        updateField();
+    }
+    
+    void updateField() {
+        txt_localPath.setText(updateJob.getLocalDir().getAbsolutePath());
+        txt_remoteAddress.setText(updateJob.getRemoteAddress());
+        txt_user.setText(updateJob.getUser());
+        txt_password.setText(updateJob.getPwd());
+        local_read_only_CheckBox1.setSelected(updateJob.isLocalReadonly());
+        
     }
 
     /**
@@ -90,7 +103,7 @@ public class updateJob extends javax.swing.JPanel {
             }
         });
 
-        jButton2.setText("Connect");
+        jButton2.setText("reConnect");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -195,7 +208,7 @@ public class updateJob extends javax.swing.JPanel {
 
         JFileChooser filechooser = new JFileChooser();
         filechooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
+        
         filechooser.setAcceptAllFileFilterUsed(false);
         //    
         if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -226,7 +239,7 @@ public class updateJob extends javax.swing.JPanel {
             try {
                 String listBrache = Helper.readUrl(query, user, password);
                 ArrayList<String> list = Helper.getDataFromJson(listBrache);
-
+                
                 combo_branch.addItem("");
                 for (int i = 1; i < list.size() - 1; i++) {
                     combo_branch.addItem(list.get(i));
@@ -234,7 +247,7 @@ public class updateJob extends javax.swing.JPanel {
             } catch (Exception ex) {
                 //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
             }
-
+            
         }
     }//GEN-LAST:event_combo_repositryItemStateChanged
 
@@ -267,19 +280,19 @@ public class updateJob extends javax.swing.JPanel {
 String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
     boolean isdone;
     SyncJob job = new SyncJob();
-
+    
     public SyncJob doAddJob() {
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
         System.out.println("doAddJob   " + 1);
         if (!localPath.trim().isEmpty() && combo_repositry.getSelectedIndex() != 0 && combo_branch.getSelectedIndex() != 0) {
-
+            
             sDbFile = "~/syncdb";
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
                     System.out.println("doAddJob   " + 2);
-
+                    
                     SyncCommand.monitor(sDbFile, localPath, remoteAddress, user, password);
                     job.setLocalDir(new File(localPath));
                     job.setMonitor(true);
@@ -290,11 +303,11 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                     return job;
                 }
             } catch (Exception ex) {
-
+                
                 System.out.println("ex: " + ex.getMessage());
-
+                
             }
-
+            
         } else {
             System.out.println("");
             //   JOptionPane.showMessageDialog(txt_localPath, "Please Complete insertd data....");
@@ -302,7 +315,7 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
         }
         return null;
     }
-
+    
     void doConnect() {
         l_status.setText("Status");
         combo_repositry.removeAll();
@@ -317,32 +330,32 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                 publish(3);
                 publish(5);
                 publish(10);
-
+                
                 try {
-
+                    
                     remoteAddress = txt_remoteAddress.getText();
                     query_repo = remoteAddress + "/repositories/_DAV/PROPFIND?fields=name";
                     user = txt_user.getText();
                     password = txt_password.getText();
-
+                    
                     if (Helper.checkInternet()) {
                         json = Helper.readUrl(query_repo, user, password);
                         isdone = true;
-
+                        
                     } else {
-
+                        
                         isdone = false;
                     }
-
+                    
                 } catch (Exception ex) {
                     //   JOptionPane.showMessageDialog(null, "Exception running monitor: " + ex.getMessage());
                     progress.setValue(0);
-
+                    
                     return null;
                 }
-
+                
                 publish(30);
-
+                
                 publish(40);
                 Thread.sleep(500);
                 publish(50);
@@ -352,15 +365,15 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                 publish(85);
                 Thread.sleep(500);
                 publish(100);
-
+                
                 return null;
             }
-
+            
             @Override
             protected void process(List< Integer> in) {
                 progress.setValue(in.get(0));
             }
-
+            
             @Override
             protected void done() {
                 if (isdone == true) {
@@ -368,9 +381,9 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                     ArrayList<String> list = Helper.getDataFromJson(json);
                     list.remove(0);
                     for (int i = 0; i < list.size(); i++) {
-
+                        
                         combo_repositry.addItem(list.get(i));
-
+                        
                     }
                     grayedField();
                     setProgress(PROPERTIES);
@@ -383,19 +396,19 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                 }
             }
         };
-
+        
         if (checkFields()) {
             worker.execute();
         }
     }
-
+    
     void grayedField() {
         txt_remoteAddress.setEditable(false);
         txt_password.setEditable(false);
         txt_user.setEditable(false);
-
+        
     }
-
+    
     boolean checkFields() {
         return !txt_remoteAddress.getText().trim().isEmpty()
                 && !txt_user.getText().trim().isEmpty() && !txt_password.getText().trim().isEmpty();

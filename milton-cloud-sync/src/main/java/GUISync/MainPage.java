@@ -159,7 +159,7 @@ public class MainPage extends javax.swing.JFrame {
         // TODO add your handling code here:
         int index = list_Jobs.getSelectedIndex();
 
-
+        displaUpdate(index);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
@@ -241,10 +241,9 @@ public class MainPage extends javax.swing.JFrame {
 
     private void displaUpdate(int index) {
 
-        jobs.get(index);
-        updateJ
+        updateJob update = new updateJob(jobs.get(index));
 
-        int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Add Job Sync",
+        int result = JOptionPane.showConfirmDialog(list_Jobs, update, "Add Job Sync",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             System.out.println("addjob");
