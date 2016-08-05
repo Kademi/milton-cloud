@@ -21,8 +21,6 @@ public class base {
 
     MainPage main = new MainPage();
 
-    
-
     public void run() {
         main.setVisible(true);
     }
@@ -62,7 +60,7 @@ public class base {
         } catch (IOException | RuntimeException e) {
             System.out.println(e.getMessage());
 
-            JOptionPane.showMessageDialog(null, "KSync tool already running !");
+            System.exit(0);
 
         }
     }

@@ -17,12 +17,12 @@ import javax.swing.SwingWorker;
  *
  * @author ibraheem
  */
-public class addJob extends javax.swing.JPanel {
+public class updateJob extends javax.swing.JPanel {
 
     /**
      * Creates new form addJob
      */
-    public addJob() {
+    public updateJob() {
         initComponents();
     }
 

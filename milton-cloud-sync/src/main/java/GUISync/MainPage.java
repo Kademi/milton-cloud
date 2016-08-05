@@ -1,6 +1,7 @@
 package GUISync;
 
 import io.milton.sync.SyncJob;
+import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -14,9 +15,13 @@ public class MainPage extends javax.swing.JFrame {
     /**
      * Creates new form MainPage
      */
+    ArrayList<SyncJob> jobs;
+
     public MainPage() {
         initComponents();
         setLocationRelativeTo(null);
+        jobs = new ArrayList<>();
+        list_Jobs.setModel(model);
     }
 
     /**
@@ -81,6 +86,11 @@ public class MainPage extends javax.swing.JFrame {
 
         jButton2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jButton2.setText("Edit");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jButton3.setText("Delete");
@@ -145,6 +155,13 @@ public class MainPage extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        int index = list_Jobs.getSelectedIndex();
+
+
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -199,6 +216,7 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JList<String> list_Jobs;
     // End of variables declaration//GEN-END:variables
+ DefaultListModel model = new DefaultListModel();
 
     private void display() {
 
@@ -207,13 +225,34 @@ public class MainPage extends javax.swing.JFrame {
         int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Add Job Sync",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-              System.out.println("addjob");
+            System.out.println("addjob");
             SyncJob job = panel.doAddJob();
-            System.out.println("job "+ job.getRemoteAddress());
+            //   System.out.println("job "+ job);
             if (job != null) {
-                DefaultListModel model = new DefaultListModel();
-                list_Jobs.setModel(model);
-                model.add(0, job.getLocalDir().toString());
+                model.addElement(job.getLocalDir().toString());
+
+            }
+
+        } else {
+            System.out.println("Cancelled");
+        }
+
+    }
+
+    private void displaUpdate(int index) {
+
+        jobs.get(index);
+        updateJ
+
+        int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Add Job Sync",
+                JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            System.out.println("addjob");
+            SyncJob job = panel.doAddJob();
+            //   System.out.println("job "+ job);
+            if (job != null) {
+                model.addElement(job.getLocalDir().toString());
+
             }
 
         } else {

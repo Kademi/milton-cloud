@@ -52,7 +52,7 @@ public class Helper {
                 }
             });
             InputStreamReader s = new InputStreamReader(url.openStream());
-            System.out.println("getEncoding " + s.getEncoding());
+     //       System.out.println("getEncoding " + s.getEncoding());
             reader = new BufferedReader(s);
 
             buffer = new StringBuilder();
