@@ -1,8 +1,10 @@
 package GUISync;
 
 import io.milton.sync.SyncCommand;
+import io.milton.sync.SyncJob;
 import java.awt.Color;
 import static java.awt.image.ImageObserver.PROPERTIES;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,7 +43,7 @@ public class addJob extends javax.swing.JPanel {
         txt_user = new javax.swing.JTextField();
         txt_password = new javax.swing.JPasswordField();
         jLabel4 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        local_read_only_CheckBox1 = new javax.swing.JCheckBox();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         combo_branch = new javax.swing.JComboBox<>();
@@ -64,10 +66,10 @@ public class addJob extends javax.swing.JPanel {
 
         jLabel4.setText("Password");
 
-        jCheckBox1.setText("Local Read Only");
-        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+        local_read_only_CheckBox1.setText("Local Read Only");
+        local_read_only_CheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox1ActionPerformed(evt);
+                local_read_only_CheckBox1ActionPerformed(evt);
             }
         });
 
@@ -119,32 +121,27 @@ public class addJob extends javax.swing.JPanel {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(txt_user, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(txt_localPath, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addGap(148, 148, 148)
-                                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(txt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addComponent(txt_remoteAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(l_status, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addGap(0, 0, 0))))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addComponent(txt_localPath, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                            .addGap(148, 148, 148)
+                                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(txt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(txt_remoteAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(l_status, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                     .addComponent(jSeparator2)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(20, 20, 20))
-                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jCheckBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(local_read_only_CheckBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(10, 10, 10)
@@ -153,7 +150,8 @@ public class addJob extends javax.swing.JPanel {
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(combo_branch, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -178,8 +176,8 @@ public class addJob extends javax.swing.JPanel {
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(10, 10, 10)
-                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -188,7 +186,7 @@ public class addJob extends javax.swing.JPanel {
                     .addComponent(combo_repositry, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(combo_branch, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
-                .addComponent(jCheckBox1))
+                .addComponent(local_read_only_CheckBox1))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -210,14 +208,21 @@ public class addJob extends javax.swing.JPanel {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-
+        combo_branch.removeAll();
+        combo_repositry.removeAll();
         doConnect();
     }//GEN-LAST:event_jButton2ActionPerformed
     String query;
     private void combo_repositryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combo_repositryItemStateChanged
         // TODO add your handling code here:
+        String remotehost = txt_remoteAddress.getText();
+        if (remoteAddress.endsWith("/")) {
+            remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
+        }
+       /// System.out.println("remotehost" + remotehost);
         if (combo_repositry.getSelectedIndex() != 0) {
-            query = remoteAddress + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
+            query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
+        //    System.out.println("query braches   " + query);
             try {
                 String listBrache = Helper.readUrl(query, user, password);
                 ArrayList<String> list = Helper.getDataFromJson(listBrache);
@@ -227,15 +232,15 @@ public class addJob extends javax.swing.JPanel {
                     combo_branch.addItem(list.get(i));
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
+                //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
             }
 
         }
     }//GEN-LAST:event_combo_repositryItemStateChanged
 
-    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
+    private void local_read_only_CheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_local_read_only_CheckBox1ActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBox1ActionPerformed
+    }//GEN-LAST:event_local_read_only_CheckBox1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -243,7 +248,6 @@ public class addJob extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> combo_repositry;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -253,39 +257,49 @@ public class addJob extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel l_status;
+    private javax.swing.JCheckBox local_read_only_CheckBox1;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTextField txt_localPath;
     private javax.swing.JPasswordField txt_password;
     private javax.swing.JTextField txt_remoteAddress;
     private javax.swing.JTextField txt_user;
     // End of variables declaration//GEN-END:variables
-String localPath, json, sDbFile, remoteAddress, user, password;
+String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
     boolean isdone;
+    SyncJob job = new SyncJob();
 
-    boolean doAddJob() {
+    public  SyncJob doAddJob() {
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
-        System.out.println("local host  " + -1);
+        System.out.println("doAddJob   " + 1);
         if (!localPath.trim().isEmpty() && combo_repositry.getSelectedIndex() != 0 && combo_branch.getSelectedIndex() != 0) {
 
             sDbFile = "~/syncdb";
-            System.out.println("local host  " + 1);
+            System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
-                    System.out.println("local host  " + 2);
+                    System.out.println("doAddJob   " + 2);
 
                     SyncCommand.monitor(sDbFile, localPath, remoteAddress, user, password);
-
+                    job.setLocalDir(new File(localPath));
+                    job.setMonitor(true);
+                    job.setPwd(password);
+                    job.setRemoteAddress(remoteAddress);
+                    job.setUser(user);
+                    job.setLocalReadonly(local_read_only_CheckBox1.isSelected());
+                    return job;
                 }
             } catch (Exception ex) {
-             
+
+                System.out.println("ex: " + ex.getMessage());
+
             }
 
         } else {
             JOptionPane.showMessageDialog(txt_localPath, "Please Complete insertd data....");
 
         }
-        return false;
+        return null;
     }
 
     void doConnect() {
@@ -295,7 +309,7 @@ String localPath, json, sDbFile, remoteAddress, user, password;
         SwingWorker worker = new SwingWorker<Void, Integer>() {
             @Override
             protected synchronized Void doInBackground() throws Exception {
-                System.out.println("df");
+           
                 /*
                  * Here Thread sleeping used fot the testing purposes only
                  */
@@ -305,8 +319,8 @@ String localPath, json, sDbFile, remoteAddress, user, password;
 
                 try {
 
-                    String sRemoteAddress = txt_remoteAddress.getText();
-                    String query_repo = sRemoteAddress + "/repositories/_DAV/PROPFIND?fields=name";
+                    remoteAddress = txt_remoteAddress.getText();
+                    query_repo = remoteAddress + "/repositories/_DAV/PROPFIND?fields=name";
                     user = txt_user.getText();
                     password = txt_password.getText();
 
@@ -320,7 +334,7 @@ String localPath, json, sDbFile, remoteAddress, user, password;
                     }
 
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Exception running monitor: " + ex.getMessage());
+                    //   JOptionPane.showMessageDialog(null, "Exception running monitor: " + ex.getMessage());
                     progress.setValue(0);
 
                     return null;

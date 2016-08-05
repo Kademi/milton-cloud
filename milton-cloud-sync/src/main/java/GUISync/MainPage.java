@@ -1,5 +1,7 @@
 package GUISync;
 
+import io.milton.sync.SyncJob;
+import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -157,21 +159,21 @@ public class MainPage extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
-                    
+
                 }
             }
         } catch (ClassNotFoundException ex) {
             java.util.logging.Logger.getLogger(MainPage.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            
+
         } catch (InstantiationException ex) {
             java.util.logging.Logger.getLogger(MainPage.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            
+
         } catch (IllegalAccessException ex) {
             java.util.logging.Logger.getLogger(MainPage.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(MainPage.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
@@ -199,16 +201,24 @@ public class MainPage extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void display() {
-        
-        JPanel panel = new addJob();
-        
+
+        addJob panel = new addJob();
+
         int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Add Job Sync",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            
+              System.out.println("addjob");
+            SyncJob job = panel.doAddJob();
+            System.out.println("job "+ job.getRemoteAddress());
+            if (job != null) {
+                DefaultListModel model = new DefaultListModel();
+                list_Jobs.setModel(model);
+                model.add(0, job.getLocalDir().toString());
+            }
+
         } else {
             System.out.println("Cancelled");
         }
-        
+
     }
 }
