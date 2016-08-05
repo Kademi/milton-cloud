@@ -19,13 +19,12 @@ import javax.swing.UIManager;
  */
 public class base {
 
-
-    login login = new login();
+    MainPage main = new MainPage();
 
     
 
     public void run() {
-        login.setVisible(true);
+        main.setVisible(true);
     }
 
     public static File file;

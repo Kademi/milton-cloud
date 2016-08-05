@@ -278,7 +278,7 @@ String localPath, json, sDbFile, remoteAddress, user, password;
 
                 }
             } catch (Exception ex) {
-                Logger.getLogger(FileBreach.class.getName()).log(Level.SEVERE, null, ex);
+             
             }
 
         } else {
