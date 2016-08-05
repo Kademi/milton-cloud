@@ -68,12 +68,6 @@
     </build>
     
     <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-install-plugin</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-        
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -101,4 +95,3 @@
         </repository>
     </repositories>    
 </project>
-
