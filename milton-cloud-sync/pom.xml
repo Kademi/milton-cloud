@@ -100,15 +100,8 @@
                     <groupId>log4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>     
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20160212</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-
             <groupId>io.milton</groupId>
             <artifactId>milton-client</artifactId>
             <version>${milton.version}</version>
@@ -158,4 +151,7 @@
 
         </dependency>
     </dependencies>
+
 </project>
+
+
