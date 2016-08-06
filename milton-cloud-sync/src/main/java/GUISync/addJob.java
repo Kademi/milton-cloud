@@ -64,6 +64,8 @@ public class addJob extends javax.swing.JPanel {
         txt_localPath.setEditable(false);
         txt_localPath.setBackground(new java.awt.Color(204, 204, 204));
 
+        txt_remoteAddress.setToolTipText("http://example.admin.kademi.us/");
+
         jLabel4.setText("Password");
 
         local_read_only_CheckBox1.setText("Local Read Only");
@@ -107,6 +109,7 @@ public class addJob extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jSeparator1)
                         .addContainerGap())
@@ -138,7 +141,6 @@ public class addJob extends javax.swing.JPanel {
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(l_status, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                    .addComponent(jSeparator2)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(local_read_only_CheckBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -151,7 +153,7 @@ public class addJob extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(combo_branch, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jSeparator2)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -175,11 +177,11 @@ public class addJob extends javax.swing.JPanel {
                     .addComponent(txt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGap(2, 2, 2)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -208,6 +210,7 @@ public class addJob extends javax.swing.JPanel {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        l_status.setForeground(Color.BLACK);
         combo_branch.removeAll();
         combo_repositry.removeAll();
         doConnect();
@@ -215,27 +218,48 @@ public class addJob extends javax.swing.JPanel {
     String query;
     private void combo_repositryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combo_repositryItemStateChanged
         // TODO add your handling code here:
-        String remotehost = txt_remoteAddress.getText();
-        if (remoteAddress.endsWith("/")) {
-            remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
-        }
-        /// System.out.println("remotehost" + remotehost);
-        if (combo_repositry.getSelectedIndex() != 0) {
-            query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
-            //    System.out.println("query braches   " + query);
-            try {
-                String listBrache = Helper.readUrl(query, user, password);
-                ArrayList<String> list = Helper.getDataFromJson(listBrache);
-
-                combo_branch.addItem("");
-                for (int i = 1; i < list.size() - 1; i++) {
-                    combo_branch.addItem(list.get(i));
+        SwingWorker worker = new SwingWorker<Void, Integer>() {
+            @Override
+            protected synchronized Void doInBackground() throws Exception {
+                String remotehost = txt_remoteAddress.getText();
+                if (remoteAddress.endsWith("/")) {
+                    remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
                 }
-            } catch (Exception ex) {
-                //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
+                /// System.out.println("remotehost" + remotehost);
+                if (combo_repositry.getSelectedIndex() != 0) {
+                    query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
+                    //    System.out.println("query braches   " + query);
+                    try {
+                        String listBrache = Helper.readUrl(query, user, password);
+                        ArrayList<String> list = Helper.getDataFromJson(listBrache);
+                        combo_branch.removeAllItems();
+                        combo_branch.addItem("");
+                        for (int i = 1; i < list.size() - 2; i++) {
+                            combo_branch.addItem(list.get(i));
+                        }
+                    } catch (Exception ex) {
+                        //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
+                    }
+
+                }
+                return null;
             }
 
+            @Override
+            protected void process(List< Integer> in) {
+
+            }
+
+            @Override
+            protected void done() {
+
+            }
+        };
+        if (combo_repositry.getSelectedIndex() != 0) {
+
+            worker.execute();
         }
+
     }//GEN-LAST:event_combo_repositryItemStateChanged
 
     private void local_read_only_CheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_local_read_only_CheckBox1ActionPerformed
@@ -364,9 +388,11 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
             @Override
             protected void done() {
                 if (isdone == true) {
+                    combo_repositry.removeAllItems();
                     combo_repositry.addItem("");
                     ArrayList<String> list = Helper.getDataFromJson(json);
                     list.remove(0);
+
                     for (int i = 0; i < list.size(); i++) {
 
                         combo_repositry.addItem(list.get(i));

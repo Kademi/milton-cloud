@@ -19,6 +19,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="progress" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="jSeparator1" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -62,7 +63,6 @@
                           </Group>
                       </Group>
                   </Group>
-                  <Component id="jSeparator2" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="1" attributes="0">
                           <Component id="local_read_only_CheckBox1" min="-2" pref="132" max="-2" attributes="0"/>
@@ -78,7 +78,7 @@
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="progress" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
               </Group>
           </Group>
       </Group>
@@ -108,11 +108,11 @@
                   <Component id="jButton2" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
                   <Component id="jLabel4" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-              <Component id="progress" min="-2" pref="5" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="progress" min="-2" pref="8" max="-2" attributes="0"/>
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Component id="jSeparator2" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel5" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
                   <Component id="jLabel6" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
@@ -150,6 +150,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txt_remoteAddress">
+      <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="http://example.admin.kademi.us/"/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txt_user">
     </Component>

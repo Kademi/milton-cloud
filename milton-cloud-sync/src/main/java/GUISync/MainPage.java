@@ -4,7 +4,6 @@ import io.milton.sync.SyncJob;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 /**
  *
@@ -21,7 +20,7 @@ public class MainPage extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         jobs = new ArrayList<>();
-        list_Jobs.setModel(model);
+
     }
 
     /**
@@ -72,6 +71,7 @@ public class MainPage extends javax.swing.JFrame {
                 .addGap(0, 0, 0))
         );
 
+        list_Jobs.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jScrollPane1.setViewportView(list_Jobs);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, java.awt.Color.white, java.awt.Color.white));
@@ -96,6 +96,11 @@ public class MainPage extends javax.swing.JFrame {
         jButton3.setText("Delete");
         jButton3.setBorder(null);
         jButton3.setInheritsPopupMenu(true);
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -158,9 +163,16 @@ public class MainPage extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         int index = list_Jobs.getSelectedIndex();
+        if (index != -1) {
+            displaUpdate(index);
+        }
 
-        displaUpdate(index);
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        model.remove(list_Jobs.getSelectedIndex());
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -227,8 +239,9 @@ public class MainPage extends javax.swing.JFrame {
         if (result == JOptionPane.OK_OPTION) {
             System.out.println("addjob");
             SyncJob job = panel.doAddJob();
-            //   System.out.println("job "+ job);
+
             if (job != null) {
+                jobs.add(job);
                 model.addElement(job.getLocalDir().toString());
 
             }
@@ -240,16 +253,22 @@ public class MainPage extends javax.swing.JFrame {
     }
 
     private void displaUpdate(int index) {
+        SyncJob sj = jobs.get(index);
+        updateJob panel = new updateJob(sj);
 
-        updateJob update = new updateJob(jobs.get(index));
-
-        int result = JOptionPane.showConfirmDialog(list_Jobs, update, "Add Job Sync",
+        int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Update Job Sync",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            System.out.println("addjob");
+
             SyncJob job = panel.doAddJob();
-            //   System.out.println("job "+ job);
+            sj.setLocalDir(job.getLocalDir());
+            sj.setLocalReadonly(job.isLocalReadonly());
+            sj.setRemoteAddress(job.getRemoteAddress());
+            sj.setPwd(job.getPwd());
+            sj.setUser(job.getUser());
+
             if (job != null) {
+                model.remove(index);
                 model.addElement(job.getLocalDir().toString());
 
             }
@@ -259,4 +278,5 @@ public class MainPage extends javax.swing.JFrame {
         }
 
     }
+
 }

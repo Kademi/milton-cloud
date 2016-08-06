@@ -39,7 +39,7 @@ public class Helper {
     }
 
     public static String readUrl(String urlString, final String userid, final String password) throws Exception {
-        System.out.println("1");
+    
         BufferedReader reader = null;
         StringBuilder buffer = null;
         try {
@@ -63,7 +63,8 @@ public class Helper {
             }
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "The server or your internet connection could be down.", "connection test", JOptionPane.ERROR_MESSAGE);
+            System.out.println("Exception       "  +e.getMessage());
+          //  JOptionPane.showMessageDialog(null, "The server or your internet connection could be down.", "connection test", JOptionPane.ERROR_MESSAGE);
 
         } finally {
             if (reader != null) {

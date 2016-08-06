@@ -23,20 +23,20 @@ public class updateJob extends javax.swing.JPanel {
      * Creates new form addJob
      */
     SyncJob updateJob;
-    
+
     public updateJob(SyncJob updateJob) {
         initComponents();
         this.updateJob = updateJob;
         updateField();
     }
-    
+
     void updateField() {
-        txt_localPath.setText(updateJob.getLocalDir().getAbsolutePath());
+       txt_localPath.setText(updateJob.getLocalDir().getAbsolutePath());
         txt_remoteAddress.setText(updateJob.getRemoteAddress());
         txt_user.setText(updateJob.getUser());
         txt_password.setText(updateJob.getPwd());
         local_read_only_CheckBox1.setSelected(updateJob.isLocalReadonly());
-        
+
     }
 
     /**
@@ -188,8 +188,8 @@ public class updateJob extends javax.swing.JPanel {
                     .addComponent(txt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(1, 1, 1)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
@@ -208,7 +208,7 @@ public class updateJob extends javax.swing.JPanel {
 
         JFileChooser filechooser = new JFileChooser();
         filechooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        
+
         filechooser.setAcceptAllFileFilterUsed(false);
         //    
         if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -221,6 +221,7 @@ public class updateJob extends javax.swing.JPanel {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        l_status.setForeground(Color.BLACK);
         combo_branch.removeAll();
         combo_repositry.removeAll();
         doConnect();
@@ -228,27 +229,48 @@ public class updateJob extends javax.swing.JPanel {
     String query;
     private void combo_repositryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combo_repositryItemStateChanged
         // TODO add your handling code here:
-        String remotehost = txt_remoteAddress.getText();
-        if (remoteAddress.endsWith("/")) {
-            remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
-        }
-        /// System.out.println("remotehost" + remotehost);
-        if (combo_repositry.getSelectedIndex() != 0) {
-            query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
-            //    System.out.println("query braches   " + query);
-            try {
-                String listBrache = Helper.readUrl(query, user, password);
-                ArrayList<String> list = Helper.getDataFromJson(listBrache);
-                
-                combo_branch.addItem("");
-                for (int i = 1; i < list.size() - 1; i++) {
-                    combo_branch.addItem(list.get(i));
+        SwingWorker worker = new SwingWorker<Void, Integer>() {
+            @Override
+            protected synchronized Void doInBackground() throws Exception {
+                String remotehost = txt_remoteAddress.getText();
+                if (remoteAddress.endsWith("/")) {
+                    remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
                 }
-            } catch (Exception ex) {
-                //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
+                /// System.out.println("remotehost" + remotehost);
+                if (combo_repositry.getSelectedIndex() != 0) {
+                    query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
+                    //    System.out.println("query braches   " + query);
+                    try {
+                        String listBrache = Helper.readUrl(query, user, password);
+                        ArrayList<String> list = Helper.getDataFromJson(listBrache);
+                        combo_branch.removeAllItems();
+                        combo_branch.addItem("");
+                        for (int i = 1; i < list.size() - 2; i++) {
+                            combo_branch.addItem(list.get(i));
+                        }
+                    } catch (Exception ex) {
+                        //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
+                    }
+
+                }
+                return null;
             }
-            
+
+            @Override
+            protected void process(List< Integer> in) {
+
+            }
+
+            @Override
+            protected void done() {
+
+            }
+        };
+        if (combo_repositry.getSelectedIndex() != 0) {
+
+            worker.execute();
         }
+
     }//GEN-LAST:event_combo_repositryItemStateChanged
 
     private void local_read_only_CheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_local_read_only_CheckBox1ActionPerformed
@@ -280,19 +302,19 @@ public class updateJob extends javax.swing.JPanel {
 String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
     boolean isdone;
     SyncJob job = new SyncJob();
-    
+
     public SyncJob doAddJob() {
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
         System.out.println("doAddJob   " + 1);
         if (!localPath.trim().isEmpty() && combo_repositry.getSelectedIndex() != 0 && combo_branch.getSelectedIndex() != 0) {
-            
+
             sDbFile = "~/syncdb";
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
                     System.out.println("doAddJob   " + 2);
-                    
+
                     SyncCommand.monitor(sDbFile, localPath, remoteAddress, user, password);
                     job.setLocalDir(new File(localPath));
                     job.setMonitor(true);
@@ -303,11 +325,11 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                     return job;
                 }
             } catch (Exception ex) {
-                
+
                 System.out.println("ex: " + ex.getMessage());
-                
+
             }
-            
+
         } else {
             System.out.println("");
             //   JOptionPane.showMessageDialog(txt_localPath, "Please Complete insertd data....");
@@ -315,7 +337,7 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
         }
         return null;
     }
-    
+
     void doConnect() {
         l_status.setText("Status");
         combo_repositry.removeAll();
@@ -330,32 +352,32 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                 publish(3);
                 publish(5);
                 publish(10);
-                
+
                 try {
-                    
+
                     remoteAddress = txt_remoteAddress.getText();
                     query_repo = remoteAddress + "/repositories/_DAV/PROPFIND?fields=name";
                     user = txt_user.getText();
                     password = txt_password.getText();
-                    
+
                     if (Helper.checkInternet()) {
                         json = Helper.readUrl(query_repo, user, password);
                         isdone = true;
-                        
+
                     } else {
-                        
+
                         isdone = false;
                     }
-                    
+
                 } catch (Exception ex) {
                     //   JOptionPane.showMessageDialog(null, "Exception running monitor: " + ex.getMessage());
                     progress.setValue(0);
-                    
+
                     return null;
                 }
-                
+
                 publish(30);
-                
+
                 publish(40);
                 Thread.sleep(500);
                 publish(50);
@@ -365,15 +387,15 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                 publish(85);
                 Thread.sleep(500);
                 publish(100);
-                
+
                 return null;
             }
-            
+
             @Override
             protected void process(List< Integer> in) {
                 progress.setValue(in.get(0));
             }
-            
+
             @Override
             protected void done() {
                 if (isdone == true) {
@@ -381,9 +403,9 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                     ArrayList<String> list = Helper.getDataFromJson(json);
                     list.remove(0);
                     for (int i = 0; i < list.size(); i++) {
-                        
+
                         combo_repositry.addItem(list.get(i));
-                        
+
                     }
                     grayedField();
                     setProgress(PROPERTIES);
@@ -396,19 +418,19 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                 }
             }
         };
-        
+
         if (checkFields()) {
             worker.execute();
         }
     }
-    
+
     void grayedField() {
         txt_remoteAddress.setEditable(false);
         txt_password.setEditable(false);
         txt_user.setEditable(false);
-        
+
     }
-    
+
     boolean checkFields() {
         return !txt_remoteAddress.getText().trim().isEmpty()
                 && !txt_user.getText().trim().isEmpty() && !txt_password.getText().trim().isEmpty();
