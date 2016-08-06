@@ -1,9 +1,24 @@
 package GUISync;
 
 import io.milton.sync.SyncJob;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
+import javax.swing.border.Border;
 
 /**
  *
@@ -16,10 +31,14 @@ public class MainPage extends javax.swing.JFrame {
      */
     ArrayList<SyncJob> jobs;
 
+    DefaultListModel model;
+
     public MainPage() {
         initComponents();
         setLocationRelativeTo(null);
         jobs = new ArrayList<>();
+        model = new DefaultListModel();
+        list_Jobs.setCellRenderer(new JObCellRenderer());
         list_Jobs.setModel(model);
 
     }
@@ -73,6 +92,8 @@ public class MainPage extends javax.swing.JFrame {
         );
 
         list_Jobs.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        list_Jobs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        list_Jobs.setAutoscrolls(false);
         jScrollPane1.setViewportView(list_Jobs);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, java.awt.Color.white, java.awt.Color.white));
@@ -110,9 +131,9 @@ public class MainPage extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE))
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -157,7 +178,7 @@ public class MainPage extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        model.add(0,"job \n "+"des");
+//        model.add(0, "job \n " + "des");
         display();
 
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -230,7 +251,6 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JList<String> list_Jobs;
     // End of variables declaration//GEN-END:variables
- DefaultListModel model = new DefaultListModel();
 
     private void display() {
 
@@ -244,7 +264,7 @@ public class MainPage extends javax.swing.JFrame {
 
             if (job != null) {
                 jobs.add(job);
-                model.addElement(job.getLocalDir().toString());
+//                model.addElement(job.getLocalDir().toString());
 
             }
 
@@ -279,6 +299,76 @@ public class MainPage extends javax.swing.JFrame {
             System.out.println("Cancelled");
         }
 
+    }
+
+    public class JobModel {
+
+        private final String local, remote;
+        URL imagePath;
+        private ImageIcon image;
+
+        public JobModel(String local, URL imagePath, String remote) {
+            this.local = local;
+            this.imagePath = imagePath;
+            this.remote = remote;
+        }
+
+        public JobModel(String local, String remote) {
+            this.local = local;
+            this.remote = remote;
+
+            imagePath = getClass().getResource("/Images/340.png");
+        }
+
+        public String getLocal() {
+            return local;
+        }
+
+        public URL getImagePath() {
+            return imagePath;
+        }
+
+        public String getRemote() {
+            return remote;
+        }
+
+        public ImageIcon getImage() {
+            if (image == null) {
+                image = new ImageIcon(imagePath);
+            }
+            return image;
+        }
+
+        // Override standard toString method to give a useful result
+    }
+
+    class JObCellRenderer extends JLabel implements ListCellRenderer {
+
+        private final Color HIGHLIGHT_COLOR = new Color(0, 0, 128);
+        Object value;
+
+        public JObCellRenderer() {
+            setOpaque(true);
+
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value,
+                int index, boolean isSelected, boolean cellHasFocus) {
+
+            JobModel entry = (JobModel) value;
+
+            setText(entry.getLocal());
+
+            if (isSelected) {
+                setBackground(HIGHLIGHT_COLOR);
+                setForeground(Color.white);
+            } else {
+                setBackground(Color.white);
+                setForeground(Color.black);
+            }
+            return this;
+        }
     }
 
 }
