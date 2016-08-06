@@ -20,6 +20,7 @@ public class MainPage extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         jobs = new ArrayList<>();
+        list_Jobs.setModel(model);
 
     }
 
@@ -156,6 +157,7 @@ public class MainPage extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
+        model.add(0,"job \n "+"des");
         display();
 
     }//GEN-LAST:event_jButton1ActionPerformed
