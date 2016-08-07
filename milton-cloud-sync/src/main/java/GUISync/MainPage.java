@@ -1,24 +1,20 @@
 package GUISync;
 
 import io.milton.sync.SyncJob;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.Font;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 /**
  *
@@ -38,8 +34,8 @@ public class MainPage extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         jobs = new ArrayList<>();
         model = new DefaultListModel();
-        list_Jobs.setCellRenderer(new JObCellRenderer());
         list_Jobs.setModel(model);
+        list_Jobs.setCellRenderer(new JObCellRenderer());
 
     }
 
@@ -179,16 +175,28 @@ public class MainPage extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
 //        model.add(0, "job \n " + "des");
-        display();
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                display();
+
+            }
+        });
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         int index = list_Jobs.getSelectedIndex();
-        if (index != -1) {
-            displaUpdate(index);
-        }
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+
+                if (index != -1) {
+                    displaUpdate(index);
+                }
+
+            }
+        });
+
 
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -264,7 +272,7 @@ public class MainPage extends javax.swing.JFrame {
 
             if (job != null) {
                 jobs.add(job);
-//                model.addElement(job.getLocalDir().toString());
+                model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
 
             }
 
@@ -290,8 +298,8 @@ public class MainPage extends javax.swing.JFrame {
             sj.setUser(job.getUser());
 
             if (job != null) {
-                model.remove(index);
-                model.addElement(job.getLocalDir().toString());
+
+                model.set(index, new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
 
             }
 
@@ -349,6 +357,10 @@ public class MainPage extends javax.swing.JFrame {
 
         public JObCellRenderer() {
             setOpaque(true);
+            setIconTextGap(20);
+            setFont(new java.awt.Font("Arial", 0, 13));
+            setIcon(new ImageIcon(getClass().getResource("/Images/upload.png")));
+          
 
         }
 
@@ -357,7 +369,8 @@ public class MainPage extends javax.swing.JFrame {
                 int index, boolean isSelected, boolean cellHasFocus) {
 
             JobModel entry = (JobModel) value;
-
+            setSize(list.getWidth(), 10);
+            setTitle(entry.getRemote());
             setText(entry.getLocal());
 
             if (isSelected) {
