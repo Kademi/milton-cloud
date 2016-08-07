@@ -298,12 +298,13 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
         System.out.println("doAddJob   " + 1);
         if (!localPath.trim().isEmpty() && combo_repositry.getSelectedIndex() != 0 && combo_branch.getSelectedIndex() != 0) {
 
+            remoteAddress = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
             sDbFile = "~/syncdb";
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
                     System.out.println("doAddJob   " + 2);
-
+                    System.out.println("remoteAddress   "+remoteAddress);
                     SyncCommand.monitor(sDbFile, localPath, remoteAddress, user, password);
                     job.setLocalDir(new File(localPath));
                     job.setMonitor(true);
