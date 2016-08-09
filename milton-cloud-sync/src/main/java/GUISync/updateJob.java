@@ -303,7 +303,7 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
     boolean isdone;
     SyncJob job = new SyncJob();
 
-    public SyncJob doAddJob() {
+    public SyncJob doUpdateJob() {
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
         System.out.println("doAddJob   " + 1);

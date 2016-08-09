@@ -1,19 +1,32 @@
 package GUISync;
 
+import io.milton.event.EventManager;
+import io.milton.event.EventManagerImpl;
+import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListCellRenderer;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 /**
@@ -36,6 +49,11 @@ public class MainPage extends javax.swing.JFrame {
         model = new DefaultListModel();
         list_Jobs.setModel(model);
         list_Jobs.setCellRenderer(new JObCellRenderer());
+        ArrayList<SyncJob> jobsreades = readObject();
+        if (jobsreades != null) {
+            jobs = jobsreades;
+            updateJobList(jobs);
+        }
 
     }
 
@@ -130,7 +148,7 @@ public class MainPage extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -278,6 +296,11 @@ public class MainPage extends javax.swing.JFrame {
 
             if (job != null) {
                 jobs.add(job);
+                Thread thread = new Thread(() -> {
+                    writeObject(jobs);
+                    System.out.println("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+                });
+                thread.start();
                 model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
 
             }
@@ -296,7 +319,7 @@ public class MainPage extends javax.swing.JFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
 
-            SyncJob job = panel.doAddJob();
+            SyncJob job = panel.doUpdateJob();
             sj.setLocalDir(job.getLocalDir());
             sj.setLocalReadonly(job.isLocalReadonly());
             sj.setRemoteAddress(job.getRemoteAddress());
@@ -331,7 +354,7 @@ public class MainPage extends javax.swing.JFrame {
             this.local = local;
             this.remote = remote;
 
-            imagePath = getClass().getResource("/Images/340.png");
+            imagePath = getClass().getResource("/Images/upload.png");
         }
 
         public String getLocal() {
@@ -365,7 +388,7 @@ public class MainPage extends javax.swing.JFrame {
             setOpaque(true);
             setIconTextGap(20);
             setFont(new java.awt.Font("Arial", 0, 13));
-            setIcon(new ImageIcon(getClass().getResource("/Images/upload.png")));
+          
 
         }
 
@@ -374,9 +397,10 @@ public class MainPage extends javax.swing.JFrame {
                 int index, boolean isSelected, boolean cellHasFocus) {
 
             JobModel entry = (JobModel) value;
-            setSize(list.getWidth(), 10);
+            setSize(list.getWidth(), 12);
             setToolTipText("Remote host: " + entry.getRemote());
             setText(entry.getLocal());
+            setIcon(entry.getImage());
 
             if (isSelected) {
                 setBackground(HIGHLIGHT_COLOR);
@@ -389,4 +413,71 @@ public class MainPage extends javax.swing.JFrame {
         }
     }
 
+    public static void writeObject(ArrayList<SyncJob> jobs) {
+        try {
+
+            FileOutputStream fos;
+
+            fos = new FileOutputStream(new File("jobs.data").getAbsoluteFile());
+
+            try (
+                    ObjectOutputStream objOutputStream = new ObjectOutputStream(fos)) {
+
+                for (Object obj : jobs) {
+                    objOutputStream.writeObject(obj);
+                    objOutputStream.reset();
+                }
+                System.out.println("saved ");
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+    }
+
+    public static ArrayList<SyncJob> readObject() {
+        ArrayList<SyncJob> jobs = new ArrayList();
+
+        try (FileInputStream fis = new FileInputStream(new File("jobs.data").getAbsoluteFile()); //Create new ObjectInputStream object to read object from file
+                ObjectInputStream obj = new ObjectInputStream(fis)) {
+            int i = 0;
+            Object o;
+            while (fis.available() > 1) {
+
+                Object o1 = obj.readObject();
+                if (o1 == null) {
+                    return null;
+                }
+                SyncJob job = (SyncJob) o1;
+                jobs.add(job);
+                System.out.println(" i= ....   " + ++i);
+            }
+
+        } catch (FileNotFoundException ex) {
+            System.out.println("ex 2" + ex.getMessage());
+            return null;
+        } catch (IOException ex) {
+            System.out.println("ww   3" + ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+            System.out.println("ww   4" + ex.getMessage());
+        }
+        return jobs;
+    }
+
+    void updateJobList(ArrayList<SyncJob> jobs)  {
+        String sDbFile = "~/syncdb";
+        EventManager eventManager = new EventManagerImpl();
+        try {
+            SyncCommand.start(new File(sDbFile), jobs, eventManager);
+        } catch (Exception ex) {
+            System.out.println(" ex "+ ex.getMessage());
+        }
+
+        jobs.stream().forEach((job) -> {
+            model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
+        });
+    }
 }

@@ -290,22 +290,25 @@ public class addJob extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
     boolean isdone;
-    SyncJob job = new SyncJob();
+    SyncJob job;
 
     public SyncJob doAddJob() {
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
         System.out.println("doAddJob   " + 1);
+        job = new SyncJob();
         if (!localPath.trim().isEmpty() && combo_repositry.getSelectedIndex() != 0 && combo_branch.getSelectedIndex() != 0) {
 
-            remoteAddress = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
+            String q_host = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/";
+
             sDbFile = "~/syncdb";
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
+
                     System.out.println("doAddJob   " + 2);
-                    System.out.println("remoteAddress   "+remoteAddress);
-                    SyncCommand.monitor(sDbFile, localPath, remoteAddress, user, password);
+                    System.out.println("remoteAddress   " + remoteAddress);
+                    SyncCommand.monitor(sDbFile, localPath, q_host, user, password);
                     job.setLocalDir(new File(localPath));
                     job.setMonitor(true);
                     job.setPwd(password);

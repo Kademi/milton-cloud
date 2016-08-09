@@ -16,12 +16,13 @@ package io.milton.sync;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  *
  * @author brad
  */
-public class SyncJob {
+public class SyncJob implements Serializable{
     private File localDir;
     private String remoteAddress;
     private String user;
