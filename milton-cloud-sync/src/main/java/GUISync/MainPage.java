@@ -6,28 +6,21 @@ import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.awt.Color;
 import java.awt.Component;
-import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListCellRenderer;
-import javax.swing.border.EmptyBorder;
 
 /**
  *
@@ -50,6 +43,7 @@ public class MainPage extends javax.swing.JFrame {
         list_Jobs.setModel(model);
         list_Jobs.setCellRenderer(new JObCellRenderer());
         ArrayList<SyncJob> jobsreades = readObject();
+        
         if (jobsreades != null) {
             jobs = jobsreades;
             updateJobList(jobs);
@@ -453,7 +447,7 @@ public class MainPage extends javax.swing.JFrame {
                 }
                 SyncJob job = (SyncJob) o1;
                 jobs.add(job);
-                System.out.println(" i= ....   " + ++i);
+               
             }
 
         } catch (FileNotFoundException ex) {
