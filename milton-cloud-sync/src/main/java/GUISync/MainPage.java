@@ -2,6 +2,7 @@ package GUISync;
 
 import io.milton.event.EventManager;
 import io.milton.event.EventManagerImpl;
+import io.milton.sync.SpliffySync;
 import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.awt.Color;
@@ -11,10 +12,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -31,23 +34,32 @@ public class MainPage extends javax.swing.JFrame {
     /**
      * Creates new form MainPage
      */
-    ArrayList<SyncJob> jobs;
-
     DefaultListModel model;
+    final static String JOB = "job";
+    final static String sDbFile = "~/syncdb";
+    static File file;
+    static Properties jobFile;
+    int sizeJobs;
 
     public MainPage() {
         initComponents();
         setLocationRelativeTo(null);
-        jobs = new ArrayList<>();
+
+        file = new File("ksync.properties");
+        jobFile = new Properties();
+        if (!file.exists()) {
+
+            createBlankFile(file);
+        } else {
+            loadProperties(jobFile);;
+        }
+
         model = new DefaultListModel();
         list_Jobs.setModel(model);
+
         list_Jobs.setCellRenderer(new JObCellRenderer());
-        ArrayList<SyncJob> jobsreades = readObject();
-        
-        if (jobsreades != null) {
-            jobs = jobsreades;
-            updateJobList(jobs);
-        }
+
+        updateJobList(readObject());
 
     }
 
@@ -192,11 +204,8 @@ public class MainPage extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
 //        model.add(0, "job \n " + "des");
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                display();
-
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            display();
         });
 
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -204,13 +213,10 @@ public class MainPage extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         int index = list_Jobs.getSelectedIndex();
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-
-                if (index != -1) {
-                    displaUpdate(index);
-                }
-
+        System.out.println(" index getSelectedIndex " + index);
+        java.awt.EventQueue.invokeLater(() -> {
+            if (index != -1) {
+                displaUpdate(index);
             }
         });
 
@@ -219,7 +225,46 @@ public class MainPage extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        model.remove(list_Jobs.getSelectedIndex());
+        System.out.println(" list_Jobs.getSelectedIndex()" + list_Jobs.getSelectedIndex());
+
+        int index = list_Jobs.getSelectedIndex();
+        int i = 0;
+
+        if (model.getSize() <= 1) {
+            rProperty(i, "localPath");
+            rProperty(i, "remoteAddress");
+            rProperty(i, "repositry");
+            rProperty(i, "branch");
+            rProperty(i, "user");
+            rProperty(i, "password");
+            rProperty(i, "LocalReadonly");
+        } else {
+
+            for (i = index; i < model.getSize() - 1; i++) {
+                rwProperty(i, "localPath");
+                rwProperty(i, "remoteAddress");
+                rwProperty(i, "repositry");
+                rwProperty(i, "branch");
+                rwProperty(i, "user");
+                rwProperty(i, "password");
+                rwProperty(i, "LocalReadonly");
+
+            }
+            rProperty(i, "localPath");
+            rProperty(i, "remoteAddress");
+            rProperty(i, "repositry");
+            rProperty(i, "branch");
+            rProperty(i, "user");
+            rProperty(i, "password");
+            rProperty(i, "LocalReadonly");
+        }
+
+        sizeJobs = Integer.parseInt(jobFile.getProperty("sizeJobs", "0"));
+        wProperty(-1, "sizeJobs", String.valueOf(Integer.parseInt(jobFile.getProperty("sizeJobs", "0")) - 1));
+        saveProperties(jobFile);
+        loadProperties(jobFile);
+        model.remove(index);
+
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -280,7 +325,7 @@ public class MainPage extends javax.swing.JFrame {
 
     private void display() {
 
-        addJob panel = new addJob();
+        addJob panel = new addJob(Integer.parseInt(jobFile.getProperty("sizeJobs", "0")));
 
         int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Add Job Sync",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -289,14 +334,10 @@ public class MainPage extends javax.swing.JFrame {
             SyncJob job = panel.doAddJob();
 
             if (job != null) {
-                jobs.add(job);
-                Thread thread = new Thread(() -> {
-                    writeObject(jobs);
-                    System.out.println("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
-                });
-                thread.start();
-                model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
 
+                model.addElement(new JobModel(job.getLocalDir().getAbsolutePath(), job.getRemoteAddress()));
+                saveProperties(jobFile);
+                loadProperties(jobFile);
             }
 
         } else {
@@ -306,23 +347,20 @@ public class MainPage extends javax.swing.JFrame {
     }
 
     private void displaUpdate(int index) {
-        SyncJob sj = jobs.get(index);
-        updateJob panel = new updateJob(sj);
+
+        updateJob panel = new updateJob(index);
 
         int result = JOptionPane.showConfirmDialog(list_Jobs, panel, "Update Job Sync",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
 
             SyncJob job = panel.doUpdateJob();
-            sj.setLocalDir(job.getLocalDir());
-            sj.setLocalReadonly(job.isLocalReadonly());
-            sj.setRemoteAddress(job.getRemoteAddress());
-            sj.setPwd(job.getPwd());
-            sj.setUser(job.getUser());
 
             if (job != null) {
 
                 model.set(index, new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
+                saveProperties(jobFile);
+                loadProperties(jobFile);
 
             }
 
@@ -382,7 +420,6 @@ public class MainPage extends javax.swing.JFrame {
             setOpaque(true);
             setIconTextGap(20);
             setFont(new java.awt.Font("Arial", 0, 13));
-          
 
         }
 
@@ -407,71 +444,120 @@ public class MainPage extends javax.swing.JFrame {
         }
     }
 
-    public static void writeObject(ArrayList<SyncJob> jobs) {
-        try {
+    public ArrayList<SyncJob> readObject() {
 
-            FileOutputStream fos;
-
-            fos = new FileOutputStream(new File("jobs.data").getAbsoluteFile());
-
-            try (
-                    ObjectOutputStream objOutputStream = new ObjectOutputStream(fos)) {
-
-                for (Object obj : jobs) {
-                    objOutputStream.writeObject(obj);
-                    objOutputStream.reset();
-                }
-                System.out.println("saved ");
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }
-
-        } catch (FileNotFoundException ex) {
-            System.out.println(ex.getMessage());
-        }
-
-    }
-
-    public static ArrayList<SyncJob> readObject() {
+        String localPathProperty = null, repositryProperty = null, branchProperty = null, userProperty = null, passwordProperty = null, LocalReadonlyProperty = null, remoteAddressProperty = null;
         ArrayList<SyncJob> jobs = new ArrayList();
 
-        try (FileInputStream fis = new FileInputStream(new File("jobs.data").getAbsoluteFile()); //Create new ObjectInputStream object to read object from file
-                ObjectInputStream obj = new ObjectInputStream(fis)) {
-            int i = 0;
-            Object o;
-            while (fis.available() > 1) {
-
-                Object o1 = obj.readObject();
-                if (o1 == null) {
-                    return null;
-                }
-                SyncJob job = (SyncJob) o1;
-                jobs.add(job);
-               
+        for (int num = 0; num < sizeJobs; num++) {
+            SyncJob job = new SyncJob();
+            localPathProperty = jobFile.getProperty(JOB + "." + num + "." + "localPath");
+            if (localPathProperty == null) {
+                break;
             }
 
-        } catch (FileNotFoundException ex) {
-            System.out.println("ex 2" + ex.getMessage());
-            return null;
-        } catch (IOException ex) {
-            System.out.println("ww   3" + ex.getMessage());
-        } catch (ClassNotFoundException ex) {
-            System.out.println("ww   4" + ex.getMessage());
+            repositryProperty = jobFile.getProperty(JOB + "." + num + "." + "repositry");
+            branchProperty = jobFile.getProperty(JOB + "." + num + "." + "branch");
+            userProperty = jobFile.getProperty(JOB + "." + num + "." + "user");
+            passwordProperty = jobFile.getProperty(JOB + "." + num + "." + "password");
+            LocalReadonlyProperty = jobFile.getProperty(JOB + "." + num + "." + "LocalReadonly");
+            remoteAddressProperty = jobFile.getProperty(JOB + "." + num + "." + "remoteAddress");
+            job.setLocalDir(new File(localPathProperty));
+            job.setLocalReadonly(Boolean.valueOf(LocalReadonlyProperty));
+            job.setPwd(passwordProperty);
+            job.setUser(userProperty);
+
+            String q_host = remoteAddressProperty + "repositories/" + repositryProperty + "/" + branchProperty + "/";
+            job.setRemoteAddress(q_host);
+            jobs.add(job);
         }
+
         return jobs;
     }
 
-    void updateJobList(ArrayList<SyncJob> jobs)  {
-        String sDbFile = "~/syncdb";
-        EventManager eventManager = new EventManagerImpl();
-        try {
-            SyncCommand.start(new File(sDbFile), jobs, eventManager);
-        } catch (Exception ex) {
-            System.out.println(" ex "+ ex.getMessage());
+    void updateJobList(ArrayList<SyncJob> jobs) {
+        if (!jobs.isEmpty() && jobs != null) {
+
+            EventManager eventManager = new EventManagerImpl();
+            try {
+                SyncCommand.start(new File(sDbFile), jobs, eventManager);
+            } catch (Exception ex) {
+                System.out.println(" ex " + ex.getMessage());
+            }
+
+            jobs.stream().forEach((job) -> {
+
+                model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
+            });
         }
 
-        jobs.stream().forEach((job) -> {
-            model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
-        });
     }
+
+    void loadProperties(Properties p) {
+        FileInputStream fi;
+        try {
+            fi = new FileInputStream(file);
+            p.load(fi);
+            fi.close();
+            sizeJobs = Integer.parseInt(jobFile.getProperty("sizeJobs", "0"));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(updateJob.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(updateJob.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.out.println("After Loading properties:" + p);
+    }
+
+    private static void createBlankFile(File f) {
+        try {
+            FileOutputStream fout = new FileOutputStream(f);
+
+            byte[] b = "".getBytes();
+            fout.write(b);
+            fout.close();
+        } catch (Throwable e) {
+            e
+                    = e;
+            System.out.println("Couldnt create empty properties file, not big deal");
+        } finally {
+        }
+    }
+
+    static void wProperty(int index, String Property, String value) {
+        if ("sizeJobs".equals(Property)) {
+            jobFile.setProperty(Property, value);
+        } else {
+            jobFile.setProperty(JOB + "." + index + "." + Property, value);
+        }
+
+    }
+
+    static void rwProperty(int index, String Property) {
+        jobFile.setProperty(JOB + "." + index + "." + Property, jobFile.getProperty(JOB + "." + (index + 1) + "." + Property));
+
+    }
+
+    void rProperty(int index, String Property) {
+
+        jobFile.remove(JOB + "." + index + "." + Property);
+
+    }
+
+    void saveProperties(Properties p) {
+        FileOutputStream fr;
+        try {
+            fr = new FileOutputStream(file);
+            p.store(fr, "Properties");
+            fr.close();
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(addJob.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(addJob.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.out.println("After saving properties:" + p);
+    }
+
 }

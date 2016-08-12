@@ -1,14 +1,21 @@
 package GUISync;
 
+import static GUISync.MainPage.file;
 import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.awt.Color;
 import static java.awt.image.ImageObserver.PROPERTIES;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -22,8 +29,18 @@ public class addJob extends javax.swing.JPanel {
     /**
      * Creates new form addJob
      */
-    public addJob() {
+    static File file;
+
+    final String JOB = "job";
+    DefaultComboBoxModel<String> modelRepositry, modelBranch;
+
+    public addJob(int index) {
+
         initComponents();
+        num = index;
+        modelRepositry = (DefaultComboBoxModel) combo_repositry.getModel();
+        modelBranch = (DefaultComboBoxModel) combo_branch.getModel();
+
     }
 
     /**
@@ -225,17 +242,18 @@ public class addJob extends javax.swing.JPanel {
                 if (remoteAddress.endsWith("/")) {
                     remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
                 }
-                /// System.out.println("remotehost" + remotehost);
+
                 if (combo_repositry.getSelectedIndex() != 0) {
                     query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
-                    //    System.out.println("query braches   " + query);
+
                     try {
                         String listBrache = Helper.readUrl(query, user, password);
                         ArrayList<String> list = Helper.getDataFromJson(listBrache);
                         combo_branch.removeAllItems();
                         combo_branch.addItem("");
                         for (int i = 1; i < list.size() - 2; i++) {
-                            combo_branch.addItem(list.get(i));
+
+                            addToBranch(list.get(i));
                         }
                     } catch (Exception ex) {
                         //   JOptionPane.showMessageDialog(txt_remoteAddress, ex.getMessage());
@@ -266,6 +284,19 @@ public class addJob extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_local_read_only_CheckBox1ActionPerformed
 
+    void addToRepo(String item) {
+
+        if ((modelRepositry).getIndexOf(item) == -1) {
+            combo_repositry.addItem(item);
+        }
+    }
+
+    void addToBranch(String item) {
+
+        if ((modelBranch).getIndexOf(item) == -1) {
+            combo_branch.addItem(item);
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> combo_branch;
@@ -288,33 +319,44 @@ public class addJob extends javax.swing.JPanel {
     private javax.swing.JTextField txt_remoteAddress;
     private javax.swing.JTextField txt_user;
     // End of variables declaration//GEN-END:variables
-String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
+String localPath, json, remoteAddress, user, password, q_host, repositry, branch, query_repo;
     boolean isdone;
     SyncJob job;
+    int num;
 
     public SyncJob doAddJob() {
+        System.out.println("num  " + num);
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
         System.out.println("doAddJob   " + 1);
         job = new SyncJob();
         if (!localPath.trim().isEmpty() && combo_repositry.getSelectedIndex() != 0 && combo_branch.getSelectedIndex() != 0) {
+            repositry = combo_repositry.getSelectedItem().toString();
+            branch = combo_branch.getSelectedItem().toString();
+            q_host = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/";
 
-            String q_host = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/";
-
-            sDbFile = "~/syncdb";
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
+                    SyncCommand.monitor(MainPage.sDbFile, localPath, q_host, user, password);
 
-                    System.out.println("doAddJob   " + 2);
-                    System.out.println("remoteAddress   " + remoteAddress);
-                    SyncCommand.monitor(sDbFile, localPath, q_host, user, password);
+                    MainPage.wProperty(num, "localPath", localPath);
+                    MainPage.wProperty(num, "remoteAddress", remoteAddress);
+                    MainPage.wProperty(num, "repositry", repositry);
+                    MainPage.wProperty(num, "branch", branch);
+                    MainPage.wProperty(num, "user", user);
+                    MainPage.wProperty(num, "password", password);
+                    MainPage.wProperty(num, "LocalReadonly", String.valueOf(local_read_only_CheckBox1.isSelected()));
+                    MainPage.wProperty(num, "sizeJobs", String.valueOf(num + 1));
+
                     job.setLocalDir(new File(localPath));
                     job.setMonitor(true);
                     job.setPwd(password);
-                    job.setRemoteAddress(remoteAddress);
+                    job.setRemoteAddress(q_host);
                     job.setUser(user);
+
                     job.setLocalReadonly(local_read_only_CheckBox1.isSelected());
+
                     return job;
                 }
             } catch (Exception ex) {
@@ -325,7 +367,7 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
 
         } else {
             System.out.println("");
-            //   JOptionPane.showMessageDialog(txt_localPath, "Please Complete insertd data....");
+            JOptionPane.showMessageDialog(txt_localPath, "Please Complete insertd data....");
 
         }
         return null;
@@ -363,7 +405,7 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                     }
 
                 } catch (Exception ex) {
-                    //   JOptionPane.showMessageDialog(null, "Exception running monitor: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(null, "Exception running monitor: " + ex.getMessage());
                     progress.setValue(0);
 
                     return null;
@@ -395,11 +437,9 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
                     combo_repositry.removeAllItems();
                     combo_repositry.addItem("");
                     ArrayList<String> list = Helper.getDataFromJson(json);
-                    list.remove(0);
 
-                    for (int i = 0; i < list.size(); i++) {
-
-                        combo_repositry.addItem(list.get(i));
+                    for (int i = 1; i < list.size(); i++) {
+                        addToRepo(list.get(i));
 
                     }
                     grayedField();
@@ -430,4 +470,5 @@ String localPath, json, sDbFile, remoteAddress, user, password, query_repo;
         return !txt_remoteAddress.getText().trim().isEmpty()
                 && !txt_user.getText().trim().isEmpty() && !txt_password.getText().trim().isEmpty();
     }
+
 }

@@ -78,6 +78,12 @@ public class base {
 
     //will prevent copy
     private static void protect() {
+        try {
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+        
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            ex.printStackTrace();
+        }
         base b = new base();
         b.run();
     }
