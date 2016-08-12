@@ -66,7 +66,7 @@ public class SyncingDeltaListener implements DeltaListener {
                 //log.info("new remote file: " + localChild.getAbsolutePath());
             }
             if (readonlyLocal) {
-                log.info("in read only mode so not doing anything");
+                log.info("in read only mode so not doing anything to file {}", localChild.getCanonicalPath() );
                 return;
             }
             syncer.downloadSync(remoteTriplet.getHash(), path);
