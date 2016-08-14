@@ -44,8 +44,11 @@ public class MainPage extends javax.swing.JFrame {
     public MainPage() {
         initComponents();
         setLocationRelativeTo(null);
+        String userHome = System.getProperty("user.home");
 
-        file = new File("ksync.properties");
+        File fUserHome = new File(userHome);
+        file = new File(fUserHome, ".ksync.properties");
+
         jobFile = new Properties();
         if (!file.exists()) {
 
@@ -226,44 +229,46 @@ public class MainPage extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         System.out.println(" list_Jobs.getSelectedIndex()" + list_Jobs.getSelectedIndex());
+        int yes = JOptionPane.showConfirmDialog(null, "Do you want Delete Job ?","Confirm",JOptionPane.YES_NO_OPTION);
+        if (yes == 0) {
+            int index = list_Jobs.getSelectedIndex();
+            int i = 0;
 
-        int index = list_Jobs.getSelectedIndex();
-        int i = 0;
+            if (model.getSize() <= 1) {
+                rProperty(i, "localPath");
+                rProperty(i, "remoteAddress");
+                rProperty(i, "repositry");
+                rProperty(i, "branch");
+                rProperty(i, "user");
+                rProperty(i, "password");
+                rProperty(i, "LocalReadonly");
+            } else {
 
-        if (model.getSize() <= 1) {
-            rProperty(i, "localPath");
-            rProperty(i, "remoteAddress");
-            rProperty(i, "repositry");
-            rProperty(i, "branch");
-            rProperty(i, "user");
-            rProperty(i, "password");
-            rProperty(i, "LocalReadonly");
-        } else {
+                for (i = index; i < model.getSize() - 1; i++) {
+                    rwProperty(i, "localPath");
+                    rwProperty(i, "remoteAddress");
+                    rwProperty(i, "repositry");
+                    rwProperty(i, "branch");
+                    rwProperty(i, "user");
+                    rwProperty(i, "password");
+                    rwProperty(i, "LocalReadonly");
 
-            for (i = index; i < model.getSize() - 1; i++) {
-                rwProperty(i, "localPath");
-                rwProperty(i, "remoteAddress");
-                rwProperty(i, "repositry");
-                rwProperty(i, "branch");
-                rwProperty(i, "user");
-                rwProperty(i, "password");
-                rwProperty(i, "LocalReadonly");
-
+                }
+                rProperty(i, "localPath");
+                rProperty(i, "remoteAddress");
+                rProperty(i, "repositry");
+                rProperty(i, "branch");
+                rProperty(i, "user");
+                rProperty(i, "password");
+                rProperty(i, "LocalReadonly");
             }
-            rProperty(i, "localPath");
-            rProperty(i, "remoteAddress");
-            rProperty(i, "repositry");
-            rProperty(i, "branch");
-            rProperty(i, "user");
-            rProperty(i, "password");
-            rProperty(i, "LocalReadonly");
-        }
 
-        sizeJobs = Integer.parseInt(jobFile.getProperty("sizeJobs", "0"));
-        wProperty(-1, "sizeJobs", String.valueOf(Integer.parseInt(jobFile.getProperty("sizeJobs", "0")) - 1));
-        saveProperties(jobFile);
-        loadProperties(jobFile);
-        model.remove(index);
+            sizeJobs = Integer.parseInt(jobFile.getProperty("sizeJobs", "0"));
+            wProperty(-1, "sizeJobs", String.valueOf(Integer.parseInt(jobFile.getProperty("sizeJobs", "0")) - 1));
+            saveProperties(jobFile);
+            loadProperties(jobFile);
+            model.remove(index);
+        }
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
