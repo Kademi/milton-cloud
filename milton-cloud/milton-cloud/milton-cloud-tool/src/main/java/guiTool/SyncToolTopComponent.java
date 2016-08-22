@@ -456,6 +456,7 @@ public final class SyncToolTopComponent extends TopComponent {
             job.setLocalReadonly(Boolean.valueOf(LocalReadonlyProperty));
             job.setPwd(passwordProperty);
             job.setUser(userProperty);
+            job.setMonitor(true);
 
             String q_host = remoteAddressProperty + "repositories/" + repositryProperty + "/" + branchProperty + "/";
             job.setRemoteAddress(q_host);
