@@ -44,7 +44,7 @@ import org.openide.util.NbBundle.Messages;
 )
 @TopComponent.Description(
         preferredID = "SyncToolTopComponent",
-        //iconBase="SET/PATH/TO/ICON/HERE", 
+        //iconBase="SET/PATH/TO/ICON/HERE",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
@@ -72,7 +72,7 @@ public final class SyncToolTopComponent extends TopComponent {
         setToolTipText(Bundle.HINT_SyncToolTopComponent());
 
         String userHome = System.getProperty("user.home");
-       
+
         File fUserHome = new File(userHome);
         file = new File(fUserHome, ".ksync.properties");
         jobFile = new Properties();
@@ -376,7 +376,7 @@ public final class SyncToolTopComponent extends TopComponent {
             this.local = local;
             this.remote = remote;
 
-            imagePath = getClass().getResource("/Images/upload.png");
+            imagePath = getClass().getResource("/images/upload.png");
         }
 
         public String getLocal() {
