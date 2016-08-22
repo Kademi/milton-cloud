@@ -30,3 +30,17 @@ milton-cloud-sync/.settings/
 milton-cloud-vfs/.classpath
 milton-cloud-vfs/.project
 milton-cloud-vfs/.settings/
+/sync-tool/sync-gui/target/
+/sync-tool/sync-tool-gui/target/
+/sync-tool/branding/target/
+/sync-tool/application/target/
+/SyncTool/SyncTool/branding/target/
+/SyncTool/SyncTool/SyncToolGui/target/
+/SyncTool/SyncTool/application/target/
+/SyncTool/SyncTool/target/
+/milton-cloud-tool/branding/target/
+/milton-cloud-tool/application/target/
+/milton-cloud-tool/milton-cloud-tool-gui/target/
+/milton-cloud/milton-cloud/milton-cloud-tool/target/
+/milton-cloud/milton-cloud/branding/target/
+/milton-cloud/milton-cloud/application/target/

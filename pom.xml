@@ -31,7 +31,7 @@
         <jpa.version>1.0</jpa.version>
         <jdbc.driverClassName>org.hsqldb.jdbcDriver</jdbc.driverClassName>
         <jdbc.username>sa</jdbc.username>
-        <jdbc.password />
+        <jdbc.password/>
         <jdbc.groupId>hsqldb</jdbc.groupId>
         <jdbc.artifactId>hsqldb</jdbc.artifactId>
         <jdbc.version>1.8.0.7</jdbc.version>   
@@ -52,7 +52,8 @@
     <modules>
         <module>milton-cloud-sync</module>
         <module>milton-cloud-vfs</module>
-    </modules>
+   
+  </modules>
     <build>
         <plugins>
             <plugin>
