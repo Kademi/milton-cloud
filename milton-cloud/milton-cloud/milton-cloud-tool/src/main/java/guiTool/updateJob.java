@@ -92,8 +92,8 @@ public final class updateJob extends javax.swing.JPanel {
         local_read_only_CheckBox1 = new javax.swing.JCheckBox();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        combo_branch = new javax.swing.JComboBox<>();
-        combo_repositry = new javax.swing.JComboBox<>();
+        combo_branch = new javax.swing.JComboBox<String>();
+        combo_repositry = new javax.swing.JComboBox<String>();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         l_status = new javax.swing.JLabel();
@@ -136,7 +136,7 @@ public final class updateJob extends javax.swing.JPanel {
             }
         });
 
-        jButton2.setText("reConnect");
+        jButton2.setText("Connect");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -207,9 +207,9 @@ public final class updateJob extends javax.swing.JPanel {
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_localPath, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_remoteAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -222,8 +222,8 @@ public final class updateJob extends javax.swing.JPanel {
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(1, 1, 1)
-                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -243,7 +243,7 @@ public final class updateJob extends javax.swing.JPanel {
         filechooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         filechooser.setAcceptAllFileFilterUsed(false);
-        //    
+        //
         if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             localPath = filechooser.getSelectedFile().getAbsolutePath();
             txt_localPath.setText(localPath);
@@ -350,7 +350,7 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
-                  
+
                     String q_host = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/";
                     SyncToolTopComponent.wProperty(num, "localPath", localPath);
                     SyncToolTopComponent.wProperty(num, "remoteAddress", remoteAddress);
@@ -359,9 +359,9 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
                     SyncToolTopComponent.wProperty(num, "user", user);
                     SyncToolTopComponent.wProperty(num, "password", password);
                     SyncToolTopComponent.wProperty(num, "LocalReadonly", String.valueOf(local_read_only_CheckBox1.isSelected()));
-                                    
+
                   syncJob= new SyncJob(new File(localPath), q_host, user, password, true, local_read_only_CheckBox1.isSelected());
-                              
+
                     return syncJob;
                 }
             } catch (Exception ex) {
@@ -372,7 +372,7 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
 
         } else {
             System.out.println("");
-    
+
 
         }
         return null;
