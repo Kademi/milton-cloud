@@ -5,11 +5,15 @@
  */
 package guiTool;
 
-
+import io.milton.event.Event;
+import io.milton.event.EventListener;
 import io.milton.event.EventManager;
 import io.milton.event.EventManagerImpl;
 import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
+import io.milton.sync.event.DownloadSyncEvent;
+import io.milton.sync.event.TransferProgressEvent;
+import io.milton.sync.event.UploadSyncEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.io.File;
@@ -19,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +39,6 @@ import org.openide.awt.ActionReference;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 
-
 /**
  * Top component which displays something.
  */
@@ -49,7 +53,7 @@ import org.openide.util.NbBundle.Messages;
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
 @ActionID(category = "Window", id = "guiTool.SyncToolTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
+@ActionReference(path = "Menu/Window" /*, position = 333 /Window */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_SyncToolAction",
         preferredID = "SyncToolTopComponent"
@@ -60,31 +64,37 @@ import org.openide.util.NbBundle.Messages;
     "HINT_SyncToolTopComponent=This is a SyncTool window"
 })
 public final class SyncToolTopComponent extends TopComponent {
-  DefaultListModel model;
+
+    DefaultListModel model;
     final static String JOB = "job";
     final static String sDbFile = "~/syncdb";
     static File file;
     static Properties jobFile;
     int sizeJobs;
+    EventManager eventManager;
+
     public SyncToolTopComponent() {
         initComponents();
         setName(Bundle.CTL_SyncToolTopComponent());
         setToolTipText(Bundle.HINT_SyncToolTopComponent());
-
-        String userHome = System.getProperty("user.home");
-
-        File fUserHome = new File(userHome);
+        
+        File fUserHome = new File(System.getProperty("user.home"));
         file = new File(fUserHome, ".ksync.properties");
         jobFile = new Properties();
+
         if (!file.exists()) {
             createBlankFile(file);
         } else {
             loadProperties(jobFile);;
         }
-
+eventManager = new EventManagerImpl();
+        registerEvents();
+        
         model = new DefaultListModel();
         list_Jobs.setModel(model);
         list_Jobs.setCellRenderer(new JObCellRenderer());
+        updateJobList(readObject());
+
     }
 
     /**
@@ -106,10 +116,19 @@ public final class SyncToolTopComponent extends TopComponent {
         jButton7 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
 
+        setAttentionHighlight(false);
+        setAutoscrolls(true);
+        setFocusable(true);
+        setName("Form"); // NOI18N
+
         jPanel1.setBackground(new java.awt.Color(250, 250, 250));
+        jPanel1.setName("jPanel1"); // NOI18N
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, "Sync Jobs ");
+        jLabel1.setName("jLabel1"); // NOI18N
+
+        jSeparator1.setName("jSeparator1"); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -131,15 +150,20 @@ public final class SyncToolTopComponent extends TopComponent {
                 .addGap(0, 0, 0))
         );
 
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
         list_Jobs.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         list_Jobs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         list_Jobs.setAutoscrolls(false);
+        list_Jobs.setName("list_Jobs"); // NOI18N
         jScrollPane1.setViewportView(list_Jobs);
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, java.awt.Color.white, java.awt.Color.white));
+        jPanel6.setName("jPanel6"); // NOI18N
 
         jButton5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(jButton5, "Add");
+        jButton5.setName("jButton5"); // NOI18N
         jButton5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton5ActionPerformed(evt);
@@ -148,6 +172,7 @@ public final class SyncToolTopComponent extends TopComponent {
 
         jButton6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(jButton6, "Edit");
+        jButton6.setName("jButton6"); // NOI18N
         jButton6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton6ActionPerformed(evt);
@@ -158,6 +183,7 @@ public final class SyncToolTopComponent extends TopComponent {
         org.openide.awt.Mnemonics.setLocalizedText(jButton7, "Delete");
         jButton7.setBorder(null);
         jButton7.setInheritsPopupMenu(true);
+        jButton7.setName("jButton7"); // NOI18N
         jButton7.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton7ActionPerformed(evt);
@@ -165,6 +191,7 @@ public final class SyncToolTopComponent extends TopComponent {
         });
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logo-dark.png"))); // NOI18N
+        jLabel2.setName("jLabel2"); // NOI18N
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -188,7 +215,7 @@ public final class SyncToolTopComponent extends TopComponent {
                 .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
                 .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 247, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -198,7 +225,7 @@ public final class SyncToolTopComponent extends TopComponent {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 558, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -276,16 +303,12 @@ public final class SyncToolTopComponent extends TopComponent {
     }//GEN-LAST:event_jButton7ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
@@ -294,7 +317,7 @@ public final class SyncToolTopComponent extends TopComponent {
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
-           updateJobList(readObject());
+        //   updateJobList(readObject());
     }
 
     @Override
@@ -313,7 +336,8 @@ public final class SyncToolTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
-     private void display() {
+
+    private void display() {
 
         addJob panel = new addJob(Integer.parseInt(jobFile.getProperty("sizeJobs", "0")));
 
@@ -326,6 +350,14 @@ public final class SyncToolTopComponent extends TopComponent {
             if (job != null) {
 
                 model.addElement(new JobModel(job.getLocalDir().getAbsolutePath(), job.getRemoteAddress()));
+                //add new sync job
+                try {
+                    SyncCommand.start(new File(sDbFile), Arrays.asList(job), eventManager).get(0);
+                } catch (Exception ex) {
+                    outRsponseTopComponent.addRsponse("Exception..." + ex.getMessage());
+
+                }
+
                 saveProperties(jobFile);
                 loadProperties(jobFile);
             }
@@ -349,6 +381,14 @@ public final class SyncToolTopComponent extends TopComponent {
             if (job != null) {
 
                 model.set(index, new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
+                /// run updated job
+                try {
+                    SyncCommand.start(new File(sDbFile), Arrays.asList(job), eventManager).get(0);
+                } catch (Exception ex) {
+                    outRsponseTopComponent.addRsponse("Exception..." + ex.getMessage());
+
+                }
+
                 saveProperties(jobFile);
                 loadProperties(jobFile);
 
@@ -358,6 +398,38 @@ public final class SyncToolTopComponent extends TopComponent {
             System.out.println("Cancelled");
         }
 
+    }
+
+    private void registerEvents() {
+        eventManager.registerEventListener(new EventListener() {
+            @Override
+            public void onEvent(Event event) {
+
+                UploadSyncEvent e = (UploadSyncEvent) event;
+                File f = e.getLocalFile();
+                outRsponseTopComponent.addRsponse("UploadSync                   " + f.getAbsolutePath());
+            }
+        }, UploadSyncEvent.class);
+
+        eventManager.registerEventListener(new EventListener() {
+            @Override
+            public void onEvent(Event event) {
+
+                DownloadSyncEvent e = (DownloadSyncEvent) event;
+                File f = e.getLocalFile();
+                outRsponseTopComponent.addRsponse("DownloadSync                 " + f.getAbsolutePath());
+            }
+        }, DownloadSyncEvent.class);
+
+        eventManager.registerEventListener(new EventListener() {
+            @Override
+            public void onEvent(Event event) {
+
+                TransferProgressEvent e = (TransferProgressEvent) event;
+
+                outRsponseTopComponent.addRsponse("TransferProgress             " + e.getFileName() + "    " + e.getPercent());
+            }
+        }, TransferProgressEvent.class);
     }
 
     public class JobModel {
@@ -465,11 +537,11 @@ public final class SyncToolTopComponent extends TopComponent {
 
         return jobs;
     }
+    File localFile;
 
     void updateJobList(ArrayList<SyncJob> jobs) {
         if (!jobs.isEmpty() && jobs != null) {
 
-            EventManager eventManager = new EventManagerImpl();
             try {
                 SyncCommand.start(new File(sDbFile), jobs, eventManager);
             } catch (Exception ex) {
@@ -477,6 +549,8 @@ public final class SyncToolTopComponent extends TopComponent {
             }
 
             for (SyncJob job : jobs) {
+                localFile = job.getLocalDir();
+
                 model.addElement(new JobModel(job.getLocalDir().getAbsoluteFile().toString(), job.getRemoteAddress()));
 
             }
@@ -508,8 +582,6 @@ public final class SyncToolTopComponent extends TopComponent {
             fout.write(b);
             fout.close();
         } catch (Throwable e) {
-            e
-                    = e;
             System.out.println("Couldnt create empty properties file, not big deal");
         } finally {
         }

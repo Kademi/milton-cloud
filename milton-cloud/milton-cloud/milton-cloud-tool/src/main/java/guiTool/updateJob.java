@@ -2,7 +2,6 @@ package guiTool;
 
 
 
-import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.awt.Color;
 import static java.awt.image.ImageObserver.PROPERTIES;
@@ -18,7 +17,7 @@ import javax.swing.SwingWorker;
  *
  * @author ibraheem
  */
-public class updateJob extends javax.swing.JPanel {
+public final class updateJob extends javax.swing.JPanel {
 
     /**
      * Creates new form addJob
@@ -333,7 +332,7 @@ public class updateJob extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 String localPath, json, remoteAddress, user, password, query_repo, repositry, branch;
     boolean isdone;
-    SyncJob job = new SyncJob();
+    SyncJob syncJob;
     int num;
 
     public SyncJob doUpdateJob() {
@@ -351,26 +350,19 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
             System.out.println("doAddJob   " + 1);
             try {
                 if (Helper.checkInternet()) {
-                    System.out.println("doAddJob   " + 2);
+                  
                     String q_host = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/";
-
-                    System.out.println("doAddJob   " + 3);
                     SyncToolTopComponent.wProperty(num, "localPath", localPath);
                     SyncToolTopComponent.wProperty(num, "remoteAddress", remoteAddress);
                     SyncToolTopComponent.wProperty(num, "repositry", repositry);
                     SyncToolTopComponent.wProperty(num, "branch", branch);
                     SyncToolTopComponent.wProperty(num, "user", user);
                     SyncToolTopComponent.wProperty(num, "password", password);
-                    System.out.println("doAddJob   " + 4);
                     SyncToolTopComponent.wProperty(num, "LocalReadonly", String.valueOf(local_read_only_CheckBox1.isSelected()));
-                    SyncCommand.monitor(SyncToolTopComponent.sDbFile, localPath, q_host, user, password);
-                    job.setLocalDir(new File(localPath));
-                    job.setMonitor(true);
-                    job.setPwd(password);
-                    job.setRemoteAddress(remoteAddress);
-                    job.setUser(user);
-                    job.setLocalReadonly(local_read_only_CheckBox1.isSelected());
-                    return job;
+                                    
+                  syncJob= new SyncJob(new File(localPath), q_host, user, password, true, local_read_only_CheckBox1.isSelected());
+                              
+                    return syncJob;
                 }
             } catch (Exception ex) {
 
@@ -380,7 +372,7 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
 
         } else {
             System.out.println("");
-            //   JOptionPane.showMessageDialog(txt_localPath, "Please Complete insertd data....");
+    
 
         }
         return null;

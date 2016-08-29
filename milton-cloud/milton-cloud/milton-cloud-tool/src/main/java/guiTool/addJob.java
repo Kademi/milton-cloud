@@ -1,8 +1,5 @@
 package guiTool;
 
-
-
-import io.milton.sync.SyncCommand;
 import io.milton.sync.SyncJob;
 import java.awt.Color;
 import static java.awt.image.ImageObserver.PROPERTIES;
@@ -313,7 +310,7 @@ public class addJob extends javax.swing.JPanel {
     private javax.swing.JTextField txt_remoteAddress;
     private javax.swing.JTextField txt_user;
     // End of variables declaration//GEN-END:variables
-String localPath, json, remoteAddress, user, password, q_host, repositry, branch, query_repo;
+    String localPath, json, remoteAddress, user, password, q_host, repositry, branch, query_repo;
     boolean isdone;
     SyncJob job;
     int num;
@@ -331,9 +328,10 @@ String localPath, json, remoteAddress, user, password, q_host, repositry, branch
 
             System.out.println("qhost " + q_host);
             try {
+                SyncJob syncJob = new SyncJob(new File(localPath), q_host, user, password, true, local_read_only_CheckBox1.isSelected());
+              
                 if (Helper.checkInternet()) {
-                    SyncCommand.monitor(SyncToolTopComponent.sDbFile, localPath, q_host, user, password);
-
+                  
                     SyncToolTopComponent.wProperty(num, "localPath", localPath);
                     SyncToolTopComponent.wProperty(num, "remoteAddress", remoteAddress);
                     SyncToolTopComponent.wProperty(num, "repositry", repositry);
@@ -343,16 +341,9 @@ String localPath, json, remoteAddress, user, password, q_host, repositry, branch
                     SyncToolTopComponent.wProperty(num, "LocalReadonly", String.valueOf(local_read_only_CheckBox1.isSelected()));
                     SyncToolTopComponent.wProperty(num, "sizeJobs", String.valueOf(num + 1));
 
-                    job.setLocalDir(new File(localPath));
-                    job.setMonitor(true);
-                    job.setPwd(password);
-                    job.setRemoteAddress(q_host);
-                    job.setUser(user);
-
-                    job.setLocalReadonly(local_read_only_CheckBox1.isSelected());
-
-                    return job;
+                    return syncJob;
                 }
+                 
             } catch (Exception ex) {
 
                 System.out.println("ex: " + ex.getMessage());
@@ -465,4 +456,5 @@ String localPath, json, remoteAddress, user, password, q_host, repositry, branch
                 && !txt_user.getText().trim().isEmpty() && !txt_password.getText().trim().isEmpty();
     }
 
+  
 }
