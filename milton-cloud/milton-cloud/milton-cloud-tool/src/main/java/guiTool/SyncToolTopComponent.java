@@ -65,6 +65,8 @@ import org.openide.util.NbBundle.Messages;
 })
 public final class SyncToolTopComponent extends TopComponent {
 
+    private static final Logger LOG = Logger.getLogger("org.netbeans.modules.ksync");
+
     DefaultListModel model;
     final static String JOB = "job";
     final static String sDbFile = "~/syncdb";
@@ -77,7 +79,7 @@ public final class SyncToolTopComponent extends TopComponent {
         initComponents();
         setName(Bundle.CTL_SyncToolTopComponent());
         setToolTipText(Bundle.HINT_SyncToolTopComponent());
-        
+
         File fUserHome = new File(System.getProperty("user.home"));
         file = new File(fUserHome, ".ksync.properties");
         jobFile = new Properties();
@@ -89,7 +91,7 @@ public final class SyncToolTopComponent extends TopComponent {
         }
 eventManager = new EventManagerImpl();
         registerEvents();
-        
+
         model = new DefaultListModel();
         list_Jobs.setModel(model);
         list_Jobs.setCellRenderer(new JObCellRenderer());
@@ -407,7 +409,7 @@ eventManager = new EventManagerImpl();
 
                 UploadSyncEvent e = (UploadSyncEvent) event;
                 File f = e.getLocalFile();
-                outRsponseTopComponent.addRsponse("UploadSync                   " + f.getAbsolutePath());
+                LOG.info("Upload " + f.getAbsolutePath());
             }
         }, UploadSyncEvent.class);
 
@@ -417,7 +419,9 @@ eventManager = new EventManagerImpl();
 
                 DownloadSyncEvent e = (DownloadSyncEvent) event;
                 File f = e.getLocalFile();
-                outRsponseTopComponent.addRsponse("DownloadSync                 " + f.getAbsolutePath());
+                if( f != null ) {
+                    LOG.info("Download " + f.getAbsolutePath());
+                }
             }
         }, DownloadSyncEvent.class);
 
@@ -427,7 +431,7 @@ eventManager = new EventManagerImpl();
 
                 TransferProgressEvent e = (TransferProgressEvent) event;
 
-                outRsponseTopComponent.addRsponse("TransferProgress             " + e.getFileName() + "    " + e.getPercent());
+                LOG.info("TransferProgress " + e.getFileName() + "    " + e.getPercent());
             }
         }, TransferProgressEvent.class);
     }
