@@ -29,8 +29,8 @@ public final class updateJob extends javax.swing.JPanel {
 
         initComponents();
         num = index;
-        modelRepositry = (DefaultComboBoxModel) combo_repositry.getModel();
-        modelBranch = (DefaultComboBoxModel) combo_branch.getModel();
+        modelRepositry = (DefaultComboBoxModel) combo_Repositry.getModel();
+        modelBranch = (DefaultComboBoxModel) combo_Branch.getModel();
         updateField();
 
     }
@@ -53,8 +53,8 @@ public final class updateJob extends javax.swing.JPanel {
         addToRepo(repositryProperty);
         addToBranch(branchProperty);
 
-        combo_repositry.setSelectedItem(repositryProperty);
-        combo_branch.setSelectedItem(branchProperty);
+        combo_Repositry.setSelectedItem(repositryProperty);
+        combo_Branch.setSelectedItem(branchProperty);
 
     }
 
@@ -66,14 +66,14 @@ public final class updateJob extends javax.swing.JPanel {
     void addToRepo(String item) {
 
         if ((modelRepositry).getIndexOf(item) == -1) {
-            combo_repositry.addItem(item);
+            combo_Repositry.addItem(item);
         }
     }
 
     void addToBranch(String item) {
 
         if ((modelBranch).getIndexOf(item) == -1) {
-            combo_branch.addItem(item);
+            combo_Branch.addItem(item);
         }
     }
 
@@ -92,10 +92,10 @@ public final class updateJob extends javax.swing.JPanel {
         local_read_only_CheckBox1 = new javax.swing.JCheckBox();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        combo_branch = new javax.swing.JComboBox<String>();
-        combo_repositry = new javax.swing.JComboBox<String>();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        combo_Branch = new javax.swing.JComboBox<>();
+        combo_Repositry = new javax.swing.JComboBox<>();
+        btn_BrowseDirectory = new javax.swing.JButton();
+        btn_ConnectToServer = new javax.swing.JButton();
         l_status = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
@@ -123,23 +123,23 @@ public final class updateJob extends javax.swing.JPanel {
 
         jLabel6.setText("Branch");
 
-        combo_repositry.addItemListener(new java.awt.event.ItemListener() {
+        combo_Repositry.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                combo_repositryItemStateChanged(evt);
+                combo_RepositryItemStateChanged(evt);
             }
         });
 
-        jButton1.setText("Browse");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btn_BrowseDirectory.setText("Browse");
+        btn_BrowseDirectory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btn_BrowseDirectoryActionPerformed(evt);
             }
         });
 
-        jButton2.setText("Connect");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btn_ConnectToServer.setText("Connect");
+        btn_ConnectToServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btn_ConnectToServerActionPerformed(evt);
             }
         });
 
@@ -171,7 +171,7 @@ public final class updateJob extends javax.swing.JPanel {
                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                     .addComponent(txt_localPath, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(btn_BrowseDirectory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGroup(layout.createSequentialGroup()
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -182,7 +182,7 @@ public final class updateJob extends javax.swing.JPanel {
                                         .addComponent(txt_remoteAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(btn_ConnectToServer, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(l_status, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                     .addComponent(jSeparator2)
                     .addGroup(layout.createSequentialGroup()
@@ -191,11 +191,11 @@ public final class updateJob extends javax.swing.JPanel {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(10, 10, 10)
-                                .addComponent(combo_repositry, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(combo_Repositry, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(combo_branch, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(combo_Branch, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
@@ -206,10 +206,10 @@ public final class updateJob extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_localPath, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btn_BrowseDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_remoteAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -219,24 +219,24 @@ public final class updateJob extends javax.swing.JPanel {
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_user, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btn_ConnectToServer, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(1, 1, 1)
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(0, 0, 0)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(combo_repositry, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(combo_branch, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(combo_Repositry, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(combo_Branch, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
                 .addComponent(local_read_only_CheckBox1))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btn_BrowseDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_BrowseDirectoryActionPerformed
         // TODO add your handling code here:
 
         JFileChooser filechooser = new JFileChooser();
@@ -250,17 +250,17 @@ public final class updateJob extends javax.swing.JPanel {
         } else {
             System.out.println("No Selection ");
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btn_BrowseDirectoryActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btn_ConnectToServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ConnectToServerActionPerformed
         // TODO add your handling code here:
         l_status.setForeground(Color.BLACK);
-        combo_branch.removeAll();
-        combo_repositry.removeAll();
+        combo_Branch.removeAll();
+        combo_Repositry.removeAll();
         doConnect();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btn_ConnectToServerActionPerformed
     String query;
-    private void combo_repositryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combo_repositryItemStateChanged
+    private void combo_RepositryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combo_RepositryItemStateChanged
         // TODO add your handling code here:
         SwingWorker worker = new SwingWorker<Void, Integer>() {
             @Override
@@ -270,13 +270,13 @@ public final class updateJob extends javax.swing.JPanel {
                     remotehost = remoteAddress.substring(0, remoteAddress.length() - 1);
                 }
 
-                query = remotehost + "/repositories/" + combo_repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
+                query = remotehost + "/repositories/" + combo_Repositry.getSelectedItem().toString() + "/_DAV/PROPFIND?fields=name";
                 //    System.out.println("query braches   " + query);
                 try {
                     String listBrache = Helper.readUrl(query, user, password);
                     ArrayList<String> list = Helper.getDataFromJson(listBrache);
-                    combo_branch.removeAllItems();
-                    combo_branch.addItem("");
+                    combo_Branch.removeAllItems();
+                    combo_Branch.addItem("");
                     for (int i = 1; i < list.size() - 2; i++) {
                         addToBranch(list.get(i));
                     }
@@ -297,12 +297,12 @@ public final class updateJob extends javax.swing.JPanel {
 
             }
         };
-        if (!combo_repositry.getSelectedItem().toString().isEmpty()) {
+        if (!combo_Repositry.getSelectedItem().toString().isEmpty()) {
 
             worker.execute();
         }
 
-    }//GEN-LAST:event_combo_repositryItemStateChanged
+    }//GEN-LAST:event_combo_RepositryItemStateChanged
 
     private void local_read_only_CheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_local_read_only_CheckBox1ActionPerformed
         // TODO add your handling code here:
@@ -310,10 +310,10 @@ public final class updateJob extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> combo_branch;
-    private javax.swing.JComboBox<String> combo_repositry;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btn_BrowseDirectory;
+    private javax.swing.JButton btn_ConnectToServer;
+    private javax.swing.JComboBox<String> combo_Branch;
+    private javax.swing.JComboBox<String> combo_Repositry;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -340,10 +340,10 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
         localPath = txt_localPath.getText();
         remoteAddress = txt_remoteAddress.getText();
         System.out.println("doAddJob   " + 1);
-        if (!localPath.trim().isEmpty() && !combo_repositry.getSelectedItem().toString().isEmpty() && !combo_branch.getSelectedItem().toString().isEmpty()) {
+        if (!localPath.trim().isEmpty() && !combo_Repositry.getSelectedItem().toString().isEmpty() && !combo_Branch.getSelectedItem().toString().isEmpty()) {
 
-            repositry = combo_repositry.getSelectedItem().toString();
-            branch = combo_branch.getSelectedItem().toString();
+            repositry = combo_Repositry.getSelectedItem().toString();
+            branch = combo_Branch.getSelectedItem().toString();
             user = txt_user.getText();
             password = Arrays.toString(txt_password.getPassword());
 
@@ -351,7 +351,7 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
             try {
                 if (Helper.checkInternet()) {
 
-                    String q_host = remoteAddress + "repositories/" + combo_repositry.getSelectedItem().toString() + "/" + combo_branch.getSelectedItem().toString() + "/";
+                    String q_host = remoteAddress + "repositories/" + combo_Repositry.getSelectedItem().toString() + "/" + combo_Branch.getSelectedItem().toString() + "/";
                     SyncToolTopComponent.wProperty(num, "localPath", localPath);
                     SyncToolTopComponent.wProperty(num, "remoteAddress", remoteAddress);
                     SyncToolTopComponent.wProperty(num, "repositry", repositry);
@@ -380,8 +380,8 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
 
     void doConnect() {
         l_status.setText("Status");
-        combo_repositry.removeAll();
-        combo_branch.removeAll();
+        combo_Repositry.removeAll();
+        combo_Branch.removeAll();
         SwingWorker worker = new SwingWorker<Void, Integer>() {
             @Override
             protected synchronized Void doInBackground() throws Exception {
@@ -439,7 +439,7 @@ String localPath, json, remoteAddress, user, password, query_repo, repositry, br
             @Override
             protected void done() {
                 if (isdone == true) {
-                    combo_repositry.addItem("");
+                    combo_Repositry.addItem("");
                     ArrayList<String> list = Helper.getDataFromJson(json);
                     list.remove(0);
                     for (int i = 0; i < list.size(); i++) {

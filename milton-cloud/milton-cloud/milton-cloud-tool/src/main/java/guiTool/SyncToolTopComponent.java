@@ -89,7 +89,7 @@ public final class SyncToolTopComponent extends TopComponent {
         } else {
             loadProperties(jobFile);;
         }
-eventManager = new EventManagerImpl();
+        eventManager = new EventManagerImpl();
         registerEvents();
 
         model = new DefaultListModel();
@@ -113,9 +113,9 @@ eventManager = new EventManagerImpl();
         jScrollPane1 = new javax.swing.JScrollPane();
         list_Jobs = new javax.swing.JList<>();
         jPanel6 = new javax.swing.JPanel();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
+        btn_addJob = new javax.swing.JButton();
+        btn_editJob = new javax.swing.JButton();
+        btn_deleteJob = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
 
         setAttentionHighlight(false);
@@ -163,32 +163,32 @@ eventManager = new EventManagerImpl();
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED, java.awt.Color.white, java.awt.Color.white));
         jPanel6.setName("jPanel6"); // NOI18N
 
-        jButton5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(jButton5, "Add");
-        jButton5.setName("jButton5"); // NOI18N
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
+        btn_addJob.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btn_addJob, "Add");
+        btn_addJob.setName("btn_addJob"); // NOI18N
+        btn_addJob.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
+                btn_addJobActionPerformed(evt);
             }
         });
 
-        jButton6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(jButton6, "Edit");
-        jButton6.setName("jButton6"); // NOI18N
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
+        btn_editJob.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btn_editJob, "Edit");
+        btn_editJob.setName("btn_editJob"); // NOI18N
+        btn_editJob.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton6ActionPerformed(evt);
+                btn_editJobActionPerformed(evt);
             }
         });
 
-        jButton7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(jButton7, "Delete");
-        jButton7.setBorder(null);
-        jButton7.setInheritsPopupMenu(true);
-        jButton7.setName("jButton7"); // NOI18N
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
+        btn_deleteJob.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(btn_deleteJob, "Delete");
+        btn_deleteJob.setBorder(null);
+        btn_deleteJob.setInheritsPopupMenu(true);
+        btn_deleteJob.setName("btn_deleteJob"); // NOI18N
+        btn_deleteJob.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
+                btn_deleteJobActionPerformed(evt);
             }
         });
 
@@ -202,9 +202,9 @@ eventManager = new EventManagerImpl();
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btn_addJob, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                    .addComponent(btn_editJob, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btn_deleteJob, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -212,11 +212,11 @@ eventManager = new EventManagerImpl();
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addGap(26, 26, 26)
-                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_addJob, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_editJob, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_deleteJob, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -245,21 +245,21 @@ eventManager = new EventManagerImpl();
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+    private void btn_addJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addJobActionPerformed
         // TODO add your handling code here:
         //        model.add(0, "job \n " + "des");
         display();
-    }//GEN-LAST:event_jButton5ActionPerformed
+    }//GEN-LAST:event_btn_addJobActionPerformed
 
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+    private void btn_editJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editJobActionPerformed
         // TODO add your handling code here:
         int index = list_Jobs.getSelectedIndex();
         if (index != -1) {
             displaUpdate(index);
         }
-    }//GEN-LAST:event_jButton6ActionPerformed
+    }//GEN-LAST:event_btn_editJobActionPerformed
 
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+    private void btn_deleteJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteJobActionPerformed
         // TODO add your handling code here:
         System.out.println(" list_Jobs.getSelectedIndex()" + list_Jobs.getSelectedIndex());
         int yes = JOptionPane.showConfirmDialog(null, "Do you want Delete Job ?", "Confirm", JOptionPane.YES_NO_OPTION);
@@ -295,19 +295,19 @@ eventManager = new EventManagerImpl();
                 rProperty(i, "password");
                 rProperty(i, "LocalReadonly");
             }
-
+           
             sizeJobs = Integer.parseInt(jobFile.getProperty("sizeJobs", "0"));
             wProperty(-1, "sizeJobs", String.valueOf(Integer.parseInt(jobFile.getProperty("sizeJobs", "0")) - 1));
             saveProperties(jobFile);
             loadProperties(jobFile);
             model.remove(index);
         }
-    }//GEN-LAST:event_jButton7ActionPerformed
+    }//GEN-LAST:event_btn_deleteJobActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
+    private javax.swing.JButton btn_addJob;
+    private javax.swing.JButton btn_deleteJob;
+    private javax.swing.JButton btn_editJob;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
@@ -356,8 +356,8 @@ eventManager = new EventManagerImpl();
                 try {
                     SyncCommand.start(new File(sDbFile), Arrays.asList(job), eventManager).get(0);
                 } catch (Exception ex) {
-                    outRsponseTopComponent.addRsponse("Exception..." + ex.getMessage());
 
+                    LOG.log(Level.WARNING, ex.getMessage());
                 }
 
                 saveProperties(jobFile);
@@ -387,7 +387,7 @@ eventManager = new EventManagerImpl();
                 try {
                     SyncCommand.start(new File(sDbFile), Arrays.asList(job), eventManager).get(0);
                 } catch (Exception ex) {
-                    outRsponseTopComponent.addRsponse("Exception..." + ex.getMessage());
+                    LOG.log(Level.WARNING, ex.getMessage());
 
                 }
 
@@ -409,7 +409,7 @@ eventManager = new EventManagerImpl();
 
                 UploadSyncEvent e = (UploadSyncEvent) event;
                 File f = e.getLocalFile();
-                LOG.info("Upload " + f.getAbsolutePath());
+                LOG.log(Level.INFO, "Upload {0}", f.getAbsolutePath());
             }
         }, UploadSyncEvent.class);
 
@@ -419,8 +419,8 @@ eventManager = new EventManagerImpl();
 
                 DownloadSyncEvent e = (DownloadSyncEvent) event;
                 File f = e.getLocalFile();
-                if( f != null ) {
-                    LOG.info("Download " + f.getAbsolutePath());
+                if (f != null) {
+                    LOG.log(Level.INFO, "Download {0}", f.getAbsolutePath());
                 }
             }
         }, DownloadSyncEvent.class);
@@ -431,7 +431,7 @@ eventManager = new EventManagerImpl();
 
                 TransferProgressEvent e = (TransferProgressEvent) event;
 
-                LOG.info("TransferProgress " + e.getFileName() + "    " + e.getPercent());
+                LOG.log(Level.INFO, "TransferProgress {0}    {1}", new Object[]{e.getFileName(), e.getPercent()});
             }
         }, TransferProgressEvent.class);
     }
