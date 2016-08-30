@@ -31,7 +31,7 @@
         <jpa.version>1.0</jpa.version>
         <jdbc.driverClassName>org.hsqldb.jdbcDriver</jdbc.driverClassName>
         <jdbc.username>sa</jdbc.username>
-        <jdbc.password />
+        <jdbc.password/>
         <jdbc.groupId>hsqldb</jdbc.groupId>
         <jdbc.artifactId>hsqldb</jdbc.artifactId>
         <jdbc.version>1.8.0.7</jdbc.version>   
@@ -52,7 +52,8 @@
     <modules>
         <module>milton-cloud-sync</module>
         <module>milton-cloud-vfs</module>
-    </modules>
+   
+  </modules>
     <build>
         <plugins>
             <plugin>
@@ -60,8 +61,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -95,4 +96,3 @@
         </repository>
     </repositories>    
 </project>
-
