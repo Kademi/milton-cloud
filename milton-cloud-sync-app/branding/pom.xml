@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
       <groupId>io.milton</groupId>
-      <artifactId>milton-cloud-parent</artifactId>
+      <artifactId>milton-cloud-sync-app-parent</artifactId>
       <version>1.2.1</version>
   </parent>
 

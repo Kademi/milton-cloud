@@ -8,7 +8,7 @@
     <version>1.2.1</version>
     <packaging>pom</packaging>
 
-    <name>milton-cloud-parent</name>
+    <name>milton-cloud-sync-app-parent</name>
 
     <repositories>
         <!--
