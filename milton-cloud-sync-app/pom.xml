@@ -2,15 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>io.milton</groupId>        
-        <artifactId>milton-cloud</artifactId>
-        <version>1.2.1</version>
-    </parent>    
-    <artifactId>milton-cloud-sync-app-parent</artifactId>    
-    <packaging>pom</packaging>
-    <version>1.0.0</version>
 
+    <groupId>io.milton</groupId>
+    <artifactId>milton-cloud-sync-app-parent</artifactId>
+    <version>1.2.1</version>
+    <packaging>pom</packaging>
+
+    <name>milton-cloud-parent</name>
 
     <repositories>
         <!--
@@ -21,7 +19,7 @@
         <repository>
             <id>netbeans</id>
             <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
+            <url>http://bits.netbeans.org/nexus/content/groups/netbeans/</url>
         </repository>
     </repositories>
 
@@ -31,7 +29,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.7</version>
+                    <version>3.13</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
@@ -39,19 +37,19 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <!-- NetBeans 6.9+ requires JDK 6 -->
+                    <!-- NetBeans 6.9+ requires JDK 6, starting NetBeans 7.4 source 1.7 is required -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
+                    <version>2.5.1</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.7</source>
+                        <target>1.7</target>
                     </configuration>
                 </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>2.4</version>
             </plugin>
             </plugins>
         </pluginManagement>
@@ -60,11 +58,11 @@
     <modules>
         <module>branding</module>
         <module>application</module>
-        <module>module</module>
+        <module>milton-cloud-tool</module>
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE712</netbeans.version>
-        <brandingToken>milton_cloud_sync_app</brandingToken>
+        <netbeans.version>RELEASE81</netbeans.version>
+        <brandingToken>miltoncloud</brandingToken>
     </properties>
 </project>

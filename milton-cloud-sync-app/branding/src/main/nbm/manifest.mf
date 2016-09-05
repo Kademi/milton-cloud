@@ -1,4 +1,3 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Layer: org/spliffy/sync/app/branding/layer.xml
-OpenIDE-Module-Localizing-Bundle: org/spliffy/sync/app/branding/Bundle.properties
+OpenIDE-Module-Localizing-Bundle: io/milton/branding/Bundle.properties
 AutoUpdate-Essential-Module: true
