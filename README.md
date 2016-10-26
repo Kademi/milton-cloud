@@ -59,7 +59,7 @@ Once you have your Repository you can grab the live branch, create a DataSession
 and start adding files.
 
 So putting all that together:
-
+```
 Session session = ... (get a session from hibernate)
 Transaction tx = session.beginTransaction();
 
@@ -102,6 +102,7 @@ dataSession.save(t);
 
 // And commit the transaction
 tx.commit();
+```
 
 
 Using the version history
@@ -110,6 +111,7 @@ Milton VFS gives you a complete version history of each branch in the form of a
 list of Commits. To find the version history for a single file you need to walk
 the list of commits and look for changes to that file
 
+```
 Branch trunk = repo.liveBranch();
 List<Commit> commits = Commit.findByBranch(trunk, session);
 // Display the commits
@@ -118,6 +120,7 @@ for( Commit commit : commits ) {
     DataSession dataSession = new DataSession(b, session, hashStore, blobStore, currentDateService);    
     display( dataSession.getRootDataNode() ); // display the files
 }
+```
 
 
 Concurrency
@@ -138,9 +141,11 @@ Access Control
 
 The milton vfs library includes classes suitable for use in persisting and applying
 an access control scheme:
+```
 io.milton.vfs.db.Group
 io.milton.vfs.db.GroupRole
 io.milton.vfs.db.GroupMembership
+```
 
 However, no access control rules are applie within milton vfs.
 
