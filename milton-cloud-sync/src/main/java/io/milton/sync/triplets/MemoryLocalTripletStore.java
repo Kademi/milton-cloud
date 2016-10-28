@@ -43,6 +43,7 @@ public class MemoryLocalTripletStore {
     private final EventManager eventManager;
     private final BlobStore blobStore;
     private final HashStore hashStore;
+    private final RepoChangedCallback callback;
     private File currentScanFile;
     private long currentOffset;
     private String lastBlobHash;
@@ -61,10 +62,11 @@ public class MemoryLocalTripletStore {
      * @param dialect
      * @param group - so we can cache different collections in one table
      */
-    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore) throws IOException {
+    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback) throws IOException {
         this.root = root;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
+        this.callback = callback;
         this.eventManager = eventManager;
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
@@ -88,6 +90,9 @@ public class MemoryLocalTripletStore {
         //Thread.dumpStack();
         try {
             String hash = scanDirectory(root);
+            if( callback != null ) {
+                callback.onChanged(hash);
+            }
             eventManager.fireEvent(new FileChangedEvent(root, hash));
 
         } catch (Throwable e) {
@@ -381,6 +386,9 @@ public class MemoryLocalTripletStore {
         if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
             queuedEvents = 0;
             log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
+            if( callback != null ) {
+                callback.onChanged(hash);
+            }
             EventUtils.fireQuietly(eventManager, new FileChangedEvent(this.root, hash));
         } else {
             log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
@@ -396,4 +404,7 @@ public class MemoryLocalTripletStore {
         return f.getAbsolutePath() + "-" + f.lastModified();
     }
 
+    public interface RepoChangedCallback {
+        public void onChanged(String newHash);
+    }
 }
