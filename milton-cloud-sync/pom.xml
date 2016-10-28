@@ -8,7 +8,7 @@
     </parent>
     <artifactId>milton-cloud-sync</artifactId>
     <packaging>jar</packaging>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
     <dependencies>
         <dependency>
             <groupId>org.swinglabs</groupId>
@@ -63,7 +63,7 @@
             <artifactId>milton-client</artifactId>
             <version>${milton.version}</version>
         </dependency>
-      
+
         <dependency>
             <groupId>hashsplit4j</groupId>
             <artifactId>hashsplit4j-lib</artifactId>

@@ -17,16 +17,36 @@
 package io.milton.sync.event;
 
 import io.milton.event.Event;
+import java.io.File;
 
 
 /**
  * Fired when one or more changed files are detected in the file system.
- * 
+ *
  * This will usually inform the sync program after local triplet store has been updated.
  * The sync client will then scan the local triplet store against the remote.
  *
  * @author brad
  */
 public class FileChangedEvent implements Event{
-    
+    private final File root;
+    private final String rootHash;
+
+
+    public FileChangedEvent(File root, String rootHash) {
+        this.root = root;
+        this.rootHash = rootHash;
+    }
+
+    public File getRoot() {
+        return root;
+    }
+
+    public String getRootHash() {
+        return rootHash;
+    }
+
+
+
+
 }

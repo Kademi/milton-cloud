@@ -107,13 +107,9 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
         };
         final TableCreatorService creatorService = new TableCreatorService(null, Arrays.asList(defs), dialect);
 
-        useConnection.use(new With<Connection, Object>() {
-
-            @Override
-            public Object use(Connection con) throws Exception {
-                creatorService.processTableDefinitions(con);
-                return null;
-            }
+        useConnection.use((Connection con) -> {
+            creatorService.processTableDefinitions(con);
+            return null;
         });
     }
 
@@ -222,28 +218,24 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
     }
 
     public void scan() {
-        useConnection.use(new With<Connection, Object>() {
+        useConnection.use((Connection t) -> {
+            log.info("START SCAN");
+            //Thread.dumpStack();
+            try {
+                tlConnection.set(t);
+                scanDirectory(root, true);
+                con().commit();
 
-            @Override
-            public Object use(Connection t) throws Exception {
-                log.info("START SCAN");
-                //Thread.dumpStack();
-                try {
-                    tlConnection.set(t);
-                    scanDirectory(root, true);
-                    con().commit();
+                long count = crcDao.getCrcRecordCount(con());
+                //log.info("scan: Contains crc records: " + count);
 
-                    long count = crcDao.getCrcRecordCount(con());
-                    //log.info("scan: Contains crc records: " + count);
-
-                } catch (Throwable e) {
-                    log.error("Exception in scan: " + root.getAbsolutePath(), e);
-                } finally {
-                    tlConnection.remove();
-                }
-
-                return null;
+            } catch (Throwable e) {
+                log.error("Exception in scan: " + root.getAbsolutePath(), e);
+            } finally {
+                tlConnection.remove();
             }
+
+            return null;
         });
         if (!initialScanDone) {
             log.info("Done initial scan");
@@ -258,15 +250,11 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
     public void start() {
         // after initial scan is done, start the thread which will process file changed events
         // note these events begin accumulating as the scan processes directories
-        Runnable rScan = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    scanFsEvents();
-                } catch (IOException ex) {
-                    log.error("Exception processing events", ex);
-                }
+        Runnable rScan = () -> {
+            try {
+                scanFsEvents();
+            } catch (IOException ex) {
+                log.error("Exception processing events", ex);
             }
         };
         log.info("Begin file watch loop: " + root.getAbsolutePath());
@@ -638,38 +626,40 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
 
     private void _scanDirTx(final File dir, final boolean deep) {
         log.info("scanDirTx: " + dir.getAbsolutePath());
-        useConnection.use(new With<Connection, Object>() {
-
-            @Override
-            public Object use(Connection t) throws Exception {
-                tlConnection.set(t);
-                log.info("//*************** Start Scan - " + dir.getName() + "***************************");
-                if (scanDirectory(dir, deep)) {
-                    log.info("scanDirectory says something changed");
-                } else {
-                    log.info("scanDirectory says nothing changed");
-                }
-                con().commit();
-
-                tlConnection.remove();
-                log.info("//*************** END Scan - " + dir.getName() + "***************************");
-
-                long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
-                log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-                if (queuedEvents < 0) {
-                    log.warn("huh?? queuedEvents={}", queuedEvents);
-                }
-                if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
-                    queuedEvents = 0;
-                    log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
-                    EventUtils.fireQuietly(eventManager, new FileChangedEvent());
-                } else {
-                    log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-                }
-
-                return null;
+        useConnection.use((Connection t) -> {
+            tlConnection.set(t);
+            log.info("//*************** Start Scan - " + dir.getName() + "***************************");
+            if (scanDirectory(dir, deep)) {
+                log.info("scanDirectory says something changed");
+            } else {
+                log.info("scanDirectory says nothing changed");
             }
+            con().commit();
+
+            tlConnection.remove();
+            log.info("//*************** END Scan - " + dir.getName() + "***************************");
+
+            long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
+            log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
+            if (queuedEvents < 0) {
+                log.warn("huh?? queuedEvents={}", queuedEvents);
+            }
+            if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
+                queuedEvents = 0;
+                log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
+                EventUtils.fireQuietly(eventManager, new FileChangedEvent(root, null));
+            } else {
+                log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
+            }
+
+            return null;
         });
     }
+
+    public File getRoot() {
+        return root;
+    }
+
+
 
 }

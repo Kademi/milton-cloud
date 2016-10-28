@@ -51,8 +51,8 @@ public class Syncer {
     public static final String TMP_SUFFIX = ".new.tmp";
 
     private final EventManager eventManager;
-    private final HttpHashStore httpHashStore;
-    private final HttpBlobStore httpBlobStore;
+    private final HashStore httpHashStore;
+    private final BlobStore httpBlobStore;
     private final Host host;
     private final Archiver archiver;
     private final File root;
@@ -64,7 +64,7 @@ public class Syncer {
     private Parser parser;
     private ProgressListener progressListener = new EventProgressListener();
 
-    public Syncer(EventManager eventManager, File root, HttpHashStore httpHashStore, HttpBlobStore httpBlobStore, Host host, Archiver archiver, String baseUrl) {
+    public Syncer(EventManager eventManager, File root, HashStore httpHashStore, BlobStore httpBlobStore, Host host, Archiver archiver, String baseUrl) {
         this.eventManager = eventManager;
         this.root = root;
         this.httpHashStore = httpHashStore;
