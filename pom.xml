@@ -5,17 +5,18 @@
     <artifactId>milton-cloud</artifactId>
     <version>1.2.1</version>
     <packaging>pom</packaging>
-    <distributionManagement>
-        <repository>
-            <id>ettrema-repo</id>
-            <url>http://milton.io/maven</url>
-        </repository>
-        <snapshotRepository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>ettrema-repo</id>
-            <url>http://milton.io/maven</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>bintray-milton-Milton</id>
+			<name>milton-Milton</name>
+			<url>https://api.bintray.com/maven/milton/Milton/milton/;publish=1</url>
+		</repository>
+		<snapshotRepository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>ettrema-repo</id>
+			<url>http://milton.io/maven/</url>
+		</snapshotRepository>
+	</distributionManagement>
     <developers>
         <developer>
             <name>Brad McEvoy</name>
@@ -23,7 +24,7 @@
             <organization>McEvoy Software</organization>
             <organizationUrl>http://www.mcevoysoftware.co.nz/</organizationUrl>
         </developer>
-    </developers>    
+    </developers>
     <properties>
         <milton.version>2.6.3.3</milton.version>
         <!-- Really want to deprecate endrick, but need to refactor cache in milton-client -->
@@ -34,7 +35,7 @@
         <jdbc.password/>
         <jdbc.groupId>hsqldb</jdbc.groupId>
         <jdbc.artifactId>hsqldb</jdbc.artifactId>
-        <jdbc.version>1.8.0.7</jdbc.version>   
+        <jdbc.version>1.8.0.7</jdbc.version>
         <netbeans.hint.license>agpl3</netbeans.hint.license>
     </properties>
     <licenses>
@@ -44,15 +45,15 @@
             <distribution>repo</distribution>
             <comments>The GNU Affero General Public License is a free, copyleft license for software and other kinds of works, specifically designed to ensure cooperation with the community in the case of network server software.</comments>
         </license>
-    </licenses>    
+    </licenses>
     <organization>
         <name>McEvoy Software Ltd</name>
         <url>http://www.mcevoysoftware.co.nz/</url>
-    </organization>    
+    </organization>
     <modules>
         <module>milton-cloud-sync</module>
         <module>milton-cloud-vfs</module>
-   
+
   </modules>
     <build>
         <plugins>
@@ -67,32 +68,32 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.0.1</version>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
         <dependency>
             <scope>test</scope>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.7</version>
-        </dependency>    		
+        </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
             <type>jar</type>
-        </dependency>        
+        </dependency>
     </dependencies>
-        
+
     <repositories>
         <repository>
             <id>ettrema-repo</id>
             <url>http://milton.io/maven</url>
         </repository>
-    </repositories>    
+    </repositories>
 </project>
