@@ -86,6 +86,7 @@ public class SyncCommand {
             Host client = new Host(url.getHost(), url.getPort(), job.getUser(), job.getPwd(), null);
             boolean secure = url.getProtocol().equals("https");
             client.setSecure(secure);
+            client.setTimeout(30000);
 
             System.out.println("Sync: " + localRootDir.getAbsolutePath() + " - " + job.getRemoteAddress());
 

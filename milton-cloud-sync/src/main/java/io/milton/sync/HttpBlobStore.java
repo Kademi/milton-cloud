@@ -40,6 +40,11 @@ public class HttpBlobStore implements BlobStore {
         this.hashCache = hashCache;
     }
 
+    public HttpBlobStore(Host host) {
+        this.host = host;
+        this.hashCache = null;
+    }
+    
     @Override
     public void setBlob(String hash, byte[] bytes) {
         if (hasBlob(hash)) {

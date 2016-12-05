@@ -50,6 +50,12 @@ public class HttpHashStore implements HashStore {
         this.filesHashCache = filesHashCache;
     }
 
+    public HttpHashStore(Host host) {
+        this.host = host;
+        this.chunksHashCache = null;
+        this.filesHashCache = null;
+    }
+    
     @Override
     public void setChunkFanout(String hash, List<String> childCrcs, long actualContentLength) {
         if (hasChunk(hash)) {

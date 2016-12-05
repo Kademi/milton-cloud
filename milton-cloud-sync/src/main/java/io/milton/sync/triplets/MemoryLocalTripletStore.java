@@ -1,6 +1,5 @@
 package io.milton.sync.triplets;
 
-import com.sun.imageio.plugins.jpeg.JPEG;
 import java.io.*;
 import java.nio.file.*;
 import java.util.List;
@@ -20,13 +19,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.CompositeCacheAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.hashsplit4j.api.HashStore;
-import org.hashsplit4j.store.JCSCachingBlobStore;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.hashsplit4j.triplets.Triplet;
@@ -44,10 +41,6 @@ public class MemoryLocalTripletStore {
     private final BlobStore blobStore;
     private final HashStore hashStore;
     private final RepoChangedCallback callback;
-    private File currentScanFile;
-    private long currentOffset;
-    private String lastBlobHash;
-    private byte[] lastBlob;
     private boolean initialScanDone;
     private ScheduledFuture<?> futureScan;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -56,11 +49,15 @@ public class MemoryLocalTripletStore {
 
     private final JCS cache;
 
+
     /**
-     *
-     * @param useConnection
-     * @param dialect
-     * @param group - so we can cache different collections in one table
+     * 
+     * @param root
+     * @param eventManager
+     * @param blobStore
+     * @param hashStore
+     * @param callback
+     * @throws IOException 
      */
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback) throws IOException {
         this.root = root;
@@ -194,8 +191,6 @@ public class MemoryLocalTripletStore {
         if (f.isDirectory()) {
             return null; // will generate directory records in scan after all children are processed
         }
-        this.currentScanFile = f; // will be used by setBlob
-        this.currentOffset = 0;
 
         String fileKey = genFileKey(f);
         String hash = (String) cache.get(fileKey);
@@ -209,7 +204,7 @@ public class MemoryLocalTripletStore {
         } catch (CacheException ex) {
             log.warn("Could not add to cache", ex);
         }
-        this.currentScanFile = null;
+
         return hash;
     }
 
