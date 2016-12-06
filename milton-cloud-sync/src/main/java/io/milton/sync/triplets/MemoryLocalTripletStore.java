@@ -51,13 +51,13 @@ public class MemoryLocalTripletStore {
 
 
     /**
-     * 
+     *
      * @param root
      * @param eventManager
      * @param blobStore
      * @param hashStore
      * @param callback
-     * @throws IOException 
+     * @throws IOException
      */
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback) throws IOException {
         this.root = root;
@@ -129,6 +129,8 @@ public class MemoryLocalTripletStore {
         }
     }
 
+
+
     public String scanDirectory(File dir) throws IOException {
         if (Utils.ignored(dir)) {
             return null;
@@ -170,8 +172,6 @@ public class MemoryLocalTripletStore {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         String thisHash = hashCalc.calcHash(triplets, out);
-//        System.out.println("dir - " + dir.getName() + " - " + thisHash);
-//        System.out.println(out.toString());
         blobStore.setBlob(thisHash, out.toByteArray());
 
         // Need to store this in the blob store
@@ -398,6 +398,7 @@ public class MemoryLocalTripletStore {
     private String genFileKey(File f) {
         return f.getAbsolutePath() + "-" + f.lastModified();
     }
+
 
     public interface RepoChangedCallback {
         public void onChanged(String newHash);
