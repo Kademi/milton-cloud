@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
+import java.util.function.Consumer;
 import org.apache.jcs.engine.CompositeCacheAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.hashsplit4j.api.HashStore;
@@ -41,14 +40,14 @@ public class MemoryLocalTripletStore {
     private final BlobStore blobStore;
     private final HashStore hashStore;
     private final RepoChangedCallback callback;
+    private final Consumer<Runnable> filter;
     private boolean initialScanDone;
     private ScheduledFuture<?> futureScan;
     private final ScheduledExecutorService scheduledExecutorService;
     private final HashCalc hashCalc = HashCalc.getInstance();
     private boolean paused; // if true ignores fs events
 
-    private final JCS cache;
-
+    private final BerkeleyDbFileHashCache fileHashCache;
 
     /**
      *
@@ -59,22 +58,23 @@ public class MemoryLocalTripletStore {
      * @param callback
      * @throws IOException
      */
-    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback) throws IOException {
+    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback, Consumer<Runnable> filter) throws IOException {
         this.root = root;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.callback = callback;
         this.eventManager = eventManager;
+        this.filter = filter;
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
         watchService = path.getFileSystem().newWatchService();
         ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
         cfg.setUseDisk(true);
-        try {
-            cache = JCS.getInstance("file-hashes", cfg);
-        } catch (CacheException ex) {
-            throw new RuntimeException(ex);
-        }
+        File tmp = new File(System.getProperty("java.io.tmpdir"));
+        File envDir = new File(tmp, "triplets");
+        envDir.mkdirs();
+        fileHashCache = new BerkeleyDbFileHashCache(envDir);
+
     }
 
     public boolean isPaused() {
@@ -83,11 +83,11 @@ public class MemoryLocalTripletStore {
 
     public void scan() {
 
-        log.info("START SCAN");
+        log.info("START SCAN: " + root.getAbsolutePath());
         //Thread.dumpStack();
         try {
             String hash = scanDirectory(root);
-            if( callback != null ) {
+            if (callback != null) {
                 callback.onChanged(hash);
             }
             eventManager.fireEvent(new FileChangedEvent(root, hash));
@@ -129,8 +129,6 @@ public class MemoryLocalTripletStore {
         }
     }
 
-
-
     public String scanDirectory(File dir) throws IOException {
         if (Utils.ignored(dir)) {
             return null;
@@ -138,7 +136,7 @@ public class MemoryLocalTripletStore {
         if (!initialScanDone) {
             registerWatchDir(dir);
         }
-        log.info("scanDirectory: dir={}", dir.getAbsolutePath());
+        //log.info("scanDirectory: dir={}", dir.getAbsolutePath());
 
         File[] children = dir.listFiles();
 
@@ -175,8 +173,6 @@ public class MemoryLocalTripletStore {
         blobStore.setBlob(thisHash, out.toByteArray());
 
         // Need to store this in the blob store
-
-
         return thisHash;
 
     }
@@ -192,18 +188,13 @@ public class MemoryLocalTripletStore {
             return null; // will generate directory records in scan after all children are processed
         }
 
-        String fileKey = genFileKey(f);
-        String hash = (String) cache.get(fileKey);
+        String hash = (String) fileHashCache.get(f);
         if (hash != null) {
             return hash;
         }
 
         hash = Parser.parse(f, blobStore, hashStore); // will generate blobs into this blob store
-        try {
-            cache.put(fileKey, hash);
-        } catch (CacheException ex) {
-            log.warn("Could not add to cache", ex);
-        }
+        fileHashCache.put(f, hash);
 
         return hash;
     }
@@ -220,7 +211,7 @@ public class MemoryLocalTripletStore {
         // will only watch specified directory, not subdirectories
         WatchKey key = path.register(watchService, events);
         mapOfWatchKeysByDir.put(dir, key);
-        log.info("Now watching: " + dir.getAbsolutePath());
+        //log.info("Now watching: " + dir.getAbsolutePath());
     }
 
     private void unregisterWatchDir(final File dir) {
@@ -356,7 +347,13 @@ public class MemoryLocalTripletStore {
                     queuedEvents = 0;
                 }
                 try {
-                    _scanDir(dir, deep);
+                    if( filter != null ) {
+                        filter.accept((Runnable) () -> {
+                            _scanDir(dir);
+                        });
+                    } else {
+                        _scanDir(dir);
+                    }
                 } catch (Throwable e) {
                     log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage(), e);
                 } finally {
@@ -366,27 +363,31 @@ public class MemoryLocalTripletStore {
         }, 500, TimeUnit.MILLISECONDS);
     }
 
-    private void _scanDir(final File dir, final boolean deep) throws IOException {
-        log.info("scanDirTx: " + dir.getAbsolutePath());
-        log.info("//*************** Start Scan - " + dir.getName() + "***************************");
-        String hash = scanDirectory(this.root);
-
-        log.info("//*************** END Scan - " + dir.getName() + "***************************");
-
-        long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
-        log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-        if (queuedEvents < 0) {
-            log.warn("huh?? queuedEvents={}", queuedEvents);
-        }
-        if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
-            queuedEvents = 0;
-            log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
-            if( callback != null ) {
-                callback.onChanged(hash);
+    private void _scanDir(final File dir) {
+        try {
+            log.info("scanDirTx: " + dir.getAbsolutePath());
+            log.info("//*************** Start Scan - " + dir.getName() + "***************************");
+            String hash = scanDirectory(this.root);
+            
+            log.info("//*************** END Scan - " + dir.getName() + "***************************");
+            
+            long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
+            log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
+            if (queuedEvents < 0) {
+                log.warn("huh?? queuedEvents={}", queuedEvents);
             }
-            EventUtils.fireQuietly(eventManager, new FileChangedEvent(this.root, hash));
-        } else {
-            log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
+            if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
+                queuedEvents = 0;
+                log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
+                if (callback != null) {
+                    callback.onChanged(hash);
+                }
+                EventUtils.fireQuietly(eventManager, new FileChangedEvent(this.root, hash));
+            } else {
+                log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
 
     }
@@ -399,8 +400,8 @@ public class MemoryLocalTripletStore {
         return f.getAbsolutePath() + "-" + f.lastModified();
     }
 
-
     public interface RepoChangedCallback {
+
         public void onChanged(String newHash);
     }
 }
