@@ -311,7 +311,7 @@ public class MemoryLocalTripletStore {
         log.info("Directory Created: " + f.getAbsolutePath());
         try {
             registerWatchDir(f);
-            scanDirTx(f.getParentFile(), false); // scan the parent, so it can see the new member
+            scanDir(f.getParentFile(), false); // scan the parent, so it can see the new member
         } catch (IOException e) {
             log.error("Exception in directoryCreated", e);
         }
@@ -319,18 +319,18 @@ public class MemoryLocalTripletStore {
 
     private void fileCreated(File f) {
         log.info("fileCreated: " + f.getAbsolutePath());
-        scanDirTx(f.getParentFile(), false);
+        scanDir(f.getParentFile(), false);
     }
 
     private void fileModified(File f) {
         log.info("fileModified: " + f.getAbsolutePath());
-        scanDirTx(f.getParentFile(), false);
+        scanDir(f.getParentFile(), false);
     }
 
     private void fileDeleted(File f) {
         log.info("file deleted " + f.getAbsolutePath());
         unregisterWatchDir(f); // f might be a file or directory, but unregister checks for presence so ok to call regardless
-        scanDirTx(f.getParentFile(), false);
+        scanDir(f.getParentFile(), false);
     }
 
     private final Set<File> scanningDirs = new HashSet<>();
@@ -341,7 +341,7 @@ public class MemoryLocalTripletStore {
      * @param deep - if true will scan the directory and its children, otherwise
      * only the directory
      */
-    private void scanDirTx(final File dir, final boolean deep) {
+    private void scanDir(final File dir, final boolean deep) {
         if (scanningDirs.contains(dir)) {
             log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile());
             return;
@@ -356,7 +356,7 @@ public class MemoryLocalTripletStore {
                     queuedEvents = 0;
                 }
                 try {
-                    _scanDirTx(dir, deep);
+                    _scanDir(dir, deep);
                 } catch (Throwable e) {
                     log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage(), e);
                 } finally {
@@ -366,7 +366,7 @@ public class MemoryLocalTripletStore {
         }, 500, TimeUnit.MILLISECONDS);
     }
 
-    private void _scanDirTx(final File dir, final boolean deep) throws IOException {
+    private void _scanDir(final File dir, final boolean deep) throws IOException {
         log.info("scanDirTx: " + dir.getAbsolutePath());
         log.info("//*************** Start Scan - " + dir.getName() + "***************************");
         String hash = scanDirectory(this.root);
