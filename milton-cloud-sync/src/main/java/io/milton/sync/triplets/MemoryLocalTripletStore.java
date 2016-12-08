@@ -49,6 +49,10 @@ public class MemoryLocalTripletStore {
 
     private final BerkeleyDbFileHashCache fileHashCache;
 
+    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
+        this(root, null, blobStore, hashStore, null, null);
+    }
+
     /**
      *
      * @param root
@@ -368,9 +372,9 @@ public class MemoryLocalTripletStore {
             log.info("scanDirTx: " + dir.getAbsolutePath());
             log.info("//*************** Start Scan - " + dir.getName() + "***************************");
             String hash = scanDirectory(this.root);
-            
+
             log.info("//*************** END Scan - " + dir.getName() + "***************************");
-            
+
             long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
             log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
             if (queuedEvents < 0) {
