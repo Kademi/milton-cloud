@@ -2,10 +2,15 @@ package io.milton.sync.triplets;
 
 import io.milton.common.Path;
 import io.milton.sync.triplets.DeltaGenerator.DeltaListener;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
+import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.hashsplit4j.triplets.Triplet;
 
@@ -19,6 +24,7 @@ public class OneWayMergingDeltaListener implements DeltaListener{
     private final HashStore hashStore;
     private final BlobStore blobStore;
     private String hash;
+    private final HashCalc hashCalc = HashCalc.getInstance();
 
     public OneWayMergingDeltaListener(String startingHash, HashStore hashStore, BlobStore blobStore) {
         this.startingHash = startingHash;
@@ -32,7 +38,7 @@ public class OneWayMergingDeltaListener implements DeltaListener{
 
     @Override
     public void doDeleted(Path p, ITriplet triplet1) {
-        List<Triplet> triplets = getTriplets(p);
+        this.hash = findAndRemove(p, triplet1.getName());
         if( triplets != null ) {
             Iterator<Triplet> it = triplets.iterator();
             while( it.hasNext() ) {
@@ -56,15 +62,19 @@ public class OneWayMergingDeltaListener implements DeltaListener{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private List<Triplet> getTriplets(Path p) {
+    private String findAndRemove(Path p, String name) {
+        findAndRemote(Path.root, name);
+    }
+
+    private String findAndRemove(Path p, String name) {
         if( p.isRoot() ) {
             return getTriplets(hash);
         } else {
-            List<Triplet> parentTriplets = getTriplets(p.getParent());
+            List<ITriplet> parentTriplets = findAndRemove(p.getParent());
             if( parentTriplets == null ) {
                 return null;
             }
-            for( Triplet t : parentTriplets) {
+            for( ITriplet t : parentTriplets) {
                 if( t.getName().equals(p.getName())) {
                     return getTriplets(t.getHash());
                 }
@@ -73,8 +83,13 @@ public class OneWayMergingDeltaListener implements DeltaListener{
         }
     }
 
-    private List<Triplet> getTriplets(String hash) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private List<ITriplet> getTriplets(String hash) {
+        byte[] dir = blobStore.getBlob(hash);
+        try {
+            return hashCalc.parseTriplets(new ByteArrayInputStream(dir));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
 }
