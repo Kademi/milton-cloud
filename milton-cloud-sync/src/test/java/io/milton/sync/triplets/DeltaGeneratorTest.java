@@ -1,5 +1,6 @@
 package io.milton.sync.triplets;
 
+import io.milton.common.Path;
 import java.io.File;
 import java.io.IOException;
 import org.hashsplit4j.api.BlobStore;
@@ -43,27 +44,24 @@ public class DeltaGeneratorTest {
 
         System.out.println("hash1=" + hash1 + " - hash2=" + hash2);
 
-        boolean didDelete = false;
-        boolean didCreate = false;
-
         DeltaGenerator dg = new DeltaGenerator(hashStore, blobStore, new DeltaGenerator.DeltaListener() {
 
             @Override
-            public void doDeleted(ITriplet triplet1) {
+            public void doDeleted(Path p, ITriplet triplet1) {
                 if( triplet1.getName().equals("a-deleted.txt")) {
                     Assert.assertEquals("a-deleted.txt", triplet1.getName());
                 }
             }
 
             @Override
-            public void doUpdated(ITriplet triplet2) {
+            public void doUpdated(Path p, ITriplet triplet2) {
                 if( triplet2.getType().equals("f")) {
                     Assert.assertEquals("a-changed.txt", triplet2.getName());
                 }
             }
 
             @Override
-            public void doCreated(ITriplet triplet2) {
+            public void doCreated(Path p, ITriplet triplet2) {
                 if( triplet2.getType().equals("f")) {
                     Assert.assertEquals("a-new1.txt", triplet2.getName());
                 }

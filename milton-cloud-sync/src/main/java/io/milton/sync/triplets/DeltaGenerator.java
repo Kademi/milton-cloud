@@ -1,5 +1,6 @@
 package io.milton.sync.triplets;
 
+import io.milton.common.Path;
 import io.milton.sync.Utils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,6 +38,10 @@ public class DeltaGenerator {
     }
 
     public void generateDeltas(String hash1, String hash2) throws IOException {
+        generateDeltas(hash1, hash2, Path.root);
+    }
+
+    public void generateDeltas(String hash1, String hash2, Path path) throws IOException {
         // find the dir listing for each hash
         List<ITriplet> triplets1 = null;
         if (hash1 != null) {
@@ -47,10 +52,10 @@ public class DeltaGenerator {
         byte[] dir2 = blobStore.getBlob(hash2);
         List<ITriplet> triplets2 = hashCalc.parseTriplets(new ByteArrayInputStream(dir2));
 
-        generateDeltas(triplets1, triplets2);
+        generateDeltas(triplets1, triplets2, path);
     }
 
-    private void generateDeltas(List<ITriplet> triplets1, List<ITriplet> triplets2) throws IOException {
+    private void generateDeltas(List<ITriplet> triplets1, List<ITriplet> triplets2, Path path) throws IOException {
         //log.info("walk3: " + path);
         if (canceled) {
             log.trace("walk canceled");
@@ -59,29 +64,27 @@ public class DeltaGenerator {
         Map<String, ITriplet> tripletMap1 = Utils.toMap(triplets1);
         Map<String, ITriplet> tripletMap2 = Utils.toMap(triplets2);
 
-        if (tripletMap2 != null) {
-            for (ITriplet triplet2 : triplets2) {
-                if (canceled) {
-                    return;
-                }
-                ITriplet triplet1 = tripletMap1.get(triplet2.getName());
-                if (triplet1 == null) {
-                    deltaListener.doCreated(triplet2);
+        for (ITriplet triplet2 : triplets2) {
+            if (canceled) {
+                return;
+            }
+            ITriplet triplet1 = tripletMap1.get(triplet2.getName());
+            if (triplet1 == null) {
+                deltaListener.doCreated(path, triplet2);
+            } else {
+                if (triplet1.getHash().equals(triplet2.getHash())) {
+                    // clean, nothing to do
                 } else {
-                    if (triplet1.getHash().equals(triplet2.getHash())) {
-                        // clean, nothing to do
-                    } else {
-                        deltaListener.doUpdated(triplet2);
-                    }
+                    deltaListener.doUpdated(path, triplet2);
                 }
+            }
 
-                if (triplet2.getType().equals("d")) {
-                    String triplet1Hash = null;
-                    if (triplet1 != null) {
-                        triplet1Hash = triplet1.getHash();
-                    }
-                    generateDeltas(triplet1Hash, triplet2.getHash());
+            if (triplet2.getType().equals("d")) {
+                String triplet1Hash = null;
+                if (triplet1 != null) {
+                    triplet1Hash = triplet1.getHash();
                 }
+                generateDeltas(triplet1Hash, triplet2.getHash(), path.child(triplet2.getName()));
             }
         }
 
@@ -89,7 +92,7 @@ public class DeltaGenerator {
         if (triplets1 != null) {
             for (ITriplet triplet1 : triplets1) {
                 if (!tripletMap2.containsKey(triplet1.getName())) {
-                    deltaListener.doDeleted(triplet1);
+                    deltaListener.doDeleted(path, triplet1);
                 }
             }
         }
@@ -98,11 +101,11 @@ public class DeltaGenerator {
 
     public interface DeltaListener {
 
-        void doDeleted(ITriplet triplet1);
+        void doDeleted(Path p, ITriplet triplet1);
 
-        void doUpdated(ITriplet triplet2);
+        void doUpdated(Path p, ITriplet triplet2);
 
-        void doCreated(ITriplet triplet2);
+        void doCreated(Path p, ITriplet triplet2);
 
     }
 }
