@@ -68,7 +68,7 @@ public class DeltaGenerator {
                 if (triplet1 == null) {
                     deltaListener.doCreated(triplet2);
                 } else {
-                    if (triplet2.getHash().equals(triplet2.getHash())) {
+                    if (triplet1.getHash().equals(triplet2.getHash())) {
                         // clean, nothing to do
                     } else {
                         deltaListener.doUpdated(triplet2);

@@ -7,6 +7,7 @@ import org.hashsplit4j.api.HashStore;
 import org.hashsplit4j.store.MemoryBlobStore;
 import org.hashsplit4j.store.MemoryHashStore;
 import org.hashsplit4j.triplets.ITriplet;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -38,25 +39,34 @@ public class DeltaGeneratorTest {
         String hash1 = st1.scanDirectory(dir1);
 
         MemoryLocalTripletStore st2 = new MemoryLocalTripletStore(dir2, blobStore, hashStore);
-        String hash2 = st1.scanDirectory(dir2);
+        String hash2 = st2.scanDirectory(dir2);
 
         System.out.println("hash1=" + hash1 + " - hash2=" + hash2);
+
+        boolean didDelete = false;
+        boolean didCreate = false;
 
         DeltaGenerator dg = new DeltaGenerator(hashStore, blobStore, new DeltaGenerator.DeltaListener() {
 
             @Override
             public void doDeleted(ITriplet triplet1) {
-                System.out.println("deleted: " + triplet1.getName());
+                if( triplet1.getName().equals("a-deleted.txt")) {
+                    Assert.assertEquals("a-deleted.txt", triplet1.getName());
+                }
             }
 
             @Override
             public void doUpdated(ITriplet triplet2) {
-                System.out.println("updated: " + triplet2.getName());
+                if( triplet2.getType().equals("f")) {
+                    Assert.assertEquals("a-changed.txt", triplet2.getName());
+                }
             }
 
             @Override
             public void doCreated(ITriplet triplet2) {
-                System.out.println("created: " + triplet2.getName());
+                if( triplet2.getType().equals("f")) {
+                    Assert.assertEquals("a-new1.txt", triplet2.getName());
+                }
             }
         });
         dg.generateDeltas(hash1, hash2);
