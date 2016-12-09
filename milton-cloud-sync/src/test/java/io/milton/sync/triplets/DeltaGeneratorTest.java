@@ -1,12 +1,15 @@
 package io.milton.sync.triplets;
 
 import io.milton.common.Path;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashStore;
 import org.hashsplit4j.store.MemoryBlobStore;
 import org.hashsplit4j.store.MemoryHashStore;
+import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,6 +23,7 @@ public class DeltaGeneratorTest {
 
     HashStore hashStore;
     BlobStore blobStore;
+    private final HashCalc hashCalc = HashCalc.getInstance();
 
     public DeltaGeneratorTest() {
     }
@@ -31,7 +35,7 @@ public class DeltaGeneratorTest {
     }
 
     @Test
-    public void testSomeMethod() throws IOException {
+    public void testScan() throws IOException {
         File dir1 = new File("src/test/resources/branch1");
         File dir2 = new File("src/test/resources/branch2");
         System.out.println("dir1: " + dir1.getAbsolutePath());
@@ -71,4 +75,44 @@ public class DeltaGeneratorTest {
 
     }
 
+    @Test
+    public void testMerge() throws IOException {
+        File dir1 = new File("src/test/resources/branch1");
+        File dir2 = new File("src/test/resources/branch2");
+        File mergeDest = new File("src/test/resources/branch3");
+
+        MemoryLocalTripletStore st1 = new MemoryLocalTripletStore(dir1, blobStore, hashStore);
+        String hash1 = st1.scanDirectory(dir1);
+
+        MemoryLocalTripletStore st2 = new MemoryLocalTripletStore(dir2, blobStore, hashStore);
+        String hash2 = st2.scanDirectory(dir2);
+
+        MemoryLocalTripletStore stMergeDest = new MemoryLocalTripletStore(mergeDest, blobStore, hashStore);
+        String origMergeDest = stMergeDest.scanDirectory(mergeDest);
+
+        OneWayMergingDeltaListener dl = new OneWayMergingDeltaListener(origMergeDest, blobStore);
+
+        DeltaGenerator dg = new DeltaGenerator(hashStore, blobStore,dl);
+        System.out.println("Start merge: original branch: " + origMergeDest);
+        dg.generateDeltas(hash1, hash2);
+
+        System.out.println("result of merge: " + dl.getHash());
+
+        System.out.println("Before merge: ");
+        showBranch(origMergeDest, "");
+
+        System.out.println("After merge:");
+        showBranch(dl.getHash(), "");
+    }
+
+    private void showBranch(String hash, String indent) throws IOException {
+        byte[] arr = blobStore.getBlob(hash);
+        List<ITriplet> triplets = hashCalc.parseTriplets(new ByteArrayInputStream(arr));
+        for( ITriplet t : triplets ) {
+            System.out.println(indent + t.getName() + " - " + t.getType() + " - " + t.getHash());
+            if( t.getType().equals("d")) {
+                showBranch(t.getHash(), indent + "  ");
+            }
+        }
+    }
 }

@@ -56,7 +56,6 @@ public class DeltaGenerator {
     }
 
     private void generateDeltas(List<ITriplet> triplets1, List<ITriplet> triplets2, Path path) throws IOException {
-        //log.info("walk3: " + path);
         if (canceled) {
             log.trace("walk canceled");
             return;

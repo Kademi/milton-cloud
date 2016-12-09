@@ -3,9 +3,11 @@ package io.milton.sync.triplets;
 import io.milton.common.Path;
 import io.milton.sync.triplets.DeltaGenerator.DeltaListener;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hashsplit4j.api.BlobStore;
@@ -18,78 +20,131 @@ import org.hashsplit4j.triplets.Triplet;
  *
  * @author brad
  */
-public class OneWayMergingDeltaListener implements DeltaListener{
+public class OneWayMergingDeltaListener implements DeltaListener {
 
     private final String startingHash;
-    private final HashStore hashStore;
     private final BlobStore blobStore;
     private String hash;
     private final HashCalc hashCalc = HashCalc.getInstance();
 
-    public OneWayMergingDeltaListener(String startingHash, HashStore hashStore, BlobStore blobStore) {
+    public OneWayMergingDeltaListener(String startingHash, BlobStore blobStore) {
         this.startingHash = startingHash;
-        this.hashStore = hashStore;
+        this.hash = startingHash;
+
         this.blobStore = blobStore;
         this.hash = startingHash;
     }
 
-
-
-
     @Override
     public void doDeleted(Path p, ITriplet triplet1) {
-        this.hash = findAndRemove(p, triplet1.getName());
-        if( triplets != null ) {
-            Iterator<Triplet> it = triplets.iterator();
-            while( it.hasNext() ) {
-                Triplet t = it.next();
-                if( t.getName().equals(triplet1.getName())) {
-                    it.remove();
-                }
-            }
-            // hmm, now how do we calc a new root hash?
-        }
+        this.hash = modifyTriplets(p, (List<ITriplet> t) -> {
+            Triplet child = findChildHash(triplet1.getName(), t);
+            t.remove(child);
+            return calcHash(t);
 
+        });
     }
 
     @Override
     public void doUpdated(Path p, ITriplet triplet2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (triplet2.getType().equals("d")) {
+            // Just make sure it exists
+            this.hash = modifyTriplets(p, (List<ITriplet> t) -> {
+                Triplet child = findChildHash(triplet2.getName(), t);
+                if (child == null) {
+                    System.out.println("Creating new dir triplet: " + triplet2.getName() + " in parent path: " + p);
+                    child = new Triplet();
+                    child.setName(triplet2.getName());
+                    child.setType(triplet2.getType());
+                    t.add(child);
+                }
+                return calcHash(t);
+            });
+        } else {
+            this.hash = modifyTriplets(p, (List<ITriplet> t) -> {
+                Triplet child = findChildHash(triplet2.getName(), t);
+                if (child != null) {
+                    child.setHash(triplet2.getHash());
+                } else {
+                    System.out.println("Creating new triplet: " + triplet2.getName() + " in parent path: " + p);
+                    child = new Triplet();
+                    child.setName(triplet2.getName());
+                    child.setHash(triplet2.getHash());
+                    child.setType(triplet2.getType());
+                    t.add(child);
+                }
+                return calcHash(t);
+            });
+        }
     }
 
     @Override
     public void doCreated(Path p, ITriplet triplet2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.hash = modifyTriplets(p, (List<ITriplet> t) -> {
+            System.out.println("add child: " + triplet2.getName());
+            Triplet child = new Triplet();
+            child.setName(triplet2.getName());
+            child.setHash(triplet2.getHash());
+            child.setType(triplet2.getType());
+            t.add(child);
+            return calcHash(t);
+        });
     }
 
-    private String findAndRemove(Path p, String name) {
-        findAndRemote(Path.root, name);
-    }
-
-    private String findAndRemove(Path p, String name) {
-        if( p.isRoot() ) {
-            return getTriplets(hash);
+    private String modifyTriplets(Path p, Function<List<ITriplet>, String> f) {
+        if (p.isRoot()) {
+            List<ITriplet> triplets = getTriplets(hash);
+            return f.apply(triplets);
         } else {
-            List<ITriplet> parentTriplets = findAndRemove(p.getParent());
-            if( parentTriplets == null ) {
-                return null;
-            }
-            for( ITriplet t : parentTriplets) {
-                if( t.getName().equals(p.getName())) {
-                    return getTriplets(t.getHash());
-                }
-            }
-            return null;
+            return modifyTriplets(p.getParent(), (List<ITriplet> t) -> {
+                Triplet child = findChildHash(p.getName(), t);
+                List<ITriplet> triplets = getTriplets(child.getHash());
+                String newHash = f.apply(triplets);
+                child.setHash(newHash);
+                return calcHash(t);
+            });
         }
     }
 
     private List<ITriplet> getTriplets(String hash) {
         byte[] dir = blobStore.getBlob(hash);
         try {
+            String sDir = new String(dir);
+            System.out.println("Dir - " + hash);
+            System.out.println(sDir);
+            System.out.println("---");
             return hashCalc.parseTriplets(new ByteArrayInputStream(dir));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private Triplet findChildHash(String child, List<ITriplet> triplets) {
+        for (ITriplet t : triplets) {
+            if (t.getName().equals(child)) {
+                return (Triplet) t;
+            }
+        }
+        return null;
+    }
+
+    private String calcHash(List<ITriplet> list) {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        String hash;
+        try {
+            hash = hashCalc.calcHash(list, bout);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        byte[] blob = bout.toByteArray();
+        String s = new String(blob);
+        //System.out.println(s);
+        blobStore.setBlob(hash, blob);
+        return hash;
+    }
+
+    public String getHash() {
+        return hash;
     }
 
 }
