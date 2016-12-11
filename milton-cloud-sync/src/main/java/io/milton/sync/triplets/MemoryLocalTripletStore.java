@@ -147,7 +147,7 @@ public class MemoryLocalTripletStore {
         if (!initialScanDone) {
             registerWatchDir(dir);
         }
-        //log.info("scanDirectory: dir={}", dir.getAbsolutePath());
+        log.info("scanDirectory: dir={}", dir.getAbsolutePath());
 
         File[] children = dir.listFiles();
 

@@ -13,12 +13,12 @@ import org.hashsplit4j.triplets.ITriplet;
  */
 public class Utils {
     public static boolean ignored(File childFile) {
-        if( childFile.getName().equals(".mil") ) { // usually ignore resources starting with a dot, but special case for .mil directory
-            return false;
+        if( childFile.getName().equals(".ksync") ) { // usually ignore resources starting with a dot, but special case for .mil directory
+            return true;
         }
         return childFile.isHidden() || childFile.getName().startsWith(".");
     }
-    
+
     public static boolean ignored(String name) {
         if( name == null ) {
             return false; //indicates the root of Path
@@ -26,9 +26,9 @@ public class Utils {
         if( name.equals(".mil") ) { // usually ignore resources starting with a dot, but special case for .mil directory
             return false;
         }
-        return name.startsWith(".");        
+        return name.startsWith(".");
     }
-    
+
     public static boolean ignored(Path p) {
         while (p != null && p.getName() != null ) {
             if (Utils.ignored(p.getName())) {
@@ -38,7 +38,7 @@ public class Utils {
         }
         return false;
     }
-    
+
     public static Map<String, File> toMap(File[] files) {
         Map<String, File> map = new HashMap<>();
         if (files != null) {
@@ -48,7 +48,7 @@ public class Utils {
         }
         return map;
     }
-    
+
     public static Map<String, ITriplet> toMap(List<ITriplet> triplets) {
         Map<String, ITriplet> map = new HashMap<>();
         if (triplets != null) {
@@ -57,7 +57,7 @@ public class Utils {
             }
         }
         return map;
-    }    
+    }
 
     public static File toFile(File root, Path path) {
         File f = root;
