@@ -11,12 +11,15 @@ import io.milton.http.exceptions.NotFoundException;
 
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
+import io.milton.sync.triplets.MemoryLocalTripletStore;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.hashsplit4j.api.HashCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -24,6 +27,8 @@ import org.hashsplit4j.api.HashCache;
  * @author brad
  */
 public class HttpBloomFilterHashCache implements HashCache {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpBloomFilterHashCache.class);
 
     private final Host host;
     private final Path basePath;
@@ -38,13 +43,15 @@ public class HttpBloomFilterHashCache implements HashCache {
         this.paramVal = paramVal;
         loadBloomFilter();
     }
-    
-    
-    
+
+
+
     @Override
     public boolean hasHash(String hash) {
         boolean b = filter.mightContain(hash);
-        System.out.println("hasHash: " + b + " hash=" + hash + " in " + paramVal);
+        if( !b ) {
+            log.info("hasHash: " + b + " hash=" + hash + " in " + paramVal);
+        }
         return b;
     }
 
@@ -52,7 +59,7 @@ public class HttpBloomFilterHashCache implements HashCache {
     public void setHash(String hash) {
         filter.put(hash);
     }
-    
+
     private BloomFilter<CharSequence> loadBloomFilter() {
         try {
             Map<String,String> params = new HashMap();
@@ -64,10 +71,10 @@ public class HttpBloomFilterHashCache implements HashCache {
             throw new RuntimeException("Could not load bloomfilter from " + basePath, iOException);
         }
     }
-    
+
     private BloomFilter<CharSequence> loadBloomFilter(InputStream in) throws IOException {
         Funnel<CharSequence> funnel = Funnels.unencodedCharsFunnel();
         filter = BloomFilter.readFrom(in, funnel);
         return filter;
-    }    
+    }
 }

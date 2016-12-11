@@ -72,7 +72,7 @@ public class MemoryLocalTripletStore {
 
         ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
         cfg.setUseDisk(true);
-        if( dataDir == null ) {
+        if (dataDir == null) {
             dataDir = new File(System.getProperty("java.io.tmpdir"));
         }
         File envDir = new File(dataDir, "triplets");
@@ -118,6 +118,9 @@ public class MemoryLocalTripletStore {
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
         watchService = path.getFileSystem().newWatchService();
+
+        initWatch(root);
+
         // after initial scan is done, start the thread which will process file changed events
         // note these events begin accumulating as the scan processes directories
         Runnable rScan = () -> {
@@ -213,8 +216,8 @@ public class MemoryLocalTripletStore {
     private final Map<File, WatchKey> mapOfWatchKeysByDir = new HashMap<>();
 
     private void registerWatchDir(final File dir) throws IOException {
-        if( watchService == null ) {
-            return ;
+        if (watchService == null) {
+            return;
         }
         if (mapOfWatchKeysByDir.containsKey(dir)) {
             WatchKey key = mapOfWatchKeysByDir.get(dir);
@@ -225,7 +228,7 @@ public class MemoryLocalTripletStore {
         // will only watch specified directory, not subdirectories
         WatchKey key = path.register(watchService, events);
         mapOfWatchKeysByDir.put(dir, key);
-        //log.info("Now watching: " + dir.getAbsolutePath());
+        log.info("Now watching: " + dir.getAbsolutePath());
     }
 
     private void unregisterWatchDir(final File dir) {
@@ -360,7 +363,7 @@ public class MemoryLocalTripletStore {
                     queuedEvents = 0;
                 }
                 try {
-                    if( filter != null ) {
+                    if (filter != null) {
                         filter.accept((Runnable) () -> {
                             _scanDir(dir);
                         });
@@ -409,8 +412,20 @@ public class MemoryLocalTripletStore {
         return root;
     }
 
-    private String genFileKey(File f) {
-        return f.getAbsolutePath() + "-" + f.lastModified();
+
+    private void initWatch(File dir) throws IOException {
+        if (dir.isDirectory()) {
+        if (Utils.ignored(dir)) {
+            return ;
+        }
+            registerWatchDir(dir);
+            File[] list = dir.listFiles();
+            if (list != null) {
+                for (File f : list) {
+                    initWatch(f);
+                }
+            }
+        }
     }
 
     public interface RepoChangedCallback {
