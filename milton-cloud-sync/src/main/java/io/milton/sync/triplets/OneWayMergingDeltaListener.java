@@ -5,13 +5,9 @@ import io.milton.sync.triplets.DeltaGenerator.DeltaListener;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hashsplit4j.api.BlobStore;
-import org.hashsplit4j.api.HashStore;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
 import org.hashsplit4j.triplets.Triplet;
@@ -147,4 +143,9 @@ public class OneWayMergingDeltaListener implements DeltaListener {
         return hash;
     }
 
+    public String getStartingHash() {
+        return startingHash;
+    }
+
+    
 }

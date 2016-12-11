@@ -35,7 +35,7 @@ public class MemoryLocalTripletStore {
     private static final WatchEvent.Kind<?>[] events = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
 
     private final File root;
-    private final WatchService watchService;
+    private WatchService watchService;
     private final EventManager eventManager;
     private final BlobStore blobStore;
     private final HashStore hashStore;
@@ -43,14 +43,14 @@ public class MemoryLocalTripletStore {
     private final Consumer<Runnable> filter;
     private boolean initialScanDone;
     private ScheduledFuture<?> futureScan;
-    private final ScheduledExecutorService scheduledExecutorService;
+    private ScheduledExecutorService scheduledExecutorService;
     private final HashCalc hashCalc = HashCalc.getInstance();
     private boolean paused; // if true ignores fs events
 
     private final BerkeleyDbFileHashCache fileHashCache;
 
     public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
-        this(root, null, blobStore, hashStore, null, null);
+        this(root, null, blobStore, hashStore, null, null, null);
     }
 
     /**
@@ -62,20 +62,21 @@ public class MemoryLocalTripletStore {
      * @param callback
      * @throws IOException
      */
-    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback, Consumer<Runnable> filter) throws IOException {
+    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback, Consumer<Runnable> filter, File dataDir) throws IOException {
         this.root = root;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.callback = callback;
         this.eventManager = eventManager;
         this.filter = filter;
-        scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
-        watchService = path.getFileSystem().newWatchService();
+
         ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
         cfg.setUseDisk(true);
-        File tmp = new File(System.getProperty("java.io.tmpdir"));
-        File envDir = new File(tmp, "triplets");
+        if( dataDir == null ) {
+            dataDir = new File(System.getProperty("java.io.tmpdir"));
+        }
+        File envDir = new File(dataDir, "triplets");
+        log.info("Create berkey db: " + envDir.getAbsolutePath());
         envDir.mkdirs();
         fileHashCache = new BerkeleyDbFileHashCache(envDir);
 
@@ -85,12 +86,13 @@ public class MemoryLocalTripletStore {
         return paused;
     }
 
-    public void scan() {
+    public String scan() {
 
         log.info("START SCAN: " + root.getAbsolutePath());
         //Thread.dumpStack();
+        String hash = null;
         try {
-            String hash = scanDirectory(root);
+            hash = scanDirectory(root);
             if (callback != null) {
                 callback.onChanged(hash);
             }
@@ -105,12 +107,17 @@ public class MemoryLocalTripletStore {
             initialScanDone = true;
         }
         log.info("END SCAN");
+
+        return hash;
     }
 
     /**
      * Start processing file system events
      */
-    public void start() {
+    public void start() throws IOException {
+        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
+        watchService = path.getFileSystem().newWatchService();
         // after initial scan is done, start the thread which will process file changed events
         // note these events begin accumulating as the scan processes directories
         Runnable rScan = () -> {
@@ -206,6 +213,9 @@ public class MemoryLocalTripletStore {
     private final Map<File, WatchKey> mapOfWatchKeysByDir = new HashMap<>();
 
     private void registerWatchDir(final File dir) throws IOException {
+        if( watchService == null ) {
+            return ;
+        }
         if (mapOfWatchKeysByDir.containsKey(dir)) {
             WatchKey key = mapOfWatchKeysByDir.get(dir);
             key.cancel();
@@ -219,7 +229,6 @@ public class MemoryLocalTripletStore {
     }
 
     private void unregisterWatchDir(final File dir) {
-        final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
         WatchKey key = mapOfWatchKeysByDir.get(dir);
         if (key != null) {
             log.info("Cancel watch: " + dir.getAbsolutePath() + " - " + key.watchable());
@@ -306,7 +315,7 @@ public class MemoryLocalTripletStore {
         log.info("Directory Created: " + f.getAbsolutePath());
         try {
             registerWatchDir(f);
-            scanDir(f.getParentFile(), false); // scan the parent, so it can see the new member
+            scanDir(f.getParentFile()); // scan the parent, so it can see the new member
         } catch (IOException e) {
             log.error("Exception in directoryCreated", e);
         }
@@ -314,18 +323,18 @@ public class MemoryLocalTripletStore {
 
     private void fileCreated(File f) {
         log.info("fileCreated: " + f.getAbsolutePath());
-        scanDir(f.getParentFile(), false);
+        scanDir(f.getParentFile());
     }
 
     private void fileModified(File f) {
         log.info("fileModified: " + f.getAbsolutePath());
-        scanDir(f.getParentFile(), false);
+        scanDir(f.getParentFile());
     }
 
     private void fileDeleted(File f) {
         log.info("file deleted " + f.getAbsolutePath());
         unregisterWatchDir(f); // f might be a file or directory, but unregister checks for presence so ok to call regardless
-        scanDir(f.getParentFile(), false);
+        scanDir(f.getParentFile());
     }
 
     private final Set<File> scanningDirs = new HashSet<>();
@@ -336,7 +345,7 @@ public class MemoryLocalTripletStore {
      * @param deep - if true will scan the directory and its children, otherwise
      * only the directory
      */
-    private void scanDir(final File dir, final boolean deep) {
+    private void scanDir(final File dir) {
         if (scanningDirs.contains(dir)) {
             log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile());
             return;
