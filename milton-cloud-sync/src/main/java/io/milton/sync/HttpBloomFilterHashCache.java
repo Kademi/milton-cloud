@@ -50,7 +50,7 @@ public class HttpBloomFilterHashCache implements HashCache {
     public boolean hasHash(String hash) {
         boolean b = filter.mightContain(hash);
         if( !b ) {
-            log.info("hasHash: " + b + " hash=" + hash + " in " + paramVal);
+            //log.info("hasHash: " + b + " hash=" + hash + " in " + paramVal);
         }
         return b;
     }
