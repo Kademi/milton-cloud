@@ -25,7 +25,7 @@ public class HttpBlobStore implements BlobStore {
     private Path basePath;
     private long gets;
     private long sets;
-    
+
     public HttpBlobStore(String server, int port, String rootPath, String username, String password) {
         this.host = new Host(server, port, username, password, null);
         this.host.setUseDigestForPreemptiveAuth(false); // we don't want DIGEST because it precludes preemptive auth
@@ -33,8 +33,8 @@ public class HttpBlobStore implements BlobStore {
         this.basePath = Path.path(rootPath);
     }
 
-    
-    
+
+
     public HttpBlobStore(Host host, HashCache hashCache) {
         this.host = host;
         this.hashCache = hashCache;
@@ -44,12 +44,9 @@ public class HttpBlobStore implements BlobStore {
         this.host = host;
         this.hashCache = null;
     }
-    
+
     @Override
     public void setBlob(String hash, byte[] bytes) {
-        if (hasBlob(hash)) {
-            return;
-        }
         Path destPath = basePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
@@ -118,11 +115,11 @@ public class HttpBlobStore implements BlobStore {
     public long getSets() {
         return sets;
     }
-    
+
     private void checkResult(HttpResult result) {
         if (result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
             throw new RuntimeException("Failed to upload - " + result.getStatusCode());
         }
 
-    }    
+    }
 }

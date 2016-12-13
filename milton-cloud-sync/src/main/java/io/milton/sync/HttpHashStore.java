@@ -55,13 +55,9 @@ public class HttpHashStore implements HashStore {
         this.chunksHashCache = null;
         this.filesHashCache = null;
     }
-    
+
     @Override
     public void setChunkFanout(String hash, List<String> childCrcs, long actualContentLength) {
-        if (hasChunk(hash)) {
-            return;
-        }
-
         sets++;
 
         // Copy longs into a byte array
@@ -76,6 +72,8 @@ public class HttpHashStore implements HashStore {
         Path destPath = chunksBasePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
+
+        chunksHashCache.setHash(hash);
     }
 
     @Override
@@ -139,6 +137,8 @@ public class HttpHashStore implements HashStore {
         Path destPath = filesBasePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
+        
+        filesHashCache.setHash(hash);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class HttpHashStore implements HashStore {
         try {
             byte[] arr = host.doGet(destPath);
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
-                        
+
             String s = new String(arr);
             Fanout fanout = FanoutSerializationUtils.readFanout(bin);
 
