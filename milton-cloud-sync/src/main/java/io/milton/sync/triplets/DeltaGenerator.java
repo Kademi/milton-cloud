@@ -42,6 +42,7 @@ public class DeltaGenerator {
     }
 
     public void generateDeltas(String hash1, String hash2, Path path) throws IOException {
+        log.info("generateDeltas path={}", path);
         // find the dir listing for each hash
         List<ITriplet> triplets1 = null;
         if (hash1 != null) {
