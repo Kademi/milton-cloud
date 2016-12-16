@@ -137,8 +137,10 @@ public class HttpHashStore implements HashStore {
         Path destPath = filesBasePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
-        
-        filesHashCache.setHash(hash);
+
+        if (filesHashCache != null) {
+            filesHashCache.setHash(hash);
+        }
     }
 
     @Override
@@ -153,7 +155,9 @@ public class HttpHashStore implements HashStore {
             Fanout fanout = FanoutSerializationUtils.readFanout(bin);
 
             if (filesHashCache != null) {
-                filesHashCache.setHash(fileHash);
+                if (fanout != null) {
+                    filesHashCache.setHash(fileHash);
+                }
             }
             return fanout;
         } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
@@ -222,7 +226,7 @@ public class HttpHashStore implements HashStore {
     }
 
     private void checkResult(HttpResult result) {
-        if (result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
+        if (result.getStatusCode() < 200 || result.getStatusCode() > 299) {
             throw new RuntimeException("Failed to upload - " + result.getStatusCode());
         }
 

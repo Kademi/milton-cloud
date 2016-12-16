@@ -33,8 +33,6 @@ public class HttpBlobStore implements BlobStore {
         this.basePath = Path.path(rootPath);
     }
 
-
-
     public HttpBlobStore(Host host, HashCache hashCache) {
         this.host = host;
         this.hashCache = hashCache;
@@ -50,6 +48,10 @@ public class HttpBlobStore implements BlobStore {
         Path destPath = basePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
+        if (hashCache != null) {
+            hashCache.setHash(hash);
+        }
+
     }
 
     @Override
@@ -68,7 +70,7 @@ public class HttpBlobStore implements BlobStore {
             return true;
         } catch (NotFoundException e) {
             return false;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -77,8 +79,14 @@ public class HttpBlobStore implements BlobStore {
     public byte[] getBlob(String hash) {
         Path destPath = basePath.child(hash + "");
         try {
-            return host.doGet(destPath);
-        } catch(NotFoundException e) {
+            byte[] arr = host.doGet(destPath);
+            if( arr != null ) {
+                if( hashCache != null ) {
+                    hashCache.setHash(hash);
+                }
+            }
+            return arr;
+        } catch (NotFoundException e) {
             return null;
         } catch (IOException | HttpException | NotAuthorizedException | BadRequestException | ConflictException ex) {
             throw new RuntimeException(ex);
@@ -117,7 +125,7 @@ public class HttpBlobStore implements BlobStore {
     }
 
     private void checkResult(HttpResult result) {
-        if (result.getStatusCode() < 200 || result.getStatusCode() > 299 ) {
+        if (result.getStatusCode() < 200 || result.getStatusCode() > 299) {
             throw new RuntimeException("Failed to upload - " + result.getStatusCode());
         }
 
