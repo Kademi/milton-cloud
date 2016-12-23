@@ -59,6 +59,8 @@ public class HttpBlobStore implements BlobStore {
         if (hashCache != null) {
             if (hashCache.hasHash(hash)) { // say that 3 times quickly!!!  :)
                 return true;
+            } else {
+                return false;
             }
         }
         Path destPath = basePath.child(hash + "");
