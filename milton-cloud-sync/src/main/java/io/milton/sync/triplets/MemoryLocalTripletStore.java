@@ -192,7 +192,9 @@ public class MemoryLocalTripletStore {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         String thisHash = hashCalc.calcHash(triplets, out);
-        blobStore.setBlob(thisHash, out.toByteArray());
+        if( !blobStore.hasBlob(thisHash)) {
+            blobStore.setBlob(thisHash, out.toByteArray());
+        }
 
         // Need to store this in the blob store
         return thisHash;
