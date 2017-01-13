@@ -48,6 +48,7 @@ public class MemoryLocalTripletStore {
     private boolean paused; // if true ignores fs events
 
     private final BerkeleyDbFileHashCache fileHashCache;
+    private long logTime;
 
     public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
         this(root, null, blobStore, hashStore, null, null, null);
@@ -60,6 +61,8 @@ public class MemoryLocalTripletStore {
      * @param blobStore
      * @param hashStore
      * @param callback
+     * @param filter
+     * @param dataDir
      * @throws IOException
      */
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback, Consumer<Runnable> filter, File dataDir) throws IOException {
@@ -96,7 +99,9 @@ public class MemoryLocalTripletStore {
             if (callback != null) {
                 callback.onChanged(hash);
             }
-            eventManager.fireEvent(new FileChangedEvent(root, hash));
+            if (eventManager != null) {
+                eventManager.fireEvent(new FileChangedEvent(root, hash));
+            }
 
         } catch (Throwable e) {
             log.error("Exception in scan: " + root.getAbsolutePath(), e);
@@ -150,7 +155,10 @@ public class MemoryLocalTripletStore {
         if (!initialScanDone) {
             registerWatchDir(dir);
         }
-        log.info("scanDirectory: dir={}", dir.getAbsolutePath());
+        if( System.currentTimeMillis() - logTime > 2000) { // just output current dir every couple of seconds
+            log.info("scanDirectory: dir={}", dir.getAbsolutePath());
+            logTime = System.currentTimeMillis();
+        }
 
         File[] children = dir.listFiles();
 
@@ -412,12 +420,11 @@ public class MemoryLocalTripletStore {
         return root;
     }
 
-
     private void initWatch(File dir) throws IOException {
         if (dir.isDirectory()) {
-        if (Utils.ignored(dir)) {
-            return ;
-        }
+            if (Utils.ignored(dir)) {
+                return;
+            }
             registerWatchDir(dir);
             File[] list = dir.listFiles();
             if (list != null) {
