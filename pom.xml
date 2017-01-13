@@ -26,7 +26,7 @@
         </developer>
     </developers>
     <properties>
-        <milton.version>2.6.3.3</milton.version>
+        <milton.version>2.7.2.0</milton.version>
         <!-- Really want to deprecate endrick, but need to refactor cache in milton-client -->
         <endrick.version>1.7.8</endrick.version>
         <jpa.version>1.0</jpa.version>
