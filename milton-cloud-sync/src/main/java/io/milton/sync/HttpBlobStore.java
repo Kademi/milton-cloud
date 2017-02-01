@@ -25,6 +25,7 @@ public class HttpBlobStore implements BlobStore {
     private Path basePath;
     private long gets;
     private long sets;
+    private boolean force;
 
     public HttpBlobStore(String server, int port, String rootPath, String username, String password) {
         this.host = new Host(server, port, username, password, null);
@@ -45,6 +46,10 @@ public class HttpBlobStore implements BlobStore {
 
     @Override
     public void setBlob(String hash, byte[] bytes) {
+        if ( !force && hashCache.hasHash(hash)) {
+            return;
+        }
+        
         Path destPath = basePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
@@ -130,6 +135,15 @@ public class HttpBlobStore implements BlobStore {
         if (result.getStatusCode() < 200 || result.getStatusCode() > 299) {
             throw new RuntimeException("Failed to upload - " + result.getStatusCode());
         }
-
     }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+    
+    
 }

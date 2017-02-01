@@ -36,6 +36,7 @@ public class HttpHashStore implements HashStore {
     private Path filesBasePath;
     private long gets;
     private long sets;
+    private boolean force;
 
     /**
      *
@@ -119,7 +120,7 @@ public class HttpHashStore implements HashStore {
 
     @Override
     public void setFileFanout(String hash, List<String> fanoutHashes, long actualContentLength) {
-        if (hasFile(hash)) {
+        if ( !force && hasFile(hash)) {
             return;
         }
 
@@ -229,6 +230,15 @@ public class HttpHashStore implements HashStore {
         if (result.getStatusCode() < 200 || result.getStatusCode() > 299) {
             throw new RuntimeException("Failed to upload - " + result.getStatusCode());
         }
-
     }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+    
+    
 }

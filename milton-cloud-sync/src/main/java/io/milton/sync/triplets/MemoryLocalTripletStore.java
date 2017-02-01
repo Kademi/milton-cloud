@@ -160,6 +160,7 @@ public class MemoryLocalTripletStore {
             logTime = System.currentTimeMillis();
         }
 
+        log.info("scanDirectory {}", dir);
         File[] children = dir.listFiles();
 
         List<ITriplet> triplets = new ArrayList<>();
@@ -212,9 +213,10 @@ public class MemoryLocalTripletStore {
             return null; // will generate directory records in scan after all children are processed
         }
 
+        log.info("scanFile: {}", f);
         String hash = (String) fileHashCache.get(f);
         if (hash != null) {
-            return hash;
+//            return hash;
         }
 
         hash = Parser.parse(f, blobStore, hashStore); // will generate blobs into this blob store
