@@ -240,7 +240,7 @@ public class MemoryLocalTripletStore {
         // will only watch specified directory, not subdirectories
         WatchKey key = path.register(watchService, events);
         mapOfWatchKeysByDir.put(dir, key);
-        log.info("Now watching: " + dir.getAbsolutePath());
+        //log.info("Now watching: " + dir.getAbsolutePath());
     }
 
     private void unregisterWatchDir(final File dir) {
