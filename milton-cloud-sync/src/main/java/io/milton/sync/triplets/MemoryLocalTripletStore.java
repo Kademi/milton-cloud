@@ -79,7 +79,7 @@ public class MemoryLocalTripletStore {
             dataDir = new File(System.getProperty("java.io.tmpdir"));
         }
         File envDir = new File(dataDir, "triplets");
-        log.info("Create berkey db: " + envDir.getAbsolutePath());
+        log.trace("Create berkey db: " + envDir.getAbsolutePath());
         envDir.mkdirs();
         fileHashCache = new BerkeleyDbFileHashCache(envDir);
 
@@ -108,7 +108,7 @@ public class MemoryLocalTripletStore {
         }
 
         if (!initialScanDone) {
-            log.info("Done initial scan");
+            log.trace("Done initial scan");
             initialScanDone = true;
         }
         log.info("END SCAN");
@@ -135,7 +135,7 @@ public class MemoryLocalTripletStore {
                 log.error("Exception processing events", ex);
             }
         };
-        log.info("Begin file watch loop: " + root.getAbsolutePath());
+        log.trace("Begin file watch loop: " + root.getAbsolutePath());
         futureScan = scheduledExecutorService.scheduleWithFixedDelay(rScan, 200, 200, TimeUnit.MILLISECONDS);
     }
 
@@ -156,7 +156,7 @@ public class MemoryLocalTripletStore {
             registerWatchDir(dir);
         }
         if( System.currentTimeMillis() - logTime > 2000) { // just output current dir every couple of seconds
-            log.info("scanDirectory: dir={}", dir.getAbsolutePath());
+            log.trace("scanDirectory: dir={}", dir.getAbsolutePath());
             logTime = System.currentTimeMillis();
         }
 
@@ -274,7 +274,7 @@ public class MemoryLocalTripletStore {
                 //ignore
             } else {
                 if (paused) {
-                    log.info("Ignoring fs events while paused during scan");
+                    log.trace("Ignoring fs events while paused during scan");
                 } else {
                     if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
                         java.nio.file.Path pathCreated = (java.nio.file.Path) event.context();
@@ -283,7 +283,7 @@ public class MemoryLocalTripletStore {
                         if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
                             // ignore it
                         } else {
-                            log.info("scanFsEvents: watchedPath=" + watchedPath);
+                            log.trace("scanFsEvents: watchedPath=" + watchedPath);
                             if (f.isDirectory()) {
                                 directoryCreated(f);
                             } else {
@@ -294,7 +294,7 @@ public class MemoryLocalTripletStore {
                         java.nio.file.Path pathDeleted = (java.nio.file.Path) event.context();
                         final File f = new File(watchedPath + File.separator + pathDeleted);
                         if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
-                            log.info("ignoring change to ignored file");
+                            log.trace("ignoring change to ignored file");
                         } else {
                             fileDeleted(f);
                         }
@@ -310,7 +310,7 @@ public class MemoryLocalTripletStore {
                         java.nio.file.Path pathModified = (java.nio.file.Path) event.context();
                         final File f = new File(watchedPath + File.separator + pathModified);
                         if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
-                            log.info("ignoring change to ignored file");
+                            log.trace("ignoring change to ignored file");
                         } else {
                             fileModified(f);
                         }
