@@ -105,6 +105,7 @@ public class MemoryLocalTripletStore {
 
         } catch (Throwable e) {
             log.error("Exception in scan: " + root.getAbsolutePath(), e);
+            throw new RuntimeException(e);
         }
 
         if (!initialScanDone) {
