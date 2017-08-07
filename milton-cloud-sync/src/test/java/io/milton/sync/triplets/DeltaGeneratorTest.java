@@ -48,6 +48,8 @@ public class DeltaGeneratorTest {
 
         System.out.println("hash1=" + hash1 + " - hash2=" + hash2);
 
+        DeltaGenerator db2;
+
         DeltaGenerator dg = new DeltaGenerator(hashStore, blobStore, new DeltaGenerator.DeltaListener() {
 
             @Override
@@ -70,8 +72,13 @@ public class DeltaGeneratorTest {
                     Assert.assertEquals("a-new1.txt", triplet2.getName());
                 }
             }
+
+            @Override
+            public void doConflict(Path path, ITriplet triplet2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
-        dg.generateDeltas(hash1, hash2);
+        dg.generateDeltas(hash1, hash2, null);
 
     }
 
@@ -94,7 +101,7 @@ public class DeltaGeneratorTest {
 
         DeltaGenerator dg = new DeltaGenerator(hashStore, blobStore,dl);
         System.out.println("Start merge: original branch: " + origMergeDest);
-        dg.generateDeltas(hash1, hash2);
+        dg.generateDeltas(hash1, hash2, null);
 
         System.out.println("result of merge: " + dl.getHash());
 
