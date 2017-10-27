@@ -54,6 +54,12 @@ public class MemoryLocalTripletStore {
         this(root, null, blobStore, hashStore, null, null, null);
     }
 
+    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore, WatchService watchService, ScheduledExecutorService scheduledExecutorService) throws IOException {
+        this(root, null, blobStore, hashStore, null, null, null);
+        this.watchService = watchService;
+        this.scheduledExecutorService = scheduledExecutorService;
+    }
+
     /**
      *
      * @param root
@@ -121,9 +127,13 @@ public class MemoryLocalTripletStore {
      * Start processing file system events
      */
     public void start() throws IOException {
-        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        if (scheduledExecutorService == null) {
+            scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        }
         final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
-        watchService = path.getFileSystem().newWatchService();
+        if (watchService == null) {
+            watchService = path.getFileSystem().newWatchService();
+        }
 
         initWatch(root);
 
@@ -156,7 +166,7 @@ public class MemoryLocalTripletStore {
         if (!initialScanDone) {
             registerWatchDir(dir);
         }
-        if( System.currentTimeMillis() - logTime > 2000) { // just output current dir every couple of seconds
+        if (System.currentTimeMillis() - logTime > 2000) { // just output current dir every couple of seconds
             log.trace("scanDirectory: dir={}", dir.getAbsolutePath());
             logTime = System.currentTimeMillis();
         }
@@ -194,7 +204,7 @@ public class MemoryLocalTripletStore {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         String thisHash = hashCalc.calcHash(triplets, out);
-        if( !blobStore.hasBlob(thisHash)) {
+        if (!blobStore.hasBlob(thisHash)) {
             blobStore.setBlob(thisHash, out.toByteArray());
         }
 
