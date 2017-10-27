@@ -15,6 +15,7 @@ import io.milton.sync.triplets.MemoryLocalTripletStore;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import org.hashsplit4j.api.HashCache;
@@ -73,7 +74,8 @@ public class HttpBloomFilterHashCache implements HashCache {
     }
 
     private BloomFilter<CharSequence> loadBloomFilter(InputStream in) throws IOException {
-        Funnel<CharSequence> funnel = Funnels.unencodedCharsFunnel();
+        //Funnel<CharSequence> funnel = Funnels.unencodedCharsFunnel();
+        Funnel<CharSequence> funnel = Funnels.stringFunnel(Charset.forName("UTF-8"));
         filter = BloomFilter.readFrom(in, funnel);
         return filter;
     }

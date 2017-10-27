@@ -41,8 +41,8 @@ public class SwingConflictResolver {
         NOTHING
     }
 
-    ConflictChoice choice = null;
-    Integer rememberSecs;
+    public ConflictChoice choice = null;
+    public Integer rememberSecs;
 
     public SwingConflictResolver() {
     }

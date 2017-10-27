@@ -147,5 +147,10 @@ public class OneWayMergingDeltaListener implements DeltaListener {
         return startingHash;
     }
 
-    
+    @Override
+    public void doConflict(Path path, ITriplet triplet2) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+
 }
