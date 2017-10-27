@@ -51,13 +51,7 @@ public class MemoryLocalTripletStore {
     private long logTime;
 
     public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
-        this(root, null, blobStore, hashStore, null, null, null);
-    }
-
-    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore, WatchService watchService, ScheduledExecutorService scheduledExecutorService) throws IOException {
-        this(root, null, blobStore, hashStore, null, null, null);
-        this.watchService = watchService;
-        this.scheduledExecutorService = scheduledExecutorService;
+        this(root, null, blobStore, hashStore, null, null, null, null, null);
     }
 
     /**
@@ -69,15 +63,21 @@ public class MemoryLocalTripletStore {
      * @param callback
      * @param filter
      * @param dataDir
+     * @param watchService
+     * @param scheduledExecutorService
      * @throws IOException
      */
-    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback, Consumer<Runnable> filter, File dataDir) throws IOException {
+    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback, 
+            Consumer<Runnable> filter, File dataDir, WatchService watchService, ScheduledExecutorService scheduledExecutorService) throws IOException {
         this.root = root;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.callback = callback;
         this.eventManager = eventManager;
         this.filter = filter;
+        
+        this.watchService = watchService;
+        this.scheduledExecutorService = scheduledExecutorService;        
 
         ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
         cfg.setUseDisk(true);
