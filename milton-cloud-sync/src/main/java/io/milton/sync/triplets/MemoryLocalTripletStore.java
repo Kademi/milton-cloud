@@ -39,6 +39,8 @@ public class MemoryLocalTripletStore {
     private final HashStore hashStore;
     private final RepoChangedCallback callback;
     private final Consumer<Runnable> filter;
+    private final List<String> ignorePatterns;
+
     private boolean initialScanDone;
 
     private final HashCalc hashCalc = HashCalc.getInstance();
@@ -48,7 +50,7 @@ public class MemoryLocalTripletStore {
     private long logTime;
 
     public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
-        this(root, null, blobStore, hashStore, null, null, null, null);
+        this(root, null, blobStore, hashStore, null, null, null, null, null);
     }
 
     /**
@@ -64,13 +66,14 @@ public class MemoryLocalTripletStore {
      * @throws IOException
      */
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback,
-            Consumer<Runnable> filter, File dataDir, FileSystemWatchingService fileSystemWatchingService) throws IOException {
+            Consumer<Runnable> filter, File dataDir, FileSystemWatchingService fileSystemWatchingService, List<String> ignorePatterns) throws IOException {
         this.root = root;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
         this.callback = callback;
         this.eventManager = eventManager;
         this.filter = filter;
+        this.ignorePatterns = ignorePatterns;
 
         if (fileSystemWatchingService == null) {
             scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -141,7 +144,7 @@ public class MemoryLocalTripletStore {
     }
 
     public String scanDirectory(File dir) throws IOException {
-        if (Utils.ignored(dir)) {
+        if (Utils.ignored(dir, ignorePatterns)) {
             return null;
         }
 
@@ -225,7 +228,7 @@ public class MemoryLocalTripletStore {
             } else {
                 if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
 
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                    if (ignored(f) || ignored(f.getParentFile())) {
                         // ignore it
                     } else {
                         if (f.isDirectory()) {
@@ -235,19 +238,19 @@ public class MemoryLocalTripletStore {
                         }
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                    if (ignored(f) || ignored(f.getParentFile())) {
                         log.trace("ignoring change to ignored file");
                     } else {
                         fileDeleted(f);
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                    if (ignored(f) || ignored(f.getParentFile())) {
                         // ignored
                     } else {
                         fileDeleted(f);
                     }
                 } else if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-                    if (Utils.ignored(f) || Utils.ignored(f.getParentFile())) {
+                    if (ignored(f) || ignored(f.getParentFile())) {
                         log.trace("ignoring change to ignored file");
                     } else {
                         fileModified(f);
@@ -348,6 +351,10 @@ public class MemoryLocalTripletStore {
 
     public File getRoot() {
         return root;
+    }
+
+    public boolean ignored(File childFile) {
+        return Utils.ignored(childFile, ignorePatterns);
     }
 
     public interface RepoChangedCallback {

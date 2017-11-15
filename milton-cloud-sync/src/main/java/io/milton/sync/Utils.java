@@ -12,9 +12,21 @@ import org.hashsplit4j.triplets.ITriplet;
  * @author brad
  */
 public class Utils {
+
     public static boolean ignored(File childFile) {
+        return ignored(childFile, null);
+    }
+
+    public static boolean ignored(File childFile, List<String> ignoredPatterns) {
         if( childFile.getName().equals(".ksync") ) { // usually ignore resources starting with a dot, but special case for .mil directory
             return true;
+        }
+        if( ignoredPatterns != null ) {
+            for( String s : ignoredPatterns) {
+                if( childFile.getName().equals(s) || childFile.getName().matches(s)) {
+                    return true;
+                }
+            }
         }
         return childFile.isHidden() || childFile.getName().startsWith(".");
     }

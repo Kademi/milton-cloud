@@ -298,7 +298,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
      * @throws IOException
      */
     private boolean scanDirectory(File dir, String dirHash, boolean deep) throws SQLException, IOException {
-        if (Utils.ignored(dir)) {
+        if (Utils.ignored(dir, null)) {
             return false;
         }
         if (!initialScanDone) {
@@ -329,7 +329,7 @@ public class JdbcLocalTripletStore implements PausableTripletStore, BlobStore {
                         }
                     }
                     if (!mapOfRecords.containsKey(child.getName())) {
-                        if (Utils.ignored(child) || Utils.ignored(child.getParentFile())) {
+                        if (Utils.ignored(child, null) || Utils.ignored(child.getParentFile(), null)) {
                             log.info("Found a new but ignored resource " + child.getAbsolutePath());
                         } else {
                             log.info("A resource has been added locally: " + child.getName());
