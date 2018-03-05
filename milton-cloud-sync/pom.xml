@@ -8,7 +8,7 @@
     </parent>
     <artifactId>milton-cloud-sync</artifactId>
     <packaging>jar</packaging>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
     <dependencies>
         <dependency>
             <groupId>org.swinglabs</groupId>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>hashsplit4j</groupId>
             <artifactId>hashsplit4j-lib</artifactId>
-            <version>2.4.0</version>
+            <version>2.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -97,11 +97,6 @@
             <artifactId>junit</artifactId>
             <version>4.9</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>hashsplit4j</groupId>
-            <artifactId>hashsplit4j-lib</artifactId>
-            <version>2.3.7</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
