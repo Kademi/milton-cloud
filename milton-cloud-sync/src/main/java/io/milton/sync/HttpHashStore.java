@@ -173,6 +173,7 @@ public class HttpHashStore implements HashStore {
                 return true;
             }
         }
+        gets++;
         Path destPath = filesBasePath.child(fileHash + "");
         try {
             host.doOptions(destPath);
@@ -239,6 +240,6 @@ public class HttpHashStore implements HashStore {
     public void setForce(boolean force) {
         this.force = force;
     }
-    
-    
+
+
 }

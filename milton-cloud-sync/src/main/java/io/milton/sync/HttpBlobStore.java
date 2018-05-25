@@ -49,10 +49,11 @@ public class HttpBlobStore implements BlobStore {
         if ( !force && hashCache.hasHash(hash)) {
             return;
         }
-        
+
         Path destPath = basePath.child(hash + "");
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
+        sets++;
         if (hashCache != null) {
             hashCache.setHash(hash);
         }
@@ -70,6 +71,7 @@ public class HttpBlobStore implements BlobStore {
         }
         Path destPath = basePath.child(hash + "");
         try {
+            gets++;
             host.doOptions(destPath);
             if (hashCache != null) {
                 hashCache.setHash(hash);
@@ -84,6 +86,7 @@ public class HttpBlobStore implements BlobStore {
 
     @Override
     public byte[] getBlob(String hash) {
+        gets++;
         Path destPath = basePath.child(hash + "");
         try {
             byte[] arr = host.doGet(destPath);
@@ -144,6 +147,6 @@ public class HttpBlobStore implements BlobStore {
     public void setForce(boolean force) {
         this.force = force;
     }
-    
-    
+
+
 }
