@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import org.hashsplit4j.api.HashCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +46,32 @@ public class HttpBloomFilterHashCache implements HashCache {
         loadBloomFilter();
     }
 
+    public HttpBloomFilterHashCache(byte[] filter) {
+        this.host = null;
+        this.basePath = null;
+        this.param = null;
+        this.paramVal = null;
+        ByteArrayInputStream bin = new ByteArrayInputStream(filter);
+        try {
+            loadBloomFilter(bin);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
 
     @Override
     public boolean hasHash(String hash) {
         boolean b = filter.mightContain(hash);
         if( !b ) {
-            //log.info("hasHash: " + b + " hash=" + hash + " in " + paramVal);
+//            log.info("hasHash: " + b + " hash=" + hash + " in " + paramVal);
         }
         return b;
     }
 
     @Override
     public void setHash(String hash) {
+        //log.info("sethash: " + hash);
         filter.put(hash);
     }
 
