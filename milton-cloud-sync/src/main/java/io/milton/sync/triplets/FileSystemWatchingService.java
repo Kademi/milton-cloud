@@ -122,15 +122,19 @@ public class FileSystemWatchingService {
     }
 
     private void registerWatchDir(final File dir) throws IOException {
-        if (watchService == null) {
-            return;
+        try {
+            if (watchService == null) {
+                return;
+            }
+            
+            final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
+            
+            WatchKey key = path.register(watchService, events);
+            //mapOfWatchKeysByDir.put(dir, key);
+            log.info("Watching: " + path);
+        } catch (Throwable ex) {
+            throw new RuntimeException("Couldnt start watching dir: " + dir.getAbsolutePath(), ex);
         }
-
-        final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
-
-        WatchKey key = path.register(watchService, events);
-        //mapOfWatchKeysByDir.put(dir, key);
-        log.info("Watching: " + path);
 
     }
     
