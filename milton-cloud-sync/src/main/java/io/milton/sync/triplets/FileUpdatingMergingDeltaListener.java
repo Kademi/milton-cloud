@@ -50,7 +50,11 @@ public class FileUpdatingMergingDeltaListener implements DeltaGenerator.DeltaLis
         log.info("deleted {}", dest.getAbsolutePath());
         if (dest.exists()) {
             try {
-                FileUtils.deleteDirectory(dest);
+                if (dest.isDirectory()) {
+                    FileUtils.deleteDirectory(dest);
+                } else {
+                    dest.delete();
+                }
             } catch (IOException ex) {
                 throw new RuntimeException("Could not delete: " + dest.getAbsolutePath(), ex);
             }
@@ -106,7 +110,7 @@ public class FileUpdatingMergingDeltaListener implements DeltaGenerator.DeltaLis
 
     private File find(Path p) {
         File f = root;
-        for( String s : p.getParts()) {
+        for (String s : p.getParts()) {
             f = new File(f, s);
         }
         return f;
