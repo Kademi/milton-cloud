@@ -101,8 +101,13 @@ public class HttpHashStore implements HashStore {
         if (chunksHashCache != null) {
             if (chunksHashCache.hasHash(fanoutHash)) { // say that 3 times quickly!!!  :)
                 return true;
+            } else {
+        // If not in the hashcache, lets assume we dont have it.
+                // This is faster then doing lots of unnecessary checks
+                return false;
             }
         }
+
         Path destPath = chunksBasePath.child(fanoutHash + "");
         try {
             host.doOptions(destPath);
@@ -120,7 +125,7 @@ public class HttpHashStore implements HashStore {
 
     @Override
     public void setFileFanout(String hash, List<String> fanoutHashes, long actualContentLength) {
-        if ( !force && hasFile(hash)) {
+        if (!force && hasFile(hash)) {
             return;
         }
 
@@ -172,6 +177,8 @@ public class HttpHashStore implements HashStore {
             if (filesHashCache.hasHash(fileHash)) { // say that 3 times quickly!!!  :)
                 return true;
             }
+            // assume we dont have it, not necessarily true but faster then unnecessary checks
+            return false;
         }
         gets++;
         Path destPath = filesBasePath.child(fileHash + "");
@@ -240,6 +247,5 @@ public class HttpHashStore implements HashStore {
     public void setForce(boolean force) {
         this.force = force;
     }
-
 
 }

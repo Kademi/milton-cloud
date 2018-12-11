@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import org.apache.jcs.engine.CompositeCacheAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.hashsplit4j.api.HashStore;
@@ -206,13 +207,23 @@ public class MemoryLocalTripletStore {
             return null; // will generate directory records in scan after all children are processed
         }
 
-        //log.info("scanFile: {}", f);
+        log.info("scanFile: {}", f);
         String hash = (String) fileHashCache.get(f);
         if (hash != null) {
 //            return hash;
         }
 
         hash = Parser.parse(f, blobStore, hashStore); // will generate blobs into this blob store
+
+        if( blobStore instanceof BlockingBlobStore) {
+            BlockingBlobStore bbs = (BlockingBlobStore) blobStore;
+            try {
+                //bbs.checkComplete();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
         fileHashCache.put(f, hash);
 
         return hash;

@@ -51,6 +51,7 @@ public class HttpBlobStore implements BlobStore {
         }
 
         Path destPath = basePath.child(hash + "");
+        System.out.println("PUT " + hash);
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
         sets++;
