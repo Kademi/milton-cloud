@@ -25,7 +25,7 @@
         <dependency>
             <groupId>io.milton</groupId>
             <artifactId>milton-client</artifactId>
-            <version>2.7.4.4</version>
+            <version>2.7.4.5</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.milton</groupId>
@@ -86,12 +86,7 @@
             <version>20160212</version>
             <type>jar</type>
         </dependency>
-        <dependency>
 
-            <groupId>io.milton</groupId>
-            <artifactId>milton-client</artifactId>
-            <version>${milton.version}</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

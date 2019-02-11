@@ -64,6 +64,7 @@ public class MemoryLocalTripletStore {
      * @param filter
      * @param dataDir
      * @param fileSystemWatchingService
+     * @param ignorePatterns
      * @throws IOException
      */
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback,
