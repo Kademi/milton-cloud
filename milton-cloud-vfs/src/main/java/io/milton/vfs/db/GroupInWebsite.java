@@ -21,7 +21,7 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 @Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_group", "website"})}// item names must be unique within a directory
+    @UniqueConstraint(columnNames = {"user_group_id", "website_id"})}// item names must be unique within a directory
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupInWebsite implements Serializable {

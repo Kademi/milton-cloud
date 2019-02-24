@@ -229,8 +229,6 @@ public class Profile extends BaseEntity implements VfsAcceptor {
     private List<Credential> credentials;
     private List<GroupMembership> memberships; // can belong to groups    
 
-    @Column(nullable = false)
-    @Index(name = "ids_entity_name")
     public String getName() {
         return name;
     }

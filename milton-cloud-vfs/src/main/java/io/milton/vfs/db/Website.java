@@ -129,7 +129,7 @@ public class Website extends Repository implements VfsAcceptor {
         this.domainName = name;
     }
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true) // must allow null when using single table inheritance
     public Organisation getOrganisation() {
         return organisation;
     }

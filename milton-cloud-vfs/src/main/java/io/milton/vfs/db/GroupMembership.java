@@ -49,8 +49,9 @@ import org.hibernate.criterion.Restrictions;
  */
 @Entity
 @Table(
-        uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"member", "group_entity", "within_org"})})
+//        uniqueConstraints = {
+//    @UniqueConstraint(columnNames = {"member", "group_entity", "within_org"})}
+)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupMembership implements Serializable {
 

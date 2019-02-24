@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @author brad
  */
 @javax.persistence.Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("E")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -69,7 +69,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
     public abstract String getEntityName();
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     public long getId() {
         return id;
     }
@@ -108,7 +108,7 @@ public abstract class BaseEntity implements Serializable, VfsAcceptor {
         this.modifiedDate = modifiedDate;
     }
 
-    @Column
+    @Column(insertable = false, updatable = false)
     public String getType() {
         return type;
     }

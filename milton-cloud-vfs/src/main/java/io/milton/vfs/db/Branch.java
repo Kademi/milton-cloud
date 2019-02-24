@@ -20,8 +20,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author brad
  */
 @javax.persistence.Entity
-@Table(name = "BRANCH", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"repository", "name"})}// unique names within a repository
+@Table(name = "BRANCH"
+//        , uniqueConstraints = {
+//    @UniqueConstraint(columnNames = {"repository", "name"})}// unique names within a repository
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Branch implements Serializable, VfsAcceptor {

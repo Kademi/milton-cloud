@@ -46,8 +46,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  */
 @Entity
 @Table(
-uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"roleName", "grantee","within_org","repository"})}
+//uniqueConstraints = {
+//    @UniqueConstraint(columnNames = {"roleName", "grantee","within_org","repository"})}
 )
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GroupRole implements Serializable{

@@ -20,11 +20,12 @@ import org.slf4j.LoggerFactory;
  */
 @javax.persistence.Entity
 @Table(
-        uniqueConstraints = {
-            @UniqueConstraint(columnNames = {"name", "base_entity"})})
+//        uniqueConstraints = {
+//            @UniqueConstraint(columnNames = {"name", "base_entity"})}
+)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, length = 20)
 @DiscriminatorValue("R")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Repository implements Serializable {
 
@@ -162,7 +163,7 @@ public class Repository implements Serializable {
         this.branches = branches;
     }
 
-    @Column
+    @Column(insertable = false, updatable = false)
     public String getType() {
         return type;
     }
@@ -321,12 +322,12 @@ public class Repository implements Serializable {
 
     /**
      * Move this repository to the given owner
-     * 
+     *
      * @param dest
      * @param movedBy - the user performing the move
-     * @param session 
+     * @param session
      */
-    public void moveTo(BaseEntity dest,Profile movedBy, Session session) {
+    public void moveTo(BaseEntity dest, Profile movedBy, Session session) {
         getBaseEntity().getRepositories().remove(this);
         this.setBaseEntity(dest);
         dest.getRepositories().add(this);
@@ -341,16 +342,16 @@ public class Repository implements Serializable {
 
         public IsContainedVisitor(BaseEntity entity) {
             this.entity = entity;
-        }                
+        }
 
         @Override
         public void visit(Organisation owner) {
             if (owner.getId() == entity.getId()) {
                 isContained = true;
-                return ;
-            }    
+                return;
+            }
             Organisation parent = owner.getOrganisation();
-            if( parent != null ) {
+            if (parent != null) {
                 parent.accept(this);
             }
         }
@@ -359,7 +360,7 @@ public class Repository implements Serializable {
         public void visit(Profile owner) {
             if (owner.getId() == entity.getId()) {
                 isContained = true;
-            }    
-        }       
+            }
+        }
     }
 }
