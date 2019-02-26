@@ -174,10 +174,12 @@ public class DataSession {
             branch.setHead(newCommit);
             log.info("New branch hash. Repo/Branch={}/{} BranchID={} CommitID={} Hash={}", branch.getRepository().getName(), branch.getName(), branch.getId(), newCommit.getId(), newHash);
             session.save(branch);
-            try {
-                eventManager.fireEvent(new NodesChangedEvent(this, changedDirectoryNodes));
-            } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
-                throw new RuntimeException(ex);
+            if (eventManager != null) {
+                try {
+                    eventManager.fireEvent(new NodesChangedEvent(this, changedDirectoryNodes));
+                } catch (ConflictException | BadRequestException | NotAuthorizedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         } else {
             log.warn("Hashes are unchanged, will not save");
@@ -187,7 +189,7 @@ public class DataSession {
     }
 
     private void recalcHashes(DataNode item, List<DataSession.DirectoryNode> changedDirectoryNodes) throws IOException {
-        if (item.dirty == null && item.getHash() != null ) { // if hash is null we need to calc it
+        if (item.dirty == null && item.getHash() != null) { // if hash is null we need to calc it
             return; // not dirty, which means no children are dirty
         }
         // only directories have derived hashes
@@ -205,7 +207,7 @@ public class DataSession {
                 String newHash = hashCalc.calcHash(dirNode, bout);
                 item.setHash(newHash);
 
-                if( !newHash.equals(oldHash)) {
+                if (!newHash.equals(oldHash)) {
                     //log.info("Found diry node: " + dirNode.getName());
                     changedDirectoryNodes.add(dirNode);
                 }
@@ -531,8 +533,6 @@ public class DataSession {
             super.setHash(hash);
             fanout = null;
         }
-
-
 
         public byte[] getContent() throws IOException {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
