@@ -103,6 +103,11 @@ public class MemoryLocalTripletStore {
         return paused;
     }
 
+    /**
+     * Returns the new hash
+     *
+     * @return
+     */
     public String scan() {
 
         log.info("START SCAN: " + root.getAbsolutePath());
