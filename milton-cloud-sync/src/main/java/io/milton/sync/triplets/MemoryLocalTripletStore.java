@@ -160,6 +160,7 @@ public class MemoryLocalTripletStore {
             logTime = System.currentTimeMillis();
         }
 
+        System.out.print("/"); // progress indication
         //log.info("scanDirectory {}", dir);
         File[] children = dir.listFiles();
 
@@ -213,6 +214,7 @@ public class MemoryLocalTripletStore {
             return null; // will generate directory records in scan after all children are processed
         }
 
+        System.out.print("."); // just to give progress indication
         //log.info("scanFile: {}", f);
         String hash = (String) fileHashCache.get(f);
         if (hash != null) {
