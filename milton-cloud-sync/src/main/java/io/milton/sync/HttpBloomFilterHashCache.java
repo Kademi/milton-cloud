@@ -83,7 +83,7 @@ public class HttpBloomFilterHashCache implements HashCache {
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
             return loadBloomFilter(bin);
         } catch (IOException | NotFoundException | HttpException | NotAuthorizedException | BadRequestException | ConflictException iOException) {
-            throw new RuntimeException("Could not load bloomfilter from " + basePath, iOException);
+            throw new RuntimeException("Could not load bloomfilter: " + iOException.getMessage() + "; from basePath=" + basePath + " host server=" + host.server + " host root path=" + host.rootPath, iOException);
         }
     }
 
