@@ -1,7 +1,6 @@
 package io.milton.sync.triplets;
 
 import io.milton.common.Path;
-import io.milton.http.exceptions.NotFoundException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,8 +41,6 @@ public class HttpTripletStore implements ParentHashAwareTripletStore {
             return triplets;
         } catch (IOException ex) {
             throw new RuntimeException(p.toString(), ex);
-        } catch (NotFoundException ex) {
-            return null;
         } catch(Throwable e) {
             throw new RuntimeException(p.toString(), e);
         }
@@ -60,8 +57,6 @@ public class HttpTripletStore implements ParentHashAwareTripletStore {
             return triplets;
         } catch (IOException ex) {
             throw new RuntimeException(p.toString(), ex);
-        } catch (NotFoundException ex) {
-            return null;
         } catch(Throwable e) {
             throw new RuntimeException(p.toString(), e);
         }
