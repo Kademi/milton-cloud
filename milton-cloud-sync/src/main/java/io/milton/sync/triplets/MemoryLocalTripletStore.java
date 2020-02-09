@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import org.apache.jcs.engine.CompositeCacheAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.hashsplit4j.api.HashStore;
@@ -332,6 +331,7 @@ public class MemoryLocalTripletStore {
                     }
                 } catch (Throwable e) {
                     log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage(), e);
+                    e.printStackTrace();
                 } finally {
                     scanningDirs.remove(dir);
                 }

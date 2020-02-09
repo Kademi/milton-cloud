@@ -25,7 +25,7 @@
         <dependency>
             <groupId>io.milton</groupId>
             <artifactId>milton-client</artifactId>
-            <version>2.7.4.9</version>
+            <version>2.7.5.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.milton</groupId>
@@ -148,6 +148,6 @@
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
             <version>18.3.12</version>
-        </dependency>        
+        </dependency>
     </dependencies>
 </project>
