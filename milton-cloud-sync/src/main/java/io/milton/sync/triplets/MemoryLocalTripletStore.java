@@ -3,7 +3,6 @@ package io.milton.sync.triplets;
 import java.io.*;
 import java.nio.file.*;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.hashsplit4j.api.BlobStore;
@@ -16,6 +15,7 @@ import io.milton.sync.event.FileChangedEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import org.apache.jcs.engine.CompositeCacheAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
@@ -46,7 +46,7 @@ public class MemoryLocalTripletStore {
     private final HashCalc hashCalc = HashCalc.getInstance();
     private boolean paused; // if true ignores fs events
 
-    private final BerkeleyDbFileHashCache fileHashCache;
+    private final SyncHashCache fileHashCache;
     private long logTime;
 
     public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
@@ -77,24 +77,25 @@ public class MemoryLocalTripletStore {
         this.ignorePatterns = ignorePatterns;
 
         if (fileSystemWatchingService == null) {
+            this.fileSystemWatchingService = null;
             scheduledExecutorService = Executors.newScheduledThreadPool(1);
-            final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
-            WatchService watchService = path.getFileSystem().newWatchService();
-            this.fileSystemWatchingService = new FileSystemWatchingService(watchService, scheduledExecutorService);
+//            final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
+//            WatchService watchService = path.getFileSystem().newWatchService();
+//            this.fileSystemWatchingService = new FileSystemWatchingService(watchService, scheduledExecutorService);
+            fileHashCache = new MemorySyncHashCache();
         } else {
             this.fileSystemWatchingService = fileSystemWatchingService;
             this.scheduledExecutorService = fileSystemWatchingService.getScheduledExecutorService();
+            ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
+            cfg.setUseDisk(true);
+            if (dataDir == null) {
+                dataDir = new File(System.getProperty("java.io.tmpdir"));
+            }
+            File envDir = new File(dataDir, "triplets");
+            log.trace("Create berkey db: " + envDir.getAbsolutePath());
+            envDir.mkdirs();
+            fileHashCache = new BerkeleyDbFileHashCache(envDir);
         }
-
-        ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
-        cfg.setUseDisk(true);
-        if (dataDir == null) {
-            dataDir = new File(System.getProperty("java.io.tmpdir"));
-        }
-        File envDir = new File(dataDir, "triplets");
-        log.trace("Create berkey db: " + envDir.getAbsolutePath());
-        envDir.mkdirs();
-        fileHashCache = new BerkeleyDbFileHashCache(envDir);
 
     }
 
@@ -141,11 +142,12 @@ public class MemoryLocalTripletStore {
      * @throws java.io.IOException
      */
     public void start() throws IOException {
-
-        this.fileSystemWatchingService.watch(root, (WatchEvent.Kind<?> event, File changed) -> {
-            processEvent(changed, event);
-        });
-        this.fileSystemWatchingService.start();
+        if (fileSystemWatchingService != null) {
+            this.fileSystemWatchingService.watch(root, (WatchEvent.Kind<?> event, File changed) -> {
+                processEvent(changed, event);
+            });
+            this.fileSystemWatchingService.start();
+        }
 
     }
 
@@ -222,7 +224,7 @@ public class MemoryLocalTripletStore {
 
         hash = Parser.parse(f, blobStore, hashStore); // will generate blobs into this blob store
 
-        if( blobStore instanceof BlockingBlobStore) {
+        if (blobStore instanceof BlockingBlobStore) {
             BlockingBlobStore bbs = (BlockingBlobStore) blobStore;
             try {
                 //bbs.checkComplete();

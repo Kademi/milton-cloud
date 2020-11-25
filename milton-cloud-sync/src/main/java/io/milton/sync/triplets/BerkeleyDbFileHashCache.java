@@ -32,7 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class BerkeleyDbFileHashCache {
+public class BerkeleyDbFileHashCache implements SyncHashCache{
 
     private final Logger log = LoggerFactory.getLogger(BerkeleyDbFileHashCache.class);
 
@@ -68,16 +68,18 @@ public class BerkeleyDbFileHashCache {
         hashByKeyIndex = store.getPrimaryIndex(String.class, FileHashEntity.class);
     }
 
+    @Override
     public void put(File file, String hash) {
         String key = getKey(file);
         FileHashEntity fileHash = new FileHashEntity(key, hash);
         hashByKeyIndex.put(fileHash);
-        
+
         lastCommit = new Date();
         doCommit = true;
         commitCount++;
     }
 
+    @Override
     public String get(File file) {
         String key = getKey(file);
         FileHashEntity fileHash = hashByKeyIndex.get(key);
@@ -91,7 +93,7 @@ public class BerkeleyDbFileHashCache {
         String key = file.getAbsolutePath() + "-" + file.length() + "-" + file.lastModified();
         return key;
     }
-    
+
     /**
      * Close the database environment and database store transaction
      */
@@ -132,8 +134,8 @@ public class BerkeleyDbFileHashCache {
             this.hash = hash;
         }
 
-        
-        
+
+
         public String getKey() {
             return key;
         }
@@ -149,6 +151,6 @@ public class BerkeleyDbFileHashCache {
         public void setHash(String hash) {
             this.hash = hash;
         }
-                
+
     }
 }
