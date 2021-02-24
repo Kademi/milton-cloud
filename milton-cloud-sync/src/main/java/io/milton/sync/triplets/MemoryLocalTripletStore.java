@@ -354,7 +354,7 @@ public class MemoryLocalTripletStore {
             if (queuedEvents < 0) {
                 log.warn("huh?? queuedEvents={}", queuedEvents);
             }
-            if (queuedEvents <= 0 || durationSinceLastEvent > 5000) {
+            if (queuedEvents <= 0 && durationSinceLastEvent > 3000) {
                 queuedEvents = 0;
                 log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
                 if (callback != null) {
