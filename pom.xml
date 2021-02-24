@@ -5,28 +5,21 @@
     <artifactId>milton-cloud</artifactId>
     <version>1.2.3</version>
     <packaging>pom</packaging>
-	<distributionManagement>
-		<repository>
-			<id>bintray-milton-Milton</id>
-			<name>milton-Milton</name>
-			<url>https://api.bintray.com/maven/milton/Milton/milton/;publish=1</url>
-		</repository>
-		<snapshotRepository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>ettrema-repo</id>
-			<url>http://milton.io/maven/</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>bintray-kademi-Kademi</id>
+            <name>bintray-kademi-Kademi</name>
+            <url>https://api.bintray.com/maven/kademi/Kademi/kademi/;publish=1</url>
+        </repository>
+    </distributionManagement>
     <developers>
         <developer>
             <name>Brad McEvoy</name>
-            <timezone>GMT+12</timezone>
-            <organization>McEvoy Software</organization>
-            <organizationUrl>http://www.mcevoysoftware.co.nz/</organizationUrl>
+            <organization>Kademi</organization>
         </developer>
     </developers>
     <properties>
-        <milton.version>2.7.5.0</milton.version>
+        <milton.version>2.8.0.1.k4</milton.version>
         <!-- Really want to deprecate endrick, but need to refactor cache in milton-client -->
         <endrick.version>1.7.8</endrick.version>
         <jpa.version>1.0</jpa.version>
@@ -46,15 +39,11 @@
             <comments>The GNU Affero General Public License is a free, copyleft license for software and other kinds of works, specifically designed to ensure cooperation with the community in the case of network server software.</comments>
         </license>
     </licenses>
-    <organization>
-        <name>McEvoy Software Ltd</name>
-        <url>http://www.mcevoysoftware.co.nz/</url>
-    </organization>
     <modules>
         <module>milton-cloud-sync</module>
         <module>milton-cloud-vfs</module>
 
-  </modules>
+    </modules>
     <build>
         <plugins>
             <plugin>
@@ -101,8 +90,8 @@
             </snapshots>
         </repository>
         <repository>
-            <id>ettrema-repo</id>
-            <url>http://milton.io/maven</url>
-        </repository>
+            <id>milton-bintray-repo</id>
+            <url>http://dl.bintray.com/milton/Milton</url>
+        </repository>        
     </repositories>
 </project>
