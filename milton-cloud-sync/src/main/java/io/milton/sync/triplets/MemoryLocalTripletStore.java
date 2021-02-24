@@ -13,9 +13,8 @@ import io.milton.sync.Utils;
 import io.milton.sync.event.EventUtils;
 import io.milton.sync.event.FileChangedEvent;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
 import org.apache.jcs.engine.CompositeCacheAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
@@ -96,7 +95,6 @@ public class MemoryLocalTripletStore {
             envDir.mkdirs();
             fileHashCache = new BerkeleyDbFileHashCache(envDir);
         }
-
     }
 
     public boolean isPaused() {
@@ -219,8 +217,9 @@ public class MemoryLocalTripletStore {
         //log.info("scanFile: {}", f);
         String hash = (String) fileHashCache.get(f);
         if (hash != null) {
-//            return hash;
+            return hash;
         }
+        log.info("parsing: {}", f.getAbsolutePath());
 
         hash = Parser.parse(f, blobStore, hashStore); // will generate blobs into this blob store
 
@@ -299,73 +298,81 @@ public class MemoryLocalTripletStore {
         scanDir(f.getParentFile());
     }
 
-    private final Set<File> scanningDirs = new HashSet<>();
-    private int queuedEvents;
-    private long lastEventTime;
-
+//    private final Set<File> scanningDirs = new HashSet<>();
+//    private int queuedEvents;
+//    private long lastEventTime;
     /**
      *
      * @param dir
      * @param deep - if true will scan the directory and its children, otherwise
      * only the directory
      */
+//    private void scanDir(final File dir) {
+//        lastEventTime = System.currentTimeMillis();
+////        if (scanningDirs.contains(dir)) {
+////            log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile());
+////            return;
+////        }
+//        scanningDirs.add(dir);
+//        queuedEvents++;
+//
+//        scheduledExecutorService.schedule(() -> {
+//            synchronized (MemoryLocalTripletStore.this) {
+//                queuedEvents--;
+//                if (queuedEvents < 0) {
+//                    queuedEvents = 0;
+//                }
+//                try {
+//                    if (filter != null) {
+//                        filter.accept((Runnable) () -> {
+//                            _scanDir(dir);
+//                        });
+//                    } else {
+//                        _scanDir(dir);
+//                    }
+//                } catch (Throwable e) {
+//                    log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage(), e);
+//                    e.printStackTrace();
+//                } finally {
+//                    scanningDirs.remove(dir);
+//                }
+//            }
+//        }, 500, TimeUnit.MILLISECONDS);
+//    }
+    private ScheduledFuture<?> future;
+    private boolean isRunning;
+
     private void scanDir(final File dir) {
-        if (scanningDirs.contains(dir)) {
-            log.info("Not scanning directory {} because a scan is already queued or running for it", dir.getAbsoluteFile());
-            return;
+        if (future != null) {
+            future.cancel(false);
         }
-        scanningDirs.add(dir);
-        queuedEvents++;
-        lastEventTime = System.currentTimeMillis();
-        scheduledExecutorService.schedule(() -> {
-            synchronized (MemoryLocalTripletStore.this) {
-                queuedEvents--;
-                if (queuedEvents < 0) {
-                    queuedEvents = 0;
-                }
-                try {
-                    if (filter != null) {
-                        filter.accept((Runnable) () -> {
-                            _scanDir(dir);
-                        });
-                    } else {
-                        _scanDir(dir);
-                    }
-                } catch (Throwable e) {
-                    log.error("An exception occurred scanning directory: " + dir.getAbsolutePath() + " because " + e.getMessage(), e);
-                    e.printStackTrace();
-                } finally {
-                    scanningDirs.remove(dir);
-                }
-            }
-        }, 500, TimeUnit.MILLISECONDS);
+        future = scheduledExecutorService.schedule(() -> {
+            _scanDir(dir);
+        }, 1000, TimeUnit.MILLISECONDS);
     }
 
     private void _scanDir(final File dir) {
         try {
+            isRunning = true;
             log.info("scanDirTx: " + dir.getAbsolutePath());
             log.info("//*************** Start Scan - " + dir.getName() + "***************************");
+            long tm = System.currentTimeMillis();
+
             String hash = scanDirectory(this.root);
 
-            log.info("//*************** END Scan - " + dir.getName() + "***************************");
+            tm = System.currentTimeMillis() - tm;
+            log.info("//*************** END Scan - " + dir.getName() + " new hash=" + hash + " in " + tm + "ms " + "***************************");
 
-            long durationSinceLastEvent = System.currentTimeMillis() - lastEventTime;
-            log.info("finished scan dir queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-            if (queuedEvents < 0) {
-                log.warn("huh?? queuedEvents={}", queuedEvents);
+            log.info("fire FileChangedEvent event");
+            if (callback != null) {
+                callback.onChanged(hash);
             }
-            if (queuedEvents <= 0 && durationSinceLastEvent > 3000) {
-                queuedEvents = 0;
-                log.info("No more queued events, or its been a while, so fire FileChangedEvent event");
-                if (callback != null) {
-                    callback.onChanged(hash);
-                }
-                EventUtils.fireQuietly(eventManager, new FileChangedEvent(this.root, hash));
-            } else {
-                log.info("Not firing file changed event because queued events is not empty queuedEvents={} duration since last event={} ms", queuedEvents, durationSinceLastEvent);
-            }
+            EventUtils.fireQuietly(eventManager, new FileChangedEvent(this.root, hash));
+
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            isRunning = false;
         }
 
     }
