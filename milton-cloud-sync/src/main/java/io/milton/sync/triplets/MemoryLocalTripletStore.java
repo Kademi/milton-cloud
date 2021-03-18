@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
-import org.apache.jcs.engine.CompositeCacheAttributes;
-import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.hashsplit4j.api.HashStore;
 import org.hashsplit4j.triplets.HashCalc;
 import org.hashsplit4j.triplets.ITriplet;
@@ -48,25 +46,12 @@ public class MemoryLocalTripletStore {
     private final SyncHashCache fileHashCache;
     private long logTime;
 
-    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
-        this(root, null, blobStore, hashStore, null, null, null, null, null);
-    }
+//    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
+//        this(root, null, blobStore, hashStore, null, null, null, null, null);
+//    }
 
-    /**
-     *
-     * @param root
-     * @param eventManager
-     * @param blobStore
-     * @param hashStore
-     * @param callback
-     * @param filter
-     * @param dataDir
-     * @param fileSystemWatchingService
-     * @param ignorePatterns
-     * @throws IOException
-     */
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback,
-            Consumer<Runnable> filter, File dataDir, FileSystemWatchingService fileSystemWatchingService, List<String> ignorePatterns) throws IOException {
+            Consumer<Runnable> filter, FileSystemWatchingService fileSystemWatchingService, List<String> ignorePatterns, SyncHashCache fileHashCache) throws IOException {
         this.root = root;
         this.blobStore = blobStore;
         this.hashStore = hashStore;
@@ -74,28 +59,47 @@ public class MemoryLocalTripletStore {
         this.eventManager = eventManager;
         this.filter = filter;
         this.ignorePatterns = ignorePatterns;
-
-        if (fileSystemWatchingService == null) {
-            this.fileSystemWatchingService = null;
+        this.fileHashCache = fileHashCache;
+        this.fileSystemWatchingService = fileSystemWatchingService;
+        if( this.fileSystemWatchingService == null ) {
             scheduledExecutorService = Executors.newScheduledThreadPool(1);
-//            final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
-//            WatchService watchService = path.getFileSystem().newWatchService();
-//            this.fileSystemWatchingService = new FileSystemWatchingService(watchService, scheduledExecutorService);
-            fileHashCache = new MemorySyncHashCache();
         } else {
-            this.fileSystemWatchingService = fileSystemWatchingService;
             this.scheduledExecutorService = fileSystemWatchingService.getScheduledExecutorService();
-            ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
-            cfg.setUseDisk(true);
-            if (dataDir == null) {
-                dataDir = new File(System.getProperty("java.io.tmpdir"));
-            }
-            File envDir = new File(dataDir, "triplets");
-            log.trace("Create berkey db: " + envDir.getAbsolutePath());
-            envDir.mkdirs();
-            fileHashCache = new BerkeleyDbFileHashCache(envDir);
         }
     }
+
+
+//    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback,
+//            Consumer<Runnable> filter, File dataDir, FileSystemWatchingService fileSystemWatchingService, List<String> ignorePatterns) throws IOException {
+//        this.root = root;
+//        this.blobStore = blobStore;
+//        this.hashStore = hashStore;
+//        this.callback = callback;
+//        this.eventManager = eventManager;
+//        this.filter = filter;
+//        this.ignorePatterns = ignorePatterns;
+//
+//        if (fileSystemWatchingService == null) {
+//            this.fileSystemWatchingService = null;
+//            scheduledExecutorService = Executors.newScheduledThreadPool(1);
+////            final java.nio.file.Path path = FileSystems.getDefault().getPath(root.getAbsolutePath());
+////            WatchService watchService = path.getFileSystem().newWatchService();
+////            this.fileSystemWatchingService = new FileSystemWatchingService(watchService, scheduledExecutorService);
+//            fileHashCache = new MemorySyncHashCache();
+//        } else {
+//            this.fileSystemWatchingService = fileSystemWatchingService;
+//            this.scheduledExecutorService = fileSystemWatchingService.getScheduledExecutorService();
+//            ICompositeCacheAttributes cfg = new CompositeCacheAttributes();
+//            cfg.setUseDisk(true);
+//            if (dataDir == null) {
+//                dataDir = new File(System.getProperty("java.io.tmpdir"));
+//            }
+//            File envDir = new File(dataDir, "triplets");
+//            log.trace("Create berkey db: " + envDir.getAbsolutePath());
+//            envDir.mkdirs();
+//            fileHashCache = new BerkeleyDbFileHashCache(envDir);
+//        }
+//    }
 
     public boolean isPaused() {
         return paused;
