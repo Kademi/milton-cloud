@@ -288,17 +288,17 @@ public class MemoryLocalTripletStore {
     }
 
     private void fileCreated(File f) {
-        log.info("fileCreated: " + f.getAbsolutePath());
+        log.info("file change detected: " + f.getAbsolutePath());
         scanDir(f.getParentFile());
     }
 
     private void fileModified(File f) {
-        log.info("fileModified: " + f.getAbsolutePath());
+        log.info("file change detected: " + f.getAbsolutePath());
         scanDir(f.getParentFile());
     }
 
     private void fileDeleted(File f) {
-        log.info("file deleted " + f.getAbsolutePath());
+        log.info("file change detected: " + f.getAbsolutePath());
         scanDir(f.getParentFile());
     }
 
@@ -358,16 +358,16 @@ public class MemoryLocalTripletStore {
     private void _scanDir(final File dir) {
         try {
             isRunning = true;
-            log.info("scanDirTx: " + dir.getAbsolutePath());
-            log.info("//*************** Start Scan - " + dir.getName() + "***************************");
+            //log.info("scanDirTx: " + dir.getAbsolutePath());
+            log.info("//*************** Start Scan - " + dir.getAbsolutePath() + "***************************");
             long tm = System.currentTimeMillis();
 
             String hash = scanDirectory(this.root);
 
             tm = System.currentTimeMillis() - tm;
-            log.info("//*************** END Scan - " + dir.getName() + " new hash=" + hash + " in " + tm + "ms " + "***************************");
+            log.info("//*************** END Scan - " + dir.getName() + ", completed in " + tm + "ms " + "***************************");
 
-            log.info("fire FileChangedEvent event");
+            //log.info("fire FileChangedEvent event");
             if (callback != null) {
                 callback.onChanged(hash);
             }
