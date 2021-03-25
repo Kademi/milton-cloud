@@ -2,10 +2,11 @@ package com.ettrema.db.dialects;
 
 import com.ettrema.db.Table;
 import com.ettrema.db.types.BinaryType;
-import com.ettrema.db.types.CharacterType;
 import com.ettrema.db.types.FieldType;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,7 +14,7 @@ import java.sql.ResultSet;
  */
 public class PostgresDialect implements Dialect {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger( PostgresDialect.class );
+    private static final Logger log = LoggerFactory.getLogger(PostgresDialect.class);
 
 
     private String catalog;

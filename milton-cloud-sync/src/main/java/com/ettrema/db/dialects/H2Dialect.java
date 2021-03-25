@@ -6,6 +6,8 @@ import com.ettrema.db.types.BinaryType;
 import com.ettrema.db.types.FieldType;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mostly the same as postgres, but need to uppercase table names
@@ -14,7 +16,7 @@ import java.sql.ResultSet;
  */
 public class H2Dialect implements Dialect{
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger( PostgresDialect.class );
+    private static final Logger log = LoggerFactory.getLogger(H2Dialect.class);
 
 
     private String catalog;

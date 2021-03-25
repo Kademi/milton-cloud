@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.concurrent.*;
 import io.milton.sync.event.FileChangedEvent;
 import io.milton.sync.triplets.HttpTripletStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -23,7 +25,7 @@ import io.milton.sync.triplets.HttpTripletStore;
  */
 public class SpliffySync {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SpliffySync.class);
+    private static final Logger log = LoggerFactory.getLogger(SpliffySync.class);
 
     private final File localRoot;
     private final DbInitialiser dbInit;
@@ -39,7 +41,7 @@ public class SpliffySync {
     private ScheduledExecutorService scheduledExecService;
     private ScheduledFuture<?> scanJob;
     private boolean paused;
-    
+
     private boolean jobScheduled;
     private DirWalker dirWalker;
 
@@ -58,36 +60,36 @@ public class SpliffySync {
         deltaListener2.setReadonlyLocal(localReadonly);
 //        try {
 //            // Now subscribe to server push notifications
-//            pushClient = new TcpChannelClient(httpClient.server, 7020);            
+//            pushClient = new TcpChannelClient(httpClient.server, 7020);
 //            pushClient.registerListener(this);
 //        } catch (UnknownHostException ex) {
 //            log.error("exception setting up push notifications", ex);
 //        }
-        
+
     }
 
     /**
      * Perform an immediate scan
-     * 
+     *
      * @throws io.milton.httpclient.HttpException
      * @throws NotAuthorizedException
      * @throws BadRequestException
      * @throws ConflictException
      * @throws NotFoundException
-     * @throws IOException 
+     * @throws IOException
      */
     public void walk() throws HttpException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException, IOException {
 //        jdbcTripletStore.scan();
         dirWalker = new DirWalker(remoteTripletStore, jdbcTripletStore, statusStore, deltaListener2);
 
-        // Now do the 
+        // Now do the
         dirWalker.walk();
     }
 
     /**
-     * Start the syncronisation service. This will schedule the first scan after 
+     * Start the syncronisation service. This will schedule the first scan after
      * a short delay, then will scan at intervals after that.
-     * 
+     *
      */
     public void start() {
         // subscribe to receive notifications when the file system changes
@@ -97,7 +99,7 @@ public class SpliffySync {
         scanJob = scheduledExecService.scheduleWithFixedDelay(new ScanRunner(),5000, 60000*10, TimeUnit.MILLISECONDS); // scan at 10 min intervals
         jdbcTripletStore.start();
 //        pushClient.start();
-        
+
 //        log.info("Authenticate to push manager");
 //        AuthenticateMessage msg = new AuthenticateMessage();
 //        msg.setUsername(httpClient.user);
@@ -117,7 +119,7 @@ public class SpliffySync {
         }
         jdbcTripletStore.stop();
     }
-    
+
     public void setPaused(boolean state) {
         if( dirWalker != null ) {
             dirWalker.setCanceled(paused);
@@ -125,7 +127,7 @@ public class SpliffySync {
         paused = state;
         syncer.setPaused(state);
     }
-    
+
     public boolean isPaused() {
         return paused;
     }
@@ -183,7 +185,7 @@ public class SpliffySync {
     }
 
 //    @Override
-//    public void handleNotification(UUID sourceId, Serializable msg) {        
+//    public void handleNotification(UUID sourceId, Serializable msg) {
 //        if( jobScheduled ) {
 //            log.info("handleNotification: already scheduled");
 //            return ;
@@ -196,20 +198,20 @@ public class SpliffySync {
 //
 //    @Override
 //    public void memberRemoved(UUID sourceId) {
-//        
+//
 //    }
 //
 //    @Override
 //    public void onConnect() {
-//        
+//
 //    }
-    
-    
+
+
 
     private class ScanRunner implements Runnable {
 
         @Override
-        public void run() {            
+        public void run() {
             jobScheduled = false;
             try {
                 if( !paused ) {
@@ -223,7 +225,7 @@ public class SpliffySync {
             } catch(Throwable e) {
                 log.error("Exception during scan", e);
             }
-                
+
         }
     }
 

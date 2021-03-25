@@ -15,14 +15,16 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Uses a local database to record the sync status for local files
  * and directories.
- * 
+ *
  * A record is recorded whenever a local resource is found to be in sync with
  * the remote resource.
- * 
+ *
  * An instance is for a single local root directory and remote server and path.
  * Records when stored are stored with that information, so syncing to different
  * remote servers, or different local directories, is possible with different instances
@@ -32,8 +34,8 @@ import java.util.List;
  */
 public class JdbcSyncStatusStore implements SyncStatusStore {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(JdbcSyncStatusStore.class);
-    
+    private static final Logger log = LoggerFactory.getLogger(JdbcSyncStatusStore.class);
+
     public static final LastBackedUpTable SYNC_TABLE = new LastBackedUpTable();
     private final UseConnection useConnection;
     private final String baseRemoteAddress;
@@ -72,7 +74,7 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
         });
     }
 
-    @Override 
+    @Override
     public String findBackedUpHash(Path path) {
         final File f = toFile(path);
         final String sql = SYNC_TABLE.getSelect() + " WHERE " + SYNC_TABLE.localPath.getName() + " = ? AND " + SYNC_TABLE.remoteRoot.getName() + " = ?";
@@ -101,7 +103,7 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
     }
 
     @Override
-    public void setBackedupHash(Path path, final String hash) {        
+    public void setBackedupHash(Path path, final String hash) {
         final File f = toFile(path);
         //log.info("setBackedupHash: " + path + " hash: " + hash);
         final String deleteSql = SYNC_TABLE.getDeleteBy(SYNC_TABLE.localPath);
@@ -150,7 +152,7 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
             }
         });
     }
-    
+
 
 
 
@@ -159,7 +161,7 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
          * Full path to the local file
          */
         public final Table.Field<String> localPath = add("localPath", FieldTypes.CHARACTER_VARYING, false);
-        
+
         /**
          * Base address for the remote server
          */
@@ -171,12 +173,12 @@ public class JdbcSyncStatusStore implements SyncStatusStore {
             super("sync_status");
         }
     }
-    
+
     private File toFile(Path path) {
         File f = root;
         for (String fname : path.getParts()) {
             f = new File(f, fname);
         }
         return f;
-    }    
+    }
 }

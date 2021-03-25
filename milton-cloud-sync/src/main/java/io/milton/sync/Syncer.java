@@ -35,6 +35,7 @@ import org.hashsplit4j.store.MultipleBlobStore;
 import org.hashsplit4j.store.MultipleHashStore;
 import org.hashsplit4j.store.NullHashStore;
 import org.hashsplit4j.triplets.HashCalc;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the code to actually perform file sync operations. This
@@ -46,7 +47,7 @@ import org.hashsplit4j.triplets.HashCalc;
 public class Syncer {
 
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Syncer.class);
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Syncer.class);
 
     public static final String TMP_SUFFIX = ".new.tmp";
 

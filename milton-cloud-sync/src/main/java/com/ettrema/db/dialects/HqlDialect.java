@@ -4,6 +4,8 @@ import com.ettrema.db.Table;
 import com.ettrema.db.types.FieldType;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -11,7 +13,7 @@ import java.sql.ResultSet;
  */
 public class HqlDialect implements Dialect{
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger( HqlDialect.class );
+    private static final Logger log = LoggerFactory.getLogger(HqlDialect.class);
 
 
     private String catalog;

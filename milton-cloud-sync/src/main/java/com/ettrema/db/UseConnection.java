@@ -13,7 +13,6 @@ import javax.sql.DataSource;
  */
 public class UseConnection {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger( UseConnection.class );
 
 
     private final DataSource ds;
@@ -46,7 +45,7 @@ public class UseConnection {
             try {
                 con.rollback();
             } catch( SQLException ex ) {
-                log.error("exception rolling back", ex);
+                
             }
         }
     }
