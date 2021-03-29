@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 public class MemoryLocalTripletStore {
 
     private static final Logger log = LoggerFactory.getLogger(MemoryLocalTripletStore.class);
-    private static final WatchEvent.Kind<?>[] events = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
 
     private final File root;
     private final FileSystemWatchingService fileSystemWatchingService;
@@ -45,6 +44,7 @@ public class MemoryLocalTripletStore {
 
     private final SyncHashCache fileHashCache;
     private long logTime;
+    private String status;
 
 //    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
 //        this(root, null, blobStore, hashStore, null, null, null, null, null);
@@ -105,6 +105,12 @@ public class MemoryLocalTripletStore {
         return paused;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+
+
     /**
      * Returns the new hash
      *
@@ -121,6 +127,7 @@ public class MemoryLocalTripletStore {
                 callback.onChanged(hash);
             }
             if (eventManager != null) {
+                this.status = "Firing event..";
                 eventManager.fireEvent(new FileChangedEvent(root, hash));
             }
 
@@ -134,6 +141,7 @@ public class MemoryLocalTripletStore {
             initialScanDone = true;
         }
         log.info("END SCAN");
+        this.status = "";
 
         return hash;
     }
@@ -148,7 +156,9 @@ public class MemoryLocalTripletStore {
             this.fileSystemWatchingService.watch(root, (WatchEvent.Kind<?> event, File changed) -> {
                 processEvent(changed, event);
             });
+            this.status = "start..";
             this.fileSystemWatchingService.start();
+            this.status = "";
         }
 
     }
@@ -163,7 +173,9 @@ public class MemoryLocalTripletStore {
             logTime = System.currentTimeMillis();
         }
 
+
         System.out.print("/"); // progress indication
+        this.status = "Scan directory " + dir.getAbsolutePath();
         //log.info("scanDirectory {}", dir);
         File[] children = dir.listFiles();
 
@@ -202,6 +214,7 @@ public class MemoryLocalTripletStore {
         }
 
         // Need to store this in the blob store
+        this.status = "";
         return thisHash;
 
     }
@@ -224,6 +237,7 @@ public class MemoryLocalTripletStore {
             return hash;
         }
         log.info("parsing: {}", f.getAbsolutePath());
+        this.status = "Parsing file " + f.getAbsolutePath();
 
         hash = Parser.parse(f, blobStore, hashStore); // will generate blobs into this blob store
 
@@ -242,6 +256,7 @@ public class MemoryLocalTripletStore {
     }
 
     private void processEvent(File f, WatchEvent.Kind<?> kind) {
+        this.status = "process event for file " + f.getAbsolutePath();
         String changedPath = f.getAbsolutePath();
         if (changedPath.endsWith(".spliffy") || changedPath.endsWith(Syncer.TMP_SUFFIX)) {
             //ignore
@@ -281,6 +296,7 @@ public class MemoryLocalTripletStore {
                 }
             }
         }
+        this.status = "";
     }
 
     private void directoryCreated(final File f) {
