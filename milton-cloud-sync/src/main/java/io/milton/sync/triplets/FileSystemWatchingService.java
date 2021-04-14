@@ -9,7 +9,9 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.Watchable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -90,7 +92,7 @@ public class FileSystemWatchingService {
             } else if (kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                 if (f.isDirectory()) {
                     unregisterWatchDir(f);
-                }                
+                }
             }
         }
 
@@ -101,52 +103,58 @@ public class FileSystemWatchingService {
         }
     }
 
-    public void watch(File dir, WatchNotificationListener listener) throws IOException {
+    public List<WatchKey> watch(File dir, WatchNotificationListener listener) throws IOException {
         mapOfListeners.put(listener, dir);
-        initWatch(dir);
+        List<WatchKey> watchKeys = new ArrayList<>();
+        initWatch(dir, watchKeys);
+        return watchKeys;
     }
 
-    private void initWatch(File dir) throws IOException {
+    private void initWatch(File dir, List<WatchKey> watchKeys) throws IOException {
         if (dir.isDirectory()) {
             if (Utils.ignored(dir)) {
                 return;
             }
-            registerWatchDir(dir);
+            WatchKey key = registerWatchDir(dir);
+            if( key != null ) {
+                watchKeys.add(key);
+            }
             File[] list = dir.listFiles();
             if (list != null) {
                 for (File f : list) {
-                    initWatch(f);
+                    initWatch(f, watchKeys);
                 }
             }
         }
     }
 
-    private void registerWatchDir(final File dir) throws IOException {
+    private WatchKey registerWatchDir(final File dir) throws IOException {
         try {
             if (watchService == null) {
-                return;
+                return null;
             }
-            
+
             final java.nio.file.Path path = FileSystems.getDefault().getPath(dir.getAbsolutePath());
-            
+
             WatchKey key = path.register(watchService, events);
             //mapOfWatchKeysByDir.put(dir, key);
             log.info("Watching: " + path);
+            return key;
         } catch (Throwable ex) {
             throw new RuntimeException("Couldnt start watching dir: " + dir.getAbsolutePath(), ex);
         }
 
     }
-    
+
     private void unregisterWatchDir(final File dir) {
 
-    }    
+    }
 
     public ScheduledExecutorService getScheduledExecutorService() {
         return scheduledExecutorService;
     }
-    
-    
+
+
 
     public interface WatchNotificationListener {
 

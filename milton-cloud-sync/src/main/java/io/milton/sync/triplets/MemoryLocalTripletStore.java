@@ -45,6 +45,7 @@ public class MemoryLocalTripletStore {
     private final SyncHashCache fileHashCache;
     private long logTime;
     private String status;
+    private List<WatchKey> watchKeys;
 
 //    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
 //        this(root, null, blobStore, hashStore, null, null, null, null, null);
@@ -153,14 +154,25 @@ public class MemoryLocalTripletStore {
      */
     public void start() throws IOException {
         if (fileSystemWatchingService != null) {
-            this.fileSystemWatchingService.watch(root, (WatchEvent.Kind<?> event, File changed) -> {
+            watchKeys = this.fileSystemWatchingService.watch(root, (WatchEvent.Kind<?> event, File changed) -> {
                 processEvent(changed, event);
             });
             this.status = "start..";
             this.fileSystemWatchingService.start();
             this.status = "";
         }
+    }
 
+    public void stop() {
+        this.initialScanDone = false;
+        if( fileSystemWatchingService != null ) {
+            this.fileSystemWatchingService.stop();
+        }
+        if( this.watchKeys != null ) {
+            for( WatchKey key : watchKeys ) {
+                key.cancel();
+            }
+        }
     }
 
     public String scanDirectory(File dir) throws IOException {
