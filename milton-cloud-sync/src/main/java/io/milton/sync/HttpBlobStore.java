@@ -51,6 +51,7 @@ public class HttpBlobStore implements BlobStore {
     @Override
     public void setBlob(String hash, byte[] bytes) {
         if ( !force && hashCache.hasHash(hash)) {
+            log.info("setBlob: Hash cache already has hash {}, and force is false, so will not upload", hash);
             return;
         }
 
