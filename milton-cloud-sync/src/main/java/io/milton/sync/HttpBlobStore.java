@@ -11,6 +11,8 @@ import io.milton.httpclient.HttpResult;
 import java.io.IOException;
 import org.hashsplit4j.api.BlobStore;
 import org.hashsplit4j.api.HashCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements getting and setting blobs over HTTP
@@ -18,6 +20,8 @@ import org.hashsplit4j.api.HashCache;
  * @author brad
  */
 public class HttpBlobStore implements BlobStore {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpBlobStore.class);
 
     private final Host host;
     private final HashCache hashCache;
@@ -51,7 +55,7 @@ public class HttpBlobStore implements BlobStore {
         }
 
         Path destPath = basePath.child(hash + "");
-        System.out.println("PUT " + hash);
+        log.info("PUT " + hash);
         HttpResult result = host.doPut(destPath, bytes, null);
         checkResult(result);
         sets++;
