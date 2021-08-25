@@ -1,4 +1,4 @@
-/* 
+/*
  *       Copyright FuseLMS
  */
 package io.milton.sync.triplets;
@@ -16,7 +16,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import org.apache.commons.io.IOUtils;
 import org.hashsplit4j.api.BlobImpl;
 import org.hashsplit4j.api.BlobStore;
