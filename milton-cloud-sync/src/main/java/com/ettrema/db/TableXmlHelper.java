@@ -6,8 +6,8 @@ import com.ettrema.db.types.FieldType;
 import com.ettrema.db.types.FieldTypes;
 import java.util.ArrayList;
 import java.util.List;
-import org.jdom.Element;
-import org.jdom.Namespace;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
 
 /**
  *
@@ -143,7 +143,7 @@ public class TableXmlHelper {
 			}
 			fields.add(f);
 		}
-		table.addIndex(name, fields); 
+		table.addIndex(name, fields);
 	}
 
 	private List<Element> toElements(List children) {
@@ -167,6 +167,6 @@ public class TableXmlHelper {
 	public Namespace getNs() {
 		return ns;
 	}
-	
+
 
 }

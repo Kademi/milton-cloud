@@ -10,30 +10,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.BeanUtils;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CatalogConfigurator {
     private static final Logger log = LoggerFactory.getLogger( CatalogConfigurator.class );
-    
+
     public RootContext load( FactoryCatalog c, File configFile, List<Object> initialContents ) {
         log.info("loading config at: " + configFile.getAbsolutePath());
         loadConfig(c,configFile);
         RootContext context = new RootContext(c, initialContents);
-        return context;                
+        return context;
     }
-    
+
     public RootContext load( FactoryCatalog c, File configFile ) {
         log.info("loading config at: " + configFile.getAbsolutePath());
         loadConfig(c,configFile);
-        RootContext context = new RootContext(c);        
-        return context;        
+        RootContext context = new RootContext(c);
+        return context;
     }
-    
+
     public void loadConfig( FactoryCatalog c, File configFile ) {
         if( !configFile.exists() ) throw new IllegalArgumentException("Config file does not exist: " + configFile.getAbsolutePath());
         try {
@@ -49,9 +49,9 @@ public class CatalogConfigurator {
         } catch (ConfigurationException ex) {
             log.error("Exception loading config file: " + configFile,ex);
             throw new RuntimeException(configFile.getAbsolutePath() + ". See logs for original exception",ex);
-        }        
+        }
     }
-    
+
     protected File resolveRelativePath(File start, String path) {
         String[] arr = path.split("/");
         File f = start;
@@ -144,7 +144,7 @@ public class CatalogConfigurator {
         }
     }
 
-    private void loadKeys(final Document doc, final FactoryCatalog c) throws ConfigurationException {        
+    private void loadKeys(final Document doc, final FactoryCatalog c) throws ConfigurationException {
         int i = 0;
         for( Object oEl : doc.getRootElement().getChildren("key") ) {
             Element el = (Element) oEl;
@@ -165,12 +165,12 @@ public class CatalogConfigurator {
         } catch (JDOMException ex) {
             throw new RuntimeException(configFile.getAbsolutePath(), ex);
         } catch (FileNotFoundException ex) {
-            throw new ConfigurationException(configFile.getAbsolutePath(),ex);        
+            throw new ConfigurationException(configFile.getAbsolutePath(),ex);
         } catch (IOException ex) {
             throw new RuntimeException(configFile.getAbsolutePath(), ex);
         }
     }
-    
+
     protected boolean isPresent(String s) {
         return (s!=null && s.length()>0);
     }
