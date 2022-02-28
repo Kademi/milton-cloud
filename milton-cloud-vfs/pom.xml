@@ -4,10 +4,10 @@
     <parent>
         <groupId>io.milton</groupId>
         <artifactId>milton-cloud</artifactId>
-        <version>1.2.4</version>
+        <version>1.2.4.k01</version>
     </parent>
     <artifactId>milton-cloud-vfs</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.2.k01</version>
     <packaging>jar</packaging>
     <description>The VFS library provides a logical view of the current state of the versioned content repository</description>
     <build>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>hashsplit4j</groupId>
             <artifactId>hashsplit4j-lib</artifactId>
-            <version>2.4.3</version>
+            <version>2.5.7.k02</version>
         </dependency>
     </dependencies>
 </project>

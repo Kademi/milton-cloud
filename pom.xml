@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.milton</groupId>
     <artifactId>milton-cloud</artifactId>
-    <version>1.2.4</version>
+    <version>1.2.4.k01</version>
     <packaging>pom</packaging>
     <distributionManagement>
         <repository>
@@ -19,7 +19,7 @@
         </developer>
     </developers>
     <properties>
-        <milton.version>2.8.0.1.k4</milton.version>
+        <milton.version>2.8.0.1.k10</milton.version>
         <!-- Really want to deprecate endrick, but need to refactor cache in milton-client -->
         <endrick.version>1.7.8</endrick.version>
         <jpa.version>1.0</jpa.version>
