@@ -50,7 +50,6 @@ public class MemoryLocalTripletStore {
 //    public MemoryLocalTripletStore(File root, BlobStore blobStore, HashStore hashStore) throws IOException {
 //        this(root, null, blobStore, hashStore, null, null, null, null, null);
 //    }
-
     public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback,
             Consumer<Runnable> filter, FileSystemWatchingService fileSystemWatchingService, List<String> ignorePatterns, SyncHashCache fileHashCache) throws IOException {
         this.root = root;
@@ -62,13 +61,12 @@ public class MemoryLocalTripletStore {
         this.ignorePatterns = ignorePatterns;
         this.fileHashCache = fileHashCache;
         this.fileSystemWatchingService = fileSystemWatchingService;
-        if( this.fileSystemWatchingService == null ) {
+        if (this.fileSystemWatchingService == null) {
             scheduledExecutorService = Executors.newScheduledThreadPool(1);
         } else {
             this.scheduledExecutorService = fileSystemWatchingService.getScheduledExecutorService();
         }
     }
-
 
 //    public MemoryLocalTripletStore(File root, EventManager eventManager, BlobStore blobStore, HashStore hashStore, RepoChangedCallback callback,
 //            Consumer<Runnable> filter, File dataDir, FileSystemWatchingService fileSystemWatchingService, List<String> ignorePatterns) throws IOException {
@@ -101,7 +99,6 @@ public class MemoryLocalTripletStore {
 //            fileHashCache = new BerkeleyDbFileHashCache(envDir);
 //        }
 //    }
-
     public boolean isPaused() {
         return paused;
     }
@@ -109,8 +106,6 @@ public class MemoryLocalTripletStore {
     public String getStatus() {
         return status;
     }
-
-
 
     /**
      * Returns the new hash
@@ -165,11 +160,11 @@ public class MemoryLocalTripletStore {
 
     public void stop() {
         this.initialScanDone = false;
-        if( fileSystemWatchingService != null ) {
+        if (fileSystemWatchingService != null) {
             this.fileSystemWatchingService.stop();
         }
-        if( this.watchKeys != null ) {
-            for( WatchKey key : watchKeys ) {
+        if (this.watchKeys != null) {
+            for (WatchKey key : watchKeys) {
                 key.cancel();
             }
         }
@@ -185,7 +180,6 @@ public class MemoryLocalTripletStore {
             logTime = System.currentTimeMillis();
         }
 
-
         System.out.print("/"); // progress indication
         this.status = "Scan directory " + dir.getAbsolutePath();
         //log.info("scanDirectory {}", dir);
@@ -194,6 +188,9 @@ public class MemoryLocalTripletStore {
         List<ITriplet> triplets = new ArrayList<>();
         if (children != null) {
             for (File child : children) {
+                if (Utils.ignored(child, ignorePatterns)) {
+                    continue;
+                }
                 Triplet t = new Triplet();
                 t.setName(child.getName());
                 if (child.isDirectory()) {
