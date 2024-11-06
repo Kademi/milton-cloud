@@ -7,9 +7,9 @@
     <packaging>pom</packaging>
     <distributionManagement>
         <repository>
-            <id>central</id>
-            <name>a0glkgfeusb7f-artifactory-primary-0-releases</name>
-            <url>https://kademi.jfrog.io/artifactory/kademi-libs-release-local</url>
+            <id>kademi-codeartifact</id>
+            <name>kademi-codeartifact</name>
+            <url>https://kademi-repository-826388764847.d.codeartifact.us-east-1.amazonaws.com/maven/kademi-releases</url>
         </repository>
     </distributionManagement>
     <developers>
