@@ -4,10 +4,10 @@
     <parent>
         <groupId>io.milton</groupId>
         <artifactId>milton-cloud</artifactId>
-        <version>1.2.4.k01</version>
+        <version>1.2.4.k02</version>
     </parent>
     <artifactId>milton-cloud-vfs</artifactId>
-    <version>1.5.2.k01</version>
+    <version>1.5.2.k02</version>
     <packaging>jar</packaging>
     <description>The VFS library provides a logical view of the current state of the versioned content repository</description>
     <build>

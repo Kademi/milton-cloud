@@ -11,18 +11,15 @@ import io.milton.http.exceptions.NotFoundException;
 
 import io.milton.httpclient.Host;
 import io.milton.httpclient.HttpException;
-import io.milton.sync.triplets.MemoryLocalTripletStore;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.hashsplit4j.api.HashCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  *
@@ -59,11 +56,10 @@ public class HttpBloomFilterHashCache implements HashCache {
         }
     }
 
-
     @Override
     public boolean hasHash(String hash) {
         boolean b = filter.mightContain(hash);
-        if( !b ) {
+        if (!b) {
 //            log.info("hasHash: " + b + " hash=" + hash + " in " + paramVal);
         }
         return b;
@@ -77,7 +73,7 @@ public class HttpBloomFilterHashCache implements HashCache {
 
     private BloomFilter<CharSequence> loadBloomFilter() {
         try {
-            Map<String,String> params = new HashMap();
+            Map<String, String> params = new HashMap();
             params.put(param, paramVal);
             byte[] arr = host.doGet(basePath, params);
             ByteArrayInputStream bin = new ByteArrayInputStream(arr);
