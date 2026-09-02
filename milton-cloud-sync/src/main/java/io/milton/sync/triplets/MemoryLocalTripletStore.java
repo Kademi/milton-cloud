@@ -217,6 +217,11 @@ public class MemoryLocalTripletStore {
         }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        // A directory hash is defined over the sorted triplets, and File.listFiles
+        // order is unspecified, so without this the hash depends on the filesystem
+        // rather than the content. JdbcLocalTripletStore, DirWalker and the server's
+        // DataSession.recalcHashes all sort.
+        hashCalc.sort(triplets);
         String thisHash = hashCalc.calcHash(triplets, out);
         if (!blobStore.hasBlob(thisHash)) {
             blobStore.setBlob(thisHash, out.toByteArray());

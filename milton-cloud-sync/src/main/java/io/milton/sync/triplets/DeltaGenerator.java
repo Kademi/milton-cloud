@@ -57,39 +57,39 @@ public class DeltaGenerator {
     public void generateDeltas(String hash1, String hash2, String workingDirHash, Path path) throws IOException {
         log.info("generateDeltas path={}", path);
         // find the dir listing for each hash
-        List<ITriplet> triplets1 = null;
-        if (hash1 != null) {
-            byte[] dir1 = blobStore.getBlob(hash1);
-            if (dir1 != null) {
-                triplets1 = hashCalc.parseTriplets(new ByteArrayInputStream(dir1));
-            } else {
-                log.warn("Could not locate blob: {}", hash1);
-                throw new RuntimeException("Could not locate blob: " + hash1 + " in blob store: " + blobStore);
-            }
-        }
-
-        byte[] dir2 = blobStore.getBlob(hash2);
-        List<ITriplet> triplets2 = null;
-        if (dir2 != null) {
-            triplets2 = hashCalc.parseTriplets(new ByteArrayInputStream(dir2));
-        }
-
-        List<ITriplet> tripletsWorkingDir = null;
-        if (workingDirHash != null) {
-            byte[] dir1 = null;
-            if (hash1 != null) {
-                dir1 = blobStore.getBlob(hash1);
-
-                if (dir1 != null) {
-                    tripletsWorkingDir = hashCalc.parseTriplets(new ByteArrayInputStream(dir1));
-                } else {
-                    log.warn("Could not locate blob: {}", hash1);
-                    throw new RuntimeException("Could not locate blob: " + hash1 + " in blob store: " + blobStore);
-                }
-            }
-        }
+        List<ITriplet> triplets1 = readListing(hash1, true);
+        // A missing target listing is tolerated, as it always has been: the caller gets
+        // deletes for everything in triplets1 and nothing else.
+        List<ITriplet> triplets2 = readListing(hash2, false);
+        // The working directory listing comes from workingDirHash. It used to be read
+        // from hash1, which made tripletWorkingHash equal to the base hash for every
+        // entry - so every changed file failed the "did the local copy change" test and
+        // was reported as a conflict. In ksync3 that meant a plain pull prompted the
+        // user about a local change they had not made, for every updated file.
+        List<ITriplet> tripletsWorkingDir = readListing(workingDirHash, true);
 
         generateDeltas(triplets1, triplets2, tripletsWorkingDir, path);
+    }
+
+    /**
+     * Reads and parses a directory listing blob. Null hash means no listing. A named
+     * but absent blob throws when required, which is what the base and working
+     * listings have always done - losing them silently would mean losing the
+     * information conflict detection depends on.
+     */
+    private List<ITriplet> readListing(String hash, boolean required) throws IOException {
+        if (hash == null) {
+            return null;
+        }
+        byte[] blob = blobStore.getBlob(hash);
+        if (blob == null) {
+            if (required) {
+                log.warn("Could not locate blob: {}", hash);
+                throw new RuntimeException("Could not locate blob: " + hash + " in blob store: " + blobStore);
+            }
+            return null;
+        }
+        return hashCalc.parseTriplets(new ByteArrayInputStream(blob));
     }
 
     private void generateDeltas(List<ITriplet> triplets1, List<ITriplet> triplets2, List<ITriplet> tripletsWorkingDir, Path path) throws IOException {
@@ -116,25 +116,33 @@ public class DeltaGenerator {
 
                 if (triplet1 == null) {
                     deltaListener.doCreated(path, triplet2);
+                } else if (triplet1.getHash().equals(triplet2.getHash())) {
+                    // Identical, and for a directory that means every descendant is
+                    // identical too - the hash covers the whole subtree, which is the
+                    // point of hashing directories. So it is not walked. Without this
+                    // an unchanged subtree was read and parsed all the way down to
+                    // report nothing.
+                    log.trace("Unchanged, not walking {}/{} hash={}", path, triplet1.getName(), triplet1.getHash());
+                    continue;
                 } else {
-                    if (triplet1.getHash().equals(triplet2.getHash())) {
-                        // clean, nothing to do
-                        log.info("Directory={}/{} hashes match={}", path, triplet1.getName(), triplet1.getHash());
+                    // we only support conflict handling for files
+                    if (triplet1.getType().equals("d")
+                            || tripletWorkingHash == null
+                            || triplet2.getHash().equals(tripletWorkingHash)
+                            // The local copy still matches the base, so it has not been
+                            // edited and there is nothing to lose by updating it. Absent
+                            // this, every clean update was a conflict.
+                            || triplet1.getHash().equals(tripletWorkingHash)) {
+                        deltaListener.doUpdated(path, triplet2);
                     } else {
-                        // we only support conflict handling for files
-                        if (triplet1.getType().equals("d") || tripletWorkingHash == null || triplet2.getHash().equals(tripletWorkingHash)) {
-                            deltaListener.doUpdated(path, triplet2);
-                        } else {
-                            deltaListener.doConflict(path, triplet2);
-                        }
+                        deltaListener.doConflict(path, triplet2);
                     }
                 }
 
                 if (triplet2.getType().equals("d")) {
-                    String triplet1Hash = null;
-                    if (triplet1 != null) {
-                        triplet1Hash = triplet1.getHash();
-                    }
+                    // triplet1 is null for a directory that is new in the target, and
+                    // then the whole subtree is reported as created.
+                    String triplet1Hash = triplet1 == null ? null : triplet1.getHash();
                     generateDeltas(triplet1Hash, triplet2.getHash(), tripletWorkingHash, path.child(triplet2.getName()));
                 }
             }
